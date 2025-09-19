@@ -65,7 +65,7 @@ steps:
         type: http
         with:
           url: https://google.com # cursor is here`;
-    const model = createMockModel(inputYaml, { lineNumber: 10, column: 1 });
+    const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const snippetText = generateBuiltInStepSnippet('http', false, true);
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
@@ -116,5 +116,24 @@ steps:
       ],
       expect.any(Function)
     );
+  });
+
+  it('should call pushUndoStop when editor is provided', () => {
+    const inputYaml = `name: one_step_workflow`;
+    const model = createMockModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const mockEditor = {
+      pushUndoStop: jest.fn(),
+    } as unknown as monaco.editor.IStandaloneCodeEditor;
+
+    insertStepSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'http',
+      undefined,
+      mockEditor
+    );
+
+    expect(mockEditor.pushUndoStop).toHaveBeenCalledTimes(2);
   });
 });

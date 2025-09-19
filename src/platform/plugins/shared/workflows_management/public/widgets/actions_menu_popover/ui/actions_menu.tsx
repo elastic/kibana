@@ -139,8 +139,8 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
-        id: 'loop',
-        label: i18n.translate('workflows.actionsMenu.loop', {
+        id: 'foreach',
+        label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {

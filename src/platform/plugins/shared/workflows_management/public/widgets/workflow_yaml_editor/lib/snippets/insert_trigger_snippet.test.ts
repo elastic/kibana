@@ -51,4 +51,22 @@ describe('insertTriggerSnippet', () => {
       expect.any(Function)
     );
   });
+
+  it('should call pushUndoStop when editor is provided', () => {
+    const inputYaml = `steps:\n  - type: http`;
+    const model = createMockModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    const mockEditor = {
+      pushUndoStop: jest.fn(),
+    } as unknown as monaco.editor.IStandaloneCodeEditor;
+
+    insertTriggerSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'manual',
+      mockEditor
+    );
+
+    expect(mockEditor.pushUndoStop).toHaveBeenCalledTimes(2);
+  });
 });

@@ -327,13 +327,14 @@ export const WorkflowYAMLEditor = ({
     const model = editorRef.current?.getModel();
     const yamlDocumentCurrent = yamlDocumentRef.current;
     const cursorPosition = editorRef.current?.getPosition();
-    if (!model || !yamlDocumentCurrent) {
+    const editor = editorRef.current;
+    if (!model || !yamlDocumentCurrent || !editor) {
       return;
     }
     if (TriggerTypes.includes(action.id)) {
-      insertTriggerSnippet(model, yamlDocumentCurrent, action.id);
+      insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
     } else {
-      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition);
+      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
     }
     closeActionsPopover();
   };

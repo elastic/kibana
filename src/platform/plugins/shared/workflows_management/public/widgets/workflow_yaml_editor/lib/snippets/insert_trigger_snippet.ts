@@ -22,7 +22,8 @@ import { generateTriggerSnippet } from './generate_trigger_snippet';
 export function insertTriggerSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document,
-  triggerType: string
+  triggerType: string,
+  editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   const triggerSnippet = generateTriggerSnippet(triggerType, false, true, 0, false);
   // find triggers: line number and column number
@@ -48,6 +49,11 @@ export function insertTriggerSnippet(
   } else {
     prepend = 'triggers:\n  ';
   }
+  // Create separate undo boundary for each snippet insertion
+  if (editor) {
+    editor.pushUndoStop();
+  }
+
   model.pushEditOperations(
     null,
     [
@@ -58,4 +64,8 @@ export function insertTriggerSnippet(
     ],
     () => null
   );
+
+  if (editor) {
+    editor.pushUndoStop();
+  }
 }

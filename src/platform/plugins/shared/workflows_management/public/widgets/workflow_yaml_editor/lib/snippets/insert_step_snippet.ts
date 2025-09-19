@@ -26,7 +26,8 @@ export function insertStepSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document,
   stepType: string,
-  cursorPosition?: monaco.Position | null
+  cursorPosition?: monaco.Position | null,
+  editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   let snippetText = '';
   if (BuiltInStepTypes.includes(stepType)) {
@@ -45,10 +46,12 @@ export function insertStepSnippet(
     const absolutePosition = model.getOffsetAt(cursorPosition);
     nearestStepNode = getStepNodeAtPosition(yamlDocument, absolutePosition);
   }
-  const stepNode = nearestStepNode || (stepNodes[stepNodes.length - 1] ?? null);
+  const stepNode =
+    nearestStepNode || (stepNodes.length > 0 ? stepNodes[stepNodes.length - 1] : null);
   let indentLevel = 0;
   if (!stepNode) {
-    prepend = 'steps:\n  ';
+    prepend = '\nsteps:\n';
+    indentLevel = 2;
   } else {
     const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
     if (stepRange) {
@@ -58,6 +61,11 @@ export function insertStepSnippet(
       indentLevel = getIndentLevelFromLineNumber(model, stepRange.startLineNumber);
     }
   }
+  // Create separate undo boundary for each snippet insertion
+  if (editor) {
+    editor.pushUndoStop();
+  }
+
   model.pushEditOperations(
     null,
     [
@@ -68,4 +76,8 @@ export function insertStepSnippet(
     ],
     () => null
   );
+
+  if (editor) {
+    editor.pushUndoStop();
+  }
 }
