@@ -631,7 +631,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        await supertestWithoutAuth
+        const response = await supertestWithoutAuth
           .put('/read_only_objects/change_access_mode')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
@@ -640,6 +640,9 @@ export default function ({ getService }: FtrProviderContext) {
             newAccessMode: 'read_only',
           })
           .expect(200);
+        expect(response.body.objects).to.have.length(1);
+        expect(response.body.objects[0].id).to.eql(objectId);
+        expect(response.body.objects[0].type).to.eql('read_only_type');
 
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
@@ -665,7 +668,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        await supertestWithoutAuth
+        const response = await supertestWithoutAuth
           .put('/read_only_objects/change_access_mode')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
@@ -674,6 +677,9 @@ export default function ({ getService }: FtrProviderContext) {
             newAccessMode: 'read_only',
           })
           .expect(200);
+        expect(response.body.objects).to.have.length(1);
+        expect(response.body.objects[0].id).to.eql(objectId);
+        expect(response.body.objects[0].type).to.eql('read_only_type');
 
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
