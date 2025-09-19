@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, debounce } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
@@ -26,7 +27,7 @@ import {
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
-import { MAX_ITEMS_COUNT } from '../../constants';
+import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   items: TabItem[];
@@ -93,12 +94,32 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     [changeState, onEvent]
   );
 
+  // Debounced tabSwitched EBT event sender
+  const debouncedTabSwitched = useMemo(
+    () => debounce((payload: any) => onEvent('tabSwitched', payload), TAB_SWITCH_DEBOUNCE_MS),
+    [onEvent]
+  );
+
   const onSelect = useCallback(
     async (item: TabItem) => {
-      changeState((prevState) => selectTab(prevState, item));
-      onEvent('tabSwitched');
+      changeState((prevState) => {
+        const prevItems = prevState.items;
+        const nextState = selectTab(prevState, item);
+
+        const payload = {
+          tabId: item.id,
+          fromIndex: prevItems.findIndex(
+            (singleItem) => singleItem.id === prevState.selectedItem?.id
+          ),
+          toIndex: nextState.items.findIndex((singleItem) => singleItem.id === item.id),
+          totalTabsOpen: prevItems.length,
+        };
+        debouncedTabSwitched(payload);
+
+        return nextState;
+      });
     },
-    [changeState, onEvent]
+    [changeState, debouncedTabSwitched]
   );
 
   const onSelectRecentlyClosed = useCallback(
@@ -139,12 +160,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           return nextState;
         }
 
-        const fromIndex = prevItems.findIndex((item) => item.id === movedItem.id);
-        const toIndex = reorderedItems.findIndex((item) => item.id === movedItem.id);
-
         onEvent('tabReordered', {
-          fromIndex,
-          toIndex,
+          fromIndex: prevItems.findIndex((item) => item.id === movedItem.id),
+          toIndex: reorderedItems.findIndex((item) => item.id === movedItem.id),
           totalTabsOpen: prevState.items.length,
           tabId: movedItem.id,
         });
