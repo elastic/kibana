@@ -23,7 +23,7 @@ export interface FleetApiService {
     delete: (name: string) => Promise<number>;
   };
   agent_policies: {
-    get: (params: Record<string, any>) => Promise<any>;
+    get: (queryParams?: Record<string, any>) => Promise<any>;
     create: (
       policyName: string,
       policyNamespace: string,
@@ -39,10 +39,10 @@ export interface FleetApiService {
     ) => Promise<any>;
     bulkGet: (
       bulkGetIds: string[],
-      params: BulkGetBody,
+      params?: BulkGetBody,
       queryParams?: Record<string, string>
     ) => Promise<any>;
-    delete: (id: string) => Promise<number>;
+    delete: (id: string, isForceSet?: boolean) => Promise<number>;
   };
   outputs: {
     getOutputs: () => Promise<any>;
@@ -112,12 +112,12 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
       },
     },
     agent_policies: {
-      get: async (params: Record<string, any>) => {
+      get: async (queryParams?: Record<string, any>) => {
         return await measurePerformanceAsync(log, `fleetApi.agent_policies.get`, async () => {
           return await kbnClient.request({
             method: 'GET',
             path: `/api/fleet/agent_policies`,
-            query: params,
+            query: queryParams,
           });
         });
       },
@@ -180,7 +180,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
 
       bulkGet: async (
         bulkGetIds: string[],
-        params: BulkGetBody,
+        params?: BulkGetBody,
         queryParams?: Record<string, string>
       ) => {
         return await measurePerformanceAsync(
