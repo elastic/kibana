@@ -6,12 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useSimulatorSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
-import { selectUnsupportedDottedFields } from '../stream_detail_enrichment/state_management/simulation_state_machine/selectors';
 import { useFieldSuggestions } from '../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions';
 import type { FieldSuggestion } from '../stream_detail_enrichment/steps/blocks/action/utils/field_suggestions';
 
@@ -25,7 +22,6 @@ export interface FieldSelectorProps {
   compressed?: boolean;
   fullWidth?: boolean;
   processorType?: string;
-  showUnsupportedFieldsWarning?: boolean;
   dataTestSubj?: string;
   isInvalid?: boolean;
   error?: string;
@@ -44,17 +40,10 @@ export const FieldSelector = ({
   compressed = false,
   fullWidth = false,
   processorType,
-  showUnsupportedFieldsWarning = true,
   dataTestSubj = 'streamsAppFieldSelector',
   isInvalid,
   error,
 }: FieldSelectorProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const unsupportedFields = useSimulatorSelector((state) =>
-    selectUnsupportedDottedFields(state.context)
-  );
-
   const suggestions = useFieldSuggestions(processorType);
 
   const selectedOptions = useMemo(() => {
@@ -81,12 +70,6 @@ export const FieldSelector = ({
       }
     },
     [handleSelectionChange]
-  );
-
-  const isUnsupported = useMemo(
-    () =>
-      showUnsupportedFieldsWarning && value && unsupportedFields.some((f) => value.startsWith(f)),
-    [value, unsupportedFields, showUnsupportedFieldsWarning]
   );
 
   const defaultLabel = i18n.translate('xpack.streams.fieldSelector.defaultLabel', {
@@ -125,32 +108,6 @@ export const FieldSelector = ({
           })}
         />
       </EuiFormRow>
-
-      {isUnsupported && (
-        <EuiCallOut
-          color="warning"
-          iconType="alert"
-          title={i18n.translate('xpack.streams.fieldSelector.unsupportedFieldsWarning.title', {
-            defaultMessage: 'Dot-separated field names are not supported.',
-          })}
-          css={css`
-            margin-top: ${euiTheme.size.s};
-            margin-bottom: ${euiTheme.size.m};
-          `}
-        >
-          <p>
-            {i18n.translate('xpack.streams.fieldSelector.unsupportedFieldsWarning.p1', {
-              defaultMessage: 'Dot-separated field names can produce misleading results.',
-            })}
-          </p>
-          <p>
-            {i18n.translate('xpack.streams.fieldSelector.unsupportedFieldsWarning.p2', {
-              defaultMessage:
-                'For accurate results, avoid dot-separated field names or expand them into nested objects.',
-            })}
-          </p>
-        </EuiCallOut>
-      )}
     </>
   );
 };

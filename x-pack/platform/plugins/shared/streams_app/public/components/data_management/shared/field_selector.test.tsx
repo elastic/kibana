@@ -10,18 +10,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FieldSelector } from './field_selector';
 
-jest.mock('../stream_detail_enrichment/state_management/stream_enrichment_state_machine', () => ({
-  useSimulatorSelector: jest.fn(),
-}));
-
 jest.mock('../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions', () => ({
   useFieldSuggestions: jest.fn(),
 }));
 
-import { useSimulatorSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
 import { useFieldSuggestions } from '../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions';
 
-const mockUseSimulatorSelector = jest.mocked(useSimulatorSelector);
 const mockUseFieldSuggestions = jest.mocked(useFieldSuggestions);
 
 describe('FieldSelector', () => {
@@ -41,7 +35,6 @@ describe('FieldSelector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSimulatorSelector.mockReturnValue([]);
     mockUseFieldSuggestions.mockReturnValue(mockSuggestions);
   });
 
@@ -165,50 +158,6 @@ describe('FieldSelector', () => {
     });
   });
 
-  describe('Unsupported Fields Warning', () => {
-    it('shows warning for problematic dot-separated fields in streaming contexts', () => {
-      // Simulate fields that cause issues in streaming pipelines
-      mockUseSimulatorSelector.mockReturnValue(['kubernetes.', 'host.', 'service.']);
-
-      render(
-        <FieldSelector
-          {...defaultProps}
-          value="kubernetes.container.name"
-          showUnsupportedFieldsWarning
-        />
-      );
-
-      expect(screen.getByText('Dot-separated field names are not supported.')).toBeInTheDocument();
-    });
-
-    it('hides warning when processor does not require field validation', () => {
-      mockUseSimulatorSelector.mockReturnValue(['kubernetes.']);
-
-      render(
-        <FieldSelector
-          {...defaultProps}
-          value="kubernetes.pod.uid"
-          showUnsupportedFieldsWarning={false}
-        />
-      );
-
-      expect(
-        screen.queryByText('Dot-separated field names are not supported.')
-      ).not.toBeInTheDocument();
-    });
-
-    it('allows well-structured nested fields without warnings', () => {
-      mockUseSimulatorSelector.mockReturnValue(['legacy_field.']);
-
-      render(
-        <FieldSelector {...defaultProps} value="error.message" showUnsupportedFieldsWarning />
-      );
-
-      expect(
-        screen.queryByText('Dot-separated field names are not supported.')
-      ).not.toBeInTheDocument();
-    });
-  });
 
   describe('Disabled State', () => {
     it('disables the combobox when disabled prop is true', () => {

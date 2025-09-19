@@ -227,7 +227,6 @@ function FilterForm(props: {
           })}
           compressed
           disabled={disabled}
-          showUnsupportedFieldsWarning={false}
           dataTestSubj="streamsAppConditionEditorFieldText"
         />
       </EuiFlexItem>

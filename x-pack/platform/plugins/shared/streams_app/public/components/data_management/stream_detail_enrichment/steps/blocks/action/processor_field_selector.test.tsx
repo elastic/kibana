@@ -28,7 +28,6 @@ jest.mock('../../../../shared/field_selector', () => ({
       compressed,
       processorType,
       fullWidth,
-      showUnsupportedFieldsWarning,
       ...restProps
     }) => (
       <div>
@@ -152,22 +151,11 @@ describe('ProcessorFieldSelector', () => {
           processorType: 'grok',
           placeholder: 'Custom placeholder',
           fullWidth: true,
-          showUnsupportedFieldsWarning: true,
           dataTestSubj: 'streamsAppProcessorFieldSelectorComboFieldText',
         }),
         expect.anything()
       );
     });
 
-    it('enables unsupported field warnings by default', () => {
-      renderComponent();
-
-      expect(FieldSelector).toHaveBeenCalledWith(
-        expect.objectContaining({
-          showUnsupportedFieldsWarning: true,
-        }),
-        expect.anything()
-      );
-    });
   });
 });

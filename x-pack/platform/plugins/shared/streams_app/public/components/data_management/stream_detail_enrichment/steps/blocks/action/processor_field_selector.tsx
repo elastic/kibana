@@ -69,7 +69,6 @@ export const ProcessorFieldSelector = ({
       placeholder={placeholder ?? defaultPlaceholder}
       processorType={processorType}
       fullWidth
-      showUnsupportedFieldsWarning
       dataTestSubj="streamsAppProcessorFieldSelectorComboFieldText"
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
