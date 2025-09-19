@@ -13,7 +13,7 @@ import type {
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
-  results: ToolDefinitionWithSchema[];
+  results: ToolDefinition[];
 }
 
 export type GetToolResponse = ToolDefinitionWithSchema;
