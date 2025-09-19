@@ -97,7 +97,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     OPEN_TEST_FLYOUT_QUERY_PARAM,
     { defaultValue: false }
   );
-  const [urlToolType] = useQueryState<ToolType | undefined>(TOOL_TYPE_QUERY_PARAM);
+  const [urlToolType, setUrlToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
 
   const initialToolType = useMemo(() => {
     if (urlToolType && getToolTypeConfig(urlToolType)) {
@@ -334,7 +334,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               {isViewMode ? (
                 <ToolForm mode={ToolFormMode.View} formId={toolFormId} />
               ) : (
-                <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
+                <ToolForm
+                  mode={mode}
+                  formId={toolFormId}
+                  saveTool={handleSave}
+                  toolType={urlToolType!}
+                  setToolType={setUrlToolType}
+                />
               )}
               {showTestFlyout && currentToolId && (
                 <ToolTestFlyout

@@ -39,7 +39,6 @@ export const createIndexSearchFormValidationSchema = (toolsService: ToolsService
           if (!pattern || !pattern.trim()) {
             return true;
           }
-
           try {
             const response = await toolsService.resolveSearchSources({ pattern });
             return response.total > 0;

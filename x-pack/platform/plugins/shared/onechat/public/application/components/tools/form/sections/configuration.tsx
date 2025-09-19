@@ -12,24 +12,27 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
-import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
-import { useQueryState } from '../../../../hooks/use_query_state';
 import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
+import { ToolFormMode } from '../tool_form';
 
-export const Configuration = () => {
+interface ConfigurationProps {
+  toolType: ToolType;
+  setToolType: (toolType: ToolType) => void;
+  mode: ToolFormMode;
+}
+
+export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProps) => {
   const {
     formState: { errors },
     control,
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
 
-  const [urlQueryToolType, setUrlQueryToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
-
   useEffect(() => {
-    if (type && type !== urlQueryToolType) {
-      setUrlQueryToolType(type);
+    if (type && type !== toolType) {
+      setToolType(type);
     }
-  }, [type, urlQueryToolType, setUrlQueryToolType]);
+  }, [type, toolType, setToolType]);
 
   const toolConfig = getToolTypeConfig(type);
   const ConfigurationComponent = useMemo(() => {
@@ -55,7 +58,12 @@ export const Configuration = () => {
           control={control}
           name="type"
           render={({ field: { ref, ...field } }) => (
-            <EuiSelect options={editableToolTypes} {...field} inputRef={ref} />
+            <EuiSelect
+              options={editableToolTypes}
+              {...field}
+              inputRef={ref}
+              disabled={mode === ToolFormMode.Edit}
+            />
           )}
         />
       </EuiFormRow>

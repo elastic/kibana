@@ -17,9 +17,8 @@ export function useToolRegistryResolver(toolType: ToolType): Resolver<ToolFormDa
 
   return useCallback(
     async (data, context, options) => {
-      const currentType = data.type || toolType;
-      const toolTypeConfig = getToolTypeConfig(currentType);
-      if (!toolTypeConfig) throw new Error(`Unknown tool type: ${currentType}`);
+      const toolTypeConfig = getToolTypeConfig(toolType);
+      if (!toolTypeConfig) throw new Error(`Unknown tool type: ${toolType}`);
 
       const { getValidationResolver } = toolTypeConfig;
       // @ts-expect-error TS2345 - Union type ToolFormData cannot be narrowed to specific resolver type at compile time
