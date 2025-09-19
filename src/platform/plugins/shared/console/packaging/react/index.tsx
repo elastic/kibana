@@ -10,9 +10,21 @@
 import React, { useEffect } from 'react';
 // import 'monaco-editor/min/vs/editor/editor.main.css';
 
+// Disable Monaco workers entirely to prevent "Unexpected usage" errors
+// This sacrifices some language features but allows the editor to work in external apps
 (window as any).MonacoEnvironment = {
-  getWorkerUrl: () => '',
-  getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
+  getWorker: function () {
+    // Return a minimal mock worker that doesn't actually do anything
+    return {
+      postMessage: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      terminate: () => {},
+      onerror: null,
+      onmessage: null,
+      onmessageerror: null
+    };
+  }
 };
 
 // Create a provider factory for packaging environment
@@ -125,7 +137,15 @@ const coreContext = {
     get: createLogger,
   },
   env: {
-    packageInfo: { buildFlavor: 'development' },
+    packageInfo: {
+      buildFlavor: 'development',
+      // Add missing build info for analytics
+      isDistributable: false,
+      version: '1.0.0',
+      branch: 'main',
+      buildNum: 1,
+      buildSha: 'dev-build'
+    },
     mode: {
       name: 'development',
       dev: true,

@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK_DIR="/tmp/console_definitions_temp"
 KIBANA_REPO="https://github.com/elastic/kibana.git"
 ES_SPEC_REPO="https://github.com/elastic/elasticsearch-specification.git"
-VERSIONS=("9.0" "9.1")
+VERSIONS=("9.1")
 
 echo "=== Console Definitions Generator ==="
 echo "Script directory: $SCRIPT_DIR"

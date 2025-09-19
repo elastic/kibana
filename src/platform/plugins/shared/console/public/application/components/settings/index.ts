@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
+// import { withSuspense } from '@kbn/shared-ux-utility';
+import { SettingsEditor as SettingsEditorComponent } from './settings_editor';
 
 export { type Props } from './settings_editor';
 export { type AutocompleteOptions } from './types';
@@ -28,4 +29,5 @@ export const SettingsEditorLazy = React.lazy(() =>
  * be used directly by consumers and will load the `SettingsEditorLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const SettingsEditor = withSuspense(SettingsEditorLazy);
+// export const SettingsEditor = withSuspense(SettingsEditorLazy);
+export const SettingsEditor = SettingsEditorComponent;

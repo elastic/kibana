@@ -12,9 +12,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
-const webpack = require('webpack');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';
@@ -240,70 +238,6 @@ module.exports = [
       }),
       // new MonacoWebpackPlugin({}),
       // new BundleAnalyzerPlugin(),
-    ],
-  },
-
-  // Server bundle configuration
-  {
-    mode: process.env.NODE_ENV || 'development',
-    entry: require.resolve('./server/index.ts'),
-    context: __dirname,
-    devtool: 'cheap-source-map',
-    output: {
-      libraryTarget: 'commonjs',
-      path: path.resolve(BUILD_OUTPUT_DIR, 'server'),
-      filename: 'index.js',
-      publicPath: '',
-    },
-    target: 'node',
-    devtool: 'source-map',
-    externals: [
-      // Externalize Node.js built-ins and npm packages, but not relative imports
-      function (context, request, callback) {
-        // Don't externalize relative imports
-        if (request.startsWith('.') || request.startsWith('/')) {
-          return callback();
-        }
-        // Externalize Node.js built-ins and npm packages
-        if (/^[a-z@]/.test(request)) {
-          return callback(null, 'commonjs ' + request);
-        }
-        callback();
-      },
-    ],
-    module: {
-      rules: [
-        {
-          test: /\.(js|tsx?)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: 'development',
-              presets: [BABEL_PRESET],
-            },
-          },
-        },
-      ],
-    },
-    resolve: {
-      alias: {},
-      extensions: ['.js', '.ts', '.tsx'],
-    },
-    optimization: {
-      minimize: false,
-      noEmitOnErrors: true,
-      splitChunks: false,
-    },
-    plugins: [
-      new CleanWebpackPlugin({
-        cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'server/**/*')],
-      }),
-      new ConsoleDefinitionsPlugin({
-        from: path.resolve(__dirname, 'server/console_definitions'),
-        to: path.resolve(BUILD_OUTPUT_DIR, 'server/console_definitions'),
-      }),
     ],
   },
 ];
