@@ -86,8 +86,9 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
-    let packagePoliciesRequireReformatting =
-      taskInstance.state.packagePoliciesRequireReformatting ?? true;
+    let packagePoliciesRequireReformatting = Boolean(
+      taskInstance.state.packagePoliciesRequireReformatting ?? true
+    );
     try {
       this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
@@ -103,7 +104,6 @@ export class SyncPrivateLocationMonitorsTask {
       if (hasDataChanged || packagePoliciesRequireReformatting) {
         if (packagePoliciesRequireReformatting) {
           this.serverSetup.logger.info(`Reformatting synthetics package policies.`);
-          packagePoliciesRequireReformatting = false;
         }
         if (hasDataChanged) {
           this.debugLog(`Syncing private location monitors because data has changed`);
@@ -116,6 +116,7 @@ export class SyncPrivateLocationMonitorsTask {
             encryptedSavedObjects,
           });
         }
+        packagePoliciesRequireReformatting = false;
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
         this.debugLog(
