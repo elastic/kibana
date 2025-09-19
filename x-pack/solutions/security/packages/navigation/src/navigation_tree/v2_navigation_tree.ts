@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { defaultNavigationTree } from '../../navigation_tree';
 
 import { SecurityPageName } from '../..';
 import { securityLink } from '../../links';
-import { iconBulb } from './v2_icons/bulb';
+
+const LazyIconBulb = lazy(() =>
+  import('./v2_icons/bulb').then(({ iconBulb }) => ({ default: iconBulb }))
+);
 
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   defaultNavigationTree.dashboards({ sideNavVersion: 'v2' }),
@@ -46,7 +50,7 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   },
   {
     id: SecurityPageName.threatIntelligence,
-    iconV2: iconBulb,
+    iconV2: LazyIconBulb,
     link: securityLink(SecurityPageName.threatIntelligence),
     sideNavVersion: 'v2',
   },
