@@ -79,7 +79,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     blockingError$.next(error);
   }
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
-  console.log({ willHaveInitialFilter });
   const filtersLoading$ = new BehaviorSubject<boolean>(Boolean(willHaveInitialFilter));
 
   function setDataLoading(loading: boolean | undefined) {
