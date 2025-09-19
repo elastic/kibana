@@ -10,6 +10,8 @@ import {
   isProviderForSolutions,
 } from './inference_service_form_fields';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -27,6 +29,9 @@ jest.mock('../hooks/use_providers', () => ({
 
 const httpMock = httpServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
+const history = createMemoryHistory({
+  initialEntries: ['/'],
+});
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const { form } = useForm();
@@ -38,34 +43,31 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   );
 };
 
-describe('Inference Services', () => {
-  it('renders', () => {
-    render(
+const renderForm = () =>
+  render(
+    <Router history={history}>
       <MockFormProvider>
         <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
-    );
+    </Router>
+  );
+
+describe('Inference Services', () => {
+  it('renders', () => {
+    renderForm();
 
     expect(screen.getByTestId('provider-select')).toBeInTheDocument();
   });
 
   it('renders Selectable', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     expect(screen.getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
   it('renders Elastic at top', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     const listItems = screen.getAllByTestId('provider');
@@ -73,11 +75,7 @@ describe('Inference Services', () => {
   });
 
   it('renders selected provider fields - hugging_face', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     await userEvent.click(screen.getByText('Hugging Face'));
@@ -93,11 +91,7 @@ describe('Inference Services', () => {
   });
 
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     await userEvent.click(screen.getByText('Hugging Face'));
