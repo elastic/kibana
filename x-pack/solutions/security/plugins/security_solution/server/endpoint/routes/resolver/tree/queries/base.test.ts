@@ -139,7 +139,6 @@ describe('BaseResolverQuery', () => {
         shouldExcludeColdAndFrozenTiers: false,
       });
 
-      // Default schema should include process.name according to the changes
       expect(query.resolverFields).toEqual(
         expect.arrayContaining([
           { field: 'process.entity_id' },
