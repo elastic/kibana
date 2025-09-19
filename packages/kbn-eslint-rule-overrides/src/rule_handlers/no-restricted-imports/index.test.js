@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { mergeRestrictedImports } = require('./utils/merge_restricted_imports');
 const noRestrictedImportsHandler = require('.');
-
-jest.mock('./utils/merge_restricted_imports', () => ({
-  mergeRestrictedImports: jest.fn(),
-}));
 
 describe('noRestrictedImportsHandler', () => {
   let config;
@@ -51,25 +46,125 @@ describe('noRestrictedImportsHandler', () => {
 
   describe('WHEN using merge strategy', () => {
     describe('AND WHEN provided with imports and severity', () => {
-      it('SHOULD call mergeRestrictedImports with correct params', () => {
+      it('SHOULD merge imports with existing ones and update severity', () => {
         noRestrictedImportsHandler.process(config, {
           strategy: 'merge',
           value: ['react-router'],
           severity: 'error',
         });
 
-        expect(mergeRestrictedImports).toHaveBeenCalledWith(config, ['react-router'], 2);
+        const rule1 = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule1[0]).toBe(2); // error = 2
+        expect(rule1[1].paths).toEqual(['lodash', 'moment', 'react-router']);
+        expect(rule1[1].patterns).toEqual(['@internal/*']);
+
+        const rule2 = config.overrides[1].rules['no-restricted-imports'];
+        expect(rule2[0]).toBe(2); // changed from warn to error
+        expect(rule2[1].paths).toEqual(['jquery', 'react-router']);
       });
     });
 
     describe('AND WHEN severity is not provided', () => {
-      it('SHOULD call mergeRestrictedImports with null severity', () => {
+      it('SHOULD merge imports preserving existing severity', () => {
         noRestrictedImportsHandler.process(config, {
           strategy: 'merge',
           value: ['react-router'],
         });
 
-        expect(mergeRestrictedImports).toHaveBeenCalledWith(config, ['react-router'], null);
+        const rule1 = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule1[0]).toBe('error'); // preserved
+        expect(rule1[1].paths).toEqual(['lodash', 'moment', 'react-router']);
+
+        const rule2 = config.overrides[1].rules['no-restricted-imports'];
+        expect(rule2[0]).toBe('warn'); // preserved
+        expect(rule2[1].paths).toEqual(['jquery', 'react-router']);
+      });
+    });
+
+    describe('AND WHEN merging object restrictions', () => {
+      it('SHOULD merge object restrictions with existing ones', () => {
+        noRestrictedImportsHandler.process(config, {
+          strategy: 'merge',
+          value: [
+            {
+              name: 'axios',
+              message: 'Use fetch instead',
+            },
+            'underscore',
+          ],
+        });
+
+        const rule = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule[1].paths).toEqual([
+          'lodash',
+          'moment',
+          {
+            name: 'axios',
+            message: 'Use fetch instead',
+          },
+          'underscore',
+        ]);
+      });
+    });
+
+    describe('AND WHEN merging duplicate imports', () => {
+      it('SHOULD replace existing imports with new ones', () => {
+        config.overrides[0].rules['no-restricted-imports'] = [
+          'error',
+          {
+            paths: [
+              'lodash',
+              {
+                name: 'moment',
+                message: 'Old message',
+              },
+            ],
+            patterns: [],
+          },
+        ];
+
+        noRestrictedImportsHandler.process(config, {
+          strategy: 'merge',
+          value: [
+            {
+              name: 'lodash',
+              message: 'New message',
+            },
+            'moment', // This replaces the object version
+          ],
+        });
+
+        const rule = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule[1].paths).toEqual([
+          {
+            name: 'lodash',
+            message: 'New message',
+          },
+          'moment',
+        ]);
+      });
+    });
+
+    describe('AND WHEN config has legacy format', () => {
+      it('SHOULD handle legacy format and merge correctly', () => {
+        config.overrides[0].rules['no-restricted-imports'] = [
+          'error',
+          'lodash',
+          'moment',
+          {
+            paths: ['jquery'],
+            patterns: ['@internal/*'],
+          },
+        ];
+
+        noRestrictedImportsHandler.process(config, {
+          strategy: 'merge',
+          value: ['react-router'],
+        });
+
+        const rule = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule[1].paths).toEqual(['lodash', 'moment', 'jquery', 'react-router']);
+        expect(rule[1].patterns).toEqual(['@internal/*']);
       });
     });
   });
@@ -227,6 +322,86 @@ describe('noRestrictedImportsHandler', () => {
             value: ['lodash'],
           });
         }).not.toThrow();
+      });
+    });
+  });
+
+  describe('WHEN testing actual merge functionality', () => {
+    describe('AND WHEN merging complex restrictions', () => {
+      it('SHOULD correctly merge all types of restrictions', () => {
+        config.overrides[0].rules['no-restricted-imports'] = [
+          'error',
+          {
+            paths: [
+              'lodash',
+              {
+                name: 'moment',
+                message: 'Use date-fns',
+              },
+            ],
+            patterns: ['@internal/*'],
+          },
+        ];
+
+        noRestrictedImportsHandler.process(config, {
+          strategy: 'merge',
+          value: [
+            'axios',
+            {
+              name: 'react-router-dom',
+              importNames: ['Route', 'Switch'],
+              message: 'Use @kbn/shared-ux-router',
+            },
+            'lodash', // Duplicate - should be replaced
+          ],
+          severity: 'error',
+        });
+
+        const rule = config.overrides[0].rules['no-restricted-imports'];
+        expect(rule[0]).toBe(2);
+        expect(rule[1].paths).toHaveLength(4);
+        expect(rule[1].paths).toContainEqual({
+          name: 'moment',
+          message: 'Use date-fns',
+        });
+        expect(rule[1].paths).toContainEqual({
+          name: 'react-router-dom',
+          importNames: ['Route', 'Switch'],
+          message: 'Use @kbn/shared-ux-router',
+        });
+        expect(rule[1].paths).toContain('axios');
+        expect(rule[1].paths).toContain('lodash');
+        expect(rule[1].patterns).toEqual(['@internal/*']);
+      });
+    });
+
+    describe('AND WHEN working with malformed rules', () => {
+      it('SHOULD skip malformed rules during merge', () => {
+        config.overrides.push({
+          files: ['**/*.ts'],
+          rules: {
+            'no-restricted-imports': 'error', // Malformed - not an array
+          },
+        });
+        config.overrides.push({
+          files: ['**/*.tsx'],
+          rules: {
+            'no-restricted-imports': ['error'], // Malformed - no options
+          },
+        });
+
+        noRestrictedImportsHandler.process(config, {
+          strategy: 'merge',
+          value: ['axios'],
+        });
+
+        // Only first two overrides should be processed
+        expect(config.overrides[0].rules['no-restricted-imports'][1].paths).toContain('axios');
+        expect(config.overrides[1].rules['no-restricted-imports'][1].paths).toContain('axios');
+
+        // Malformed rules should remain unchanged
+        expect(config.overrides[2].rules['no-restricted-imports']).toBe('error');
+        expect(config.overrides[3].rules['no-restricted-imports']).toEqual(['error']);
       });
     });
   });
