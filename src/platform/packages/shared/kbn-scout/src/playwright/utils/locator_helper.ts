@@ -19,7 +19,7 @@ export type SelectorInput = string | { dataTestSubj: string } | { locator: strin
  * - { dataTestSubj: string }: explicit data-test-subj selector
  * - { locator: string }: any valid Playwright locator (CSS, XPath, role, text, etc.)
  */
-export function createLocator(page: ScoutPage, selector: SelectorInput): Locator {
+export function resolveSelector(page: ScoutPage, selector: SelectorInput): Locator {
   if (typeof selector === 'string') {
     // Backward compatibility: treat string as dataTestSubj
     // eslint-disable-next-line playwright/no-nth-methods

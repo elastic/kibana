@@ -9,7 +9,7 @@
 
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
-import { createLocator, type SelectorInput } from '../utils';
+import { resolveSelector, type SelectorInput } from '../utils';
 
 // https://eui.elastic.co/docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox-group
 export class EuiCheckBoxWrapper {
@@ -24,7 +24,7 @@ export class EuiCheckBoxWrapper {
    * new EuiCheckBoxWrapper(page, { locator: 'role=checkbox[name="I am a checkbox"]' })
    */
   constructor(page: ScoutPage, selector: SelectorInput) {
-    this.checkBoxWrapper = createLocator(page, selector);
+    this.checkBoxWrapper = resolveSelector(page, selector);
     this.checkBoxInput = this.checkBoxWrapper.locator('input.euiCheckbox__input');
     this.checkBoxLabel = this.checkBoxWrapper.locator('.euiCheckbox__label');
   }

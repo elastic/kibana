@@ -11,7 +11,7 @@ import { subj } from '@kbn/test-subj-selector';
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
-import { createLocator, type SelectorInput } from '../utils';
+import { resolveSelector, type SelectorInput } from '../utils';
 
 // https://eui.elastic.co/docs/components/forms/selection/combo-box/
 export class EuiComboBoxWrapper {
@@ -29,7 +29,7 @@ export class EuiComboBoxWrapper {
    */
   constructor(page: ScoutPage, selector: SelectorInput) {
     this.page = page;
-    this.comboBoxWrapper = createLocator(page, selector);
+    this.comboBoxWrapper = resolveSelector(page, selector);
 
     this.comboBoxMainInput = this.comboBoxWrapper.locator(subj('comboBoxInput'));
     this.comboBoxSearchInput = this.comboBoxWrapper.locator(subj('comboBoxSearchInput'));

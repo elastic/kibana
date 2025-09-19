@@ -8,4 +8,4 @@
  */
 
 export { isValidUTCDate, formatTime, getPlaywrightGrepTag, execPromise } from './runner_utils';
-export { createLocator, type SelectorInput } from './locator_helper';
+export { resolveSelector, type SelectorInput } from './locator_helper';

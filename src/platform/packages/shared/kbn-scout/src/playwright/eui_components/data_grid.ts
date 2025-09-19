@@ -11,7 +11,7 @@ import { subj } from '@kbn/test-subj-selector';
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
-import { createLocator, type SelectorInput } from '../utils';
+import { resolveSelector, type SelectorInput } from '../utils';
 
 // https://eui.elastic.co/docs/components/tables/data-grid/
 export class EuiDataGridWrapper {
@@ -33,7 +33,7 @@ export class EuiDataGridWrapper {
    */
   constructor(page: ScoutPage, selector: SelectorInput) {
     this.page = page;
-    this.dataGridWrapper = createLocator(page, selector);
+    this.dataGridWrapper = resolveSelector(page, selector);
 
     // Toolbar elements
     this.toolbarFullScreenButton = this.dataGridWrapper.locator(subj('dataGridFullScreenButton'));

@@ -11,7 +11,7 @@ import { subj } from '@kbn/test-subj-selector';
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
-import { createLocator, type SelectorInput } from '../utils';
+import { resolveSelector, type SelectorInput } from '../utils';
 
 // https://eui.elastic.co/docs/components/forms/selection/selectable/
 export class EuiSelectableWrapper {
@@ -28,7 +28,7 @@ export class EuiSelectableWrapper {
    * new EuiSelectableWrapper(page, { locator: 'role=combobox[name="Searchable example"]' })
    */
   constructor(page: ScoutPage, selector: SelectorInput) {
-    this.selectableWrapper = createLocator(page, selector);
+    this.selectableWrapper = resolveSelector(page, selector);
 
     this.selectableList = this.selectableWrapper.locator(subj('euiSelectableList'));
     this.selectableSearchInput = this.selectableWrapper.locator('.euiFieldSearch');
