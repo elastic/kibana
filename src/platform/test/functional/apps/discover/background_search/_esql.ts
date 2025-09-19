@@ -115,6 +115,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
       });
+
+      describe('when clicking the open background search flyout button', () => {
+        it('opens the background search flyout', async () => {
+          await testSubjects.click('openBackgroundSearchFlyoutButton');
+          await testSubjects.exists('searchSessionsMgmtUiTable');
+        });
+      });
     });
   });
 }
