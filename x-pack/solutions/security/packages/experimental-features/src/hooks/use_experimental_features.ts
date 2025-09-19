@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { selectExperimentalFeature, useSelector } from '../store/redux';
+import { allowedExperimentalValues } from '../constants/experimental_features';
 import type { ExperimentalFeatures } from '../types';
-import { getExperimentalAllowedValues } from '../utils/helpers';
+import { getExperimentalAllowedValuesKeys } from '../utils/helpers';
 
-const allowedExperimentalValues = getExperimentalAllowedValues();
-
-const useEnableExperimental = (): ExperimentalFeatures => useSelector(selectExperimentalFeature());
+const allowedExperimentalValuesKeys = getExperimentalAllowedValuesKeys();
 
 export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
-  const enableExperimental = useEnableExperimental();
-
-  if (!enableExperimental || !(feature in enableExperimental)) {
+  if (!allowedExperimentalValues || !(feature in allowedExperimentalValues)) {
     throw new Error(
-      `Invalid enable value ${feature}. Allowed values are: ${allowedExperimentalValues.join(', ')}`
+      `Invalid enable value ${feature}. Allowed values are: ${allowedExperimentalValuesKeys.join(
+        ', '
+      )}`
     );
   }
-  return enableExperimental[feature];
+  return allowedExperimentalValues[feature];
 };

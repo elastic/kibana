@@ -11,6 +11,6 @@ export { useIsExperimentalFeatureEnabled } from './src/hooks/use_experimental_fe
 
 export { ExperimentalFeaturesService } from './src/services/experimental_features_service';
 
-export { parseExperimentalConfigValue, getExperimentalAllowedValues } from './src/utils/helpers';
+export { parseExperimentalConfigValue } from './src/utils/helpers';
 
 export type { ExperimentalFeatures } from './src/types';
