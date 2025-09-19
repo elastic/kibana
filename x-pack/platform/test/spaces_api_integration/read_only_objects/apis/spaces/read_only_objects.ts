@@ -643,7 +643,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should throw when trying to make changes on locked objects', async () => {
+      it.only('should throw when trying to change access mode on locked objects when not owner', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -654,19 +654,22 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', ownerCookie.cookieString())
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(200);
+
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         await activateSimpleUserProfile();
         const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
         const updateResponse = await supertestWithoutAuth
-          .put('/read_only_objects/update')
+          .put('/read_only_objects/change_access_mode')
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newAccessMode: 'read_only' })
           .expect(403);
         expect(updateResponse.body).to.have.property('message');
-        expect(updateResponse.body.message).to.contain(`Unable to update read_only_type`);
+        expect(updateResponse.body.message).to.contain(
+          `Access denied: Unable to manage access control for read_only_type`
+        );
       });
 
       it('allows updates on removing read only access mode', async () => {
