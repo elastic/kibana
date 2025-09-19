@@ -13,7 +13,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { registerInferenceConnectorsUsageCollector } from './usage/inference_connectors_usage_collector';
+import { registerInferenceConnectorsUsageCollector } from './usage/inference/inference_connectors_usage_collector';
 import { registerConnectorTypes } from './connector_types';
 import {
   validSlackApiChannelsRoute,

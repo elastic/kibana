@@ -2619,6 +2619,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
 
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
@@ -3003,3 +3004,4 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+

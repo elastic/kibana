@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { UsageCollectionSetup, MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 interface InferenceConnectorsUsage {
-  count_by_provider: Record<string, number>;
+  inference_count_by_provider: Record<string, number>;
 }
 
 interface ByProviderBucket {
@@ -26,10 +26,10 @@ export function registerInferenceConnectorsUsageCollector(
   core: CoreSetup
 ) {
   const collector = usageCollection.makeUsageCollector<InferenceConnectorsUsage>({
-    type: 'stack_connectors_inference',
+    type: 'stack_connectors',
     isReady: () => true,
     schema: {
-      count_by_provider: {
+      inference_count_by_provider: {
         DYNAMIC_KEY: { type: 'long' },
       },
     } as MakeSchemaFrom<InferenceConnectorsUsage>,
@@ -76,11 +76,11 @@ export function registerInferenceConnectorsUsageCollector(
         }
 
         return {
-          count_by_provider: countByProvider,
+          inference_count_by_provider: countByProvider,
         };
       } catch (e) {
         return {
-          count_by_provider: {},
+          inference_count_by_provider: {},
         };
       }
     },
