@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 import { z } from '@kbn/zod';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition, FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
@@ -80,22 +80,26 @@ const exportContentRoute = createServerRoute({
         root: params.path.name,
         include: params.body.include,
       }),
-      streams: [root, ...descendants].map((stream) =>
-        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
-      ),
+      streams: [root, ...descendants].map((stream) => {
+        if (stream.name === params.path.name) {
+          // merge inherited mappings into the exported root
+          const mergedFields = { ...inheritedFields, ...stream.ingest.wired.fields };
+          stream.ingest.wired.fields = Object.keys(mergedFields)
+            .filter((key) => !baseFields[key])
+            .reduce((fields, key) => {
+              fields[key] = omit(mergedFields[key], 'from');
+              return fields;
+            }, {} as FieldDefinition);
+        }
+
+        return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });
+      }),
     });
 
-    const streamObjects = prepareStreamsForExport({
-      tree: exportedTree,
-      inheritedFields: Object.keys(inheritedFields)
-        .filter((field) => !baseFields[field])
-        .reduce((fields, field) => {
-          fields[field] = omit(inheritedFields[field], ['from']);
-          return fields;
-        }, {} as FieldDefinition),
-    });
-
-    const archive = await generateArchive(params.body, streamObjects);
+    const archive = await generateArchive(
+      params.body,
+      prepareStreamsForExport({ tree: exportedTree })
+    );
 
     return response.ok({
       body: archive,

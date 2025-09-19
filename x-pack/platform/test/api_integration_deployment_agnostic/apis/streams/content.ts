@@ -182,21 +182,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_a',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
                       {
                         destination: 'branch_a.child1',
                         objects: {
+                          mappings: true,
                           queries: [],
                           routing: [
                             {
                               destination: 'branch_a.child1.nested',
-                              objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                              objects: {
+                                mappings: true,
+                                queries: [{ id: 'my-error-query' }],
+                                routing: [],
+                              },
                             },
                           ],
                         },
@@ -256,14 +263,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_b',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
-                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                      {
+                        destination: 'branch_b.child1',
+                        objects: { mappings: true, queries: [], routing: [] },
+                      },
                     ],
                   },
                 },
@@ -344,11 +356,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'nested',
-                  objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                  objects: { mappings: true, queries: [{ id: 'my-error-query' }], routing: [] },
                 },
               ],
             },
@@ -413,14 +426,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const importResponse = await importContent(apiClient, 'logs.branch_d', {
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_b',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
-                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                      {
+                        destination: 'branch_b.child1',
+                        objects: { mappings: true, queries: [], routing: [] },
+                      },
                     ],
                   },
                 },
