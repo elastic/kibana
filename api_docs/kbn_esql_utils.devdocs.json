@@ -522,7 +522,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          ", allowNoIndex: boolean | undefined) => Promise<",
+          ", options: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; } | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -575,17 +575,43 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getESQLAdHocDataview.$3",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "allowNoIndex",
+            "label": "options",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$3.allowNoIndex",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "allowNoIndex",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$3.createNewInstanceEvenIfCachedOneAvailable",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createNewInstanceEvenIfCachedOneAvailable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
