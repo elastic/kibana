@@ -502,8 +502,8 @@ export class UnifiedActionsProvider {
 
     this.updateEditorActionsCss({
       position: 'absolute',
-      top: `${topPosition + 20}px`, // Account for border and padding + 4px down
-      right: '8px', // Inside the step area
+      top: `${topPosition + 24}px`, // Account for border
+      right: 0, // Inside the step area
       zIndex: 1002, // Above the highlighting and pseudo-element
       pointerEvents: 'auto',
       display: 'flex',

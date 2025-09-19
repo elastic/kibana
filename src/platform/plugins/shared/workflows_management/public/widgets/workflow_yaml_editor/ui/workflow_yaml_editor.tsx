@@ -1369,7 +1369,10 @@ export const WorkflowYAMLEditor = ({
         justifyContent="center"
         alignItems="center"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
+        >
           <ElasticsearchStepActions
             actionsProvider={unifiedProvidersRef.current?.actions}
             http={http}
