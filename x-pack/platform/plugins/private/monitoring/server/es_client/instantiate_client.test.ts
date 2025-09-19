@@ -91,15 +91,20 @@ describe('Instantiate Client', () => {
 
   describe('Use a connection to production cluster', () => {
     it('exposes an authenticated client using production host settings', () => {
-      instantiateClient(server.monitoring.ui.elasticsearch, log, elasticsearchStart);
+      const client = instantiateClient(server.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
       expect(elasticsearchStart.createClient).toHaveBeenCalledTimes(0);
+      expect(client).toEqual(elasticsearchStart.client);
     });
   });
 
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
-      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, elasticsearchStart);
+      const client = instantiateClient(
+        serverWithUrl.monitoring.ui.elasticsearch,
+        log,
+        elasticsearchStart
+      );
       const createClusterCall = elasticsearchStart.createClient.mock.calls[0];
       const createClientOptions = createClusterCall[1];
 
@@ -108,6 +113,8 @@ describe('Instantiate Client', () => {
       expect(createClientOptions?.hosts?.[0]).toEqual('http://monitoring-cluster.test:9200');
       expect(createClientOptions?.username).toEqual('monitoring-user-internal-test');
       expect(createClientOptions?.password).toEqual('monitoring-p@ssw0rd!-internal-test');
+
+      expect(client).toEqual(elasticsearchStart.createClient.mock.results[0].value);
     });
   });
 
