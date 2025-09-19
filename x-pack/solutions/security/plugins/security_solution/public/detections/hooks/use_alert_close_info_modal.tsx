@@ -119,13 +119,13 @@ const AlertCloseConfirmationModal = ({
   const { title, message } =
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
       ? {
-        title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
-        message: continueSuppressionMessageComponent,
-      }
+          title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
+          message: continueSuppressionMessageComponent,
+        }
       : {
-        title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
-        message: restartSuppressionMessageComponent,
-      };
+          title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
+          message: restartSuppressionMessageComponent,
+        };
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
