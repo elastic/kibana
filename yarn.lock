@@ -5260,10 +5260,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-mocks@link:src/core/packages/saved-objects/browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-common@link:src/core/packages/saved-objects/common":
   version "0.0.0"
   uid ""
