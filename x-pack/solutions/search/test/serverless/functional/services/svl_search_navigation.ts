@@ -20,13 +20,23 @@ export function SvlSearchNavigationServiceProvider({
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
         // Wait for the side nav, since the landing page will sometimes redirect to index management now
-        await testSubjects.existOrFail('svlSearchSideNav', { timeout: 2000 });
+        await testSubjects.existOrFail('~svlSearchSideNav', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('serverlessElasticsearch');
         await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
+      });
+    },
+    async navigateToElasticsearchHome(expectRedirect: boolean = false) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('searchHomepage', {
+          shouldLoginIfPrompted: false,
+        });
+        if (!expectRedirect) {
+          await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
+        }
       });
     },
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {

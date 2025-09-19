@@ -105,6 +105,9 @@ export const AdvancedFieldMappingOptions = ({
                   if (onValidate) onValidate(false);
                 }
               }}
+              options={{
+                automaticLayout: true,
+              }}
             />
           ) : (
             <EuiCodeBlock language="json" isCopyable>

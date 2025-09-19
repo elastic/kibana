@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a mix of well-formed and malformed (overly long fields) synthetics monitor documents.
+ */
+
 import type { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
 import { generateShortId, syntheticsMonitor } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

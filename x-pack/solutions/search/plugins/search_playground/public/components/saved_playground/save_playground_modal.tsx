@@ -84,7 +84,7 @@ export const SavePlaygroundModal = ({
           reset(newPlayground);
           notifications.toasts.addSuccess({
             title: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.title', {
-              defaultMessage: 'Playground saved',
+              defaultMessage: 'playground saved',
             }),
             text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
               defaultMessage: '{name} was saved.',

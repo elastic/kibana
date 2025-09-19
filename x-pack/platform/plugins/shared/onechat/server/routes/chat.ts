@@ -13,13 +13,13 @@ import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
 import {
-  AgentMode,
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
@@ -38,15 +38,6 @@ export function registerChatRoutes({
 
   const conversePayloadSchema = schema.object({
     agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    mode: schema.oneOf(
-      [
-        schema.literal(AgentMode.normal),
-        schema.literal(AgentMode.reason),
-        schema.literal(AgentMode.plan),
-        schema.literal(AgentMode.research),
-      ],
-      { defaultValue: AgentMode.normal }
-    ),
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
@@ -65,7 +56,6 @@ export function registerChatRoutes({
   }) => {
     const {
       agent_id: agentId,
-      mode,
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
@@ -73,7 +63,6 @@ export function registerChatRoutes({
 
     return chatService.converse({
       agentId,
-      mode,
       connectorId,
       conversationId,
       abortSignal,
@@ -84,7 +73,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse',
+      path: `${publicApiPath}/converse`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -143,7 +132,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse/async',
+      path: `${publicApiPath}/converse/async`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },

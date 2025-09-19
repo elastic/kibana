@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { BaseMessage, ToolMessage, MessageContentComplex } from '@langchain/core/messages';
+import type { BaseMessage, MessageContentComplex, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
-import { isArray, isEmpty } from 'lodash';
+import { isArray } from 'lodash';
+import { ToolResultType } from '@kbn/onechat-common';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -60,16 +61,25 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
  * it was executed from a onechat agent.
  */
 export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
-  if (!message.artifact) {
-    throw new Error('No artifact attached to tool message');
-  }
-  if (!isArray(message.artifact.results) || isEmpty(message.artifact.results)) {
-    throw new Error(
-      `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
-        message.artifact
-      )}`
-    );
-  }
+  if (message.artifact) {
+    if (!isArray(message.artifact.results)) {
+      throw new Error(
+        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+          message.artifact
+        )}`
+      );
+    }
 
-  return message.artifact as RunToolReturn;
+    return message.artifact as RunToolReturn;
+  } else {
+    // langchain tool validation error (such as schema errors) are out of our control and don't emit artifacts...
+    const content = extractTextContent(message);
+    if (content.startsWith('Error:')) {
+      return {
+        results: [{ type: ToolResultType.error, data: { message: content } }],
+      };
+    } else {
+      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
+    }
+  }
 };

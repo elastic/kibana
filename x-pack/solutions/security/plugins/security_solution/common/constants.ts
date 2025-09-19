@@ -109,6 +109,7 @@ export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailNam
 export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
+export const SIEM_READINESS_PATH = '/siem_readiness' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
@@ -139,7 +140,10 @@ export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
+export const APP_ENDPOINT_EXCEPTIONS_PATH = `${APP_PATH}${ENDPOINT_EXCEPTIONS_PATH}` as const;
+export const APP_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}` as const;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
+export const APP_TRUSTED_DEVICES_PATH = `${APP_PATH}${TRUSTED_DEVICES_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
@@ -148,7 +152,9 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
 // AI SOC exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
@@ -184,12 +190,24 @@ export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReport
 /** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
 export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
 
+/** This Kibana Advanced Setting sets a default title for the AI value report page */
+export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
+
+/** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
+export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
+
+export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
+  RestartWindow = 'restart-suppression',
+  ContinueWindow = 'continue-until-window-ends',
+}
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -234,6 +252,9 @@ export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInven
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
@@ -435,7 +456,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',

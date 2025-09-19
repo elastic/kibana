@@ -16,31 +16,9 @@ export enum AgentType {
 }
 
 /**
- * Execution mode for agents.
- */
-export enum AgentMode {
-  /**
-   * Normal (Q/A) mode
-   */
-  normal = 'normal',
-  /**
-   * "Think more" mode
-   */
-  reason = 'reason',
-  /**
-   * "Plan-and-execute" mode
-   */
-  plan = 'plan',
-  /**
-   * "Deep-research" mode
-   */
-  research = 'research',
-}
-
-/**
  * ID of the onechat default conversational agent
  */
-export const oneChatDefaultAgentId = 'default';
+export const oneChatDefaultAgentId = 'elastic-ai-agent';
 
 /**
  * Base descriptor for an agent.
@@ -72,6 +50,18 @@ export interface AgentDefinition {
    * Human-readable description for the agent.
    */
   description: string;
+  /**
+   * Optional labels used to organize or filter agents
+   */
+  labels?: string[];
+  /**
+   * Optional color used to represent the agent in the UI
+   */
+  avatar_color?: string;
+  /**
+   * Optional symbol used to represent the agent in the UI
+   */
+  avatar_symbol?: string;
   /**
    * Configuration associated with this agent
    */

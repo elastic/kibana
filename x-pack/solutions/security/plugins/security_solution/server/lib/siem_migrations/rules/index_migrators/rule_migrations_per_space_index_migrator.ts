@@ -12,8 +12,8 @@ import type {
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleMigrationAdapters, StoredSiemMigration } from '../types';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import type { RuleMigrationAdapters, StoredRuleMigration } from '../types';
+import { MAX_ES_SEARCH_SIZE } from '../../common/data/constants';
 
 export class RuleMigrationSpaceIndexMigrator {
   constructor(
@@ -101,7 +101,7 @@ export class RuleMigrationSpaceIndexMigrator {
   /**
    * Creates migration documents in the migrations index.
    */
-  private async createMigrationDocs(docs: Array<Partial<StoredSiemMigration>>) {
+  private async createMigrationDocs(docs: Array<Partial<StoredRuleMigration>>) {
     const _index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
     const operations = docs.flatMap(({ id: _id, ...doc }) => [
       { create: { _id, _index } },
@@ -113,7 +113,7 @@ export class RuleMigrationSpaceIndexMigrator {
   /**
    * Updates migration documents in the migrations index.
    */
-  private async updateMigrationDocs(docs: Array<Partial<StoredSiemMigration>>) {
+  private async updateMigrationDocs(docs: Array<Partial<StoredRuleMigration>>) {
     const _index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
     const operations = docs.flatMap(({ id: _id, ...doc }) => [
       { update: { _id, _index } },
@@ -159,7 +159,7 @@ export class RuleMigrationSpaceIndexMigrator {
    */
   private async getMigrationIdsFromMigrationsIndex(): Promise<string[]> {
     const index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
-    const result = await this.esClient.search<StoredSiemMigration>({
+    const result = await this.esClient.search<StoredRuleMigration>({
       index,
       size: MAX_ES_SEARCH_SIZE,
       query: { match_all: {} },
@@ -178,7 +178,7 @@ export class RuleMigrationSpaceIndexMigrator {
   private async getMigrationIdsWithoutName(): Promise<string[]> {
     const index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
 
-    const result = await this.esClient.search<StoredSiemMigration>({
+    const result = await this.esClient.search<StoredRuleMigration>({
       index,
       query: { bool: { must_not: { exists: { field: 'name' } } } },
       size: MAX_ES_SEARCH_SIZE,

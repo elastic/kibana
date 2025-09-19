@@ -27,15 +27,13 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
-  DashboardCreateOut,
   DashboardCreateOptions,
-  DashboardGetOut,
-  DashboardSearchOut,
   DashboardUpdateOptions,
-  DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardItem,
+  DashboardGetOut,
 } from './latest';
+import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -214,6 +212,7 @@ export class DashboardStorage {
       DashboardGetOut,
       DashboardGetOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -283,11 +282,11 @@ export class DashboardStorage {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
+
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
-    const validationError = transforms.create.out.result.validate({ item });
+    const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -300,6 +299,7 @@ export class DashboardStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<DashboardItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -384,6 +384,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -462,6 +463,7 @@ export class DashboardStorage {
       DashboardSearchOut,
       DashboardSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above

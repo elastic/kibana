@@ -77,7 +77,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -102,7 +101,6 @@ describe('Onechat runner', () => {
       expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        runId: expect.any(String),
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
     });
@@ -156,7 +154,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });
@@ -185,7 +182,6 @@ describe('Onechat runner', () => {
       );
 
       expect(response).toEqual({
-        runId: expect.any(String),
         result: 'someResult',
       });
     });

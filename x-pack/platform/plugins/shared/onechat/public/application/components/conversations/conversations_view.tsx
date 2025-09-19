@@ -17,7 +17,7 @@ import { useConversationList } from '../../hooks/use_conversation_list';
 import { SendMessageProvider } from '../../context/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
@@ -56,8 +56,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  // Prefetch conversations before sidebar is opened
-  const { conversations, isLoading } = useConversationList();
+  const { conversations = [], isLoading } = useConversationList();
 
   return (
     <SendMessageProvider>

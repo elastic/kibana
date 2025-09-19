@@ -843,7 +843,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1627,6 +1627,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; streams: ",
+              "default",
               "; synonyms: ",
               "default",
               "; tasks: ",
@@ -1953,7 +1955,7 @@
               "ConnectorUsageCollector",
               ") => Promise<",
               "AxiosResponse",
-              "<R, any>>"
+              "<R, any, {}>>"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
@@ -3115,6 +3117,114 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-server.Connector",
+        "type": "Interface",
+        "tags": [],
+        "label": "Connector",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.actionTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "actionTypeId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.isMissingSecrets",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMissingSecrets",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.isPreconfigured",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPreconfigured",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.Connector.isSystemAction",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemAction",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.ConnectorWithExtraFindData",
         "type": "Interface",
         "tags": [],
@@ -3129,7 +3239,13 @@
             "text": "ConnectorWithExtraFindData"
           },
           " extends ",
-          "Connector"
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector.ts",
         "deprecated": false,
@@ -3165,7 +3281,13 @@
             "text": "InMemoryConnector"
           },
           "<Config, Secrets> extends ",
-          "Connector"
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
@@ -3630,7 +3752,13 @@
         "label": "ActionResult",
         "description": [],
         "signature": [
-          "Connector"
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
         "deprecated": false,
@@ -3673,13 +3801,31 @@
           "<unknown>>; create: ({ action, options, }: Omit<",
           "ConnectorCreateParams",
           ", \"context\">) => Promise<",
-          "Connector",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           ">; update: ({ id, action, }: Pick<",
           "ConnectorUpdateParams",
           ", \"id\" | \"action\">) => Promise<",
-          "Connector",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          "Connector",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
@@ -3697,7 +3843,13 @@
             "text": "ConnectorWithExtraFindData"
           },
           "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          "Connector",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",

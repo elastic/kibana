@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         ref: ${{ matrix.branch }}
 
@@ -31,7 +31,8 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        debug: true
+        packs: |
+          githubsecuritylab/codeql-${{ matrix.language }}-queries
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -69,7 +70,7 @@ jobs:
     if: ${{ github.repository == 'elastic/kibana' && success() }} # Hack: Do not run on forks
     steps:
     - name: Checkout kibana-operations
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         repository: 'elastic/kibana-operations'
         ref: main
@@ -95,7 +96,7 @@ jobs:
     if: failure()
     steps:
       - name: Send notification to slack
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
         with:
           method: chat.postMessage
           token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}

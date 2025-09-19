@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -56,10 +56,12 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  // TODO remove when we remove the newDataViewPickerEnabled feature flag
   /**
    * DataViewSpec object to use internally to fetch the data
    */
   dataViewSpec: DataViewSpec;
+  // TODO this should probably not be optional anymore once we remove the newDataViewPickerEnabled feature flag
   /**
    * DataView object to use internally to fetch the data.
    */

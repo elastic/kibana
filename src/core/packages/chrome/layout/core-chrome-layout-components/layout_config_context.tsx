@@ -22,7 +22,6 @@ export type LayoutConfig = Pick<
   | 'footerHeight'
   | 'navigationWidth'
   | 'sidebarWidth'
-  | 'sidebarPanelWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
 >;

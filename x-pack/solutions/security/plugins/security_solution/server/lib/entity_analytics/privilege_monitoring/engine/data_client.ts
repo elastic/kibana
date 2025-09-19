@@ -15,12 +15,11 @@ import type {
   SavedObjectsClientProviderOptions,
   KibanaRequest,
 } from '@kbn/core/server';
-
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EngineComponentResource } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
+import type { ExperimentalFeatures } from '../../../../../common';
+import type { MonitoringEngineComponentResource } from '../../../../../common/api/entity_analytics';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
-
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../../audit';
 import { monitoringEntitySourceType } from '../saved_objects';
@@ -38,6 +37,8 @@ export interface PrivilegeMonitoringGlobalDependencies {
 
   apiKeyManager?: ApiKeyManager;
   taskManager?: TaskManagerStartContract;
+
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**
@@ -48,6 +49,7 @@ export class PrivilegeMonitoringDataClient {
 
   constructor(public readonly deps: PrivilegeMonitoringGlobalDependencies) {
     this.index = getPrivilegedMonitorUsersIndex(deps.namespace);
+    this.deps.experimentalFeatures = deps.experimentalFeatures;
   }
 
   public getScopedSoClient(request: KibanaRequest, options?: SavedObjectsClientProviderOptions) {
@@ -63,7 +65,7 @@ export class PrivilegeMonitoringDataClient {
 
   public audit(
     action: PrivilegeMonitoringEngineActions,
-    resource: EngineComponentResource,
+    resource: MonitoringEngineComponentResource,
     msg: string,
     error?: Error
   ) {

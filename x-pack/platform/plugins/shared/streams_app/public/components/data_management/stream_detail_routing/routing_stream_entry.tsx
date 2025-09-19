@@ -19,9 +19,8 @@ import {
 } from '@elastic/eui';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isDescendantOf } from '@kbn/streams-schema';
+import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
-import { isNeverCondition } from '@kbn/streamlang';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
@@ -91,7 +90,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(routingRule.where) && (
+        {!isRoutingEnabled(routingRule.status) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -100,7 +99,7 @@ export function RoutingStreamEntry({
         )}
         <EuiLink
           href={router.link('/{key}/management/{tab}', {
-            path: { key: routingRule.destination, tab: 'route' },
+            path: { key: routingRule.destination, tab: 'partitioning' },
           })}
           data-test-subj="streamsAppRoutingStreamEntryButton"
         >
@@ -137,16 +136,11 @@ export function RoutingStreamEntry({
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
             condition={routingRule.where}
-            onConditionChange={(condition) => onChange({ where: condition })}
+            status={routingRule.status}
+            onConditionChange={(cond) => onChange({ where: cond })}
+            onStatusChange={(status) => onChange({ status })}
           />
-          <EditRoutingRuleControls
-            relatedStreams={availableStreams.filter(
-              (streamName) =>
-                streamName === routingRule.destination ||
-                isDescendantOf(routingRule.destination, streamName)
-            )}
-            routingRule={routingRule}
-          />
+          <EditRoutingRuleControls routingRule={routingRule} />
         </EuiFlexGroup>
       )}
     </EuiPanel>
