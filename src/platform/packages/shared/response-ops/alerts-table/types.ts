@@ -63,6 +63,12 @@ export interface Consumer {
   name: string;
 }
 
+interface Observable {
+  typeKey: string;
+  value: string;
+  description: string | null;
+}
+
 export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
 
 export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
@@ -78,7 +84,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: ({ attachments, observables }: { attachments: any[]; observables: any[] }) => void;
   close: () => void;
 };
 
@@ -87,8 +93,10 @@ type UseCasesAddToExistingCaseModal = (
 ) => {
   open: ({
     getAttachments,
+    getObservables,
   }: {
     getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getObservables: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
 };
 
@@ -138,6 +146,7 @@ export interface CasesService {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
+    getObservablesFromEcs: (ecs: any) => Observable[];
   };
 }
 
@@ -639,7 +648,7 @@ export interface TimelineItem {
   _id: string;
   _index?: string | null;
   data: TimelineNonEcsData[];
-  ecs: { _id: string; _index?: string };
+  ecs: { _id: string; _index?: string } & any;
 }
 
 export interface TimelineNonEcsData {

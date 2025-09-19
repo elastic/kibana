@@ -87,6 +87,7 @@ export const AlertsDataGrid = typedMemo(
     const {
       isLoading,
       alerts,
+      ecsAlertsData,
       alertsCount,
       isLoadingAlerts,
       browserFields,
@@ -133,6 +134,7 @@ export const AlertsDataGrid = typedMemo(
       alertsCount,
       rowSelection: bulkActionsState.rowSelection,
       alerts,
+      ecsAlerts: ecsAlertsData,
       isLoading,
       columnIds,
       onToggleColumn,

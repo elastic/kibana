@@ -20,6 +20,7 @@ import {
 import type { Alert } from '@kbn/alerting-types';
 import useObservable from 'react-use/lib/useObservable';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+// import { unflattenObject } from '@kbn/object-utils';
 import type { BulkActionsPanelConfig, RowSelection, TimelineItem } from '../types';
 import { BulkActionsVerbs } from '../types';
 import * as i18n from '../translations';
@@ -29,6 +30,7 @@ interface BulkActionsProps {
   totalItems: number;
   panels: BulkActionsPanelConfig[];
   alerts: Alert[];
+  ecsAlerts: any[];
   setIsBulkActionsLoading: (loading: boolean) => void;
   clearSelection: () => void;
   refresh: () => void;
@@ -40,10 +42,12 @@ const containerStyles = { display: 'inline-block', position: 'relative' } as con
 
 const selectedIdsToTimelineItemMapper = (
   alerts: Alert[],
+  ecsAlerts: any[],
   rowSelection: RowSelection
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
+    const ecsAlert = ecsAlerts[rowIndex];
     return {
       _id: alert._id,
       _index: alert._index,
@@ -60,7 +64,10 @@ const selectedIdsToTimelineItemMapper = (
       ecs: {
         _id: alert._id,
         _index: alert._index,
+        ...ecsAlert,
       },
+      // Option 2: rebuild ecs from alert
+      // ecs: unflattenObject(alert),
     };
   });
 };
@@ -75,6 +82,7 @@ const useBulkActionsToMenuPanelMapper = (
   // In case bulk item action changes the alert data and need to refresh table page.
   refresh: BulkActionsProps['refresh'],
   alerts: Alert[],
+  ecsAlerts: any[],
   closeIfPopoverIsOpen: () => void
 ) => {
   const {
@@ -84,7 +92,7 @@ const useBulkActionsToMenuPanelMapper = (
   const bulkActionsPanels = useMemo(() => {
     const bulkActionPanelsToReturn = [];
     for (const panel of panels) {
-      const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection);
+      const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, ecsAlerts, rowSelection);
       if (panel.items) {
         const newItems = panel.items.map((item) => {
           const isDisabled = isAllSelected && item.disableOnQuery;
@@ -124,6 +132,7 @@ const useBulkActionsToMenuPanelMapper = (
     return bulkActionPanelsToReturn;
   }, [
     alerts,
+    ecsAlerts,
     clearSelection,
     isAllSelected,
     panels,
@@ -140,6 +149,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   totalItems,
   panels,
   alerts,
+  ecsAlerts,
   setIsBulkActionsLoading,
   clearSelection,
   refresh,
@@ -190,6 +200,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
     clearSelection,
     refresh,
     alerts,
+    ecsAlerts,
     closeIfPopoverIsOpen
   );
 

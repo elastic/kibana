@@ -180,6 +180,7 @@ export const useGetToolbarVisibility = ({
   alertsCount,
   rowSelection,
   alerts,
+  ecsAlerts,
   isLoading,
   columnIds,
   onToggleColumn,
@@ -199,6 +200,7 @@ export const useGetToolbarVisibility = ({
   alertsCount: number;
   rowSelection: RowSelection;
   alerts: Alert[];
+  ecsAlerts: any[];
   isLoading: boolean;
   columnIds: string[];
   onToggleColumn: (columnId: string) => void;
@@ -270,6 +272,7 @@ export const useGetToolbarVisibility = ({
                     totalItems={alertsCount}
                     panels={bulkActions}
                     alerts={alerts}
+                    ecsAlerts={ecsAlerts}
                     setIsBulkActionsLoading={setIsBulkActionsLoading}
                     clearSelection={clearSelection}
                     refresh={refresh}
@@ -293,6 +296,7 @@ export const useGetToolbarVisibility = ({
     showInspectButton,
     alertsCount,
     alerts,
+    ecsAlerts,
     setIsBulkActionsLoading,
     clearSelection,
     refresh,
