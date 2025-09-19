@@ -42,6 +42,18 @@ export const injectCanvasRenderingProps = async (
             }
             return context;
           };
+
+          // fillText override to reassert textRendering - fix for lens reports
+          const originalFillText = CanvasRenderingContext2D.prototype.fillText;
+          CanvasRenderingContext2D.prototype.fillText = function (
+            text: string,
+            x: number,
+            y: number,
+            maxWidth?: number
+          ) {
+            this.textRendering = 'geometricPrecision';
+            return originalFillText.call(this, text, x, y, maxWidth);
+          };
         },
         args: [],
       },
