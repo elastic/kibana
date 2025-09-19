@@ -112,7 +112,6 @@ export async function deleteActionSecrets(opts: {
 
 /**
  * Helper function to get the secret paths for an agent action.
- * Currently only supports user_info.password as a secret.
  */
 function getActionSecretPaths(action: NewAgentAction): SOSecretPath[] {
   const secretPaths: SOSecretPath[] = [];
@@ -121,6 +120,12 @@ function getActionSecretPaths(action: NewAgentAction): SOSecretPath[] {
     secretPaths.push({
       path: 'secrets.user_info.password',
       value: action.secrets.user_info.password,
+    });
+  }
+  if (action?.secrets?.enrollment_token) {
+    secretPaths.push({
+      path: 'secrets.enrollment_token',
+      value: action.secrets.enrollment_token,
     });
   }
 
