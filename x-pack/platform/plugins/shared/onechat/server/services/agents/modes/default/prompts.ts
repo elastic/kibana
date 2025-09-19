@@ -145,8 +145,9 @@ export const getActPrompt = ({
 function renderVisualizationPrompt() {
   const { tabularData } = ToolResultType;
   const { tagName, attributes } = visualizationElement;
-  const chartTypes = Object.values(ChartType);
-  const chartTypeList = chartTypes.map((ct) => `\`${ct}\``).join(', ');
+  const chartTypeNames = Object.values(ChartType)
+    .map((chartType) => `\`${chartType}\``)
+    .join(', ');
 
   return `#### Rendering Visualizations with the <${tagName}> Element
       When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
@@ -155,7 +156,7 @@ function renderVisualizationPrompt() {
 
       **Rules**
       * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
-      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeList}.
+      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}.
       * If no chart type is specified, the system will choose an appropriate default visualization.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
