@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPortal,
+  EuiProgress,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { useControls } from './hooks/use_controls';
-import type { SchemaEditorProps } from './types';
+import type { SchemaEditorProps, SchemaField } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
@@ -28,6 +36,7 @@ export function SchemaEditor({
   withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
+  const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
 
   return (
     <SchemaEditorContextProvider
@@ -58,6 +67,45 @@ export function SchemaEditor({
         {withControls && (
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>{selectedFields.length} selected</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              type="single"
+              legend=""
+              options={[
+                {
+                  id: 'guess',
+                  label: i18n.translate('dataManagement.schemaEditor.guessType', {
+                    defaultMessage: 'Guess type',
+                  }),
+                },
+                {
+                  id: 'unmap',
+                  label: i18n.translate('dataManagement.schemaEditor.removeType', {
+                    defaultMessage: 'Remove type (unmap)',
+                  }),
+                },
+              ]}
+              onChange={(id) => {
+                if (id === 'guess') {
+                } else if (id === 'unmap') {
+                  selectedFields.forEach((fieldName) => {
+                    const field = fields.find(({ name }) => name === fieldName)!;
+                    onFieldUpdate({
+                      name: field.name,
+                      parent: field.parent,
+                      status: 'unmapped',
+                    } as SchemaField);
+                  });
+
+                  setSelectedFields([]);
+                }
+              }}
+              idSelected=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <FieldsTable
           isLoading={isLoading ?? false}
           controls={controls}
@@ -66,6 +114,16 @@ export function SchemaEditor({
           fields={fields}
           stream={stream}
           withTableActions={withTableActions}
+          selectedFields={selectedFields}
+          onFieldSelection={(name, checked) => {
+            setSelectedFields((selection) => {
+              if (checked) {
+                return [...selection, name];
+              } else {
+                return selection.filter((field) => field !== name);
+              }
+            });
+          }}
         />
       </EuiFlexGroup>
     </SchemaEditorContextProvider>

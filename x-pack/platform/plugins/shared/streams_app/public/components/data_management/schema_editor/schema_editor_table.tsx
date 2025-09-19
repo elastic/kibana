@@ -17,6 +17,7 @@ import {
   EuiDataGrid,
   EuiIconTip,
   EuiFlexGroup,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -38,6 +39,8 @@ export function FieldsTable({
   stream,
   withTableActions,
   withToolbar,
+  selectedFields,
+  onFieldSelection,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -46,6 +49,8 @@ export function FieldsTable({
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
   withToolbar: boolean;
+  selectedFields: string[];
+  onFieldSelection: (name: string, checked: boolean) => void;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -56,6 +61,19 @@ export function FieldsTable({
     () => filterFieldsByControls(fields, controls),
     [fields, controls]
   );
+
+  const leadingColumns = useMemo(() => {
+    if (!withTableActions) return undefined;
+
+    return [
+      createFieldSelectionCellRenderer(
+        filteredFields,
+        selectedFields,
+        onFieldSelection,
+        stream.name
+      ),
+    ];
+  }, [withTableActions, filteredFields, selectedFields, onFieldSelection]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -92,6 +110,7 @@ export function FieldsTable({
       toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
+      leadingControlColumns={leadingColumns}
       trailingControlColumns={trailingColumns}
       gridStyle={{
         border: 'none',
@@ -166,6 +185,38 @@ const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridContr
     if (!field) return null;
 
     return <FieldActionsCell field={field} />;
+  },
+});
+
+const createFieldSelectionCellRenderer = (
+  fields: SchemaField[],
+  selectedFields: string[],
+  onChange: (name: string, checked: boolean) => void,
+  streamName: string
+): EuiDataGridControlColumn => ({
+  id: 'field-selection',
+  width: 40,
+  headerCellRender: () => (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSelectionTitle', {
+          defaultMessage: 'Field selection',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+  rowCellRender: ({ rowIndex }) => {
+    const field = fields[rowIndex];
+
+    if (!field || field.parent !== streamName) return null;
+
+    return (
+      <EuiCheckbox
+        id={field.name}
+        onChange={(e) => onChange(field.name, e.target.checked)}
+        checked={selectedFields.includes(field.name)}
+      />
+    );
   },
 });
 

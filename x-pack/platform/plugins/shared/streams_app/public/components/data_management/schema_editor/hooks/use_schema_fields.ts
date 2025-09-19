@@ -156,15 +156,16 @@ export const useSchemaFields = ({
 
   const updateField = useCallback(
     async (field: SchemaField) => {
-      const index = fields.findIndex((f) => f.name === field.name);
-      if (index === -1) {
-        return;
-      }
+      setFields((prevFields) => {
+        const index = prevFields.findIndex((f) => f.name === field.name);
+        if (index === -1) {
+          return prevFields;
+        }
 
-      const before = fields.slice(0, index);
-      const after = fields.slice(index + 1);
-      const nextFields = [...before, field, ...after];
-      setFields(nextFields);
+        const before = prevFields.slice(0, index);
+        const after = prevFields.slice(index + 1);
+        return [...before, field, ...after];
+      });
     },
     [fields]
   );
