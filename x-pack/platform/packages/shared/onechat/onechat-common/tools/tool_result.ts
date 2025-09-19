@@ -71,5 +71,6 @@ export const visualizationElement = {
   tagName: 'visualization',
   attributes: {
     toolResultId: 'tool-result-id',
+    chartType: 'chart-type',
   },
 };

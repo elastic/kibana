@@ -36,16 +36,24 @@ export const visualizationPlugin = () => {
       return;
     }
 
-    // extract attributes
-    const toolResultRegex = new RegExp(
+    // extract attribute: tool-result-id
+    const toolResultIdRegex = new RegExp(
       `${visualizationElement.attributes.toolResultId}="([^"]*)"`,
       'i'
     );
-    const toolResultId = value.match(toolResultRegex)?.[1];
+    const toolResultId = value.match(toolResultIdRegex)?.[1];
+
+    // extract attribute: chart-type
+    const chartTypeRegex = new RegExp(
+      `${visualizationElement.attributes.chartType}="([^"]*)"`,
+      'i'
+    );
+    const chartType = value.match(chartTypeRegex)?.[1] as ChartType | undefined;
 
     // transform the node from type `html` to (custom) type `visualization`
     (node as any).type = visualizationElement.tagName;
     (node as any).toolResultId = toolResultId;
+    (node as any).chartType = chartType;
     delete (node as any).value; // remove the raw HTML value
   };
 
