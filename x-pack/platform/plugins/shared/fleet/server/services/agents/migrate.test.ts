@@ -111,9 +111,11 @@ describe('Agent migration', () => {
         type: 'MIGRATE',
         policyId: options.policyId,
         data: {
-          enrollment_token: options.enrollment_token,
           target_uri: options.uri,
           settings: options.settings,
+        },
+        secrets: {
+          enrollment_token: options.enrollment_token,
         },
       });
 
@@ -144,9 +146,11 @@ describe('Agent migration', () => {
         soClientMock,
         expect.objectContaining({
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
         })
       );
@@ -191,9 +195,11 @@ describe('Agent migration', () => {
           agents: [mockedAgent.id, mockedAgent.id],
           type: 'MIGRATE',
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: options.settings,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
           total: 2,
           namespaces: ['default'],
@@ -219,9 +225,11 @@ describe('Agent migration', () => {
         soClientMock,
         expect.objectContaining({
           data: {
-            enrollment_token: options.enrollment_token,
             target_uri: options.uri,
             settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
           },
         })
       );
