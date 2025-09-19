@@ -213,7 +213,8 @@ export const OptionsListControl = () => {
     >
       <EuiFilterButton
         badgeColor="success"
-        iconType={loading ? 'empty' : 'arrowDown'}
+        isLoading={loading}
+        iconType={'arrowDown'}
         data-test-subj={`optionsList-control-${componentApi.uuid}`}
         css={styles.filterButton}
         onClick={() => setPopoverOpen(!isPopoverOpen)}

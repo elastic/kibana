@@ -35,6 +35,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
        * Border is rendered with a combination of outline, border on ::after, and box-shadows
        */
       .euiFormControlLayout {
+        background: transparent;
         border: none;
         border-radius: 0;
         box-shadow: none;
@@ -60,13 +61,13 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         /** Don't deform the control when rendering the loading spinner. 
         * Instead, render the spinner on top of the control with a light background,
         * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
-        * Add 16px of right padding to get it out of the way of the drag handle.
+        * Add 8px of right padding to get it out of the way of the drag handle.
         */
         & .euiFormControlLayoutIcons:last-child {
           position: absolute;
           right: 0;
-          padding-right: 16px;
-          background: ${euiTheme.colors.backgroundBaseSubdued};
+          padding-right: ${euiTheme.size.s}
+          background: ${euiTheme.colors.backgroundBasePlain};
         }
       }
     `,
@@ -74,7 +75,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* EUI CSS util for the generating the underline background-image/gradient */
       ${euiFormControlDefaultShadow(euiThemeContext, {
         withBorder: false,
-        withBackgroundColor: false,
+        withBackgroundColor: true,
         withBackgroundAnimation: true,
       })}
 
@@ -90,12 +91,20 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* Remove the append background so the caution icon looks more natural */
       .euiFormControlLayout__append {
         background-color: transparent;
+        // remove the border on the append element
+        &::before {
+          display: none;
+        }
+      }
+
+      & input:last-child {
+        padding-right: ${euiTheme.size.s} !important; // overwrite edit mode styles
       }
     `,
 
     editMode: css`
-      .euiFormControlLayout {
-        padding-right: ${euiTheme.size.s};
+      & input:last-child {
+        padding-right: calc(${euiTheme.size.s} * 2); // 16px
       }
     `,
 
@@ -123,7 +132,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       // unset the red underline for values between steps
       valid: css`
         &:invalid:not(:focus) {
-          --euiFormControlStateColor: transparent;
+          --euiFormControlStateColor: red;
         }
       `,
     },

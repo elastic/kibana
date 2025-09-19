@@ -76,7 +76,6 @@ export const ControlPanel = ({
   );
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
-  const [dataLoading, setDataLoading] = useState<boolean | undefined>();
 
   const initialState = useMemo(() => {
     return parentApi.layout$.getValue().controls[uuid];
@@ -105,14 +104,6 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-
-    if (apiPublishesDataLoading(api)) {
-      subscriptions.add(
-        api.dataLoading$.subscribe((result) => {
-          setDataLoading(result);
-        })
-      );
-    }
     if (apiPublishesTitle(api)) {
       subscriptions.add(
         api.title$.subscribe((result) => {
@@ -187,7 +178,6 @@ export const ControlPanel = ({
         >
           <EuiFormControlLayout
             fullWidth
-            isLoading={Boolean(dataLoading)}
             className={classNames('controlFrame__formControlLayout', {
               'controlFrame__formControlLayout--edit': isEditable,
               type,
