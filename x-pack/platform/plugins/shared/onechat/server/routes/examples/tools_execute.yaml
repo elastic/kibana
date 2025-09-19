@@ -3,31 +3,15 @@ responses:
     content:
       application/json:
         examples:
-          deleteAgentResponseExample:
+          executeToolResponseExample:
             results:
-            - type: query
+            - type: other
               data:
-                esql: |-
-                  FROM financial_data
-                  | LIMIT 5
-            - tool_result_id: 1WcU
-              type: tabular_data
-              data:
-                source: esql
-                query: |-
-                  FROM financial_data
-                  | LIMIT 5
-                columns:
-                - name: some_object.cost
-                  type: text
-                - name: some_object.cost.keyword
-                  type: keyword
-                - name: some_object.currency
-                  type: text
-                - name: some_object.currency.keyword
-                  type: keyword
-                values:
-                - - '20000'
-                  - '20000'
-                  - USD
-                  - USD
+                indices:
+                - name: connector-mongodb-f360
+                - name: connector-sharepoint-production
+                - name: connector-mysql-financial-data
+                - name: connector-github-customer-support
+                aliases: []
+                data_streams: []
+                warnings: []
