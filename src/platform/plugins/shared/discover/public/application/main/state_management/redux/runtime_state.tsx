@@ -124,6 +124,7 @@ export const selectTabRuntimeInternalState = (
   return {
     serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
     visContext: savedSearch.visContext,
+    controlGroupJson: savedSearch.controlGroupJson,
   };
 };
 
