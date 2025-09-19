@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { createIndexPatternService } from '../../../data_views_service/service';
 import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
@@ -42,8 +41,6 @@ export function LayerConfiguration({
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
   const { visualization } = useLensSelector((state) => state.lens);
-  const activeVisualization =
-    visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
@@ -91,16 +88,6 @@ export function LayerConfiguration({
         padding: ${hasPadding ? euiTheme.size.s : 0};
       `}
     >
-      <EuiSpacer size="xs" />
-      {activeVisualization?.ToolbarComponent && (
-        <>
-          <VisualizationToolbar
-            activeVisualization={activeVisualization}
-            framePublicAPI={framePublicAPI}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       <ConfigPanelWrapper {...layerPanelsProps} />
     </div>
   );
