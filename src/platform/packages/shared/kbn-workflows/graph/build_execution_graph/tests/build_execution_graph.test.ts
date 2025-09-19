@@ -300,6 +300,8 @@ describe('convertToWorkflowGraph', () => {
       const node = executionGraph.node('testElasticsearchStep');
       expect(node).toEqual({
         id: 'testElasticsearchStep',
+        stepId: 'testElasticsearchStep',
+        stepType: 'elasticsearch.search.query',
         type: 'elasticsearch.search.query',
         configuration: {
           name: 'testElasticsearchStep',
@@ -379,6 +381,8 @@ describe('convertToWorkflowGraph', () => {
       expect(node).toEqual({
         id: 'testKibanaStep',
         type: 'kibana.cases.create',
+        stepId: 'testKibanaStep',
+        stepType: 'kibana.cases.create',
         configuration: {
           name: 'testKibanaStep',
           type: 'kibana.cases.create',
