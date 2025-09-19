@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { mockDataView } from '../../rtl_helpers';
-import { RECORDS_FIELD } from '../constants';
 
 export const sampleAttribute = {
   description: '',
@@ -33,14 +32,7 @@ export const sampleAttribute = {
       formBased: {
         layers: {
           layer0: {
-            columnOrder: [
-              'x-axis-column-layer0',
-              'y-axis-column-layer0-0',
-              'y-axis-column-layer0X0',
-              'y-axis-column-layer0X1',
-              'y-axis-column-layer0X2',
-              'y-axis-column-layer0X3',
-            ],
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0-0'],
             columns: {
               'x-axis-column-layer0': {
                 dataType: 'number',
@@ -82,72 +74,7 @@ export const sampleAttribute = {
                     "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                   isFormulaBroken: false,
                 },
-                references: ['y-axis-column-layer0X3'],
-              },
-              'y-axis-column-layer0X0': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-                },
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                sourceField: RECORDS_FIELD,
-                timeScale: undefined,
-                timeShift: undefined,
-              },
-              'y-axis-column-layer0X1': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-                },
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                sourceField: RECORDS_FIELD,
-                timeScale: undefined,
-                timeShift: undefined,
-              },
-              'y-axis-column-layer0X2': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'overall_sum',
-                params: undefined,
-                references: ['y-axis-column-layer0X1'],
-              },
-              'y-axis-column-layer0X3': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'math',
-                params: {
-                  tinymathAst: {
-                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-                    location: {
-                      max: 212,
-                      min: 0,
-                    },
-                    name: 'divide',
-                    text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
-                    type: 'function',
-                  },
-                },
-                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
+                references: [],
               },
             },
             incompleteColumns: {},
