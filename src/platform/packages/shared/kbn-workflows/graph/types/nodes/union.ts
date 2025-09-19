@@ -8,7 +8,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { AtomicGraphNodeSchema, HttpGraphNodeSchema, WaitGraphNodeSchema } from './base';
+import {
+  AtomicGraphNodeSchema,
+  HttpGraphNodeSchema,
+  WaitGraphNodeSchema,
+  ElasticsearchGraphNodeSchema,
+  KibanaGraphNodeSchema,
+} from './base';
 import {
   EnterIfNodeSchema,
   ExitIfNodeSchema,
@@ -31,6 +37,8 @@ import {
 
 const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
   AtomicGraphNodeSchema,
+  ElasticsearchGraphNodeSchema,
+  KibanaGraphNodeSchema,
   HttpGraphNodeSchema,
   WaitGraphNodeSchema,
   EnterIfNodeSchema,

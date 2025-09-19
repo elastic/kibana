@@ -47,7 +47,7 @@ export const HttpGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
 
-export const ElasticsearchGraphNodeSchema = z.object({
+export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
     message: 'Elasticsearch graph node type must start with "elasticsearch."',
@@ -56,7 +56,7 @@ export const ElasticsearchGraphNodeSchema = z.object({
 });
 export type ElasticsearchGraphNode = z.infer<typeof ElasticsearchGraphNodeSchema>;
 
-export const KibanaGraphNodeSchema = z.object({
+export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.string().refine((val) => val.startsWith('kibana.'), {
     message: 'Kibana graph node type must start with "kibana."',
