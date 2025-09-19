@@ -766,6 +766,8 @@
       "@kbn/cypress-config/*": ["src/platform/packages/shared/kbn-cypress-config/*"],
       "@kbn/cypress-test-helper": ["src/platform/packages/shared/kbn-cypress-test-helper"],
       "@kbn/cypress-test-helper/*": ["src/platform/packages/shared/kbn-cypress-test-helper/*"],
+      "@kbn/dashboard_markdown_schemas": ["src/platform/packages/private/kbn-dashboard_markdown_schemas"],
+      "@kbn/dashboard_markdown_schemas/*": ["src/platform/packages/private/kbn-dashboard_markdown_schemas/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/platform/plugins/shared/dashboard_enhanced"],
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/platform/plugins/shared/dashboard_enhanced/*"],
       "@kbn/dashboard-markdown": ["src/platform/plugins/shared/dashboard_markdown"],

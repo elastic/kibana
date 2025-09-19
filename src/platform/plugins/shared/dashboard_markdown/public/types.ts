@@ -7,28 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MarkdownEmbeddableState } from '@kbn/dashboard_markdown_schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   CanOverrideHoverActions,
   PublishesUnsavedChanges,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-/**
- * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state
- * supplied by other common managers.
- */
-export interface MarkdownEditorState {
-  content: string;
-}
-
-/**
- * Markdown serialized state includes all state that the parent should provide to this embeddable.
- */
-export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorState;
-
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
+export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
   CanOverrideHoverActions;

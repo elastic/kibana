@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { type SerializedTitles } from './src/types';
-
-export { serializedTitlesSchema } from './src/titles_schema';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-dashboard_markdown_schemas'],
+};

@@ -5512,6 +5512,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard_markdown_schemas@link:src/platform/packages/private/kbn-dashboard_markdown_schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboards-selector@link:src/platform/packages/shared/dashboards/dashboards-selector":
   version "0.0.0"
   uid ""
