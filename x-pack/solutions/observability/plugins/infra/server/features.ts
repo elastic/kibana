@@ -17,7 +17,6 @@ import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -51,7 +50,6 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     }),
     order: 800,
     category: DEFAULT_APP_CATEGORIES.observability,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['infra', 'metrics', 'kibana'],
     catalogue: ['infraops', 'metrics'],
     management: {
