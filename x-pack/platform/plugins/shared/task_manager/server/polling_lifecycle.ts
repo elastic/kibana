@@ -13,6 +13,7 @@ import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
+import type { IEventLoggerBase } from '@kbn/event-log-types';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -80,6 +81,7 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  eventLogger: IEventLoggerBase;
 }
 
 export type TaskLifecycleEvent =
@@ -121,6 +123,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private config: TaskManagerConfig;
   private currentPollInterval: number;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
+  private eventLogger: IEventLoggerBase;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -140,6 +143,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    eventLogger,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -149,6 +153,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.eventLogger = eventLogger;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
 
@@ -270,6 +275,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      eventLogger: this.eventLogger,
     });
   };
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import mappings from '@kbn/event-log-types/generated/mappings.json';
 import type { EsNames } from './names';
-import mappings from '../../generated/mappings.json';
 
 // returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames) {

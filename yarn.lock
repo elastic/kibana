@@ -5992,6 +5992,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-log-types@link:x-pack/platform/packages/shared/kbn-event-log-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-stacktrace@link:x-pack/platform/packages/shared/kbn-event-stacktrace":
   version "0.0.0"
   uid ""
