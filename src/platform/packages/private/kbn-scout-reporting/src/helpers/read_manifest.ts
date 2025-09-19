@@ -87,7 +87,7 @@ export const readKibanaModuleManifest = (filePath: string): KibanaModuleMetadata
 };
 
 /**
- * Resolves the plugin manifest file path and reads its content.
+ * Resolves the module manifest file path and reads its content.
  * @param configPath - Absolute path to the Playwright configuration file in the plugin directory.
  * @returns Parsed `KibanaModuleMetadata` object.
  */
