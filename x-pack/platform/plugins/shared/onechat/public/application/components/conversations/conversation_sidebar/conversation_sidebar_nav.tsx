@@ -43,7 +43,7 @@ export const ConversationSidebarNav: React.FC<{}> = () => {
         iconType="wrench"
         label={
           <FormattedMessage
-            id="xpack.onechat.conversationSidebar.navigation.agents"
+            id="xpack.onechat.conversationSidebar.navigation.tools"
             defaultMessage="Tools"
           />
         }
