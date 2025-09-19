@@ -114,7 +114,6 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
   catalogue: ['infralogging', 'logs'],
   management: {
