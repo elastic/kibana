@@ -38,6 +38,7 @@ export const TABS_EVENT_NAME = 'eventName';
 export const TAB_ID = 'tabId';
 export const TOTAL_TABS_OPEN = 'totalTabsOpen';
 export const REMAINING_TABS_COUNT = 'remainingTabsCount';
+export const CLOSED_TABS_COUNT = 'closedTabsCount';
 export const FROM_INDEX = 'fromIndex';
 export const TO_INDEX = 'toIndex';
 
@@ -158,6 +159,13 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'integer',
         _meta: {
           description: 'The number of remaining tabs after an event',
+          optional: true,
+        },
+      },
+      [CLOSED_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of tabs closed in a single action',
           optional: true,
         },
       },

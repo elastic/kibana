@@ -223,8 +223,35 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onCloseOtherTabs = useCallback(
     (item: TabItem) => {
-      changeState((prevState) => closeOtherTabs(prevState, item));
-      onEvent('tabClosedOthers');
+      changeState((prevState) => {
+        const nextState = closeOtherTabs(prevState, item);
+
+        onEvent('tabClosedOthers', {
+          tabId: item.id,
+          totalTabsOpen: prevState.items.length,
+          closedTabsCount: prevState.items.length - nextState.items.length,
+        });
+
+        return nextState;
+      });
+    },
+    [changeState, onEvent]
+  );
+
+  const onCloseTabsToTheRight = useCallback(
+    (item: TabItem) => {
+      changeState((prevState) => {
+        const nextState = closeTabsToTheRight(prevState, item);
+
+        onEvent('tabClosedToTheRight', {
+          tabId: item.id,
+          totalTabsOpen: prevState.items.length,
+          closedTabsCount: prevState.items.length - nextState.items.length,
+          remainingTabsCount: nextState.items.length,
+        });
+
+        return nextState;
+      });
     },
     [changeState, onEvent]
   );
@@ -235,10 +262,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       maxItemsCount,
       onDuplicate,
       onCloseOtherTabs,
-      onCloseTabsToTheRight: (item) =>
-        changeState((prevState) => closeTabsToTheRight(prevState, item)),
+      onCloseTabsToTheRight,
     });
-  }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, changeState]);
+  }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
 
   return (
     <EuiFlexGroup
