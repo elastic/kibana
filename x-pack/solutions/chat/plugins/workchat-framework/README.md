@@ -1,3 +1,0 @@
-# WorkChatFramework
-
-WorkChat framework plugin

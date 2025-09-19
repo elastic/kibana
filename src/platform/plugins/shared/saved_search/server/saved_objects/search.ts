@@ -23,6 +23,7 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_6,
   SCHEMA_SEARCH_MODEL_VERSION_7,
   SCHEMA_SEARCH_MODEL_VERSION_8,
+  SCHEMA_SEARCH_MODEL_VERSION_9,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -105,6 +106,13 @@ export function getSavedSearchObjectType(
         },
       },
       8: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_8,
+        },
+      },
+      9: {
         changes: [
           {
             type: 'data_removal',
@@ -128,12 +136,13 @@ export function getSavedSearchObjectType(
               'headerRowHeight',
               'visContext',
               'density',
+              'controlGroupJson',
             ],
           },
         ],
         schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
-          create: SCHEMA_SEARCH_MODEL_VERSION_8,
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_9.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_9,
         },
       },
     },

@@ -169,7 +169,23 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
 });
 
+const CONTROL_GROUP_JSON_SCHEMA = {
+  controlGroupJson: schema.maybe(schema.string()),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES.extends(CONTROL_GROUP_JSON_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8,
+});
+
 export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  ...CONTROL_GROUP_JSON_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_9 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
   columns: undefined,
   sort: undefined,
   grid: undefined,
@@ -189,8 +205,9 @@ export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.exten
   headerRowHeight: undefined,
   visContext: undefined,
   density: undefined,
+  controlGroupJson: undefined,
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
-export type DiscoverSessionAttributes = TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_8>;
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+export type DiscoverSessionAttributes = TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_9>;
