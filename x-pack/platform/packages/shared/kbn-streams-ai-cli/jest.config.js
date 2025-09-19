@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { unmanagedAssetsRoute } from './unmanaged_assets_route';
-
-export const internalManagementRoutes = {
-  ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-streams-ai-cli'],
 };

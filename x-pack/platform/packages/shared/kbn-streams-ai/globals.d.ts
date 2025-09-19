@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { unmanagedAssetsRoute } from './unmanaged_assets_route';
-
-export const internalManagementRoutes = {
-  ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
-};
+declare module '*.text' {
+  const content: string;
+  export default content;
+}

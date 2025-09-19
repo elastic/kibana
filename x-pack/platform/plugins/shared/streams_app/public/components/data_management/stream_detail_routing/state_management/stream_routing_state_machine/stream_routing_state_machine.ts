@@ -10,6 +10,7 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
   StreamRoutingContext,
   StreamRoutingEvent,
@@ -60,6 +61,11 @@ export const streamRoutingMachine = setup({
       return {
         currentRuleId: newRule.id,
         routing: [...context.routing, newRule],
+      };
+    }),
+    appendRoutingRules: assign(({ context }, params: { definitions: RoutingDefinition[] }) => {
+      return {
+        routing: [...context.routing, ...params.definitions.map(routingConverter.toUIDefinition)],
       };
     }),
     patchRule: assign(
@@ -130,6 +136,23 @@ export const streamRoutingMachine = setup({
           target: '#ready',
           actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
           reenter: true,
+        },
+        'suggestion.preview': {
+          target: '#idle',
+          actions: enqueueActions(({ enqueue, event }) => {
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: event.condition,
+            });
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            });
+          }),
+        },
+        'suggestion.append': {
+          target: '#idle',
+          actions: [{ type: 'appendRoutingRules', params: ({ event }) => event }],
         },
       },
       invoke: {

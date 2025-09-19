@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { unmanagedAssetsRoute } from './unmanaged_assets_route';
-
-export const internalManagementRoutes = {
-  ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
-};
+export { partitionStream } from './workflows/partition_stream';

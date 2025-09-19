@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { unmanagedAssetsRoute } from './unmanaged_assets_route';
-
-export const internalManagementRoutes = {
-  ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
-};
+export function wrapStr(str: string | undefined, wrapToken: string, fallback: string = 'none') {
+  return str === undefined ? fallback : `${wrapToken}${str}${wrapToken}`;
+}

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { unmanagedAssetsRoute } from './unmanaged_assets_route';
+import { castArray } from 'lodash';
+import type { Flags } from '@kbn/dev-cli-runner';
 
-export const internalManagementRoutes = {
-  ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
-};
+export function getStreamNames(flags: Flags) {
+  return castArray(flags.stream ?? []).flatMap((val) => String(val).split(','));
+}
