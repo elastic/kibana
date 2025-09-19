@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 import { isNonEmptyString } from '@kbn/zod-helpers';
 
-import { AlertStatus } from '../../../model/alert.gen';
+import { AlertStatusExceptClosed } from '../../../model/alert.gen';
 
 /**
  * The reason for closing the alerts
@@ -34,23 +34,51 @@ export const ReasonEnum = z.enum([
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
 export const ReasonEnumEnum = ReasonEnum.enum;
 
-export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
-export const SetAlertsStatusByIds = z.object({
+export type SetAlertsStatusByIdsBase = z.infer<typeof SetAlertsStatusByIdsBase>;
+export const SetAlertsStatusByIdsBase = z.object({
   /**
    * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
    */
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
-  status: AlertStatus,
+  status: AlertStatusExceptClosed,
+});
+
+export type CloseAlertsByIds = z.infer<typeof CloseAlertsByIds>;
+export const CloseAlertsByIds = z.object({
+  /**
+   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+  status: z.literal('closed'),
+  reason: ReasonEnum.optional(),
+});
+
+export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
+export const SetAlertsStatusByIds = z.discriminatedUnion('status', [
+  CloseAlertsByIds,
+  SetAlertsStatusByIdsBase,
+]);
+
+export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
+export const SetAlertsStatusByQueryBase = z.object({
+  query: z.object({}).catchall(z.unknown()),
+  status: AlertStatusExceptClosed,
+  conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+});
+
+export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;
+export const CloseAlertsByQuery = z.object({
+  query: z.object({}).catchall(z.unknown()),
+  status: z.literal('closed'),
+  conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
   reason: ReasonEnum.optional(),
 });
 
 export type SetAlertsStatusByQuery = z.infer<typeof SetAlertsStatusByQuery>;
-export const SetAlertsStatusByQuery = z.object({
-  query: z.object({}).catchall(z.unknown()),
-  status: AlertStatus,
-  conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
-  reason: ReasonEnum.optional(),
-});
+export const SetAlertsStatusByQuery = z.discriminatedUnion('status', [
+  CloseAlertsByQuery,
+  SetAlertsStatusByQueryBase,
+]);
 
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;
 export const SetAlertsStatusRequestBody = z.union([SetAlertsStatusByIds, SetAlertsStatusByQuery]);
