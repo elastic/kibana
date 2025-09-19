@@ -19,8 +19,8 @@ import type {
 
 export interface FleetApiService {
   integration: {
-    install: (name: string) => Promise<void>;
-    delete: (name: string) => Promise<void>;
+    install: (name: string) => Promise<any>;
+    delete: (name: string) => Promise<number>;
   };
   agent_policies: {
     get: (params: Record<string, any>) => Promise<any>;
@@ -42,7 +42,7 @@ export interface FleetApiService {
       params: BulkGetBody,
       queryParams?: Record<string, string>
     ) => Promise<any>;
-    delete: (id: string) => Promise<void>;
+    delete: (id: string) => Promise<number>;
   };
   outputs: {
     getOutputs: () => Promise<any>;
@@ -53,7 +53,7 @@ export interface FleetApiService {
       outputType: string,
       params?: FleetOutputBody
     ) => Promise<any>;
-    delete: (outputId: string) => Promise<void>;
+    delete: (outputId: string) => Promise<number>;
   };
   server_hosts: {
     get: () => Promise<any>;
@@ -62,10 +62,12 @@ export interface FleetApiService {
       hostUrls: string[],
       params?: FleetServerHostCreateBody
     ) => Promise<any>;
-    delete: (id: string) => Promise<void>;
+    delete: (id: string) => Promise<number>;
   };
   agent: {
     setup: () => Promise<any>;
+    get: (queryParams: Record<string, any>) => Promise<any>;
+    delete: (agentId: string) => Promise<number>;
   };
 }
 
@@ -73,35 +75,40 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
   return {
     integration: {
       install: async (name: string) => {
-        await measurePerformanceAsync(log, `fleetApi.integration.install [${name}]`, async () => {
-          await kbnClient.request({
-            method: 'POST',
-            path: `/api/fleet/epm/custom_integrations`,
-            body: {
-              force: true,
-              integrationName: name,
-              datasets: [
-                { name: `${name}.access`, type: 'logs' },
-                { name: `${name}.error`, type: 'metrics' },
-                { name: `${name}.warning`, type: 'logs' },
-              ],
-            },
-          });
-        });
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.install [${name}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/epm/custom_integrations`,
+              body: {
+                force: true,
+                integrationName: name,
+                datasets: [
+                  { name: `${name}.access`, type: 'logs' },
+                  { name: `${name}.error`, type: 'metrics' },
+                  { name: `${name}.warning`, type: 'logs' },
+                ],
+              },
+            });
+          }
+        );
       },
 
       delete: async (name: string) => {
-        await measurePerformanceAsync(log, `fleetApi.integration.delete [${name}]`, async () => {
-          await kbnClient
-            .request({
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.delete [${name}]`,
+          async () => {
+            const response = await kbnClient.request({
               method: 'DELETE',
               path: `/api/fleet/epm/packages/${name}`,
               ignoreErrors: [400],
-            })
-            .then((response) => {
-              return response.status;
             });
-        });
+            return response.status;
+          }
+        );
       },
     },
     agent_policies: {
@@ -120,31 +127,25 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         sysMonitoring?: boolean,
         params?: AgentPolicyCreateBody
       ) => {
-        await measurePerformanceAsync(
+        return await measurePerformanceAsync(
           log,
           `fleetApi.agent_policies.create [${policyName}]`,
           async () => {
-            await kbnClient
-              .request({
-                method: 'POST',
-                path: `/api/fleet/agent_policies`,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                query: {
-                  ...(typeof sysMonitoring !== 'undefined'
-                    ? { sys_monitoring: sysMonitoring }
-                    : {}),
-                },
-                body: {
-                  name: policyName,
-                  namespace: policyNamespace,
-                  ...params,
-                },
-              })
-              .then((response) => {
-                return { data: response.data, status: response.status };
-              });
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/agent_policies`,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              query: {
+                ...(typeof sysMonitoring !== 'undefined' ? { sys_monitoring: sysMonitoring } : {}),
+              },
+              body: {
+                name: policyName,
+                namespace: policyNamespace,
+                ...params,
+              },
+            });
           }
         );
       },
@@ -203,20 +204,25 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
       },
 
       delete: async (id: string, isForceSet?: boolean) => {
-        await measurePerformanceAsync(log, `fleetApi.agent_policies.delete [${id}]`, async () => {
-          await kbnClient.request({
-            method: 'POST',
-            path: `/api/fleet/agent_policies/delete`,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: {
-              agentPolicyId: id,
-              ...(typeof isForceSet !== 'undefined' ? { force: isForceSet } : {}),
-            },
-            ignoreErrors: [400],
-          });
-        });
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.agent_policies.delete [${id}]`,
+          async () => {
+            const response = await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/agent_policies/delete`,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: {
+                agentPolicyId: id,
+                ...(typeof isForceSet !== 'undefined' ? { force: isForceSet } : {}),
+              },
+              ignoreErrors: [400],
+            });
+            return response.status;
+          }
+        );
       },
     },
     outputs: {
@@ -262,13 +268,18 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         );
       },
       delete: async (outputId: string) => {
-        await measurePerformanceAsync(log, `fleetApi.outputs.delete [${outputId}]`, async () => {
-          await kbnClient.request({
-            method: 'DELETE',
-            path: `/api/fleet/outputs/${outputId}`,
-            ignoreErrors: [400, 404],
-          });
-        });
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.outputs.delete [${outputId}]`,
+          async () => {
+            const response = await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/fleet/outputs/${outputId}`,
+              ignoreErrors: [400, 404],
+            });
+            return response.status;
+          }
+        );
       },
     },
     server_hosts: {
@@ -302,15 +313,16 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
       },
 
       delete: async (fleetServerHostId: string) => {
-        await measurePerformanceAsync(
+        return await measurePerformanceAsync(
           log,
           `fleetApi.server_hosts.delete [${fleetServerHostId}]`,
           async () => {
-            await kbnClient.request({
+            const response = await kbnClient.request({
               method: 'DELETE',
               path: `/api/fleet/fleet_server_hosts/${fleetServerHostId}`,
               ignoreErrors: [400, 404],
             });
+            return response.status;
           }
         );
       },
@@ -326,6 +338,32 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             },
           });
         });
+      },
+      get: async (queryParams: Record<string, any>) => {
+        return await measurePerformanceAsync(log, `fleetApi.agent.get`, async () => {
+          return await kbnClient.request({
+            method: 'GET',
+            path: `/api/fleet/agents`,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            query: queryParams,
+          });
+        });
+      },
+      delete: async (agentId: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.agent.delete [${agentId}]`,
+          async () => {
+            const response = await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/fleet/agents/${agentId}`,
+              ignoreErrors: [400, 404],
+            });
+            return response.status;
+          }
+        );
       },
     },
   };
