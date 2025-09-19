@@ -27,7 +27,13 @@ describe('getSavedObjectsCounts', () => {
     const results = await getSavedObjectsCounts(soClient, ['type-a']);
     // Make sure ES.search is triggered (we'll test the actual params in other specific tests)
     expect(soClient.find).toHaveBeenCalledTimes(1);
-    expect(results).toStrictEqual({ total: 0, per_type: [], non_expected_types: [], others: 0 });
+    expect(results).toStrictEqual({
+      total: 0,
+      per_type: [],
+      non_expected_types: [],
+      others: 0,
+      by_access_control_type: [],
+    });
   });
 
   test('should match all and request the `missing` bucket (size + 1) when `exclusive === false`', async () => {
@@ -45,6 +51,9 @@ describe('getSavedObjectsCounts', () => {
             missing: 'missing_so_type',
           },
         },
+        has_access_control: {
+          filter: { exists: { field: 'accessControl' } },
+        },
       },
     });
   });
@@ -56,7 +65,10 @@ describe('getSavedObjectsCounts', () => {
       type: ['type_one', 'type_two'],
       namespaces: ['*'],
       perPage: 0,
-      aggs: { types: { terms: { field: 'type', size: 2 } } },
+      aggs: {
+        types: { terms: { field: 'type', size: 2 } },
+        has_access_control: { filter: { exists: { field: 'accessControl' } } },
+      },
     });
   });
 
@@ -81,6 +93,7 @@ describe('getSavedObjectsCounts', () => {
       ],
       non_expected_types: [],
       others: 10,
+      by_access_control_type: [],
     });
   });
 
@@ -109,6 +122,7 @@ describe('getSavedObjectsCounts', () => {
       ],
       non_expected_types: ['type-3', 'type-four'],
       others: 6,
+      by_access_control_type: [],
     });
   });
 });

@@ -33,6 +33,10 @@ export interface SavedObjectsCounts {
    * Typically, it should be 0, so it will highlight any unexpected documents if it's > 0.
    */
   others: number;
+  /**
+   * Break-down of documents per Saved Object Type supporting access control
+   */
+  by_access_control_type: Array<{ key: string; doc_count: number }>;
 }
 
 /**
@@ -56,7 +60,13 @@ export async function getSavedObjectsCounts(
 ): Promise<SavedObjectsCounts> {
   const { exclusive = false, namespaces = ['*'] } = options || {};
 
-  const body = await soClient.find<void, { types: estypes.AggregationsStringTermsAggregate }>({
+  const body = await soClient.find<
+    void,
+    {
+      types: estypes.AggregationsStringTermsAggregate;
+      has_access_control: estypes.AggregationsStringTermsAggregate;
+    }
+  >({
     type: soTypes,
     perPage: 0,
     namespaces,
@@ -71,11 +81,18 @@ export async function getSavedObjectsCounts(
             : { missing: MISSING_TYPE_KEY, size: soTypes.length + 1 }),
         },
       },
+      has_access_control: {
+        filter: { exists: { field: 'accessControl' } },
+      },
     },
   });
 
   const buckets =
     (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
+
+  const accessControlBuckets =
+    (body.aggregations?.has_access_control
+      ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const nonExpectedTypes: string[] = [];
 
@@ -89,11 +106,17 @@ export async function getSavedObjectsCounts(
     return { key: perTypeEntry.key, doc_count: perTypeEntry.doc_count };
   });
 
+  const accessControlPerType = accessControlBuckets.map((perTypeEntry) => {
+    const key = perTypeEntry.key as string;
+    return { key, doc_count: perTypeEntry.doc_count };
+  });
+
   return {
     total: body.total,
     // @ts-expect-error `FieldValue` types now claim that bucket keys can be `null`
     per_type: perType,
     non_expected_types: nonExpectedTypes,
     others: body.aggregations?.types?.sum_other_doc_count ?? 0,
+    by_access_control_type: accessControlPerType,
   };
 }
