@@ -6,20 +6,9 @@
  */
 
 import React from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import { PLUGIN_NAME } from '../../common/constants';
 
 export const DataSourcesRegistryApp = () => {
-  return (
-    <I18nProvider>
-      <h1>
-        <FormattedMessage
-          id="dataSourcesRegistry.helloWorldText"
-          defaultMessage="{name}"
-          values={{ name: PLUGIN_NAME }}
-        />
-      </h1>
-    </I18nProvider>
-  );
+  return <h1>{PLUGIN_NAME}</h1>;
 };
