@@ -27,7 +27,7 @@ import type {
   PackagePolicyPackage,
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { SecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -139,7 +139,7 @@ export interface PackagePolicySOAttributes {
   updated_by: string;
   description?: string;
   is_managed?: boolean;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
   elasticsearch?: {
@@ -261,6 +261,7 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  action_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {

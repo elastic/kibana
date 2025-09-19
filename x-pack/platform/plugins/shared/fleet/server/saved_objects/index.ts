@@ -171,6 +171,7 @@ export const getSavedObjectTypes = (
               is_preconfigured: { type: 'boolean', index: false },
             },
           },
+          action_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -202,6 +203,16 @@ export const getSavedObjectTypes = (
                     is_preconfigured: { type: 'boolean', index: false },
                   },
                 },
+              },
+            },
+          ],
+        },
+        4: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                action_secret_storage_requirements_met: { type: 'boolean' },
               },
             },
           ],
