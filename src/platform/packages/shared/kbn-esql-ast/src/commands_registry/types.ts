@@ -84,6 +84,12 @@ export interface ISuggestionItem {
     start: number;
     end: number;
   };
+  /**
+   * If the suggestions list is incomplete and should be re-requested when the user types more characters.
+   * If a completion item with incomplete true is shown, the editor will ask for new suggestions in every keystroke
+   * until there are no more incomplete suggestions returned.
+   */
+  incomplete?: boolean;
 }
 
 export type GetColumnsByTypeFn = (
@@ -251,6 +257,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
+  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,

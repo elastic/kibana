@@ -37,5 +37,6 @@ export type {
 export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_overview';
 
 export { UnifiedDocViewerObservabilityTracesOverview } from './components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview';
+export { UnifiedDocViewerObservabilityGenericOverview } from './components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview';
 export { UnifiedDocViewerObservabilityAttributesOverview } from './components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

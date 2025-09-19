@@ -133,7 +133,7 @@ export const pagePathGetters: {
   }) => {
     const categoryPath =
       category && subCategory
-        ? `/${category}/${subCategory} `
+        ? `/${category}/${subCategory}`
         : category && !subCategory
         ? `/${category}`
         : ``;

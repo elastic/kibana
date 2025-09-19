@@ -120,6 +120,7 @@ export const saveDiscoverSession = async (
         breakdownField: tab.breakdownField,
         density: tab.density,
         visContext: tab.visContext,
+        controlGroupJson: tab.controlGroupJson,
       },
     };
   });

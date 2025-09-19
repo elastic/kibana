@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
@@ -702,5 +702,82 @@ export function getValidSignaturesAndTypesToSuggestNext(
     enrichedArgs,
     argIndex,
     currentArg,
+  };
+}
+
+export function getLookupIndexCreateSuggestion(
+  innerText: string,
+  indexName?: string
+): ISuggestionItem {
+  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
+  const rangeToReplace =
+    indexName && start !== -1
+      ? {
+          start,
+          end: start + indexName.length,
+        }
+      : undefined;
+  return {
+    label: indexName
+      ? i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+
+          {
+            defaultMessage: 'Create lookup index "{indexName}"',
+
+            values: { indexName },
+          }
+        )
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+          defaultMessage: 'Create lookup index',
+        }),
+
+    text: indexName,
+
+    kind: 'Issue',
+
+    filterText: indexName,
+
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+      {
+        defaultMessage: 'Click to create',
+      }
+    ),
+
+    sortText: '1A',
+
+    command: {
+      id: `esql.lookup_index.create`,
+
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+
+      arguments: [{ indexName }],
+    },
+
+    rangeToReplace,
+
+    incomplete: true,
+  } as ISuggestionItem;
+}
+
+export function createInferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): ISuggestionItem {
+  return {
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
+      defaultMessage: 'Inference endpoint used for the completion',
+    }),
+    kind: 'Reference',
+    label: inferenceEndpoint.inference_id,
+    sortText: '1',
+    text: inferenceEndpoint.inference_id,
   };
 }

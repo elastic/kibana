@@ -11,3 +11,32 @@ export {
   convertToWorkflowGraph,
   convertToSerializableGraph,
 } from './build_execution_graph/build_execution_graph';
+export { WorkflowGraph } from './workflow_graph/workflow_graph';
+
+export type {
+  GraphNode,
+  AtomicGraphNode,
+  EnterConditionBranchNode,
+  EnterConditionBranchNodeSchema,
+  EnterForeachNode,
+  EnterIfNode,
+  EnterRetryNode,
+  ExitConditionBranchNode,
+  ExitConditionBranchNodeSchema,
+  ExitForeachNode,
+  ExitIfNode,
+  ExitRetryNode,
+  EnterContinueNode,
+  ExitContinueNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
+  HttpGraphNode,
+  HttpGraphNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
+  UnionExecutionGraphNode,
+} from './types';

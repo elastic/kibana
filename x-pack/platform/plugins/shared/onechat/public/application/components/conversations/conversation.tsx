@@ -17,6 +17,7 @@ import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSendMessage } from '../../context/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
+import { ConversationContent } from './conversation_grid';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -70,39 +71,41 @@ export const Conversation: React.FC<{}> = () => {
     left: 50%;
     transform: translateX(-50%);
   `;
+  const contentStyles = css`
+    ${fullHeightStyles}
+    align-items: stretch;
+  `;
+
+  if (!hasActiveConversation) {
+    return <NewConversationPrompt />;
+  }
 
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
       {(EuiResizablePanel, EuiResizableButton) => {
         return (
           <>
-            {hasActiveConversation ? (
-              <EuiResizablePanel initialSize={80}>
-                <div ref={scrollContainerRef} css={scrollContainerStyles}>
-                  <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
-                </div>
-                {showScrollButton && (
-                  <EuiButtonIcon
-                    display="base"
-                    size="s"
-                    color="text"
-                    css={scrollDownButtonStyles}
-                    iconType="sortDown"
-                    aria-label="Scroll down"
-                    onClick={scrollToMostRecentRoundBottom}
-                  />
-                )}
-              </EuiResizablePanel>
-            ) : (
-              <EuiResizablePanel initialSize={80}>
-                <div css={fullHeightStyles}>
-                  <NewConversationPrompt />
-                </div>
-              </EuiResizablePanel>
-            )}
+            <EuiResizablePanel initialSize={80}>
+              <div ref={scrollContainerRef} css={scrollContainerStyles}>
+                <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+              </div>
+              {showScrollButton && (
+                <EuiButtonIcon
+                  display="base"
+                  size="s"
+                  color="text"
+                  css={scrollDownButtonStyles}
+                  iconType="sortDown"
+                  aria-label="Scroll down"
+                  onClick={scrollToMostRecentRoundBottom}
+                />
+              )}
+            </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+              <ConversationContent css={contentStyles}>
+                <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+              </ConversationContent>
             </EuiResizablePanel>
           </>
         );

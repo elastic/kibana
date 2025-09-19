@@ -152,6 +152,7 @@ export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().scrollIntoView();
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
     cy.get(TIMELINE_CONTEXT_MENU_BTN)
@@ -168,6 +169,7 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
+  cy.get(EXPAND_ALERT_BTN).first().scrollIntoView();
   cy.get(EXPAND_ALERT_BTN).first().should('be.visible');
   // Cypress is flaky on clicking this button despite production not having that issue
   cy.get(EXPAND_ALERT_BTN).first().trigger('click');

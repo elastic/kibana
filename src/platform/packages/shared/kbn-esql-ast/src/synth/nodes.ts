@@ -55,6 +55,33 @@ export const float = (value: number): ESQLDecimalLiteral => {
 };
 
 /**
+ * Creates an ES|QL numeric literal node. If the value is an integer, an integer
+ * literal node is created, otherwise a decimal literal node is created.
+ *
+ * @param value The numeric value to create a literal for.
+ * @returns ES|QL numeric literal node.
+ */
+export const num = (value: number): ESQLDecimalLiteral | ESQLIntegerLiteral => {
+  if (Number.isInteger(value)) {
+    return int(value);
+  } else {
+    return float(value);
+  }
+};
+
+/**
+ * Creates an ES|QL boolean literal node.
+ *
+ * @param value The boolean value to create a literal for.
+ * @returns ES|QL boolean literal node.
+ */
+export const bool = (value: boolean) => {
+  const node = Builder.expression.literal.boolean(value);
+
+  return SynthNode.from(node);
+};
+
+/**
  * Creates an ES|QL string literal node.
  *
  * @param value The string value to create a literal for.

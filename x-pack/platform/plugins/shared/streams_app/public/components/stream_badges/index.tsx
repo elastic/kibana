@@ -59,7 +59,7 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
@@ -80,7 +80,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
 
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0}>
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
@@ -99,7 +99,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isErrorLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
           values: { message: lifecycle.error.message },
@@ -108,7 +108,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isDslLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
           defaultMessage: 'Retention: {retention}',
           values: { retention: lifecycle.dsl.data_retention || '∞' },
@@ -117,7 +117,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
           defaultMessage: 'Retention: Disabled',
         })}

@@ -7,24 +7,42 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 
-import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
-
+import '@testing-library/jest-dom';
 import { Loading, LoadingOverlay } from '.';
 
 describe('Loading', () => {
-  it('renders', () => {
-    const wrapper = shallow(<Loading />);
-    expect(wrapper.hasClass('enterpriseSearchLoading')).toBe(true);
-    expect(wrapper.find(EuiLoadingLogo)).toHaveLength(1);
+  let loading: HTMLElement;
+
+  beforeEach(() => {
+    render(<Loading />);
+    loading = screen.getByTestId('enterpriseSearchLoading');
+  });
+  it('renders Loading', () => {
+    expect(loading).toBeInTheDocument();
+  });
+
+  it('renders loading logo', () => {
+    const logo = within(loading).getByTestId('euiLoadingLogo');
+    expect(logo).toBeInTheDocument();
   });
 });
 
 describe('LoadingOverlay', () => {
-  it('renders', () => {
-    const wrapper = shallow(<LoadingOverlay />);
-    expect(wrapper.hasClass('enterpriseSearchLoadingOverlay')).toBe(true);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+  let loadingOverlay: HTMLElement;
+
+  beforeEach(() => {
+    render(<LoadingOverlay />);
+    loadingOverlay = screen.getByTestId('enterpriseSearchLoadingOverlay');
+  });
+
+  it('renders Loading', () => {
+    expect(loadingOverlay).toBeInTheDocument();
+  });
+
+  it('renders loading spinner', () => {
+    const spinner = within(loadingOverlay).getByTestId('euiLoadingSpinner');
+    expect(spinner).toBeInTheDocument();
   });
 });

@@ -292,7 +292,6 @@ export interface LensXYConfigBase {
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;
-  formulaAPI?: FormulaPublicApi;
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;

@@ -49,7 +49,6 @@
         "css-loader",
         "file-loader",
         "mini-css-extract-plugin",
-        "postcss-loader",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -2026,7 +2025,8 @@
       "groupName": "postcss",
       "matchDepNames": [
         "postcss",
-        "postcss-scss"
+        "postcss-scss",
+        "postcss-loader"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -3341,6 +3341,7 @@
         "backport:all-open",
         "release_note:skip"
       ],
+      "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
