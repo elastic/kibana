@@ -10156,6 +10156,25 @@
             }
           }
         },
+        "by_access_control_type": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "type": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The SavedObjects types supporting access control"
+                }
+              },
+              "count": {
+                "type": "long",
+                "_meta": {
+                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
+                }
+              }
+            }
+          }
+        },
         "others": {
           "type": "long",
           "_meta": {
