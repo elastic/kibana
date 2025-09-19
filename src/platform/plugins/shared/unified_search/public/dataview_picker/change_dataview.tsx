@@ -316,6 +316,7 @@ export function ChangeDataView({
                 initialFocus={`[id="${searchListInputId}"]`}
                 display="block"
                 buffer={8}
+                css={{ inlineSize: '100%' }}
               >
                 <div css={styles.popoverContent}>
                   <EuiContextMenuPanel size="s" items={items} />
