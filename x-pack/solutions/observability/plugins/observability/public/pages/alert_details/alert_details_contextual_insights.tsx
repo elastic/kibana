@@ -86,7 +86,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     }
   }, [alert, http, observabilityAIAssistant]);
 
-  if (!ObservabilityAIAssistantContextualInsight || !getAlertContextMessages()) {
+  if (!ObservabilityAIAssistantContextualInsight) {
     return null;
   }
 
