@@ -6,16 +6,15 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { i18nStrings } from '../i18n_strings';
 
-export const createMachineLearningNavigationTree = ({
-  sideNavVersion,
-}: {
-  sideNavVersion: SideNavVersion;
-}): NodeDefinition => ({
+export const createMachineLearningNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
   iconV2: 'machineLearningApp',
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,

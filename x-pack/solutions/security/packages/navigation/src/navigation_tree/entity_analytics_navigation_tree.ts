@@ -6,16 +6,15 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createEntityAnalyticsNavigationTree = ({
-  sideNavVersion,
-}: {
-  sideNavVersion: SideNavVersion;
-}): NodeDefinition => ({
+export const createEntityAnalyticsNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
   iconV2: 'anomalyChart',
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,

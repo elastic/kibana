@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
@@ -16,7 +15,9 @@ const LazyIconBriefcase = lazy(() =>
 );
 
 export const createCasesNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
 ): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),

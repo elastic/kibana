@@ -7,7 +7,6 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
@@ -16,7 +15,9 @@ import { renderIntegrationsLinkCallout } from './integrations_link_callout';
 
 export const createAssetsNavigationTree = (
   core: CoreStart,
-  { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
 ): NodeDefinition => ({
   id: SecurityGroupName.assets,
   iconV2: 'folderClosed',
