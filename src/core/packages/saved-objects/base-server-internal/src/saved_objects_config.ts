@@ -58,6 +58,10 @@ const migrationSchema = schema.object({
      */
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
+  /**
+   * Skip logging migration progress unless there are any errors.
+   */
+  useCummulativeLogger: schema.boolean({ defaultValue: true }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;

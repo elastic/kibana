@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, LogMessageSource } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
@@ -24,7 +24,6 @@ import type {
   IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { Histogram } from '@opentelemetry/api/build/src/metrics/Metric';
-import type { MigrationLog } from '../types';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
@@ -51,7 +50,7 @@ export interface RunZeroDowntimeMigrationOpts {
   nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */
   esCapabilities: ElasticsearchCapabilities;
-
+  /** The OTel Histogram metric to record the duration of each migrator */
   meter: Histogram;
 }
 
@@ -65,60 +64,25 @@ export const runZeroDowntimeMigration = async (
 
   return await Promise.all(
     migratorConfigs.map(async (migratorConfig) => {
-      const logger = createCustomLogger(options.logger);
-      const dumpLogs = () => {
-        logger.dump();
-      };
-      process.on('uncaughtExceptionMonitor', dumpLogs);
+      const startTime = performance.now();
       try {
-        return await migrateIndex({
+        const result = await migrateIndex({
           ...options,
           ...migratorConfig,
-          logger,
         });
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migratorConfig.indexPrefix,
+        });
+        return result;
       } catch (error) {
-        logger.dump();
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migratorConfig.indexPrefix,
+          'error.type': error.message, // Ideally, we had codes for each error instead.
+        });
         throw error;
-      } finally {
-        process.removeListener('uncaughtExceptionMonitor', dumpLogs);
-        const duration = 0; // TODO: Calculate duration
-        options.meter.record(duration, { scope: migratorConfig.indexPrefix }); // TODO: find better naming for scope
       }
     })
   );
 };
-
-function createCustomLogger(logger: Logger): Logger & { dump: () => void } {
-  const migrationLogs: MigrationLog[] = [];
-
-  return {
-    ...logger,
-    dump(): void {
-      migrationLogs.forEach((log) => {
-        const level = log.level === 'warning' ? 'warn' : log.level;
-        logger[level](log.message);
-      });
-    },
-    error(errorOrMessage: LogMessageSource | Error): void {
-      migrationLogs.push({
-        level: 'error',
-        message: errorOrMessage.toString(),
-      });
-    },
-    get(...childContextPaths: string[]): Logger {
-      return createCustomLogger(logger.get(...childContextPaths));
-    },
-    info(message: LogMessageSource): void {
-      migrationLogs.push({
-        level: 'info',
-        message: message.toString(),
-      });
-    },
-    warn(errorOrMessage: LogMessageSource | Error): void {
-      migrationLogs.push({
-        level: 'warning',
-        message: errorOrMessage.toString(),
-      });
-    },
-  };
-}

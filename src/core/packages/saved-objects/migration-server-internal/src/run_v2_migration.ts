@@ -28,6 +28,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import Semver, { SemVer } from 'semver';
 import { pick } from 'lodash';
+import type { Histogram } from '@opentelemetry/api';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import {
@@ -71,6 +72,8 @@ export interface RunV2MigrationOpts {
   esCapabilities: ElasticsearchCapabilities;
   /** If we are upgrading from an older Kibana, ensure that the previous version is at least the specified value (e.g. kibanaVersionCheck: '8.18.0') */
   kibanaVersionCheck: string | undefined;
+  /** The OTel Histogram metric to record the duration of each migrator */
+  meter: Histogram;
 }
 
 export const runV2Migration = async (options: RunV2MigrationOpts): Promise<MigrationResult[]> => {
@@ -221,8 +224,28 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           esCapabilities: options.esCapabilities,
         });
       },
+      indexPrefix: indexName,
     };
   });
 
-  return Promise.all(migrators.map((migrator) => migrator.migrate()));
+  return Promise.all(
+    migrators.map(async (migrator) => {
+      const startTime = performance.now();
+      try {
+        const result = await migrator.migrate();
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+        });
+        return result;
+      } catch (error) {
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+          'error.type': error.message, // Ideally, we had codes for each error instead.
+        });
+        throw error;
+      }
+    })
+  );
 };

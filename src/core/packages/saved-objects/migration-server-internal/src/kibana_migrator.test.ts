@@ -49,9 +49,10 @@ const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
 
 jest.mock('./run_v2_migration', () => {
   return {
-    runV2Migration: jest.fn(
-      (): Promise<MigrationResult[]> => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)
-    ),
+    runV2Migration: jest.fn((options): Promise<MigrationResult[]> => {
+      options.logger.info('Running v2 migrations');
+      return Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT);
+    }),
   };
 });
 
@@ -233,6 +234,41 @@ describe('KibanaMigrator', () => {
       migrator.prepareMigrations();
       expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
+
+    it('does not log intermediate steps when `useCummulativeLogger: true`', async () => {
+      const options = mockOptions();
+      (options.soMigrationsConfig.useCummulativeLogger as boolean) = true; // casting because soMigrationsConfig are readonly
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      await migrator.runMigrations();
+
+      expect(options.logger.info).toHaveBeenCalledTimes(2);
+      expect(options.logger.warn).toHaveBeenCalledTimes(0);
+      expect(options.logger.error).toHaveBeenCalledTimes(0);
+      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Performing migrations');
+      expect(options.logger.info).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('Completed all migrations in ')
+      );
+    });
+
+    it('logs the intermediate steps when `useCummulativeLogger: false`', async () => {
+      const options = mockOptions();
+      (options.soMigrationsConfig.useCummulativeLogger as boolean) = false; // casting because soMigrationsConfig are readonly
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      await migrator.runMigrations();
+
+      expect(options.logger.info).toHaveBeenCalledTimes(3);
+      expect(options.logger.warn).toHaveBeenCalledTimes(0);
+      expect(options.logger.error).toHaveBeenCalledTimes(0);
+      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Performing migrations');
+      expect(options.logger.info).toHaveBeenNthCalledWith(2, 'Running v2 migrations');
+      expect(options.logger.info).toHaveBeenNthCalledWith(
+        3,
+        expect.stringContaining('Completed all migrations in ')
+      );
+    });
   });
 });
 
@@ -321,6 +357,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
+      useCummulativeLogger: true,
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
