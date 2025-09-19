@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useSendMessage } from '../../../context/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
+import { hasWorkflowCommands, transformWorkflowCommands } from '../../../utils/workflow_commands';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
@@ -34,7 +35,13 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     if (isSubmitDisabled) {
       return;
     }
-    sendMessage({ message: input });
+    
+    // Transform workflow commands into natural language instructions
+    const transformedMessage = hasWorkflowCommands(input) 
+      ? transformWorkflowCommands(input)
+      : input;
+    
+    sendMessage({ message: transformedMessage });
     setInput('');
     onSubmit();
   };

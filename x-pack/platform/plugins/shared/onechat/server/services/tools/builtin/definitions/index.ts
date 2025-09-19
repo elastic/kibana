@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+export { executeEsqlTool } from './execute_esql';
+export { generateEsqlTool } from './generate_esql';
 export { getDocumentByIdTool } from './get_document_by_id';
 export { getIndexMappingsTool } from './get_index_mapping';
-export { listIndicesTool } from './list_indices';
 export { indexExplorerTool } from './index_explorer';
-export { generateEsqlTool } from './generate_esql';
-export { executeEsqlTool } from './execute_esql';
+export { listIndicesTool } from './list_indices';
 export { searchTool } from './search';

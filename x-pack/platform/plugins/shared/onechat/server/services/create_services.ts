@@ -6,17 +6,17 @@
  */
 
 import type { Runner } from '@kbn/onechat-server';
+import { AgentsService } from './agents';
+import { createChatService } from './chat';
+import { ConversationServiceImpl } from './conversation';
+import { RunnerFactoryImpl } from './runner';
+import { ToolsService } from './tools';
 import type {
   InternalSetupServices,
   InternalStartServices,
-  ServicesStartDeps,
   ServiceSetupDeps,
+  ServicesStartDeps,
 } from './types';
-import { ToolsService } from './tools';
-import { AgentsService } from './agents';
-import { RunnerFactoryImpl } from './runner';
-import { ConversationServiceImpl } from './conversation';
-import { createChatService } from './chat';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -28,14 +28,14 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger }),
+      tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
     };
 

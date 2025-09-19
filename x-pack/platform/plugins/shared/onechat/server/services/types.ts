@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
-import type { RunnerFactory } from './runner';
+import type { Logger } from '@kbn/logging';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
-import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { ConversationService } from './conversation';
+import type { RunnerFactory } from './runner';
+import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -32,6 +33,7 @@ export interface InternalStartServices {
 
 export interface ServiceSetupDeps {
   logger: Logger;
+  workflowsManagement?: WorkflowsPluginSetup;
 }
 
 export interface ServicesStartDeps {
