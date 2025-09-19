@@ -75,10 +75,9 @@ export function filterStreamsByQuery(
 export function filterCollapsedStreamRows(
   rows: TableRow[],
   collapsedStreams: Set<string>,
-  sortField: SortableField,
-  searchQuery: string
+  sortField: SortableField
 ) {
-  if (!shouldComposeTree(sortField, searchQuery)) return rows;
+  if (!shouldComposeTree(sortField)) return rows;
   const result: TableRow[] = [];
   for (const row of rows) {
     // If any ancestor is collapsed, skip this row

@@ -85,8 +85,8 @@ export function StreamsTreeTable({
   }, [sortField, filteredStreams]);
 
   const flattenTreeWithCollapse = React.useCallback(
-    (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField, searchQuery),
-    [collapsed, sortField, searchQuery]
+    (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField),
+    [collapsed, sortField]
   );
 
   const allRows = React.useMemo(

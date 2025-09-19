@@ -176,13 +176,13 @@ describe('filterCollapsedStreamRows', () => {
 
   it('returns all rows when no streams are collapsed', () => {
     const collapsed = new Set<string>();
-    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey', '');
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
     expect(filtered.map((r) => r.stream.name)).toEqual(rows.map((r) => r.stream.name));
   });
 
   it('filters out children of collapsed streams', () => {
     const collapsed = new Set<string>(['logs-a']);
-    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey', '');
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
     // Should include logs-a, but not its children
     expect(filtered.map((r) => r.stream.name)).toEqual([
       'logs-a',
@@ -199,7 +199,7 @@ describe('filterCollapsedStreamRows', () => {
 
   it('filters out nested children if ancestor is collapsed', () => {
     const collapsed = new Set<string>(['metrics-c']);
-    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey', '');
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
     expect(filtered.map((r) => r.stream.name)).toEqual([
       'logs-a',
       'logs-a.child1',
@@ -215,7 +215,7 @@ describe('filterCollapsedStreamRows', () => {
 
   it('filters out children of multiple collapsed streams', () => {
     const collapsed = new Set<string>(['logs-a', 'metrics-c']);
-    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey', '');
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'nameSortKey');
     expect(filtered.map((r) => r.stream.name)).toEqual([
       'logs-a',
       'logs-b',
@@ -228,7 +228,7 @@ describe('filterCollapsedStreamRows', () => {
 
   it('does not filter when shouldComposeTree returns false', () => {
     const collapsed = new Set<string>(['logs-a']);
-    const filtered = filterCollapsedStreamRows(rows, collapsed, 'retentionMs', 'search');
+    const filtered = filterCollapsedStreamRows(rows, collapsed, 'retentionMs');
     // Should return all rows regardless of collapsed streams
     expect(filtered.map((r) => r.stream.name)).toEqual(rows.map((r) => r.stream.name));
   });
@@ -257,7 +257,7 @@ describe('filterCollapsedStreamRows', () => {
       'asc' as Direction
     );
     const collapsed = new Set<string>(['logs-a.child1']);
-    const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey', '');
+    const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey');
     // Should include logs-a.child1, but not its grandchild
     expect(filtered.map((r) => r.stream.name)).toContain('logs-a.child1');
     expect(filtered.map((r) => r.stream.name)).not.toContain('logs-a.child1.grandchild');
