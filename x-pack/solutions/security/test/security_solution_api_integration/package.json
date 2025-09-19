@@ -434,6 +434,13 @@
     "rule_patch:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials rule_patch serverless qaEnv",
     "rule_patch:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_patch ess",
     "rule_patch:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_patch ess essEnv",
+  
+    "prebuilt_rules_management:customization_disabled:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier",
+    "prebuilt_rules_management:customization_disabled:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier serverlessEnv",
+    "prebuilt_rules_management:customization_disabled:qa:serverless": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier qaPeriodicEnv",
+    "prebuilt_rules_management:customization_disabled:qa:serverless:release": "npm run run-tests:rm:prebuilt_rules:customization_disabled . serverless_essentials_tier qaEnv",
+    "prebuilt_rules_management:customization_disabled:server:ess": "npm run initialize-server:rm:prebuilt_rules:customization_disabled . ess_basic_license",
+    "prebuilt_rules_management:customization_disabled:runner:ess": "npm run run-tests:rm:prebuilt_rules:customization_disabled . ess_basic_license essEnv",
 
     "prebuilt_rules_management:customization_enabled:customization:server:serverless": "npm run initialize-server:rm:prebuilt_rules:customization_enabled customization serverless",
     "prebuilt_rules_management:customization_enabled:customization:runner:serverless": "npm run run-tests:rm:prebuilt_rules:customization_enabled customization serverless serverlessEnv",
