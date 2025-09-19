@@ -130,11 +130,8 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
       return {
         id: topHit?._source?.user?.id ?? 'unknown',
         username: bucket.key.username,
-        email: topHit?._source?.user?.email,
-        roles: topHit?._source?.user?.roles ?? [],
         sourceId: 'from_matcher',
         existingUserId: existingUserMap.get(bucket.key.username),
-        lastSeen: topHit?._source?.['@timestamp'] ?? new Date().toISOString(),
         isPrivileged: Boolean(isPriv),
       };
     });

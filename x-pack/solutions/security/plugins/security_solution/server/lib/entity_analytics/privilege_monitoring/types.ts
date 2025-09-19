@@ -15,7 +15,5 @@ export interface PrivMonBulkUser {
 
 export interface PrivMonIntegrationsUser extends PrivMonBulkUser {
   id: string; // do you actually need this? I think you can use existingUserId instead
-  roles: string[];
-  lastSeen: string;
   isPrivileged: boolean;
 }

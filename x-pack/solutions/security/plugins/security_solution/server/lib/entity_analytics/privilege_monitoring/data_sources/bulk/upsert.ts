@@ -141,9 +141,7 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
       }),
       buildCreateDoc: (user, sourceLabel) => ({
         user: { name: user.username, is_privileged: user.isPrivileged },
-        roles: user.roles ?? [],
         labels: { sources: [sourceLabel] },
-        last_seen: user.lastSeen,
       }),
       shouldCreate: (user) => user.isPrivileged,
     });
