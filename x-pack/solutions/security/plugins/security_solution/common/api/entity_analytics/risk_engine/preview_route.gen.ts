@@ -63,6 +63,23 @@ export const RiskScoresPreviewRequest = z.object({
    * A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
    */
   exclude_alert_tags: z.array(z.string()).optional(),
+  /**
+   * Entity-specific filters to apply during risk score calculation
+   */
+  filters: z
+    .array(
+      z.object({
+        /**
+         * List of entity types this filter applies to
+         */
+        entity_types: z.array(z.enum(['host', 'user', 'service'])),
+        /**
+         * KQL filter string to apply to the specified entity types
+         */
+        filter: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export type RiskScoresPreviewResponse = z.infer<typeof RiskScoresPreviewResponse>;

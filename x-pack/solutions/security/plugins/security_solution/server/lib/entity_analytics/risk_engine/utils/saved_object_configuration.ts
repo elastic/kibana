@@ -33,7 +33,7 @@ export const getDefaultRiskEngineConfiguration = ({
   excludeAlertStatuses: ['closed'],
   _meta: {
     // Upgrade this property when changing mappings
-    mappingsVersion: 4,
+    mappingsVersion: 5,
   },
 });
 
