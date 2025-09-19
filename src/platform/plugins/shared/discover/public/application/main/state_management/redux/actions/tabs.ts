@@ -99,8 +99,8 @@ export const updateTabs: InternalStateThunkActionCreator<
   ({ items, selectedItem }) =>
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
-    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+    const currentTabId = currentState.tabs.unsafeCurrentId;
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
     const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
@@ -152,7 +152,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
         } else {
           // the new tab is a fresh one
-          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
+          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTabId)?.query;
           const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
 
           if (!currentQuery || !currentDataView) {
@@ -176,10 +176,12 @@ export const updateTabs: InternalStateThunkActionCreator<
       return tab;
     });
 
-    if (selectedItem?.id !== currentTab.id) {
+    if (selectedItem?.id !== currentTabId) {
       currentTabStateContainer?.actions.stopSyncing();
 
-      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
+      const nextTab = selectedItem
+        ? updatedTabs.find((tab) => tab.id === selectedItem.id)
+        : undefined;
       const nextTabRuntimeState = selectedItem
         ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
         : undefined;
@@ -224,7 +226,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     dispatch(
       setTabs({
         allTabs: updatedTabs,
-        selectedTabId: selectedItem?.id ?? currentTab.id,
+        selectedTabId: selectedItem?.id ?? currentTabId,
         recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
       })
     );
