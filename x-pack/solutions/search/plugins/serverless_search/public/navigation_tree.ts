@@ -254,21 +254,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             sideNavVersion: 'v2',
             title: MACHINE_LEARNING_TITLE,
           },
-          {
-            iconV2: 'globe' /* TODO: review icon */,
-            link: 'maps',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'graphApp',
-            link: 'graph',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'visualizeApp',
-            link: 'visualize',
-            sideNavVersion: 'v2',
-          },
         ],
       },
     ],
@@ -535,6 +520,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 children: [
                   { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
                   { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                  { link: 'visualize' },
                   { link: 'management:objects', breadcrumbStatus: 'hidden' },
                   { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
                   { link: 'management:reporting', breadcrumbStatus: 'hidden' },
