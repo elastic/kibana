@@ -190,7 +190,7 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
       }
       kibanaGroup.options.push({
         id: connector.type,
-        label: connector.description || connector.type,
+        label: connector.summary || connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
       });

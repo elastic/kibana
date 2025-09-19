@@ -94,6 +94,33 @@ function generateApiClient() {
   }
 }
 
+function extractEndpointSummaries() {
+  const endpointSummaries = new Map();
+  try {
+    const specPath = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
+    if (!fs.existsSync(specPath)) {
+      return endpointSummaries;
+    }
+
+    const yaml = require('yaml');
+    const specContent = fs.readFileSync(specPath, 'utf8');
+    const spec = yaml.parse(specContent);
+    if (spec.paths) {
+      for (const path of Object.keys(spec.paths)) {
+        const pathItem = spec.paths[path];
+        for (const method of Object.keys(pathItem)) {
+          if (pathItem[method].summary) {
+            endpointSummaries.set(`${method}:${path}`, pathItem[method].summary);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Error extracting endpoint summaries:', error.message);
+  }
+  return endpointSummaries;
+}
+
 /**
  * Extract tag documentation URLs from OpenAPI spec (simplified for fallback only)
  */
@@ -764,7 +791,7 @@ function readKibanaBodyDefinitions(operationId, endpoint) {
 /**
  * Convert Kibana API endpoint to connector definition
  */
-function convertToConnectorDefinition(endpoint, index, tagDocs) {
+function convertToConnectorDefinition(endpoint, index, tagDocs, summary) {
   const { method, path, operationId, parameters = [], examples = {} } = endpoint;
 
   // Categorize parameters by type
@@ -914,6 +941,8 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
   // Extract documentation URL
   const documentation = generateDocumentationUrl(method, path, operationId, tagDocs);
 
+  const escapedSummary = summary ? summary.replace(/'/g, "\\'") : null;
+
   // Convert Zodios path format (:param) to our pattern format ({param})
   const pattern = path.replace(/:([^\/]+)/g, '{$1}');
 
@@ -937,7 +966,7 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
   return `  {
     type: '${type}',
     connectorIdRequired: false,
-    description: '${description}',
+    description: '${description}',${escapedSummary ? `\n    summary: '${escapedSummary}',` : ''}
     methods: ["${method}"],
     patterns: ["${pattern}"],
     isInternal: true,
@@ -1101,6 +1130,8 @@ ${schemaLines.filter((line) => !line.includes("import { z } from '@kbn/zod';")).
  */
 function generateKibanaConnectors() {
   try {
+    console.log('🔄 Generating Kibana connectors from temporary API client file');
+
     if (!fs.existsSync(TEMP_OUTPUT_PATH)) {
       console.error('❌ Temporary API client file not found');
       return { success: false, count: 0 };
@@ -1114,6 +1145,9 @@ function generateKibanaConnectors() {
 
     // Extract tag documentation
     const tagDocs = extractTagDocumentation();
+
+    // Extract endpoint summaries
+    const endpointSummaries = extractEndpointSummaries();
 
     // Extract endpoint information
     const endpoints = extractEndpointInfo(content);
@@ -1131,7 +1165,12 @@ function generateKibanaConnectors() {
 
     for (const endpoint of endpoints) {
       try {
-        const connectorDef = convertToConnectorDefinition(endpoint, successCount, tagDocs);
+        const connectorDef = convertToConnectorDefinition(
+          endpoint,
+          successCount,
+          tagDocs,
+          endpointSummaries.get(`${endpoint.method.toLowerCase()}:${endpoint.path}`)
+        );
         connectorDefinitions.push(connectorDef);
         successCount++;
       } catch (error) {
