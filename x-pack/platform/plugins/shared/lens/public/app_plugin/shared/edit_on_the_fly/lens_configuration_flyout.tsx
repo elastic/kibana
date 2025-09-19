@@ -28,6 +28,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
@@ -332,6 +333,12 @@ export function LensEditConfigurationFlyout({
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
+        toolbar={
+          <VisualizationToolbarWrapper
+            visualizationMap={visualizationMap}
+            framePublicAPI={framePublicAPI}
+          />
+        }
       >
         <>
           <div
