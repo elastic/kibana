@@ -26,7 +26,11 @@ export interface DashboardLayout {
     [uuid: string]: DashboardLayoutPanel;
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
-  controls: { [id: string]: ControlsGroupState['controls'][number] & { order: number } };
+  controls: {
+    [id: string]: Pick<ControlsGroupState['controls'][number], 'width' | 'grow' | 'type'> & {
+      order: number;
+    };
+  };
 }
 
 export interface DashboardChildState {

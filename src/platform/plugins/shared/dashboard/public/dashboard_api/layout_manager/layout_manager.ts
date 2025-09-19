@@ -78,6 +78,7 @@ export function initializeLayoutManager(
     references$.value ?? [],
     getReferences
   );
+
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
@@ -419,7 +420,6 @@ export function initializeLayoutManager(
             )
           ),
           map(([currentLayout]) => {
-            console.log({ lastSavedLayout, currentLayout });
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
               const serialized = serializeLayout(currentLayout, currentChildState);

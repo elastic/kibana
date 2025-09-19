@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth } from '@kbn/controls-schemas';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-export type ControlPanelState<State extends DefaultControlState = DefaultControlState> = State & {
-  type: string;
-  order: number;
-};
-
-export interface DefaultControlState {
-  grow?: boolean;
-  width?: ControlWidth;
-}
+type ControlState = ControlsGroupState['controls'][number];
+export type ControlPanelState = Pick<ControlState, 'width' | 'grow'> & { order: number };

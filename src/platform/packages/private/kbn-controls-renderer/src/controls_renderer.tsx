@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { map, type BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, map, type BehaviorSubject } from 'rxjs';
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -29,10 +30,9 @@ import {
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type { PublishesDisabledActionIds, PublishesViewMode } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
@@ -43,13 +43,11 @@ export const ControlsRenderer = ({
   uiActions,
   parentApi,
 }: {
-  parentApi: PresentationContainer &
-    PublishesViewMode &
+  parentApi: PublishesViewMode &
     HasSerializedChildState<ControlsGroupState['controls'][number] & { order: number }> &
     Partial<PublishesDisabledActionIds> & {
       registerChildApi: (api: DefaultEmbeddableApi) => void;
       layout$: BehaviorSubject<DashboardLayout>;
-      serializeLayout: () => Pick<DashboardState, 'panels' | 'references' | 'controlGroupInput'>;
     };
   uiActions: UiActionsStart;
 }) => {
@@ -59,22 +57,30 @@ export const ControlsRenderer = ({
   }, []);
 
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
-  const controlsInOrder: Array<DashboardLayout['controls'][string]> = useMemo(() => {
-    return Object.values(controlState).sort((controlA, controlB) => {
-      return controlA.order - controlB.order;
-    });
-  }, [controlState]);
+  const controlsInOrder: Array<DashboardLayout['controls'][string] & { id: string }> =
+    useMemo(() => {
+      return Object.entries(controlState)
+        .map(([id, control]) => {
+          return { id, ...control };
+        })
+        .sort((controlA, controlB) => {
+          return controlA.order - controlB.order;
+        });
+    }, [controlState]);
 
   useEffect(() => {
     const layoutSubscription = parentApi.layout$
       .pipe(
-        map(({ controls }) => controls)
-        // distinctUntilChanged(deepEqual)
+        map(({ controls }) => controls),
+        distinctUntilChanged(deepEqual)
       )
       .subscribe((controls) => {
-        console.log('CONTROLS', controls);
         setControlState(controls);
       });
+
+    return () => {
+      layoutSubscription.unsubscribe();
+    };
   }, [parentApi]);
 
   /** Handle drag and drop */

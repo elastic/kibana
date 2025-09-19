@@ -8,9 +8,10 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, map, of } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Subscription, distinctUntilChanged, map, of, type BehaviorSubject } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,12 +25,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import {
-  PublishesUnsavedChanges,
   apiPublishesDataLoading,
   apiPublishesTitle,
   useBatchedPublishingSubjects,
@@ -39,16 +39,10 @@ import {
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import type { ControlPanelState } from '../types';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
-import {
-  type ControlPanelApi,
-  type ControlPanelState,
-  buildControlPanelApi,
-} from './build_control_panel_api';
-import { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
-import { pick } from 'lodash';
 
 export const ControlPanel = ({
   parentApi,
@@ -58,8 +52,7 @@ export const ControlPanel = ({
   setControlPanelRef,
   uiActions,
 }: {
-  parentApi: PresentationContainer &
-    PublishesViewMode &
+  parentApi: PublishesViewMode &
     HasSerializedChildState<object> &
     Partial<PublishesDisabledActionIds> & {
       registerChildApi: (api: DefaultEmbeddableApi) => void;
@@ -71,7 +64,7 @@ export const ControlPanel = ({
   uiActions: UiActionsStart;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
-  const [api, setApi] = useState<ControlPanelApi | null>(null);
+  const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
@@ -79,7 +72,7 @@ export const ControlPanel = ({
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
-    parentApi?.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
+    parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
@@ -88,22 +81,18 @@ export const ControlPanel = ({
   const initialState = useMemo(() => {
     return parentApi.layout$.getValue().controls[uuid];
   }, [parentApi, uuid]);
-
   const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
   const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
-  const [order, setOrder] = useState<ControlPanelState['order']>(initialState.order);
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
       .pipe(
-        map(({ controls }) => pick(controls[uuid], ['grow', 'width', 'order'])),
+        map(({ controls }) => pick(controls[uuid], ['grow', 'width'])),
         distinctUntilChanged(deepEqual)
       )
       .subscribe((newState) => {
-        console.log({ newState });
         setGrow(newState.grow);
         setWidth(newState.width);
-        setOrder(newState.order);
       });
 
     return () => {
@@ -116,17 +105,6 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-
-    // subscriptions.add(
-    //   api.grow$.subscribe((result) => {
-    //     setGrow(result);
-    //   })
-    // );
-    // subscriptions.add(
-    //   api.width$.subscribe((result) => {
-    //     setWidth(result);
-    //   })
-    // );
 
     if (apiPublishesDataLoading(api)) {
       subscriptions.add(
@@ -244,10 +222,9 @@ export const ControlPanel = ({
               maybeId={uuid}
               type={type}
               getParentApi={() => parentApi}
-              onApiAvailable={(panelApi) => {
-                // const newApi = buildControlPanelApi(uuid, initialState, panelApi);
-                setApi(panelApi);
-                parentApi.registerChildApi(panelApi);
+              onApiAvailable={(controlApi) => {
+                setApi(controlApi);
+                parentApi.registerChildApi(controlApi);
               }}
               hidePanelChrome
             />

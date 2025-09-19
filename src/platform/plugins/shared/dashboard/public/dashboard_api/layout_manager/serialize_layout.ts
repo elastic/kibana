@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
@@ -48,10 +46,14 @@ export function serializeLayout(
   return {
     panels: [...panels, ...Object.values(sections)],
     controlGroupInput: {
-      controls: Object.values(layout.controls)
-        .sort(({ order: orderA }, { order: orderB }) => orderA - orderB)
-        .map((control) => {
-          return { type: control.type, id: control.id, ...childState[control.id!].rawState };
+      controls: Object.entries(layout.controls)
+        .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+        .map(([id, control]) => {
+          return {
+            id,
+            ...control,
+            ...(childState[id].rawState as ControlsGroupState['controls'][number]),
+          };
         }),
     },
     references,
