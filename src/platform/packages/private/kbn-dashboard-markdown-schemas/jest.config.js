@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-dashboard_markdown_schemas'],
+  roots: ['<rootDir>/src/platform/packages/private/kbn-dashboard-markdown-schemas'],
 };
