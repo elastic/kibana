@@ -83,7 +83,11 @@ function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-const getAdhocDataView = (dataView: { index: string; timeFieldName: string }) => {
+const getAdhocDataView = (dataView: {
+  type: 'adHocDataView';
+  index: string;
+  timeFieldName: string;
+}) => {
   const id = uuidv4();
   return {
     [id]: {
@@ -102,10 +106,23 @@ const getAdhocDataView = (dataView: { index: string; timeFieldName: string }) =>
 };
 
 export const getAdhocDataviews = (
-  dataviews: Record<string, { index: string; timeFieldName: string }>
+  dataviews: Record<
+    string,
+    | { type: 'dataView'; id: string }
+    | { type: 'adHocDataView'; index: string; timeFieldName: string }
+  >
 ) => {
   let adHocDataViews: Record<string, { id: string; timeFieldName: string }> = {};
-  [...new Set(Object.values(dataviews))].forEach((d) => {
+  [
+    ...new Set(
+      Object.values(dataviews).filter(
+        (
+          dataViewEntry
+        ): dataViewEntry is { type: 'adHocDataView'; index: string; timeFieldName: string } =>
+          dataViewEntry.type === 'adHocDataView'
+      )
+    ),
+  ].forEach((d) => {
     adHocDataViews = {
       ...adHocDataViews,
       ...getAdhocDataView(d),
@@ -147,13 +164,13 @@ export const buildDatasetState = (
     }
     return {
       type: 'dataView',
-      name: reference.id,
+      id: reference.id,
     };
   }
 
   return {
     type: 'dataView',
-    name: layer.indexPatternId,
+    id: layer.indexPatternId,
   };
 };
 
@@ -196,7 +213,7 @@ export function getDatasetIndex(dataset: LensApiState['dataset']) {
       };
     case 'dataView':
       return {
-        index: dataset.name,
+        index: dataset.id,
         timeFieldName,
       };
     case 'table':
@@ -276,7 +293,6 @@ function buildDatasourceStatesLayer(
  */
 export const buildDatasourceStates = (
   config: LensApiState,
-  dataviews: Record<string, { index: string; timeFieldName: string }>,
   buildFormulaLayers: (
     config: unknown,
     i: number,
@@ -287,6 +303,11 @@ export const buildDatasourceStates = (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   const mainDataset = config.dataset;
+  const usedDataviews: Record<
+    string,
+    | { type: 'dataView'; id: string }
+    | { type: 'adHocDataView'; index: string; timeFieldName: string }
+  > = {};
   // a few charts types support multiple layers
   const configLayers = 'layers' in config ? (config.layers as LensApiState[]) : [config];
   for (let i = 0; i < configLayers.length; i++) {
@@ -323,12 +344,18 @@ export const buildDatasourceStates = (
     // keep record of all dataviews used by layers
     if (index) {
       Object.keys(layers[type]?.layers ?? []).forEach((id) => {
-        dataviews[id] = index;
+        usedDataviews[id] =
+          dataset.type === 'dataView'
+            ? { type: 'dataView', id: dataset.id }
+            : {
+                type: 'adHocDataView',
+                ...index,
+              };
       });
     }
   }
 
-  return layers;
+  return { layers, usedDataviews };
 };
 
 // adds new column to existing layer
