@@ -9,12 +9,13 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import type { CommonProps } from '@elastic/eui';
 import { FeedbackButton } from './feedback_button';
 import { FeedbackPanel } from './feedback_panel';
 
 const FEEDBACK_PANEL_POSITIVE_LIFETIME = 3000;
 
-interface FeedbackSnippetProps {
+interface FeedbackSnippetProps extends CommonProps {
   /**
    * Message to display in the FeedbackButton.
    */
@@ -44,6 +45,7 @@ export const FeedbackSnippet = ({
   feedbackSnippetId,
   promptViewMessage,
   surveyUrl,
+  className,
 }: FeedbackSnippetProps) => {
   const [feedbackView, setFeedbackView] = useState<FeedbackView>('prompt');
   const [showPanel, setShowPanel] = useState(() => {
@@ -103,6 +105,7 @@ export const FeedbackSnippet = ({
     />
   ) : (
     <FeedbackButton
+      className={className}
       feedbackButtonMessage={feedbackButtonMessage}
       feedbackSnippetId={feedbackSnippetId}
       handleOpenSurvey={handleOpenSurvey}

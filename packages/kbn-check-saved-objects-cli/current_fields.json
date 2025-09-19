@@ -618,10 +618,7 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [
-    "guideId",
-    "isActive"
-  ],
+  "guided-onboarding-guide-state": [],
   "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
@@ -773,6 +770,7 @@
     "vars"
   ],
   "ingest_manager_settings": [
+    "action_secret_storage_requirements_met",
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
@@ -924,9 +922,7 @@
   "privilege-monitoring-status": [
     "status"
   ],
-  "privmon-api-key": [
-    "apiKey"
-  ],
+  "privmon-api-key": [],
   "product-doc-install-status": [
     "index_name",
     "inference_id",

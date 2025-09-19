@@ -35,6 +35,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
 
   const body = await AgentService.migrateSingleAgent(
     esClient,
+    soClient,
     request.params.agentId,
     agentPolicy,
     agent,

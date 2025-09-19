@@ -14,8 +14,8 @@ import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
+import { ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
-import { CasesAlertsTable } from './cases_alerts_table';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -25,7 +25,13 @@ export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
     cases,
+    data,
     http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
   } = useKibana().services;
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -76,7 +82,21 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
-        renderAlertsTable={(props) => <CasesAlertsTable {...props} />}
+        renderAlertsTable={(props) => (
+          <ObservabilityAlertsTable
+            {...props}
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              cases,
+              settings,
+            }}
+          />
+        )}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (

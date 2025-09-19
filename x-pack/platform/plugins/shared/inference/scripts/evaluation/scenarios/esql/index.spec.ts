@@ -134,16 +134,22 @@ async function evaluateEsqlQuery({
 
   const docBase = await EsqlDocumentBase.load();
 
+  const prompts = docBase.getPrompts();
+  const languageDescription = `${prompts.syntax}
+
+  ${prompts.examples}
+  `;
+
   const usedCommands = await retrieveUsedCommands({
     question,
     answer,
-    esqlDescription: docBase.getSystemMessage(),
+    esqlDescription: languageDescription,
   });
 
   const requestedDocumentation = docBase.getDocumentation(usedCommands, {
     generateMissingKeywordDoc: false,
   });
-  requestedDocumentation.commands_and_functions = docBase.getSystemMessage();
+  requestedDocumentation.commands_and_functions = languageDescription;
 
   const evaluation = await evaluationClient.evaluate({
     input: `

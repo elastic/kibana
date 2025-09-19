@@ -58,10 +58,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Stack Monitoring' });
 
       if (isV2) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
@@ -73,6 +70,8 @@ export default function searchSolutionNavigation({
       } else {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
       }
@@ -124,16 +123,6 @@ export default function searchSolutionNavigation({
               link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
-            },
-            {
-              link: { deepLinkId: 'searchSynonyms:synonyms' },
-              breadcrumbs: ['Relevance', 'Synonyms'],
-              pageTestSubject: 'searchSynonymsOverviewPage',
-            },
-            {
-              link: { deepLinkId: 'searchQueryRules' },
-              breadcrumbs: ['Relevance', 'Query rules'],
-              pageTestSubject: 'queryRulesBasePage',
             },
             {
               link: { deepLinkId: 'graph' },
@@ -229,12 +218,9 @@ export default function searchSolutionNavigation({
             'discover',
             'dashboards',
             'searchPlayground',
-            'searchSynonyms:synonyms',
-            'searchQueryRules',
             'machine_learning',
             'dev_tools',
             'ingest_and_data',
-            'monitoring',
             'stack_management',
             // more:
             'maps',
@@ -266,7 +252,6 @@ export default function searchSolutionNavigation({
           'searchInferenceEndpoints:inferenceEndpoints',
           'search_project_nav_footer',
           'dev_tools',
-          'monitoring',
           'project_settings_project_nav',
           'management:trained_models',
           'stack_management',

@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeedbackView } from './feedback_snippet';
+import { Confetti } from './confetti';
 
 interface FeedbackPanelProps {
   feedbackSnippetId: string;
@@ -34,8 +35,6 @@ interface FeedbackPanelProps {
   handleNegativeFeedback: () => void;
   handlePositiveFeedback: () => void;
 }
-
-const ConfettiComponentLazy = React.lazy(() => import('./confetti'));
 
 const thumbUpIconLabel = i18n.translate(
   'sharedUXPackages.feedbackSnippet.feedbackPanel.thumbUpIconLabel',
@@ -147,6 +146,7 @@ export const FeedbackPanel = ({
       onClick={handleOpenSurveyAndDismissPanel}
       fill
       fullWidth
+      size="s"
       iconType="popout"
       iconSide="right"
       id={`${feedbackSnippetId}PanelSurveyLink`}
@@ -181,7 +181,7 @@ export const FeedbackPanel = ({
     >
       <EuiFlexGroup
         gutterSize="s"
-        justifyContent={feedbackView === 'positive' ? 'center' : 'flexStart'}
+        justifyContent={feedbackView === 'positive' ? 'center' : 'spaceBetween'}
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s" textAlign={feedbackView === 'positive' ? 'center' : 'left'}>
@@ -195,7 +195,7 @@ export const FeedbackPanel = ({
       <EuiFlexGroup gutterSize="s" justifyContent="center">
         {panelFooter[feedbackView]}
       </EuiFlexGroup>
-      {feedbackView === 'positive' && <ConfettiComponentLazy />}
+      {feedbackView === 'positive' && <Confetti />}
     </EuiPanel>
   );
 };

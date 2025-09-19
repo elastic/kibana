@@ -41,7 +41,18 @@ export const DimensionBadges = ({
         const isAttributes = dimension.name.startsWith('attributes.');
         const isTopLevel = dimension.name.startsWith(topLevelNamespace);
         const badgeColor = isAttributes || isTopLevel ? 'default' : 'hollow';
-        const isKeyword = dimension.type === 'keyword';
+        const iconMap = new Map<string, string>([
+          ['boolean', 'tokenBoolean'],
+          ['ip', 'tokenIP'],
+          ['keyword', 'tokenKeyword'],
+          ['long', 'tokenNumber'],
+          ['integer', 'tokenNumber'],
+          ['short', 'tokenNumber'],
+          ['byte', 'tokenNumber'],
+          ['unsigned_long', 'tokenNumber'],
+        ]);
+
+        const hasIcon = iconMap.has(dimension.type);
 
         const badgeContent = (
           <EuiBadge
@@ -49,15 +60,15 @@ export const DimensionBadges = ({
             color={badgeColor}
             style={{ marginRight: euiTheme.size.xs, marginBottom: euiTheme.size.xxs }}
           >
-            {isKeyword && (
+            {hasIcon && (
               <EuiToken
-                iconType="tokenKeyword"
+                iconType={iconMap.get(dimension.type)!}
                 size="xs"
                 style={{ marginRight: euiTheme.size.xs }}
               />
             )}
             {dimension.name}
-            {!isKeyword && ` (${dimension.type})`}
+            {!hasIcon && ` (${dimension.type})`}
           </EuiBadge>
         );
 

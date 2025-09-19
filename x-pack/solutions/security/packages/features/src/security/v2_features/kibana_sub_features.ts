@@ -131,9 +131,6 @@ export const getSecurityV2SubFeaturesMap = ({
   if (!experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
     securitySubFeaturesMap.delete(SecuritySubFeatureId.globalArtifactManagement);
   }
-  if (!experimentalFeatures.defendInsights) {
-    securitySubFeaturesMap.delete(SecuritySubFeatureId.workflowInsights);
-  }
 
   return Object.freeze(securitySubFeaturesMap);
 };
