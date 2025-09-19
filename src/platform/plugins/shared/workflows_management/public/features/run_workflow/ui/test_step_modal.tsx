@@ -49,45 +49,46 @@ export function TestStepModal({
     });
   }, [initialStepContextMock.schema]);
 
-  const modelUri = useMemo(() => `inmemory://models/${id ?? 'doc'}.json`, [id]);
+  const modelUri = useMemo(() => `inmemory://models/${id}.json`, [id]);
+  const schemaUri = useMemo(() => `inmemory://schemas/${id}`, [id]);
 
-  // 3) Hook Monaco on mount to register the schema for validation + suggestions
+  // Hook Monaco on mount to register the schema for validation + suggestions
   const mountedOnce = useRef(false);
   const handleMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     if (mountedOnce.current) return;
     mountedOnce.current = true;
-    const current = editor.getModel(); // may exist from value/defaultValue
-    const text = current?.getValue() ?? '{}';
-    // create the model with the URI you want
-    const uri = monaco.Uri.parse(`inmemory://schemas/${id ?? 'doc'}`);
-    const model = monaco.editor.createModel(text, 'json', uri);
-    // swap the editor to use this model
-    editor.setModel(model);
 
-    monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
-      validate: true,
-      allowComments: false,
-      enableSchemaRequest: false,
-      schemas: [
-        {
-          uri: 'inmemory://schemas/step-context', // schema URI (any unique string)
-          fileMatch: [modelUri], // bind **only** this editor model
-          schema: jsonSchema as any,
-        },
-      ],
-    });
+    try {
+      // First, configure the JSON language service with schema validation
+      monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
+        validate: true,
+        allowComments: false,
+        enableSchemaRequest: false,
+        schemas: [
+          {
+            uri: schemaUri, // schema URI
+            fileMatch: [modelUri], // bind to this specific model URI
+            schema: jsonSchema as any,
+          },
+        ],
+      });
 
-    // Optional: seed example if empty
+      // Get current editor content
+      const text = editor.getValue() || JSON.stringify(initialStepContextMock.stepContext, null, 2);
+
+      // Create model with the specific URI that matches our schema fileMatch
+      const uri = monaco.Uri.parse(modelUri);
+      const model = monaco.editor.createModel(text, 'json', uri);
+
+      // Set the model to the editor
+      editor.setModel(model);
+    } catch (error) {
+      // Monaco setup failed - fall back to basic JSON editing
+    }
+
+    // Optional: seed example if editor is empty
     if (!editor.getValue()?.trim()) {
-      editor.setValue(
-        [
-          '{',
-          '  "$schema": "inmemory://schemas/' + (id ?? 'doc') + '",',
-          '  // Start typing — keys & enums will be suggested from your Zod schema',
-          '}',
-        ].join('\n')
-      );
-      editor.setPosition({ lineNumber: 3, column: 3 });
+      editor.setValue(JSON.stringify(initialStepContextMock.stepContext, null, 2));
     }
   };
 
@@ -127,8 +128,6 @@ export function TestStepModal({
               height={500}
               editorDidMount={handleMount}
               onChange={handleInputChange}
-              // suggestionProvider={createSuggestionProvider()}
-              // hoverProvider={createHoverProvider()}
               dataTestSubj={'workflow-event-json-editor'}
               options={{
                 language: 'json',
@@ -152,9 +151,7 @@ export function TestStepModal({
                   strings: true,
                 },
                 formatOnType: true,
-                // Keep Monaco widgets within the modal bounds and add offset
                 fixedOverflowWidgets: true,
-                // Additional positioning configuration
                 hover: {
                   delay: 300,
                   sticky: true,
