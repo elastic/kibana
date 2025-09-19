@@ -329,7 +329,7 @@ describe('Elasticsearch function', () => {
       expect(result.passed).to.be(true);
     });
 
-    it('returns anomalies in index in the last 3 hours? and explain what the anomaly is about?', async () => {
+    it('returns ML job anomalies in index in the last 3 hours? and explain what the anomaly is about?', async () => {
       const conversation = await chatClient.complete({
         messages: `List anomalies in ${TEST_INDEX} index in the last 3 hours? and explain what the anomaly is about?`,
         scope: 'all',
@@ -345,7 +345,7 @@ describe('Elasticsearch function', () => {
       expect(result.passed).to.be(true);
     });
 
-    it(`reports whether ${TEST_JOB_ID} is running and the last time it ran`, async () => {
+    it(`reports whether ML job id ${TEST_JOB_ID} is running and the last time it ran`, async () => {
       const conversation = await chatClient.complete({
         messages: `Is the Machine Learning (ML) job ${TEST_JOB_ID} running now? When was the last time it ran?`,
         scope: 'all',
@@ -359,7 +359,7 @@ describe('Elasticsearch function', () => {
       expect(result.passed).to.be(true);
     });
 
-    it('list anomalies in past 1 hour with score > 50 and links them to jobs', async () => {
+    it('list ML job anomalies in past 1 hour with score > 50 and links them to jobs', async () => {
       const conversation = await chatClient.complete({
         messages: 'Any anomalies in the past 1 hour with anomaly score > 50?',
         scope: 'all',
@@ -387,7 +387,7 @@ describe('Elasticsearch function', () => {
       expect(result.passed).to.be(true);
     });
 
-    it('explains anomalies for a job id in the last 3 hours with cause analysis', async () => {
+    it('explains anomalies for a ML job id in the last 3 hours with cause analysis', async () => {
       const conversation = await chatClient.complete({
         messages: `Explain ${TEST_JOB_ID} anomaly alerts for the past 3 hours where anomaly score is > 50 and indicate probable cause.`,
         scope: 'all',
