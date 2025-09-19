@@ -23,7 +23,7 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           defaultMessage: 'Sets value of "{field}" to "{value}"',
           values: {
             field: step.to,
-            value: step.value,
+            value: JSON.stringify(step.value),
           },
         }
       );
