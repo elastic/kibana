@@ -251,12 +251,17 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             body: schema.object({
               tool_id: schema.string({}),
               tool_params: schema.recordOf(schema.string(), schema.any()),
+              connector_id: schema.maybe(schema.string()),
             }),
           },
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tool_id: id, tool_params: toolParams } = request.body;
+        const {
+          tool_id: id,
+          tool_params: toolParams,
+          connector_id: defaultConnectorId,
+        } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
@@ -270,7 +275,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await registry.execute({ toolId: id, toolParams });
+        const toolResult = await registry.execute({ toolId: id, toolParams, defaultConnectorId });
 
         return response.ok({
           body: {
