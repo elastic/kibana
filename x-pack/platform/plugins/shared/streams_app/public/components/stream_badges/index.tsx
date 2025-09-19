@@ -23,6 +23,9 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
+import iconStreamClassic from '../../assets/icon_stream_classic.svg';
+import iconStreamWired from '../../assets/icon_stream_wired.svg';
+
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
     position="top"
@@ -59,9 +62,34 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" iconType={iconStreamClassic} iconSide="left">
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
+export function WiredStreamBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.wired.title', {
+        defaultMessage: 'Wired Stream',
+      })}
+      content={i18n.translate('xpack.streams.badges.wired.description', {
+        defaultMessage: 'Fully powered by the Streams technology',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge color="hollow" iconType={iconStreamWired} iconSide="left">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+          defaultMessage: 'Wired',
         })}
       </EuiBadge>
     </EuiToolTip>
@@ -107,11 +135,17 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
       </EuiBadge>
     );
   } else if (isDslLifecycle(lifecycle)) {
-    badge = (
+    badge = lifecycle.dsl.data_retention ? (
       <EuiBadge color="hollow">
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
           defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention || '∞' },
+          values: { retention: lifecycle.dsl.data_retention },
+        })}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
+          defaultMessage: 'Forever',
         })}
       </EuiBadge>
     );
