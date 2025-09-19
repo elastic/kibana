@@ -240,9 +240,10 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'searchSynonyms:synonyms' },
                     { link: 'searchQueryRules' },
-                    { link: 'searchInferenceEndpoints:inferenceEndpoints', sideNavVersion: 'v1' },
+                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                   ],
                   id: 'relevance',
+                  sideNavVersion: 'v1',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
                   }),
@@ -348,10 +349,12 @@ export const getNavigationTreeDefinition = ({
                               pathNameSerialized.startsWith(
                                 prepend('/app/elasticsearch/index_management/indices')
                               ) ||
-                              pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
+                              pathNameSerialized.startsWith(
+                                prepend('/app/management/data/index_management')
+                              )
                             );
                           },
-                          link: 'elasticsearchIndexManagement',
+                          link: 'management:index_management',
                         },
                         { link: 'management:index_lifecycle_management' },
                         { link: 'management:snapshot_restore' },
@@ -377,6 +380,16 @@ export const getNavigationTreeDefinition = ({
                         }
                       ),
                     },
+                    {
+                      children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                      id: 'search_relevance',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.relevance.title',
+                        {
+                          defaultMessage: 'Relevance',
+                        }
+                      ),
+                    },
                   ],
                   iconV2: 'database',
                   id: 'ingest_and_data',
@@ -385,10 +398,6 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
                     defaultMessage: 'Ingest and manage data',
                   }),
-                },
-                {
-                  id: 'monitoring',
-                  link: 'monitoring',
                 },
                 {
                   breadcrumbStatus: 'hidden',
@@ -406,6 +415,17 @@ export const getNavigationTreeDefinition = ({
                     {
                       iconV2: 'managementApp',
                       children: [
+                        {
+                          children: [
+                            {
+                              id: 'monitoring',
+                              link: 'monitoring',
+                            },
+                          ],
+                          id: 'monitoring',
+                          sideNavVersion: 'v2',
+                          title: '',
+                        },
                         {
                           children: [
                             { link: 'management:ingest_pipelines' },
@@ -440,8 +460,8 @@ export const getNavigationTreeDefinition = ({
                         },
                         {
                           children: [
+                            { link: 'management:triggersActionsAlerts' },
                             { link: 'management:triggersActions' },
-                            { link: 'management:cases' },
                             { link: 'management:triggersActionsConnectors' },
                             { link: 'management:reporting' },
                             { link: 'management:jobsListLink' },
@@ -462,6 +482,8 @@ export const getNavigationTreeDefinition = ({
                               link: 'searchInferenceEndpoints:inferenceEndpoints',
                               sideNavVersion: 'v2',
                             },
+                            { link: 'management:anomaly_detection' },
+                            { link: 'management:analytics' },
                           ],
                           title: i18n.translate(
                             'xpack.enterpriseSearch.searchNav.management.machineLearning',
@@ -469,6 +491,16 @@ export const getNavigationTreeDefinition = ({
                               defaultMessage: 'Machine Learning',
                             }
                           ),
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
+                            defaultMessage: 'AI',
+                          }),
                         },
                         {
                           children: [
@@ -488,7 +520,6 @@ export const getNavigationTreeDefinition = ({
                           children: [
                             { link: 'management:cross_cluster_replication' },
                             { link: 'management:remote_clusters' },
-                            { link: 'management:migrate_data' },
                           ],
                           title: i18n.translate(
                             'xpack.enterpriseSearch.searchNav.management.dataV2',
@@ -503,26 +534,6 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:dataViews' },
                             { link: 'management:filesManagement' },
                             { link: 'management:objects' },
-                            {
-                              getIsActive: ({ pathNameSerialized, prepend }) => {
-                                const someSubItemSelected = searchApps?.some((app) =>
-                                  app.items?.some((item) => item.isSelected)
-                                );
-
-                                if (someSubItemSelected) return false;
-
-                                return (
-                                  pathNameSerialized ===
-                                  prepend(
-                                    `/app/elasticsearch/applications${SEARCH_APPLICATIONS_PATH}`
-                                  )
-                                );
-                              },
-                              iconV2: 'searchProfilerApp' /* TODO: review icon */,
-                              link: 'enterpriseSearchApplications:searchApplications',
-                              renderAs: 'item',
-                              sideNavVersion: 'v2',
-                            },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
                             { link: 'management:spaces' },
@@ -534,16 +545,6 @@ export const getNavigationTreeDefinition = ({
                               defaultMessage: 'Kibana',
                             }
                           ),
-                        },
-                        {
-                          children: [
-                            { link: 'management:genAiSettings' },
-                            { link: 'management:agentBuilder' },
-                            { link: 'management:aiAssistantManagementSelection' },
-                          ],
-                          title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
-                            defaultMessage: 'AI',
-                          }),
                         },
                         {
                           children: [

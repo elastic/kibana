@@ -57,13 +57,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // navigate to a different section
           await solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'searchSynonyms:synonyms',
+            deepLinkId: 'searchPlayground',
           });
           await solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchSynonyms:synonyms',
+            deepLinkId: 'searchPlayground',
           });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Synonyms' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         } else {
           // check the Data > Indices section
           await solutionNavigation.sidenav.clickLink({

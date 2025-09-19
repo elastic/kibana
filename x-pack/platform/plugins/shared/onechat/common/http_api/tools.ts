@@ -53,7 +53,7 @@ export interface BulkDeleteToolResponse {
 }
 
 export interface ExecuteToolResponse {
-  result: ToolResult[];
+  results: ToolResult[];
 }
 
 export interface ResolveSearchSourcesRequest {
