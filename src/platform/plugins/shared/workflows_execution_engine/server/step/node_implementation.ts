@@ -20,6 +20,7 @@ export interface RunStepResult {
   error: any;
 }
 
+// TODO: To remove it and replace with AtomicGraphNode
 // Base step interface
 export interface BaseStep {
   name: string;
@@ -32,7 +33,7 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
-export interface StepImplementation {
+export interface NodeImplementation {
   run(): Promise<void>;
 }
 
@@ -40,7 +41,9 @@ export interface StepErrorCatcher {
   catchError(): Promise<void>;
 }
 
-export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
+  implements NodeImplementation
+{
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
@@ -69,23 +72,21 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
   }
 
   public async run(): Promise<void> {
-    const stepId = (this.step as any).id || this.getName();
-
-    await this.workflowExecutionRuntime.startStep(stepId);
+    await this.workflowExecutionRuntime.startStep();
 
     const input = this.getInput();
 
     try {
       const result = await this._run(input);
-      await this.workflowExecutionRuntime.setStepResult(result);
+      await this.workflowExecutionRuntime.setCurrentStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.workflowExecutionRuntime.setStepResult(result);
+      await this.workflowExecutionRuntime.setCurrentStepResult(result);
     } finally {
-      await this.workflowExecutionRuntime.finishStep(stepId);
+      await this.workflowExecutionRuntime.finishStep();
     }
 
-    this.workflowExecutionRuntime.goToNextStep();
+    this.workflowExecutionRuntime.navigateToNextNode();
   }
 
   // Subclasses implement this to execute the step logic
