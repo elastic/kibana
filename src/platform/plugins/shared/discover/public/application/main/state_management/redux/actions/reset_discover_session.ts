@@ -10,14 +10,14 @@
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
-import { selectHasUnsavedChanges, selectRecentlyClosedTabs, selectTab } from '../selectors';
+import { selectHasUnsavedChanges, selectTab } from '../selectors';
 import {
   fromSavedObjectTabToSavedSearch,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
-import { setTabs } from './tabs';
+import { updateTabs } from './tabs';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -77,15 +77,8 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       })
     );
 
-    const selectedTabId =
-      allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId)?.id ?? allTabs[0]?.id;
+    const selectedTab = allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId) ?? allTabs[0];
 
-    dispatch(
-      setTabs({
-        allTabs,
-        selectedTabId,
-        recentlyClosedTabs: selectRecentlyClosedTabs(state),
-      })
-    );
+    await dispatch(updateTabs({ items: allTabs, selectedItem: selectedTab }));
   }
 );
