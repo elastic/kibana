@@ -19,13 +19,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
-import React, { useEffect, useRef } from 'react';
+import { CodeEditor, monaco } from '@kbn/code-editor';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import type { monaco } from '@kbn/monaco';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
-import { useJsonValidation } from './hooks/use_json_validation';
 
 export function TestStepModal({
   initialStepContextMock,
@@ -42,32 +41,67 @@ export function TestStepModal({
   );
   const [isJsonValid, setIsJsonValid] = React.useState<boolean>(true);
   const modalTitleId = useGeneratedHtmlId();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const id = 'json-editor-schema';
 
-  const { validateJson, createSuggestionProvider, createHoverProvider } = useJsonValidation({
-    schema: initialStepContextMock.schema,
-  });
+  const jsonSchema = useMemo(() => {
+    return zodToJsonSchema(initialStepContextMock.schema, {
+      $refStrategy: 'none',
+    });
+  }, [initialStepContextMock.schema]);
+
+  const modelUri = useMemo(() => `inmemory://models/${id ?? 'doc'}.json`, [id]);
+
+  // 3) Hook Monaco on mount to register the schema for validation + suggestions
+  const mountedOnce = useRef(false);
+  const handleMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    if (mountedOnce.current) return;
+    mountedOnce.current = true;
+    const current = editor.getModel(); // may exist from value/defaultValue
+    const text = current?.getValue() ?? '{}';
+    // create the model with the URI you want
+    const uri = monaco.Uri.parse(`inmemory://schemas/${id ?? 'doc'}`);
+    const model = monaco.editor.createModel(text, 'json', uri);
+    // swap the editor to use this model
+    editor.setModel(model);
+
+    monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
+      validate: true,
+      allowComments: false,
+      enableSchemaRequest: false,
+      schemas: [
+        {
+          uri: 'inmemory://schemas/step-context', // schema URI (any unique string)
+          fileMatch: [modelUri], // bind **only** this editor model
+          schema: jsonSchema as any,
+        },
+      ],
+    });
+
+    // Optional: seed example if empty
+    if (!editor.getValue()?.trim()) {
+      editor.setValue(
+        [
+          '{',
+          '  "$schema": "inmemory://schemas/' + (id ?? 'doc') + '",',
+          '  // Start typing — keys & enums will be suggested from your Zod schema',
+          '}',
+        ].join('\n')
+      );
+      editor.setPosition({ lineNumber: 3, column: 3 });
+    }
+  };
 
   useEffect(() => {
-    if (editorRef.current) {
-      const validation = validateJson(editorRef.current, inputsJson);
-      setIsJsonValid(validation.isValid);
+    try {
+      JSON.parse(inputsJson);
+      setIsJsonValid(true);
+    } catch (e) {
+      setIsJsonValid(false);
     }
-  }, [inputsJson, validateJson]);
-
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
-    // Trigger initial validation
-    const validation = validateJson(editor, inputsJson);
-    setIsJsonValid(validation.isValid);
-  };
+  }, [inputsJson]);
 
   const handleInputChange = (value: string) => {
     setInputsJson(value);
-    if (editorRef.current) {
-      const validation = validateJson(editorRef.current, value);
-      setIsJsonValid(validation.isValid);
-    }
   };
 
   const handleSubmit = () => {
@@ -84,67 +118,60 @@ export function TestStepModal({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup direction="row" gutterSize="l" css={styles.codeEditorWrapper}>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <CodeEditor
-                  languageId="json"
-                  value={inputsJson}
-                  width={1000}
-                  height={500}
-                  editorDidMount={handleEditorDidMount}
-                  onChange={handleInputChange}
-                  suggestionProvider={createSuggestionProvider()}
-                  hoverProvider={createHoverProvider()}
-                  dataTestSubj={'workflow-event-json-editor'}
-                  options={{
-                    language: 'json',
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    automaticLayout: true,
-                    lineNumbers: 'on',
-                    glyphMargin: true,
-                    tabSize: 2,
-                    lineNumbersMinChars: 2,
-                    insertSpaces: true,
-                    fontSize: 14,
-                    renderWhitespace: 'all',
-                    wordWrapColumn: 80,
-                    wrappingIndent: 'indent',
-                    theme: 'vs-light',
-                    quickSuggestions: {
-                      other: true,
-                      comments: false,
-                      strings: true,
-                    },
-                    formatOnType: true,
-                    // Keep Monaco widgets within the modal bounds and add offset
-                    fixedOverflowWidgets: true,
-                    // Additional positioning configuration
-                    hover: {
-                      delay: 300,
-                      sticky: true,
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={{ alignSelf: 'flex-end' }} grow={false}>
-                <EuiButton
-                  onClick={handleSubmit}
-                  disabled={!isJsonValid}
-                  color="success"
-                  iconType="play"
-                  size="s"
-                >
-                  <FormattedMessage
-                    id="workflows.testStepModal.submitRunBtn"
-                    defaultMessage="Run"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="l" css={styles.codeEditorWrapper}>
+          <EuiFlexItem grow={false}>
+            <CodeEditor
+              languageId="json"
+              value={inputsJson}
+              width={1000}
+              height={500}
+              editorDidMount={handleMount}
+              onChange={handleInputChange}
+              // suggestionProvider={createSuggestionProvider()}
+              // hoverProvider={createHoverProvider()}
+              dataTestSubj={'workflow-event-json-editor'}
+              options={{
+                language: 'json',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                automaticLayout: true,
+                lineNumbers: 'on',
+                glyphMargin: true,
+                tabSize: 2,
+                lineNumbersMinChars: 2,
+                insertSpaces: true,
+                fontSize: 14,
+                renderWhitespace: 'all',
+                wordWrapColumn: 80,
+                wrappingIndent: 'indent',
+                theme: 'vs-light',
+                quickSuggestions: {
+                  other: true,
+                  comments: false,
+                  strings: true,
+                },
+                formatOnType: true,
+                // Keep Monaco widgets within the modal bounds and add offset
+                fixedOverflowWidgets: true,
+                // Additional positioning configuration
+                hover: {
+                  delay: 300,
+                  sticky: true,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem css={{ alignSelf: 'flex-end' }} grow={false}>
+            <EuiButton
+              onClick={handleSubmit}
+              disabled={!isJsonValid}
+              color="success"
+              iconType="play"
+              size="s"
+            >
+              <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
@@ -156,6 +183,7 @@ const componentStyles = {
   codeEditorWrapper: ({ euiTheme }: UseEuiTheme) => css`
     height: 100%;
     overflow: auto;
+    position: relative;
 
     .monaco-editor .editor-widget {
       background-color: ${euiTheme.colors.mediumShade} !important;
