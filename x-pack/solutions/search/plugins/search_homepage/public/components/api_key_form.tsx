@@ -107,20 +107,6 @@ const ApiKeyFormContent = ({
           )}
         </EuiFlexItem>
       )}
-      {/* <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          size="s"
-          display="base"
-          color="text"
-          iconType="gear"
-          href={manageKeysLink}
-          target="_blank"
-          aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.manageApiKeys', {
-            defaultMessage: 'Manage API keys',
-          })}
-          data-test-subj="manageApiKeysButton"
-        />
-      </EuiFlexItem> */}
     </EuiFlexGroup>
   );
 };
