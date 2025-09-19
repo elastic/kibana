@@ -33,6 +33,9 @@ describe('DescendantsQuery', () => {
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
+    // Replace search methods with proper Jest mocks
+    (client.asCurrentUser.search as jest.Mock) = jest.fn();
+    (client.asInternalUser.search as jest.Mock) = jest.fn();
   });
 
   describe('query generation', () => {
@@ -46,11 +49,11 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
@@ -81,11 +84,11 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
@@ -116,20 +119,18 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
       // Verify that the search was called with process.name in the fields
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          fields: expect.arrayContaining([
-            { field: 'process.name' },
-          ]),
+          fields: expect.arrayContaining([{ field: 'process.name' }]),
         }),
         index: indexPatterns,
       });
@@ -146,11 +147,11 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
@@ -181,15 +182,15 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
-      const searchCall = client.asCurrentUser.search.mock.calls[0][0];
+      const searchCall = (client.asCurrentUser.search as jest.Mock).mock.calls[0][0];
       const filters = searchCall.body.query.bool.filter;
 
       // Verify required filters are present
@@ -214,11 +215,11 @@ describe('DescendantsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asInternalUser.search.mockResolvedValue({
+      (client.asInternalUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], 100);
 
@@ -266,11 +267,11 @@ describe('DescendantsQuery', () => {
         },
       ];
 
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: mockHits,
         },
-      } as any);
+      });
 
       const result = await query.search(client, ['parent1'], 100);
 

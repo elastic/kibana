@@ -23,6 +23,9 @@ describe('StatsQuery', () => {
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
+    // Replace search methods with proper Jest mocks
+    (client.asCurrentUser.search as jest.Mock) = jest.fn();
+    (client.asInternalUser.search as jest.Mock) = jest.fn();
   });
 
   describe('query generation', () => {
@@ -35,13 +38,13 @@ describe('StatsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         aggregations: {
           ids: {
             buckets: [],
           },
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], undefined, false);
 
@@ -72,13 +75,13 @@ describe('StatsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         aggregations: {
           ids: {
             buckets: [],
           },
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], undefined, false);
 
@@ -108,17 +111,17 @@ describe('StatsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         aggregations: {
           ids: {
             buckets: [],
           },
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], undefined, false);
 
-      const searchCall = client.asCurrentUser.search.mock.calls[0][0];
+      const searchCall = (client.asCurrentUser.search as jest.Mock).mock.calls[0][0];
       const filters = searchCall.body.query.bool.filter;
 
       // Verify that agent.id filter is not present
@@ -142,13 +145,13 @@ describe('StatsQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asInternalUser.search.mockResolvedValue({
+      (client.asInternalUser.search as jest.Mock).mockResolvedValue({
         aggregations: {
           ids: {
             buckets: [],
           },
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id'], undefined, false);
 
@@ -204,7 +207,7 @@ describe('StatsQuery', () => {
         },
       };
 
-      client.asCurrentUser.search.mockResolvedValue(mockResponse as any);
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await query.search(client, ['node1'], undefined, false);
 

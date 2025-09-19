@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { BaseResolverQuery } from './base';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 
@@ -47,7 +46,8 @@ describe('BaseResolverQuery', () => {
         shouldExcludeColdAndFrozenTiers: false,
       });
 
-      const processNameField = query.resolverFields.find(
+      const processNameField = query.resolverFields?.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (field: any) => field.field === 'process.name'
       );
       expect(processNameField).toBeUndefined();

@@ -23,6 +23,9 @@ describe('LifecycleQuery', () => {
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
+    // Replace search methods with proper Jest mocks
+    (client.asCurrentUser.search as jest.Mock) = jest.fn();
+    (client.asInternalUser.search as jest.Mock) = jest.fn();
   });
 
   describe('query generation', () => {
@@ -36,11 +39,11 @@ describe('LifecycleQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id']);
 
@@ -72,11 +75,11 @@ describe('LifecycleQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id']);
 
@@ -107,15 +110,15 @@ describe('LifecycleQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id']);
 
-      const searchCall = client.asCurrentUser.search.mock.calls[0][0];
+      const searchCall = (client.asCurrentUser.search as jest.Mock).mock.calls[0][0];
       const filters = searchCall.body.query.bool.filter;
 
       // Verify required filters are present
@@ -137,11 +140,11 @@ describe('LifecycleQuery', () => {
       });
 
       // Mock the Elasticsearch response
-      client.asInternalUser.search.mockResolvedValue({
+      (client.asInternalUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [],
         },
-      } as any);
+      });
 
       await query.search(client, ['test-node-id']);
 
@@ -183,11 +186,11 @@ describe('LifecycleQuery', () => {
         },
       ];
 
-      client.asCurrentUser.search.mockResolvedValue({
+      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: mockHits,
         },
-      } as any);
+      });
 
       const result = await query.search(client, ['node1']);
 
