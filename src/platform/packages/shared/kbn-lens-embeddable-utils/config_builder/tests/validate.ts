@@ -30,25 +30,25 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
 
   const newApiConfig = builder.toAPIFormat(attributes);
 
-  // expect(() => {
-  //   schema.validate(newApiConfig);
-  // }).not.toThrow();
+  expect(() => {
+    schema.validate(newApiConfig);
+  }).not.toThrow();
 
-  // expect(() => {
-  //   lensApiStateSchema.validate(newApiConfig);
-  // }).not.toThrow();
+  expect(() => {
+    lensApiStateSchema.validate(newApiConfig);
+  }).not.toThrow();
 
   const newLensAttributes = builder.fromAPIFormat(newApiConfig);
 
   const newApiConfig2 = builder.toAPIFormat(newLensAttributes);
 
-  // expect(() => {
-  //   schema.validate(newApiConfig2);
-  // }).not.toThrow();
+  expect(() => {
+    schema.validate(newApiConfig2);
+  }).not.toThrow();
 
-  // expect(() => {
-  //   lensApiStateSchema.validate(newApiConfig2);
-  // }).not.toThrow();
+  expect(() => {
+    lensApiStateSchema.validate(newApiConfig2);
+  }).not.toThrow();
 
   expect(newApiConfig).toEqual(newApiConfig2);
 }
