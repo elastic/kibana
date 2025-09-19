@@ -36,6 +36,10 @@ export const Configuration = () => {
     return toolConfig!.getConfigurationComponent();
   }, [toolConfig]);
 
+  const editableToolTypes = useMemo(() => {
+    return getEditableToolTypes();
+  }, []);
+
   return (
     <ToolFormSection
       title={i18nMessages.configuration.documentation.title}
@@ -51,7 +55,7 @@ export const Configuration = () => {
           control={control}
           name="type"
           render={({ field: { ref, ...field } }) => (
-            <EuiSelect options={getEditableToolTypes()} {...field} inputRef={ref} />
+            <EuiSelect options={editableToolTypes} {...field} inputRef={ref} />
           )}
         />
       </EuiFormRow>

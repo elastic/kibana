@@ -7,19 +7,17 @@
 
 import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
-import { i18n } from '@kbn/i18n';
 
 import { transformBuiltInToolToFormData } from '../../../../../utils/transform_built_in_form_data';
 import { zodResolver } from '../../../../../utils/zod_resolver';
 import type { BuiltinToolTypeRegistryEntry } from '../common';
 import { commonToolFormDefaultValues } from '../common';
+import { labels } from '../../../../../utils/i18n';
 
 // This is to support displaying form of read-only built-in tools
 
 export const builtinToolRegistryEntry: BuiltinToolTypeRegistryEntry = {
-  label: i18n.translate('xpack.onechat.tools.builtinLabel', {
-    defaultMessage: 'Built-in',
-  }),
+  label: labels.tools.builtinLabel,
   getConfigurationComponent: () => {
     throw new Error("Built-in tools don't have a configuration component");
   },

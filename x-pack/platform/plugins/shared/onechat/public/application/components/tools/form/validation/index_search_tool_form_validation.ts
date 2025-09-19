@@ -16,12 +16,6 @@ const indexSearchI18nMessages = {
     requiredError: i18n.translate('xpack.onechat.tools.indexPattern.pattern.requiredError', {
       defaultMessage: 'Pattern is required.',
     }),
-    trailingCommaError: i18n.translate(
-      'xpack.onechat.tools.indexPattern.pattern.trailingCommaError',
-      {
-        defaultMessage: 'Pattern cannot end with a comma. Add another pattern or remove the comma.',
-      }
-    ),
     noMatchesError: i18n.translate('xpack.onechat.tools.indexPattern.pattern.noMatchesError', {
       defaultMessage: 'No matches found for this pattern.',
     }),
@@ -40,7 +34,6 @@ export const createIndexSearchFormValidationSchema = (toolsService: ToolsService
     pattern: z
       .string()
       .min(1, { message: indexSearchI18nMessages.pattern.requiredError })
-      .regex(/^.+[^,]$/, { message: indexSearchI18nMessages.pattern.trailingCommaError })
       .refine(
         async (pattern) => {
           if (!pattern || !pattern.trim()) {
