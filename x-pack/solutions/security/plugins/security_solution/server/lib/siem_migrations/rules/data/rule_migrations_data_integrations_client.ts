@@ -11,8 +11,9 @@ import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_
 
 const INTEGRATION_WEIGHTS = [
   { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
-  { ids: ['splunk', 'elastic_security'], weight: 0 }, // exclude Splunk and Elastic Security integrations since they don't make sense
 ];
+
+const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security']; // exclude Splunk and Elastic Security integrations since they don't make sense
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;
@@ -97,6 +98,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         query: {
           bool: {
             must: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
+            must_not: { ids: { values: EXCLUDED_INTEGRATIONS } },
             filter: { exists: { field: 'data_streams' } },
           },
         },
