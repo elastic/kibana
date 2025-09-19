@@ -7,9 +7,17 @@ id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-09-17
+date: 2025-09-19
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
+
+
+## @kbn/ai-tools
+
+| Deprecated API | Reference location(s) | Remove By |
+| ---------------|-----------|-----------|
+| <DocLink id="kibInferencePluginApi" section="def-server.EsqlDocumentBase.getSystemMessage" text="getSystemMessage"/> | [index.ts](https://github.com/elastic/kibana/tree/main/x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts#:~:text=getSystemMessage) | - |
+
 
 
 ## @kbn/alerting-types
@@ -138,7 +146,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.ESQLAst" text="ESQLAst"/> | [validation.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts#:~:text=ESQLAst), [validation.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts#:~:text=ESQLAst), [validation.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts#:~:text=ESQLAst), [context.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts#:~:text=ESQLAst), [context.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts#:~:text=ESQLAst), [context.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts#:~:text=ESQLAst), [context.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts#:~:text=ESQLAst) | - |
-| <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.parse" text="parse"/> | [autocomplete.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts#:~:text=parse), [autocomplete.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts#:~:text=parse), [resources_helpers.test.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.test.ts#:~:text=parse), [resources_helpers.test.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.test.ts#:~:text=parse) | - |
+| <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.parse" text="parse"/> | [autocomplete.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts#:~:text=parse), [autocomplete.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts#:~:text=parse), [get_query_for_fields.test.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/get_query_for_fields.test.ts#:~:text=parse), [get_query_for_fields.test.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/get_query_for_fields.test.ts#:~:text=parse) | - |
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.ParseResult.ast" text="ast"/> | [autocomplete.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts#:~:text=ast), [marker_node_removal.test.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/marker_node_removal.test.ts#:~:text=ast) | - |
 
 
@@ -148,6 +156,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibDataViewsPluginApi" section="def-common.AbstractDataView.title" text="title"/> | [breakdown.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts#:~:text=title) | - |
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectReference" text="SavedObjectReference"/> | [metric.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts#:~:text=SavedObjectReference), [metric.ts](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts#:~:text=SavedObjectReference) | - |
 
 
 

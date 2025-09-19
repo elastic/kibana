@@ -24,6 +24,7 @@ import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_g
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
+import type { MockZodError } from '../../../../common/lib/errors/invalid_yaml_schema';
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -363,13 +364,14 @@ export function useYamlValidation({
           }
 
           // Create a mock error object that matches our formatter's expected structure
-          const mockError = {
+          const mockError: MockZodError = {
+            message: marker.message,
             issues: [
               {
                 code: marker.message.includes('Value must be') ? 'invalid_literal' : 'unknown',
                 message: marker.message,
                 path: ['type'], // Assume it's a type field error for now
-                received: receivedValue,
+                received: receivedValue ?? '',
               },
             ],
           };
