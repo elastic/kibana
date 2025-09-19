@@ -1647,6 +1647,7 @@
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
     "@kbn/stdio-dev-helpers": "link:src/platform/packages/private/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:src/platform/packages/shared/kbn-storybook",
+    "@kbn/streams-ai-cli": "link:x-pack/platform/packages/shared/kbn-streams-ai-cli",
     "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
     "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
