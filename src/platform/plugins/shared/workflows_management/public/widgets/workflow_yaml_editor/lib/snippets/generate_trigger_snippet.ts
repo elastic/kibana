@@ -10,11 +10,13 @@
 /**
  * Generate a snippet template for trigger types with appropriate parameters
  */
+// TODO: better interface for this function
 export function generateTriggerSnippet(
   triggerType: string,
-  shouldBeQuoted: boolean,
+  shouldBeQuoted: boolean, // FIX: why we might need quoted type?
   full: boolean = false,
-  indentLevel: number = 0
+  indentLevel: number = 0,
+  monacoSuggestionFormat: boolean = true
 ): string {
   const quotedType = shouldBeQuoted ? `"${triggerType}"` : triggerType;
   let prepend = '';
@@ -29,6 +31,9 @@ export function generateTriggerSnippet(
       return `${prepend}${quotedType}`;
 
     case 'scheduled':
+      if (!monacoSuggestionFormat) {
+        return `${prepend}${quotedType}\n  with:\n    every: "5"\n    unit: minute`;
+      }
       return `${prepend}${quotedType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
 
     case 'manual':

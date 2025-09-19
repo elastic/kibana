@@ -24,12 +24,12 @@ export function insertTriggerSnippet(
   yamlDocument: Document,
   triggerType: string
 ) {
-  const triggerSnippet = generateTriggerSnippet(triggerType, false, true);
+  const triggerSnippet = generateTriggerSnippet(triggerType, false, true, 0, false);
   // find triggers: line number and column number
   const triggerNodes = getTriggerNodes(yamlDocument);
   const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);
   let prepend = '';
-  let range = new monaco.Range(1, 1, 1, 1);
+  let insertAtLineNumber = 1;
   let indentLevel = 0;
   if (triggerNode) {
     // do not override existing trigger
@@ -42,12 +42,7 @@ export function insertTriggerSnippet(
     );
     if (lastTriggerRange) {
       // add a newline after the last trigger
-      range = new monaco.Range(
-        lastTriggerRange.endLineNumber + 1,
-        1,
-        lastTriggerRange.endLineNumber + 1,
-        1
-      );
+      insertAtLineNumber = lastTriggerRange.endLineNumber;
       indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
     }
   } else {
@@ -57,7 +52,7 @@ export function insertTriggerSnippet(
     null,
     [
       {
-        range,
+        range: new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, 1),
         text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
       },
     ],
