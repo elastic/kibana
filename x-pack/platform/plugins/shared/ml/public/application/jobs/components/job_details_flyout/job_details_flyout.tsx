@@ -106,7 +106,7 @@ export const JobDetailsFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={openJobsList}>
               <FormattedMessage
-                id="xpack.ml.jobDetailsFlyout.manageJobsButton"
+                id="xpack.ml.overview.anomalyDetection.manageJobsButton"
                 defaultMessage="Manage jobs"
               />
             </EuiButtonEmpty>
