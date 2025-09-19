@@ -22,7 +22,7 @@ describe('HeadersField', () => {
   it('renders one default header row', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
 
@@ -36,7 +36,7 @@ describe('HeadersField', () => {
   it('renders a new header when clicking on add button', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
     const addBtn = await screen.findByTestId('webhookAddHeaderButton');
@@ -50,7 +50,7 @@ describe('HeadersField', () => {
   it('removes header row when clicking on remove button', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
 
@@ -70,7 +70,7 @@ describe('HeadersField', () => {
   it('renders config/secret options when clicking on the select type button', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
     const typeSelector = await screen.findByTestId('webhookHeaderTypeSelect');
@@ -83,7 +83,7 @@ describe('HeadersField', () => {
   it('switches value field to password when selection secret type', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
 
@@ -97,7 +97,7 @@ describe('HeadersField', () => {
   it('renders the encrypted headers badge when secret headers are present', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>
-        <HeadersFields readOnly={false} />
+        <HeadersFields maxHeaders={20} readOnly={false} />
       </AuthFormTestProvider>
     );
 
@@ -106,6 +106,21 @@ describe('HeadersField', () => {
     await userEvent.click(await screen.findByTestId('option-secret'), { pointerEventsCheck: 0 });
 
     expect(await screen.findByTestId('encryptedHeadersBadge')).toBeInTheDocument();
+  });
+
+  it('does not render the add header button if the max number of headers is reached', async () => {
+    render(
+      <AuthFormTestProvider onSubmit={onSubmit}>
+        <HeadersFields maxHeaders={4} readOnly={false} />
+      </AuthFormTestProvider>
+    );
+    const addBtn = await screen.findByTestId('webhookAddHeaderButton');
+    await userEvent.click(addBtn);
+    await userEvent.click(addBtn);
+    await userEvent.click(addBtn);
+
+    expect(screen.queryByTestId('webhookAddHeaderButton')).not.toBeInTheDocument();
+    expect(screen.getByText('Maximum number of 4 custom fields reached.')).toBeInTheDocument();
   });
 
   describe('validation', () => {
@@ -117,7 +132,7 @@ describe('HeadersField', () => {
       };
       render(
         <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
-          <HeadersFields readOnly={false} />
+          <HeadersFields maxHeaders={3} readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -142,7 +157,7 @@ describe('HeadersField', () => {
       };
       render(
         <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
-          <HeadersFields readOnly={false} />
+          <HeadersFields maxHeaders={20} readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -165,7 +180,7 @@ describe('HeadersField', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testData} onSubmit={onSubmit}>
-          <HeadersFields readOnly={false} />
+          <HeadersFields maxHeaders={20} readOnly={false} />
         </AuthFormTestProvider>
       );
 

@@ -34,10 +34,8 @@ const { emptyField } = fieldValidators;
 
 interface Props {
   readOnly: boolean;
+  maxHeaders: number;
 }
-
-// this should be moved somewhere
-const MAX_HEADERS = 20;
 
 const headerTypeOptions = [
   {
@@ -70,7 +68,7 @@ const headerTypeOptions = [
   },
 ];
 
-export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
+export const HeadersFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -82,7 +80,7 @@ export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
 
       <UseArray path="__internal__.headers" initialNumberOfItems={1}>
         {({ addItem, items, removeItem }) => {
-          const limitOfHeaderExceeded = items.length >= MAX_HEADERS;
+          const limitOfHeaderExceeded = items.length >= maxHeaders;
 
           return (
             <>
@@ -105,7 +103,7 @@ export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
 
               {limitOfHeaderExceeded && (
                 <EuiText size="s" color="subdued" style={{ marginTop: 8 }}>
-                  {i18n.MAX_HEADERS_LIMIT(MAX_HEADERS)}
+                  {i18n.MAX_HEADERS_LIMIT(maxHeaders)}
                 </EuiText>
               )}
               <EuiSpacer size="s" />

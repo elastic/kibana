@@ -22,3 +22,5 @@ export enum WebhookMethods {
   PUT = 'put',
   GET = 'get',
 }
+
+export const MAX_HEADERS: number = 20;

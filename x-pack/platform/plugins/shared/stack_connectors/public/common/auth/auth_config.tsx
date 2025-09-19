@@ -23,7 +23,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeadersFields } from './headers_fields';
@@ -147,7 +147,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         }}
       />
 
-      {hasHeaders && <HeadersFields readOnly={readOnly} />}
+      {hasHeaders && <HeadersFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}
 
       <EuiSpacer size="m" />
       <UseField
