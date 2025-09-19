@@ -48,7 +48,7 @@ describe('useCasesFeatures', () => {
         pushToServiceAuthorized: false,
         observablesAuthorized: false,
         isObservablesFeatureEnabled: true,
-        isExtractObservablesEnabled: true,
+        isExtractObservablesEnabled: false,
         connectorsAuthorized: false,
       });
     }
@@ -61,8 +61,8 @@ describe('useCasesFeatures', () => {
     [false, false, { enabled: false, autoExtract: true }],
     [false, false, { enabled: false, autoExtract: false }],
     [false, false, { enabled: false }],
-    // the default are observables is enabled and autoExtract is true
-    [true, true, { enabled: true }],
+    // if observables is enabled and autoExtract is by defaultfalse
+    [true, false, { enabled: true }],
   ];
 
   it.each(observableTests)(
@@ -105,7 +105,7 @@ describe('useCasesFeatures', () => {
       pushToServiceAuthorized: false,
       observablesAuthorized: false,
       isObservablesFeatureEnabled: true,
-      isExtractObservablesEnabled: true,
+      isExtractObservablesEnabled: false,
       connectorsAuthorized: false,
     });
   });

@@ -18,7 +18,7 @@ import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { NO_ATTACHMENTS_ADDED } from '../translations';
-import { bulkPostObservables } from '../../../containers/api';
+import { useBulkPostObservables } from '../../../containers/use_bulk_post_observables';
 import type { ObservablePost } from '../../../../common/types/api';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
@@ -61,6 +61,7 @@ export const useCasesAddToExistingCaseModal = ({
   const { appId } = useApplication();
   const casesToasts = useCasesToast();
   const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: bulkPostObservables } = useBulkPostObservables();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
 
   const closeModal = useCallback(() => {
@@ -109,7 +110,7 @@ export const useCasesAddToExistingCaseModal = ({
           attachments,
         });
 
-        await bulkPostObservables({ observables }, theCase.id);
+        await bulkPostObservables({ caseId: theCase.id, observables });
 
         onSuccess?.(theCase);
 
@@ -130,6 +131,7 @@ export const useCasesAddToExistingCaseModal = ({
       casesToasts,
       closeModal,
       createAttachments,
+      bulkPostObservables,
       openCreateNewCaseFlyout,
       successToaster?.title,
       successToaster?.content,

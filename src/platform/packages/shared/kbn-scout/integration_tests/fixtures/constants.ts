@@ -35,6 +35,7 @@ export const createCasePayload: CreateCaseParams = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   owner: '',
   customFields: [],

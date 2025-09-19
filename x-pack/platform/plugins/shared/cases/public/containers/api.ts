@@ -701,14 +701,13 @@ export const deleteObservable = async (
 
 export const bulkPostObservables = async (
   request: BulkAddObservablesRequest,
-  caseId: string,
   signal?: AbortSignal
 ): Promise<CaseUI> => {
   const response = await KibanaServices.get().http.fetch<Case>(
-    getBulkCreateObservablesUrl(caseId),
+    getBulkCreateObservablesUrl(request.caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ observables: request.observables }),
+      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
       signal,
     }
   );

@@ -30,6 +30,7 @@ export const UpdateObservableRequestRt = rt.strict({
 });
 
 export const BulkAddObservablesRequestRt = rt.strict({
+  caseId: rt.string,
   observables: rt.array(ObservablePostRt),
 });
 

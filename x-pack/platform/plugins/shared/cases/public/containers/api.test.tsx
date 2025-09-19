@@ -1320,6 +1320,7 @@ describe('Cases API', () => {
     it('should be called with correct check url, method, signal', async () => {
       await bulkPostObservables(
         {
+          caseId: mockCase.id,
           observables: [
             {
               typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
@@ -1328,7 +1329,6 @@ describe('Cases API', () => {
             },
           ],
         },
-        mockCase.id,
         abortCtrl.signal
       );
 
@@ -1337,9 +1337,10 @@ describe('Cases API', () => {
         {
           method: 'POST',
           body: JSON.stringify({
+            caseId: mockCase.id,
             observables: [
               {
-                typeKey: '18b62f19-8c60-415e-8a08-70  6d1078c556',
+                typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
                 value: 'test value',
                 description: '',
               },
@@ -1353,6 +1354,7 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await bulkPostObservables(
         {
+          caseId: mockCase.id,
           observables: [
             {
               typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
@@ -1361,7 +1363,6 @@ describe('Cases API', () => {
             },
           ],
         },
-        mockCase.id,
         abortCtrl.signal
       );
       expect(resp).toEqual(basicCase);

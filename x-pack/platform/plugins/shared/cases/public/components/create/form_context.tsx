@@ -21,7 +21,7 @@ import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_ca
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
-import { bulkPostObservables } from '../../containers/api';
+import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 
 interface Props {
   afterCaseCreated?: (
@@ -51,6 +51,7 @@ export const FormContext: React.FC<Props> = ({
   const { data: connectors = [] } = useGetSupportedActionConnectors();
   const { mutateAsync: postCase } = usePostCase();
   const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: bulkPostObservables } = useBulkPostObservables();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
@@ -74,7 +75,7 @@ export const FormContext: React.FC<Props> = ({
 
         if (theCase && Array.isArray(observables) && observables.length > 0) {
           if (data.settings.extractObservables) {
-            await bulkPostObservables({ observables }, theCase.id);
+            await bulkPostObservables({ caseId: theCase.id, observables });
           }
         }
 
@@ -104,6 +105,7 @@ export const FormContext: React.FC<Props> = ({
       createAttachments,
       pushCaseToExternalService,
       observables,
+      bulkPostObservables,
     ]
   );
 

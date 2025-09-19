@@ -59,7 +59,9 @@ const defaultObservableTypes = [
   },
   {
     label: i18n.FILE_HASH,
-    value: HASH_PARENTS.map((parent) => HASH_FIELDS.map((field) => `${parent}.hash.${field}`)),
+    value: HASH_PARENTS.map((parent) =>
+      HASH_FIELDS.map((field) => `${parent}.hash.${field}`)
+    ).flat(),
   },
 ];
 

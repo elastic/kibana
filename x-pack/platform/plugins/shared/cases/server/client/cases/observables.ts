@@ -246,7 +246,6 @@ export const deleteObservable = async (
 };
 
 export const bulkAddObservables = async (
-  caseId: string,
   params: BulkAddObservablesRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
@@ -268,7 +267,7 @@ export const bulkAddObservables = async (
 
   try {
     const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
-    const retrievedCase = await caseService.getCase({ id: caseId });
+    const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
     await Promise.all(
@@ -284,7 +283,7 @@ export const bulkAddObservables = async (
     const updatedObservables = [...currentObservables];
 
     paramArgs.observables.forEach((observable) => {
-      const isExistingObservable = currentObservables.some((obs) => obs.value === observable.value);
+      const isExistingObservable = updatedObservables.some((obs) => obs.value === observable.value);
       if (!isExistingObservable) {
         updatedObservables.push({
           ...observable,

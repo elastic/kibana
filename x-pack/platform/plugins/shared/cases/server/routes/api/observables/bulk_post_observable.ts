@@ -36,7 +36,7 @@ export const bulkPostObservableRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const { observables } = request.body as observableApiV1.BulkAddObservablesRequest;
-      const theCase = await casesClient.cases.bulkAddObservables(caseId, { observables });
+      const theCase = await casesClient.cases.bulkAddObservables({ caseId, observables });
 
       return response.ok({
         body: theCase,

@@ -62,9 +62,11 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
+jest.mock('../../containers/use_bulk_post_observables');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -85,6 +87,7 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -210,6 +213,7 @@ describe('Create case', () => {
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+    useBulkPostObservablesMock.mockImplementation(() => ({ mutateAsync: bulkPostObservables }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
@@ -424,7 +428,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false, extractObservables: true },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
@@ -461,7 +465,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false, extractObservables: true },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });

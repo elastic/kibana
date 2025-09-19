@@ -740,7 +740,7 @@ describe('CaseUserActionService', () => {
                 },
                 type: 'settings',
                 owner: 'securitySolution',
-                payload: { settings: { syncAlerts: false, extractObservables: true } },
+                payload: { settings: { syncAlerts: false, extractObservables: false } },
               },
               references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
               type: 'cases-user-actions',

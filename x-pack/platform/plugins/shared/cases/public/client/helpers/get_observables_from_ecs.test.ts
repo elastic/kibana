@@ -56,12 +56,12 @@ describe('getObservablesFromEcsData', () => {
         },
         file: {
           hash: {
-            sha256: ['sha256'],
+            sha256: ['sha256hash', 'sha256hash2'],
           },
         },
         dns: {
           question: {
-            name: ['example.com'],
+            name: ['example.com', 'example.org'],
           },
         },
       })
@@ -83,12 +83,12 @@ describe('getObservablesFromEcsData', () => {
       },
       {
         typeKey: 'observable-type-file-hash',
-        value: 'ssdeephash',
+        value: 'sha256hash',
         description: 'Auto extracted observable',
       },
       {
         typeKey: 'observable-type-file-hash',
-        value: 'ssdeephash2',
+        value: 'sha256hash2',
         description: 'Auto extracted observable',
       },
       {

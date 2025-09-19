@@ -25,6 +25,7 @@ const caseBeforeUpdate = {
   ],
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
 } as CaseUI;
 

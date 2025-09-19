@@ -103,7 +103,7 @@ describe('user action migrations', () => {
           title: 'old case',
           status: 'open',
           owner: 'securitySolution',
-          settings: { syncAlerts: true },
+          settings: { syncAlerts: true, extractObservables: false },
         },
         type: 'create_case',
       };
@@ -295,6 +295,7 @@ describe('user action migrations', () => {
               title: 'old case',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               status: 'in-progress',
               owner: 'testOwner',
@@ -401,5 +402,57 @@ describe('user action migrations', () => {
     });
 
     describe('failures', () => {});
+  });
+
+  describe('9.1.0 and 8.x', () => {
+    let context: jest.Mocked<SavedObjectMigrationContext>;
+
+    beforeEach(() => {
+      context = migrationMocks.createContext();
+    });
+
+    describe('payloadMigration', () => {
+      const expectedCreateCaseUserAction = {
+        action: 'create',
+        created_at: '2022-01-09T22:00:00.000Z',
+        created_by: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic User',
+          username: 'elastic',
+        },
+        owner: 'securitySolution',
+        payload: {
+          connector: {
+            fields: null,
+            name: 'none',
+            type: '.none',
+          },
+          description: 'a desc',
+          tags: ['some tags'],
+          title: 'old case',
+          status: 'open',
+          owner: 'securitySolution',
+          settings: { syncAlerts: true, extractObservables: false },
+        },
+        type: 'create_case',
+      };
+
+      it('adds the extract observables settings in the payload on a create case user action if it is missing', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['description', 'title', 'tags', 'settings'],
+          new_value: {
+            title: 'old case',
+            description: 'a desc',
+            tags: ['some tags'],
+            settings: { syncAlerts: true },
+          },
+          old_value: null,
+        });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual(expectedCreateCaseUserAction);
+      });
+    });
   });
 });

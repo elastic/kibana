@@ -5,68 +5,72 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useBulkPostObservables } from './use_bulk_post_observables';
 import { mockCase, mockObservables } from './mock';
 import { useCasesToast } from '../common/use_cases_toast';
 import * as api from './api';
-import { casesQueriesKeys } from './constants';
-import { TestProviders, createTestQueryClient } from '../common/mock';
+import { MAX_OBSERVABLES_PER_CASE } from '../../common/constants';
+import type { ObservablePost } from '../../common/types/api';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 jest.mock('../common/use_cases_toast');
 
 const showErrorToast = jest.fn();
-const showSuccessToast = jest.fn();
+const showInfoToast = jest.fn();
 
 describe('useBulkPostObservables', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showInfoToast });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'bulkPostObservables');
-    const { result } = renderHook(() => useBulkPostObservables(mockCase.id), {
+    const { result } = renderHook(() => useBulkPostObservables(), {
       wrapper: TestProviders,
     });
 
     act(() => {
-      result.current.mutate({ observables: mockObservables });
+      result.current.mutate({ caseId: mockCase.id, observables: mockObservables });
     });
 
     await waitFor(() =>
-      expect(spy).toHaveBeenCalledWith({ observables: mockObservables }, mockCase.id)
+      expect(spy).toHaveBeenCalledWith({ caseId: mockCase.id, observables: mockObservables })
     );
   });
 
-  it('invalidates the queries correctly', async () => {
-    const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
-    const { result } = renderHook(() => useBulkPostObservables(mockCase.id), {
-      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
+  it('shows an info toast when the api call is successful and the maximum number of observables is reached', async () => {
+    const { result } = renderHook(() => useBulkPostObservables(), {
+      wrapper: TestProviders,
     });
-
+    const maxObservables: ObservablePost[] = [];
+    for (let i = 0; i < MAX_OBSERVABLES_PER_CASE; i++) {
+      maxObservables.push({
+        typeKey: 'observable-type-ipv4',
+        value: `192.168.1.${i}`,
+        description: 'test',
+      });
+    }
     act(() => {
-      result.current.mutate({ observables: mockObservables });
+      result.current.mutate({ caseId: mockCase.id, observables: maxObservables });
     });
 
-    await waitFor(() => expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView()));
+    await waitFor(() => expect(showInfoToast).toHaveBeenCalled());
   });
 
-  it('shows a success toaster when the api call is successful', async () => {
-    const { result } = renderHook(() => useBulkPostObservables(mockCase.id), {
+  it('does not show an info toast when the api call is successful and the maximum number of observables is not reached', async () => {
+    const { result } = renderHook(() => useBulkPostObservables(), {
       wrapper: TestProviders,
     });
 
     act(() => {
-      result.current.mutate({ observables: mockObservables });
+      result.current.mutate({ caseId: mockCase.id, observables: mockObservables });
     });
 
-    await waitFor(() => expect(showSuccessToast).toHaveBeenCalled());
+    await waitFor(() => expect(showInfoToast).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -74,12 +78,12 @@ describe('useBulkPostObservables', () => {
       .spyOn(api, 'bulkPostObservables')
       .mockRejectedValue(new Error('useBulkPostObservables: Test error'));
 
-    const { result } = renderHook(() => useBulkPostObservables(mockCase.id), {
+    const { result } = renderHook(() => useBulkPostObservables(), {
       wrapper: TestProviders,
     });
 
     act(() => {
-      result.current.mutate({ observables: mockObservables });
+      result.current.mutate({ caseId: mockCase.id, observables: mockObservables });
     });
 
     await waitFor(() => expect(showErrorToast).toHaveBeenCalled());

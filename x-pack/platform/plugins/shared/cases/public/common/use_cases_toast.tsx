@@ -30,11 +30,10 @@ import {
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
-import { OWNER_INFO, MAX_OBSERVABLES_PER_CASE } from '../../common/constants';
+import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 import { TruncatedText } from '../components/truncated_text';
 import type { ObservablePost } from '../../common/types/api';
-import { OBSERVABLE_MAX_REACHED } from '../containers/translations';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -77,12 +76,10 @@ function getToastContent({
   theCase,
   content,
   attachments,
-  observables,
 }: {
   theCase: CaseUI;
   content?: string;
   attachments?: CaseAttachmentsWithoutOwner;
-  observables?: ObservablePost[];
 }): string | undefined {
   if (content !== undefined) {
     return content;
@@ -103,13 +100,6 @@ function getToastContent({
     }
   }
 
-  if (
-    observables !== undefined &&
-    observables.length > 0 &&
-    theCase.observables.length === MAX_OBSERVABLES_PER_CASE
-  ) {
-    toastContent = toastContent + OBSERVABLE_MAX_REACHED(MAX_OBSERVABLES_PER_CASE);
-  }
   return toastContent;
 }
 
@@ -173,7 +163,7 @@ export const useCasesToast = () => {
         };
 
         const renderTitle = getToastTitle({ theCase, title, attachments });
-        const renderContent = getToastContent({ theCase, content, attachments, observables });
+        const renderContent = getToastContent({ theCase, content, attachments });
 
         return toasts.addSuccess({
           color: 'success',
@@ -196,8 +186,8 @@ export const useCasesToast = () => {
       showSuccessToast: (title: string) => {
         toasts.addSuccess({ title, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string) => {
-        toasts.addDanger({ title, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: string) => {
+        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
       },
       showInfoToast: (title: string, text?: string) => {
         toasts.addInfo({

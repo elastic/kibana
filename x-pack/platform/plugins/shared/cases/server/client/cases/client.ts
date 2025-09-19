@@ -137,7 +137,7 @@ export interface CasesSubClient {
   /**
    * Bulk adds observables to the case
    */
-  bulkAddObservables(caseId: string, params: BulkAddObservablesRequest): Promise<Case>;
+  bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
 }
 
 /**
@@ -174,8 +174,8 @@ export const createCasesSubClient = (
       updateObservable(caseId, observableId, params, clientArgs, casesClient),
     deleteObservable: (caseId: string, observableId: string) =>
       deleteObservable(caseId, observableId, clientArgs, casesClient),
-    bulkAddObservables: (caseId: string, params: BulkAddObservablesRequest) =>
-      bulkAddObservables(caseId, params, clientArgs, casesClient),
+    bulkAddObservables: (params: BulkAddObservablesRequest) =>
+      bulkAddObservables(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);
