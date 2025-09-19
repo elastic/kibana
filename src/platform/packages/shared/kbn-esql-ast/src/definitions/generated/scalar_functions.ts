@@ -91,6 +91,7 @@ const absDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW number = -1.0\n| EVAL abs_number = ABS(number)',
@@ -159,6 +160,7 @@ const acosDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=.9\n| EVAL acos=ACOS(a)'],
 };
@@ -225,6 +227,7 @@ const asinDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=.9\n| EVAL asin=ASIN(a)'],
 };
@@ -291,6 +294,7 @@ const atanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=12.9\n| EVAL atan=ATAN(a)'],
 };
@@ -557,6 +561,7 @@ const atan2Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)'],
 };
@@ -602,6 +607,7 @@ const bitLengthDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| WHERE country == "India"\n| KEEP city\n| EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)',
@@ -649,6 +655,7 @@ const byteLengthDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| WHERE country == "India"\n| KEEP city\n| EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)',
@@ -717,6 +724,7 @@ const cbrtDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW d = 1000.0\n| EVAL c = CBRT(d)'],
 };
@@ -782,6 +790,7 @@ const ceilDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL a=CEIL(a)'],
 };
@@ -840,6 +849,7 @@ const cidrMatchDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM hosts\n| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")\n| KEEP card, host, ip0, ip1',
@@ -1179,6 +1189,7 @@ const coalesceDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
 };
@@ -1268,6 +1279,7 @@ const concatDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| KEEP first_name, last_name\n| EVAL fullname = CONCAT(first_name, " ", last_name)',
@@ -1356,6 +1368,7 @@ const containsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = "hello"\n| EVAL has_ll = CONTAINS(a, "ll")'],
 };
@@ -1517,6 +1530,7 @@ const copySignDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [],
 };
@@ -1582,6 +1596,7 @@ const cosDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL cos=COS(a)'],
 };
@@ -1647,6 +1662,7 @@ const coshDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL cosh=COSH(a)'],
 };
@@ -1846,6 +1862,7 @@ const dateDiffDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"),\n    date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")\n| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)',
@@ -1966,6 +1983,7 @@ const dateExtractDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")\n| EVAL year = DATE_EXTRACT("year", date)',
@@ -2074,6 +2092,7 @@ const dateFormatDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL hired = DATE_FORMAT("yyyy-MM-dd", hire_date)',
@@ -2162,6 +2181,7 @@ const dateParseDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW date_string = "2022-05-06"\n| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)'],
 };
@@ -2248,6 +2268,7 @@ const dateTruncDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL year_hired = DATE_TRUNC(1 year, hire_date)',
@@ -2297,8 +2318,254 @@ const dayNameDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW dt = to_datetime("1953-09-02T00:00:00.000Z")\n| EVAL weekday = DAY_NAME(dt);'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const decayDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'decay',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.decay', {
+    defaultMessage:
+      'Calculates a relevance score that decays based on the distance of a numeric, spatial or date type value from a target origin, using configurable decay functions.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'time_duration',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'time_duration',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'origin',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'scale',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.'}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.'}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+  ],
+  examples: [
+    'FROM employees\n| EVAL decay_result = decay(salary, 0, 100000, {"offset": 5, "decay": 0.5, "type": "linear"})\n| SORT decay_result DESC',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -2326,6 +2593,7 @@ const eDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW E()'],
 };
@@ -2412,6 +2680,7 @@ const endsWithDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_E = ENDS_WITH(last_name, "d")'],
 };
@@ -2477,6 +2746,7 @@ const expDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW d = 5.0\n| EVAL s = EXP(d)'],
 };
@@ -2542,6 +2812,7 @@ const floorDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL a=FLOOR(a)'],
 };
@@ -2587,6 +2858,7 @@ const fromBase64Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = "ZWxhc3RpYw=="\n| EVAL d = FROM_BASE64(a)'],
 };
@@ -2828,6 +3100,7 @@ const greatestDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)'],
 };
@@ -2914,6 +3187,7 @@ const hashDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM sample_data\n| WHERE message != "Connection error"\n| EVAL md5 = hash("md5", message), sha256 = hash("sha256", message)\n| KEEP message, md5, sha256',
@@ -3182,6 +3456,7 @@ const hypotDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = 3.0, b = 4.0\n| EVAL c = HYPOT(a, b)'],
 };
@@ -3227,6 +3502,7 @@ const ipPrefixDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW ip4 = to_ip("1.2.3.4"), ip6 = TO_IP("fe80::cae2:65ff:fece:feb9")\n| EVAL ip4_prefix = IP_PREFIX(ip4, 24, 0), ip6_prefix = IP_PREFIX(ip6, 0, 112);',
@@ -3239,7 +3515,7 @@ const knnDefinition: FunctionDefinition = {
   name: 'knn',
   description: i18n.translate('kbn-esql-ast.esql.definitions.knn', {
     defaultMessage:
-      'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors.',
+      'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors or semantic_text fields.',
   }),
   ignoreAsSuggestion: true,
   preview: true,
@@ -3255,9 +3531,10 @@ const knnDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
-    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0], 10)\n| sort _score desc, color asc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc, color asc',
   ],
 };
 
@@ -3537,6 +3814,7 @@ const leastDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)'],
 };
@@ -3593,6 +3871,7 @@ const leftDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| KEEP last_name\n| EVAL left = LEFT(last_name, 3)'],
 };
@@ -3638,6 +3917,7 @@ const lengthDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| WHERE country == "India"\n| KEEP city\n| EVAL fn_length = LENGTH(city)',
@@ -3806,6 +4086,7 @@ const locateDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = "hello"\n| EVAL a_ll = LOCATE(a, "ll")'],
 };
@@ -4112,6 +4393,7 @@ const logDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW base = 2.0, value = 8.0\n| EVAL s = LOG(base, value)',
@@ -4181,6 +4463,7 @@ const log10Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW d = 1000.0\n| EVAL s = LOG10(d)'],
 };
@@ -4226,6 +4509,7 @@ const ltrimDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = LTRIM(message)\n| EVAL color = LTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
@@ -5042,6 +5326,7 @@ const matchPhraseDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM books\n| WHERE MATCH_PHRASE(author, "William Faulkner")'],
 };
@@ -5087,6 +5372,7 @@ const md5Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM sample_data\n| WHERE message != "Connection error"\n| EVAL md5 = md5(message)\n| KEEP message, md5',
@@ -5134,6 +5420,7 @@ const monthNameDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW dt = to_datetime("1996-03-21T00:00:00.000Z")\n| EVAL monthName = MONTH_NAME(dt);',
@@ -5829,6 +6116,7 @@ const multiMatchDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM books\n| WHERE MULTI_MATCH("Faulkner", author, description)\n| KEEP book_no, author\n| SORT book_no\n| LIMIT 5',
@@ -6157,6 +6445,7 @@ const mvAppendDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| WHERE emp_no == 10039 OR emp_no == 10040\n| SORT emp_no\n| EVAL dates = MV_APPEND(birth_date, hire_date)\n| KEEP emp_no, birth_date, hire_date, dates',
@@ -6225,6 +6514,7 @@ const mvAvgDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=[3, 5, 1, 6]\n| EVAL avg_a = MV_AVG(a)'],
 };
@@ -6311,6 +6601,7 @@ const mvConcatDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a=["foo", "zoo", "bar"]\n| EVAL j = MV_CONCAT(a, ", ")',
@@ -6640,6 +6931,7 @@ const mvContainsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW set = ["a", "b", "c"], element = "a"\n| EVAL set_contains_element = mv_contains(set, element)',
@@ -6850,6 +7142,7 @@ const mvCountDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=["foo", "zoo", "bar"]\n| EVAL count_a = MV_COUNT(a)'],
 };
@@ -7055,6 +7348,7 @@ const mvDedupeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=["foo", "foo", "bar", "foo"]\n| EVAL dedupe_a = MV_DEDUPE(a)'],
 };
@@ -7261,6 +7555,7 @@ const mvFirstDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a="foo;bar;baz"\n| EVAL first_a = MV_FIRST(SPLIT(a, ";"))'],
 };
@@ -7467,6 +7762,7 @@ const mvLastDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a="foo;bar;baz"\n| EVAL last_a = MV_LAST(SPLIT(a, ";"))'],
 };
@@ -7603,6 +7899,7 @@ const mvMaxDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a=[3, 5, 1]\n| EVAL max_a = MV_MAX(a)',
@@ -7672,6 +7969,7 @@ const mvMedianDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a=[3, 5, 1]\n| EVAL median_a = MV_MEDIAN(a)',
@@ -7741,6 +8039,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW values = [0, 2, 5, 6]\n| EVAL median_absolute_deviation = MV_MEDIAN_ABSOLUTE_DEVIATION(values), median = MV_MEDIAN(values)',
@@ -7879,6 +8178,7 @@ const mvMinDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a=[2, 1]\n| EVAL min_a = MV_MIN(a)',
@@ -8043,6 +8343,7 @@ const mvPercentileDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW values = [5, 5, 10, 12, 5000]\n| EVAL p50 = MV_PERCENTILE(values, 50), median = MV_MEDIAN(values)',
@@ -8086,6 +8387,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]\n| EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)\n| KEEP sum',
@@ -8474,6 +8776,7 @@ const mvSliceDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'row a = [1, 2, 2, 3]\n| eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)',
@@ -8662,6 +8965,7 @@ const mvSortDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
 };
@@ -8728,6 +9032,7 @@ const mvSumDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)'],
 };
@@ -8974,6 +9279,7 @@ const mvZipDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW a = ["x", "y", "z"], b = ["1", "2"]\n| EVAL c = mv_zip(a, b, "-")\n| KEEP a, b, c',
@@ -9005,6 +9311,7 @@ const nowDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW current_date = NOW()', 'FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour'],
 };
@@ -9034,6 +9341,7 @@ const piDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW PI()'],
 };
@@ -9299,6 +9607,7 @@ const powDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW base = 2.0, exponent = 2\n| EVAL result = POW(base, exponent)',
@@ -9416,6 +9725,7 @@ const repeatDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3)'],
 };
@@ -9602,6 +9912,7 @@ const replaceDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW str = "Hello World"\n| EVAL str = REPLACE(str, "World", "Universe")\n| KEEP str'],
 };
@@ -9647,6 +9958,7 @@ const reverseDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);',
@@ -9706,6 +10018,7 @@ const rightDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| KEEP last_name\n| EVAL right = RIGHT(last_name, 3)'],
 };
@@ -9892,6 +10205,7 @@ const roundDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| KEEP first_name, last_name, height\n| EVAL height_ft = ROUND(height * 3.281, 1)',
@@ -10095,6 +10409,7 @@ const roundToDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| STATS COUNT(*) BY birth_window=ROUND_TO(\n    birth_date,\n    "1900-01-01T00:00:00Z"::DATETIME,\n    "1950-01-01T00:00:00Z"::DATETIME,\n    "1955-01-01T00:00:00Z"::DATETIME,\n    "1960-01-01T00:00:00Z"::DATETIME,\n    "1965-01-01T00:00:00Z"::DATETIME,\n    "1970-01-01T00:00:00Z"::DATETIME,\n    "1975-01-01T00:00:00Z"::DATETIME\n)\n| SORT birth_window ASC',
@@ -10142,6 +10457,7 @@ const rtrimDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = RTRIM(message)\n| EVAL color = RTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
@@ -10290,6 +10606,7 @@ const scalbDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['row x = 3.0, y = 10 | eval z = scalb(x, y)'],
 };
@@ -10327,6 +10644,7 @@ const scoreDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM books METADATA _score\n| WHERE match(title, "Return") AND match(author, "Tolkien")\n| EVAL first_score = score(match(title, "Return"))',
@@ -10374,6 +10692,7 @@ const sha1Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM sample_data\n| WHERE message != "Connection error"\n| EVAL sha1 = sha1(message)\n| KEEP message, sha1',
@@ -10421,6 +10740,7 @@ const sha256Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM sample_data\n| WHERE message != "Connection error"\n| EVAL sha256 = sha256(message)\n| KEEP message, sha256',
@@ -10489,6 +10809,7 @@ const signumDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW d = 100.0\n| EVAL s = SIGNUM(d)'],
 };
@@ -10554,6 +10875,7 @@ const sinDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL sin=SIN(a)'],
 };
@@ -10619,6 +10941,7 @@ const sinhDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL sinh=SINH(a)'],
 };
@@ -10654,6 +10977,7 @@ const spaceDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW message = CONCAT("Hello", SPACE(1), "World!");'],
 };
@@ -10739,6 +11063,7 @@ const splitDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW words="foo;bar;baz;qux;quux;corge"\n| EVAL word = SPLIT(words, ";")'],
 };
@@ -10805,6 +11130,7 @@ const sqrtDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW d = 100.0\n| EVAL s = SQRT(d)'],
 };
@@ -10951,6 +11277,7 @@ const stContainsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))\n| KEEP abbrev, airport, region, city, city_location',
@@ -11062,6 +11389,51 @@ const stDisjointDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
           type: 'geo_shape',
           optional: false,
         },
@@ -11088,6 +11460,51 @@ const stDisjointDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.EVAL,
@@ -11099,6 +11516,7 @@ const stDisjointDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))\n| KEEP abbrev, airport, region, city, city_location',
@@ -11157,6 +11575,7 @@ const stDistanceDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| WHERE abbrev == "CPH"\n| EVAL distance = ST_DISTANCE(location, city_location)\n| KEEP abbrev, name, location, city_location, distance',
@@ -11224,6 +11643,7 @@ const stEnvelopeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| KEEP abbrev, airport, envelope',
@@ -11238,7 +11658,6 @@ const stGeohashDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geohash` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use TO_STRING to convert the result to a string,\nTO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate\nthe `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geohash_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -11252,7 +11671,7 @@ const stGeohashDefinition: FunctionDefinition = {
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
+          optional: false,
         },
       ],
       returnType: 'geohash',
@@ -11267,7 +11686,7 @@ const stGeohashDefinition: FunctionDefinition = {
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
+          optional: false,
         },
         {
           name: 'bounds',
@@ -11288,6 +11707,7 @@ const stGeohashDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| EVAL geohash = ST_GEOHASH(location, 1)\n| STATS\n    count = COUNT(geohash),\n    centroid = ST_CENTROID_AGG(location)\n      BY geohash\n| WHERE count >= 10\n| EVAL geohashString = TO_STRING(geohash)\n| KEEP count, centroid, geohashString\n| SORT count DESC, geohashString ASC',
@@ -11302,7 +11722,6 @@ const stGeohexDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geohex`, the H3 cell-id, of the supplied geo_point at the specified precision.\nThe result is long encoded. Use TO_STRING to convert the result to a string,\nTO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate\nthe `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geohex_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -11354,6 +11773,7 @@ const stGeohexDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   license: 'platinum',
   examples: [
@@ -11369,7 +11789,6 @@ const stGeotileDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geotile` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use TO_STRING to convert the result to a string,\nTO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate\nthe `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geotile_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -11419,6 +11838,7 @@ const stGeotileDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| EVAL geotile = ST_GEOTILE(location, 2)\n| STATS\n    count = COUNT(geotile),\n    centroid = ST_CENTROID_AGG(location)\n      BY geotile\n| EVAL geotileString = TO_STRING(geotile)\n| SORT count DESC, geotileString ASC\n| KEEP count, centroid, geotileString',
@@ -11530,6 +11950,51 @@ const stIntersectsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
           type: 'geo_shape',
           optional: false,
         },
@@ -11556,6 +12021,51 @@ const stIntersectsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.EVAL,
@@ -11567,6 +12077,7 @@ const stIntersectsDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airports\n| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))',
@@ -11715,6 +12226,7 @@ const stWithinDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))\n| KEEP abbrev, airport, region, city, city_location',
@@ -11763,6 +12275,7 @@ const stXDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")\n| EVAL x =  ST_X(point), y = ST_Y(point)',
@@ -11831,6 +12344,7 @@ const stXmaxDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)\n| KEEP abbrev, airport, xmin, xmax, ymin, ymax',
@@ -11899,6 +12413,7 @@ const stXminDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)\n| KEEP abbrev, airport, xmin, xmax, ymin, ymax',
@@ -11947,6 +12462,7 @@ const stYDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")\n| EVAL x =  ST_X(point), y = ST_Y(point)',
@@ -12015,6 +12531,7 @@ const stYmaxDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)\n| KEEP abbrev, airport, xmin, xmax, ymin, ymax',
@@ -12083,6 +12600,7 @@ const stYminDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)\n| KEEP abbrev, airport, xmin, xmax, ymin, ymax',
@@ -12171,6 +12689,7 @@ const startsWithDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_S = STARTS_WITH(last_name, "B")'],
 };
@@ -12237,6 +12756,7 @@ const substringDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, 1, 3)',
@@ -12306,6 +12826,7 @@ const tanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL tan=TAN(a)'],
 };
@@ -12371,6 +12892,7 @@ const tanhDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=1.8\n| EVAL tanh=TANH(a)'],
 };
@@ -12400,6 +12922,7 @@ const tauDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW TAU()'],
 };
@@ -12487,6 +13010,7 @@ const termDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['FROM books\n| WHERE TERM(author, "gabriel")'],
 };
@@ -12511,6 +13035,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW x = 3892095203\n| EVAL agg_metric = TO_AGGREGATE_METRIC_DOUBLE(x)',
@@ -12559,6 +13084,7 @@ const toBase64Definition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a = "elastic"\n| EVAL e = TO_BASE64(a)'],
 };
@@ -12655,6 +13181,7 @@ const toBooleanDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW str = ["true", "TRuE", "false", "", "yes", "1"]\n| EVAL bool = TO_BOOLEAN(str)'],
 };
@@ -12711,6 +13238,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]\n| MV_EXPAND wkt\n| EVAL pt = TO_CARTESIANPOINT(wkt)',
@@ -12779,6 +13307,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]\n| MV_EXPAND wkt\n| EVAL geom = TO_CARTESIANSHAPE(wkt)',
@@ -12876,6 +13405,7 @@ const toDateNanosDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'FROM date_nanos\n| WHERE MV_MIN(nanos) < TO_DATE_NANOS("2023-10-23T12:27:28.948Z")\n    AND millis > "2000-01-01"\n| SORT nanos DESC',
@@ -12933,6 +13463,7 @@ const toDateperiodDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW x = "2024-01-01"::datetime\n| EVAL y = x + "3 DAYS"::date_period, z = x - TO_DATEPERIOD("3 days");',
@@ -13041,6 +13572,7 @@ const toDatetimeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]\n| EVAL datetime = TO_DATETIME(string)',
@@ -13109,8 +13641,36 @@ const toDegreesDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW rad = [1.57, 3.14, 4.71]\n| EVAL deg = TO_DEGREES(rad)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const toDenseVectorDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'to_dense_vector',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_dense_vector', {
+    defaultMessage:
+      'Converts a multi-valued input of numbers, or a hexadecimal string, to a dense_vector.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: false,
+  alias: undefined,
+  signatures: [],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+  ],
+  examples: ['row ints = [1, 2, 3]\n| eval vector = to_dense_vector(ints)\n| keep vector'],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -13245,6 +13805,7 @@ const toDoubleDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW str1 = "5.20128E11", str2 = "foo"\n| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)',
@@ -13257,9 +13818,8 @@ const toGeohashDefinition: FunctionDefinition = {
   name: 'to_geohash',
   description: i18n.translate('kbn-esql-ast.esql.definitions.to_geohash', {
     defaultMessage:
-      'Converts an input value to a `geohash` value.\nA string will only be successfully converted if it respects the\n`geohash` format.',
+      'Converts an input value to a `geohash` value.\nA string will only be successfully converted if it respects the\n`geohash` format, as described for the\ngeohash grid aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -13314,6 +13874,7 @@ const toGeohashDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW string = "u3bu"\n| EVAL geohash = TO_GEOHASH(string)'],
 };
@@ -13324,9 +13885,8 @@ const toGeohexDefinition: FunctionDefinition = {
   name: 'to_geohex',
   description: i18n.translate('kbn-esql-ast.esql.definitions.to_geohex', {
     defaultMessage:
-      'Converts an input value to a `geohex` value.\nA string will only be successfully converted if it respects the\n`geohex` format.',
+      'Converts an input value to a `geohex` value.\nA string will only be successfully converted if it respects the\n`geohex` format, as described for the\ngeohex grid aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -13381,6 +13941,7 @@ const toGeohexDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW string = "841f059ffffffff"\n| EVAL geohex = TO_GEOHEX(string)'],
 };
@@ -13437,6 +13998,7 @@ const toGeopointDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW wkt = "POINT(42.97109630194 14.7552534413725)"\n| EVAL pt = TO_GEOPOINT(wkt)'],
 };
@@ -13533,6 +14095,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"\n| EVAL geom = TO_GEOSHAPE(wkt)',
@@ -13545,9 +14108,8 @@ const toGeotileDefinition: FunctionDefinition = {
   name: 'to_geotile',
   description: i18n.translate('kbn-esql-ast.esql.definitions.to_geotile', {
     defaultMessage:
-      'Converts an input value to a `geotile` value.\nA string will only be successfully converted if it respects the\n`geotile` format.',
+      'Converts an input value to a `geotile` value.\nA string will only be successfully converted if it respects the\n`geotile` format, as described for the\ngeotile grid aggregation.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -13602,6 +14164,7 @@ const toGeotileDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW string = "4/8/5"\n| EVAL geotile = TO_GEOTILE(string)'],
 };
@@ -13718,6 +14281,7 @@ const toIntegerDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)'],
 };
@@ -13773,6 +14337,7 @@ const toIpDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW str1 = "1.1.1.1", str2 = "foo"\n| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)\n| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")',
@@ -13943,6 +14508,7 @@ const toLongDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"\n| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)',
@@ -13990,6 +14556,7 @@ const toLowerDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW message = "Some Text"\n| EVAL message_lower = TO_LOWER(message)',
@@ -14058,6 +14625,7 @@ const toRadiansDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW deg = [90.0, 180.0, 270.0]\n| EVAL rad = TO_RADIANS(deg)'],
 };
@@ -14263,6 +14831,7 @@ const toStringDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW a=10\n| EVAL j = TO_STRING(a)', 'ROW a=[10, 9, 8]\n| EVAL j = TO_STRING(a)'],
 };
@@ -14318,6 +14887,7 @@ const toTimedurationDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW x = "2024-01-01"::datetime\n| EVAL y = x + "3 hours"::time_duration, z = x - TO_TIMEDURATION("3 hours");',
@@ -14426,6 +14996,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"\n| EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)',
@@ -14473,6 +15044,7 @@ const toUpperDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW message = "Some Text"\n| EVAL message_upper = TO_UPPER(message)'],
 };
@@ -14528,6 +15100,7 @@ const toVersionDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: ['ROW v = TO_VERSION("1.2.3")'],
 };
@@ -14573,9 +15146,59 @@ const trimDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = TRIM(message)\n| EVAL color = TRIM(color)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const urlDecodeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'url_decode',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.url_decode', {
+    defaultMessage: 'URL decodes the input.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'string',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'string',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+  ],
+  examples: [
+    'ROW u = "https%3A%2F%2Fwww.example.com%2Fpapers%3Fq%3Dinformation%2Bretrieval%26year%3D2024%26citations%3Dhigh" | EVAL u = URL_DECODE(u)',
   ],
 };
 
@@ -14621,6 +15244,7 @@ const urlEncodeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'ROW u = "https://www.example.com/papers?q=information+retrieval&year=2024&citations=high" | EVAL u = URL_ENCODE(u)',
@@ -14648,6 +15272,7 @@ const vCosineDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | where color != "black"\n | eval similarity = v_cosine(rgb_vector, [0, 255, 255])\n | sort similarity desc, color asc',
@@ -14675,6 +15300,7 @@ const vDotProductDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | eval similarity = v_dot_product(rgb_vector, [0, 255, 255])\n | sort similarity desc, color asc',
@@ -14702,6 +15328,7 @@ const vHammingDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | eval similarity = v_hamming(rgb_vector, [0, 255, 255])\n | sort similarity desc, color asc',
@@ -14729,6 +15356,7 @@ const vL1NormDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | eval similarity = v_l1_norm(rgb_vector, [0, 255, 255])\n | sort similarity desc, color asc',
@@ -14756,6 +15384,7 @@ const vL2NormDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | eval similarity = v_l2_norm(rgb_vector, [0, 255, 255])\n | sort similarity desc, color asc',
@@ -14783,6 +15412,7 @@ const vMagnitudeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     ' from colors\n | eval magnitude = v_magnitude(rgb_vector)\n | sort magnitude desc, color asc',
@@ -14825,6 +15455,7 @@ const caseDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.RERANK,
   ],
   examples: [
     'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
@@ -14853,6 +15484,7 @@ export const scalarFunctionDefinitions = [
   dateParseDefinition,
   dateTruncDefinition,
   dayNameDefinition,
+  decayDefinition,
   eDefinition,
   endsWithDefinition,
   expDefinition,
@@ -14945,6 +15577,7 @@ export const scalarFunctionDefinitions = [
   toDateperiodDefinition,
   toDatetimeDefinition,
   toDegreesDefinition,
+  toDenseVectorDefinition,
   toDoubleDefinition,
   toGeohashDefinition,
   toGeohexDefinition,
@@ -14962,6 +15595,7 @@ export const scalarFunctionDefinitions = [
   toUpperDefinition,
   toVersionDefinition,
   trimDefinition,
+  urlDecodeDefinition,
   urlEncodeDefinition,
   vCosineDefinition,
   vDotProductDefinition,

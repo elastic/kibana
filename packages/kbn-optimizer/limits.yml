@@ -11,7 +11,8 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 8836
+  chatDataRegistry: 4162
+  cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -29,7 +30,7 @@ pageLoadAssetSize:
   dashboardMarkdown: 5134
   data: 453742
   dataQuality: 10387
-  datasetQuality: 27203
+  datasetQuality: 30094
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -46,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 10370
+  esql: 12323
   esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
@@ -108,19 +109,19 @@ pageLoadAssetSize:
   navigation: 13598
   newsfeed: 12371
   noDataPage: 1749
-  observability: 160191
-  observabilityAIAssistant: 46941
+  observability: 176467
+  observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 14281
+  onechat: 15709
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3058
+  productDocBase: 3074
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -134,7 +135,7 @@ pageLoadAssetSize:
   savedObjectsManagement: 22426
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
-  savedSearch: 12662
+  savedSearch: 11000
   screenshotMode: 2351
   screenshotting: 8417
   searchAssistant: 6150
@@ -154,16 +155,16 @@ pageLoadAssetSize:
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
-  serverlessSearch: 28909
+  serverlessSearch: 35000
   sessionView: 47938
   share: 58677
   slo: 36645
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67227
+  stackConnectors: 67975
   streams: 8494
-  streamsApp: 12431
+  streamsApp: 15200
   streamsAppWrapper: 5787
   synthetics: 31571
   telemetry: 25755
@@ -174,7 +175,7 @@ pageLoadAssetSize:
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedSearch: 23000
+  unifiedSearch: 24000
   upgradeAssistant: 6898
   uptime: 48184
   urlDrilldown: 21563
@@ -196,9 +197,5 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 41000
   watcher: 16031
-  wciExternalServer: 8979
-  wciIndexSource: 28727
-  wciSalesforce: 8506
   workchatApp: 12411
-  workchatFramework: 5706
-  workflowsManagement: 6200
+  workflowsManagement: 6555

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  PieVisualizationState,
-} from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, PieVisualizationState } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   BuildDependencies,
@@ -70,12 +66,11 @@ function buildVisualizationState(
 function buildFormulaLayer(
   layer: LensTreeMapConfig | LensPieConfig | LensMosaicConfig,
   layerNr: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
     },
   };
 
@@ -115,11 +110,11 @@ function getValueColumns(layer: LensTreeMapConfig) {
 
 export async function buildPartitionChart(
   config: LensTreeMapConfig | LensPieConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: any, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

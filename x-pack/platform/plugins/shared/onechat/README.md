@@ -17,10 +17,7 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 
 ```yml
 uiSettings.overrides:
-  onechat:mcp:enabled: true
-  onechat:a2a:enabled: true
-  onechat:api:enabled: true
-  onechat:ui:enabled: true
+  agentBuilder:enabled: true
 ```
 
 This will ensure all Onechat features are available in your Kibana instance.
@@ -31,17 +28,14 @@ If running in Serverless or Cloud dev environments, it may be more practical to 
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "onechat:mcp:enabled": true,
-      "onechat:a2a:enabled": true,
-      "onechat:api:enabled": true,
-      "onechat:ui:enabled": true
+      "agentBuilder:enabled": true
    }
 }
 ```
 
 ## Enabling tracing
 
-Onechat agents are compatible with the Kibana inference tracing. 
+Onechat agents are compatible with the Kibana inference tracing.
 
 You can enable tracing on your local instance by adding the following config parameters:
 
@@ -284,17 +278,11 @@ try {
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 
 ### Running with Claude Desktop
 
-To enable the MCP server, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:mcp:enabled: true
-```
 Configure Claude Desktop by adding this to its configuration:
 ```json
 {
@@ -303,7 +291,7 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/chat/mcp",
+        "http://localhost:5601/api/agent_builder/mcp",
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
@@ -319,14 +307,14 @@ Configure Claude Desktop by adding this to its configuration:
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
+Agentcards for onechat agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 
 The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
 
 ```json
-POST kbn://api/chat/tools
+POST kbn://api/agent_builder/tools
 {
   "id": "case_by_id",
   "description": "Find a custom case by id.",
@@ -344,16 +332,20 @@ POST kbn://api/chat/tools
 }
 ```
 
-To enable the API, add the following to your Kibana config
 
-```yaml
-uiSettings.overrides:
-  onechat:api:enabled: true
-```
-## Chat UI
-To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
+## Use custom LLM connector
 
-```yaml
-uiSettings.overrides:
-  onechat:ui:enabled: true
+Create new LLM connector in UI (in search bar type “connectors” ), fill it in with creds. In dev console:
+
 ```
+GET kbn://api/actions/connectors # find id of your connector
+
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "{connecotor id}"
+   }
+}
+```
+
+Or, set the default LLM in the UI under Management > GenAI Settings.

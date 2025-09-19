@@ -6,12 +6,8 @@
   "include": ["../../../../typings/**/*", "public/**/*", "server/**/*", "common/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
     "@kbn/server-route-repository",
-    "@kbn/kibana-react-plugin",
-    "@kbn/esql-ast",
-    "@kbn/shared-ux-utility",
     "@kbn/server-route-repository-client",
     "@kbn/traced-es-client",
     "@kbn/es-query",
@@ -19,6 +15,7 @@
     "@kbn/field-types",
     "@kbn/zod",
     "@kbn/es-types",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-feature-flags-server"
   ]
 }

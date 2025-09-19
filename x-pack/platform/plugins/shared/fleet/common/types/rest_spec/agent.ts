@@ -209,7 +209,7 @@ export interface MigrateSingleAgentResponse {
 }
 export interface BulkMigrateAgentsRequest {
   body: {
-    agents: string[];
+    agents: string[] | string;
     enrollment_token: string;
     uri: string;
     settings?: {

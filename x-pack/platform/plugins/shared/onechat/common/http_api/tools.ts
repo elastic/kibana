@@ -53,5 +53,19 @@ export interface BulkDeleteToolResponse {
 }
 
 export interface ExecuteToolResponse {
-  result: ToolResult[];
+  results: ToolResult[];
+}
+
+export interface ResolveSearchSourcesRequest {
+  pattern: string;
+}
+
+export interface ResolveSearchSourceItem {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+}
+
+export interface ResolveSearchSourcesResponse {
+  results: ResolveSearchSourceItem[];
+  total: number;
 }

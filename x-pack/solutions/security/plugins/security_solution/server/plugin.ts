@@ -141,6 +141,7 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
+import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -581,7 +582,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService.setup({
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
-      isFeatureEnabled: config.experimentalFeatures.defendInsights,
       endpointContext: this.endpointContext.service,
     });
 
@@ -635,7 +635,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
+      ? assistantTools
+      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+
+    plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       defendInsightsPolicyResponseFailure:

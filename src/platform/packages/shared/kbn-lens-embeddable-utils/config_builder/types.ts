@@ -102,6 +102,7 @@ export interface LensConfigOptions {
 export interface LensAxisTitleVisibilityConfig {
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
+  showYRightAxisTitle?: boolean;
 }
 
 export interface LensYBoundsConfig {
@@ -291,7 +292,6 @@ export interface LensXYConfigBase {
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;
-  formulaAPI?: FormulaPublicApi;
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;
