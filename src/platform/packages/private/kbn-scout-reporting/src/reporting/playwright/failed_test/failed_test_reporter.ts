@@ -30,7 +30,7 @@ import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import {
   getRunTarget,
-  getPluginManifestData,
+  getKibanaModuleData,
   parseStdout,
   generateTestRunId,
   getTestIDForTitle,
@@ -91,7 +91,7 @@ export class ScoutFailedTestReporter implements Reporter {
 
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
-      const metadata = getPluginManifestData(config.configFile);
+      const metadata = getKibanaModuleData(config.configFile);
       this.kibanaModule = {
         id: metadata.id,
         type: metadata.type,
