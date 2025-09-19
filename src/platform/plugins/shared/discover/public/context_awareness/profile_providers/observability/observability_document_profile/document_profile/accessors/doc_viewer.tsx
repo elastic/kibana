@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import { UnifiedDocViewerObservabilityGenericOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { TraceIndexes } from '@kbn/discover-utils/src/data_types/traces/types';
 import type { DocumentProfileProvider } from '../../../../../profiles';
@@ -20,18 +20,18 @@ export const createGetDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
-    const tabTitle = i18n.translate('discover.docViews.observability.traces.overview.title', {
-      defaultMessage: 'Trace Overview',
+    const tabTitle = i18n.translate('discover.docViews.observability.generic.overview.title', {
+      defaultMessage: 'Overview',
     });
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
-          id: 'doc_view_obs_traces_overview',
+          id: 'doc_view_obs_generic_overview',
           title: tabTitle,
           order: 0,
           component: (props) => (
-            <UnifiedDocViewerObservabilityTracesOverview {...props} indexes={indexes} />
+            <UnifiedDocViewerObservabilityGenericOverview {...props} indexes={indexes} />
           ),
         });
 
