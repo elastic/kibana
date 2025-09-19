@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { DeepStrict } from '@kbn/zod-helpers';
-import { ZodParamsObject } from '@kbn/server-route-repository-utils';
+import type { ZodParamsObject } from '@kbn/server-route-repository-utils';
 import { noParamsValidationObject } from './validation_objects';
 
 export function makeZodValidationObject(params: ZodParamsObject) {

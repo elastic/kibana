@@ -11,9 +11,9 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
-import { SearchConnectorsPluginSetupDependencies } from '../types';
+import type { SearchConnectorsPluginSetupDependencies } from '../types';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 

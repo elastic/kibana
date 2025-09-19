@@ -8,12 +8,10 @@
  */
 
 import type { PluginName } from '@kbn/core-base-common';
-import type { Plugin } from '@kbn/core-plugins-browser';
+import type { PluginDefinition } from './plugin_reader';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 
-export type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
-
-export const mockPluginInitializerProvider: jest.Mock<MockedPluginInitializer, [PluginName]> = jest
+export const mockPluginInitializerProvider: jest.Mock<PluginDefinition, [PluginName]> = jest
   .fn()
   .mockImplementation(() => () => {
     throw new Error('No provider specified');

@@ -11,4 +11,4 @@ export { TooltipContent } from './metric_explanation/tooltip_content';
 export { HostMetricsDocsLink } from './metric_explanation/host_metrics_docs_link';
 export { HostMetricsExplanationContent } from './metric_explanation/host_metrics_explanation_content';
 
-export * from './types';
+export type * from './types';

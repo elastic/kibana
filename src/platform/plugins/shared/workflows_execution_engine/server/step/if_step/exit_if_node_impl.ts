@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitIfNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../node_implementation';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class ExitIfNodeImpl implements StepImplementation {
-  constructor(private step: ExitIfNode, private workflowState: WorkflowExecutionRuntimeManager) {}
+export class ExitIfNodeImpl implements NodeImplementation {
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
-    await this.workflowState.finishStep(this.step.startNodeId);
-    this.workflowState.goToNextStep();
+    this.wfExecutionRuntimeManager.exitScope();
+    await this.wfExecutionRuntimeManager.finishStep();
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
     let esQueryRuleId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
       const { body: createdESRule } = await supertest
         .post('/api/alerting/rule')
         .set('kbn-xsrf', 'foo')
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
       await supertest.delete(`/api/alerting/rule/${esQueryRuleId}`).set('kbn-xsrf', 'foo');
     });
 

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { EuiDragDropContext, EuiDraggable, EuiDroppable, euiDragDropReorder } from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
-import {
-  ComponentTemplatesListItem,
-  Props as ComponentTemplatesListItemProps,
-} from './component_templates_list_item';
+import type { ComponentTemplateListItem } from '../../../../../common';
+import type { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
+import { ComponentTemplatesListItem } from './component_templates_list_item';
 
 interface Props {
   components: ComponentTemplateListItem[];

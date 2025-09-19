@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FormulaPublicApi, HeatmapVisualizationState } from '@kbn/lens-plugin/public';
+import type { HeatmapVisualizationState } from '@kbn/lens-plugin/public';
 
 import { euiPaletteRed } from '@elastic/eui';
-import { ColorStop } from '@kbn/coloring';
-import { LayerConfig } from '../lens_attributes';
+import type { ColorStop } from '@kbn/coloring';
+import type { LayerConfig } from '../lens_attributes';
 import { SingleMetricLensAttributes } from './single_metric_attributes';
 
 export class HeatMapLensAttributes extends SingleMetricLensAttributes {
@@ -17,12 +17,8 @@ export class HeatMapLensAttributes extends SingleMetricLensAttributes {
   layerId: string;
   breakDownColumnId: string;
 
-  constructor(
-    layerConfigs: LayerConfig[],
-    reportType: string,
-    lensFormulaHelper: FormulaPublicApi
-  ) {
-    super(layerConfigs, reportType, lensFormulaHelper);
+  constructor(layerConfigs: LayerConfig[], reportType: string) {
+    super(layerConfigs, reportType);
 
     this.xColumnId = 'layer-0-column-x-1';
     this.breakDownColumnId = 'layer-0-breakdown-column';

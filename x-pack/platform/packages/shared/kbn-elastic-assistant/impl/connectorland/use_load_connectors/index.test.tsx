@@ -6,7 +6,8 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadConnectors, Props } from '.';
+import type { Props } from '.';
+import { useLoadConnectors } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 

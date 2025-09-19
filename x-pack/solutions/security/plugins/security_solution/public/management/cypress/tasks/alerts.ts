@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -15,32 +16,50 @@ import {
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { request } from './common';
 import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
+import { logger } from './logger';
 
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 
 /**
  * Continuously check for any alert to have been received by the given endpoint.
  *
- * NOTE:  This is tno the same as the alerts that populate the Alerts list. To check for
+ * NOTE:  This is not the same as the alerts that populate the Alerts list. To check for
  *        those types of alerts, use `waitForDetectionAlerts()`
  */
 export const waitForEndpointAlerts = (
   endpointAgentId: string,
-  additionalFilters?: object[],
+  /** Additional filters that will be included in the ES `filter` array */
+  additionalFilters: object[] = [],
   timeout = 120000
 ): Cypress.Chainable => {
+  const esQuery: QueryDslQueryContainer = {
+    bool: {
+      filter: [
+        {
+          term: { 'agent.id': endpointAgentId },
+        },
+        ...additionalFilters,
+      ],
+    },
+  };
+
+  logger.debug(
+    `Looking for endpoint [${endpointAgentId}] alerts streamed to [${ENDPOINT_ALERTS_INDEX}] using query:\n${JSON.stringify(
+      esQuery,
+      null,
+      2
+    )}`
+  );
+
   return cy
     .waitUntil(
       () => {
         return request<estypes.SearchResponse>({
           method: 'GET',
-          url: `${ES_URL}/${ENDPOINT_ALERTS_INDEX}/_search`,
+          url: `${ES_URL}/${ENDPOINT_ALERTS_INDEX}/_search?ignore_unavailable=true`,
+          failOnStatusCode: false,
           body: {
-            query: {
-              match: {
-                'agent.id': endpointAgentId,
-              },
-            },
+            query: esQuery,
             size: 1,
             _source: false,
           },

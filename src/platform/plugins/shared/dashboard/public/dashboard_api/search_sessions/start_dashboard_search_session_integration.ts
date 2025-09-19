@@ -15,7 +15,7 @@ import { dataService } from '../../services/kibana_services';
 import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { newSession$ } from './new_session';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
-import { DashboardInternalApi } from '../types';
+import type { DashboardInternalApi } from '../types';
 
 /**
  * Enables dashboard search sessions.

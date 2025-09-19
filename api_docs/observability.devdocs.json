@@ -11,7 +11,7 @@
         "label": "AlertActions",
         "description": [],
         "signature": [
-          "(args: CellContext & ",
+          "({ observabilityRuleTypeRegistry, alert, tableId, refresh, openAlertInFlyout, parentAlert, services, ...rest }: {} | (CellContext & ",
           "EuiDataGridCellValueElementProps",
           " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
           "EuiDataGridRefProps",
@@ -297,7 +297,69 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: any | React.ComponentClass<CellContext & ",
+          ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: ((args: CellContext & ",
+          "EuiDataGridCellValueElementProps",
+          " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+          "EuiDataGridRefProps",
+          " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.UnknownAlertFields",
+            "text": "UnknownAlertFields"
+          },
+          ">[]; oldAlertsData: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.LegacyField",
+            "text": "LegacyField"
+          },
+          "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.BrowserFields",
+            "text": "BrowserFields"
+          },
+          "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+          "MutedAlerts",
+          " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+          "Case",
+          "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindow",
+            "text": "MaintenanceWindow"
+          },
+          "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+          "BulkActionsState",
+          ", React.Dispatch<",
+          "BulkActionsReducerAction",
+          ">]; } & any & ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.ObservabilityAlertsTableContext",
+            "text": "ObservabilityAlertsTableContext"
+          },
+          " & ",
+          "AlertWithLegacyFormats",
+          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode) | React.ComponentClass<CellContext & ",
           "EuiDataGridCellValueElementProps",
           " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
           "EuiDataGridRefProps",
@@ -401,7 +463,7 @@
           },
           " & ",
           "AlertWithLegacyFormats",
-          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode"
+          " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions_lazy.tsx",
         "deprecated": false,
@@ -413,12 +475,464 @@
             "id": "def-public.AlertActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "args",
+            "label": "__0",
             "description": [],
             "signature": [
-              "Props & AP"
+              "{} | (CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & { services: { data: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              },
+              "; http: ",
+              "HttpSetup",
+              "; notifications: ",
+              "NotificationsStart",
+              "; fieldFormats: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              },
+              "; application: ",
+              "ApplicationStart",
+              "; licensing: ",
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              },
+              "; settings: ",
+              "SettingsStart",
+              "; cases?: ",
+              "CasesService",
+              " | undefined; }; renderCellValue?: ((args: CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              ") => React.ReactNode) | React.ComponentClass<CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              ", any> | undefined; renderCellPopover?: ((args: ",
+              "EuiDataGridCellPopoverElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & { alert: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">; }) => React.ReactNode) | React.ComponentClass<any, any> | undefined; renderActionsCell?: ((args: CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }) => React.ReactNode) | React.ComponentClass<CellContext & ",
+              "EuiDataGridCellValueElementProps",
+              " & { tableId?: string | undefined; dataGridRef: React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>; refresh: () => void; isLoading: boolean; isLoadingAlerts: boolean; alerts: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Alert",
+                "text": "Alert"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.UnknownAlertFields",
+                "text": "UnknownAlertFields"
+              },
+              ">[]; oldAlertsData: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.LegacyField",
+                "text": "LegacyField"
+              },
+              "[][]; ecsAlertsData: any[]; alertsCount: number; browserFields: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              },
+              "; isLoadingMutedAlerts: boolean; mutedAlerts?: ",
+              "MutedAlerts",
+              " | undefined; isLoadingCases: boolean; cases?: Map<string, ",
+              "Case",
+              "> | undefined; isLoadingMaintenanceWindows: boolean; maintenanceWindows?: Map<string, ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindow",
+                "text": "MaintenanceWindow"
+              },
+              "> | undefined; pageIndex: number; pageSize: number; openAlertInFlyout: (alertId: string) => void; showAlertStatusWithFlapping?: boolean | undefined; bulkActionsStore: [",
+              "BulkActionsState",
+              ", React.Dispatch<",
+              "BulkActionsReducerAction",
+              ">]; } & any & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; }, any> | undefined; renderFlyoutHeader?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; renderFlyoutBody?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; renderFlyoutFooter?: ",
+              "FlyoutSectionRenderer",
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              "> | undefined; flyoutOwnsFocus?: boolean | undefined; flyoutPagination?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; columns: ",
+              "EuiDataGridColumn",
+              "[]; openLinksInNewTab: boolean; } & ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityAlertsTableContext",
+                "text": "ObservabilityAlertsTableContext"
+              },
+              " & ",
+              "AlertWithLegacyFormats",
+              " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts",
+            "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5879,7 +6393,7 @@
         "label": "useAnnotations",
         "description": [],
         "signature": [
-          "({ domain, editAnnotation, slo, setEditAnnotation, }?: { slo?: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; preventInitialBackfill: boolean; } & { syncField?: string | null | undefined; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { createdBy?: string | undefined; updatedBy?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; fiveMinuteBurnRate: number; oneHourBurnRate: number; oneDayBurnRate: number; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; instanceId: string; } & { meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }) | undefined; editAnnotation?: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) | null | undefined; setEditAnnotation?: ((annotation: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) | null) => void) | undefined; domain?: { min: string | number; max: string | number; } | undefined; }) => { annotations: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; })[]; onAnnotationClick: (annotations: { rects: ",
+          "({ domain, editAnnotation, slo, setEditAnnotation, }?: { slo?: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; preventInitialBackfill: boolean; } & { syncField?: string | null | undefined; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { createdBy?: string | undefined; updatedBy?: string | undefined; } & { artifacts?: { dashboards?: { id: string; }[] | undefined; } | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; fiveMinuteBurnRate: number; oneHourBurnRate: number; oneDayBurnRate: number; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; instanceId: string; } & { meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }) | undefined; editAnnotation?: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) | null | undefined; setEditAnnotation?: ((annotation: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }) | null) => void) | undefined; domain?: { min: string | number; max: string | number; } | undefined; }) => { annotations: ({ id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; })[]; onAnnotationClick: (annotations: { rects: ",
           "RectAnnotationEvent",
           "[]; lines: ",
           "LineAnnotationEvent",
@@ -5916,7 +6430,7 @@
                 "label": "slo",
                 "description": [],
                 "signature": [
-                  "({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; preventInitialBackfill: boolean; } & { syncField?: string | null | undefined; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { createdBy?: string | undefined; updatedBy?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; fiveMinuteBurnRate: number; oneHourBurnRate: number; oneDayBurnRate: number; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; instanceId: string; } & { meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }) | undefined"
+                  "({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; preventInitialBackfill: boolean; } & { syncField?: string | null | undefined; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { createdBy?: string | undefined; updatedBy?: string | undefined; } & { artifacts?: { dashboards?: { id: string; }[] | undefined; } | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; fiveMinuteBurnRate: number; oneHourBurnRate: number; oneDayBurnRate: number; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; instanceId: string; } & { meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }) | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/use_annotations.tsx",
                 "deprecated": false,
@@ -6330,7 +6844,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertDetails: { logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; }"
+              "{ alertDetails: { logs?: { enabled: boolean; } | undefined; uptime: { enabled: boolean; }; observability?: { enabled: boolean; } | undefined; }; thresholdRule?: { enabled: boolean; } | undefined; ruleFormV2?: { enabled: boolean; } | undefined; managedOtlpServiceUrl: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8414,7 +8928,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -8709,13 +9223,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
@@ -9541,21 +10049,6 @@
           "\"ALERTS_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.apmEnableServiceMapApiV2",
-        "type": "string",
-        "tags": [],
-        "label": "apmEnableServiceMapApiV2",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableServiceMapApiV2\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -17252,7 +17745,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18035,6 +18528,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -18329,7 +18824,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -19112,6 +19607,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -20122,7 +20619,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20247,7 +20744,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -20280,7 +20777,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20601,13 +21098,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInspectEsQueries.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableInspectEsQueries.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20696,13 +21193,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.maxSuggestions.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.maxSuggestions.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20794,13 +21291,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableComparisonByDefault.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableComparisonByDefault.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20903,13 +21400,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.defaultApmServiceEnvironment.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21121,13 +21618,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmProgressiveLoading.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmProgressiveLoading.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21216,13 +21713,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21342,13 +21839,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableTableSearchBar.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableTableSearchBar.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21482,13 +21979,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21497,146 +21994,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.technicalPreview",
-                "type": "boolean",
-                "tags": [],
-                "label": "technicalPreview",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmEnableServiceMapApiV2",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmEnableServiceMapApiV2]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.technicalPreview",
                 "type": "boolean",
                 "tags": [],
                 "label": "technicalPreview",
@@ -21761,13 +22118,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21845,13 +22202,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21957,13 +22314,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22083,13 +22440,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableLegacyUptimeApp.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22184,13 +22541,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingShowErrorFrames.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingShowErrorFrames.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22293,13 +22650,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPervCPUWattX86.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22402,13 +22759,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPervCPUWattArm64.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22511,13 +22868,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingDatacenterPUE.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingDatacenterPUE.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22620,13 +22977,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingCo2PerKWH.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingCo2PerKWH.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22729,13 +23086,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22838,13 +23195,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingAzureCostDiscountRate.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingAzureCostDiscountRate.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22947,13 +23304,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23048,13 +23405,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableTransactionProfiling.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableTransactionProfiling.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23160,13 +23517,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.searchExcludedDataTiers.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23175,6 +23532,132 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.searchExcludedDataTiers.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableDiagnosticMode",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableDiagnosticMode]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.solutionViews",
+                "type": "Array",
+                "tags": [],
+                "label": "solutionViews",
+                "description": [],
+                "signature": [
+                  "(\"oblt\" | \"classic\")[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableDiagnosticMode.technicalPreview",
                 "type": "boolean",
                 "tags": [],
                 "label": "technicalPreview",
@@ -23200,7 +23683,7 @@
       "label": "ObservabilityPluginSetup",
       "description": [],
       "signature": [
-        "{ getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: { core: Promise<{ elasticsearch: { client: ",
+        "{ getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: { core: Promise<{ elasticsearch: { client: ",
         "IScopedClusterClient",
         "; }; }>; licensing: Promise<",
         {
@@ -24382,21 +24865,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.apmEnableServiceMapApiV2",
-        "type": "string",
-        "tags": [],
-        "label": "apmEnableServiceMapApiV2",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableServiceMapApiV2\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.apmEnableTableSearchBar",
         "type": "string",
         "tags": [],
@@ -24672,6 +25140,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.enableDiagnosticMode",
+        "type": "string",
+        "tags": [],
+        "label": "enableDiagnosticMode",
+        "description": [],
+        "signature": [
+          "\"observability:enableDiagnosticMode\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.enableInspectEsQueries",
         "type": "string",
         "tags": [],
@@ -24912,6 +25395,21 @@
         "description": [],
         "signature": [
           "\"RULES_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.sloDetailsHistoryLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsHistoryLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_HISTORY_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

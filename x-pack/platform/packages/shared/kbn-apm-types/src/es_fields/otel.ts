@@ -11,3 +11,8 @@ export const ERROR_MESSAGE = 'error.message';
 export const EXCEPTION_TYPE = 'exception.type';
 export const EXCEPTION_MESSAGE = 'exception.message';
 export const DURATION = 'duration';
+export const KIND = 'kind';
+export const RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
+  'resource.attributes.telemetry.sdk.language';
+export const LINKS_TRACE_ID = 'links.trace_id';
+export const LINKS_SPAN_ID = 'links.span_id';

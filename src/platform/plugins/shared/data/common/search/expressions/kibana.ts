@@ -8,9 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExecutionContext, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { ExpressionValueSearchContext } from './kibana_context_type';
+import type {
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { ExpressionValueSearchContext } from './kibana_context_type';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];

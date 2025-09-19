@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import Fs from 'fs';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -19,13 +19,13 @@ import { ExtractNodeBuilds } from './extract_node_builds_task';
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
 
-const Fs = jest.requireMock('../../lib/fs');
+const BuildFs = jest.requireMock('../../lib/fs');
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
 
 // The node variant may be overriden by an environment variable,
 // to provide test coverage against pointer-compression
@@ -68,6 +68,12 @@ async function setup() {
 beforeEach(() => {
   testWriter.messages.length = 0;
   jest.clearAllMocks();
+  // Extraction is skipped if folder already exists
+  jest.spyOn(Fs, 'existsSync').mockImplementation(() => false);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 it('runs expected fs operations', async () => {
@@ -76,7 +82,7 @@ it('runs expected fs operations', async () => {
   await ExtractNodeBuilds.run(config, log);
 
   const usedMethods = Object.fromEntries(
-    Object.entries(Fs)
+    Object.entries(BuildFs)
       .filter((entry): entry is [string, jest.Mock] => {
         const [, mock] = entry;
 
@@ -139,6 +145,132 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },

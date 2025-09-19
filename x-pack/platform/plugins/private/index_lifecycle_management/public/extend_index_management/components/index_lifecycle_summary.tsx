@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiLink,
@@ -19,16 +21,14 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiBadgeProps,
   EuiBadge,
   EuiCode,
-  EuiThemeComputed,
 } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
-import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
-import { Phase } from '../../../common/types';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
+import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import type { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 interface Props {
   index: Index;

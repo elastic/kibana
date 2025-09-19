@@ -12,20 +12,24 @@ import {
   isEmbeddableApiContext,
   type PublishesTitle,
 } from '@kbn/presentation-publishing';
-import {
+import type {
   ChartActionContext,
+  RangeSelectContext,
+  ValueClickContext,
+} from '@kbn/embeddable-plugin/public';
+import {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
-  RangeSelectContext,
   SELECT_RANGE_TRIGGER,
-  ValueClickContext,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import type { ActionFactoryContext } from '../url_drilldown';
-import { deleteUndefinedKeys, toPrimitiveOrUndefined, Primitive } from './util';
+import type { Primitive } from './util';
+import { deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';
 
 /**
  * URL drilldown event scope, available as `{{event.*}}` Handlebars variables.

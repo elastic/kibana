@@ -11,8 +11,8 @@ import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
 import { paginate } from '../../../pagination/paginate';
 import { getMetrics } from '../../../details/get_metrics';
-import { LegacyRequest } from '../../../../types';
-import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import type { LegacyRequest } from '../../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /**
  * This function performs an optimization around the node listing tables in the UI. To avoid

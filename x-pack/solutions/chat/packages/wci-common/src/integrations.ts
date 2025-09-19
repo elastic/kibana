@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationType } from './constants';
+import type { IntegrationType } from './constants';
 
 export interface Integration {
   id: string;

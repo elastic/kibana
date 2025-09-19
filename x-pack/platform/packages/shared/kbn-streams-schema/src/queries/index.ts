@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';

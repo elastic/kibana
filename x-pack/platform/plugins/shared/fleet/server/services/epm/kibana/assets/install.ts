@@ -75,6 +75,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
+  [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -110,7 +111,6 @@ export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
-  pkgName: string;
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
 }): Promise<SavedObjectsImportSuccess[]> {
   const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
@@ -287,7 +287,6 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     logger,
     savedObjectsImporter,
-    pkgName,
     kibanaAssetsArchiveIterator,
   });
   const assets = importedAssets.map(
@@ -373,6 +372,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
       const soType = KibanaSavedObjectTypeMapping[assetType];
       if (!validKibanaAssetTypes.has(assetType)) {
+        return;
+      }
+
+      if (
+        soType === KibanaSavedObjectType.alertingRuleTemplate &&
+        !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+      ) {
         return;
       }
 

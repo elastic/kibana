@@ -33,7 +33,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
   const { docLinks } = useKibana().services;
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj="privilegedUserMonitoringOnboardingPanel">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup
           direction="row"

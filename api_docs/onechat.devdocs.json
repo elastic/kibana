@@ -27,11 +27,36 @@
       "type": "Interface",
       "tags": [],
       "label": "OnechatPluginStart",
-      "description": [],
+      "description": [
+        "\nPublic start contract for the browser-side onechat plugin."
+      ],
       "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTool service contract, can be used to list or execute tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/onechat-browser",
+              "scope": "common",
+              "docId": "kibKbnOnechatBrowserPluginApi",
+              "section": "def-common.ToolServiceStartContract",
+              "text": "ToolServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -63,7 +88,7 @@
               "\nRegister a built-in tool to be available in onechat."
             ],
             "signature": [
-              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>, RunOutput = unknown>(tool: ",
+              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -71,7 +96,7 @@
                 "section": "def-common.BuiltinToolDefinition",
                 "text": "BuiltinToolDefinition"
               },
-              "<RunInput, RunOutput>) => void"
+              "<RunInput>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
             "deprecated": false,
@@ -93,7 +118,7 @@
                     "section": "def-common.BuiltinToolDefinition",
                     "text": "BuiltinToolDefinition"
                   },
-                  "<RunInput, RunOutput>"
+                  "<RunInput>"
                 ],
                 "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
                 "deprecated": false,
@@ -127,7 +152,7 @@
               "\nExecute a tool."
             ],
             "signature": [
-              "<TParams = Record<string, unknown>, TResult = unknown>(params: ",
+              "<TParams = Record<string, unknown>>(params: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -143,7 +168,7 @@
                 "section": "def-common.RunToolReturn",
                 "text": "RunToolReturn"
               },
-              "<TResult>>"
+              ">"
             ],
             "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
             "deprecated": false,

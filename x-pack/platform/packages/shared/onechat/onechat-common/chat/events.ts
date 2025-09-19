@@ -6,10 +6,12 @@
  */
 
 import type { OnechatEvent } from '../base/events';
+import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
+  toolProgress = 'tool_progress',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
@@ -17,6 +19,7 @@ export enum ChatEventType {
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
+  conversationIdSet = 'conversation_id_set',
 }
 
 export type ChatEventBase<
@@ -38,12 +41,27 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
   return event.type === ChatEventType.toolCall;
 };
 
+// Tool progress
+
+export interface ToolProgressEventData {
+  tool_call_id: string;
+  message: string;
+}
+
+export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
+
+export const isToolProgressEvent = (
+  event: OnechatEvent<string, any>
+): event is ToolProgressEvent => {
+  return event.type === ChatEventType.toolProgress;
+};
+
 // Tool result
 
 export interface ToolResultEventData {
   tool_call_id: string;
   tool_id: string;
-  result: string;
+  results: ToolResult[];
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
@@ -152,11 +170,29 @@ export const isConversationUpdatedEvent = (
   return event.type === ChatEventType.conversationUpdated;
 };
 
+// conversation id set
+
+export interface ConversationIdSetEventData {
+  conversation_id: string;
+}
+
+export type ConversationIdSetEvent = ChatEventBase<
+  ChatEventType.conversationIdSet,
+  ConversationIdSetEventData
+>;
+
+export const isConversationIdSetEvent = (
+  event: OnechatEvent<string, any>
+): event is ConversationIdSetEvent => {
+  return event.type === ChatEventType.conversationIdSet;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
 export type ChatAgentEvent =
   | ToolCallEvent
+  | ToolProgressEvent
   | ToolResultEvent
   | ReasoningEvent
   | MessageChunkEvent
@@ -166,4 +202,8 @@ export type ChatAgentEvent =
 /**
  * All types of events that can be emitted from the chat API.
  */
-export type ChatEvent = ChatAgentEvent | ConversationCreatedEvent | ConversationUpdatedEvent;
+export type ChatEvent =
+  | ChatAgentEvent
+  | ConversationCreatedEvent
+  | ConversationUpdatedEvent
+  | ConversationIdSetEvent;

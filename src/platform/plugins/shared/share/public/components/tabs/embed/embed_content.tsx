@@ -18,14 +18,14 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { AnonymousAccessState } from '../../../../common';
+import type { AnonymousAccessState } from '../../../../common';
 
 import type { IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
@@ -274,16 +274,15 @@ export const EmbedContent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
-          >
-            <EuiIcon type="question" />
-          </EuiToolTip>
+            type="question"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

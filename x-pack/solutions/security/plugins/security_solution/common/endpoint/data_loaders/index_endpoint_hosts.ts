@@ -37,14 +37,12 @@ import {
   deleteIndexedFleetAgents,
   indexFleetAgentForHost,
 } from './index_fleet_agent';
-import type {
-  DeleteIndexedEndpointFleetActionsResponse,
-  IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
   type IndexEndpointAndFleetActionsForHostOptions,
+  type DeleteIndexedEndpointFleetActionsResponse,
+  type IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 
 import type {

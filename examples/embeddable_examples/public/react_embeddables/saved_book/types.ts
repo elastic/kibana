@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   PublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { BookState } from '../../../server';
-import { BookEmbeddableState, BookByReferenceState } from '../../../common';
+import type { BookEmbeddableState, BookByReferenceState } from '../../../common';
 
 export type BookApi = DefaultEmbeddableApi<BookEmbeddableState> &
   HasEditCapabilities &

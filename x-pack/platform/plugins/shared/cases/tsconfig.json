@@ -94,7 +94,11 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/page-attachment-schema"
+    "@kbn/page-attachment-schema",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/licensing-types",
+    "@kbn/cases-ai"
   ],
   "exclude": ["target/**/*"]
 }

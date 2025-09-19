@@ -17,19 +17,18 @@ import {
 } from '@elastic/eui';
 import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import type { Streams } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 import { AdvancedFieldMappingOptions } from './advanced_field_mapping_options';
 
 export interface SchemaEditorFlyoutProps {
   field: SchemaField;
   isEditingByDefault?: boolean;
   onClose?: () => void;
-  onSave: (field: SchemaField) => void;
+  onStage: (field: SchemaField) => void;
   stream: Streams.ingest.all.Definition;
   withFieldSimulation?: boolean;
 }
@@ -38,7 +37,7 @@ export const SchemaEditorFlyout = ({
   field,
   stream,
   onClose,
-  onSave,
+  onStage,
   isEditingByDefault = false,
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
@@ -56,11 +55,6 @@ export const SchemaEditorFlyout = ({
   );
 
   const hasValidFieldType = nextField.type !== undefined;
-
-  const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
-    await onSave(nextField);
-    if (onClose) onClose();
-  }, [nextField, onClose, onSave]);
 
   return (
     <>
@@ -111,18 +105,18 @@ export const SchemaEditorFlyout = ({
               })}
             </EuiButtonEmpty>
             <EuiButton
-              data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-              disabled={
-                isSaving ||
-                !hasValidFieldType ||
-                !isValidAdvancedFieldMappings ||
-                !isValidSimulation
-              }
-              isLoading={isSaving}
-              onClick={saveChanges}
+              data-test-subj="streamsAppSchemaEditorFieldStageButton"
+              disabled={!hasValidFieldType || !isValidAdvancedFieldMappings || !isValidSimulation}
+              onClick={() => {
+                onStage({
+                  ...nextField,
+                  status: 'mapped',
+                } as SchemaField);
+                if (onClose) onClose();
+              }}
             >
-              {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
-                defaultMessage: 'Save changes',
+              {i18n.translate('xpack.streams.fieldForm.stageButtonLabel', {
+                defaultMessage: 'Stage changes',
               })}
             </EuiButton>
           </EuiFlexGroup>

@@ -10,18 +10,18 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
-import { AggConfig } from './agg_config';
-import { IAggConfigs } from './agg_configs';
+import type { AggConfig } from './agg_config';
+import type { IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
-import { AggParamType } from './param_types/agg';
+import type { AggParamType } from './param_types/agg';
 
 type PostFlightRequestFn<TAggConfig> = (
   resp: estypes.SearchResponse<any>,

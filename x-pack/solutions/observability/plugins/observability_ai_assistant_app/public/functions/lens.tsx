@@ -11,13 +11,13 @@ import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddabl
 import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { Assign } from 'utility-types';
-import {
+import type { Assign } from 'utility-types';
+import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public/types';
 import type { LensFunctionArguments } from '../../common/functions/lens';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export enum SeriesType {
   Bar = 'bar',
@@ -48,10 +48,6 @@ function Lens({
   dataViews: DataViewsServicePublic;
   timeField: string;
 }) {
-  const formulaAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
-
   const dataViewAsync = useAsync(() => {
     return dataViews.create({
       title: indexPattern,
@@ -61,14 +57,13 @@ function Lens({
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
-  if (!formulaAsync.value || !dataViewAsync.value) {
+  if (!dataViewAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
   const attributes = new LensAttributesBuilder({
     visualization: new XYChart({
       layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
       dataView: dataViewAsync.value,
     }),
   }).build();

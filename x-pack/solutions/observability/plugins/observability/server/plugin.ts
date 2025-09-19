@@ -13,33 +13,42 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/server';
-import {
+import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/common/constants';
+import type { Subject, Subscription } from 'rxjs';
+import { ReplaySubject, takeUntil } from 'rxjs';
 import { getLogsFeature } from './features/logs_feature';
-import { ObservabilityConfig } from '.';
+import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
-import {
+import type {
   AnnotationsAPI,
-  bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
 } from './lib/annotations/bootstrap_annotations';
+import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
@@ -49,7 +58,10 @@ import { uiSettings } from './ui_settings';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
-import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
+import {
+  setEsqlRecommendedQueries,
+  unsetMetricsExperienceEsqlRecommendedQueries,
+} from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -79,10 +91,13 @@ export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
 {
   private logger: Logger;
+  private metricExperienceEnabled$?: Subscription;
+  private pluginStop$: Subject<void>;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(core: CoreSetup<PluginStart, void>, plugins: PluginSetup) {
@@ -98,12 +113,13 @@ export class ObservabilityPlugin
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
-    plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
-    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
-
+    if (plugins.cases?.config.enabled) {
+      plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+      plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+    }
     if (
-      plugins.cases &&
+      plugins.cases?.config.enabled &&
       plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled
     ) {
       plugins.cases.attachmentFramework.registerPersistableState({
@@ -164,9 +180,18 @@ export class ObservabilityPlugin
         repository: getObservabilityServerRouteRepository(config),
         isDev: this.initContext.env.mode.dev,
       });
-    });
 
-    setEsqlRecommendedQueries(plugins.esql);
+      setEsqlRecommendedQueries(plugins.esql);
+
+      this.metricExperienceEnabled$ = coreStart.featureFlags
+        .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false)
+        .pipe(takeUntil(this.pluginStop$))
+        .subscribe((isMetricsExperienceEnabled) => {
+          if (!isMetricsExperienceEnabled) {
+            unsetMetricsExperienceEsqlRecommendedQueries(plugins.esql);
+          }
+        });
+    });
 
     return {
       getAlertDetailsConfig() {
@@ -184,5 +209,12 @@ export class ObservabilityPlugin
 
   public start(core: CoreStart, plugins: PluginStart) {}
 
-  public stop() {}
+  public stop() {
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
+
+    if (this.metricExperienceEnabled$ !== undefined) {
+      this.metricExperienceEnabled$.unsubscribe();
+    }
+  }
 }

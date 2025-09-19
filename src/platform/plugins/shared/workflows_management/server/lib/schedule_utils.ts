@@ -9,7 +9,7 @@
 
 // Define the trigger type based on the schema
 export interface WorkflowTrigger {
-  type: 'triggers.elastic.detectionRule' | 'triggers.elastic.scheduled' | 'triggers.elastic.manual';
+  type: 'alert' | 'scheduled' | 'manual';
   with?: Record<string, any>;
   enabled?: boolean;
 }
@@ -18,8 +18,8 @@ export interface WorkflowTrigger {
  * Converts a workflow scheduled trigger to a task manager schedule format
  */
 export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) {
-  if (trigger.type !== 'triggers.elastic.scheduled') {
-    throw new Error(`Expected trigger type 'triggers.elastic.scheduled', got '${trigger.type}'`);
+  if (trigger.type !== 'scheduled') {
+    throw new Error(`Expected trigger type 'scheduled', got '${trigger.type}'`);
   }
 
   const config = trigger.with || {};
@@ -78,16 +78,12 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
  * Checks if a workflow has any scheduled triggers
  */
 export function hasScheduledTriggers(triggers: WorkflowTrigger[]): boolean {
-  return triggers.some(
-    (trigger) => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled
-  );
+  return triggers.some((trigger) => trigger.type === 'scheduled' && trigger.enabled);
 }
 
 /**
  * Gets all scheduled triggers from a workflow
  */
 export function getScheduledTriggers(triggers: WorkflowTrigger[]): WorkflowTrigger[] {
-  return triggers.filter(
-    (trigger) => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled
-  );
+  return triggers.filter((trigger) => trigger.type === 'scheduled' && trigger.enabled);
 }

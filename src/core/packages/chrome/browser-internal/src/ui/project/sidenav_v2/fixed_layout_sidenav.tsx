@@ -8,57 +8,47 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
-// import {
-//   LOGO,
-//   PRIMARY_MENU_FOOTER_ITEMS,
-//   PRIMARY_MENU_ITEMS,
-//   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-// } from '@kbn/core-chrome-navigation/src/mocks/observability';
-// import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
-import { SideNavV2CollapseButton } from './collapse_button';
 
-// const demoItems = {
-//   primaryItems: PRIMARY_MENU_ITEMS,
-//   footerItems: PRIMARY_MENU_FOOTER_ITEMS,
-// };
+import { Navigation } from './navigation';
+import { SideNavV2CollapseButton } from './collapse_button';
+import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
   toggle: (isVisible: boolean) => void;
   isCollapsed$: BehaviorSubject<boolean>;
+  navProps: NavigationProps;
+  side?: 'left' | 'right';
 }
 
 export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigationProps> = ({
   toggle,
   isCollapsed$,
+  navProps,
+  side,
 }) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
 
   return (
     <>
       <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} />
-      <CollapsibleNavigationFlyout>
-        {
-          ({ setWidth }) => null
-          // <NavigationComponent
-          //   isCollapsed={isCollapsed}
-          //   items={demoItems}
-          //   logoLabel={LOGO.label}
-          //   logoType={LOGO.logoType}
-          //   setWidth={setWidth}
-          // />
-        }
+      <CollapsibleNavigationFlyout side={side}>
+        {({ setWidth }) => (
+          <Navigation {...navProps} isCollapsed={isCollapsed} setWidth={setWidth} />
+        )}
       </CollapsibleNavigationFlyout>
     </>
   );
 };
 
 const CollapsibleNavigationFlyout: FunctionComponent<{
+  side?: 'left' | 'right';
   children: (props: { setWidth: (width: number) => void }) => React.ReactNode;
-}> = ({ children }) => {
+}> = ({ children, side = 'left' }) => {
   const [width, setWidth] = React.useState<number>(0);
 
   const childrenProps = React.useMemo(() => ({ setWidth }), [setWidth]);
@@ -75,12 +65,13 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
       />
       <EuiFlyout
         size={width}
-        side={'left'}
+        side={side}
         type={'push'}
         paddingSize="none"
         pushMinBreakpoint="xs"
         hideCloseButton={true}
         onClose={() => {}}
+        className="hide-for-sharing"
       >
         <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>

@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, of, Subject } from 'rxjs';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -21,23 +22,25 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE, ControlGroupSerializedState } from '@kbn/controls-plugin/common';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataLoading,
+import type {
   PublishesDataLoading,
   SerializedPanelState,
-  useBatchedPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataLoading,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import { savedStateManager, unsavedStateManager, WEB_LOGS_DATA_VIEW_ID } from './session_storage';
 
@@ -142,9 +145,7 @@ export const ReactControlExample = ({
               references: [],
             };
       },
-      setLastSavedControlGroupState: (
-        savedState: SerializedPanelState<ControlGroupSerializedState>
-      ) => {
+      setLastSavedControlGroupState: (savedState: SerializedPanelState<ControlsGroupState>) => {
         lastSavedControlGroupState$.next(savedState);
       },
     };
@@ -403,7 +404,7 @@ export const ReactControlExample = ({
       />
       {hasControls && <EuiSpacer size="m" />}
       <EmbeddableRenderer
-        type={CONTROL_GROUP_TYPE}
+        type={CONTROLS_GROUP_TYPE}
         maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
         onApiAvailable={(api) => {
           setControlGroupApi(api as ControlGroupApi);

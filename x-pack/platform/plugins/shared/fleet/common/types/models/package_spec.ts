@@ -37,6 +37,9 @@ export interface PackageSpecManifest {
   };
   asset_tags?: PackageSpecTags[];
   discovery?: {
+    fields?: Array<{
+      name: string;
+    }>;
     datasets?: DiscoveryDataset[];
   };
 }
@@ -99,6 +102,7 @@ export type PackageSpecCategory =
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'

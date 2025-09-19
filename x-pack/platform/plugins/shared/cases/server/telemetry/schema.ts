@@ -68,10 +68,18 @@ const assigneesSchema: AssigneesSchema = {
   totalWithAtLeastOne: long,
 };
 
+const statusSchema: StatusSchema = {
+  open: long,
+  inProgress: long,
+  closed: long,
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
+  totalWithAlerts: long,
+  status: statusSchema,
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -82,12 +90,6 @@ const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema =
     totals: long,
     required: long,
   },
-};
-
-const statusSchema: StatusSchema = {
-  open: long,
-  inProgress: long,
-  closed: long,
 };
 
 const latestDatesSchema: LatestDatesSchema = {
@@ -118,7 +120,12 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   userActions: { all: { ...countSchema, maxOnACase: long } },
   comments: { all: { ...countSchema, maxOnACase: long } },
-  alerts: { all: { ...countSchema, maxOnACase: long } },
+  alerts: {
+    all: { ...countSchema, maxOnACase: long },
+    obs: { ...countSchema, maxOnACase: long },
+    sec: { ...countSchema, maxOnACase: long },
+    main: { ...countSchema, maxOnACase: long },
+  },
   connectors: {
     all: {
       all: { totalAttached: long },

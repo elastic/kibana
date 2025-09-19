@@ -9,7 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 
 const limitExpectSuggestions = (
   query: string,

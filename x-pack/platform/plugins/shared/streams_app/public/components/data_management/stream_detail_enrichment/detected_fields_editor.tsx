@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { Streams } from '@kbn/streams-schema';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
-import { SchemaField } from '../schema_editor/types';
+import type { SchemaField } from '../schema_editor/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -73,13 +73,18 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'type']}
+        defaultColumns={['name', 'type', 'format', 'status']}
         fields={detectedFields}
         stream={definition.stream}
-        onFieldUnmap={unmapField}
-        onFieldUpdate={mapField}
-        withTableActions={isWiredStream}
-        withToolbar={isWiredStream}
+        onFieldUpdate={(field) => {
+          if (field.status === 'mapped') {
+            mapField(field);
+          } else if (field.status === 'unmapped') {
+            unmapField(field.name);
+          }
+        }}
+        withControls
+        withTableActions
       />
     </>
   );

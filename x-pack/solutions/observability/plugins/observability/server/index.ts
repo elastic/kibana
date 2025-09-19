@@ -7,14 +7,16 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110905
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { DEFAULT_ANNOTATION_INDEX } from '../common/annotations';
 import type { ObservabilityPluginSetup } from './plugin';
-import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
+import type { Mappings } from './utils/create_or_update_index';
+import { createOrUpdateIndex } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
-import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
-import { CustomThresholdLocators } from './lib/rules/custom_threshold/custom_threshold_executor';
+import type { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
+import type { CustomThresholdLocators } from './lib/rules/custom_threshold/custom_threshold_executor';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
@@ -81,9 +83,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
-  managedOtlpServiceUrl: offeringBasedSchema({
-    serverless: schema.string({ defaultValue: '' }),
-  }),
+  managedOtlpServiceUrl: schema.string({ defaultValue: '' }),
 });
 
 export const config: PluginConfigDescriptor = {
@@ -95,6 +95,7 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
+    managedOtlpServiceUrl: true,
   },
   schema: configSchema,
   deprecations: ({ unused }) => [

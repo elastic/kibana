@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 
 export const createNavigationTree = ({
   streamsAvailable,
@@ -51,6 +51,18 @@ export const createNavigationTree = ({
             link: 'dashboards',
             getIsActive: ({ pathNameSerialized, prepend }) => {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+            },
+          },
+          {
+            link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
+              }),
             },
           },
           {
@@ -103,20 +115,27 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
                 children: [
                   {
                     link: 'apm:services',
                     title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
-                      defaultMessage: 'Service Inventory',
+                      defaultMessage: 'Service inventory',
                     }),
+                  },
+                  {
+                    link: 'apm:service-map',
+                    title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
+                      defaultMessage: 'Service map',
+                    }),
+                    sideNavStatus: 'hidden',
                   },
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
@@ -170,7 +189,7 @@ export const createNavigationTree = ({
                     title: i18n.translate(
                       'xpack.serverlessObservability.nav.infrastructureInventory',
                       {
-                        defaultMessage: 'Infrastructure Inventory',
+                        defaultMessage: 'Infrastructure inventory',
                       }
                     ),
                   },
@@ -391,6 +410,19 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
+                    title: 'AI',
+                    children: [
+                      {
+                        link: 'management:genAiSettings',
+                        breadcrumbStatus: 'hidden',
+                      },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
                     title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
@@ -408,13 +440,7 @@ export const createNavigationTree = ({
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },

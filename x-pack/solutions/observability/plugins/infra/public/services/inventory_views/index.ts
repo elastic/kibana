@@ -6,4 +6,4 @@
  */
 
 export * from './inventory_views_service';
-export * from './types';
+export type * from './types';

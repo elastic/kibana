@@ -1,6 +1,4 @@
-# -----
-# Copy from internal roles config in elasticsearch-controller
-# -----
+# ----- Copy from internal roles config in elasticsearch-controller
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
   cluster: []
@@ -127,6 +125,7 @@ editor:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all
@@ -182,6 +181,7 @@ t1_analyst:
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -236,6 +236,7 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -305,6 +306,7 @@ t3_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -317,6 +319,7 @@ t3_analyst:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all
@@ -453,6 +456,7 @@ rule_author:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -466,6 +470,7 @@ rule_author:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_read
         - feature_siemV3.blocklist_all # Elastic Defend Policy Management
@@ -529,6 +534,7 @@ soc_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -542,6 +548,7 @@ soc_manager:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all
@@ -600,6 +607,7 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -669,6 +677,7 @@ platform_engineer:
         - write
     - names:
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -682,6 +691,7 @@ platform_engineer:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all # Elastic Defend Policy Management
@@ -758,6 +768,7 @@ endpoint_operations_analyst:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all
@@ -848,6 +859,7 @@ endpoint_policy_manager:
         - feature_siemV3.endpoint_list_all
         - feature_siemV3.global_artifact_management_all
         - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
         - feature_siemV3.event_filters_all
         - feature_siemV3.host_isolation_exceptions_all
         - feature_siemV3.blocklist_all # Elastic Defend Policy Management

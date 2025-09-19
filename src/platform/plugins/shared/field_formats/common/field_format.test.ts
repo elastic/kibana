@@ -10,7 +10,7 @@
 import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
-import { FieldFormatParams, TextContextTypeOptions } from './types';
+import type { FieldFormatParams, TextContextTypeOptions } from './types';
 
 const getTestFormat = (
   _params?: FieldFormatParams,

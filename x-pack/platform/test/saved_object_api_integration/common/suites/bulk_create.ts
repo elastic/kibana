@@ -15,8 +15,14 @@ import {
   getTestTitle,
   getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type {
+  ExpectResponseBody,
+  TestCase,
+  TestDefinition,
+  TestSuite,
+  TestUser,
+} from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 const {

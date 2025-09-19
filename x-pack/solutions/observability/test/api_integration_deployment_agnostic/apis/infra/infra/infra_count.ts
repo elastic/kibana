@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   GetInfraEntityCountRequestBodyPayloadClient,
   GetInfraEntityCountRequestParamsPayload,
   GetInfraEntityCountResponsePayload,
@@ -50,11 +50,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             withInternalHeaders: true,
             useCookieHeader: true,
           });
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+          );
         });
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics'
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
           );
           await supertestWithAdminScope.destroy();
         });

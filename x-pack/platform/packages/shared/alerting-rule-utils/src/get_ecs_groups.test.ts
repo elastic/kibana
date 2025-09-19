@@ -86,6 +86,19 @@ describe('getEcsGroupsFromFlattenGrouping', () => {
     expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({});
   });
 
+  it('should handle ecs and non-ecs fields properly', () => {
+    const flattenGrouping = {
+      ['host.name']: 'host-1',
+      ['container.id']: 'container-1',
+      ['non.ecs.field']: 'some-value',
+    };
+
+    expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({
+      'host.name': 'host-1',
+      'container.id': 'container-1',
+    });
+  });
+
   it('should handle array types assigned non-array values', () => {
     const flattenGrouping = { tags: 'abc' };
 

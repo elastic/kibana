@@ -8,9 +8,8 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import moment from 'moment';
 
+import type { NetworkItems, NetworkItem, SidebarItems, LegendItems } from './types';
 import {
-  NetworkItems,
-  NetworkItem,
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
   FriendlyMimetypeLabels,
@@ -19,11 +18,9 @@ import {
   Timings,
   Metadata,
   TIMING_ORDER,
-  SidebarItems,
-  LegendItems,
 } from './types';
-import { WaterfallData, WaterfallMetadata } from '../../waterfall';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { WaterfallData, WaterfallMetadata } from '../../waterfall';
+import type { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export const extractItems = (data: NetworkEvent[]): NetworkItems => {
   // NOTE: This happens client side as the "payload" property is mapped

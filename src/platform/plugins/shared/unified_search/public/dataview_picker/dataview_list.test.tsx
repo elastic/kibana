@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
-import { ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { DataViewListItemEnhanced, DataViewsList, DataViewsListProps } from './dataview_list';
+import type { DataViewListItemEnhanced, DataViewsListProps } from './dataview_list';
+import { DataViewsList } from './dataview_list';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 function getDataViewPickerList(instance: ShallowWrapper) {
@@ -56,6 +58,24 @@ describe('DataView list component', () => {
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
     };
+  });
+
+  it('sorts alphabetically the items', () => {
+    const listWithEmptyName: DataViewListItemEnhanced[] = [
+      { id: 'dataview-1', title: 'beta', name: '' },
+      { id: 'dataview-2', title: 'alpha' },
+      { id: 'dataview-3', title: 'gamma', name: 'gamma' },
+    ];
+
+    const component = shallow(
+      <DataViewsList {...props} dataViewsList={listWithEmptyName} currentDataViewId="dv-1" />
+    );
+
+    expect(getDataViewPickerOptions(component)!.map((o: any) => o.label)).toEqual([
+      'alpha',
+      'beta',
+      'gamma',
+    ]);
   });
 
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {

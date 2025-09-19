@@ -17,7 +17,7 @@ import type {
   ChromeRecentlyAccessedHistoryItem,
   PanelSelectedNode,
 } from '@kbn/core-chrome-browser';
-import { EventTracker } from './analytics';
+import type { EventTracker } from './analytics';
 
 export type BasePathService = Pick<IBasePath, 'prepend' | 'remove'>;
 
@@ -44,32 +44,20 @@ export interface NavigationServices {
 }
 
 /**
- * An interface containing a collection of Kibana dependencies required to
+ * An interface containing a collection of Chrome dependencies required to
  * render this component
  * @public
  */
-export interface NavigationKibanaDependencies {
-  core: {
-    application: { navigateToUrl: NavigateToUrlFn };
-    chrome: {
-      recentlyAccessed: { get$: () => Observable<ChromeRecentlyAccessedHistoryItem[]> };
-      navLinks: {
-        getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
-      };
-      sideNav: {
-        getIsCollapsed$: () => Observable<boolean>;
-        getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
-        setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
-        getIsFeedbackBtnVisible$: () => Observable<boolean>;
-      };
-    };
-    http: {
-      basePath: BasePathService;
-      getLoadingCount$(): Observable<number>;
-    };
-    analytics: {
-      reportEvent: (eventType: string, eventData: object) => void;
-    };
-  };
+export interface NavigationChromeDependencies {
+  navigateToUrl: NavigateToUrlFn;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
+  isCollapsed$: Observable<boolean>;
+  panelSelectedNode$: Observable<PanelSelectedNode | null>;
+  setPanelSelectedNode: (node: string | PanelSelectedNode | null) => void;
+  isFeedbackBtnVisible$: Observable<boolean>;
+  basePath: BasePathService;
+  loadingCount$: Observable<number>;
+  reportEvent: (eventType: string, eventData: object) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 }

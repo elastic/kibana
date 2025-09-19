@@ -10,7 +10,8 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -267,11 +268,13 @@ export function ControlLabel({
 export function ControlWidth({
   minimumWidth,
   grow,
+  hideFitToSpace,
   onMinimumSizeChange,
   onGrowChange,
 }: {
   minimumWidth: string;
   grow: boolean;
+  hideFitToSpace: boolean;
   onMinimumSizeChange: (id: string) => void;
   onGrowChange: (e: EuiSwitchEvent) => void;
 }) {
@@ -295,17 +298,21 @@ export function ControlWidth({
           data-test-subj="esqlControlMinimumWidth"
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('esql.flyout.grow.label', {
-          defaultMessage: 'Expand width to fit available space',
-        })}
-        color="primary"
-        checked={grow ?? false}
-        onChange={(e) => onGrowChange(e)}
-        data-test-subj="esqlControlGrow"
-      />
+      {!hideFitToSpace && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('esql.flyout.grow.label', {
+              defaultMessage: 'Expand width to fit available space',
+            })}
+            color="primary"
+            checked={grow ?? false}
+            onChange={(e) => onGrowChange(e)}
+            data-test-subj="esqlControlGrow"
+          />
+        </>
+      )}
     </>
   );
 }

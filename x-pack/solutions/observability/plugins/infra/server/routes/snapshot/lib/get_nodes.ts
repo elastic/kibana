@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ESSearchClient, LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import type { SnapshotRequest } from '../../../../common/http_api';
-import type { ESSearchClient, LogQueryFields } from '../../../lib/metrics/types';
 import type { InfraSource } from '../../../lib/sources';
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 import { queryAllData } from './query_all_data';

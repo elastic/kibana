@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { Streams, findInheritedLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
-import { StreamsClient } from '../client';
+import type { StreamsClient } from '../client';
 import { getDataStreamLifecycle } from '../stream_crud';
 
 export async function getEffectiveLifecycle({
@@ -19,7 +19,7 @@ export async function getEffectiveLifecycle({
   streamsClient: StreamsClient;
   dataStream: IndicesDataStream;
 }) {
-  if (Streams.UnwiredStream.Definition.is(definition)) {
+  if (Streams.ClassicStream.Definition.is(definition)) {
     return getDataStreamLifecycle(dataStream);
   }
 

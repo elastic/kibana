@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+  const archive = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';
 
   describe('uptime ml anomaly', function () {
     this.tags(['skipFirefox']);

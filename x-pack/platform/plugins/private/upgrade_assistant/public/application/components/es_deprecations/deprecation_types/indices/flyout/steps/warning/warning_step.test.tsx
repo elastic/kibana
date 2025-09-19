@@ -11,12 +11,12 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { idForWarning, WarningFlyoutStep } from './warning_step';
-import {
+import type {
   EnrichedDeprecationInfo,
-  IndexWarning,
   ReindexAction,
 } from '../../../../../../../../../common/types';
-import { ReindexState } from '../../../use_reindex';
+import type { IndexWarning } from '@kbn/reindex-service-plugin/common';
+import type { ReindexState } from '../../../use_reindex';
 import { LoadingState } from '../../../../../../types';
 
 const kibanaVersion = new SemVer('8.0.0');

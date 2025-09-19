@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { LicenseType } from '@kbn/licensing-types';
 
 export interface LanguageDocumentationSections {
   groups: Array<{
@@ -14,4 +15,42 @@ export interface LanguageDocumentationSections {
     items: Array<{ label: string; description?: JSX.Element }>;
   }>;
   initialSection: JSX.Element;
+}
+
+export interface Signature {
+  params: Array<{
+    name: string;
+    type: string;
+    optional?: boolean;
+    supportsWildcard?: boolean;
+  }>;
+  license?: LicenseType;
+}
+
+export interface CommandDefinition {
+  name: string;
+  observability_tier?: string;
+  license?: LicenseType;
+}
+
+export interface FunctionDefinition {
+  name: string;
+  snapshot_only: boolean;
+  type: string;
+  titleName: string;
+  operator: string;
+  preview: boolean;
+  signatures: Signature[];
+  license?: LicenseType;
+}
+
+export interface LicenseInfo {
+  name: LicenseType;
+  isSignatureSpecific?: boolean;
+  paramsWithLicense?: string[];
+}
+
+export interface MultipleLicenseInfo {
+  licenses: LicenseInfo[];
+  hasMultipleLicenses: boolean;
 }

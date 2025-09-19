@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { Condition, conditionSchema } from '../../../conditions';
+import { NonEmptyString, createIsNarrowSchema } from '@kbn/zod-helpers';
+
+export const routingStatus = z.enum(['enabled', 'disabled']);
+export type RoutingStatus = z.infer<typeof routingStatus>;
 
 export interface RoutingDefinition {
   destination: string;
-  if: Condition;
+  where: Condition;
+  status?: RoutingStatus;
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
-  if: conditionSchema,
+  where: conditionSchema,
+  status: routingStatus.optional(),
 });
 
 export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =
   z.array(routingDefinitionSchema);
+
+export const isRoutingEnabled = createIsNarrowSchema(routingStatus, z.literal('enabled'));

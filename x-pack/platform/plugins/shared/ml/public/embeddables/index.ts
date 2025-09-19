@@ -14,7 +14,7 @@ import {
 } from './constants';
 
 export * from './constants';
-export * from './types';
+export type * from './types';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {

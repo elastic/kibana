@@ -7,43 +7,120 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterForeachNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { EnterForeachNode } from '@kbn/workflows/graph';
+import type { NodeImplementation } from '../node_implementation';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
-export class EnterForeachNodeImpl implements StepImplementation {
+export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
-    private step: EnterForeachNode,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private node: EnterForeachNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private contextManager: WorkflowContextManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    const evaluatedItems = this.step.configuration.foreach; // must be real items from step definition
-    const foreachState = this.workflowState.getStepState(this.step.id);
-
-    if (!foreachState) {
-      await this.workflowState.startStep(this.step.id);
-      // Initialize foreach state
-      void this.workflowState.setStepState(this.step.id, {
-        items: evaluatedItems,
-        item: evaluatedItems[0],
-        index: 0,
-        total: evaluatedItems.length,
-      });
+    if (!this.wfExecutionRuntimeManager.getCurrentStepState()) {
+      await this.enterForeach();
     } else {
-      // Update items and index if they have changed
-      const items = foreachState.items;
-      const index = foreachState.index + 1;
-      const item = evaluatedItems[index];
-      const total = foreachState.total;
-      void this.workflowState.setStepState(this.step.id, {
-        items,
-        index,
-        item,
-        total,
+      await this.advanceIteration();
+    }
+  }
+
+  private async enterForeach(): Promise<void> {
+    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
+    await this.wfExecutionRuntimeManager.startStep();
+    const evaluatedItems = this.getItems();
+
+    if (evaluatedItems.length === 0) {
+      this.workflowLogger.logDebug(
+        `Foreach step "${this.node.stepId}" has no items to iterate over. Skipping execution.`,
+        {
+          workflow: { step_id: this.node.stepId },
+        }
+      );
+      await this.wfExecutionRuntimeManager.setCurrentStepState({
+        items: [],
+        total: 0,
       });
+      await this.wfExecutionRuntimeManager.finishStep();
+      this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+      return;
     }
 
-    void this.workflowState.goToNextStep();
+    this.workflowLogger.logDebug(
+      `Foreach step "${this.node.stepId}" will iterate over ${evaluatedItems.length} items.`,
+      {
+        workflow: { step_id: this.node.stepId },
+      }
+    );
+
+    // Initialize foreach state
+    foreachState = {
+      items: evaluatedItems,
+      item: evaluatedItems[0],
+      index: 0,
+      total: evaluatedItems.length,
+    };
+
+    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    // Enter a new scope for the first iteration
+    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.navigateToNextNode();
+  }
+
+  private async advanceIteration(): Promise<void> {
+    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState()!;
+    // Update items and index if they have changed
+    const items = foreachState.items;
+    const index = foreachState.index + 1;
+    const item = items[index];
+    const total = foreachState.total;
+    foreachState = {
+      items,
+      index,
+      item,
+      total,
+    };
+    // Enter a new scope for the new iteration
+    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.navigateToNextNode();
+  }
+
+  private getItems(): any[] {
+    let items: any[] = [];
+
+    if (!this.node.configuration.foreach) {
+      throw new Error('Foreach configuration is required');
+    }
+
+    try {
+      items = JSON.parse(this.node.configuration.foreach);
+    } catch (error) {
+      const { value, pathExists } = this.contextManager.readContextPath(
+        this.node.configuration.foreach
+      );
+
+      if (!pathExists) {
+        throw new Error(
+          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
+        );
+      }
+
+      if (Array.isArray(value)) {
+        items = value;
+      } else if (typeof value === 'string') {
+        items = JSON.parse(value);
+      }
+    }
+
+    if (!Array.isArray(items)) {
+      throw new Error('Foreach configuration must be an array');
+    }
+
+    return items;
   }
 }

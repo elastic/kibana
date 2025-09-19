@@ -518,10 +518,6 @@ describe('Maintenance window events generator task', () => {
               gte: '2025-05-27T05:00:00.000Z',
               lte: '2025-05-27T13:00:00.000Z',
             },
-            {
-              gte: '2025-06-03T05:00:00.000Z',
-              lte: '2025-06-03T13:00:00.000Z',
-            },
           ],
           status: 'archived',
         },

@@ -8,16 +8,15 @@
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
   KibanaShuttingDownError,
   MissingAuthenticationError,
-  ReportingError,
-  durationToNumber,
   numberToDuration,
 } from '@kbn/reporting-common';
 import type {
@@ -27,7 +26,7 @@ import type {
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
-import { decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
+import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
   throwRetryableError,
   type ConcreteTaskInstance,
@@ -37,19 +36,23 @@ import {
   type TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
 
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportTaskParams, ReportingTask, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import type { ReportTaskParams, ReportingTask } from '.';
+import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import type { ReportingCore } from '../..';
-import { EventTracker } from '../../usage';
-import { Report, SavedReport } from '../store';
+import type { EventTracker } from '../../usage';
+import type { SavedReport } from '../store';
+import { Report } from '../store';
 import type { ReportFailedFields, ReportWarningFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import { finishedWithNoPendingCallbacks, getContentStream } from '../content_stream';
-import { EmailNotificationService } from '../../services/notifications/email_notification_service';
-import { ScheduledReportType } from '../../types';
+import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
+import type { ScheduledReportType } from '../../types';
+import { retryOnError } from '../retry_on_error';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -90,7 +93,6 @@ export interface ConstructorOpts {
 }
 
 export interface PrepareJobResults {
-  isLastAttempt: boolean;
   jobId: string;
   report?: SavedReport;
   task?: ReportTaskParams;
@@ -99,6 +101,10 @@ export interface PrepareJobResults {
 
 type ReportTaskParamsType = Record<string, any>;
 
+export interface MaxAttempts {
+  maxTaskAttempts: number; // number of times the task will be retried
+  maxRetries: number; // number of times the report generation logic within a single task run will be retried
+}
 export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   implements ReportingTask
 {
@@ -115,7 +121,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   constructor(protected readonly opts: ConstructorOpts) {
     this.logger = opts.logger.get('runTask');
     this.exportTypesRegistry = opts.reporting.getExportTypesRegistry();
-    this.queueTimeout = durationToNumber(opts.config.queue.timeout);
+    this.queueTimeout = this.getQueueTimeout().asMilliseconds();
   }
 
   // Abstract methods
@@ -130,7 +136,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected abstract prepareJob(taskInstance: ConcreteTaskInstance): Promise<PrepareJobResults>;
 
-  protected abstract getMaxAttempts(): number | undefined;
+  protected abstract getMaxAttempts(): MaxAttempts;
 
   protected abstract notify(
     report: SavedReport,
@@ -200,49 +206,25 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   }
 
   protected getQueueTimeout() {
+    const maxAttempts = this.getMaxAttempts();
+    const configuredTimeoutDuration: moment.Duration = numberToDuration(
+      this.opts.config.queue.timeout
+    );
     // round up from ms to the nearest second
-    return Math.ceil(numberToDuration(this.opts.config.queue.timeout).asSeconds()) + 's';
-  }
-
-  protected async failJob(
-    report: SavedReport,
-    error?: ReportingError
-  ): Promise<UpdateResponse<ReportDocument>> {
-    const message = `Failing ${report.jobtype} job ${report._id}`;
-    const logger = this.logger.get(report._id);
-
-    // log the error
-    let docOutput;
-    if (error) {
-      errorLogger(logger, message, error);
-      docOutput = this.formatOutput(error);
-    } else {
-      errorLogger(logger, message);
-    }
-
-    // update the report in the store
-    const store = await this.opts.reporting.getStore();
-    const completedTime = moment();
-    const doc: ReportFailedFields = {
-      completed_at: completedTime.toISOString(),
-      output: docOutput ?? null,
-    };
-
-    // event tracking of failed job
-    const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.failJob({
-      timeSinceCreation,
-      errorCode: docOutput?.error_code ?? 'unknown',
-      errorMessage: error?.message ?? 'unknown',
+    return moment.duration({
+      milliseconds: configuredTimeoutDuration.asMilliseconds() * (maxAttempts.maxRetries + 1),
     });
-
-    return await store.setReportFailed(report, doc);
   }
 
-  protected async saveExecutionError(
+  protected getQueueTimeoutAsInterval() {
+    // round up from ms to the nearest second
+    return Math.ceil(this.getQueueTimeout().asSeconds()) + 's';
+  }
+
+  private async saveExecutionError(
     report: SavedReport,
-    failedToExecuteErr: any
+    failedToExecuteErr: Error,
+    isLastAttempt: boolean
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
     const errorParsed = parseError(failedToExecuteErr);
@@ -256,6 +238,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       output: null,
       error: errorParsed,
     };
+
+    if (isLastAttempt) {
+      const error = mapToReportingError(failedToExecuteErr);
+      const docOutput = this.formatOutput(error);
+      const completedTime = moment();
+      doc.completed_at = completedTime.toISOString();
+      doc.output = docOutput ?? null;
+
+      // event tracking of failed job
+      const eventTracker = this.getEventTracker(report);
+      const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      eventTracker?.failJob({
+        timeSinceCreation,
+        errorCode: docOutput?.error_code ?? 'unknown',
+        errorMessage: error?.message ?? 'unknown',
+        scheduleType: report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE,
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
+      });
+
+      return await store.setReportFailed(report, doc);
+    }
 
     return await store.setReportError(report, doc);
   }
@@ -405,6 +408,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected async completeJob(
     report: SavedReport,
+    attempts: number,
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
@@ -433,20 +437,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const byteSize = docOutput.size;
     const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
 
+    const scheduleType = report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE;
     if (output.metrics?.csv != null) {
       eventTracker?.completeJobCsv({
         byteSize,
         timeSinceCreation,
         csvRows: output.metrics.csv.rows ?? -1,
+        scheduleType,
+        attempt: attempts,
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
       });
     } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
       const { width, height } = report.payload.layout?.dimensions ?? {};
       eventTracker?.completeJobScreenshot({
         byteSize,
         timeSinceCreation,
+        scheduleType,
+        attempt: attempts,
         screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
         numPages: output.metrics.pdf?.pages ?? -1,
         screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
+        ...(report.scheduled_report_id ? { scheduledTaskId: report.scheduled_report_id } : {}),
       });
     }
 
@@ -484,10 +495,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           if (this.kibanaName == null) {
             throw new Error(`Kibana instance name is undefined!`);
           }
+          const { attempts: taskAttempts } = taskInstance;
 
           let report: SavedReport | undefined;
           const {
-            isLastAttempt,
             jobId: jId,
             report: preparedReport,
             task,
@@ -496,17 +507,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           jobId = jId;
           report = preparedReport;
 
-          if (!isLastAttempt) {
-            this.opts.reporting.trackReport(jobId);
-          }
-
           if (!report || !task) {
             this.opts.reporting.untrackReport(jobId);
-
-            if (isLastAttempt) {
-              errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
-              return;
-            }
 
             const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
             errorLogger(this.logger, errorMessage);
@@ -521,7 +523,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
             logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
+              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
             );
           } else {
             logger.debug(`Starting ${jobType} report ${jobId}.`);
@@ -534,79 +536,98 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           );
 
           try {
-            const jobContentEncoding = this.getJobContentEncoding(jobType);
-            const stream = await getContentStream(
-              this.opts.reporting,
-              {
-                id: report._id,
-                index: report._index,
-                if_primary_term: report._primary_term,
-                if_seq_no: report._seq_no,
+            const retries = maxAttempts.maxRetries;
+            let atmpts: number | undefined = retries > 0 ? 0 : undefined;
+            await retryOnError({
+              logger: this.logger,
+              retries,
+              report,
+              operation: async (rep: SavedReport) => {
+                // keep track of the number of times we try within the task
+                atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
+                const jobContentEncoding = this.getJobContentEncoding(jobType);
+                const stream = await getContentStream(
+                  this.opts.reporting,
+                  {
+                    id: rep._id,
+                    index: rep._index,
+                    if_primary_term: rep._primary_term,
+                    if_seq_no: rep._seq_no,
+                  },
+                  {
+                    encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+                  }
+                );
+                eventLog.logExecutionStart();
+
+                const output = await Promise.race<TaskRunResult>([
+                  this.performJob({
+                    task,
+                    fakeRequest,
+                    taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                    cancellationToken,
+                    stream,
+                  }),
+                  this.throwIfKibanaShutsDown(),
+                ]);
+
+                stream.end();
+
+                logger.debug(`Begin waiting for the stream's pending callbacks...`);
+                await finishedWithNoPendingCallbacks(stream);
+                logger.info(`The stream's pending callbacks have completed.`);
+
+                rep._seq_no = stream.getSeqNo()!;
+                rep._primary_term = stream.getPrimaryTerm()!;
+
+                const byteSize = stream.bytesWritten;
+                eventLog.logExecutionComplete({ ...(output.metrics ?? {}), byteSize });
+
+                if (output) {
+                  logger.debug(`Job output size: ${byteSize} bytes.`);
+                  // Update the job status to "completed"
+                  report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
+                    ...output,
+                    size: byteSize,
+                  });
+
+                  await this.notify(
+                    report,
+                    taskInstance,
+                    output,
+                    byteSize,
+                    scheduledReport,
+                    task.payload.spaceId
+                  );
+                }
+
+                // untrack the report for concurrency awareness
+                logger.debug(`Stopping ${jobId}.`);
               },
-              {
-                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
-              }
-            );
-            eventLog.logExecutionStart();
-
-            const output = await Promise.race<TaskRunResult>([
-              this.performJob({
-                task,
-                fakeRequest,
-                taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                cancellationToken,
-                stream,
-              }),
-              this.throwIfKibanaShutsDown(),
-            ]);
-
-            stream.end();
-
-            logger.debug(`Begin waiting for the stream's pending callbacks...`);
-            await finishedWithNoPendingCallbacks(stream);
-            logger.info(`The stream's pending callbacks have completed.`);
-
-            report._seq_no = stream.getSeqNo()!;
-            report._primary_term = stream.getPrimaryTerm()!;
-
-            const byteSize = stream.bytesWritten;
-            eventLog.logExecutionComplete({
-              ...(output.metrics ?? {}),
-              byteSize,
             });
-
-            if (output) {
-              logger.debug(`Job output size: ${byteSize} bytes.`);
-              // Update the job status to "completed"
-              report = await this.completeJob(report, {
-                ...output,
-                size: byteSize,
-              });
-
-              await this.notify(
-                report,
-                taskInstance,
-                output,
-                byteSize,
-                scheduledReport,
-                task.payload.spaceId
-              );
-            }
-
-            // untrack the report for concurrency awareness
-            logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
+            const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
             eventLog.logError(failedToExecuteErr);
 
-            await this.saveExecutionError(report, failedToExecuteErr).catch((failedToSaveError) => {
-              errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
-            });
+            await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
+              (failedToSaveError) => {
+                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+              }
+            );
 
             cancellationToken.cancel();
 
-            const error = mapToReportingError(failedToExecuteErr);
+            if (isLastAttempt) {
+              this.logger.info(
+                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+              );
+            } else {
+              this.logger.info(
+                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
+              );
+            }
 
-            throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
+            throwRetryableError(failedToExecuteErr, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.opts.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);

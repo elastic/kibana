@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
-import {
+import type {
   UserMessagesGetter,
   UserMessage,
   FramePublicAPI,
@@ -23,7 +23,7 @@ import {
   getActiveVisualizationIdFromDoc,
   getInitialDataViewsObject,
 } from '../../utils';
-import {
+import type {
   LensPublicCallbacks,
   LensEmbeddableStartServices,
   VisualizationContextHelper,

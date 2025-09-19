@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 interface GetSuggestionOptions {
   searchTerm: string;

@@ -149,7 +149,7 @@
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR".
+# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR", German "de-DE".
 #i18n.locale: "en"
 
 # =================== Frequently used (Optional)===================

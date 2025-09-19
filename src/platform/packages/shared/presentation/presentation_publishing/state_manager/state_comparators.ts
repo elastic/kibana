@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { StateComparators } from './types';
+import type { StateComparators } from './types';
 import { logStateDiff, shouldLogStateDiff } from './state_diff_logger';
 
 const referenceEquality = <T>(a: T, b: T) => a === b;

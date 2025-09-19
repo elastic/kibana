@@ -9,7 +9,7 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn } from '../../../types';
+import type { GetConfigFn } from '../../../types';
 import type { SearchRequest } from './types';
 
 const defaultSessionId = `${Date.now()}`;

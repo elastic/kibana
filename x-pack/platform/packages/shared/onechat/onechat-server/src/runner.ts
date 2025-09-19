@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
@@ -15,15 +16,11 @@ import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
  * Wrapping the plain result to allow extending the shape later without
  * introducing breaking changes.
  */
-export interface RunToolReturn<TResult = unknown> {
+export interface RunToolReturn {
   /**
    * The result value as returned by the tool.
    */
-  result: TResult;
-  /**
-   * ID of this run
-   */
-  runId: string;
+  results: ToolResult[];
 }
 
 /**
@@ -47,9 +44,9 @@ export interface ScopedRunner {
 /**
  * Public onechat API to execute a tools.
  */
-export type ScopedRunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+export type ScopedRunToolFn = <TParams = Record<string, unknown>>(
   params: ScopedRunnerRunToolsParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Context bound to a run execution.
@@ -116,9 +113,9 @@ export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit
 /**
  * Public onechat API to execute a tools.
  */
-export type RunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+export type RunToolFn = <TParams = Record<string, unknown>>(
   params: RunToolParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Public onechat runner.

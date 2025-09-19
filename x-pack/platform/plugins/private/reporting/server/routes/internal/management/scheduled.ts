@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { ReportingCore } from '../../..';
+import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
 import { scheduledQueryFactory } from '../../common/scheduled';

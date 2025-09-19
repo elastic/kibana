@@ -942,4 +942,100 @@ export function defineRoutes(
       }
     }
   );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/rule/internally_managed',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.any(),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        const rulesClient = await alerting.getRulesClientWithRequest(req);
+        const { rule_type_id: ruleTypeId, ...rest } = req.body;
+
+        return res.ok({
+          body: await rulesClient.create({
+            data: {
+              enabled: true,
+              name: 'Internal Rule',
+              schedule: { interval: '1m' },
+              tags: [],
+              consumer: 'alertsFixture',
+              params: {},
+              actions: [],
+              ...rest,
+              alertTypeId: 'test.internal-rule-type',
+            },
+          }),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerting_fixture/_bulk_edit_params',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is used solely for functional testing',
+        },
+      },
+      validate: {
+        body: schema.object({
+          filter: schema.maybe(schema.string()),
+          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          operations: schema.arrayOf(
+            schema.oneOf([
+              schema.object({
+                operation: schema.literal('set'),
+                field: schema.oneOf([schema.literal('exceptionsList')]),
+                value: schema.any(),
+              }),
+            ])
+          ),
+        }),
+      },
+    },
+    async (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const alerting = await alertingStart;
+      const rulesClient = await alerting.getRulesClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await rulesClient.bulkEditRuleParamsWithReadAuth({
+            ids: req.body.ids,
+            filter: req.body.filter,
+            operations: req.body.operations,
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
+    }
+  );
 }

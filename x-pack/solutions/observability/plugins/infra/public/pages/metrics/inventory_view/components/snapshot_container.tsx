@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
@@ -16,9 +17,16 @@ import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
+    useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+  const { filterQuery } = useWaffleFiltersContext();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+
+  useEffect(() => {
+    return () => inventoryPrefill.reset();
+  }, [inventoryPrefill]);
 
   const {
     loading,
@@ -27,7 +35,7 @@ export const SnapshotContainer = React.memo(() => {
     interval = '60s',
   } = useSnapshot(
     {
-      filterQuery: filterQueryAsJson,
+      kuery: filterQuery.query,
       metrics: [metric],
       groupBy,
       nodeType,
@@ -35,6 +43,7 @@ export const SnapshotContainer = React.memo(() => {
       currentTime,
       accountId,
       region,
+      schema: preferredSchema,
     },
     { sendRequestImmediately: true }
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,10 +25,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/bm_classification');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
 
       await ml.testResources.resetKibanaTimeZone();
     });

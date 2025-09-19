@@ -6,6 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolResult } from '../tools/tool_result';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -39,6 +40,16 @@ export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, 
 };
 
 /**
+ * Tool call progress which were emitted during the tool execution
+ */
+export interface ToolCallProgress {
+  /**
+   * The full text message
+   */
+  message: string;
+}
+
+/**
  * Represents a tool call with the corresponding result.
  */
 export interface ToolCallWithResult {
@@ -55,9 +66,13 @@ export interface ToolCallWithResult {
    */
   params: Record<string, any>;
   /**
-   * Result of the tool, serialized as string.
+   * List of progress message which were send during that tool call
    */
-  result: string;
+  progression?: ToolCallProgress[];
+  /**
+   * Result of the tool
+   */
+  results: ToolResult[];
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -76,7 +91,12 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
-// reasoning step
+export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
+  return {
+    type: ConversationRoundStepType.reasoning,
+    ...reasoningStepWithResult,
+  };
+};
 
 export interface ReasoningStepData {
   /** plain text reasoning content */
@@ -102,6 +122,8 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
  * related to this particular round.
  */
 export interface ConversationRound {
+  /** unique id for this round */
+  id: string;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */

@@ -12,11 +12,11 @@
  * that defined in Kibana's package.json.
  */
 
+import type { Observable } from 'rxjs';
 import {
   interval,
   of,
   from,
-  Observable,
   BehaviorSubject,
   map,
   distinctUntilChanged,

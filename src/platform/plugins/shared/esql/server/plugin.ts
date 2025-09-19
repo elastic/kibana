@@ -9,7 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';

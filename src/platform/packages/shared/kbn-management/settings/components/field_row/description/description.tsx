@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  SettingType,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import { EuiText } from '@elastic/eui';
 
 import { useFieldStyles } from '../field_row.styles';

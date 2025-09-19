@@ -10,7 +10,7 @@ import {
   getDefaultSourceFields,
   getIndicesWithNoSourceFields,
 } from './fields';
-import { QueryGenerationFieldDescriptors } from './types';
+import type { QueryGenerationFieldDescriptors } from './types';
 
 describe('fields', () => {
   describe('getDefaultQueryFields', () => {

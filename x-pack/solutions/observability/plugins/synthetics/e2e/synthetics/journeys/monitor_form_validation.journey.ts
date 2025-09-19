@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, journey, Page, step } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
+import { expect, journey, step } from '@elastic/synthetics';
 import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {

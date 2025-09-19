@@ -9,8 +9,10 @@ export const generateTitleMock$ = jest.fn();
 export const getChatModelMock$ = jest.fn();
 export const executeAgentMock$ = jest.fn();
 export const getConversationMock$ = jest.fn();
+export const conversationExistsMock$ = jest.fn();
 export const updateConversationMock$ = jest.fn();
 export const createConversationMock$ = jest.fn();
+export const resolveSelectedConnectorIdMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -20,7 +22,14 @@ jest.doMock('./utils', () => {
     getChatModel$: getChatModelMock$,
     executeAgent$: executeAgentMock$,
     getConversation$: getConversationMock$,
+    conversationExists$: conversationExistsMock$,
     updateConversation$: updateConversationMock$,
     createConversation$: createConversationMock$,
+  };
+});
+
+jest.doMock('./utils/resolve_selected_connector_id', () => {
+  return {
+    resolveSelectedConnectorId: resolveSelectedConnectorIdMock,
   };
 });

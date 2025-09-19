@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useLatestVulnerabilitiesGrouping } from './hooks/use_latest_vulnerabilities_grouping';
 import { LatestVulnerabilitiesTable } from './latest_vulnerabilities_table';
 import { groupPanelRenderer, groupStatsRenderer } from './latest_vulnerabilities_group_renderer';
@@ -143,7 +144,12 @@ export const LatestVulnerabilitiesContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar
+          query={urlQuery}
+          setQuery={setUrlQuery}
+          loading={isFetching}
+          refreshQueryKey={CDR_VULNERABILITIES_INDEX_PATTERN}
+        />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -153,7 +159,12 @@ export const LatestVulnerabilitiesContainer = () => {
 
   return (
     <>
-      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        loading={isFetching}
+        refreshQueryKey={CDR_VULNERABILITIES_INDEX_PATTERN}
+      />
       <EuiSpacer size="m" />
       <div>
         {renderChildComponent({

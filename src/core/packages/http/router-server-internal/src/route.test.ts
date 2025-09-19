@@ -11,11 +11,11 @@ import { hapiMocks } from '@kbn/hapi-mocks';
 import { validateHapiRequest, handle } from './route';
 import { createRouter } from './versioned_router/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { RouteValidator } from './validator';
 import { schema } from '@kbn/config-schema';
-import { Router } from './router';
-import { RouteAccess } from '@kbn/core-http-server';
+import type { Router } from './router';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { createRequest } from './versioned_router/core_versioned_route.test.util';
 import { kibanaResponseFactory } from './response';
 

@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
@@ -173,8 +173,16 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(Tasks.CreateDockerServerlessX64);
-    artifactTasks.push(Tasks.CreateDockerServerlessARM64);
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', null));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'chat'));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'observability'));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'search'));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'security'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', null));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'chat'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'observability'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'search'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'security'));
   }
 
   if (options.createDockerFIPS) {

@@ -7,15 +7,22 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+  kbnTestConfig,
+} from '@kbn/test';
+import path from 'path';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { APMFtrConfigName } from '../configs';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import {
+import type {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,
@@ -98,8 +105,24 @@ export function createTestConfig(
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
 
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+        },
+      }),
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],

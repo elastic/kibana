@@ -7,7 +7,7 @@
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
 import * as i18n from './translations';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';

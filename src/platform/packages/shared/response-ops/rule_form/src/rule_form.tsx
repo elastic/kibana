@@ -18,8 +18,8 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
-import { RuleFormStepId } from './constants';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import type { RuleFormStepId } from './constants';
 
 const queryClient = new QueryClient();
 

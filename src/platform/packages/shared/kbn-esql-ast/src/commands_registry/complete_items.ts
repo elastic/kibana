@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_SUGGESTION_COMMAND } from './constants';
-import { ISuggestionItem } from './types';
+import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
@@ -83,6 +83,25 @@ export const whereCompleteItem: ISuggestionItem = {
   text: 'WHERE ',
   kind: 'Reference',
   detail: 'Where',
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const onCompleteItem: ISuggestionItem = {
+  label: 'ON',
+  text: 'ON ',
+  kind: 'Reference',
+  detail: 'On',
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const withCompleteItem: ISuggestionItem = {
+  label: 'WITH',
+  text: 'WITH { $0 }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'With',
   sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 };

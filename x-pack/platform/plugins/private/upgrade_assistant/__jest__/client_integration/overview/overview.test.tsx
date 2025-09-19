@@ -11,7 +11,8 @@ import SemVer from 'semver/classes/semver';
 
 import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
-import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
+import type { OverviewTestBed } from './overview.helpers';
+import { setupOverviewPage } from './overview.helpers';
 
 const currentMinVersion = new SemVer(MIN_VERSION_TO_UPGRADE_TO_LATEST);
 

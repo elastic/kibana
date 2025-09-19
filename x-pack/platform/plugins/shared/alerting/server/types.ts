@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
@@ -15,8 +18,14 @@ import type {
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EqlRequestParams,
+  ISearchStartSearchSource,
+} from '@kbn/data-plugin/common';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -60,6 +69,8 @@ import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
 import type { AlertDeletionClient } from './alert_deletion';
+import type { PublicAsyncSearchClient } from './task_runner/types';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -128,7 +139,18 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => PublicAsyncSearchClient<T>;
 }
+
+export type AsyncSearchStrategies =
+  | typeof ESQL_ASYNC_SEARCH_STRATEGY // ESQL
+  | typeof EQL_SEARCH_STRATEGY // EQL
+  | typeof ENHANCED_ES_SEARCH_STRATEGY; // search
+
+export type ESQLQueryRequest = ESQLSearchParams & Omit<SqlQueryRequest, 'filter'>;
+export type AsyncSearchParams = ESQLQueryRequest | IAsyncSearchRequestParams | EqlRequestParams;
 
 export interface RuleExecutorOptions<
   Params extends RuleTypeParams = never,
@@ -459,5 +481,7 @@ export type {
   RawRuleLastRun,
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
+
+export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

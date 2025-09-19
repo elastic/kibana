@@ -25,9 +25,9 @@ jest.mock('@kbn/object-versioning', () => {
   const original = jest.requireActual('@kbn/object-versioning');
   return {
     ...original,
-    getContentManagmentServicesTransforms: (...args: any[]) => {
+    getContentManagementServicesTransforms: (...args: any[]) => {
       spy()(...args);
-      return original.getContentManagmentServicesTransforms(...args);
+      return original.getContentManagementServicesTransforms(...args);
     },
   };
 });

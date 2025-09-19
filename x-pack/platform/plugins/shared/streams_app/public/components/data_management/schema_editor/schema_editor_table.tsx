@@ -6,25 +6,28 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
+import type {
   EuiDataGridColumnSortingConfig,
+  EuiDataGridCellProps,
+  EuiDataGridControlColumn,
+} from '@elastic/eui';
+import {
   EuiSearchBar,
   EuiScreenReaderOnly,
   EuiDataGrid,
-  EuiDataGridCellProps,
-  EuiDataGridControlColumn,
   EuiIconTip,
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
+import type { TableColumnName } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
-import { TControls } from './hooks/use_controls';
-import { SchemaField } from './types';
+import type { TControls } from './hooks/use_controls';
+import type { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
@@ -92,7 +95,7 @@ export function FieldsTable({
       trailingControlColumns={trailingColumns}
       gridStyle={{
         border: 'none',
-        rowHover: 'none',
+        rowHover: 'highlight',
         header: 'underline',
       }}
       inMemory={{ level: 'sorting' }}
@@ -121,7 +124,7 @@ const createCellRenderer =
                   'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
                   {
                     defaultMessage:
-                      'This field is not managed by Streams, but is defined in Elasticsearch. It can be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                      'This field is not managed by Streams, but is defined in Elasticsearch. It can also be controlled via the underlying index template and component templates available in the "Advanced" tab.',
                   }
                 )}
                 position="right"

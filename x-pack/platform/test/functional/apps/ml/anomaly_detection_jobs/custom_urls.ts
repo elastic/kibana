@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type {
   DiscoverUrlConfig,
   DashboardUrlConfig,
   OtherUrlConfig,
 } from '../../../services/ml/job_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
     let testDashboardId: string | null = null;
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -185,6 +185,13 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   }
 );
 
+export const SOLUTION_FILTER = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.solutionFilterText',
+  {
+    defaultMessage: 'Solution filter.',
+  }
+);
+
 export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
   defaultMessage: 'Google Gemini',
 });
@@ -193,5 +200,26 @@ export const DOCUMENTATION_BASE = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.documentation',
   {
     defaultMessage: 'documentation',
+  }
+);
+
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window length',
+  }
+);
+
+export const CONTEXT_WINDOW_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthValidationMessage',
+  {
+    defaultMessage: 'Context window length must be an integer.',
+  }
+);
+
+export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTaskTypeValidationMessage',
+  {
+    defaultMessage: 'Context window length is only applicable for chat completion tasks.',
   }
 );

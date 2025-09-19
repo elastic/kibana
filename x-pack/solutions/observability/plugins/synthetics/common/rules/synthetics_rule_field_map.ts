@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 export const syntheticsRuleFieldMap: FieldMap = {
   // common fields

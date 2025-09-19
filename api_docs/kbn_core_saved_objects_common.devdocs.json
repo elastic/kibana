@@ -1288,12 +1288,20 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -1306,6 +1314,22 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
           },
           {
             "plugin": "lists",
@@ -1779,22 +1803,6 @@
             "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
           },
           {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
           },
@@ -1813,6 +1821,22 @@
           {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/server/persistable_state/inject.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "uiActionsEnhanced",
@@ -1929,6 +1953,14 @@
           {
             "plugin": "controls",
             "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "canvas",

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CustomHelpers } from 'joi';
 import {
   isSchema,
   type CustomValidator,
@@ -14,7 +15,6 @@ import {
   type Schema,
   type SchemaLike,
   type WhenOptions,
-  CustomHelpers,
 } from 'joi';
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
@@ -284,7 +284,9 @@ function prettyPrintTypeParts(
 ): string | string[] {
   if (!isSchema(schema)) {
     if (schema === null) return 'null';
-    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+    // schema can be a Symbol (because of SymbolSchema). We need to wrap it with String() because
+    // implicit conversion of a 'symbol' to a 'string' will fail at runtime.
+    return `${String(schema ?? 'unknown')}${optional ? '?' : ''}`;
   }
 
   const isOptionalType = optional || schema._flags?.presence === 'optional';

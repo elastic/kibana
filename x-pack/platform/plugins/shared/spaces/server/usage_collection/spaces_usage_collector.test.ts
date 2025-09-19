@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
-import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { UsageData } from './spaces_usage_collector';

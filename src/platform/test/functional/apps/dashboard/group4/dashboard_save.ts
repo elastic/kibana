@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickAddMarkdownPanel();
+        await dashboardAddPanel.clickAddCustomVisualization();
         await visualize.saveVisualizationAndReturn();
         await dashboard.waitForRenderComplete();
         await dashboard.clickQuickSave();

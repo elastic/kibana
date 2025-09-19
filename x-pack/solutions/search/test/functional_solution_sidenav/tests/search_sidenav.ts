@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
@@ -34,37 +34,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
+        const isV2 = await solutionNavigation.sidenav.isV2();
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
 
-        // check the Data > Indices section
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'elasticsearchIndexManagement',
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'elasticsearchIndexManagement',
-        });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Indices',
-        });
+        if (isV2) {
+          await solutionNavigation.sidenav.clickLink({
+            deepLinkId: 'discover',
+          });
+          await solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'discover',
+          });
 
-        // navigate to a different section
-        await solutionNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
+
+          // navigate to a different section
+          await solutionNavigation.sidenav.clickLink({
+            deepLinkId: 'searchPlayground',
+          });
+          await solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'searchPlayground',
+          });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
+        } else {
+          // check the Data > Indices section
+          await solutionNavigation.sidenav.clickLink({
+            deepLinkId: 'elasticsearchIndexManagement',
+          });
+          await solutionNavigation.sidenav.expectLinkActive({
+            deepLinkId: 'elasticsearchIndexManagement',
+          });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+            text: 'Indices',
+          });
+
+          // navigate to a different section
+          await solutionNavigation.sidenav.openSection(
+            'search_project_nav_footer.project_settings_project_nav'
+          );
+        }
+
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
@@ -80,7 +101,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectNoPageReload();
       });
 
-      it('renders a feedback callout', async () => {
+      it('renders a feedback callout', async function () {
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();

@@ -13,13 +13,13 @@ import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
-import { ValueAxis, SeriesParam } from '../../../../types';
+import type { ValueAxis, SeriesParam } from '../../../../types';
 import { ChartOptions } from './chart_options';
-import { SetParamByIndex, ChangeValueAxis } from '.';
+import type { SetParamByIndex, ChangeValueAxis } from '.';
 
 export interface SeriesPanelProps {
   changeValueAxis: ChangeValueAxis;

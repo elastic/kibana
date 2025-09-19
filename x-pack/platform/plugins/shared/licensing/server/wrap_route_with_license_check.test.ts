@@ -7,7 +7,8 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { wrapRouteWithLicenseCheck, CheckLicense } from './wrap_route_with_license_check';
+import type { CheckLicense } from './wrap_route_with_license_check';
+import { wrapRouteWithLicenseCheck } from './wrap_route_with_license_check';
 
 const context = {
   licensing: {

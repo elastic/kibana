@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, dashboard, spaceSelector, header } = getPageObjects([
@@ -24,11 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_default_space'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/multi_space_default_space'
       );
       await spacesService.create({ id: anotherSpace, name: 'Another Space' });
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_another_space',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/multi_space_another_space',
         { space: anotherSpace }
       );
     });

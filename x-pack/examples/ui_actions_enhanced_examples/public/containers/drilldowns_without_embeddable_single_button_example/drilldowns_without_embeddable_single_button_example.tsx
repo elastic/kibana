@@ -48,7 +48,7 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
       </EuiFlexGroup>
 
       {showManager && (
-        <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
+        <EuiFlyout onClose={() => setShowManager(false)} aria-label="Drilldown Manager">
           <plugins.uiActionsEnhanced.DrilldownManager
             initialRoute={'/create'}
             dynamicActionManager={managerWithoutEmbeddableSingleButton}

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from './types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { EmbeddableStateWithType } from './types';
 
 export const telemetryBaseEmbeddableInput = (
   state: EmbeddableStateWithType,

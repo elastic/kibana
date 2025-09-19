@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SecurityAlertContentReference,
   SecurityAlertsPageContentReference,
   KnowledgeBaseEntryContentReference,
@@ -13,7 +13,7 @@ import {
   EsqlContentReference,
   HrefContentReference,
 } from '../../schemas';
-import { ContentReferenceId } from '../types';
+import type { ContentReferenceId } from '../types';
 
 /**
  * Generates a contentReference for the alerts count tool.

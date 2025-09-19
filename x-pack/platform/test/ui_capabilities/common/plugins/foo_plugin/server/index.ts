@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export const plugin = async () => new FooPlugin();
 
@@ -21,7 +20,6 @@ class FooPlugin implements Plugin {
       id: 'foo',
       name: 'Foo',
       category: { id: 'foo', label: 'foo' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {

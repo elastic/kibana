@@ -21,7 +21,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { LLMs } from '../../../common/types';
+import { isElasticConnector } from '../../utils/playground_connectors';
+import { ElasticManagedConnector } from './elastic_connector_connected';
 
 export const ConnectLLMButton: React.FC = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
@@ -54,34 +55,29 @@ export const ConnectLLMButton: React.FC = () => {
       usageTracker?.load(AnalyticsEvents.genAiConnectorSetup);
     }
   }, [connectors?.length, showCallout, usageTracker]);
+  const hasConnectors = connectors?.length;
+  const elasticConnector = hasConnectors ? connectors.find(isElasticConnector) : undefined;
+  const hasElasticConnector = elasticConnector !== undefined;
 
   return (
     <>
-      {connectors?.length ? (
+      {hasConnectors ? (
         <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMText">
           <EuiFlexItem grow={false}>
             <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="success">
-              {connectors.some((connector) => connector.type === LLMs.inference) ? (
-                <FormattedMessage
-                  id="xpack.searchPlayground.setupPage.elasticManagedLlmConnectedButtonLabel"
-                  defaultMessage="{connectorName} connected"
-                  values={{
-                    connectorName:
-                      connectors.filter((connector) => connector.type === LLMs.inference)[0]
-                        ?.name || 'Elastic Managed LLM',
-                  }}
-                />
-              ) : (
+            {hasElasticConnector ? (
+              <ElasticManagedConnector name={elasticConnector.name} />
+            ) : (
+              <EuiText color="success">
                 <FormattedMessage
                   id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
                   defaultMessage="{connectorName} connected"
                   values={{ connectorName: connectors[0]?.name || 'LLM' }}
                 />
-              )}
-            </EuiText>
+              </EuiText>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

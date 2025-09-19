@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  type AttackDiscovery,
-  Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
+import type { Replacements, AttackDiscovery } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 
 export const getDiscoveriesWithOriginalValues = ({
   attackDiscoveries,

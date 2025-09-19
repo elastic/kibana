@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { RenderedElement } from './rendered_element';
-import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
+import type { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 import { useCanvasShareableState } from '../context';
 
 import css from './page.module.scss';

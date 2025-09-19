@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -346,6 +346,10 @@ export default function (providerContext: FtrProviderContext) {
         installed_kibana: sortBy(
           [
             {
+              id: 'sample_alerting_rule_template',
+              type: 'alerting_rule_template',
+            },
+            {
               id: 'sample_dashboard',
               type: 'dashboard',
             },
@@ -574,6 +578,11 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490',
             path: 'all_assets-0.2.0/kibana/dashboard/sample_dashboard.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'c5eaf69c-2dab-5678-a6e5-e586db4f3728',
+            path: 'all_assets-0.2.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
             type: 'epm-packages-assets',
           },
           {

@@ -16,12 +16,12 @@ export {
 } from './autocomplete/helpers';
 export { getSuggestionsToRightOfOperatorExpression } from './operators';
 export {
-  buildFieldsDefinitionsWithMetadata,
+  buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getFunctionSignatures,
   getFunctionDefinition,
 } from './functions';
-export { getDateLiterals, getCompatibleLiterals, compareTypesWithLiterals } from './literals';
+export { getDateLiterals, getCompatibleLiterals } from './literals';
 export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';

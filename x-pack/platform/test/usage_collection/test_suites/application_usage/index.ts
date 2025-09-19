@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { applicationUsageSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/application_usage/schema';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application Usage', function () {

@@ -9,17 +9,17 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
-
-import { routeWithNamespace } from 'x-pack/test/common/utils/security_solution';
 
 {{#each operations}}
-import { 
+import type { 
   {{operationId}}RequestQueryInput,
   {{operationId}}RequestParamsInput,
   {{operationId}}RequestBodyInput
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
 {{/each}}
+
+import { FtrProviderContext } from 'x-pack/solutions/security/test/api_integration/ftr_provider_context';
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -33,7 +33,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     {{/if}}
     {{camelCase operationId}}({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props, {{/if}}kibanaSpace: string = 'default') {
       return supertest
-        .{{method}}(routeWithNamespace({{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}}, kibanaSpace))
+        .{{method}}(getRouteUrlForSpace({{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}}, kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '{{version}}')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -18,9 +18,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
       // Functional tests verify behavior when referenced index pattern saved objects can not be found.
       // However, saved object import fails when reference saved objects can not be found.
@@ -46,7 +48,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
@@ -54,9 +56,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
     });
 

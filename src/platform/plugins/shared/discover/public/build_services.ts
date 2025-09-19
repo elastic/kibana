@@ -55,6 +55,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
@@ -64,6 +65,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -92,6 +94,7 @@ export interface DiscoverServices {
   i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
+  contentManagement: ContentManagementPublicStart;
   core: CoreStart;
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
@@ -144,6 +147,7 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  metricsExperience?: MetricsExperiencePluginStart;
 }
 
 export const buildServices = ({
@@ -182,6 +186,7 @@ export const buildServices = ({
     addBasePath: core.http.basePath.prepend,
     analytics: core.analytics,
     capabilities: core.application.capabilities,
+    contentManagement: plugins.contentManagement,
     chrome: core.chrome,
     core,
     data: plugins.data,
@@ -238,5 +243,6 @@ export const buildServices = ({
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
     apmSourcesAccess: plugins.apmSourcesAccess,
+    metricsExperience: plugins.metricsExperience,
   };
 };

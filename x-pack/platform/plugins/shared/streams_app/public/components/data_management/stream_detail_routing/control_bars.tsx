@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiToolTip,
-  EuiToolTipProps,
-  EuiButtonEmptyProps,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiToolTipProps, EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiButton, EuiButtonEmpty, EuiToolTip, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import { StreamDeleteModal } from '../../stream_delete_modal';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export const AddRoutingRuleControls = () => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -44,10 +37,8 @@ export const AddRoutingRuleControls = () => {
 };
 
 export const EditRoutingRuleControls = ({
-  relatedStreams,
   routingRule,
 }: {
-  relatedStreams: string[];
   routingRule: RoutingDefinitionWithUIAttributes;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -66,7 +57,6 @@ export const EditRoutingRuleControls = ({
       <RemoveButton
         onDelete={removeRule}
         isDisabled={!canRemoveRoutingRule}
-        relatedStreams={relatedStreams}
         streamName={routingRuleName}
       />
       <EuiFlexItem grow={false}>
@@ -88,12 +78,10 @@ export const EditRoutingRuleControls = ({
 const RemoveButton = ({
   isDisabled,
   onDelete,
-  relatedStreams,
   streamName,
 }: {
   isDisabled: boolean;
   onDelete: () => Promise<void>;
-  relatedStreams: string[];
   streamName: string;
 }) => {
   const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
@@ -117,7 +105,6 @@ const RemoveButton = ({
           onCancel={closeDeleteModal}
           onDelete={onDelete}
           name={streamName}
-          relatedStreams={relatedStreams}
         />
       )}
     </>

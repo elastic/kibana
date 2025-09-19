@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import type { Observable, Subject, Subscription } from 'rxjs';
 import {
   map,
-  Observable,
-  Subject,
-  Subscription,
   switchMap,
   takeUntil,
   filter,
@@ -21,16 +19,16 @@ import {
 } from 'rxjs';
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
-import {
+import type {
   CoreSetup,
   Logger,
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-  ServiceStatusLevels,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
-import type { ILicense } from '../common/types';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { registerRoutes } from './routes';

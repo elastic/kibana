@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment } from 'react';
 
 import { css } from '@emotion/react';
 
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLoadingSpinner,
@@ -16,8 +18,6 @@ import {
   shadeOrTint,
   makeHighContrastColor,
   tintOrShade,
-  EuiThemeColorModeStandard,
-  EuiThemeComputed,
 } from '@elastic/eui';
 
 type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';

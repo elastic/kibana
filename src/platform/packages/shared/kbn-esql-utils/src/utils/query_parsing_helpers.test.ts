@@ -10,6 +10,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
+  getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
@@ -24,8 +25,11 @@ import {
   getCategorizeColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
+  findClosestColumn,
+  getKqlSearchQueries,
 } from './query_parsing_helpers';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLColumn } from '@kbn/esql-ast';
 import { parse, walk } from '@kbn/esql-ast';
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
@@ -200,23 +204,59 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('getKqlSearchQueries', () => {
+    it('should return an empty array for a regular ES|QL query', () => {
+      expect(getKqlSearchQueries('from a | where field == "value"')).toStrictEqual([]);
+    });
+
+    it('should return an empty array if there are no search functions', () => {
+      expect(getKqlSearchQueries('from a | eval b = 1')).toStrictEqual([]);
+    });
+
+    it("should return a KQL query when it's embedded in ES|QL query", () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
+        'field : "value"',
+      ]);
+    });
+
+    it('should correctly parse KQL full text embedded query', () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
+    });
+
+    it('should correctly parse long queries', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories" """)'
+        )
+      ).toStrictEqual([
+        '(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories"',
+      ]);
+    });
+
+    it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND KQL("""field2:value2""")'
+        )
+      ).toStrictEqual(['field1: "value1"', 'field2:value2']);
+    });
+  });
+
   describe('prettifyQuery', function () {
     it('should return the code wrapped', function () {
-      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1');
       expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
     });
 
-    it('should return the code unwrapped', function () {
-      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
+    it('should return the code wrapped with comments', function () {
       const code = prettifyQuery(
-        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
-        true
+        'FROM index1 /* cmt */ | KEEP field1, field2 /* cmt */ | SORT field1 /* cmt */'
       );
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(code).toEqual(
+        'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
     });
   });
 
@@ -557,6 +597,107 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('findClosestColumn', () => {
+    const mockColumns: ESQLColumn[] = [
+      {
+        args: [],
+        location: { min: 10, max: 15 },
+        text: 'col1',
+        incomplete: false,
+        parts: ['col1'],
+        quoted: false,
+        name: 'col1',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 20, max: 25 },
+        text: 'col2',
+        incomplete: false,
+        parts: ['col2'],
+        quoted: false,
+        name: 'col2',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 30, max: 40 },
+        text: 'col3.sub',
+        incomplete: false,
+        parts: ['col3', 'sub'],
+        quoted: false,
+        name: 'col3.sub',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 56, max: 63 },
+        text: 'clientip',
+        incomplete: false,
+        parts: ['clientip'],
+        quoted: false,
+        name: 'clientip',
+        type: 'column',
+      },
+    ];
+
+    it('should return undefined if the columns array is empty', () => {
+      const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
+      expect(findClosestColumn([], cursor)).toBeUndefined();
+    });
+
+    it('should return the column if the cursor is exactly at its min boundary', () => {
+      const cursor = { lineNumber: 1, column: 10 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the column if the cursor is exactly at its max boundary', () => {
+      const cursor = { lineNumber: 1, column: 15 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the column if the cursor is inside its range', () => {
+      const cursor = { lineNumber: 1, column: 12 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+
+      const cursor2 = { lineNumber: 1, column: 35 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor2)).toEqual(mockColumns[2]); // col3.sub
+    });
+
+    it('should return the closest column when cursor is between two columns (closer to the first)', () => {
+      const cursor = { lineNumber: 1, column: 17 } as monaco.Position; // 2 units from col1.max, 3 units from col2.min
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the closest column when cursor is between two columns (closer to the second)', () => {
+      const cursor = { lineNumber: 1, column: 18 } as monaco.Position; // 3 units from col1.max, 2 units from col2.min
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2
+    });
+
+    it('should return the closest column when cursor is far to the left of all columns', () => {
+      const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the closest column when cursor is far to the right of all columns', () => {
+      const cursor = { lineNumber: 1, column: 70 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[3]); // clientip
+    });
+
+    it('should correctly identify column when cursor is just outside max of previous column', () => {
+      const cursor = { lineNumber: 1, column: 26 } as monaco.Position; // Just past col2.max (25)
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2 (closest boundary is 25)
+    });
+
+    it('should prioritize the first found if distances are exactly equal (edge case for between columns)', () => {
+      const equidistantColumns: ESQLColumn[] = [
+        { ...mockColumns[0], location: { min: 10, max: 12 } },
+        { ...mockColumns[1], location: { min: 14, max: 16 } },
+      ];
+      const cursor = { lineNumber: 1, column: 13 } as monaco.Position; // 1 unit from col1.max, 1 unit from col2.min
+      expect(findClosestColumn(equidistantColumns, cursor)).toEqual(equidistantColumns[0]);
+    });
+  });
   describe('getValuesFromQueryField', () => {
     it('should return the values from the query field', () => {
       const queryString = 'FROM my_index | WHERE my_field ==';
@@ -577,6 +718,15 @@ describe('esql query helpers', () => {
       const queryString = 'FROM my_index \n| WHERE my_field >=';
       const values = getValuesFromQueryField(queryString);
       expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query when we have more than one columns', () => {
+      const queryString = 'FROM my_index | WHERE my_field >= 1200 AND another_field == ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 63,
+      } as monaco.Position);
+      expect(values).toEqual('another_field');
     });
 
     it('should return the values from the query field with new lines when cursor is not at the end', () => {
@@ -853,6 +1003,62 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getRemoteClustersFromESQLQuery', () => {
+    it('should return undefined for queries without remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM foo')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo-1,foo-2')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo | STATS COUNT(*)')).toBeUndefined();
+    });
+
+    it('should return undefined for empty or undefined queries', () => {
+      expect(getRemoteClustersFromESQLQuery('')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery()).toBeUndefined();
+    });
+
+    it('should extract remote clusters from FROM command', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1')).toEqual(['cluster1']);
+      expect(getRemoteClustersFromESQLQuery('FROM remote_cluster:foo-2')).toEqual([
+        'remote_cluster',
+      ]);
+    });
+
+    it('should extract multiple remote clusters from mixed indices', () => {
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM local-index, cluster1:remote-index1, cluster2:remote-index2'
+        )
+      ).toEqual(['cluster1', 'cluster2']);
+      expect(
+        getRemoteClustersFromESQLQuery('FROM cluster1:index1, local-index, cluster2:index2')
+      ).toEqual(['cluster1', 'cluster2']);
+    });
+
+    it('should extract remote clusters from TS command', () => {
+      expect(getRemoteClustersFromESQLQuery('TS cluster1:tsdb')).toEqual(['cluster1']);
+      expect(
+        getRemoteClustersFromESQLQuery('TS remote_cluster:timeseries | STATS max(cpu) BY host')
+      ).toEqual(['remote_cluster']);
+    });
+
+    it('should handle duplicate remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1, cluster1:index2')).toEqual([
+        'cluster1',
+      ]);
+    });
+
+    it('should handle wrapped in quotes', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM "cluster1:index1,cluster1:index2"')).toEqual([
+        'cluster1',
+      ]);
+
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
+        )
+      ).toEqual(['cluster3', 'cluster1', 'cluster2']);
     });
   });
 });

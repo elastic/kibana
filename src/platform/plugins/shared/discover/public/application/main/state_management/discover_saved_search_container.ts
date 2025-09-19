@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { FilterCompareOptions } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { canImportVisContext } from '@kbn/unified-histogram';
-import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../common/constants';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
-import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import type { InternalStateStore } from './redux';
+import type { InternalStateStore, TabState } from './redux';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -90,14 +88,6 @@ export interface DiscoverSavedSearchContainer {
    */
   getState: () => SavedSearch;
   /**
-   * Persist the given saved search
-   * Resets the initial and current state of the saved search
-   */
-  persist: (
-    savedSearch: SavedSearch,
-    saveOptions?: SavedObjectSaveOpts
-  ) => Promise<{ id: string | undefined } | undefined>;
-  /**
    * Set the persisted & current state of the saved search
    * Happens when a saved search is loaded or a new one is created
    * @param savedSearch
@@ -123,16 +113,21 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
+  /**
+   * Updates the current value of controlState in saved search
+   * @param params
+   */
+  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
   services,
-  globalStateContainer,
   internalState,
+  getCurrentTab,
 }: {
   services: DiscoverServices;
-  globalStateContainer: DiscoverGlobalStateContainer;
   internalState: InternalStateStore;
+  getCurrentTab: () => TabState;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -178,59 +173,6 @@ export function getSavedSearchContainer({
     };
   };
 
-  const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
-    addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-
-    const dataView = nextSavedSearch.searchSource.getField('index');
-    const profileDataViewIds = internalState.getState().defaultProfileAdHocDataViewIds;
-    let replacementDataView: DataView | undefined;
-
-    // If the Discover session is using a default profile ad hoc data view,
-    // we copy it with a new ID to avoid conflicts with the profile defaults
-    if (dataView?.id && profileDataViewIds.includes(dataView.id)) {
-      const replacementSpec: DataViewSpec = {
-        ...dataView.toSpec(),
-        id: uuidv4(),
-        name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
-          defaultMessage: '{dataViewName} ({discoverSessionTitle})',
-          values: {
-            dataViewName: dataView.name ?? dataView.getIndexPattern(),
-            discoverSessionTitle: nextSavedSearch.title,
-          },
-        }),
-      };
-
-      // Skip field list fetching since the existing data view already has the fields
-      replacementDataView = await services.dataViews.create(replacementSpec, true);
-    }
-
-    updateSavedSearch({
-      savedSearch: nextSavedSearch,
-      globalStateContainer,
-      services,
-      useFilterAndQueryServices: true,
-      dataView: replacementDataView,
-    });
-
-    const currentFilters = nextSavedSearch.searchSource.getField('filter');
-
-    // If the data view was replaced, we need to update the filter references
-    if (dataView?.id && replacementDataView?.id && Array.isArray(currentFilters)) {
-      nextSavedSearch.searchSource.setField(
-        'filter',
-        updateFilterReferences(currentFilters, dataView.id, replacementDataView.id)
-      );
-    }
-
-    const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
-
-    if (id) {
-      set(nextSavedSearch);
-    }
-
-    return { id };
-  };
-
   const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
@@ -248,8 +190,9 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
-      state: nextState || {},
-      globalStateContainer,
+      initialInternalState: undefined,
+      appState: nextState || {},
+      globalState: getCurrentTab().globalState,
       services,
       useFilterAndQueryServices,
     });
@@ -293,6 +236,22 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
+  const updateControlState = ({
+    nextControlState,
+  }: {
+    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
+  }) => {
+    const previousSavedSearch = getState();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      controlGroupJson: JSON.stringify(nextControlState),
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateControlState done', nextSavedSearch);
+  };
+
   return {
     initUrlTracking,
     getCurrent$,
@@ -301,12 +260,12 @@ export function getSavedSearchContainer({
     getInitial$,
     getState,
     getTitle,
-    persist,
     set,
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
     updateTimeRange,
     updateVisContext,
+    updateControlState,
   };
 }
 

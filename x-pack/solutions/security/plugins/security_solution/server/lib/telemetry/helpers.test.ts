@@ -25,6 +25,7 @@ import {
   tlog,
   setIsElasticCloudDeployment,
   processK8sUsernames,
+  unflatten,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -1032,5 +1033,43 @@ describe('Pii is removed from a kubernetes prebuilt rule alert', () => {
 
     const sanitizedDocument = processK8sUsernames(clusterUuid, testDocument);
     expect(sanitizedDocument).toEqual(testDocument);
+  });
+});
+
+describe('unflatten', () => {
+  test('should handle empty objects', () => {
+    expect(unflatten({})).toEqual({});
+  });
+
+  test('should unflatten single level paths', () => {
+    expect(unflatten({ 'a.b': 1 })).toEqual({ a: { b: 1 } });
+  });
+
+  test('should unflatten multi level paths', () => {
+    expect(unflatten({ 'a.b.c': 5, 'a.b.d': 6 })).toEqual({
+      a: { b: { c: 5, d: 6 } },
+    });
+  });
+
+  test('should preserve non-path keys with leading/trailing/consecutive dots', () => {
+    expect(unflatten({ '.kibana': 1, 'kbn.': 2, 'kibana..kbn': 3 })).toEqual({
+      '.kibana': 1,
+      'kbn.': 2,
+      'kibana..kbn': 3,
+    });
+  });
+
+  test('should recursively unflatten arrays of POJOs', () => {
+    const input = {
+      list: [{ 'a.b': 1 }, { 'c.d.e': 2 }],
+    };
+    expect(unflatten(input)).toEqual({
+      list: [{ a: { b: 1 } }, { c: { d: { e: 2 } } }],
+    });
+  });
+
+  test('should leave arrays of primitives untouched', () => {
+    const input = { nums: [1, 2, 3] };
+    expect(unflatten(input)).toEqual({ nums: [1, 2, 3] });
   });
 });

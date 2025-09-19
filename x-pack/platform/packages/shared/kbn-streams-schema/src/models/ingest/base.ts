@@ -5,11 +5,17 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
-import { Validation, validation } from '../validation/validation';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
-import { ProcessorDefinition, processorDefinitionSchema } from './processors';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { streamlangDSLSchema } from '@kbn/streamlang';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { IngestStreamLifecycle } from './lifecycle';
+import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -34,14 +40,16 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: ProcessorDefinition[];
+  processing: StreamlangDSL;
+  settings: IngestStreamSettings;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
-    processing: z.array(processorDefinitionSchema),
+    processing: streamlangDSLSchema,
+    settings: ingestStreamSettingsSchema,
   })
 );
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFieldText,
@@ -15,30 +16,33 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSelect,
-  EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
-import {
-  BinaryFilterCondition,
-  Condition,
-  FilterCondition,
-  isCondition,
-  isNeverCondition,
-} from '@kbn/streams-schema';
+
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import { isPlainObject } from 'lodash';
+import type { Condition, FilterCondition, OperatorKeys } from '@kbn/streamlang';
 import {
-  ALWAYS_CONDITION,
-  NEVER_CONDITION,
-  alwaysToEmptyEquals,
-  emptyEqualsToAlways,
-} from '../../../util/condition';
+  getDefaultFormValueForOperator,
+  getFilterOperator,
+  getFilterValue,
+  isCondition,
+  isFilterConditionObject,
+  operatorToHumanReadableNameMap,
+} from '@kbn/streamlang';
+import { isPlainObject } from 'lodash';
+import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
+import { isRoutingEnabled } from '@kbn/streams-schema';
+import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
-export type RoutingConditionEditorProps = ConditionEditorProps;
+type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
+
+export type RoutingConditionEditorProps = ConditionEditorProps & {
+  onStatusChange: (params: RoutingConditionChangeParams['status']) => void;
+};
 
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
-  const isEnabled = !isNeverCondition(props.condition);
+  const isEnabled = isRoutingEnabled(props.status);
 
   return (
     <EuiForm fullWidth>
@@ -63,55 +67,46 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           })}
           compressed
           checked={isEnabled}
-          onChange={(event) => {
-            props.onConditionChange(event.target.checked ? ALWAYS_CONDITION : NEVER_CONDITION);
-          }}
+          onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
-      {isEnabled && <ConditionEditor {...props} />}
+      <ConditionEditor {...props} />
     </EuiForm>
   );
 }
 
-const operatorMap = {
-  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
-  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
-  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
-  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
-    defaultMessage: 'less than or equals',
-  }),
-  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
-  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
-    defaultMessage: 'greater than or equals',
-  }),
-  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
-  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
-  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
-  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
-  notExists: i18n.translate('xpack.streams.filter.notExists', { defaultMessage: 'not exists' }),
-};
+export type ProcessorConditionEditorProps = Omit<ConditionEditorProps, 'status'>;
 
-const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([value, text]) => ({
-  value,
-  text,
-}));
+export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
+  return <ConditionEditor status="enabled" {...props} />;
+}
 
-export interface ConditionEditorProps {
+const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
+  ([value, text]) => ({
+    value,
+    text,
+  })
+);
+
+interface ConditionEditorProps {
   condition: Condition;
+  status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
+  const { status, onConditionChange } = props;
+
   const isInvalidCondition = !isCondition(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
-  const isFilterCondition = isPlainObject(condition) && 'operator' in condition;
+  const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
 
   const handleConditionChange = (updatedCondition: Condition) => {
-    props.onConditionChange(emptyEqualsToAlways(updatedCondition));
+    onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
 
   return (
@@ -121,12 +116,14 @@ export function ConditionEditor(props: ConditionEditorProps) {
       })}
       labelAppend={
         <EuiSwitch
+          data-test-subj="streamsAppConditionEditorSwitch"
           label={i18n.translate('xpack.streams.conditionEditor.switch', {
             defaultMessage: 'Syntax editor',
           })}
           compressed
           checked={usingSyntaxEditor}
           onChange={toggleSyntaxEditor}
+          disabled={status === 'disabled'}
         />
       }
       isInvalid={isInvalidCondition}
@@ -140,6 +137,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
     >
       {usingSyntaxEditor ? (
         <CodeEditor
+          dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
           languageId="json"
           value={JSON.stringify(condition, null, 2)}
@@ -150,9 +148,17 @@ export function ConditionEditor(props: ConditionEditorProps) {
               // do nothing
             }
           }}
+          options={{
+            readOnly: status === 'disabled',
+            automaticLayout: true,
+          }}
         />
       ) : isFilterCondition ? (
-        <FilterForm condition={condition} onConditionChange={handleConditionChange} />
+        <FilterForm
+          disabled={status === 'disabled'}
+          condition={condition}
+          onConditionChange={handleConditionChange}
+        />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
           {JSON.stringify(condition, null, 2)}
@@ -164,69 +170,117 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
 function FilterForm(props: {
   condition: FilterCondition;
+  disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
 }) {
+  const { condition, disabled, onConditionChange } = props;
+
+  const operator = useMemo(() => {
+    return getFilterOperator(condition);
+  }, [condition]);
+
+  const value = useMemo(() => {
+    return getFilterValue(condition);
+  }, [condition]);
+
   const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
-    props.onConditionChange({
-      ...props.condition,
+    onConditionChange({
+      ...condition,
       ...updatedCondition,
     } as FilterCondition);
   };
 
+  const handleValueChange = (nextValue: string | boolean) => {
+    onConditionChange({
+      field: condition.field,
+      [operator as OperatorKeys]: nextValue,
+    } as FilterCondition);
+  };
+
   const handleOperatorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCondition: Partial<FilterCondition> = { ...props.condition };
-
     const newOperator = event.target.value;
-    if (newOperator === 'exists' || newOperator === 'notExists') {
-      if ('value' in newCondition) delete newCondition.value;
-    } else if (!('value' in newCondition)) {
-      (newCondition as BinaryFilterCondition).value = '';
-    }
 
-    props.onConditionChange({
-      ...newCondition,
-      operator: newOperator,
+    const existingValue = getFilterValue(condition);
+
+    const defaultValue = getDefaultFormValueForOperator(newOperator as OperatorKeys);
+
+    const typeChanged = typeof existingValue !== typeof defaultValue;
+
+    onConditionChange({
+      field: condition.field,
+      [newOperator]: existingValue !== undefined && !typeChanged ? existingValue : defaultValue,
     } as FilterCondition);
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
       <EuiFieldText
-        data-test-subj="streamsAppFilterFormFieldText"
+        data-test-subj="streamsAppConditionEditorFieldText"
         aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
         compressed
         placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
           defaultMessage: 'Field',
         })}
-        value={props.condition.field}
+        value={condition.field}
         onChange={(e) => {
           handleConditionChange({ field: e.target.value });
         }}
+        disabled={disabled}
       />
       <EuiSelect
         aria-label={i18n.translate('xpack.streams.filter.operator', {
           defaultMessage: 'Operator',
         })}
-        data-test-subj="streamsAppFilterFormSelect"
+        data-test-subj="streamsAppConditionEditorOperator"
         options={operatorOptions}
-        value={props.condition.operator}
+        value={operator}
         compressed
         onChange={handleOperatorChange}
+        disabled={disabled}
       />
-      {'value' in props.condition && (
+      {typeof value === 'string' ? (
         <EuiFieldText
           aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
           placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
             defaultMessage: 'Value',
           })}
           compressed
-          value={String(props.condition.value)}
-          data-test-subj="streamsAppFilterFormValueText"
+          value={value}
+          data-test-subj="streamsAppConditionEditorValueText"
           onChange={(e) => {
-            handleConditionChange({ value: e.target.value });
+            handleValueChange(e.target.value);
           }}
+          disabled={disabled}
         />
-      )}
+      ) : typeof value === 'boolean' ? (
+        <EuiSelect
+          aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
+            defaultMessage: 'Value',
+          })}
+          compressed
+          options={[
+            {
+              value: 'true',
+              text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
+                defaultMessage: 'True',
+              }),
+            },
+            {
+              value: 'false',
+              text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
+                defaultMessage: 'False',
+              }),
+            },
+          ]}
+          value={String(value)}
+          data-test-subj="streamsAppFilterFormValueBoolean"
+          onChange={(e) => {
+            const nextValue = e.target.value === 'true' ? true : false;
+            handleValueChange(nextValue);
+          }}
+          disabled={disabled}
+        />
+      ) : null}
     </EuiFlexGroup>
   );
 }

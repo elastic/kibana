@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export * from './all';
-export * from './details';
+export type * from './all';
+export type * from './details';
 export * from './last_event_time';
-export * from './eql';
+export type * from './eql';
 
 export enum TimelineEventsQueries {
   all = 'eventsAll',

@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 
-import { splitSizeAndUnits, DataStream } from '../../../common';
+import type { DataStream } from '../../../common';
+import { splitSizeAndUnits } from '../../../common';
 import { timeUnits, extraTimeUnits } from '../constants/time_units';
 
 export const isManaged = (dataStream: DataStream): boolean => {
@@ -61,13 +62,12 @@ export const getLifecycleValue = (
 
     if (inifniteAsIcon) {
       return (
-        <EuiToolTip
+        <EuiIconTip
           data-test-subj="infiniteRetention"
           position="top"
           content={infiniteDataRetention}
-        >
-          <EuiIcon type="infinity" />
-        </EuiToolTip>
+          type="infinity"
+        />
       );
     }
 

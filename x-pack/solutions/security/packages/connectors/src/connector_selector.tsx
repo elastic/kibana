@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
-  EuiSuperSelectProps,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';

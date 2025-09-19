@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { MAX_NUMBER_OF_ALLOCATIONS } from '../../constants';
 import { AdaptiveAllocationsTitle } from './adaptive_allocations_title';
 
@@ -19,5 +20,5 @@ export const ConfigFieldTitularComponent = ({ configKey }: { configKey: string }
   if (!Component) {
     return null;
   }
-  return <Component /> ?? null;
+  return <Component />;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -197,8 +197,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('advanced job', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/categorization_small'
+      );
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();

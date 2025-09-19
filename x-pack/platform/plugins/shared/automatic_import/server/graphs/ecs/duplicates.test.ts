@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 import type { EcsMappingState } from '../../types';
 import { handleDuplicates } from './duplicates';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: '{ "message": "ll callback later."}',
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const state: EcsMappingState = ecsTestState;
 

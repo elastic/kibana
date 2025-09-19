@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
@@ -23,7 +23,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/hidden_saved_objects'
         );
       });
       after(async () => {

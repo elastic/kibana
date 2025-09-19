@@ -7,36 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitForeachNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { ExitForeachNode } from '@kbn/workflows/graph';
+import type { NodeImplementation } from '../node_implementation';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
-export class ExitForeachNodeImpl implements StepImplementation {
+export class ExitForeachNodeImpl implements NodeImplementation {
   constructor(
-    private step: ExitForeachNode,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private node: ExitForeachNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    const foreachState = this.workflowState.getStepState(this.step.startNodeId);
+    // Exit the scope of the current iteration
+    this.wfExecutionRuntimeManager.exitScope();
+    const foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
 
     if (!foreachState) {
-      const error = new Error(`Foreach state for step ${this.step.startNodeId} not found`);
-      await this.workflowState.setStepResult(this.step.startNodeId, {
-        output: null,
-        error,
-      });
-      await this.workflowState.finishStep(this.step.startNodeId);
-      return;
+      throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }
 
     if (foreachState.items[foreachState.index + 1]) {
-      this.workflowState.goToStep(this.step.startNodeId);
+      this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
       return;
     }
 
-    await this.workflowState.setStepState(this.step.startNodeId, undefined);
-    await this.workflowState.finishStep(this.step.startNodeId);
-    this.workflowState.goToNextStep();
+    await this.wfExecutionRuntimeManager.finishStep();
+    this.workflowLogger.logDebug(
+      `Exiting foreach step ${this.node.stepId} after processing all items.`,
+      {
+        workflow: { step_id: this.node.stepId },
+      }
+    );
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getEditControlGroupButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {

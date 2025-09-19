@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { badRequest } from '@hapi/boom';
 import { createDatasetQualityESClient } from '../../../utils';
 import { updateComponentTemplate } from './update_component_template';
 import { updateLastBackingIndexSettings } from './update_settings_last_backing_index';
-import { UpdateFieldLimitResponse } from '../../../../common/api_types';
+import type { UpdateFieldLimitResponse } from '../../../../common/api_types';
 import { getDataStreamSettings } from '../get_datastream_settings';
 
 export async function updateFieldLimit({

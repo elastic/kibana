@@ -8,11 +8,11 @@
 import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { fromNullable, fold } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 
-import { Rule } from '../../../../types';
+import type { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ViewInAppProps {

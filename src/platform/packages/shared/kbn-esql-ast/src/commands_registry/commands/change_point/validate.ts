@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { errors } from '../../../definitions/utils';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
+import type { SupportedDataType } from '../../../definitions/types';
 import { isNumericType } from '../../../definitions/types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
@@ -24,34 +27,21 @@ export const validate = (
   const valueArg = command.args[0];
   if (isColumn(valueArg)) {
     const columnName = valueArg.name;
-    // look up for columns in userDefinedColumns and existing fields
-    let valueColumnType: string | undefined;
-    const userDefinedColumnRef = context?.userDefinedColumns.get(columnName);
-    if (userDefinedColumnRef) {
-      valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
-    } else {
-      const fieldRef = context?.fields.get(columnName);
-      valueColumnType = fieldRef?.type;
+    let valueColumnType: SupportedDataType | 'unknown' | undefined;
+
+    if (context?.columns.has(columnName)) {
+      valueColumnType = context?.columns.get(columnName)?.type;
     }
 
     if (valueColumnType && !isNumericType(valueColumnType)) {
-      messages.push({
-        location: command.location,
-        text: i18n.translate('kbn-esql-ast.esql.validation.changePointUnsupportedFieldType', {
-          defaultMessage:
-            'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
-          values: { columnName, valueColumnType },
-        }),
-        type: 'error',
-        code: 'changePointUnsupportedFieldType',
-      });
+      messages.push(errors.changePointWrongFieldType(valueArg, valueColumnType));
     }
   }
 
   // validate ON column
   const defaultOnColumnName = '@timestamp';
   const onColumn = command.args.find((arg) => isOptionNode(arg) && arg.name === 'on');
-  const hasDefaultOnColumn = context?.fields.has(defaultOnColumnName);
+  const hasDefaultOnColumn = context?.columns.has(defaultOnColumnName);
   if (!onColumn && !hasDefaultOnColumn) {
     messages.push({
       location: command.location,
@@ -64,20 +54,15 @@ export const validate = (
     });
   }
 
-  // validate AS
-  const asArg = command.args.find((arg) => isOptionNode(arg) && arg.name === 'as');
-  if (asArg && isOptionNode(asArg)) {
-    // populate userDefinedColumns references to prevent the common check from failing with unknown column
-    asArg.args.forEach((arg, index) => {
-      if (isColumn(arg)) {
-        context?.userDefinedColumns.set(arg.name, [
-          { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
-        ]);
-      }
-    });
-  }
-
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(
+    ...validateCommandArguments(
+      // exclude AS option from generic validation
+      { ...command, args: command.args.filter((arg) => !(isOptionNode(arg) && arg.name === 'as')) },
+      ast,
+      context,
+      callbacks
+    )
+  );
 
   return messages;
 };

@@ -47,11 +47,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Alert - Get Index - RBAC - spaces', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     before(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     describe('Users:', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { Logger } from '@kbn/logging';
+import type { Readable } from 'stream';
+import type { Logger } from '@kbn/logging';
 
 export type StreamParser = (
   responseStream: Readable,

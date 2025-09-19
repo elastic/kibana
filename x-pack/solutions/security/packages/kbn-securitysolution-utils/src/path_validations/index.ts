@@ -22,6 +22,17 @@ export enum ConditionEntryField {
   SIGNER_MAC = 'process.code_signature',
 }
 
+export enum TrustedDeviceConditionEntryField {
+  USERNAME = 'user.name',
+  HOST = 'host.name',
+  DEVICE_ID = 'device.serial_number',
+  MANUFACTURER = 'device.vendor.name',
+  PRODUCT_ID = 'device.product.id',
+  PRODUCT_NAME = 'device.product.name',
+  DEVICE_TYPE = 'device.type',
+  MANUFACTURER_ID = 'device.vendor.id',
+}
+
 export enum EntryFieldType {
   HASH = '.hash.',
   EXECUTABLE = '.executable.caseless',
@@ -54,6 +65,35 @@ export enum OperatingSystem {
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
 export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
+
+export const TRUSTED_DEVICE_OS_FIELD_AVAILABILITY = {
+  /** Fields available for all supported operating systems */
+  ALL_OS: [
+    TrustedDeviceConditionEntryField.DEVICE_ID,
+    TrustedDeviceConditionEntryField.DEVICE_TYPE,
+    TrustedDeviceConditionEntryField.HOST,
+    TrustedDeviceConditionEntryField.MANUFACTURER,
+    TrustedDeviceConditionEntryField.MANUFACTURER_ID,
+    TrustedDeviceConditionEntryField.PRODUCT_ID,
+    TrustedDeviceConditionEntryField.PRODUCT_NAME,
+  ] as const,
+
+  /** Fields available only for Windows OS exclusively */
+  WINDOWS_ONLY: [TrustedDeviceConditionEntryField.USERNAME] as const,
+} as const;
+
+export function isTrustedDeviceFieldAvailableForOs(
+  field: TrustedDeviceConditionEntryField,
+  osTypes: readonly string[]
+): boolean {
+  const { WINDOWS_ONLY, ALL_OS } = TRUSTED_DEVICE_OS_FIELD_AVAILABILITY;
+
+  if (WINDOWS_ONLY.includes(field as (typeof WINDOWS_ONLY)[number])) {
+    return osTypes.length === 1 && osTypes.includes(OperatingSystem.WINDOWS);
+  }
+
+  return ALL_OS.includes(field as (typeof ALL_OS)[number]);
+}
 
 export const validatePotentialWildcardInput = ({
   field = '',

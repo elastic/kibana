@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, FC } from 'react';
+import type { FC } from 'react';
+import React, { Component } from 'react';
 import { shallow } from 'enzyme';
 import { useSharedUXRoutesContext } from './routes_context';
 import { Route } from './route';

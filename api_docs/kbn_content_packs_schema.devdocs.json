@@ -74,7 +74,7 @@
         "label": "getEntryTypeByFile",
         "description": [],
         "signature": [
-          "(rootDir: string, filepath: string) => \"dashboard\" | \"index-pattern\" | \"lens\" | \"stream\""
+          "(rootDir: string, filepath: string) => \"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
         "deprecated": false,
@@ -170,7 +170,15 @@
         "label": "isIncludeAll",
         "description": [],
         "signature": [
-          "(value: unknown) => value is ",
+          "(value: ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ") => value is ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -186,12 +194,18 @@
           {
             "parentPluginId": "@kbn/content-packs-schema",
             "id": "def-common.isIncludeAll.$1",
-            "type": "Unknown",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "unknown"
+              {
+                "pluginId": "@kbn/content-packs-schema",
+                "scope": "common",
+                "docId": "kibKbnContentPacksSchemaPluginApi",
+                "section": "def-common.ContentPackIncludedObjects",
+                "text": "ContentPackIncludedObjects"
+              }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
             "deprecated": false,
@@ -543,41 +557,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-packs-schema",
-            "id": "def-common.ContentPackIncludeAll.all",
-            "type": "Object",
-            "tags": [],
-            "label": "all",
-            "description": [],
-            "signature": [
-              "{}"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-packs-schema",
-        "id": "def-common.ContentPackIncludeObjects",
-        "type": "Interface",
-        "tags": [],
-        "label": "ContentPackIncludeObjects",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-packs-schema",
-            "id": "def-common.ContentPackIncludeObjects.objects",
+            "id": "def-common.ContentPackIncludeAll.objects",
             "type": "Object",
             "tags": [],
             "label": "objects",
             "description": [],
             "signature": [
-              "{ streams: string[]; }"
+              "{ all: {}; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
             "deprecated": false,
@@ -957,17 +943,18 @@
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
             "docId": "kibKbnContentPacksSchemaPluginApi",
-            "section": "def-common.ContentPackIncludeObjects",
-            "text": "ContentPackIncludeObjects"
+            "section": "def-common.ContentPackIncludeAll",
+            "text": "ContentPackIncludeAll"
           },
-          " | ",
+          " | { objects: { queries: { id: string; }[]; routing: ({ destination: string; } & ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
             "docId": "kibKbnContentPacksSchemaPluginApi",
-            "section": "def-common.ContentPackIncludeAll",
-            "text": "ContentPackIncludeAll"
-          }
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ")[]; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
         "deprecated": false,
@@ -983,7 +970,7 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<{ title: string; description?: string | undefined; references: ",
+          "<{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1055,7 +1042,7 @@
             "section": "def-public.XYState",
             "text": "XYState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1121,7 +1108,7 @@
           },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1193,7 +1180,7 @@
             "section": "def-public.HeatmapVisualizationState",
             "text": "HeatmapVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1265,7 +1252,7 @@
             "section": "def-public.GaugeVisualizationState",
             "text": "GaugeVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1337,7 +1324,7 @@
             "section": "def-public.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1409,7 +1396,7 @@
             "section": "def-common.LegacyMetricState",
             "text": "LegacyMetricState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1481,7 +1468,7 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "; }; } | { title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1657,7 +1644,7 @@
         "label": "SupportedEntryType",
         "description": [],
         "signature": [
-          "\"dashboard\" | \"index-pattern\" | \"lens\" | \"stream\""
+          "\"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
         "deprecated": false,
@@ -1666,21 +1653,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/content-packs-schema",
-        "id": "def-common.contentPackIncludeAllSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "contentPackIncludeAllSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ all: Zod.ZodObject<{}, \"strict\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { all: {}; }, { all: {}; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/content-packs-schema",
         "id": "def-common.contentPackIncludedObjectsSchema",

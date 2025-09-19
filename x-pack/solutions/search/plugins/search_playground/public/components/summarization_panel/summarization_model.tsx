@@ -24,6 +24,7 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
 import { useManagementLink } from '../../hooks/use_management_link';
+import { ElasticLLMCostTour } from '../elastic_llm_cost_tour';
 
 interface SummarizationModelProps {
   selectedModel?: LLMModel;
@@ -94,6 +95,14 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       })),
     [models]
   );
+  const currentModel = useMemo(
+    () =>
+      // find the model from the list to ensure all values present vs. what is saved in the form and loaded in local storage.
+      selectedModel !== undefined
+        ? models.find((model) => model.id === selectedModel.id)
+        : undefined,
+    [selectedModel, models]
+  );
 
   useEffect(() => {
     usageTracker?.click(
@@ -119,13 +128,25 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
     >
       <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem>
-          <EuiSuperSelect
-            data-test-subj="summarizationModelSelect"
-            options={modelsOption}
-            valueOfSelected={selectedModel && getOptionValue(selectedModel)}
-            onChange={onChange}
-            fullWidth
-          />
+          {currentModel && currentModel.isElasticConnector ? (
+            <ElasticLLMCostTour connectorName={currentModel.connectorName}>
+              <EuiSuperSelect
+                data-test-subj="summarizationModelSelect"
+                options={modelsOption}
+                valueOfSelected={selectedModel && getOptionValue(selectedModel)}
+                onChange={onChange}
+                fullWidth
+              />
+            </ElasticLLMCostTour>
+          ) : (
+            <EuiSuperSelect
+              data-test-subj="summarizationModelSelect"
+              options={modelsOption}
+              valueOfSelected={selectedModel && getOptionValue(selectedModel)}
+              onChange={onChange}
+              fullWidth
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

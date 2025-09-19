@@ -9,14 +9,13 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const dashboardExpect = getService('dashboardExpect');
   const { dashboard } = getPageObjects(['dashboard']);
 
   describe('empty dashboard', () => {
@@ -52,11 +51,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add new visualization from dashboard', async () => {
-      await dashboardVisualizations.createAndAddMarkdown({
-        name: 'Dashboard Test Markdown',
-        markdown: 'Markdown text',
-      });
-      await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+      const originalPanelCount = await dashboard.getPanelCount();
+      await dashboardVisualizations.createAndAddVega('Dashboard Test Vega');
+      expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
     });
 
     it('should open editor menu when editor button is clicked', async () => {

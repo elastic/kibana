@@ -184,6 +184,7 @@ export const AgentResponseSchema = schema.object({
     )
   ),
   status: schema.maybe(AgentStatusSchema),
+  last_known_status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string()),
   sort: schema.maybe(schema.arrayOf(schema.any())), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
@@ -568,10 +569,11 @@ export const MigrateSingleAgentResponseSchema = schema.object({
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.arrayOf(schema.string()),
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 export const BulkMigrateAgentsResponseSchema = schema.object({
@@ -712,6 +714,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('POLICY_CHANGE'),
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
+        schema.literal('PRIVILEGE_LEVEL_CHANGE'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -779,4 +782,24 @@ export const GetActionStatusResponseSchema = schema.object({
 
 export const GetAvailableAgentVersionsResponseSchema = schema.object({
   items: schema.arrayOf(schema.string()),
+});
+
+export const ChangeAgentPrivilegeLevelRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      user_info: schema.maybe(
+        schema.object({
+          username: schema.maybe(schema.string()),
+          groupname: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
+};
+export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
+  actionId: schema.string(),
 });

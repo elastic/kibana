@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFeature } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -101,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             'dataQuality',
             'dev_tools',
             'actions',
+            'agentBuilder',
             'enterpriseSearch',
             'enterpriseSearchApplications',
             'enterpriseSearchAnalytics',
@@ -110,11 +110,9 @@ export default function ({ getService }: FtrProviderContext) {
             'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
-            'guidedOnboardingFeature',
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
-            'onechat',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',
@@ -127,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maintenanceWindow',
             'manageReporting',
+            'reportingLegacy',
             'maps_v2',
             'osquery',
             'rulesSettings',
@@ -147,78 +146,6 @@ export default function ({ getService }: FtrProviderContext) {
             'fleet',
             'fleetv2',
           ].sort()
-        );
-      });
-
-      it('should return a full feature set with correct scope', async () => {
-        const { body } = await supertest.get('/api/features').expect(200);
-        expect(body).to.be.an(Array);
-
-        const scopeAgnosticFeatures = [
-          'discover_v2',
-          'visualize_v2',
-          'dashboard_v2',
-          'dataQuality',
-          'dev_tools',
-          'actions',
-          'enterpriseSearch',
-          'enterpriseSearchApplications',
-          'enterpriseSearchAnalytics',
-          'filesManagement',
-          'filesSharedImage',
-          'advancedSettings',
-          'aiAssistantManagementSelection',
-          'indexPatterns',
-          'graph',
-          'guidedOnboardingFeature',
-          'monitoring',
-          'observabilityAIAssistant',
-          'observabilityCasesV3',
-          'onechat',
-          'savedObjectsManagement',
-          'savedQueryManagement',
-          'savedObjectsTagging',
-          'ml',
-          'apm',
-          'stackAlerts',
-          'streams',
-          'canvas',
-          'generalCasesV3',
-          'infrastructure',
-          'logs',
-          'maintenanceWindow',
-          'maps_v2',
-          'osquery',
-          'rulesSettings',
-          'uptime',
-          'searchInferenceEndpoints',
-          'searchSynonyms',
-          'searchQueryRules',
-          'searchPlayground',
-          'siem',
-          'siemV2',
-          'siemV3',
-          'slo',
-          'streams',
-          'securitySolutionAssistant',
-          'securitySolutionAttackDiscovery',
-          'securitySolutionCasesV3',
-          'securitySolutionTimeline',
-          'securitySolutionNotes',
-          'securitySolutionSiemMigrations',
-          'fleet',
-          'fleetv2',
-          'manageReporting',
-        ];
-
-        const features = body.filter(
-          (f: KibanaFeature) =>
-            f.scope?.includes(KibanaFeatureScope.Spaces) &&
-            f.scope?.includes(KibanaFeatureScope.Security)
-        );
-
-        expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
-          true
         );
       });
     });

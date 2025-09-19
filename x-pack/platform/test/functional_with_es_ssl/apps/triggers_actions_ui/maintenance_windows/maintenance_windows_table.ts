@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createMaintenanceWindow } from './utils';
@@ -263,21 +263,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('paginates maintenance windows correctly', async () => {
-      new Array(12).fill(null).map(async (_, index) => {
-        const mw = await createMaintenanceWindow({
-          name: index + '-pagination',
-          getService,
-        });
-        objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
-      });
+      await Promise.all(
+        new Array(12).fill(null).map(async (_, index) => {
+          const mw = await createMaintenanceWindow({
+            name: index + '-pagination',
+            getService,
+          });
+          objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
+        })
+      );
       await browser.refresh();
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('pagination');
       await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
 
-      await testSubjects.click('tablePaginationPopoverButton');
-      await testSubjects.click('tablePagination-25-rows');
-      await testSubjects.missingOrFail('pagination-button-1');
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click('tablePagination-10-rows');
       const listedOnFirstPageMWs = await testSubjects.findAll('list-item');
@@ -286,8 +285,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.isEnabled('pagination-button-1');
       await testSubjects.click('pagination-button-1');
       await testSubjects.isEnabled('pagination-button-0');
-      const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
-      expect(listedOnSecondPageMWs.length).to.be(2);
+
+      await retry.try(async () => {
+        const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
+        expect(listedOnSecondPageMWs.length).to.be(2);
+      });
     });
 
     it('should delete a maintenance window', async () => {

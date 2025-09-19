@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,6 @@ import {
   EuiButton,
   EuiToolTip,
   euiDragDropReorder,
-  DragDropContextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
