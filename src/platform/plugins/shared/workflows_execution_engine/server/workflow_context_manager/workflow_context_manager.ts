@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { graphlib } from '@dagrejs/dagre';
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RunStepResult } from '../step/node_implementation';
+import { buildStepExecutionId } from '../utils';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 
 export interface ContextManagerInit {
   // New properties for logging
-  workflowExecutionGraph: graphlib.Graph;
+  workflowExecutionGraph: WorkflowGraph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  workflowExecutionState: WorkflowExecutionState;
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
@@ -24,8 +29,9 @@ export interface ContextManagerInit {
 }
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: graphlib.Graph;
+  private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
@@ -33,6 +39,7 @@ export class WorkflowContextManager {
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.workflowExecutionState = init.workflowExecutionState;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
@@ -44,38 +51,34 @@ export class WorkflowContextManager {
       steps: {},
     };
 
-    const visited = new Set<string>();
-    const collectPredecessors = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
-      visited.add(nodeId);
+    const currentNode = this.workflowExecutionRuntime.getCurrentNode()!;
+    const currentNodeId = currentNode.id;
 
-      stepContext.steps[nodeId] = {};
-      const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
-      if (stepResult) {
-        stepContext.steps[nodeId] = {
-          ...stepContext.steps[nodeId],
-          ...stepResult,
-        };
+    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
+    allPredecessors.forEach((node) => {
+      const stepId = node.stepId;
+      const stepData = this.getStepData(stepId);
+
+      if (stepData) {
+        stepContext.steps[stepId] = {};
+        if (stepData.runStepResult) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.runStepResult,
+          };
+        }
+
+        if (stepData.stepState) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.stepState,
+          };
+        }
       }
+    });
 
-      const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
-      if (stepState) {
-        stepContext.steps[nodeId] = {
-          ...stepContext.steps[nodeId],
-          ...stepState,
-        };
-      }
-
-      const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
-      preds.forEach((predId) => collectPredecessors(predId));
-    };
-
-    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
-    const currentNodeId = currentNode?.id ?? currentNode?.name;
-    const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
-    directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
-
-    return this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    return stepContext;
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
@@ -116,7 +119,7 @@ export class WorkflowContextManager {
   }
 
   private buildWorkflowContext(): WorkflowContext {
-    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
 
     return {
       execution: {
@@ -136,17 +139,52 @@ export class WorkflowContextManager {
     };
   }
 
-  private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
-    for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
-      const node = this.workflowExecutionGraph.node(nodeId) as any;
-      const nodeType = node?.type;
-      switch (nodeType) {
-        case 'enter-foreach':
-          stepContext.foreach = this.workflowExecutionRuntime.getStepState(nodeId) as any;
-          break;
+  private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
+    let scopeStack = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
+
+    while (!scopeStack.isEmpty()) {
+      const topFrame = scopeStack.getCurrentScope()!;
+      scopeStack = scopeStack.exitScope();
+      const stepExecution = this.workflowExecutionState.getStepExecution(
+        buildStepExecutionId(
+          this.workflowExecutionState.getWorkflowExecution().id,
+          topFrame.stepId,
+          scopeStack.stackFrames
+        )
+      );
+
+      if (stepExecution) {
+        switch (stepExecution.stepType) {
+          case 'foreach':
+            if (!stepContext.foreach) {
+              stepContext.foreach = stepExecution.state as StepContext['foreach'];
+            }
+            break;
+        }
       }
     }
+  }
 
-    return stepContext;
+  private getStepData(stepId: string):
+    | {
+        runStepResult: RunStepResult;
+        stepState: Record<string, any> | undefined;
+      }
+    | undefined {
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    if (!latestStepExecution) {
+      return;
+    }
+
+    return {
+      runStepResult: {
+        input: latestStepExecution?.input,
+        output: latestStepExecution?.output,
+        error: latestStepExecution?.error,
+      },
+      stepState: latestStepExecution.state,
+    };
   }
 }

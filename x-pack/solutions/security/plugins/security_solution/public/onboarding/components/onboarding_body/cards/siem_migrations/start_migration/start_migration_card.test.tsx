@@ -16,7 +16,7 @@ import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrat
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
 import { OnboardingCardId } from '../../../../../constants';
 import * as useGetMigrationTranslationStatsModule from '../../../../../../siem_migrations/rules/logic/use_get_migration_translation_stats';
-import * as useGetMissingResourcesModule from '../../../../../../siem_migrations/rules/service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../../../../../siem_migrations/common/hooks/use_get_missing_resources';
 
 const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
 
@@ -204,7 +204,7 @@ describe('StartMigrationsBody', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('migrationProgressPanel')).toBeVisible();
+      expect(screen.getByTestId('ruleMigrationProgressPanel')).toBeVisible();
     });
   });
 

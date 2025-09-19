@@ -462,6 +462,32 @@ describe('Session service', () => {
     expect(onSavingSession).toHaveBeenCalledTimes(1);
   });
 
+  test('save() return a search session', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+      appendSessionStartTimeToName: false,
+    });
+    sessionsClient.create.mockResolvedValue(mockSavedObject);
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+    const onSavingSession = jest.fn(() => Promise.resolve());
+
+    sessionService.trackSearch({ poll, abort, onSavingSession });
+
+    expect(onSavingSession).toHaveBeenCalledTimes(0);
+
+    const searchSession = await sessionService.save();
+
+    expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
+  });
+
   describe("user doesn't have access to search session", () => {
     beforeAll(() => {
       userHasAccessToSearchSessions = false;
