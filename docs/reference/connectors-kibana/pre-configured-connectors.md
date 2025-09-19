@@ -140,7 +140,7 @@ xpack.actions.preconfigured:
     actionTypeId: .bedrock
     config:
       apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
+      defaultModel: us.anthropic.claude-sonnet-4-20250514-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>
@@ -313,7 +313,7 @@ xpack.actions.preconfigured:
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
       apiProvider: 'OpenAI' <2>
-      defaultModel: gpt-4.1 <3>
+      defaultModel: gpt-5-chat <3>
     secrets:
       apiKey: superlongapikey <4>
 ```

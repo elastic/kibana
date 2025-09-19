@@ -29,6 +29,30 @@ export const getModelDefinition = (fullModelName: string): ModelDefinition | und
  */
 export const knownModels: ModelDefinition[] = [
   {
+    id: 'gpt-5',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 400000,
+  },
+  {
+    id: 'gpt-5-chat',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 128000,
+  },
+  {
+    id: 'gpt-5-mini',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 400000,
+  },
+  {
+    id: 'gpt-5-nano',
+    provider: ModelProvider.OpenAI,
+    family: ModelFamily.GPT,
+    contextWindow: 400000,
+  },
+  {
     id: 'gpt-4o-mini',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
