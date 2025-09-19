@@ -142,7 +142,7 @@ export function ImportContentPackFlyout({
           />
         )}
 
-        {file && manifest && significantEvents && contentPackObjects ? (
+        {file && manifest && contentPackObjects ? (
           <>
             <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -176,7 +176,7 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents.available}
+              significantEventsAvailable={significantEvents?.available ?? false}
             />
           </>
         ) : null}

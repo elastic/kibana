@@ -118,7 +118,7 @@ export function ExportContentPackFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {isLoadingContentPack || !significantEvents ? (
+        {isLoadingContentPack ? (
           <EuiLoadingSpinner />
         ) : !exportResponse ? null : exportResponse.contentPack.entries ? (
           <>
@@ -129,7 +129,7 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               objects={exportResponse.contentPack.entries}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents.available}
+              significantEventsAvailable={significantEvents?.available ?? false}
             />
           </>
         ) : null}
