@@ -175,7 +175,7 @@ export interface DiscoverStateContainer {
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
-    onOpenSavedSearch: (savedSearchId: string) => void;
+    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
     /**
      * Triggered when the unified search bar query is updated
      * @param payload
