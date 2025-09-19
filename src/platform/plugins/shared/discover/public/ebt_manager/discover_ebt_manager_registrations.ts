@@ -41,6 +41,7 @@ export const REMAINING_TABS_COUNT = 'remainingTabsCount';
 export const CLOSED_TABS_COUNT = 'closedTabsCount';
 export const FROM_INDEX = 'fromIndex';
 export const TO_INDEX = 'toIndex';
+export const KEY_USED = 'keyUsed';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -153,6 +154,7 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'integer',
         _meta: {
           description: 'The number of total tabs open at the time of an event',
+          optional: true,
         },
       },
       [REMAINING_TABS_COUNT]: {
@@ -187,6 +189,13 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'integer',
         _meta: {
           description: 'The new index of the tab being moved',
+          optional: true,
+        },
+      },
+      [KEY_USED]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The keyboard key used for tab navigation',
           optional: true,
         },
       },
