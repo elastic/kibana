@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import type { UsageCollectionSetup, MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 interface InferenceConnectorsUsage {
   inference_count_by_provider: Record<string, number>;
@@ -32,7 +32,7 @@ export function registerInferenceConnectorsUsageCollector(
       inference_count_by_provider: {
         DYNAMIC_KEY: { type: 'long' },
       },
-    } as MakeSchemaFrom<InferenceConnectorsUsage>,
+    },
     fetch: async () => {
       const [coreStart] = await core.getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;

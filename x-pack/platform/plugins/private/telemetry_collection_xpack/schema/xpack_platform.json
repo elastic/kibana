@@ -6358,6 +6358,17 @@
         }
       }
     },
+    "stack_connectors": {
+      "properties": {
+        "inference_count_by_provider": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "task_manager": {
       "properties": {
         "task_type_exclusion": {
