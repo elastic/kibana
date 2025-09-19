@@ -186,7 +186,6 @@ describe('Reporting Plugin', () => {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
