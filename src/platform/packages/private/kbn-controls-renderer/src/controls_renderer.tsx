@@ -130,7 +130,6 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
               type={type}
               uuid={id!}
               parentApi={parentApi}
-              compressed={true}
               setControlPanelRef={setControlPanelRef}
             />
           ))}

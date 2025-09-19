@@ -428,10 +428,6 @@ const topNavStyles = {
           position: 'unset', // on smaller screens, the top nav should not be sticky
         },
       },
-      // '.controlsWrapper': {
-      //   padding: euiTheme.size.s,
-      //   paddingTop: 0,
-      // },
     }),
   updateIcon: ({ euiTheme }: UseEuiTheme) =>
     css({

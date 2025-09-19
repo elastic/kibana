@@ -28,4 +28,5 @@ export type ControlsRendererParentApi = PublishesViewMode &
   Partial<PublishesDisabledActionIds> & {
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     layout$: BehaviorSubject<DashboardLayout>;
+    getCompressed?: () => boolean;
   };

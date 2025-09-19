@@ -19,7 +19,7 @@ import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService, navigationService, shareService } from '../services/kibana_services';
-import { InternalDashboardTopNav } from './InternalDashboardTopNav';
+import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 
 jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
   DashboardEditingToolbar: () => {

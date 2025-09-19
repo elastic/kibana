@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { HasCustomPrepend } from '@kbn/controls-plugin/public/controls/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
@@ -42,16 +43,14 @@ export const ControlPanel = ({
   parentApi,
   uuid,
   type,
-  compressed,
   setControlPanelRef,
 }: {
   parentApi: ControlsRendererParentApi;
   uuid: string;
   type: string;
-  compressed?: boolean;
   setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
 }) => {
-  const [api, setApi] = useState<DefaultEmbeddableApi | null>(null);
+  const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
@@ -153,14 +152,14 @@ export const ControlPanel = ({
           label={controlLabel}
           id={`control-title-${uuid}`}
           aria-label={`Control for ${controlLabel}`}
-          css={css({
-            '.euiFormControlLayout__childrenWrapper': {
-              '.euiPopover, .euiFilterGroup': {
-                // TODO: Remove options list styles
-                height: '100%',
-              },
-            },
-          })}
+          // css={css({
+          //   '.euiFormControlLayout__childrenWrapper': {
+          //     '.euiPopover, .euiFilterGroup': {
+          //       // TODO: Remove options list styles
+          //       height: '100%',
+          //     },
+          //   },
+          // })}
         >
           <EuiFormControlLayout
             fullWidth
@@ -177,21 +176,21 @@ export const ControlPanel = ({
                   {...attributes}
                   {...listeners}
                 />
-                {/* {api?.CustomPrependComponent ? (
+                {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
-                ) : */}
-                <EuiToolTip
-                  content={panelTitle || defaultPanelTitle}
-                  anchorProps={{ className: 'eui-textTruncate' }}
-                >
-                  <EuiFormLabel className="controlPanel--label">
-                    {panelTitle || defaultPanelTitle}
-                  </EuiFormLabel>
-                </EuiToolTip>
-                {/* )} */}
+                ) : (
+                  <EuiToolTip
+                    content={panelTitle || defaultPanelTitle}
+                    anchorProps={{ className: 'eui-textTruncate' }}
+                  >
+                    <EuiFormLabel className="controlPanel--label">
+                      {panelTitle || defaultPanelTitle}
+                    </EuiFormLabel>
+                  </EuiToolTip>
+                )}
               </>
             }
-            compressed={compressed}
+            compressed={parentApi.getCompressed ? parentApi.getCompressed() : true}
           >
             <EmbeddableRenderer
               key={uuid}

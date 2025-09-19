@@ -1,3 +1,3 @@
 # @kbn/controls-renderer
 
-React components used for rendering a group of controls.
+React component used for rendering a group of controls.

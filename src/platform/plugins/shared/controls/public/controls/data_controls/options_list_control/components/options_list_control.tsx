@@ -10,7 +10,7 @@
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { css } from '@emotion/react';
+
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -22,15 +22,16 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
-import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from '../options_list_strings';
+import { OptionsListPopover } from './options_list_popover';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
@@ -63,6 +64,7 @@ const optionListControlStyles = {
       '&:hover::before': {
         background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
       },
+      blockSize: '100% !important',
     }),
   filterButtonText: css({
     flexGrow: 1,
@@ -70,12 +72,12 @@ const optionListControlStyles = {
   }),
   inputButtonOverride: css({
     width: '100%',
-    height: 'fit-content',
+    height: '100%',
   }),
   /* additional custom overrides due to unexpected component usage;
     open issue: https://github.com/elastic/eui-private/issues/270 */
   filterGroup: css`
-    height: 20px;
+    height: 100%;
 
     /* prevents duplicate border due to nested filterGroup */
     &::after {
@@ -83,6 +85,7 @@ const optionListControlStyles = {
     }
 
     .euiFilterButton__wrapper {
+      height: 100%;
       padding: 0;
 
       &::before,

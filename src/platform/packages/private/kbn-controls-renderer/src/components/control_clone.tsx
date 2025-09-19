@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
@@ -19,8 +19,7 @@ import { controlWidthStyles } from './control_panel.styles';
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
- * the title, because individual controls can be any size, and dragging a wide item
- * can be quite cumbersome.
+ * the title so that we don't recreate the embeddable API on drag.
  */
 export const ControlClone = ({
   state,
@@ -32,8 +31,12 @@ export const ControlClone = ({
   const styles = useMemoCss(controlCloneStyles);
   const panelTitle = (state?.rawState as { title?: string }).title;
 
+  const widthStyle = useMemo(() => {
+    return width ? css({ width: `${width}px` }) : undefined;
+  }, [width]);
+
   return !state ? null : (
-    <EuiFlexItem css={(styles.container, width !== undefined && css({ width: `${width}px` }))}>
+    <EuiFlexItem css={[styles.container, widthStyle]}>
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
