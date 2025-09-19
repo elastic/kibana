@@ -82,6 +82,7 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
+    ${layoutVarName('application.margin')}: 8px;
     ${layoutVarName('application.top')}: calc(
       ${layoutVar('banner.height')} + ${layoutVar('header.height')}
     );
@@ -89,10 +90,14 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.left')}: ${navigationWidth}px;
     ${layoutVarName('application.right')}: ${sidebarWidth}px;
     ${layoutVarName('application.height')}: calc(
-      100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
+      100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')} - ${layoutVar(
+      'application.margin'
+    )}
     );
     ${layoutVarName('application.width')}: calc(
-      100vw - ${layoutVar('application.left')} - ${layoutVar('application.right')}
+      100vw - ${layoutVar('application.left')} - ${layoutVar('application.right')} - ${layoutVar(
+      'application.margin'
+    )}
     );
   `;
 

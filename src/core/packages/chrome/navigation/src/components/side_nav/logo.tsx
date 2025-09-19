@@ -51,9 +51,23 @@ export const SideNavLogoComponent = ({
    * We cannot use `euiTheme.size.s` because it's 8px.
    */
   const wrapperStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
     padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+
+    &::after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: ${isCollapsed ? euiTheme.size.l : euiTheme.size.xxxxl};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+      position: absolute;
+      bottom: 0;
+    }
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};

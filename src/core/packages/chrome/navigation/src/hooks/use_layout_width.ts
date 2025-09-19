@@ -28,11 +28,12 @@ interface UseLayoutWidthArgs {
  */
 export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLayoutWidthArgs) => {
   useEffect(() => {
-    setWidth(isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
     if (isSidePanelOpen) {
       setWidth(
         isCollapsed ? COLLAPSED_WIDTH + SIDE_PANEL_WIDTH : EXPANDED_WIDTH + SIDE_PANEL_WIDTH
       );
+    } else {
+      setWidth(isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
     }
   }, [isCollapsed, isSidePanelOpen, setWidth]);
 };

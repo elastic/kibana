@@ -23,7 +23,7 @@ import { usePreventLinkNavigation } from '../hooks/prevent_link_navigation';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
   }
 
   #storybook-root {

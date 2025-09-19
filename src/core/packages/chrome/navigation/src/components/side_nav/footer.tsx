@@ -25,6 +25,27 @@ export interface SideNavFooterProps {
 export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
+  const style = css`
+    border-top: none;
+    position: relative;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.xs};
+    justify-content: center;
+    padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    &::before {
+      content: '';
+      display: block;
+      height: 1px;
+      width: ${isCollapsed ? euiTheme.size.l : euiTheme.size.xxxxl};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+      position: absolute;
+      top: 0;
+    }
+  `;
+
   return (
     // The footer itself is not interactive but the children are
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -32,15 +53,7 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
         defaultMessage: 'Side navigation',
       })}
-      css={css`
-        align-items: center;
-        border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.xs};
-        justify-content: center;
-        padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-      `}
+      css={style}
       onKeyDown={handleRovingIndex}
       ref={(ref) => {
         if (ref) {

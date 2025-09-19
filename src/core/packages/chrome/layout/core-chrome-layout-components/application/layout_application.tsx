@@ -40,7 +40,7 @@ export const LayoutApplication = ({
 
   return (
     <div
-      css={[styles.root, overflow]}
+      css={[overflow, styles.root]}
       id={APP_MAIN_SCROLL_CONTAINER_ID}
       className="kbnChromeLayoutApplication"
       data-test-subj="kbnChromeLayoutApplication"
