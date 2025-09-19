@@ -111,8 +111,7 @@ export const DateProcessorForm = () => {
    * the component does not try to call it.
    */
   const handleProcessorFieldChange = areSuggestionsAvailable
-    ? (event: React.ChangeEvent<HTMLInputElement>) => {
-        const field = event.target.value;
+    ? (field: string) => {
         const prevFormats = form.getValues('formats');
         const hasFormats = !isEmpty(prevFormats);
         const isTouched = form.formState.touchedFields.formats;
@@ -137,7 +136,15 @@ export const DateProcessorForm = () => {
 
   return (
     <>
-      <ProcessorFieldSelector onChange={handleProcessorFieldChange} fieldKey={'from'} />
+      <ProcessorFieldSelector
+        fieldKey="from"
+        processorType="date"
+        helpText={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.setDateFieldHelpText',
+          { defaultMessage: 'Field containing date values to parse.' }
+        )}
+        onChange={handleProcessorFieldChange}
+      />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
       <EuiSpacer size="m" />
       <FieldsAccordion>
