@@ -1751,7 +1751,7 @@
     "@types/json-schema": "^7.0.15",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/json5": "^2.2.0",
-    "@types/jsonwebtoken": "^9.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/license-checker": "25.0.6",
     "@types/lodash": "^4.17.20",
     "@types/lz-string": "^1.5.0",
