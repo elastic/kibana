@@ -25,7 +25,6 @@ import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
-import { injectCanvasRenderingProps } from './inject_canvas_rendering_props';
 import { openUrl } from './open_url';
 import type { PhaseInstance, PhaseTimeouts, Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
@@ -237,15 +236,8 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  private getCanvasRenderingProps() {
-    return defer(async () => {
-      await injectCanvasRenderingProps(this.driver, this.eventLogger, this.layout);
-    });
-  }
-
   public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
-      switchMapTo(this.getCanvasRenderingProps()),
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender())
     );
