@@ -8,6 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
 import type { serializedTitlesSchema } from './titles_schema';
 
-export type SerializedTitles = TypeOf<typeof serializedTitlesSchema>;
+export type SerializedTitles = Writable<TypeOf<typeof serializedTitlesSchema>>;
