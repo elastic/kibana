@@ -48,7 +48,7 @@ export const visualizationPlugin = () => {
       `${visualizationElement.attributes.chartType}="([^"]*)"`,
       'i'
     );
-    const chartType = value.match(chartTypeRegex)?.[1] as ChartType | undefined;
+    const chartType = value.match(chartTypeRegex)?.[1];
 
     // transform the node from type `html` to (custom) type `visualization`
     (node as any).type = visualizationElement.tagName;
