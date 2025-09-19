@@ -42835,6 +42835,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "action_secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
                         "delete_unenrolled_agents": {
                           "additionalProperties": false,
                           "properties": {
@@ -43031,6 +43034,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "action_secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
                         "delete_unenrolled_agents": {
                           "additionalProperties": false,
                           "properties": {
@@ -49744,6 +49750,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -53079,6 +53088,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -56011,6 +56023,9 @@
                                                         {
                                                           "additionalProperties": false,
                                                           "properties": {
+                                                            "customIdentifier": {
+                                                              "type": "string"
+                                                            },
                                                             "where": {
                                                               "allOf": [
                                                                 {
@@ -59042,6 +59057,9 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "customIdentifier": {
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "allOf": [
                                                             {
@@ -62558,6 +62576,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {
@@ -65748,6 +65769,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "customIdentifier": {
+                                              "type": "string"
+                                            },
                                             "where": {
                                               "allOf": [
                                                 {

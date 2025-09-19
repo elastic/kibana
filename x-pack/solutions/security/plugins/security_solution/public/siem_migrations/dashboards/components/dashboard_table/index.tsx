@@ -44,8 +44,8 @@ import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/t
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -204,9 +204,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     const reprocessFailedDashboardsWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
-          ...settings,
-        });
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
       },
       [migrationId, startMigration]
     );

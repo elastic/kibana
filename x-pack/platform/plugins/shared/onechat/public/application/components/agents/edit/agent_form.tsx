@@ -390,7 +390,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             {!isCreateMode && (
               <EuiFlexItem grow={false}>
                 <AgentAvatar
-                  size="xl"
+                  size="l"
                   agent={{
                     name: agentName,
                     avatar_symbol: agentAvatarSymbol,
