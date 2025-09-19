@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -47,6 +48,9 @@ export function registerConversationRoutes({
         version: '2023-10-31',
         validate: {
           request: { query: schema.object({ agent_id: schema.maybe(schema.string()) }) },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_list.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -91,6 +95,9 @@ export function registerConversationRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_get_by_id.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService } = getInternalServices();
@@ -131,6 +138,9 @@ export function registerConversationRoutes({
               conversation_id: schema.string(),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_delete.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {

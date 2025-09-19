@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
@@ -59,6 +60,9 @@ export function registerA2ARoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_agent_card.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
@@ -92,6 +96,9 @@ export function registerA2ARoutes({
             }),
             body: schema.object({}, { unknowns: 'allow' }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task_request.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {

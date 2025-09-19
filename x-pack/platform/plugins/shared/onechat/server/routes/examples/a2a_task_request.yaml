@@ -1,0 +1,25 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        a2aTaskRequestExample:
+          jsonrpc: "2.0"
+          method: "complete"
+          params:
+            messages:
+            - role: "user"
+              content: "Hello from A2A protocol"
+          id: "task-123"
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          a2aTaskResponseExample:
+            jsonrpc: "2.0"
+            id: "task-123"
+            result:
+              type: "response"
+              response:
+                message: "Hello! How can I help you today?"
+              conversation_id: "conv-456"

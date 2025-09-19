@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -92,6 +93,9 @@ export function registerChatRoutes({
         validate: {
           request: { body: conversePayloadSchema },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_request.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService } = getInternalServices();
@@ -151,6 +155,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async_request.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
