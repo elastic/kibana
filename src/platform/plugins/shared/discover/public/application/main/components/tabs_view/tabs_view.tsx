@@ -40,6 +40,13 @@ export const TabsView = (props: SingleTabViewProps) => {
     })
   );
 
+  useEffect(() => {
+    return () => {
+      // clear session when navigating away from discover main
+      services.data.search.session.clear();
+    };
+  }, [services.data.search.session]);
+
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
     [dispatch]

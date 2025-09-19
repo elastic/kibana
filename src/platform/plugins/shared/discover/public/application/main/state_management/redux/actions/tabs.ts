@@ -205,6 +205,12 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         );
         services.data.search.session.start();
 
+        if (nextTab.dataRequestParams.searchSessionId) {
+          services.data.search.session.continue(nextTab.dataRequestParams.searchSessionId, true);
+        } else {
+          services.data.search.session.start();
+        }
+
         nextTabStateContainer.actions.initializeAndSync();
 
         if (nextTab.forceFetchOnSelect) {
