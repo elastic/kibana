@@ -6,14 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { i18n } from '@kbn/i18n';

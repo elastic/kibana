@@ -132,7 +132,7 @@ export const GetStartedWithElasticsearch = () => {
       title: i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileTitle', {
         defaultMessage: 'Upload a file',
       }),
-      dataTestSubj: 'gettingStartedUploadFileButton',
+      dataTestSubj: 'uploadFileButton',
       description: (
         <FormattedMessage
           id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
@@ -161,7 +161,7 @@ export const GetStartedWithElasticsearch = () => {
           defaultMessage="Add sample data"
         />
       ),
-      dataTestSubj: 'gettingStartedSampleDataButton',
+      dataTestSubj: 'sampleDataSection',
       description: (
         <FormattedMessage
           id="xpack.searchHomepage.connectToElasticsearch.sampleDataDescription"

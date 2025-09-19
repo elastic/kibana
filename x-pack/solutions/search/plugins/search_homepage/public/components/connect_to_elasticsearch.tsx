@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
-import { GetStartedWithElasticsearch } from './get_started_with_elasticsearch';
 import { ELASTICSEARCH_ENDPOINT_LABEL } from './shared/i18n';
 
 export const ConnectToElasticsearch = () => {
@@ -46,12 +45,6 @@ export const ConnectToElasticsearch = () => {
             <ApiKeyForm />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <GetStartedWithElasticsearch />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
