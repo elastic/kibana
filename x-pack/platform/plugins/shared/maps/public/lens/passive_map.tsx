@@ -97,7 +97,7 @@ export function PassiveMap(props: Props) {
         }}
         panelProps={{
           disableReportingAttributes: true,
-          hidePanelChrome: true
+          hidePanelChrome: true,
         }}
       />
     </div>

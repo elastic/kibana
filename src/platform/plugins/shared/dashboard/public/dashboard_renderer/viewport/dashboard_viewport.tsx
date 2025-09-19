@@ -117,7 +117,7 @@ export const DashboardViewport = () => {
             panelProps={{
               disableReportingAttributes: true,
               hideLoader: true,
-              hidePanelChrome: true
+              hidePanelChrome: true,
             }}
             type={CONTROLS_GROUP_TYPE}
             maybeId={CONTROL_GROUP_EMBEDDABLE_ID}

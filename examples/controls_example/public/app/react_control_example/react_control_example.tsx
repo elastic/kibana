@@ -413,16 +413,13 @@ export const ReactControlExample = ({
         panelProps={{
           disableReportingAttributes: true,
           hideLoader: true,
-          hidePanelChrome: true
+          hidePanelChrome: true,
         }}
       />
       <EuiSpacer size="l" />
       {isControlGroupInitialized && (
         <div style={{ height: '400px' }}>
-          <EmbeddableRenderer
-            type={'search_embeddable'}
-            getParentApi={() => parentApi}
-          />
+          <EmbeddableRenderer type={'search_embeddable'} getParentApi={() => parentApi} />
         </div>
       )}
     </>

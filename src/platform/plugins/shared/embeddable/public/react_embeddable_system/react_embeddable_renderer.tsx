@@ -135,10 +135,5 @@ export const EmbeddableRenderer = <
     [type]
   );
 
-  return (
-    <PresentationPanel<Api, {}>
-      {...panelProps}
-      Component={componentPromise}
-    />
-  );
+  return <PresentationPanel<Api, {}> {...panelProps} Component={componentPromise} />;
 };

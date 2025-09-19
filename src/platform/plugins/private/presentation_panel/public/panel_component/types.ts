@@ -42,7 +42,7 @@ export interface PresentationPanelInternalProps<
   showNotifications?: boolean;
 
   disableReportingAttributes?: boolean;
-  
+
   /**
    * Set to true to not show PanelLoader component while Panel is loading
    */
