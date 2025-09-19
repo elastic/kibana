@@ -30,6 +30,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectVisualization,
   selectVisualizationState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
@@ -69,6 +70,25 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
         }),
   };
 };
+
+export function VisualizationToolbarWrapper(props: {
+  framePublicAPI: FramePublicAPI;
+  visualizationMap: VisualizationMap;
+}) {
+  const { framePublicAPI } = props;
+  const visualization = useLensSelector(selectVisualization);
+
+  const activeVisualization = visualization.activeId
+    ? props.visualizationMap[visualization.activeId]
+    : null;
+
+  return activeVisualization && visualization.state ? (
+    <VisualizationToolbar
+      framePublicAPI={framePublicAPI}
+      activeVisualization={activeVisualization}
+    />
+  ) : null;
+}
 
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
