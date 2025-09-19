@@ -85,6 +85,7 @@ export class DashboardPlugin
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
+        isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       })
     );
 
@@ -95,6 +96,7 @@ export class DashboardPlugin
           throwOnResultValidationError: this.initializerContext.env.mode.dev,
           logger: this.logger.get('storage'),
           savedObjectsTagging,
+          isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
         }),
         version: {
           latest: LATEST_VERSION,
@@ -150,6 +152,7 @@ export class DashboardPlugin
 
     void registerAccessControl({
       http: core.http,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       getStartServices: () =>
         core.getStartServices().then(([_, { security }]) => ({
           security,

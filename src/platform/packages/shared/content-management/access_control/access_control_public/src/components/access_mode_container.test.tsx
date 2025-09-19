@@ -20,6 +20,7 @@ describe('Access Mode Container', () => {
     checkGlobalPrivilege: jest.fn(),
     changeAccessMode: jest.fn(),
     checkUserAccessControl: jest.fn(),
+    isAccessControlEnabled: jest.fn(),
   } as any;
 
   const mockGetActiveSpace = jest.fn();
@@ -33,6 +34,8 @@ describe('Access Mode Container', () => {
     mockGetCurrentUser.mockResolvedValue({
       uid: 'user-id',
     });
+
+    mockAccessControlClient.isAccessControlEnabled.mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -155,6 +158,24 @@ describe('Access Mode Container', () => {
 
     await waitFor(() => {
       expect(tooltip).not.toBeInTheDocument();
+    });
+  });
+
+  it('should not render anything when access control is disabled', async () => {
+    mockAccessControlClient.isAccessControlEnabled.mockResolvedValueOnce(false);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
+
+    const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
+
+    await act(async () => {
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
+    });
+
+    const container = screen.queryByTestId('accessModeContainer');
+
+    await waitFor(() => {
+      expect(container).not.toBeInTheDocument();
     });
   });
 });

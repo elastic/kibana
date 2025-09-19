@@ -70,7 +70,17 @@ export const AccessModeContainer = ({
   const [spaceName, setSpaceName] = useState('');
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
+  const [isAccessControlEnabled, setIsAccessControlEnabled] = useState(false);
   const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
+
+  useEffect(() => {
+    const checkAccessControlEnabled = async () => {
+      const enabled = await accessControlClient.isAccessControlEnabled();
+      setIsAccessControlEnabled(enabled);
+    };
+
+    checkAccessControlEnabled();
+  }, [accessControlClient]);
 
   useEffect(() => {
     getActiveSpace?.().then((activeSpace) => {
@@ -100,6 +110,10 @@ export const AccessModeContainer = ({
     await onChangeAccessMode(e.target.value as SavedObjectAccessControl['accessMode']);
     setIsUpdatingPermissions(false);
   };
+
+  if (!isAccessControlEnabled) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="accessModeContainer">
