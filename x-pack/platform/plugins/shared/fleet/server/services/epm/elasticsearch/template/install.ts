@@ -460,6 +460,7 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
+        // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case of otel input packages
         ...(isOtelInputType ? { dynamic: true } : {}),
         ...(isOtelInputType && type === 'traces' ? { subobjects: undefined } : {}),
       },
