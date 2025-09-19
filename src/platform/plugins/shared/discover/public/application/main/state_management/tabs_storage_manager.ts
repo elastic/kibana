@@ -82,6 +82,7 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
   ) => void;
+  updateDiscoverSessionIdLocally: (discoverSessionId: string | undefined) => void;
   loadLocally: (props: {
     userId: string;
     spaceId: string;
@@ -343,6 +344,22 @@ export const createTabsStorageManager = ({
     }
   };
 
+  const updateDiscoverSessionIdLocally: TabsStorageManager['updateDiscoverSessionIdLocally'] = (
+    discoverSessionId
+  ) => {
+    if (!enabled) {
+      return;
+    }
+
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      discoverSessionId,
+    };
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
+  };
+
   const loadLocally: TabsStorageManager['loadLocally'] = ({
     userId,
     spaceId,
@@ -476,6 +493,7 @@ export const createTabsStorageManager = ({
     startUrlSync,
     persistLocally,
     updateTabStateLocally,
+    updateDiscoverSessionIdLocally,
     loadLocally,
     getNRecentlyClosedTabs,
   };

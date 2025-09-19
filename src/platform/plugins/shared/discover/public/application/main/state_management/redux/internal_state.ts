@@ -336,6 +336,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
+    predicate: (_, currentState, previousState) => {
+      return (
+        currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
+      );
+    },
+    effect: (_, listenerApi) => {
+      const { tabsStorageManager } = listenerApi.extra;
+      const { persistedDiscoverSession } = listenerApi.getState();
+      tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
+    },
+  });
+
+  startListening({
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
