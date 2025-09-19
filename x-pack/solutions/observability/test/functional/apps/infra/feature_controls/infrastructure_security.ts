@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/230824
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
       before(async () => {
