@@ -109,7 +109,7 @@ export const ConvertToLookupIndexModal = ({
       <EuiModalBody>
         <FormattedMessage
           id="xpack.idxMgmt.convertToLookupIndexModal.modalBodyDescription"
-          defaultMessage="Converting an index to a Lookup index will create a new index with Lookup mode set. The old index will continue to exist."
+          defaultMessage="A new lookup index will be created, and the original index will still exist as before."
         />
         <EuiSpacer />
         <Form form={form} data-test-subj="convertToLookupIndexForm">

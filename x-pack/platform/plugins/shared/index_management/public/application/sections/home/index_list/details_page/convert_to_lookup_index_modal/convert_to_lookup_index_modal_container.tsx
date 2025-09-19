@@ -33,13 +33,8 @@ export const ConvertToLookupIndexModalContainer = ({
         i18n.translate(
           'xpack.idxMgmt.convertToLookupIndexAction.indexConversionInProgressToastTitle',
           {
-            defaultMessage: 'Index conversion in progress',
-          }
-        ),
-        i18n.translate(
-          'xpack.idxMgmt.convertToLookupIndexAction.indexConversionInProgressToastMessage',
-          {
-            defaultMessage: 'The conversion operation is still in progress for {sourceIndexName}.',
+            defaultMessage:
+              '{sourceIndexName} conversion into a lookup index is still in progress.',
             values: { sourceIndexName },
           }
         )
