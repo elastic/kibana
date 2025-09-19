@@ -6,8 +6,9 @@
  */
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { KibanaClient, toHttpHandler } from '@kbn/kibana-api-cli';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import { toHttpHandler } from '@kbn/kibana-api-cli';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
 export function createStreamsRepositoryCliClient(
   kibanaClient: KibanaClient

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
 import { createStreamsRepositoryCliClient } from './create_repository_client';
 
 export async function enableStreams({

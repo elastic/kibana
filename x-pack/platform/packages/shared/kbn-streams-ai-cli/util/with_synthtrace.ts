@@ -6,7 +6,7 @@
  */
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export async function withLoghubSynthtrace<T>(
   {

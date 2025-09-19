@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import {
-  TruncatedDocumentAnalysis,
-  mergeSampleDocumentsWithFieldCaps,
-  sortAndTruncateAnalyzedFields,
-} from '@kbn/ai-tools';
-import { Logger } from '@kbn/core/server';
+import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import { mergeSampleDocumentsWithFieldCaps, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import type { Logger } from '@kbn/core/server';
 import { DBSCAN } from 'density-clustering';
 import { getFlattenedObject } from '@kbn/std';
 
