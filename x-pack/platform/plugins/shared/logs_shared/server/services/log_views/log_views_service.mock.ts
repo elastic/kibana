@@ -6,7 +6,7 @@
  */
 
 import { createLogViewsClientMock } from './log_views_client.mock';
-import { LogViewsServiceSetup, LogViewsServiceStart } from './types';
+import type { LogViewsServiceSetup, LogViewsServiceStart } from './types';
 
 export const createLogViewsServiceSetupMock = (): jest.Mocked<LogViewsServiceSetup> => ({
   defineInternalLogView: jest.fn(),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
@@ -61,6 +62,10 @@ describe(
   'Bulk editing index patterns of rules with a data view only',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     const TESTED_CUSTOM_QUERY_RULE_DATA = getNewRule({
       index: undefined,
       data_view_id: DATA_VIEW_ID,

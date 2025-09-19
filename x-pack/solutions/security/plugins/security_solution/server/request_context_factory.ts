@@ -11,7 +11,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
-import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
@@ -38,10 +38,9 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
-import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/engine/data_client';
 import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
 import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
-import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 
@@ -145,6 +144,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getAnalytics: () => core.analytics,
+
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
@@ -218,7 +219,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         currentUser: coreContext.security.authc.getCurrentUser(),
         spaceId: getSpaceId(),
         dependencies: {
-          inferenceClient: startPlugins.inference.getClient({ request }),
+          inferenceService: startPlugins.inference,
           rulesClient,
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
@@ -271,23 +272,17 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getPrivilegeMonitoringDataClient: memoize(() => {
-        const soClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [
-            PrivilegeMonitoringApiKeyType.name,
-            monitoringEntitySourceType.name,
-          ],
-        });
-
         return new PrivilegeMonitoringDataClient({
           logger: options.logger,
           clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
-          soClient,
+          savedObjects: coreStart.savedObjects,
           taskManager: startPlugins.taskManager,
           apiKeyManager: getPrivilegedUserMonitoringApiKeyManager(),
-          auditLogger: getAuditLogger(),
+          auditLogger: coreStart.security.audit.asScoped(request),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         });
       }),
       getMonitoringEntitySourceDataClient: memoize(() => {
@@ -344,6 +339,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             clusterClient: coreContext.elasticsearch.client,
             uiSettingsClient: coreContext.uiSettings.client,
+            usageCollection: options.plugins.usageCollection,
+            coreStartPromise: core.getStartServices(),
           })
       ),
       getMlAuthz: memoize(() => {

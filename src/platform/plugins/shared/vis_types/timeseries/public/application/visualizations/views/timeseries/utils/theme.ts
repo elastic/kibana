@@ -8,7 +8,8 @@
  */
 
 import chroma from 'chroma-js';
-import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
+import type { Theme } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 import { getValidColor } from '@kbn/coloring';
 
 const colorValidationOption = { shouldBeCompatibleWithColorJs: true } as const;

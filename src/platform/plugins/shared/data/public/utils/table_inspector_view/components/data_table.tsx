@@ -21,15 +21,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
-import { DataViewRow, DataViewColumn } from '../types';
+import type { DataViewRow, DataViewColumn } from '../types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -211,18 +211,7 @@ class DataTableFormatClass extends Component<
         sorting={sorting}
         pagination={pagination}
         onTableChange={onTableChange}
-        css={css`
-          // Set a min width on each column - you can use [data-test-subj] to target specific columns
-          .euiTableHeaderCell {
-            min-width: 100px;
-          }
-
-          // Make sure the pagination follows the scroll
-          > div:last-child {
-            position: sticky;
-            left: 0;
-          }
-        `}
+        css={styles.table}
       />
     );
   }
@@ -233,3 +222,24 @@ export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 20,
 });
+
+const styles = {
+  table: css({
+    // Set a min width on each column
+    '.euiTableHeaderCell': {
+      minWidth: '100px',
+    },
+    // Make sure the pagination follows the scroll
+    '> div:last-child': {
+      position: 'sticky',
+      left: 0,
+    },
+    // Show filter buttons on row hover or focus
+    'tr:hover .insDataTableFormat__filter, .insDataTableFormat__filter:focus': {
+      opacity: 1,
+    },
+    '.insDataTableFormat__filter': {
+      opacity: 0,
+    },
+  }),
+};

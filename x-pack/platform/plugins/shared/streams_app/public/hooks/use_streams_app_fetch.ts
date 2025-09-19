@@ -8,9 +8,10 @@ import { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { AbortableAsyncState, useAbortableAsync } from '@kbn/react-hooks';
-import { TimeState } from '@kbn/es-query';
-import { NotificationsStart } from '@kbn/core/public';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import { useAbortableAsync } from '@kbn/react-hooks';
+import type { TimeState } from '@kbn/es-query';
+import type { NotificationsStart } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 

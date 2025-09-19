@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,14 +24,17 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
@@ -129,11 +126,11 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      savedObjects,
       savedObjectsTagging,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -212,12 +209,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -261,10 +259,14 @@ const useTableListViewProps = (
   );
 
   const deleteItems = useCallback(
-    async (selectedItems: object[]) => {
-      await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
+    async (items: object[]) => {
+      await deleteListItems(items, {
+        savedObjectsTagging,
+        typesService: getTypes(),
+        contentManagement,
+        http,
+        ...startServices,
+      }).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
@@ -272,7 +274,7 @@ const useTableListViewProps = (
         });
       });
     },
-    [savedObjects.client, toastNotifications]
+    [contentManagement, http, savedObjectsTagging, startServices, toastNotifications]
   );
 
   const props: CustomTableViewProps = {
@@ -412,7 +414,7 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="info" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}

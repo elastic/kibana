@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
 import nock from 'nock';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import type { LockId, LockDocument } from '@kbn/lock-manager/src/lock_manager_client';
 import {
-  LockId,
   LockManager,
-  LockDocument,
   withLock,
   rerunSetupIndexAsset,
 } from '@kbn/lock-manager/src/lock_manager_client';

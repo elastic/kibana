@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLODefinition } from '../../domain/models';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SLODefinition } from '../../domain/models';
 import { generateSummaryTransformForOccurrences } from './generators/occurrences';
 import { generateSummaryTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
 import { generateSummaryTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';

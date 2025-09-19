@@ -7,9 +7,9 @@
 
 import React, { Component } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { AGG_TYPE } from '../../../../common/constants';
-import { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
 import { MaskEditor } from './mask_editor';
 import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
 import {

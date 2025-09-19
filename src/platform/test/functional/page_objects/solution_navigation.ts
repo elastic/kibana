@@ -31,6 +31,38 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
 
+  async function getSideNavVersion(): Promise<'v1' | 'v2'> {
+    const sidenav = await testSubjects.find('~projectSideNav', TIMEOUT_CHECK);
+    const dataTestSubj = await sidenav.getAttribute('data-test-subj');
+    if (dataTestSubj && dataTestSubj.includes('projectSideNavV2')) return 'v2';
+    return 'v1';
+  }
+
+  async function isV2() {
+    const version = await getSideNavVersion();
+    return version === 'v2';
+  }
+
+  async function noopIfV2() {
+    if (await isV2()) {
+      log.debug('SolutionNavigation.sidenav - skipping action for v2 sidenav');
+      return true;
+    }
+    return false;
+  }
+
+  async function expandMoreIfNeeded() {
+    if (!(await isV2())) return;
+
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+      const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+      const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+      if (isExpanded === 'false') {
+        await moreMenuItem.click();
+      }
+    }
+  }
+
   async function getByVisibleText(
     selector: string | (() => Promise<WebElementWrapper[]>),
     text: string
@@ -40,7 +72,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     let found: WebElementWrapper | null = null;
     for (const subject of subjects) {
       const visibleText = await subject.getVisibleText();
-      if (visibleText === text) {
+      const ariaLabel = await subject.getAttribute('aria-label');
+      if (visibleText === text || ariaLabel === text) {
         found = subject;
         break;
       }
@@ -58,6 +91,15 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     // side nav related actions
     sidenav: {
+      async isV2() {
+        return (await getSideNavVersion()) === 'v2';
+      },
+      async skipIfV2(mochaContext: Mocha.Context) {
+        if (await isV2()) {
+          log.debug('SolutionNavigation.sidenav.skipIfV2 - skipping test for v2 sidenav');
+          mochaContext.skip();
+        }
+      },
       async expectLinkExists(
         by:
           | { deepLinkId: AppDeepLinkId }
@@ -65,6 +107,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           | { text: string }
           | { panelNavLinkId: string }
       ) {
+        await expandMoreIfNeeded();
+
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
             timeout: TIMEOUT_CHECK,
@@ -140,8 +184,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
-      async expectOnlyDefinedLinks(navItemIds: string[]) {
+      async expectOnlyDefinedLinks(navItemIds: string[], options?: { checkOrder?: boolean }) {
         const navItemIdRegEx = /nav-item-id-[^\s]+/g;
+        await expandMoreIfNeeded();
         const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
         const foundNavItemIds: string[] = [];
         for (const sideNavItem of allSideNavLinks) {
@@ -154,45 +199,85 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
         expect(foundNavItemIds).to.have.length(
           navItemIds.length,
-          'Found nav item list length does not match expected list of side nav items'
+          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${
+            navItemIds.length
+          }) of side nav items.\nFound items with nav ids:${JSON.stringify(foundNavItemIds)}`
         );
-        for (let i = 0; i < foundNavItemIds.length; i++) {
-          expect(foundNavItemIds[i]).to.eql(
-            navItemIds[i],
-            `Nav item ${foundNavItemIds[i]} @ index ${i} does not match expected item ${navItemIds[i]}`
+        if (options?.checkOrder !== false) {
+          for (let i = 0; i < foundNavItemIds.length; i++) {
+            expect(foundNavItemIds[i]).to.eql(
+              navItemIds[i],
+              `Nav item ${foundNavItemIds[i]} @ index ${i} does not match expected item ${navItemIds[i]}`
+            );
+          }
+        } else {
+          expect([...foundNavItemIds].sort()).to.eql(
+            [...navItemIds].sort(),
+            `Nav item ids do not match expected set`
           );
         }
       },
       async clickPanelLink(deepLinkId: string) {
-        await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+        if (await isV2()) {
+          await this.feedbackCallout.dismiss();
+          await this.clickLink({ deepLinkId: deepLinkId as AppDeepLinkId });
+        } else {
+          await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+        }
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionExists(sectionId: NavigationId) {
+        if (await noopIfV2()) return;
         log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
+
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async isSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
+
         const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`);
         const isExpanded = await collapseBtn.getAttribute('aria-expanded');
         return isExpanded === 'true';
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionOpen(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectSectionOpen', sectionId);
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be open`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
           return isOpen;
         });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async expectSectionClosed(sectionId: NavigationId) {
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         await retry.waitFor(`section ${sectionId} to be closed`, async () => {
           const isOpen = await this.isSectionOpen(sectionId);
           return !isOpen;
         });
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async openSection(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.openSection', sectionId);
+        if (await noopIfV2()) return;
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
@@ -200,8 +285,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await collapseBtn.click();
         await this.expectSectionOpen(sectionId);
       },
+      /**
+       * @deprecated - new side nav doesn't have accordion sections
+       * @param sectionId
+       */
       async closeSection(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
+        if (await noopIfV2()) return;
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
         const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);
@@ -267,14 +357,33 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       feedbackCallout: {
+        async getFeedbackTestSubjectId() {
+          return (await isV2()) ? 'feedbackSnippetPanel' : 'sideNavfeedbackCallout';
+        },
+        async getFeedbackDismissTestSubjectId() {
+          return (await isV2())
+            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
+            : 'sideNavfeedbackCallout > euiDismissCalloutButton';
+        },
         async expectExists() {
-          await testSubjects.existOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+          await testSubjects.existOrFail(await this.getFeedbackTestSubjectId(), {
+            timeout: TIMEOUT_CHECK,
+          });
         },
         async expectMissing() {
-          await testSubjects.missingOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+          return (await isV2())
+            ? await testSubjects.existOrFail('feedbackSnippetButton', {
+                timeout: TIMEOUT_CHECK,
+              })
+            : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {
+                timeout: TIMEOUT_CHECK,
+              });
         },
         async dismiss() {
-          await testSubjects.click('sideNavfeedbackCallout > euiDismissCalloutButton');
+          const feedbackTestSubjectId = await this.getFeedbackTestSubjectId();
+          if (await testSubjects.exists(feedbackTestSubjectId, { timeout: TIMEOUT_CHECK })) {
+            await testSubjects.click(await this.getFeedbackDismissTestSubjectId());
+          }
         },
       },
     },

@@ -490,18 +490,12 @@
               {
                 "parentPluginId": "@kbn/kibana-api-cli",
                 "id": "def-common.toolingLogToLogger.$1.flags",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "flags",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/dev-cli-runner",
-                    "scope": "common",
-                    "docId": "kibKbnDevCliRunnerPluginApi",
-                    "section": "def-common.Flags",
-                    "text": "Flags"
-                  }
+                  "{ verbose: boolean; quiet: boolean; silent: boolean; debug: boolean; help: boolean; _: string[]; unexpected: string[]; } & UnspecifiedFlags"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
                 "deprecated": false,

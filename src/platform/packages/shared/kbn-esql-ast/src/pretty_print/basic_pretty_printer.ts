@@ -13,10 +13,16 @@ import {
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
+  isParamLiteral,
   isProperNode,
 } from '../ast/is';
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
-import { ESQLAstExpressionNode, Visitor } from '../visitor';
+import {
+  BinaryExpressionGroup,
+  binaryExpressionGroup,
+  unaryExpressionGroup,
+} from '../ast/grouping';
+import type { ESQLAstExpressionNode } from '../visitor';
+import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';
@@ -322,7 +328,21 @@ export class BasicPrettyPrinter {
           operator = this.keyword(operator);
 
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          const formatted = `${operator}${separator}${ctx.visitArgument(0, undefined)}`;
+
+          const argument = ctx.arguments()[0];
+          let argumentFormatted = ctx.visitArgument(0, undefined);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted = `(${argumentFormatted})`;
+          }
+
+          const formatted = `${operator}${separator}${argumentFormatted}`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }
@@ -375,7 +395,10 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
-          if (opts.lowercaseFunctions) {
+          // Check if function name is a parameter stored in node.operator
+          if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+            operator = LeafPrinter.param(ctx.node.operator);
+          } else if (opts.lowercaseFunctions) {
             operator = operator.toLowerCase();
           }
 

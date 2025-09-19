@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import { mkdir, open } from 'fs/promises';
 import { writeSync } from 'fs';
 import { dirname } from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import type { Logger } from '@kbn/core/server';
 

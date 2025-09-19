@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
-  ChatConnection,
+import type {
   GeminiContent,
   GeminiRequest,
   GoogleAbstractedClient,
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
 } from '@langchain/google-common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { EnhancedGenerateContentResponse } from '@google/generative-ai';
-import { AsyncCaller } from '@langchain/core/utils/async_caller';
+import { ChatConnection } from '@langchain/google-common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { EnhancedGenerateContentResponse } from '@google/generative-ai';
+import type { AsyncCaller } from '@langchain/core/utils/async_caller';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { convertResponseBadFinishReasonToErrorMsg } from '../../utils/gemini';
 

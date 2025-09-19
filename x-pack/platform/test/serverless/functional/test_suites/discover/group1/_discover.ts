@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -197,6 +197,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should support querying on nested fields', async function () {
         await queryBar.setQuery('nestedField:{ child: nestedValue }');
         await queryBar.submitQuery();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });

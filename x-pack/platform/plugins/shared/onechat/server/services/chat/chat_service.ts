@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import {
   filter,
   of,
@@ -16,13 +17,15 @@ import {
   merge,
   catchError,
   throwError,
-  Observable,
+  map,
+  take,
+  EMPTY,
 } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
-  AgentMode,
   type RoundInput,
   type ChatEvent,
   oneChatDefaultAgentId,
@@ -39,16 +42,20 @@ import {
   getChatModel$,
   executeAgent$,
   getConversation$,
+  conversationExists$,
   updateConversation$,
   createConversation$,
 } from './utils';
+import { createConversationIdSetEvent } from './utils/events';
+import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
 
 interface ChatServiceOptions {
   logger: Logger;
   inference: InferenceServerStart;
-  actions: ActionsPluginStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export interface ChatService {
@@ -65,10 +72,6 @@ export interface ChatConverseParams {
    */
   agentId?: string;
   /**
-   * Agent mode to use for this round of conversation.
-   */
-  mode?: AgentMode;
-  /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
    */
@@ -78,6 +81,11 @@ export interface ChatConverseParams {
    * If empty, will create a new conversation instead.
    */
   conversationId?: string;
+  /**
+   * Create conversation with specified ID if not found.
+   * Defaults to false. Has no effect when conversationId is not provided.
+   */
+  autoCreateConversationWithId?: boolean;
   /**
    * Optional abort signal to handle cancellation.
    * Canceled rounds will not be persisted.
@@ -99,89 +107,148 @@ export const createChatService = (options: ChatServiceOptions): ChatService => {
 
 class ChatServiceImpl implements ChatService {
   private readonly inference: InferenceServerStart;
-  private readonly actions: ActionsPluginStart;
   private readonly logger: Logger;
   private readonly conversationService: ConversationService;
   private readonly agentService: AgentsServiceStart;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
 
   constructor({
     inference,
-    actions,
     logger,
     conversationService,
     agentService,
+    uiSettings,
+    savedObjects,
   }: ChatServiceOptions) {
     this.inference = inference;
-    this.actions = actions;
     this.logger = logger;
     this.conversationService = conversationService;
     this.agentService = agentService;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
   }
 
   converse({
     agentId = oneChatDefaultAgentId,
-    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
     abortSignal,
     nextInput,
+    autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { inference, actions } = this;
+    const { inference } = this;
     const isNewConversation = !conversationId;
 
-    return withConverseSpan({ agentId, mode, conversationId }, (span) => {
-      return forkJoin({
-        conversationClient: defer(async () =>
-          this.conversationService.getScopedClient({ request })
-        ),
-        agent: defer(async () => {
-          const agentClient = await this.agentService.getScopedClient({ request });
-          return agentClient.get(agentId);
+    return withConverseSpan({ agentId, conversationId }, (span) => {
+      return defer(() =>
+        resolveSelectedConnectorId({
+          uiSettings: this.uiSettings,
+          savedObjects: this.savedObjects,
+          request,
+          connectorId,
+          inference: this.inference,
+        })
+      ).pipe(
+        switchMap((selectedConnectorId) => {
+          if (!selectedConnectorId) {
+            return throwError(() => new Error('No connector available for chat execution'));
+          }
+
+          return forkJoin({
+            conversationClient: defer(async () =>
+              this.conversationService.getScopedClient({ request })
+            ),
+            agent: defer(async () => {
+              const agentClient = await this.agentService.getScopedClient({ request });
+              return agentClient.get(agentId);
+            }),
+            chatModel: getChatModel$({
+              connectorId: selectedConnectorId,
+              request,
+              inference,
+              span,
+            }),
+            selectedConnectorId: of(selectedConnectorId),
+          });
         }),
-        chatModel: getChatModel$({ connectorId, request, inference, actions, span }),
-      }).pipe(
-        switchMap(({ conversationClient, chatModel, agent }) => {
+        switchMap(({ conversationClient, chatModel, agent, selectedConnectorId }) => {
+          const shouldCreateNewConversation$ = isNewConversation
+            ? of(true)
+            : autoCreateConversationWithId
+            ? conversationExists$({ conversationId, conversationClient }).pipe(
+                switchMap((exists) => of(!exists))
+              )
+            : of(false);
+
           const conversation$ = getConversation$({
             agentId,
             conversationId,
+            autoCreateConversationWithId,
             conversationClient,
           });
+
+          // Extract the ID from the conversation and emit the event ONLY for new conversations
+          const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? conversation$.pipe(
+                    map((conversation) => createConversationIdSetEvent(conversation.id)),
+                    take(1)
+                  )
+                : EMPTY
+            )
+          );
+
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            mode,
             conversation$,
             nextInput,
             abortSignal,
             agentService: this.agentService,
+            defaultConnectorId: selectedConnectorId,
           });
 
-          const title$ = isNewConversation
-            ? generateTitle$({ chatModel, conversation$, nextInput })
-            : conversation$.pipe(
-                switchMap((conversation) => {
-                  return of(conversation.title);
-                })
-              );
+          const title$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? generateTitle$({ chatModel, conversation$, nextInput })
+                : conversation$.pipe(
+                    switchMap((conversation) => {
+                      return of(conversation.title);
+                    })
+                  )
+            )
+          );
 
           const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-          const saveOrUpdateAndEmit$ = isNewConversation
-            ? createConversation$({
-                agentId,
-                conversationClient,
-                title$,
-                roundCompletedEvents$,
-              })
-            : updateConversation$({
-                conversationClient,
-                conversation$,
-                title$,
-                roundCompletedEvents$,
-              });
+          const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? conversation$.pipe(
+                    switchMap((conversation) =>
+                      createConversation$({
+                        agentId,
+                        conversationClient,
+                        conversationId: conversationId || conversation.id,
+                        title$,
+                        roundCompletedEvents$,
+                      })
+                    )
+                  )
+                : updateConversation$({
+                    conversationClient,
+                    conversation$,
+                    title$,
+                    roundCompletedEvents$,
+                  })
+            )
+          );
 
-          return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+          return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
             handleCancellation(abortSignal),
             catchError((err) => {
               this.logger.error(`Error executing agent: ${err.stack}`);

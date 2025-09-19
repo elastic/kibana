@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateWorkflowCommand } from '@kbn/workflows';
+import type { CreateWorkflowCommand } from '@kbn/workflows';
 
 /**
  * Example of creating a workflow with scheduled triggers
@@ -60,7 +60,7 @@ workflow:
   description: 'A workflow that processes data every 5 minutes'
   enabled: true
   triggers:
-    - type: 'triggers.elastic.scheduled'
+    - type: 'scheduled'
       with:
         every: '5'
         unit: 'minute'
@@ -117,7 +117,7 @@ workflow:
   description: 'A workflow that generates daily reports at 9 AM'
   enabled: true
   triggers:
-    - type: 'triggers.elastic.scheduled'
+    - type: 'scheduled'
       with:
         cron: '0 9 * * *'
   steps:

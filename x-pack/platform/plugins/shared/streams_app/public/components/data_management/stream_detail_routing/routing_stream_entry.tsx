@@ -17,15 +17,15 @@ import {
   EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
-import { DraggableProvided } from '@hello-pangea/dnd';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
+import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { EditRoutingRuleControls } from './control_bars';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function RoutingStreamEntry({
   availableStreams,
@@ -90,7 +90,7 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(routingRule.if) && (
+        {!isRoutingEnabled(routingRule.status) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
               defaultMessage: 'Disabled',
@@ -99,7 +99,7 @@ export function RoutingStreamEntry({
         )}
         <EuiLink
           href={router.link('/{key}/management/{tab}', {
-            path: { key: routingRule.destination, tab: 'route' },
+            path: { key: routingRule.destination, tab: 'partitioning' },
           })}
           data-test-subj="streamsAppRoutingStreamEntryButton"
         >
@@ -111,7 +111,7 @@ export function RoutingStreamEntry({
           `}
         >
           <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.if} />
+            <ConditionMessage condition={routingRule.where} />
           </EuiText>
         </EuiFlexItem>
         {childrenCount > 0 && (
@@ -135,17 +135,12 @@ export function RoutingStreamEntry({
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            condition={routingRule.if}
-            onConditionChange={(condition) => onChange({ if: condition })}
+            condition={routingRule.where}
+            status={routingRule.status}
+            onConditionChange={(cond) => onChange({ where: cond })}
+            onStatusChange={(status) => onChange({ status })}
           />
-          <EditRoutingRuleControls
-            relatedStreams={availableStreams.filter(
-              (streamName) =>
-                streamName === routingRule.destination ||
-                isDescendantOf(routingRule.destination, streamName)
-            )}
-            routingRule={routingRule}
-          />
+          <EditRoutingRuleControls routingRule={routingRule} />
         </EuiFlexGroup>
       )}
     </EuiPanel>

@@ -14,7 +14,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getStats } from '../../../../lib/enterprise_search';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
 export function entSearchOverviewRoute(server: MonitoringCore) {

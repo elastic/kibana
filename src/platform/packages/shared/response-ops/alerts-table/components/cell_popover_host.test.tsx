@@ -9,7 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { screen, render } from '@testing-library/react';
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { CellPopoverHost } from './cell_popover_host';

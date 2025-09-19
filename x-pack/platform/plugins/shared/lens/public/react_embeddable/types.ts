@@ -63,8 +63,8 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -265,6 +265,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface LensRequestHandlersProps {

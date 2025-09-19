@@ -8,49 +8,43 @@
  */
 
 export type {
+  // commands
+  CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
-  WorkflowExecutionLogModel,
-  WorkflowExecutionHistoryModel,
-
-  // dtos
-  WorkflowDetailDto,
-  WorkflowListDto,
-  WorkflowListItemDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowExecutionListItemDto,
-  WorkflowListItemAction,
-
-  // commands
-  CreateWorkflowCommand,
-  UpdatedWorkflowResponseDto,
-
   // execution engine
   Provider,
   ProviderInput,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
+  StackFrame,
+  UpdatedWorkflowResponseDto,
+  // dtos
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionHistoryModel,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+  WorkflowExecutionLogModel,
+  WorkflowStepExecutionDto,
+  WorkflowListDto,
+  WorkflowListItemAction,
+  WorkflowListItemDto,
+  ExecutionStatusUnion,
+  ExecutionTypeUnion,
 } from './v1';
 
 // exported full to use enum as values
 export {
-  ExecutionStatus,
-  WorkflowStatus,
-
   // command schemas
   CreateWorkflowCommandSchema,
+  ExecutionStatus,
+  ExecutionType,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
+  SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
 } from './v1';
-
-export type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  EnterForeachNode,
-  ExitForeachNode,
-  AtomicGraphNode,
-} from './execution';

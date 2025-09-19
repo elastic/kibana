@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
+module.exports = (api) => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
@@ -50,7 +50,8 @@ module.exports = () => ({
       ],
     },
 
-    require.resolve('@babel/preset-react'),
+    // 'development: true' adds '_debugSource' and '_debugOwner' properties to React Fiber nodes, which is required for @kbn/inspect-component-plugin to work
+    [require.resolve('@babel/preset-react'), { development: api.env('development') }],
 
     [
       require.resolve('@babel/preset-typescript'),

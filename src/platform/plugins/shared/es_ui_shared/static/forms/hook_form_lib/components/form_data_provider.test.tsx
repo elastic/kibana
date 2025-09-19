@@ -10,8 +10,9 @@
 import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed } from '../shared_imports';
-import { OnUpdateHandler } from '../types';
+import type { TestBed } from '../shared_imports';
+import { registerTestBed } from '../shared_imports';
+import type { OnUpdateHandler } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
 import { UseField } from './use_field';

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  AIMessage,
-  Message,
-  MessageRole,
-  UseChatHelpers,
-  AnnotationDoc,
-  AnnotationTokens,
-} from '../types';
+import type { AIMessage, Message, UseChatHelpers, AnnotationDoc, AnnotationTokens } from '../types';
+import { MessageRole } from '../types';
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>

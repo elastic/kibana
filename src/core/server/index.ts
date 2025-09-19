@@ -30,7 +30,7 @@
  */
 
 import 'reflect-metadata';
-import { Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
@@ -294,7 +294,6 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,

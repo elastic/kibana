@@ -8,9 +8,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { AssetReference } from '@kbn/fleet-plugin/common/types';
+import type { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
@@ -563,8 +563,8 @@ const expectAssetsInstalled = ({
     expect(sortedRes).eql({
       installed_kibana: [
         {
-          id: 'sample_alert_rule',
-          type: 'alert',
+          id: 'sample_alerting_rule_template',
+          type: 'alerting_rule_template',
         },
         {
           id: 'sample_csp_rule_template',
@@ -762,8 +762,8 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
-          id: 'af688395-0e06-5c7f-9584-05ffba778108',
-          path: 'all_assets-0.1.0/kibana/alert/sample_alert_rule.json',
+          id: '6440faa4-fe21-5620-9989-f0f2b9f6944f',
+          path: 'all_assets-0.1.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
           type: 'epm-packages-assets',
         },
         {

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
+import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 const FooApp = ({

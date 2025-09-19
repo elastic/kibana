@@ -7,10 +7,11 @@
 
 import type OpenAI from 'openai';
 import { testHasEmbeddedConsole } from '../embedded_console';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
-import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
+import type { LlmProxy } from './utils/create_llm_proxy';
+import { createLlmProxy } from './utils/create_llm_proxy';
 
 const esArchiveIndex =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';

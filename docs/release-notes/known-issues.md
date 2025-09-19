@@ -8,9 +8,23 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
+
+Applies to: {{stack}} 9.1.0, 9.1.1
+
+**Details**
+
+After creating a report in a non-default {{kib}} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
+
+::::
+
 ::::{dropdown} Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000
 
 Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
 
 **Details**
 
@@ -28,7 +42,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`. PDF and PNG reports will fail when this setting is used in this release.
 
 **Action**
 

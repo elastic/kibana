@@ -27,6 +27,7 @@ export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
+  readonly serverlessReleaseNotes: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -300,7 +301,10 @@ export interface DocLinks {
     readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
-    readonly aiAssistant: string;
+    readonly aiAssistant: {
+      home: string;
+      knowledgeBaseIndexEntries: string;
+    };
     readonly cloudSecurityPosture: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
@@ -550,6 +554,8 @@ export interface DocLinks {
     httpMonitoring: string;
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
+    agentReleaseProcess: string;
+    fipsIngest: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

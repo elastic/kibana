@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { useMemoCss } from '../use_memo_css';

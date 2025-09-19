@@ -12,7 +12,8 @@
 const aliases: Record<string, string[]> = {
   STATS: ['STATS_BY', 'BY', 'STATS...BY', 'STATS ... BY'],
   OPERATORS: ['LIKE', 'RLIKE', 'IN'],
-  JOIN: ['LOOKUP JOIN'],
+  LOOKUP_JOIN: ['JOIN', 'LOOKUPJOIN', 'LOOKUP JOIN'],
+  FROM: ['METADATA'],
 };
 
 const getAliasMap = () => {

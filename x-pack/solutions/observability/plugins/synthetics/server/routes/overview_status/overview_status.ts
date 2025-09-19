@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { OverviewStatusService } from './overview_status_service';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { OverviewStatusState } from '../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { OverviewStatusState } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { OverviewStatusSchema } from '../common';
 

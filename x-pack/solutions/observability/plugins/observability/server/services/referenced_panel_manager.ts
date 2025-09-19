@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
-import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
+import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 export class ReferencedPanelManager {
   // The panelIndex refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).

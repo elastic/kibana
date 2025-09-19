@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
   DeserializerOrUndefined,
@@ -21,7 +21,7 @@ import type {
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { IndexEsListSchema } from '../../schemas/elastic_query';
+import type { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
   id: IdOrUndefined;

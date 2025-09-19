@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import SearchBar, { SearchBarProps, SearchBarState, SearchBarUI } from './search_bar';
+import type { SearchBarProps, SearchBarState } from './search_bar';
+import SearchBar, { SearchBarUI } from './search_bar';
 import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
@@ -22,37 +23,12 @@ import { mount } from 'enzyme';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
-
-const mockTimeHistory = {
-  get: () => {
-    return [];
-  },
-  add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
-};
+import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { createMockStorage, createMockTimeHistory } from './mocks';
+import { SearchSessionState } from '@kbn/data-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const noop = jest.fn();
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 const kqlQuery = {
   query: 'response:200',
@@ -63,15 +39,27 @@ const esqlQuery = {
   esql: 'from test',
 };
 
-function wrapSearchBarInContext(testProps: any) {
+function wrapSearchBarInContext(
+  testProps: any,
+  options?: {
+    backgroundSearch?: {
+      enabled?: boolean;
+      initialState?: SearchSessionState;
+    };
+  }
+) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: mockTimeHistory,
+    timeHistory: createMockTimeHistory(),
     intl: null as any,
   };
 
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
+  const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? false;
+  const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
+  const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
   const services = {
     application: {
@@ -96,6 +84,10 @@ function wrapSearchBarInContext(testProps: any) {
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      search: searchServiceMock.createStartContract({
+        isBackgroundSearchEnabled: backgroundSearchEnabled,
+        session: getSessionServiceMock({ state$: sessionState$ }),
+      }),
       query: {
         savedQueries: {
           findSavedQueries: () =>
@@ -454,5 +446,41 @@ describe('SearchBar', () => {
       expect(onDraftChange).toHaveBeenCalledWith(undefined);
       expect(component.find('textarea').prop('value')).toEqual(kqlQuery.query);
     });
+  });
+
+  it('renders BackgroundSearchRestoredCallout when feature flag enabled and session restored', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: true,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      true
+    );
+  });
+
+  it('does not render BackgroundSearchRestoredCallout when feature flag disabled', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: false,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      false
+    );
   });
 });

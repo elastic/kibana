@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OrderedChart } from './point_series';
+import type { OrderedChart } from './point_series';
 
 export function orderedDateAxis(chart: OrderedChart) {
   const x = chart.aspects.x[0];

@@ -51,6 +51,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

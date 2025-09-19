@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogRecord, DisposableAppender } from '@kbn/logging';
+import type { LogRecord, DisposableAppender } from '@kbn/logging';
 
 /**
  * Simple appender that just buffers `LogRecord` instances it receives. It is a *reserved* appender

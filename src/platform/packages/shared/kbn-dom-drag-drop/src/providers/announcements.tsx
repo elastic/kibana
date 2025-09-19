@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../types';
-import { HumanData } from '.';
+import type { DropType } from '../types';
+import type { HumanData } from '.';
 
 type AnnouncementFunction = (draggedElement: HumanData, dropElement: HumanData) => string;
 

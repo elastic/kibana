@@ -12,10 +12,13 @@
  */
 export const EXPANDED_MENU_ITEM_HEIGHT = 67;
 export const COLLAPSED_MENU_ITEM_HEIGHT = 32;
-export const MAX_MENU_ITEMS = 10;
+export const EXPANDED_MENU_GAP = 16;
+export const COLLAPSED_MENU_GAP = 4;
+export const MAX_MENU_ITEMS = 12;
 export const MAX_FOOTER_ITEMS = 5;
 export const POPOVER_HOVER_DELAY = 100;
 export const TOP_BAR_HEIGHT = 48;
 export const TOP_BAR_POPOVER_GAP = 8;
-export const BOTTOM_POPOVER_GAP = 4;
+export const BOTTOM_POPOVER_GAP = 17;
 export const POPOVER_OFFSET = 5;
+export const TOOLTIP_OFFSET = 4;

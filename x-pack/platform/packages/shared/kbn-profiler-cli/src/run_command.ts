@@ -30,11 +30,13 @@ export async function runCommand({
   amount,
   connections,
   signal,
+  env,
 }: {
   command: string[];
   amount: number;
   connections: number;
   signal: AbortSignal;
+  env?: Record<string, string>;
 }) {
   const abortPromise = new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -48,7 +50,7 @@ export async function runCommand({
 
   function executeCommand() {
     const [file, ...args] = command;
-    return execa(file, args, { stdio: 'ignore' });
+    return execa(file, args, { stdio: 'ignore', env });
   }
 
   if (amount === 1) {

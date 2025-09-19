@@ -10,9 +10,10 @@
 export { Navigation, type NavigationProps } from './src/components/navigation';
 export { useNavigation } from './src/hooks/use_navigation';
 export type {
+  BadgeType,
   MenuItem,
+  NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  NavigationStructure,
   SideNavLogo,
 } from './types';

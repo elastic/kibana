@@ -16,13 +16,10 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  FieldDefinitionConfigAdvancedParameters,
-  isSchema,
-  recursiveRecord,
-} from '@kbn/streams-schema';
+import type { FieldDefinitionConfigAdvancedParameters } from '@kbn/streams-schema';
+import { isSchema, recursiveRecord } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
@@ -107,6 +104,9 @@ export const AdvancedFieldMappingOptions = ({
                   markAsParsingError();
                   if (onValidate) onValidate(false);
                 }
+              }}
+              options={{
+                automaticLayout: true,
               }}
             />
           ) : (

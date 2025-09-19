@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { RuleFormStepId } from '@kbn/response-ops-rule-form/src/constants';
+import type { RuleFormStepId } from '@kbn/response-ops-rule-form/src/constants';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AbortableAsyncState } from '@kbn/react-hooks';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
-import { TickFormatter } from '@elastic/charts';
-import { Streams } from '@kbn/streams-schema';
-import { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
+import type { TickFormatter } from '@elastic/charts';
+import type { Streams } from '@kbn/streams-schema';
+import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
-import { formatChangePoint } from './change_point';
+import { formatChangePoint } from './utils/change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
@@ -72,7 +73,7 @@ export function SignificantEventsTable({
         <EuiLink
           target="_blank"
           href={discover?.locator?.getRedirectUrl(
-            buildDiscoverParams(record, definition, timeState)
+            buildDiscoverParams(record.query, definition, timeState)
           )}
         >
           {record.query.title}

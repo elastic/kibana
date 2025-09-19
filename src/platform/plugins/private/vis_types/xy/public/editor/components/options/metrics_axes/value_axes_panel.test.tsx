@@ -13,8 +13,9 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 
-import { ValueAxis, SeriesParam } from '../../../../types';
-import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
+import type { ValueAxis, SeriesParam } from '../../../../types';
+import type { ValueAxesPanelProps } from './value_axes_panel';
+import { ValueAxesPanel } from './value_axes_panel';
 import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {

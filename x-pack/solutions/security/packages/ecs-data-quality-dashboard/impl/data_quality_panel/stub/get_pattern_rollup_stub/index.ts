@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 
 const phases = ['hot', 'warm', 'cold', 'frozen'] as const;
 
@@ -40,6 +40,7 @@ export const getPatternRollupStub = (
               managed: true,
               policy: pattern,
               phase,
+              skip: false,
             },
           ];
         })

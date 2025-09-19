@@ -6,43 +6,21 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { ServerSentEventBase } from '@kbn/sse-utils';
-import {
+import type {
+  SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import { Observable, from as fromRxjs, map } from 'rxjs';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import {
-  STREAMS_API_PRIVILEGES,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '../../../../common/constants';
-import {
-  generateSignificantEventDefinitions,
-  type GeneratedSignificantEventQuery,
-} from '../../../lib/significant_events/generate_significant_events';
+import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
-import type { StreamsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
-
-async function assertLicenseAndPricingTier(
-  server: StreamsServer,
-  licensing: LicensingPluginStart
-): Promise<void> {
-  const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-  );
-  if (!isAvailableForTier) {
-    throw new SecurityError(`Cannot access API on the current pricing tier`);
-  }
-  await assertEnterpriseLicense(licensing);
-}
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -81,10 +59,11 @@ const previewSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsPreviewResponse> => {
-    const { streamsClient, scopedClusterClient, licensing } = await getScopedClients({
-      request,
-    });
-    await assertLicenseAndPricingTier(server, licensing);
+    const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
@@ -145,15 +124,12 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
-      request,
-    });
-    await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    const { streamsClient, assetClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
@@ -221,41 +197,39 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<
-    Observable<ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>>
-  > => {
-    const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
+  }): Promise<SignificantEventsGenerateResponse> => {
+    const { streamsClient, scopedClusterClient, licensing, inferenceClient, uiSettingsClient } =
       await getScopedClients({ request });
-    await assertLicenseAndPricingTier(server, licensing);
 
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions(
-      {
-        name: params.path.name,
-        connectorId: params.query.connectorId,
-        currentDate: params.query.currentDate,
-        shortLookback: params.query.shortLookback,
-        longLookback: params.query.longLookback,
-      },
-      {
-        inferenceClient,
-        esClient: createTracedEsClient({
-          client: scopedClusterClient.asCurrentUser,
+    const definition = await streamsClient.getStream(params.path.name);
+
+    return fromRxjs(
+      generateSignificantEventDefinitions(
+        {
+          definition,
+          connectorId: params.query.connectorId,
+          currentDate: params.query.currentDate,
+          shortLookback: params.query.shortLookback,
+          longLookback: params.query.longLookback,
+        },
+        {
+          inferenceClient,
+          esClient: createTracedEsClient({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            plugin: 'streams',
+          }),
           logger,
-          plugin: 'streams',
-        }),
-        logger,
-      }
-    );
-
-    return fromRxjs(generatedSignificantEventDefinitions).pipe(
+        }
+      )
+    ).pipe(
+      mergeMap((queries) => fromRxjs(queries)),
       map((query) => ({
         query,
-        type: 'generated_queries',
+        type: 'generated_query' as const,
       }))
     );
   },

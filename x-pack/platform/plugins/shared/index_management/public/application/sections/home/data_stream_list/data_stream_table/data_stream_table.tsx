@@ -8,28 +8,27 @@
 import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiLink,
-  EuiIcon,
-  EuiToolTip,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiIconTip,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
-import { DataStream } from '../../../../../../common/types';
+import type { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
@@ -38,7 +37,8 @@ import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { FilterListButton, Filters } from '../../components';
+import type { Filters } from '../../components';
+import { FilterListButton } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
@@ -204,24 +204,26 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   columns.push({
     field: 'lifecycle',
     name: (
-      <EuiToolTip
-        content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
-          values: {
-            // ILM is not applicable on serverless, so when the user isnt able to
-            // disable data retention (which is only for serverless) we want to
-            // tweak the copy of the tooltip to hide any references to it.
-            canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
-          },
-        })}
-      >
-        <span>
-          {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
-            defaultMessage: 'Data retention',
-          })}{' '}
-          <EuiIcon size="s" color="subdued" type="question" />
-        </span>
-      </EuiToolTip>
+      <span>
+        {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+          defaultMessage: 'Data retention',
+        })}{' '}
+        <EuiIconTip
+          content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
+            defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+            values: {
+              // ILM is not applicable on serverless, so when the user isnt able to
+              // disable data retention (which is only for serverless) we want to
+              // tweak the copy of the tooltip to hide any references to it.
+              canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+            },
+          })}
+          position="top"
+          type="question"
+          size="s"
+          color="subdued"
+        />
+      </span>
     ),
     truncateText: true,
     sortable: true,
@@ -236,7 +238,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
             <>
               {' '}
-              <EuiToolTip
+              <EuiIconTip
                 content={i18n.translate(
                   'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
                   {
@@ -246,9 +248,12 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                     },
                   }
                 )}
-              >
-                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
-              </EuiToolTip>
+                position="top"
+                type="info"
+                size="s"
+                color="subdued"
+                iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
+              />
             </>
           )}
         </>

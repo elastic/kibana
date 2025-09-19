@@ -9,13 +9,14 @@ import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { PreviewTable } from '../../preview_table';
+import { PreviewTable } from '../../shared/preview_table';
 import { LoadingPanel } from '../../../loading_panel';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../types';
+import type { MappedSchemaField, SchemaField } from '../types';
+import { isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 
 interface SamplePreviewTableProps {

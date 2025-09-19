@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Writable } from '@kbn/utility-types';
-import { timeRangeSchema, absoluteTimeRangeSchema, relativeTimeRangeSchema } from './time_range';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
+import type {
+  timeRangeSchema,
+  absoluteTimeRangeSchema,
+  relativeTimeRangeSchema,
+} from './time_range';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;

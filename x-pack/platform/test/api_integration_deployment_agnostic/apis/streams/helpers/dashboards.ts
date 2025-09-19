@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 
 export async function loadDashboards(kbnClient: KbnClient, archives: string[], spaceId: string) {
   // clear out all lingering dashboards

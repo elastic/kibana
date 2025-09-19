@@ -8,7 +8,7 @@
  */
 
 import { getFieldValidityAndErrorMessage } from './helpers';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockField = {
   type: 'date',

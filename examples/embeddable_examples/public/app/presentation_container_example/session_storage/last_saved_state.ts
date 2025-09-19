@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PageState } from '../types';
+import type { PageState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';

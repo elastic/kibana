@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HistoricalSummaryResponse } from '@kbn/slo-schema';
+import type { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
   DEGRADING_FAST_ROLLING_SLO,

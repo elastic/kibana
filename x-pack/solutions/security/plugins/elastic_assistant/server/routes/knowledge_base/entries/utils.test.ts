@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { getKBUserFilter } from './utils';
 
 describe('Utils', () => {

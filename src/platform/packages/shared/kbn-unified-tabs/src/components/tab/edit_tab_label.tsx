@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFieldText, keys, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TabItem } from '../../types';
@@ -40,7 +41,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
 
   const onSubmit = useCallback(
     async (newLabel: string) => {
-      if (!newLabel) {
+      if (!newLabel || newLabel.length > MAX_TAB_LABEL_LENGTH) {
         return;
       }
 
@@ -92,7 +93,9 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       value={value}
       maxLength={MAX_TAB_LABEL_LENGTH}
       isLoading={submitState === SubmitState.submitting}
-      isInvalid={submitState === SubmitState.error || !value.trim()}
+      isInvalid={
+        submitState === SubmitState.error || !value.trim() || value.length > MAX_TAB_LABEL_LENGTH
+      }
       onChange={onChange}
       onKeyDown={onKeyDown}
       onBlur={submitState !== SubmitState.submitting ? onExit : undefined}

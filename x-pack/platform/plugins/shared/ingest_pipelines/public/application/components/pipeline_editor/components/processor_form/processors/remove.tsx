@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import type { FieldHook, FieldConfig } from '../../../../../../shared_imports';
 import {
   FIELD_TYPES,
   UseField,
   ComboBoxField,
-  FieldHook,
-  FieldConfig,
   useFormContext,
 } from '../../../../../../shared_imports';
 

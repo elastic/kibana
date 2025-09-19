@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { indexNamePrefix as sampleIndexNamePrefix, DatasetSampleType } from '.';
+import type { DatasetSampleType } from '.';
+import { indexNamePrefix as sampleIndexNamePrefix } from '.';
 
 export const getSampleDataIndexName = (sampleType: DatasetSampleType): string =>
   `${sampleIndexNamePrefix}${sampleType.toLowerCase()}`;

@@ -8,12 +8,12 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
-import { ReactNode } from 'react';
-import { GeoJsonProperties } from 'geojson';
-import { Geometry } from 'geojson';
-import { DRAW_SHAPE } from '../constants';
-import { CustomIcon } from './style_property_descriptor_types';
-import { INITIAL_LOCATION } from '../constants';
+import type { ReactNode } from 'react';
+import type { GeoJsonProperties } from 'geojson';
+import type { Geometry } from 'geojson';
+import type { DRAW_SHAPE } from '../constants';
+import type { CustomIcon } from '.';
+import type { INITIAL_LOCATION } from '../constants';
 
 export type MapExtent = {
   minLon: number;

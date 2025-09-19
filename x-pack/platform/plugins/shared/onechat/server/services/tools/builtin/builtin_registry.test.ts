@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
+import type { BuiltinToolRegistry } from './builtin_registry';
+import { createBuiltinToolRegistry } from './builtin_registry';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('BuiltinToolRegistry', () => {
@@ -18,7 +19,7 @@ describe('BuiltinToolRegistry', () => {
   });
 
   const mockTool: BuiltinToolDefinition = {
-    id: '.test-tool',
+    id: 'test-tool',
     description: 'A test tool',
     schema: z.object({}),
     tags: [],
@@ -37,10 +38,10 @@ describe('BuiltinToolRegistry', () => {
       expect(() =>
         registry.register({
           ...mockTool,
-          id: 'invalid_id' as any,
+          id: '.invalid_id' as any,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid id: \\"invalid_id\\". Built-in tool ids must start with a dot and only contains alphanumeric characters, hyphens, and underscores."`
+        `"Invalid tool id: \\".invalid_id\\": Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores"`
       );
     });
   });
@@ -48,7 +49,7 @@ describe('BuiltinToolRegistry', () => {
   describe('has', () => {
     it('should return true when tool exists', async () => {
       registry.register(mockTool);
-      const exists = registry.has('.test-tool');
+      const exists = registry.has('test-tool');
       expect(exists).toBe(true);
     });
 
@@ -62,7 +63,7 @@ describe('BuiltinToolRegistry', () => {
   describe('get', () => {
     it('should return the tool when it exists', async () => {
       registry.register(mockTool);
-      const tool = registry.get('.test-tool');
+      const tool = registry.get('test-tool');
       expect(tool).toEqual(mockTool);
     });
 
@@ -75,7 +76,7 @@ describe('BuiltinToolRegistry', () => {
   describe('list', () => {
     it('should return all registered tools', async () => {
       const mockTool1: BuiltinToolDefinition = {
-        id: '.test-tool-1',
+        id: 'test-tool-1',
         description: 'A test tool',
         tags: [],
         schema: z.object({}),
@@ -85,7 +86,7 @@ describe('BuiltinToolRegistry', () => {
       };
 
       const mockTool2: BuiltinToolDefinition = {
-        id: '.test-tool-2',
+        id: 'test-tool-2',
         description: 'Another test tool',
         tags: [],
         schema: z.object({}),

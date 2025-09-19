@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { UpgradeAssistantUIPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return new UpgradeAssistantUIPlugin(ctx);
 };
+
+export { generateNewIndexName } from './application/components/es_deprecations/deprecation_types/indices/index_settings';

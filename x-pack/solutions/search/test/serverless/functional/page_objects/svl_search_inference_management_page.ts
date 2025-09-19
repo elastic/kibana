@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -112,6 +112,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
         await testSubjects.click('provider');
 
         await testSubjects.existOrFail('api_key-password');
+        await testSubjects.click('inference-endpoint-additional-settings-button');
         await testSubjects.click('completion');
         await testSubjects.existOrFail('inference-endpoint-input-field');
         (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodSchema, z } from '@kbn/zod';
+import type { ZodSchema, z } from '@kbn/zod';
 
 export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
   _base: TBaseSchema,

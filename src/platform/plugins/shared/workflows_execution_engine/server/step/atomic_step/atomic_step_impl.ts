@@ -6,12 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
-import { StepImplementation } from '../step_base';
+import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import type { NodeImplementation } from '../node_implementation';
 import { ConnectorStepImpl } from '../connector_step';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
-import { ConnectorExecutor } from '../../connector_executor';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { ConnectorExecutor } from '../../connector_executor';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 /**
  * Implements the execution logic for an atomic workflow step.
@@ -29,12 +30,13 @@ import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/
  * @param connectorExecutor - Executes connector operations for the step.
  * @param workflowState - Manages the runtime state of workflow execution.
  */
-export class AtomicStepImpl implements StepImplementation {
+export class AtomicStepImpl implements NodeImplementation {
   constructor(
     private node: AtomicGraphNode,
     private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private workflowState: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   async run(): Promise<void> {
@@ -45,7 +47,8 @@ export class AtomicStepImpl implements StepImplementation {
       this.node.configuration,
       this.contextManager,
       this.connectorExecutor,
-      this.workflowState
+      this.workflowState,
+      this.workflowLogger
     ).run();
   }
 }

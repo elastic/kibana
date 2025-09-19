@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
@@ -28,9 +29,7 @@ export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
  * Extract tab attributes into a separate array since multiple tabs are supported
  * @param attributes The previous attributes to be transformed (version 5)
  */
-export const extractTabs = (
-  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
-): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> => {
+export function extractTabs<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>>(attributes: T) {
   const { title, description, ...tabAttrs } = attributes;
   const tabs = [
     {
@@ -38,8 +37,8 @@ export const extractTabs = (
       label: i18n.translate('savedSearch.defaultTabLabel', {
         defaultMessage: 'Untitled',
       }),
-      attributes: tabAttrs,
+      attributes: omit(tabAttrs, 'tabs'),
     },
   ];
   return { ...attributes, tabs };
-};
+}

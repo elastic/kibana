@@ -1,51 +1,41 @@
-## KQL
+## KQL Query Syntax Guide
 
-KQL (Kibana Query Language) is a query language available in Kibana, that will be converted into Elasticsearch Query DSL.
+### Core Syntax Rule
+`field:value` - Search for `value` within the specified `field`
 
-- Supports auto completion of fields and values
-- Supports searching on scripted fields
-- Supports wildcard on field names
-- Simpler syntax for some operators
+### Key Principles
 
-### Finding values
-Find documents where any field matches any of the words/terms listed. The term must
-appear as it is in the document, e.g. this query won't match documents containing
-the word "darker": `dark light`.
+#### 1. Finding Values
+- Find documents where any field matches any of the words/terms listed. The term must appear as it is in the document, e.g. this query `dark light` won’t match documents containing the word "darker".
+- Use and/or and parentheses to define that multiple terms need to appear. This query `orange and (dark or light)` would find all documents that have the term "orange" and either "dark" or "light" (or both) in it.
+- To find values only in specific fields you can put the field name before the value e.g. this query `title : our planet or title : dark` will only find document with the term "our" and "planet" in the title field, or document with the term "dark" in the title field.
+- Putting quotes around values makes sure they are found in that specific order (match a phrase) e.g. if you want to make sure to only find documents containing “our planet” and not “planet our” you’d need the following query: `title: "our planet"`
 
-Use and/or and parentheses to define that multiple terms need to appear. This query
-would find all documents that have the term "orange" and either "dark" or "light"
-(or both) in it: `orange and (dark or light)`
+#### 2. Wildcards
+- Use wildcards * to match just parts of a term/word, e.g. this query `dark*` will find anything beginning with "dark" like "darker", "darkest", "darkness", etc.
+- Wildcards can be used anywhere in a term/word. ⚡ Using a wildcard in front of a word can be rather slow and resource intensive for your Elasticsearch — use with care. e.g. d*k *les
+- Wildcards cannot be used when searching for phrases i.e. "our plan*" will not retrieve results containing "our planet".
+- Wildcards can be used for searching over multiple fields in KQL e.g. this query will search "fakestreet" in all fields beginning with "user.address.": `user.address.* : fakestreet`
 
-To find values only in specific fields you can put the field name before the value
-e.g. this query will only find "orange" in the color field: `color:orange`. 
+#### 3. Boolean Operators
+- `or`: Combines multiple conditions where at least one must match
+  - `message:"dark cat" or message:"dark dog"` returns documents with either matching phrase
+- `and`: Requires all conditions to match
+  - `body.text:another thing and message:dark*` returns documents that have both conditions
+- Operators are case-insensitive: `OR`, `or`, `And`, `AND` all work
 
-Putting quotes around values makes sure they are found in that specific order
-(match a phrase) e.g. if you want to make sure to only find documents containing
-"our planet" and not "planet our" you'd need the following query: \`"our planet"\`.
+#### 4. Nested Field Access
+- Use dot notation for nested fields: `body.text:"value"` searches within the `text` field inside the `body` object
+- Can chain multiple levels: `body.metadata.author:"John"`
 
-### Wildcards
+### Query Construction Rules
+1. Always specify the field explicitly when you want to search within a specific field
+2. Use quotes for phrases containing spaces or special characters
+3. Parentheses group conditions: `(message:cat or message:"dark dog") and status:active`
+4. Default behavior without field: Searching just `"dark cat"` searches across all searchable fields
 
-You can use the wildcard * to match just parts of a term/word, e.g. this query will
-find anything beginning with "dark" like "darker", "darkest", "darkness", etc: `dark*`.
-
-Wildcards can be used anywhere in a term/word. ⚡ Using a wildcard in front of a word
-can be rather slow and resource intensive for your Elasticsearch — use with care:
-`d*k *les`.
-
-You can use the * wildcard also for searching over multiple fields in KQL e.g. this
-query will search "fakestreet" in all fields beginning with "user.address.".
-`user.address.* : fakestreet`
-
-Wildcards cannot be used when searching for phrases i.e. "our plan*" will not
-retrieve results containing "our planet".
-
-### Comparing values
-
-Compare numbers or dates. Those operators also work on text/keyword fields, but
-might behave not very intuitive and thus I'd recommend avoiding usage with
-text/keyword fields: `price >= 42 and price < 100`, or `time >= "2020-04-10"`
-
-### Special queries
-
-Find documents in which a specific field exists (i.e. that does have a non null
-value for that field): `destination : *`
+### Examples Explained
+- `message:"dark cat" or message:"dark dog"` → Documents where message field match either phrase
+- `message:"dark"` → Documents where message field contains the word "dark"
+- `body.text:dark*` → Documents where body.text field contains the term starting with "dark", e.g. "darkness", "darker", "dark"
+- `body.text:"another thing" and (dark or darker)` → Documents having "another thing" matching phrase in the body.text field, and dark or darker word in the document.

@@ -36,7 +36,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 jest.mock('../../utils/kibana_react', () => ({

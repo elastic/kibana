@@ -7,8 +7,8 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -24,6 +24,13 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       isCollapsible: false,
       children: [
         {
+          link: securityLink(SecurityPageName.landing),
+          title: SOLUTION_NAME,
+          icon: 'logoSecurity',
+          renderAs: 'home',
+          sideNavVersion: 'v2',
+        },
+        {
           link: 'discover',
         },
         defaultNavigationTree.dashboards(),
@@ -34,6 +41,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.alerts,
               link: securityLink(SecurityPageName.alerts),
+            },
+            {
+              link: 'workflows',
+              withBadge: true,
+              badgeTypeV2: 'techPreview' as const,
+              badgeOptions: {
+                icon: 'beaker',
+                tooltip: i18nStrings.workflows.badgeTooltip,
+              },
             },
             {
               id: SecurityPageName.attackDiscovery,
@@ -64,6 +80,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.assetInventory,
               link: securityLink(SecurityPageName.assetInventory),
+            },
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
             },
             defaultNavigationTree.assets(services),
           ],
@@ -168,13 +188,19 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
-                    { link: 'management:aiAssistantManagementSelection' },
                     { link: 'management:spaces' },
                     { link: 'maps' },
                     { link: 'visualize' },
                     { link: 'graph' },
                     { link: 'canvas' },
                     { link: 'management:settings' },
+                  ],
+                },
+                {
+                  title: 'AI',
+                  children: [
+                    { link: 'management:genAiSettings' },
+                    { link: 'management:aiAssistantManagementSelection' },
                   ],
                 },
                 {

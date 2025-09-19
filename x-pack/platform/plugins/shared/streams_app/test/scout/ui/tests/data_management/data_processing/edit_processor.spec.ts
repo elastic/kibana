@@ -18,9 +18,9 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     // Clear existing processors before each test
-    await apiServices.streams.updateStreamProcessors('logs-generic-default', [
-      { grok: { field: 'message', patterns: ['%{WORD:attributes.method}'] } },
-    ]);
+    await apiServices.streams.updateStreamProcessors('logs-generic-default', {
+      steps: [{ action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] }],
+    });
 
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
@@ -43,14 +43,17 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
 
   test('should not let edit other processors while one is in progress', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeDisabled();
 
     await pageObjects.streams.clickCancelProcessorChanges();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeEnabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeEnabled();
   });
 
   test('should cancel editing a processor', async ({ page, pageObjects }) => {
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+    // An nth selector is used here as 2 elements will exist with the same text.
+    // This is due to the truncation component creating a duplicate element for measuring purposes.
+    // eslint-disable-next-line playwright/no-nth-methods
+    await expect(page.getByText('%{WORD:attributes.method}').first()).toBeVisible();
     await pageObjects.streams.clickEditProcessor(0);
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');

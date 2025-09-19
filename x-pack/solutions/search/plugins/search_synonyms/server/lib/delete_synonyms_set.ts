@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const deleteSynonymsSet = async (client: ElasticsearchClient, synonymsSetId: string) => {
   return await client.synonyms.deleteSynonym({ id: synonymsSetId });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
+import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 
 const getMockArguments = ({
   isDefaultSettings = true,

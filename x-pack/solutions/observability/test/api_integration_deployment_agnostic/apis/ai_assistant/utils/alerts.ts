@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { APM_ALERTS_INDEX, ApmAlertFields } from '../../apm/alerts/helpers/alerting_helper';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ApmAlertFields } from '../../apm/alerts/helpers/alerting_helper';
+import { APM_ALERTS_INDEX } from '../../apm/alerts/helpers/alerting_helper';
 
 export const createRule = async ({
   getService,

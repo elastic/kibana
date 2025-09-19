@@ -17,8 +17,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import type { PostureInput, UpdatePolicy } from '../../../../common/types_old';
 import { CnvmKspmTemplateInfo } from './cnvm_kspm_info';
@@ -190,7 +190,7 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
                   }}
                   data-test-subj="namespaceInput"
                   labelId="xpack.csp.fleetIntegration.namespaceLabel"
-                  helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                  helpTextId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationDescription"
                 />
               </EuiAccordion>
             </>

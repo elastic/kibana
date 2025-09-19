@@ -1177,6 +1177,41 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.GetAlertFieldsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAlertFieldsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.GetAlertFieldsResponse.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.FieldDescriptor",
+                "text": "FieldDescriptor"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.GetBrowserFieldsResponse",
         "type": "Interface",
         "tags": [],
@@ -4755,7 +4790,7 @@
             "section": "def-common.Options",
             "text": "Options"
           },
-          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | null | undefined; wkst?: ",
+          ", \"dtstart\" | \"until\" | \"wkst\" | \"byweekday\"> & { dtstart: string; byweekday?: (string | number)[] | null | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
             "scope": "common",
@@ -5099,7 +5134,7 @@
         "label": "SummaryActionContextVariablesFlatten",
         "description": [],
         "signature": [
-          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
+          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
         "deprecated": false,

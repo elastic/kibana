@@ -19,17 +19,17 @@ const mockLogger: Logger = {
   error: jest.fn(),
 } as Partial<Logger> as Logger;
 
+import type { NotebookCatalogFetchOptions } from './notebook_catalog';
 import {
   getNotebook,
   getNotebookCatalog,
   DEFAULT_NOTEBOOKS,
   NOTEBOOKS_MAP,
-  NotebookCatalogFetchOptions,
   getNotebookMetadata,
 } from './notebook_catalog';
 import { createNotebooksCache } from '../utils';
-import { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
-import { NotebookDefinition } from '@kbn/ipynb';
+import type { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
+import type { NotebookDefinition } from '@kbn/ipynb';
 
 const emptyNotebookCache = createNotebooksCache();
 const baseConfig: SearchNotebooksConfig = { enabled: true };

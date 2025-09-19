@@ -26,16 +26,12 @@ const packages: PackageListItem[] = [
     version: '0.1.0',
   },
 ];
-const ruleResponse = {
-  rules: [],
-  isLoading: false,
-};
 
 describe('<TableSection />', () => {
   it('should render all components', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
+        <TableSection dataView={dataView} packages={packages} />
       </TestProviders>
     );
 

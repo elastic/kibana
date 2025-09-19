@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Counter, Meter } from '@opentelemetry/api';
+import type { Counter, Meter } from '@opentelemetry/api';
 
 export class Metrics {
   requestCounter: Counter;

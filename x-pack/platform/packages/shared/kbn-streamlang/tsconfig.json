@@ -16,6 +16,6 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/zod-helpers",
-    "@kbn/streams-schema",
+    "@kbn/i18n",
   ]
 }

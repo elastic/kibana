@@ -9,14 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -52,7 +46,7 @@ export class AIAssistantManagementSelectionPlugin
     core.capabilities.registerProvider(() => {
       return {
         management: {
-          kibana: {
+          ai: {
             aiAssistantManagementSelection: true,
             observabilityAiAssistantManagement: true,
             securityAiAssistantManagement: true,
@@ -64,14 +58,13 @@ export class AIAssistantManagementSelectionPlugin
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant',
+        defaultMessage: 'AI Assistant Settings',
       }),
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
-        kibana: [
+        ai: [
           'aiAssistantManagementSelection',
           'securityAiAssistantManagement',
           'observabilityAiAssistantManagement',
@@ -81,7 +74,7 @@ export class AIAssistantManagementSelectionPlugin
       privileges: {
         all: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
@@ -95,7 +88,7 @@ export class AIAssistantManagementSelectionPlugin
         },
         read: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',

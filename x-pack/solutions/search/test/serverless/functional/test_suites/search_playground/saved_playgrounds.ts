@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
@@ -30,7 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  describe('Search Playground - Saved Playgrounds', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/231246
+  describe.skip('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 

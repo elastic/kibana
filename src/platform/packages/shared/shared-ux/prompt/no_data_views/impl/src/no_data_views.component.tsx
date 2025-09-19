@@ -23,7 +23,7 @@ import {
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { DocumentationLink } from './documentation_link';
 import { DataViewIllustration } from './data_view_illustration';

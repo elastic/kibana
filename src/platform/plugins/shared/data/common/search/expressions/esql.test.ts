@@ -8,11 +8,11 @@
  */
 
 import { of } from 'rxjs';
-import { UiSettingsCommon } from '@kbn/data-views-plugin/common';
+import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { ESQLSearchResponse } from '@kbn/es-types';
-import { IKibanaSearchResponse } from '@kbn/search-types';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 
 describe('getEsqlFn', () => {
   it('should always return a fully serializable table', async () => {
@@ -41,6 +41,7 @@ describe('getEsqlFn', () => {
       abortSignal: new AbortController().signal,
       inspectorAdapters: {},
       getKibanaRequest: jest.fn(),
+      getSearchSessionId: jest.fn(),
     } as unknown as ExecutionContext;
 
     const result = await esqlFn.fn(input, args, context).toPromise();

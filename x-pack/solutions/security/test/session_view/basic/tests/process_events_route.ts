@@ -10,7 +10,7 @@ import {
   PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
-import { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import type { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
 import {
   superUser,
   globalRead,
@@ -18,7 +18,7 @@ import {
   obsOnlySpacesAll,
   noKibanaPrivileges,
 } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;
@@ -49,6 +49,31 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       .get(PROCESS_EVENTS_ROUTE)
       .set('kbn-xsrf', 'foo')
       .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
+  // Helper function to verify process args are normalized to arrays
+  function verifyProcessArgsAreArrays(events: any[]) {
+    events
+      .filter((event) => event._source?.event?.kind === 'event' && event._source?.process)
+      .forEach((event) => {
+        const process = event._source.process;
+
+        // Verify main process args is always an array
+        if (process.args !== undefined) {
+          expect(Array.isArray(process.args)).to.be(true);
+          expect(process.args.length).to.be.greaterThan(0);
+        }
+
+        // Verify nested process fields have args as arrays
+        const nestedFields = ['parent', 'session_leader', 'entry_leader', 'group_leader'];
+        nestedFields.forEach((field) => {
+          const nestedProcess = process[field];
+          if (nestedProcess?.args !== undefined) {
+            expect(Array.isArray(nestedProcess.args)).to.be(true);
+            expect(nestedProcess.args.length).to.be.greaterThan(0);
+          }
+        });
+      });
   }
 
   describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
@@ -98,7 +123,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
           pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
         });
         expect(response.status).to.be(200);
-        expect(response.body.total).to.be(MOCK_TOTAL_PROCESS_EVENTS);
+        expect(response.body.total).to.be(418);
         expect(response.body.events.length).to.be(MOCK_PAGE_SIZE + ALERTS_IN_FIRST_PAGE);
       });
 
@@ -143,6 +168,27 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         expect(events[0]._source['@timestamp']).to.be.below(
           events[events.length - 1]._source['@timestamp']
         );
+      });
+
+      it(`${PROCESS_EVENTS_ROUTE} returns a page of process events with normalized args`, async () => {
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: '2022-05-08T00:00:00.00Z',
+          pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
+        });
+        expect(response.status).to.be(200);
+        expect(response.body.total).to.be(MOCK_TOTAL_PROCESS_EVENTS);
+        expect(response.body.events.length).to.be(MOCK_PAGE_SIZE + ALERTS_IN_FIRST_PAGE);
+
+        verifyProcessArgsAreArrays(response.body.events);
+        expect(
+          response.body.events.some(
+            (ev: any) =>
+              ev._source.process.args.includes('single-arg') &&
+              ev._source.process.parent.args.includes('single-arg')
+          )
+        ).to.be(true);
       });
 
       function addTests({ authorizedUsers, unauthorizedUsers }: TestCase) {

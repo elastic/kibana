@@ -7,11 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSpacer,
   EuiAccordion,
   EuiIconTip,
@@ -23,14 +23,14 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
-import { OperationDefinition } from '..';
-import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
+import type { OperationDefinition } from '..';
+import type { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';

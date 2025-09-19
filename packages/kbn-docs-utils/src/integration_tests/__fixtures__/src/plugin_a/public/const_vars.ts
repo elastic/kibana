@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CrazyClass } from './classes';
+import type { CrazyClass } from './classes';
 import { notAnArrowFn } from './fns';
-import { ImAType } from './types';
+import type { ImAType } from './types';
 
 /**
  * Some of the plugins wrap static exports in an object to create

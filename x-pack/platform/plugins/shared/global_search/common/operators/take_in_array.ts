@@ -6,14 +6,8 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import {
-  EMPTY,
-  MonoTypeOperatorFunction,
-  Observable,
-  Operator,
-  Subscriber,
-  TeardownLogic,
-} from 'rxjs';
+import type { MonoTypeOperatorFunction, Observable, Operator, TeardownLogic } from 'rxjs';
+import { EMPTY, Subscriber } from 'rxjs';
 
 /**
  * Emits only the first `count` items from the arrays emitted by the source Observable. The limit

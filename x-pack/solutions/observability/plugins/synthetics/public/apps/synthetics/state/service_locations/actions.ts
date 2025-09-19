@@ -6,8 +6,8 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { ServiceLocations, ThrottlingOptions } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { ServiceLocations, ThrottlingOptions } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export const getServiceLocations = createAction('[SERVICE LOCATIONS] GET');
 export const getServiceLocationsSuccess = createAction<{

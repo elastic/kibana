@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { InputControlVisDependencies } from '../plugin';
+import type { InputControlVisDependencies } from '../plugin';
 import { getSearchSourceMock } from './get_search_service_mock';
 
 const fields = [] as any;

@@ -6,8 +6,8 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { IVectorSource } from '.';
+import type { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import type { IVectorSource } from '.';
 
 export interface IMvtVectorSource extends IVectorSource {
   /*

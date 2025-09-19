@@ -10,7 +10,8 @@
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { type PresentationLabsService, registerExpressionsLanguage } from '.';
+import type { registerExpressionsLanguage } from '.';
+import { type PresentationLabsService } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}

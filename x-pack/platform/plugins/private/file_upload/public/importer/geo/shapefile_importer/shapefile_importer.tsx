@@ -9,7 +9,8 @@ import React from 'react';
 import type { Feature } from 'geojson';
 import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
-import type { ImportFailure } from '../../../../common/types';
+import { NdjsonReader } from '@kbn/file-upload-common';
+import type { ImportFailure } from '@kbn/file-upload-common';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
@@ -21,6 +22,12 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
   private _prjFile: File | null = null;
   private _shxFile: File | null = null;
   private _iterator?: Iterator<{ data: Feature[] }>;
+  protected _reader: NdjsonReader;
+
+  constructor(file: File) {
+    super(file);
+    this._reader = new NdjsonReader();
+  }
 
   public canPreview() {
     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;

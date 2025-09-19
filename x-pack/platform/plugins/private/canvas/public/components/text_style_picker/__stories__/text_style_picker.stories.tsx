@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { Meta } from '@storybook/react';
 
-import { TextStylePicker, StyleProps } from '../text_style_picker';
+import type { StyleProps } from '../text_style_picker';
+import { TextStylePicker } from '../text_style_picker';
 
 const Interactive = () => {
   const [style, setStyle] = useState<StyleProps>({});

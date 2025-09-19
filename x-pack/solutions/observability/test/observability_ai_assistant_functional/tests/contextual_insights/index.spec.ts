@@ -8,11 +8,9 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteConnectors, createConnector } from '../../common/connectors';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {

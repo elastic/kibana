@@ -9,7 +9,7 @@
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
-import {
+import type {
   FormHook,
   FieldHook,
   FieldConfig,

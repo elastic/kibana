@@ -6,18 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  IngestStreamLifecycle,
-  Streams,
-  isDslLifecycle,
-  isIlmLifecycle,
-} from '@kbn/streams-schema';
+import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   deleteStream,
   disableStreams,
@@ -25,7 +19,7 @@ import {
   getStream,
   putStream,
 } from './helpers/requests';
-import { RoleCredentials } from '../../services';
+import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -59,7 +53,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          processing: { steps: [] },
+          settings: {},
           wired: {
             routing: [],
             fields: {},
@@ -70,8 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       beforeEach(async () => {
         await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
         }).then((response) => expect(response).to.have.property('acknowledged', true));
         await alertingApi.deleteRules({ roleAuthc });
       });
@@ -79,8 +73,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('updates the queries', async () => {
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -104,15 +99,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.queries-test.child',
-                    if: {
+                    where: {
                       always: {},
                     },
+                    status: 'enabled',
                   },
                 ],
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.query1',
@@ -120,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -133,25 +130,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.queries-test.child.first',
-                    if: {
+                    where: {
                       field: 'attributes.field',
-                      operator: 'lt',
-                      value: 15,
+                      lt: 15,
                     },
+                    status: 'enabled',
                   },
                   {
                     destination: 'logs.queries-test.child.second',
-                    if: {
+                    where: {
                       field: 'attributes.field',
-                      operator: 'gt',
-                      value: 15,
+                      gt: 15,
                     },
+                    status: 'enabled',
                   },
                 ],
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.query1',
@@ -159,12 +156,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
         response = await putStream(apiClient, 'logs.queries-test.child.first', {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.first.query1',
@@ -177,6 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -194,12 +193,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       };
 
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {

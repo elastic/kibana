@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  createConnector,
-  Connector,
-  ConnectorStatus,
-  deleteConnectorById,
-} from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { createConnector, ConnectorStatus, deleteConnectorById } from '@kbn/search-connectors';
 
 import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 

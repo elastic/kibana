@@ -10,8 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
 import { omit } from 'lodash';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;

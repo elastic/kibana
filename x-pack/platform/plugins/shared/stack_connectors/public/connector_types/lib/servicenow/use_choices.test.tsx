@@ -8,7 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices } from './use_choices';
 import { getChoices } from './api';
 

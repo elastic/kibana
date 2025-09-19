@@ -6,7 +6,6 @@
  */
 import { formatNumber } from '@elastic/eui';
 import moment from 'moment';
-import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 
 // Define AlertData type if not already imported
 export interface AlertData {
@@ -40,10 +39,10 @@ export const getValueMetrics = ({
   filteredAlertsPerc:
     totalAlerts > 0 ? ((totalAlerts - escalatedAlertsCount) / totalAlerts) * 100 : 0,
   escalatedAlertsPerc: totalAlerts > 0 ? (escalatedAlertsCount / totalAlerts) * 100 : 0,
-  hoursSaved: getTimeSavedHours(totalAlerts - escalatedAlertsCount, minutesPerAlert),
+  hoursSaved: getTimeSavedHours(totalAlerts, minutesPerAlert),
   totalAlerts,
   costSavings: getCostSavings({
-    alerts: totalAlerts - escalatedAlertsCount,
+    alerts: totalAlerts,
     analystHourlyRate,
     minutesPerAlert,
   }),
@@ -81,13 +80,6 @@ export const formatThousands = (value: number) =>
 
 export const formatPercent = (value: number) =>
   `${formatNumber(roundTo(value, 2), { format: '0.00' })}%`;
-
-export const getFormattedPercChange = (currentCount: number, previousCount: number): string => {
-  const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
-
-  const isNegative = percentageChange.charAt(0) === '-';
-  return isNegative ? percentageChange.slice(1) : percentageChange;
-};
 
 export const getTimeRangeAsDays = ({ from, to }: { from: string; to: string }): string => {
   const duration = moment.duration(moment(to).diff(moment(from)));

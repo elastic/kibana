@@ -10,9 +10,8 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -20,8 +19,12 @@ import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { registerIndexEditorActions } from '@kbn/index-editor';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -36,7 +39,6 @@ import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } fro
 import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
-  indexManagement: IndexManagementPluginSetup;
   uiActions: UiActionsSetup;
 }
 
@@ -44,14 +46,18 @@ interface EsqlPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
-  data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  // LOOKUP JOIN deps
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getInferenceEndpointsAutocomplete?: (
     taskType: InferenceTaskType
@@ -60,11 +66,7 @@ export interface EsqlPluginStart {
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  private indexManagement?: IndexManagementPluginSetup;
-
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
-    this.indexManagement = indexManagement;
-
+  public setup(_: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
 
@@ -81,6 +83,9 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       fieldsMetadata,
       usageCollection,
       licensing,
+      fileUpload,
+      fieldFormats,
+      share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -110,16 +115,30 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       return createESQLControlAction;
     });
 
+    /** Async register the index editor UI actions */
+    registerIndexEditorActions({
+      data,
+      coreStart: core,
+      share,
+      uiActions,
+      fieldFormats,
+      fileUpload,
+    });
+
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
+    const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
+      async (remoteClusters?: string) => {
+        const query = remoteClusters ? { remoteClusters } : {};
+
         const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices'
+          '/internal/esql/autocomplete/join/indices',
+          { query }
         );
 
         return result;
       },
+      (remoteClusters?: string) => remoteClusters || '',
       1000 * 60 * 5, // Keep the value in cache for 5 minutes
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
@@ -182,7 +201,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
-      this.indexManagement,
       fieldsMetadata,
       usageCollection
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import {

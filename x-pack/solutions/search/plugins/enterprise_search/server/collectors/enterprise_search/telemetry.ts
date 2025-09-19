@@ -7,8 +7,8 @@
 
 import { get } from 'lodash';
 
-import { SavedObjectsServiceStart, Logger } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SavedObjectsServiceStart, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { getSavedObjectAttributesFromRepo } from '../lib/telemetry';
 

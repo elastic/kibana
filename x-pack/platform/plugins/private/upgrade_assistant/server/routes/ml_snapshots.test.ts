@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
+import type { MockRouter } from './__mocks__/routes.mock';
 import {
   createMockRouter,
-  MockRouter,
   routeHandlerContextMock,
   savedObjectsClient,
 } from './__mocks__/routes.mock';

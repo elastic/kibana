@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { ConfigKey, MonitorServiceLocation } from '../types';
+import type { MonitorServiceLocation } from '../types';
+import { ConfigKey } from '../types';
 
 export const Disclaimer: React.FC = () => {
   const { watch } = useFormContext();

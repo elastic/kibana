@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../types';
+import type { GridLayoutStateManager } from '../types';
 
 export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
   return (

@@ -6,8 +6,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorPublic, LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
+import type { LocatorPublic, LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import {
   getClonePath,
   getCreatePath,

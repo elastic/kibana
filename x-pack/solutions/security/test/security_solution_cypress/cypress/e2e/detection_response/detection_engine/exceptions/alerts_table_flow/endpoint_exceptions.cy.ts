@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteEndpointExceptionList } from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
@@ -28,7 +29,7 @@ import {
 } from '../../../../../tasks/exceptions';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
-  ADD_AND_BTN,
+  ADD_NESTED_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -40,8 +41,7 @@ import {
 } from '../../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// See https://github.com/elastic/kibana/issues/163967
-describe.skip(
+describe(
   'Endpoint Exceptions workflows from Alert',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
@@ -53,6 +53,7 @@ describe.skip(
       cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
+      deleteEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
@@ -63,6 +64,7 @@ describe.skip(
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'endpoint' });
+      deleteEndpointExceptionList();
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {
@@ -99,7 +101,8 @@ describe.skip(
       validateExceptionConditionField('file.Ext.code_signature');
       addExceptionFlyoutItemName(ITEM_NAME);
 
-      cy.get(ADD_AND_BTN).click();
+      // Add non-nested condition
+      cy.get(ADD_NESTED_BTN).click();
       // edit conditions
       addExceptionEntryFieldValueAndSelectSuggestion(ADDITIONAL_ENTRY, 6);
       addExceptionEntryFieldValueValue('foo', 4);

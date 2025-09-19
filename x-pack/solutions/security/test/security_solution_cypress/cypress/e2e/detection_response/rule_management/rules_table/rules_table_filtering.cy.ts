@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
@@ -31,6 +32,10 @@ import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
 describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     // Make sure persisted rules table state is cleared

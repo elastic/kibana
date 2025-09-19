@@ -225,7 +225,9 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; }"
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; getAttachments?: ",
+          "GetAttachments",
+          " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
@@ -762,23 +764,9 @@
             },
             " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: ({ successToaster, noAttachmentsToaster, onSuccess, onClose, onCreateCaseClicked, }?: ",
             "AddToExistingCaseModalProps",
-            ") => { open: ({ getAttachments, }?: { getAttachments?: (({ theCase }: { theCase?: ",
-            {
-              "pluginId": "cases",
-              "scope": "common",
-              "docId": "kibCasesPluginApi",
-              "section": "def-common.CaseUI",
-              "text": "CaseUI"
-            },
-            " | undefined; }) => ",
-            {
-              "pluginId": "cases",
-              "scope": "public",
-              "docId": "kibCasesPluginApi",
-              "section": "def-public.CaseAttachmentsWithoutOwner",
-              "text": "CaseAttachmentsWithoutOwner"
-            },
-            ") | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
+            ") => { open: ({ getAttachments, }?: { getAttachments?: ",
+            "GetAttachments",
+            " | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
             "UseIsAddToCaseOpen",
             "; }"
           ],
@@ -1023,7 +1011,7 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+            "{ readonly unsafe?: Readonly<{} & { enableCaseSummary: boolean; }> | undefined; readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
           "deprecated": false,
@@ -1137,7 +1125,7 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+            "{ readonly unsafe?: Readonly<{} & { enableCaseSummary: boolean; }> | undefined; readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
           "deprecated": false,

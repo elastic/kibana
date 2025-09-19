@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LicensingRouter } from '../../types';
+import type { LicensingRouter } from '../../types';
 
 export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
   router.post(

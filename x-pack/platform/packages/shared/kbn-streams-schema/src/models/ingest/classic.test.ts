@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyAssets } from '../../helpers/empty_assets';
 import { ClassicStream } from './classic';
 
 describe('ClassicStream', () => {
@@ -14,11 +15,26 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
+        },
+      },
+      {
+        name: 'classic-stream-with-fields',
+        description: '',
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
+          classic: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
         },
       },
     ])('is valid', (val) => {
@@ -31,10 +47,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: null,
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
@@ -49,10 +64,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
           wired: {},
         },
@@ -69,16 +83,16 @@ describe('ClassicStream', () => {
           name: 'classic-stream',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
@@ -87,8 +101,7 @@ describe('ClassicStream', () => {
           text_structure: true,
         },
         data_stream_exists: true,
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
       expect(ClassicStream.GetResponse.is(val)).toBe(true);
@@ -100,16 +113,16 @@ describe('ClassicStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
@@ -129,18 +142,16 @@ describe('ClassicStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val)).toBe(true);
@@ -155,10 +166,9 @@ describe('ClassicStream', () => {
           name: 'my-name',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },

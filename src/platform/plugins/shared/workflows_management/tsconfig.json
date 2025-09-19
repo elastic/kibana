@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -32,9 +33,21 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-application-common",
     "@kbn/security-plugin-types-server",
+    "@kbn/spaces-plugin",
     "@kbn/css-utils",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/alerting-plugin"
+    "@kbn/alerting-plugin",
+    "@kbn/core-ui-settings-server",
+    "@kbn/logging-mocks",
+    "@kbn/discover-utils",
+    "@kbn/storybook",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-chrome-layout",
+    "@kbn/core-security-browser",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-field",
+    "@kbn/storage-adapter",
+    "@kbn/core-i18n-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

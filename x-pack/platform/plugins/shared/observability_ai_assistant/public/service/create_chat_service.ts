@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import type { IncomingMessage } from 'http';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -14,9 +15,7 @@ import {
   filter,
   from,
   map,
-  Observable,
   of,
-  OperatorFunction,
   scan,
   shareReplay,
   switchMap,
@@ -25,14 +24,14 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent } from '../../common';
+import type { ChatCompletionChunkEvent } from '../../common';
 import {
   StreamingChatResponseEventType,
   type BufferFlushEvent,
   type StreamingChatResponseEvent,
   type StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
-import {
+import type {
   FunctionDefinition,
   FunctionRegistry,
   FunctionResponse,
@@ -40,7 +39,8 @@ import {
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { untilAborted } from '../../common/utils/until_aborted';
-import { TelemetryEventTypeWithPayload, sendEvent } from '../analytics';
+import type { TelemetryEventTypeWithPayload } from '../analytics';
+import { sendEvent } from '../analytics';
 import type {
   ObservabilityAIAssistantAPIClient,
   ObservabilityAIAssistantAPIClientRequestParamsOf,
@@ -53,7 +53,7 @@ import type {
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 import { complete } from './complete';
-import { ChatActionClickHandler } from '../components/chat/types';
+import type { ChatActionClickHandler } from '../components/chat/types';
 
 const MIN_DELAY = 10;
 

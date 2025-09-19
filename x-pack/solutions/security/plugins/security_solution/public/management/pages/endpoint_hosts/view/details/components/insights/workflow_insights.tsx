@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiSpacer,
-  EuiText,
-  EuiBetaBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
-import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
+import { EuiAccordion, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 
+import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import {
-  TECHNICAL_PREVIEW_TOOLTIP,
-  TECHNICAL_PREVIEW,
-} from '../../../../../../../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';
@@ -40,6 +30,10 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
   const [expectedCount, setExpectedCount] = useState<number | null>(null);
 
+  const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
+    'defendInsightsPolicyResponseFailure'
+  );
+
   const onInsightGenerationFailure = () => {
     setInsightGenerationFailures(true);
   };
@@ -57,12 +51,21 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     expectedCount,
   });
 
+  const insightTypes = useMemo<DefendInsightType[]>(
+    () =>
+      defendInsightsPolicyResponseFailureEnabled
+        ? ['incompatible_antivirus', 'policy_response_failure']
+        : ['incompatible_antivirus'],
+    [defendInsightsPolicyResponseFailureEnabled]
+  );
+
   const {
     data: latestScan,
     isLoading: isLoadingLatestScan,
     refetch: refetchLatestScan,
   } = useFetchLatestScan({
     endpointId,
+    insightTypes,
     isPolling: isScanButtonDisabled,
     onSuccess: setExpectedCount,
     onInsightGenerationFailure,
@@ -78,7 +81,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   }, [endpointId, setExpectedCount, setIsScanCompleted]);
 
   useEffect(() => {
-    const isInsightRunning = latestScan?.status === DefendInsightStatusEnum.running;
+    const isInsightRunning = latestScan?.hasRunning ?? false;
     const hasPendingInsights = expectedCount !== null && insights?.length !== expectedCount;
     const initialFetchNotStarted = expectedCount === null;
     setIsScanButtonDisabled(
@@ -133,7 +136,12 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
-      triggerScan({ endpointId, actionTypeId, connectorId });
+      triggerScan({
+        endpointId,
+        actionTypeId,
+        connectorId,
+        insightTypes,
+      });
     },
     [
       insightGenerationFailures,
@@ -142,6 +150,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       triggerScan,
       endpointId,
       setExpectedCount,
+      insightTypes,
     ]
   );
 
@@ -156,16 +165,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
               <EuiText size={'m'}>
                 <h4>{WORKFLOW_INSIGHTS.title}</h4>
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                alignment={'middle'}
-                label={TECHNICAL_PREVIEW}
-                tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                size="s"
-                iconType={'beaker'}
-                data-test-subj={'workflow-insights-tech-preview-badge'}
-              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

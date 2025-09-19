@@ -6,7 +6,7 @@
  */
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import {
+import type {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';

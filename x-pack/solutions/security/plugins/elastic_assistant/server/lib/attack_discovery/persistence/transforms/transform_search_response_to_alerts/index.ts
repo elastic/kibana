@@ -7,7 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { AttackDiscoveryAlert, transformInternalReplacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { transformInternalReplacements } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
@@ -35,7 +36,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
-import { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 
 interface HasNumericValue {
   value: number;

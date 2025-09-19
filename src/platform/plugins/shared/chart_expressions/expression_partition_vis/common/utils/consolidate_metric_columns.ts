@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 

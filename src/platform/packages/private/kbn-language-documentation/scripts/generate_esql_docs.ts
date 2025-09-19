@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import { functions } from '../src/sections/generated/scalar_functions';
 import { getLicenseInfoForFunctions } from '../src/utils/get_license_info';
-import { FunctionDefinition, MultipleLicenseInfo } from '../src/types';
+import type { FunctionDefinition, MultipleLicenseInfo } from '../src/types';
 import { loadElasticDefinitions } from '../src/utils/load_elastic_definitions';
 
 interface DocsSectionContent {

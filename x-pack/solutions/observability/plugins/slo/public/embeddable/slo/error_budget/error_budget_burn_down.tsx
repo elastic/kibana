@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useRef, useState } from 'react';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
@@ -17,7 +18,7 @@ import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_b
 import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
-import { EmbeddableSloProps } from './types';
+import type { EmbeddableSloProps } from './types';
 
 export function SloErrorBudget({
   sloId,

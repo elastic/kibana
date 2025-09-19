@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeWindowType } from '@kbn/slo-schema';
+import type { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -28,7 +28,7 @@ import {
   ROLLING_TIMEWINDOW_OPTIONS,
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';

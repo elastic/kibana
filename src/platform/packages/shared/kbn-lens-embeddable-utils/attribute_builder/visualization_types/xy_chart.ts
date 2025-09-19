@@ -17,7 +17,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 import { LegendValue } from '@elastic/charts';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
@@ -65,12 +65,7 @@ export class XYChart implements Chart<XYState> {
       const accessorId = `${ACCESSOR}_${index}`;
       return {
         ...acc,
-        ...curr.getLayer(
-          layerId,
-          accessorId,
-          this.chartConfig.dataView,
-          this.chartConfig.formulaAPI
-        ),
+        ...curr.getLayer(layerId, accessorId, this.chartConfig.dataView),
       };
     }, {});
   }

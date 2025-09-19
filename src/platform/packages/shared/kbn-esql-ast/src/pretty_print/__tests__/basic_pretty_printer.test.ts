@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction, ESQLMap } from '../../types';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
   const { root } = parse(src);
@@ -204,39 +205,49 @@ describe('single line query', () => {
       });
     });
 
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    describe.skip('RERANK', () => {
-      test('single field', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+    describe('RERANK', () => {
+      test('single field with inference map', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}');
       });
 
-      test('two fields', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      test('target assignment and multiple fields', () => {
+        const { text } = reprint(
+          `FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}'
+        );
       });
 
-      test('param as query', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+      test('field assignment in ON clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}'
+        );
       });
 
-      test('param as field part', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+      test('multi props in WITH clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}'
+        );
       });
 
-      test('param as inference ID', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+      test('without WITH clause', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1`);
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+        expect(text).toBe('FROM a | RERANK "query" ON field1');
       });
     });
 
@@ -427,6 +438,18 @@ describe('single line query', () => {
           const { text } = reprint('ROW f(*)');
 
           expect(text).toBe('ROW F(*)');
+        });
+
+        test('parameter function name is printed as specified', () => {
+          const { text } = reprint('ROW ??functionName(*)');
+
+          expect(text).toBe('ROW ??functionName(*)');
+        });
+
+        test('parameter function name is printed as specified (single ?)', () => {
+          const { text } = reprint('ROW ?functionName(42)');
+
+          expect(text).toBe('ROW ?functionName(42)');
         });
       });
 
@@ -634,6 +657,10 @@ describe('single line query', () => {
         const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
 
         expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
+      });
+
+      test('supports nested maps', () => {
+        assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
       });
     });
 
@@ -908,4 +935,64 @@ describe('single line expression', () => {
   });
 });
 
-it.todo('test for NOT unary expression');
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint('ROW NOT (a OR b)');
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint('ROW NOT (a AND b)');
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint('ROW NOT (a > b)', 'ROW NOT a > b');
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint('ROW NOT a OR NOT (a == b OR b == c)');
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint('ROW -(a + b)');
+  });
+
+  test('unary minus should parenthesize subtraction', () => {
+    assertReprint('ROW -(a - b)');
+  });
+
+  test('unary minus should not parenthesize addition of negative number', () => {
+    assertReprint('ROW -a + -b');
+  });
+
+  test('unary minus should not parenthesize subtraction of negative number', () => {
+    assertReprint('ROW -a - -b');
+  });
+
+  test('unary minus should not parenthesize multiplication', () => {
+    assertReprint('ROW -a * b');
+  });
+
+  test('should not unnecessarily parenthesize multiplication', () => {
+    assertReprint('ROW a * b', 'ROW a * b');
+  });
+
+  test('should parenthesize addition in multiplication', () => {
+    assertReprint('ROW (a + b) * c');
+  });
+
+  test('should not parenthesize multiplication in addition', () => {
+    assertReprint('ROW a + b * c');
+  });
+
+  test('should parenthesize multiplication of addition', () => {
+    assertReprint('ROW (a + b) * (c + d)');
+  });
+});

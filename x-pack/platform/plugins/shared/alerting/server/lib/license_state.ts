@@ -12,7 +12,7 @@ import { assertNever } from '@kbn/std';
 import { capitalize } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { PLUGIN } from '../../common/constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import type {

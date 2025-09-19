@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, Logger } from '@kbn/core/server';
-import {
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type {
   AttackDiscoveryAlert,
   CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import { transformToAlertDocuments } from '../transforms/transform_to_alert_documents';
 import { getCreatedDocumentIds } from './get_created_document_ids';

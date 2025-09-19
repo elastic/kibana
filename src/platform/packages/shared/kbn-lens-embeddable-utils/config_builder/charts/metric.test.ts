@@ -67,7 +67,6 @@ test('generates metric chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
   expect(result).toMatchInlineSnapshot(`
@@ -148,44 +147,6 @@ test('generates metric chart config with trendline', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {
-        insertOrReplaceFormulaColumn: jest.fn(() => ({
-          columnOrder: ['formula_accessor_0_0X0', 'formula_accessor_0_0'],
-          columns: {
-            ['formula_accessor_0_0X0']: {
-              label: 'Part of count()',
-              dataType: 'number',
-              operationType: 'count',
-              isBucketed: false,
-              scale: 'ratio',
-              sourceField: '___records___',
-              params: {
-                emptyAsNull: false,
-              },
-              customLabel: true,
-            },
-            ['formula_accessor_0_0']: {
-              label: 'count()',
-              customLabel: true,
-              operationType: 'formula',
-              dataType: 'number',
-              references: ['formula_accessor_0_0X0'],
-              isBucketed: false,
-              timeScale: 's',
-              params: {
-                formula: 'count()',
-                format: {
-                  id: 'number',
-                  params: {
-                    decimals: 0,
-                  },
-                },
-                isFormulaBroken: false,
-              },
-            },
-          },
-        })),
-      },
     }
   );
 
@@ -212,88 +173,61 @@ test('generates metric chart config with trendline', async () => {
             "layers": Object {
               "layer_0": Object {
                 "columnOrder": Array [
-                  "formula_accessor_0_0X0",
-                  "formula_accessor_0_0",
+                  "metric_formula_accessor",
                 ],
                 "columns": Object {
-                  "formula_accessor_0_0": Object {
+                  "metric_formula_accessor": Object {
                     "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
                     "operationType": "formula",
                     "params": Object {
-                      "format": Object {
-                        "id": "number",
-                        "params": Object {
-                          "decimals": 0,
-                        },
-                      },
+                      "format": undefined,
                       "formula": "count()",
-                      "isFormulaBroken": false,
                     },
-                    "references": Array [
-                      "formula_accessor_0_0X0",
-                    ],
-                    "timeScale": "s",
-                  },
-                  "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
-                    "dataType": "number",
-                    "isBucketed": false,
-                    "label": "Part of count()",
-                    "operationType": "count",
-                    "params": Object {
-                      "emptyAsNull": false,
-                    },
-                    "scale": "ratio",
-                    "sourceField": "___records___",
+                    "references": Array [],
+                    "timeScale": undefined,
                   },
                 },
               },
               "layer_0_trendline": Object {
                 "columnOrder": Array [
-                  "formula_accessor_0_0X0",
-                  "formula_accessor_0_0",
+                  "metric_formula_accessor",
+                  "x_date_histogram",
+                  "metric_formula_accessor_trendline",
                 ],
                 "columns": Object {
-                  "formula_accessor_0_0": Object {
+                  "metric_formula_accessor_trendline": Object {
                     "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
                     "operationType": "formula",
                     "params": Object {
-                      "format": Object {
-                        "id": "number",
-                        "params": Object {
-                          "decimals": 0,
-                        },
-                      },
+                      "format": undefined,
                       "formula": "count()",
-                      "isFormulaBroken": false,
                     },
-                    "references": Array [
-                      "formula_accessor_0_0X0",
-                    ],
-                    "timeScale": "s",
+                    "references": Array [],
+                    "timeScale": undefined,
                   },
-                  "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
-                    "dataType": "number",
-                    "isBucketed": false,
-                    "label": "Part of count()",
-                    "operationType": "count",
+                  "x_date_histogram": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
                     "params": Object {
-                      "emptyAsNull": false,
+                      "includeEmptyRows": true,
+                      "interval": "auto",
                     },
-                    "scale": "ratio",
-                    "sourceField": "___records___",
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
                   },
                 },
                 "linkToLayers": Array [
                   "layer_0",
                 ],
+                "sampling": 1,
               },
             },
           },

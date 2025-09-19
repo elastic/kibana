@@ -8,7 +8,8 @@
  */
 
 import { Builder } from '../builder';
-import {
+import type {
+  ESQLColumn,
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
   ESQLParamLiteral,
@@ -23,8 +24,8 @@ import { SynthNode } from './synth_node';
  * @param index Elasticsearch index name to create a source node for.
  * @returns ES|QL source node.
  */
-export const src = (index: string): ESQLSource => {
-  const node = Builder.expression.source.index(index);
+export const src = (index: string, prefix?: string, selector?: string): ESQLSource => {
+  const node = Builder.expression.source.index(index, prefix, selector);
 
   return SynthNode.from(node);
 };
@@ -73,6 +74,30 @@ export const str = (value: string): ESQLStringLiteral => {
  */
 export const par = (name: string): ESQLParamLiteral => {
   const node = Builder.param.build(name);
+
+  return SynthNode.from(node);
+};
+
+/**
+ * Creates an ES|QL named double parameter node.
+ *
+ * @param name The name of the parameter.
+ * @returns ES|QL named parameter node.
+ */
+export const dpar = (name: string): ESQLParamLiteral => {
+  const node = Builder.param.named({ value: name, paramKind: '??' });
+
+  return SynthNode.from(node);
+};
+
+/**
+ * Creates an ES|QL column node.
+ *
+ * @param name The name of the column.
+ * @returns ES|QL column node.
+ */
+export const col = (name: string | string[]): ESQLColumn => {
+  const node = Builder.expression.column(name);
 
   return SynthNode.from(node);
 };

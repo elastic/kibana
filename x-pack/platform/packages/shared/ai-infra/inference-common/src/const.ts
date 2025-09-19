@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticModelDictionary } from './types';
+import type { ElasticModelDictionary } from './types';
 import { elasticModelIds } from './inference_endpoints';
 
 export const elasticModelDictionary: ElasticModelDictionary = {

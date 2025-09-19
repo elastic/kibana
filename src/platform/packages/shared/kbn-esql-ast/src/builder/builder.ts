@@ -12,7 +12,7 @@
 import { isStringLiteral } from '../ast/is';
 import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
@@ -46,7 +46,7 @@ import {
   ESQLTimeDurationLiteral,
   ESQLDatePeriodLiteral,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**

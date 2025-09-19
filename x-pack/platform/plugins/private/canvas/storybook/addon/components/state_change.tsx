@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiAccordion } from '@elastic/eui';
 import { formatters } from 'jsondiffpatch';
 
-import { RecordedAction } from '../types';
+import type { RecordedAction } from '../types';
 
 interface Props {
   action: RecordedAction | null;

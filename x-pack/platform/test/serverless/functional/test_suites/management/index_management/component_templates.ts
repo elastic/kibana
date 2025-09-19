@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -26,10 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the index templates tab
-        await pageObjects.indexManagement.changeTabs('component_templatesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('component_templates');
       });
 
       it('renders the component templates tab', async () => {
@@ -87,7 +84,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Creates component template', async () => {
-          await testSubjects.click('createPipelineButton');
+          // Ensure the test subject matches the UI component's data-test-subj attribute
+          await testSubjects.click('createComponentTemplateButton');
 
           await testSubjects.setValue('nameField', TEST_COMPONENT_TEMPLATE);
 
@@ -121,7 +119,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.svlCommonPage.loginWithCustomRole();
         await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       after(async () => {

@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { Labels } from '../../common/labels';
 
 interface OnechatToolTagsProps {
   tags: string[];
 }
 
 export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiBadgeGroup>
-      {tags.map((tag) => (
-        <EuiBadge
-          key={tag}
-          css={css`
-            background-color: ${euiTheme.colors.backgroundBasePrimary};
-            color: ${euiTheme.colors.textPrimary};
-          `}
-        >
-          {tag}
-        </EuiBadge>
-      ))}
-    </EuiBadgeGroup>
-  );
+  return <Labels labels={tags} />;
 };

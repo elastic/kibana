@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
-import { PageTemplateProps } from '../../shared/layout';
+import type { PageTemplateProps } from '../../shared/layout';
 import { NotFoundPrompt } from '../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../shared/telemetry';
 

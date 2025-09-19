@@ -9,7 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../../hooks/use_monitor_query_filters';

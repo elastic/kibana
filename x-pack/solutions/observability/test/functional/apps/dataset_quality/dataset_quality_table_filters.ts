@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import { datasetNames, getInitialTestLogs, getLogsForDataset, productionNamespace } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {

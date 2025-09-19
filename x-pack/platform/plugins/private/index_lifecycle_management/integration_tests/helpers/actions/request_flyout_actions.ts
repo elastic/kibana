@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 
 const jsonSelector = 'policyRequestJson';
 
