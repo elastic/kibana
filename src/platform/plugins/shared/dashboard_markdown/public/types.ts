@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MarkdownEmbeddableState } from '@kbn/dashboard_markdown_schemas';
+import type { MarkdownEmbeddableState } from '@kbn/dashboard-markdown-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,

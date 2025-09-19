@@ -8,7 +8,7 @@
  */
 
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
-import type { MarkdownEditorState, MarkdownEmbeddableState } from '@kbn/dashboard_markdown_schemas';
+import type { MarkdownEditorState, MarkdownEmbeddableState } from '@kbn/dashboard-markdown-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MarkdownEmbeddableState } from '@kbn/dashboard_markdown_schemas';
+import type { MarkdownEmbeddableState } from '@kbn/dashboard-markdown-schemas';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';

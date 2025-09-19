@@ -91,7 +91,7 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
-    "@kbn/dashboard_markdown_schemas"
+    "@kbn/dashboard-markdown-schemas"
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/dashboard_markdown_schemas",
+  "id": "@kbn/dashboard-markdown-schemas",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",
   "visibility": "private"
