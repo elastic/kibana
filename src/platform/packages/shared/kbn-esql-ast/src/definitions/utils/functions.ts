@@ -29,8 +29,10 @@ import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
-import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
+import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
+import { argMatchesParamType } from './expressions';
+import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -333,16 +335,12 @@ export function checkFunctionInvocationComplete(
   }
 
   // If the function is complete, check that the types of the arguments match the function definition
-  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
+  const hasCorrectTypes = fnDefinition.signatures.some(({ params }) => {
     return func.args.every((a, index) => {
-      return (
-        fnDefinition.name.endsWith('null') ||
-        def.params[index].type === 'any' ||
-        def.params[index].type === getExpressionType(a) ||
-        // this is a special case for expressions with named parameters
-        // e.g. "WHERE field == ?value"
-        isParamExpressionType(getExpressionType(a))
-      );
+      const expectedType = params[index].type;
+      const actualType = getExpressionType(a);
+
+      return argMatchesParamType(actualType, expectedType, isLiteral(a), false);
     });
   });
   if (!hasCorrectTypes) {
