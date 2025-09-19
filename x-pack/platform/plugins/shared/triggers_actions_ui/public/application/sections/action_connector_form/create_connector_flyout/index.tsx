@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -215,6 +215,35 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     };
   }, []);
 
+  const banner = useMemo(() => {
+    const banners = [];
+    if (!actionType && hasActionsUpgradeableByTrial) {
+      banners.push(<UpgradeLicenseCallOut />);
+    }
+
+    if (allActionTypes && actionTypeModel?.deprecationMessage) {
+      const DeprecationMessageComponent = actionTypeModel?.deprecationMessage;
+      banners.push(
+        banners.length ? <EuiSpacer /> : null,
+        <DeprecationMessageComponent
+          allActionTypes={allActionTypes}
+          handleActionTypeChange={setActionType}
+          id={actionTypeModel.id}
+          name={actionTypeModel.actionTypeTitle}
+        />
+      );
+    }
+
+    return banners;
+  }, [
+    allActionTypes,
+    actionType,
+    actionTypeModel?.deprecationMessage,
+    actionTypeModel?.id,
+    actionTypeModel?.actionTypeTitle,
+    hasActionsUpgradeableByTrial,
+  ]);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -230,9 +259,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
       />
-      <EuiFlyoutBody
-        banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
-      >
+      <EuiFlyoutBody banner={banner}>
         {!hasConnectorTypeSelected && (
           <>
             <CreateConnectorFilter
@@ -264,6 +291,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"
