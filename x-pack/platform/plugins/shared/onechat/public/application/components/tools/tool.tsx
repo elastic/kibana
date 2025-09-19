@@ -22,9 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
-import { ToolType } from '@kbn/onechat-common/tools/definition';
+import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -43,17 +41,11 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useQueryState } from '../../hooks/use_query_state';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
-import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
 import {
-  transformEsqlFormDataForCreate,
-  transformEsqlFormDataForUpdate,
-  transformEsqlToolToFormData,
-} from '../../utils/transform_esql_form_data';
-import {
-  transformIndexSearchFormDataForCreate,
-  transformIndexSearchFormDataForUpdate,
-  transformIndexSearchToolToFormData,
-} from '../../utils/transform_index_search_form_data';
+  getToolTypeConfig,
+  getCreatePayloadFromData,
+  getUpdatePayloadFromData,
+} from './tools_form_registry';
 import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
 import { ToolTestFlyout } from './execute/test_tools';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
@@ -108,13 +100,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const [urlToolType] = useQueryState<ToolType | undefined>(TOOL_TYPE_QUERY_PARAM);
 
   const initialToolType = useMemo(() => {
-    switch (urlToolType) {
-      case ToolType.esql:
-      case ToolType.index_search:
-        return urlToolType;
-      default:
-        return undefined;
+    if (urlToolType && getToolTypeConfig(urlToolType)) {
+      return urlToolType;
     }
+    return undefined;
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
@@ -158,27 +147,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       setSubmittingButtonId(buttonId);
       try {
         if (mode === ToolFormMode.Edit) {
-          switch (data.type) {
-            case ToolType.esql:
-              await saveTool(transformEsqlFormDataForUpdate(data));
-              break;
-            case ToolType.index_search:
-              await saveTool(transformIndexSearchFormDataForUpdate(data));
-              break;
-            default:
-              break;
-          }
+          const updatePayload = getUpdatePayloadFromData(data);
+          await saveTool(updatePayload);
         } else {
-          switch (data.type) {
-            case ToolType.esql:
-              await saveTool(transformEsqlFormDataForCreate(data));
-              break;
-            case ToolType.index_search:
-              await saveTool(transformIndexSearchFormDataForCreate(data));
-              break;
-            default:
-              break;
-          }
+          const createPayload = getCreatePayloadFromData(data);
+          await saveTool(createPayload);
         }
       } finally {
         setSubmittingButtonId(undefined);
@@ -204,12 +177,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   useEffect(() => {
     if (tool) {
-      if (isEsqlTool(tool)) {
-        reset(transformEsqlToolToFormData(tool));
-      } else if (isIndexSearchTool(tool)) {
-        reset(transformIndexSearchToolToFormData(tool));
-      } else if (tool.type === ToolType.builtin) {
-        reset(transformBuiltInToolToFormData(tool));
+      const toolConfig = getToolTypeConfig(tool.type);
+      if (toolConfig) {
+        const formData = toolConfig.toolToFormData(tool);
+        reset(formData);
       }
     }
   }, [tool, reset]);
