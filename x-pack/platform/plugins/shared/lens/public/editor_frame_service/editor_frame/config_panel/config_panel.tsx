@@ -6,16 +6,8 @@
  */
 
 import React, { useEffect, useMemo, memo, useCallback } from 'react';
-import {
-  EuiForm,
-  EuiTabs,
-  EuiTab,
-  euiBreakpoint,
-  useEuiTheme,
-  useEuiOverflowScroll,
-} from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -24,7 +16,6 @@ import {
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
-import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -72,7 +63,7 @@ export function LayerPanels(
 ) {
   const { datasourceMap } = useEditorFrameService();
   const { activeVisualization, indexPatternService } = props;
-  const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
@@ -274,15 +265,6 @@ export function LayerPanels(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
-  const hideAddLayerButton = query && isOfAggregateQueryType(query);
-
-  const onSelectedTabChanged = useCallback(
-    (layerId: string) => {
-      dispatchLens(setSelectedLayerId({ layerId }));
-    },
-    [dispatchLens]
-  );
-
   // if the selected tab got removed, switch back first tab
   useEffect(() => {
     if (selectedLayerId === null || (!layerIds.includes(selectedLayerId) && layerIds.length > 0)) {
@@ -301,117 +283,6 @@ export function LayerPanels(
       }),
     }));
   }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
-
-  // Create layer labels for the tabs
-  const layerLabels = useMemo(() => {
-    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
-    const countsByLayerId = new Map<string, number>();
-    const typeCounters = new Map<string, number>();
-    const layerTabDisplayNames = new Map<string, string>();
-
-    for (const config of visibleLayerConfigs) {
-      const layerType = config.layerType || '';
-      const currentCount = (typeCounters.get(layerType) || 0) + 1;
-      typeCounters.set(layerType, currentCount);
-      countsByLayerId.set(config.layerId, currentCount);
-    }
-
-    for (const config of visibleLayerConfigs) {
-      const layerType = config.layerType || '';
-      const typeCount = typeCounters.get(layerType) || 0;
-      const formattedLayerType = getLensLayerTypeDisplayName(config.layerType);
-      const layerCountForId = countsByLayerId.get(config.layerId) || 1;
-      const displayName =
-        typeCount > 1 ? `${formattedLayerType} ${layerCountForId}` : formattedLayerType;
-
-      layerTabDisplayNames.set(config.layerId, displayName);
-    }
-
-    return layerTabDisplayNames;
-  }, [layerConfigs]);
-
-  const renderTabs = useCallback(() => {
-    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
-
-    const layerTabs = visibleLayerConfigs.map((layerConfig, layerIndex) => {
-      return (
-        <EuiTab
-          key={layerIndex}
-          onClick={() => onSelectedTabChanged(layerConfig.layerId)}
-          isSelected={layerConfig.layerId === selectedLayerId}
-          disabled={false}
-          data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
-        >
-          {layerLabels.get(layerConfig.layerId)}
-        </EuiTab>
-      );
-    });
-
-    if (!hideAddLayerButton) {
-      const addLayerButton = activeVisualization?.getAddLayerButtonComponent?.({
-        state: visualization.state,
-        supportedLayers: activeVisualization.getSupportedLayers(
-          visualization.state,
-          props.framePublicAPI
-        ),
-        addLayer,
-        ensureIndexPattern: async (specOrId) => {
-          let indexPatternId;
-
-          if (typeof specOrId === 'string') {
-            indexPatternId = specOrId;
-          } else {
-            const dataView = await props.dataViews.create(specOrId);
-
-            if (!dataView.id) {
-              return;
-            }
-
-            indexPatternId = dataView.id;
-          }
-
-          const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-            id: indexPatternId,
-            cache: props.framePublicAPI.dataViews.indexPatterns,
-          });
-
-          if (newIndexPatterns) {
-            dispatchLens(
-              changeIndexPattern({
-                dataViews: { indexPatterns: newIndexPatterns },
-                datasourceIds: Object.keys(datasourceStates),
-                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-                indexPatternId,
-              })
-            );
-          }
-        },
-        registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
-      });
-
-      if (addLayerButton) layerTabs.push(addLayerButton);
-    }
-
-    return layerTabs;
-  }, [
-    activeVisualization,
-    addLayer,
-    datasourceStates,
-    dispatchLens,
-    hideAddLayerButton,
-    indexPatternService,
-    layerConfigs,
-    layerLabels,
-    onSelectedTabChanged,
-    props.dataViews,
-    props.framePublicAPI,
-    props?.setIsInlineFlyoutVisible,
-    registerLibraryAnnotationGroupFunction,
-    selectedLayerId,
-    visualization.activeId,
-    visualization.state,
-  ]);
 
   const layerConfig = useMemo(
     () => layerConfigs.find((l) => l.layerId === selectedLayerId),
@@ -433,9 +304,6 @@ export function LayerPanels(
         }
       `}
     >
-      {/* Render layer tabs only if the chart type supports multiple layers */}
-      {!hideAddLayerButton && <EuiTabs>{renderTabs()}</EuiTabs>}
-
       {/* Render the current layer panel */}
       {selectedLayerId && layerConfig && (
         <LayerPanel
