@@ -13,6 +13,7 @@ describe('content pack stream helpers', () => {
       root: 'logs.foo',
       include: {
         objects: {
+          mappings: true,
           queries: [],
           routing: [
             {
@@ -22,6 +23,7 @@ describe('content pack stream helpers', () => {
             {
               destination: 'baz',
               objects: {
+                mappings: true,
                 queries: [],
                 routing: [
                   {
