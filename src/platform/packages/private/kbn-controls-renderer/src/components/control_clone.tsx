@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
 import React from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import { controlWidthStyles } from './control_panel.styles';
 
@@ -34,14 +33,7 @@ export const ControlClone = ({
   const styles = useMemoCss(controlCloneStyles);
 
   return !state ? null : (
-    <EuiFlexItem
-      css={(styles.container, width !== undefined && css({ width: `${width}px` }))}
-      // className={classNames({
-      //   'controlFrameWrapper--medium': state.rawState.width === 'medium',
-      //   'controlFrameWrapper--small': state.rawState.width === 'small',
-      //   'controlFrameWrapper--large': state.rawState.width === 'large',
-      // })}
-    >
+    <EuiFlexItem css={(styles.container, width !== undefined && css({ width: `${width}px` }))}>
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />

@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import classNames from 'classnames';
-import type { FC, ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
+import { omit } from 'lodash';
+import React, { useEffect, useState, type FC, type ReactElement } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 import { v4 } from 'uuid';
 
+import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import type { EmbeddableApiContext, HasUniqueId, ViewMode } from '@kbn/presentation-publishing';
 import type { Action, ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { omit } from 'lodash';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -82,7 +81,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     let canceled = false;
     const context = {
       embeddable: api,
-      trigger: uiActions.getTrigger('CONTROL_HOVER_TRIGGER'),
+      trigger: uiActions.getTrigger('CONTROL_HOVER_TRIGGER'), // we cannot import this constant from the controls plugin
     };
 
     const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
