@@ -25,7 +25,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient: ElasticsearchClient = getService('es');
-  const retry = getService('retry');
   const supertest: Superagent = getService('supertest');
   let originalIndexTemplate: IndicesPutIndexTemplateRequest;
 
@@ -50,11 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not roll the data stream if it matches the template', async () => {
       await writeToDataStream(esClient);
 
-      await retry.try(async () => {
-        const templateVersion = await getMaxTemplateVersion(esClient);
-        const mappingVersion = await getMaxMappingVersion(esClient);
-        expect(mappingVersion).to.be(templateVersion);
-      });
+      const templateVersion = await getMaxTemplateVersion(esClient);
+      const mappingVersion = await getMaxMappingVersion(esClient);
+      expect(mappingVersion).to.be(templateVersion);
 
       const rolled = await rollDataStreamIfRequired(supertest);
       expect(rolled).to.be(false);
