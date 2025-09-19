@@ -10,12 +10,12 @@ import type { System } from '@kbn/streams-schema';
 import React from 'react';
 import { Chart, BarSeries, Settings, Tooltip } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { useSystemEvents } from './hooks/use_system_events';
+import { useStreamSystemEventsData } from './hooks/use_stream_system_events_data';
 
 export const SystemEventsSparkline = ({ system }: { system: System }) => {
   const chartBaseTheme = useElasticChartsTheme();
 
-  const events = useSystemEvents(system);
+  const events = useStreamSystemEventsData(system);
 
   return (
     <Chart size={{ height: 64 }}>

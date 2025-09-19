@@ -23,7 +23,7 @@ import {
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DetectedSystemEvents } from './detected_system_events';
+import { SystemEventsData } from './system_events_data';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 
 export const StreamSystemDetailsFlyout = ({
@@ -33,7 +33,7 @@ export const StreamSystemDetailsFlyout = ({
 }: {
   system: System;
   closeFlyout: () => void;
-  definition: Streams.ClassicStream.GetResponse;
+  definition: Streams.all.GetResponse;
 }) => {
   const [value, setValue] = React.useState(system.description);
   const { upsertQuery } = useStreamSystemsApi(definition);
@@ -89,7 +89,7 @@ export const StreamSystemDetailsFlyout = ({
             {JSON.stringify(system.filter)}
           </EuiCodeBlock>
           <EuiSpacer size="m" />
-          <DetectedSystemEvents system={system} />
+          <SystemEventsData system={system} />
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -14,7 +14,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { useSystemEvents } from './hooks/use_system_events';
 
-export const DetectedSystemEvents = ({ system }: { system: System }) => {
+export const SystemEventsData = ({ system }: { system: System }) => {
   const chartBaseTheme = useElasticChartsTheme();
 
   const events = useSystemEvents(system);

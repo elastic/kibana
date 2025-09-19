@@ -24,7 +24,7 @@ interface StreamConfigurationProps {
   definition: Streams.ClassicStream.GetResponse;
 }
 
-export function StreamConfiguration({ definition }: StreamConfigurationProps) {
+export function StreamSystemConfiguration({ definition }: StreamConfigurationProps) {
   const { euiTheme } = useEuiTheme();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -34,15 +34,10 @@ export function StreamConfiguration({ definition }: StreamConfigurationProps) {
         display="subdued"
         paddingSize="l"
         textAlign="left"
-        css={{
-          '& [class*="euiCard__description"]': {
-            marginTop: '0',
-          },
-        }}
         title={
           <EuiText size="m" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
             {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
-              defaultMessage: 'Stream configuration',
+              defaultMessage: 'Stream system configuration',
             })}
           </EuiText>
         }

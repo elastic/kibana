@@ -9,7 +9,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
-export const useStreamSystems = (definition: Streams.ClassicStream.GetResponse) => {
+export const useStreamSystems = (definition: Streams.all.GetResponse) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   const { value, loading, error, refresh } = useStreamsAppFetch(

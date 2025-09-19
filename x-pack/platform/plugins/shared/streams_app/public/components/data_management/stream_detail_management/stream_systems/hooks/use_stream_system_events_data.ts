@@ -7,6 +7,6 @@
 
 import type { System } from '@kbn/streams-schema';
 
-export const useSystemEvents = (system: System) => {
+export const useStreamSystemEventsData = (system: System) => {
   return [];
 };

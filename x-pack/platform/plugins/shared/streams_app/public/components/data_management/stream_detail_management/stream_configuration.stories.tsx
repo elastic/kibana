@@ -8,11 +8,11 @@
 import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { StreamConfiguration } from './stream_configuration';
+import { StreamSystemConfiguration } from './stream_system_configuration';
 
 const stories: Meta<{}> = {
-  title: 'Streams/StreamConfiguration',
-  component: StreamConfiguration,
+  title: 'Streams/StreamSystemConfiguration',
+  component: StreamSystemConfiguration,
 };
 export const testStreamDefinition = {
   stream: {
@@ -55,5 +55,5 @@ export const testStreamDefinition = {
 export default stories;
 
 export const Spike: StoryFn<{}> = () => {
-  return <StreamConfiguration definition={testStreamDefinition} />;
+  return <StreamSystemConfiguration definition={testStreamDefinition} />;
 };
