@@ -1,23 +1,91 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createEsqlToolRequest:
+          value:
+            id: example-esql-tool
+            type: esql
+            description: Example ES|QL query tool for analyzing financial trades with time filtering
+            tags:
+              - analytics
+              - finance
+            configuration:
+              query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+              params:
+                startTime:
+                  type: date
+                  description: Start time for the analysis in ISO format
+                limit:
+                  type: integer
+                  description: Maximum number of results to return
+        createIndexSearchToolRequest:
+          value:
+            id: example-index-search-tool
+            type: index_search
+            description: Search tool specifically for financial data analysis and reporting
+            tags:
+              - search
+              - finance
+            configuration:
+              pattern: financial_*
 responses:
   200:
     content:
       application/json:
         examples:
-          createToolResponseExample:
-            id: search.esql.search
-            type: index_search
-            description: This tool searches over the data in the "financial_data" index
-            tags: []
-            configuration:
-              pattern: financial_data
-            readonly: false
-            schema:
-              type: object
-              properties:
-                nlQuery:
-                  type: string
-                  description: A natural language query expressing the search request
-              required:
-              - nlQuery
-              additionalProperties: false
-              "$schema": http://json-schema.org/draft-07/schema#
+          createEsqlToolExample:
+            value:
+              id: example-esql-tool
+              type: esql
+              description: Example ES|QL query tool for analyzing financial trades with time filtering
+              tags:
+                - analytics
+                - finance
+              configuration:
+                query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+                params:
+                  startTime:
+                    type: date
+                    description: Start time for the analysis in ISO format
+                  limit:
+                    type: integer
+                    description: Maximum number of results to return
+              readonly: false
+              schema:
+                type: object
+                properties:
+                  startTime:
+                    type: string
+                    format: date-time
+                    description: Start time for the analysis in ISO format
+                  limit:
+                    type: integer
+                    description: Maximum number of results to return
+                required:
+                  - startTime
+                  - limit
+                additionalProperties: false
+                description: Parameters needed to execute the query
+                "$schema": http://json-schema.org/draft-07/schema#
+          createIndexSearchToolExample:
+            value:
+              id: example-index-search-tool
+              type: index_search
+              description: Search tool specifically for financial data analysis and reporting
+              tags:
+                - search
+                - finance
+              configuration:
+                pattern: financial_*
+              readonly: false
+              schema:
+                type: object
+                properties:
+                  nlQuery:
+                    type: string
+                    description: A natural language query expressing the search request
+                required:
+                  - nlQuery
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
