@@ -1823,7 +1823,7 @@
     "http-proxy": "^1.18.1",
     "http2-proxy": "^5.0.53",
     "http2-wrapper": "^2.2.1",
-    "ignore": "^7.0.4",
+    "ignore": "^7.0.5",
     "jest": "^29.7.0",
     "jest-canvas-mock": "^2.5.2",
     "jest-cli": "^29.7.0",
