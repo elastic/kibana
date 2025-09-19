@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
-import { PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME } from '../../common/constants';
 
 export const DataSourcesRegistryApp = () => {
   return (
