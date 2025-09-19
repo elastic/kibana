@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import {
   EnrichedDeprecationInfo,
@@ -381,16 +381,13 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       <EuiText size="s" color="subdued">
         <em>
           {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
-          <EuiToolTip
+          <EuiIconTip
             position="top"
             content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-          >
-            <EuiIcon
-              type="info"
-              aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-              size="s"
-            />
-          </EuiToolTip>
+            type="info"
+            aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+            size="s"
+          />
         </em>
       </EuiText>
     );

@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 export interface TextWithIconProps {
@@ -38,9 +39,7 @@ export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
       {!!icon && (
         <EuiFlexItem grow={false}>
           {!!iconTooltip ? (
-            <EuiToolTip content={iconTooltip}>
-              <EuiIcon color={iconColor} type={icon} />
-            </EuiToolTip>
+            <EuiIconTip content={iconTooltip} type={icon} color={iconColor} />
           ) : (
             <EuiIcon color={iconColor} type={icon} />
           )}

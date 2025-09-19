@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiIconTip } from '@elastic/eui';
 
 interface IntegrationLinkProps {
   ariaLabel: string;
@@ -27,13 +27,12 @@ export const IntegrationLink = ({
   typeof href === 'undefined' ? (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
+        <EuiIconTip
           content={i18n.translate('xpack.uptime.integrationLink.missingDataMessage', {
             defaultMessage: 'Required data for this integration was not found.',
           })}
-        >
-          <EuiIcon type={iconType} />
-        </EuiToolTip>
+          type={iconType}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="subdued">{message}</EuiText>
@@ -43,9 +42,7 @@ export const IntegrationLink = ({
     <EuiLink data-test-subj="syntheticsIntegrationLinkLink" aria-label={ariaLabel} href={href}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tooltipContent} position="top">
-            <EuiIcon type={iconType} />
-          </EuiToolTip>
+          <EuiIconTip content={tooltipContent} position="top" type={iconType} />
         </EuiFlexItem>
         <EuiFlexItem>{message}</EuiFlexItem>
       </EuiFlexGroup>

@@ -14,7 +14,14 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { EuiButton, EuiButtonIcon, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiIconTip,
+  EuiToolTip,
+  formatDate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
@@ -329,9 +336,16 @@ export function ProcessTreeNode({
                   {timeStampsNormal}
                 </span>
               )}
-              <EuiToolTip position="top" content={iconTooltip}>
-                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
-              </EuiToolTip>
+              <EuiIconTip
+                position="top"
+                content={iconTooltip}
+                data-test-subj={iconTestSubj}
+                type={processIcon}
+                css={styles.icon}
+                iconProps={{
+                  'data-test-subj': iconTestSubj,
+                }}
+              />
               <span css={styles.textSection}>
                 <TextHighlight
                   text={promptText}

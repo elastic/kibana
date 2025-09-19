@@ -13,9 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
-  EuiToolTip,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -96,7 +95,7 @@ export function PaletteColors({
               {i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsLabel', {
                 defaultMessage: 'Neutral colors',
               })}
-              <EuiToolTip
+              <EuiIconTip
                 position="bottom"
                 content={i18n.translate(
                   'coloring.colorMapping.colorPicker.themeAwareColorsTooltip',
@@ -105,9 +104,8 @@ export function PaletteColors({
                       'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
                   }
                 )}
-              >
-                <EuiIcon tabIndex={0} type="question" />
-              </EuiToolTip>
+                type="question"
+              />
             </h6>
           </EuiTitle>
           <EuiSpacer size="s" />
