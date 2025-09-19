@@ -92,6 +92,7 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
+import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -120,6 +121,7 @@ export function defineRoutes(opts: RouteOptions) {
 
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  getInternalRuleTemplateRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
