@@ -26,7 +26,6 @@ jest.mock('../../../../shared/field_selector', () => ({
       placeholder,
       disabled,
       compressed,
-      processorType,
       fullWidth,
       ...restProps
     }) => (
@@ -156,6 +155,5 @@ describe('ProcessorFieldSelector', () => {
         expect.anything()
       );
     });
-
   });
 });

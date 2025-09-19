@@ -21,7 +21,6 @@ export interface FieldSelectorProps {
   disabled?: boolean;
   compressed?: boolean;
   fullWidth?: boolean;
-  processorType?: string;
   dataTestSubj?: string;
   isInvalid?: boolean;
   error?: string;
@@ -39,12 +38,11 @@ export const FieldSelector = ({
   disabled = false,
   compressed = false,
   fullWidth = false,
-  processorType,
   dataTestSubj = 'streamsAppFieldSelector',
   isInvalid,
   error,
 }: FieldSelectorProps) => {
-  const suggestions = useFieldSuggestions(processorType);
+  const suggestions = useFieldSuggestions();
 
   const selectedOptions = useMemo(() => {
     if (!value) return [];

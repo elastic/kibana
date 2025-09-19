@@ -127,12 +127,6 @@ describe('FieldSelector', () => {
   });
 
   describe('Field Suggestions', () => {
-    it('passes processorType to useFieldSuggestions', () => {
-      render(<FieldSelector {...defaultProps} processorType="grok" />);
-
-      expect(mockUseFieldSuggestions).toHaveBeenCalledWith('grok');
-    });
-
     it('opens dropdown when clicked', async () => {
       render(<FieldSelector {...defaultProps} />);
 

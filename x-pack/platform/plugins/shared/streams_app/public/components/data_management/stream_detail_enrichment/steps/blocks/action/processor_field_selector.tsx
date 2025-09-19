@@ -13,7 +13,6 @@ import { FieldSelector } from '../../../../shared/field_selector';
 export interface ProcessorFieldSelectorProps {
   fieldKey?: string;
   helpText?: string;
-  processorType?: string;
   placeholder?: string;
   label?: string;
   onChange?: (value: string) => void;
@@ -22,7 +21,6 @@ export interface ProcessorFieldSelectorProps {
 export const ProcessorFieldSelector = ({
   fieldKey = 'from',
   helpText,
-  processorType,
   placeholder,
   label,
   onChange,
@@ -67,7 +65,6 @@ export const ProcessorFieldSelector = ({
       label={label ?? defaultLabel}
       helpText={helpText ?? defaultHelpText}
       placeholder={placeholder ?? defaultPlaceholder}
-      processorType={processorType}
       fullWidth
       dataTestSubj="streamsAppProcessorFieldSelectorComboFieldText"
       isInvalid={fieldState.invalid}

@@ -14,9 +14,7 @@ import { selectPreviewRecords } from '../../../../state_management/simulation_st
 /**
  * Hook for providing field suggestions from simulation data for EuiComboBox
  */
-export const useFieldSuggestions = (
-  processorType?: string
-): Array<EuiComboBoxOptionOption<FieldSuggestion>> => {
+export const useFieldSuggestions = (): Array<EuiComboBoxOptionOption<FieldSuggestion>> => {
   const previewRecords = useSimulatorSelector((state) => selectPreviewRecords(state.context));
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
