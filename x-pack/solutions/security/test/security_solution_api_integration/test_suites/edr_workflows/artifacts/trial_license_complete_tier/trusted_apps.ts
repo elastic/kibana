@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/235451
   // Failing: See https://github.com/elastic/kibana/issues/235456
   // Failing: See https://github.com/elastic/kibana/issues/235696
+  // Failing: See https://github.com/elastic/kibana/issues/235458
   describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Trusted Applications', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let t1AnalystSupertest: TestAgent;
