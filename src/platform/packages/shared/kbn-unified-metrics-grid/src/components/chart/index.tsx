@@ -63,25 +63,16 @@ export const Chart: React.FC<ChartProps> = ({
     return createESQLQuery({
       metricField: metric.name,
       instrument: metric.instrument,
-      timeRange: getTimeRange(),
       index: metric.index,
       dimensions,
       filters,
     });
-  }, [
-    metric.type,
-    metric.name,
-    metric.instrument,
-    metric.index,
-    getTimeRange,
-    dimensions,
-    filters,
-  ]);
+  }, [metric.type, metric.name, metric.instrument, metric.index, dimensions, filters]);
 
   const lensProps = useLensProps({
     title: metric.name,
     query: esqlQuery,
-    timeRange: getTimeRange(),
+    getTimeRange,
     color,
     seriesType: dimensions.length > 0 ? 'line' : 'area',
     services,
