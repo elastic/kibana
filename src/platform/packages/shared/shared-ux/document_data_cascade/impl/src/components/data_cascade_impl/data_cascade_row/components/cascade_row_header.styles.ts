@@ -21,8 +21,13 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
       fontVariantNumeric: 'tabular-nums',
     },
   }),
-  rowHeaderSlotWrapper: css({ overflow: 'scroll', flexGrow: 0 }),
-  rowHeaderSlotInner: css({
+  rowHeaderSlotContainer: css({
+    minWidth: 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+  }),
+  rowHeaderSlotContainerInner: css({ overflow: 'scroll', flexGrow: 0 }),
+  rowHeaderSlotItemWrapper: css({
     justifyContent: 'center',
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
