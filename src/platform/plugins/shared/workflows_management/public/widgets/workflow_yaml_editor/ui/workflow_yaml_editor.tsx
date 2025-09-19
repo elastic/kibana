@@ -15,12 +15,17 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import { BuiltInStepTypes, TriggerTypes, getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { TriggerTypes, getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import YAML, { isPair, isScalar, isMap, visit, type YAMLMap } from 'yaml';
+import YAML, { isPair, isScalar } from 'yaml';
+import {
+  getStepNodesWithType,
+  getTriggerNodes,
+  getTriggerNodesWithType,
+} from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -41,158 +46,10 @@ import type { YamlValidationError } from '../model/types';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 import { ActionsMenuPopover } from '../../actions_menu_popover';
 import type { ActionOptionData } from '../../actions_menu_popover/types';
-import { getIndentLevelFromLineNumber } from '../lib/get_indent_level';
-import { generateTriggerSnippet } from '../lib/snippets/generate_trigger_snippet';
-import { generateConnectorSnippet } from '../lib/snippets/generate_connector_snippet';
-import { generateBuiltInStepSnippet } from '../lib/snippets/generate_builtin_step_snippet';
-import { prependIndentToLines } from '../lib/prepend_indent_to_lines';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
-
-const getTriggerNodes = (
-  yamlDocument: YAML.Document
-): Array<{ node: any; triggerType: string; typePair: any }> => {
-  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
-
-  if (!yamlDocument?.contents) return triggerNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
-
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
-      }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        const triggerType = pair.value.value as string;
-        // Find the parent map node that contains this trigger
-        const triggerMapNode = ancestors[ancestors.length - 1];
-        triggerNodes.push({
-          node: triggerMapNode,
-          triggerType,
-          typePair: pair, // Store the actual type pair for precise positioning
-        });
-      }
-    },
-  });
-
-  return triggerNodes;
-};
-
-const getStepNodesWithType = (yamlDocument: YAML.Document): YAMLMap[] => {
-  const stepNodes: YAMLMap[] = [];
-
-  if (!yamlDocument?.contents) {
-    return stepNodes;
-  }
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a step (not nested inside 'with' or other blocks)
-      const path = ancestors.slice();
-      let isMainStepType = false;
-
-      // Walk up the ancestors to see if we're in a steps array
-      // and ensure this type field is a direct child of a step, not nested in 'with'
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-
-        // If we encounter a 'with' field before finding 'steps', this is a nested type
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'with') {
-          return; // Skip this type field - it's inside a 'with' block
-        }
-
-        // If we find 'steps', this could be a main step type
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'steps') {
-          isMainStepType = true;
-          break;
-        }
-      }
-
-      if (isMainStepType && isScalar(pair.value)) {
-        // Find the step node (parent containing the type) - should be the immediate parent map
-        const immediateParent = ancestors[ancestors.length - 1];
-        if (isMap(immediateParent) && 'items' in immediateParent && immediateParent.items) {
-          // Ensure this is a step node by checking it has both 'name' and 'type' fields
-          const hasName = immediateParent.items.some(
-            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'name'
-          );
-          const hasType = immediateParent.items.some(
-            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-          );
-
-          if (hasName && hasType) {
-            stepNodes.push(immediateParent);
-          }
-        }
-      }
-    },
-  });
-
-  return stepNodes;
-};
-
-const getTriggerNodesWithType = (yamlDocument: YAML.Document): any[] => {
-  const triggerNodes: any[] = [];
-
-  if (!yamlDocument?.contents) return triggerNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
-
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
-      }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        // Find the trigger node (parent containing the type)
-        for (let i = path.length - 1; i >= 0; i--) {
-          const ancestor = path[i];
-          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
-            // Check if this map contains a type field
-            const hasType = ancestor.items.some(
-              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-            );
-            if (hasType) {
-              triggerNodes.push(ancestor);
-              break;
-            }
-          }
-        }
-      }
-    },
-  });
-
-  return triggerNodes;
-};
+import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -467,130 +324,16 @@ export const WorkflowYAMLEditor = ({
   };
 
   const onActionSelected = (action: ActionOptionData) => {
-    // TODO: add snippet according to the action at current cursor position or at last step position
-    function insertTriggerSnippet(triggerType: string) {
-      const model = editorRef.current?.getModel();
-      if (!yamlDocument || !model) {
-        // TODO: show error
-        return;
-      }
-      const triggerSnippet = generateTriggerSnippet(triggerType, false, true);
-      // find triggers: line number and column number
-      const triggerNodes = getTriggerNodes(yamlDocument);
-      const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);
-      let prepend = '';
-      let range = new monaco.Range(1, 1, 1, 1);
-      let indentLevel = 0;
-      if (triggerNode) {
-        // do not override existing trigger
-        return;
-      }
-      if (triggerNodes.length > 0) {
-        const lastTriggerRange = getMonacoRangeFromYamlNode(
-          model,
-          triggerNodes[triggerNodes.length - 1].node
-        );
-        if (lastTriggerRange) {
-          range = new monaco.Range(
-            lastTriggerRange.endLineNumber,
-            lastTriggerRange.endColumn,
-            lastTriggerRange.endLineNumber,
-            lastTriggerRange.endColumn
-          );
-          indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
-        }
-      } else {
-        prepend = 'triggers:\n  ';
-      }
-      model.pushEditOperations(
-        null,
-        [
-          {
-            range,
-            text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
-          },
-        ],
-        () => null
-      );
-    }
-    function insertBuiltInStepSnippet(stepType: string) {
-      const model = editorRef.current?.getModel();
-      if (!yamlDocument || !model) {
-        // TODO: show error
-        return;
-      }
-      const builtInStepSnippet = generateBuiltInStepSnippet(stepType, false, true);
-      const stepNodes = getStepNodesWithType(yamlDocument);
-      let prepend = '';
-      let range = new monaco.Range(1, 1, 1, 1);
-      let indentLevel = 0;
-      if (stepNodes.length === 0) {
-        prepend = 'steps:\n  ';
-      } else {
-        const lastStepRange = getMonacoRangeFromYamlNode(model, stepNodes[stepNodes.length - 1]);
-        if (lastStepRange) {
-          range = new monaco.Range(
-            lastStepRange.endLineNumber,
-            lastStepRange.endColumn,
-            lastStepRange.endLineNumber,
-            lastStepRange.endColumn
-          );
-          indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
-        }
-      }
-      model.pushEditOperations(
-        null,
-        [
-          {
-            range,
-            text: prepend + prependIndentToLines(builtInStepSnippet, indentLevel) + '\n',
-          },
-        ],
-        () => null
-      );
-    }
-    function insertConnectorSnippet(connectorType: string) {
-      const model = editorRef.current?.getModel();
-      if (!yamlDocument || !model) {
-        // TODO: show error
-        return;
-      }
-      const connectorSnippet = generateConnectorSnippet(connectorType, false, true);
-      const stepNodes = getStepNodesWithType(yamlDocument);
-      let prepend = '';
-      let range = new monaco.Range(1, 1, 1, 1);
-      let indentLevel = 0;
-      if (stepNodes.length === 0) {
-        prepend = 'steps:\n  ';
-      } else {
-        const lastStepRange = getMonacoRangeFromYamlNode(model, stepNodes[stepNodes.length - 1]);
-        if (lastStepRange) {
-          range = new monaco.Range(
-            lastStepRange.endLineNumber,
-            lastStepRange.endColumn,
-            lastStepRange.endLineNumber,
-            lastStepRange.endColumn
-          );
-          indentLevel = getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber);
-        }
-      }
-      model.pushEditOperations(
-        null,
-        [
-          {
-            range,
-            text: prepend + prependIndentToLines(connectorSnippet, indentLevel) + '\n',
-          },
-        ],
-        () => null
-      );
+    const model = editorRef.current?.getModel();
+    const yamlDocumentCurrent = yamlDocumentRef.current;
+    const cursorPosition = editorRef.current?.getPosition();
+    if (!model || !yamlDocumentCurrent) {
+      return;
     }
     if (TriggerTypes.includes(action.id)) {
-      insertTriggerSnippet(action.id);
-    } else if (BuiltInStepTypes.includes(action.id)) {
-      insertBuiltInStepSnippet(action.id);
+      insertTriggerSnippet(model, yamlDocumentCurrent, action.id);
     } else {
-      insertConnectorSnippet(action.id);
+      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition);
     }
     closeActionsPopover();
   };
