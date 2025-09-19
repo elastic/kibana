@@ -289,21 +289,6 @@ export const getNavigationTreeDefinition = ({
                     defaultMessage: 'Machine Learning',
                   }),
                 },
-                {
-                  iconV2: 'globe' /* TODO: review icon */,
-                  link: 'maps',
-                  sideNavVersion: 'v2',
-                },
-                {
-                  iconV2: 'graphApp',
-                  link: 'graph',
-                  sideNavVersion: 'v2',
-                },
-                {
-                  iconV2: 'visualizeApp',
-                  link: 'visualize',
-                  sideNavVersion: 'v2',
-                },
               ],
               defaultIsCollapsed: false,
               icon,
@@ -521,6 +506,7 @@ export const getNavigationTreeDefinition = ({
                           children: [
                             { link: 'management:dataViews' },
                             { link: 'management:filesManagement' },
+                            { link: 'visualize' },
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
