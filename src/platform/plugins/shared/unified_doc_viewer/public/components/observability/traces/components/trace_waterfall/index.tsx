@@ -57,7 +57,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
 
   return (
     <>
-      {showFullScreenWaterfall && serviceName ? (
+      {showFullScreenWaterfall ? (
         <FullScreenWaterfall
           traceId={traceId}
           rangeFrom={rangeFrom}
