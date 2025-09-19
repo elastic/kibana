@@ -454,7 +454,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ],
           },
           {
-            id: 'project_settings_project_nav',
+            id: 'stack_management',
             title: i18n.translate('xpack.observability.obltNav.management', {
               defaultMessage: 'Stack Management',
             }),

@@ -78,10 +78,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(false);
         }
 
-        // navigate to a different section
-        await solutionNavigation.sidenav.openSection(
-          'observability_project_nav_footer.project_settings_project_nav'
-        );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
         await solutionNavigation.sidenav.clickPanelLink('management:tags');
