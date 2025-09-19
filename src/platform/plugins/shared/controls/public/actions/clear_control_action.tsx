@@ -49,7 +49,7 @@ export class ClearControlAction
 {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
-  public order = 1;
+  public order = 60; // puts it before the edit action
 
   constructor() {}
 

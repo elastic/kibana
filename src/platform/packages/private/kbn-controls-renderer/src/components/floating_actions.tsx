@@ -86,8 +86,8 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       trigger: uiActions.getTrigger('CONTROL_HOVER_TRIGGER'), // we cannot import this constant from the controls plugin
     };
 
-    const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
-      return (a.order || 0) - (b.order || 0);
+    const sortByOrder = (a: FloatingActionItem, b: FloatingActionItem) => {
+      return (b.order || 0) - (a.order || 0);
     };
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
@@ -95,8 +95,8 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         .filter((action) => {
           return (disabledActions ?? []).indexOf(action.id) === -1;
         })
-        .sort(sortByOrder)
-        .map((action) => getFloatingActionItem(uuid, action, context));
+        .map((action) => getFloatingActionItem(uuid, action, context))
+        .sort(sortByOrder);
     };
 
     const subscriptions = new Subscription();
@@ -104,14 +104,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
       if (canceled) return;
       setFloatingActions((currentActions) => {
-        const newActions: FloatingActionItem[] = currentActions
-          ?.filter((current) => current.id !== action.id)
-          .sort(sortByOrder) as FloatingActionItem[];
+        const newActions: FloatingActionItem[] = currentActions?.filter(
+          (current) => current.id !== action.id
+        );
         if (isCompatible) {
-          return [
-            getFloatingActionItem(uuid, action, context) as FloatingActionItem,
-            ...newActions,
-          ];
+          return [getFloatingActionItem(uuid, action, context), ...newActions].sort(sortByOrder);
         }
         return newActions;
       });
@@ -149,15 +146,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   }, [api, uuid, viewMode, disabledActions, uiActions]);
 
   const styles = useMemoCss(floatingActionsStyles);
-
   return (
     <div css={styles.wrapper}>
       {children}
       {isEnabled && floatingActions.length > 0 && (
         <div
-          data-test-subj={`presentationUtil__floatingActions__${
-            (api as HasUniqueId)?.uuid ? (api as HasUniqueId).uuid : v4() // I cannot use `apiHasUniqueId(api)` because of import limitations for packages
-          }`}
+          data-test-subj={`presentationUtil__floatingActions__${uuid}`}
           className={classNames(
             'presentationUtil__floatingActions',
             `controlFrameFloatingActions`,
