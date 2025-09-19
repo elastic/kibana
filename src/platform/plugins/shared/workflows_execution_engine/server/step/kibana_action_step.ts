@@ -11,8 +11,8 @@ import { buildKibanaRequestFromAction } from '@kbn/workflows';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
+import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -20,7 +20,7 @@ export interface KibanaActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class KibanaActionStepImpl extends StepBase<KibanaActionStep> {
+export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
   constructor(
     step: KibanaActionStep,
     contextManager: WorkflowContextManager,
