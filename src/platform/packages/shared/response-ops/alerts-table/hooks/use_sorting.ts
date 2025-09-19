@@ -25,7 +25,7 @@ const sortCombinationsToDataGridSort = (
 
 export type UseSorting = (
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
-  initialSort: SortCombinations[]
+  initialSort: AlertsTableSortCombinations[]
 ) => {
   sortingColumns: EuiDataGridSorting['columns'];
   onSort: (newSort: EuiDataGridSorting['columns']) => void;
