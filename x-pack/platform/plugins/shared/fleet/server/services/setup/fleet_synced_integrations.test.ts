@@ -18,6 +18,7 @@ jest.mock('../app_context', () => ({
     getLogger: jest.fn().mockReturnValue({
       error: jest.fn(),
       debug: jest.fn(),
+      warn: jest.fn(),
     }),
     getConfig: jest.fn().mockReturnValue({
       enableManagedLogsAndMetricsDataviews: true,
@@ -143,6 +144,15 @@ describe('fleet_synced_integrations', () => {
         ['*'],
         []
       );
+    });
+
+    it('should not create index patterns if remote info throws error', async () => {
+      esClientMock.cluster.remoteInfo = jest.fn().mockRejectedValue(new Error('Test error'));
+
+      await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
+
+      expect(soImporterMock.import).not.toHaveBeenCalled();
+      expect(soClientMock.updateObjectsSpaces).not.toHaveBeenCalled();
     });
   });
 
