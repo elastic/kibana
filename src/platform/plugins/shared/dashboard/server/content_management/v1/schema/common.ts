@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
+import { markdownEmbeddableSchema } from '@kbn/dashboard_markdown_schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
@@ -57,12 +58,15 @@ export const panelGridDataSchema = schema.object({
 });
 
 export const panelSchema = schema.object({
-  panelConfig: schema.object(
-    {},
-    {
-      unknowns: 'allow',
-    }
-  ),
+  panelConfig: schema.oneOf([
+    markdownEmbeddableSchema,
+    schema.object(
+      {},
+      {
+        unknowns: 'allow',
+      }
+    )
+  ]),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
