@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
-import type { ContentPackStream } from '@kbn/content-packs-schema';
+import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
@@ -254,6 +254,79 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kql: { query: 'message: ERROR' },
           },
         ]);
+      });
+
+      const checkMappings = (contentPack: ContentPack, fields: FieldDefinition) => {
+        expect(contentPack.entries).to.have.length(1);
+
+        const rootEntry = contentPack.entries.find(
+          (entry): entry is ContentPackStream =>
+            entry.type === 'stream' && entry.name === ROOT_STREAM_ID
+        )!;
+        expect(rootEntry.request.stream.ingest.wired.fields).to.eql(fields);
+      };
+
+      it('respects mappings inclusion', async () => {
+        const contentPackWithoutMappings = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: {
+                  mappings: false,
+                  queries: [],
+                  routing: [],
+                },
+              },
+            })
+          )
+        );
+        checkMappings(contentPackWithoutMappings, {});
+
+        const contentPackWithMappings = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: {
+                  mappings: true,
+                  queries: [],
+                  routing: [],
+                },
+              },
+            })
+          )
+        );
+
+        checkMappings(contentPackWithMappings, {
+          'resource.attributes.foo.bar': { type: 'keyword' },
+        });
+      });
+
+      it('pulls inherited mappings in the exported root', async () => {
+        // mapping is set on logs.branch_a parent
+        const contentPack = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a.child1', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: {
+                  mappings: true,
+                  queries: [],
+                  routing: [],
+                },
+              },
+            })
+          )
+        );
+
+        checkMappings(contentPack, { 'resource.attributes.foo.bar': { type: 'keyword' } });
       });
 
       it('fails when trying to export a stream thats not a descendant', async () => {
