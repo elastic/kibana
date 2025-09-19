@@ -618,6 +618,20 @@ describe('.inlineParams()', () => {
       expect(query.getParams()).toEqual({});
     });
 
+    test('can replace function name (single `?`)', () => {
+      const query = esql({ par: 'myFunction' })`FROM index | WHERE ?par(1, 2, 3) > 123`;
+
+      expect(query.print('basic')).toBe('FROM index | WHERE ?par(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({
+        par: 'myFunction',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MYFUNCTION(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({});
+    });
+
     test('can replace column names', () => {
       const query = esql({ par1: 'col1', par2: 'nested.col2' })`ROW FN(??par1, ??par2, 3)`;
 
@@ -630,6 +644,33 @@ describe('.inlineParams()', () => {
       query.inlineParams();
 
       expect(query.print('basic')).toBe('ROW FN(col1, nested.col2, 3)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace nested column name part', () => {
+      const query = esql({ par1: 'world' })`FROM a | WHERE hello.??par1.\`!\` > 42`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.??par1.`!` > 42');
+      expect(query.getParams()).toEqual({
+        par1: 'world',
+      });
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.world.`!` > 42');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace nested column name part (single `?`)', () => {
+      const query = esql({ par1: 'world' })`FROM a | WHERE hello.?par1.\`!\` > 42`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.?par1.`!` > 42');
+      expect(query.getParams()).toEqual({
+        par1: 'world',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.world.`!` > 42');
       expect(query.getParams()).toEqual({});
     });
   });
