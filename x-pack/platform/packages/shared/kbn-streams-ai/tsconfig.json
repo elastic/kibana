@@ -20,5 +20,8 @@
     "@kbn/inference-common",
     "@kbn/ai-tools",
     "@kbn/zod",
+    "@kbn/std",
+    "@kbn/inference-prompt-utils",
+    "@kbn/streamlang",
   ]
 }
