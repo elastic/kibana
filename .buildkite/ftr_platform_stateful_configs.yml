@@ -75,6 +75,7 @@ enabled:
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql/config.ts
+  - src/platform/test/functional/apps/discover/background_search/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
