@@ -493,7 +493,6 @@ describe('Alerts Client', () => {
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
               },
             },
             collapse: {
@@ -513,6 +512,7 @@ describe('Alerts Client', () => {
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
                 filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
               },
             },

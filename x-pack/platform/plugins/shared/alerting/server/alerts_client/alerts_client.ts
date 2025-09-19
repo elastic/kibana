@@ -192,12 +192,14 @@ export class AlertsClient<
         // but this may return too many alerts, therefore we make two queries:
         // 1. Get the most recent execution UUIDs
         // 2. Get the alerts for those execution UUIDs
+        // We can optimize this in the future once https://github.com/elastic/kibana/issues/235846 is
+        // implemented to allow filtering the ongoing recovered alerts. Then we can just query for
+        // the alerts of the latest execution by setting the size to 1 and adding inner_hits.
         const executions = await this.search({
           size: opts.flappingSettings.lookBackWindow,
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-              must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
             },
           },
           collapse: {
@@ -217,6 +219,7 @@ export class AlertsClient<
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+              must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
               filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
             },
           },
