@@ -11,4 +11,5 @@ export {
   isMultiTermColumn,
   getMultiTermsFormatterParams,
   transformEsqlMultiTermBreakdown,
+  restoreOriginalDatatable,
 } from './src';

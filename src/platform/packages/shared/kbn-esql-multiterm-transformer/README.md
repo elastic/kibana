@@ -55,3 +55,18 @@ transformedDatatable will be:
 }
 */
 ```
+
+## Restoring the Original Datatable
+
+In cases where you need to revert the transformed datatable back to its original structure, you can use the `restoreOriginalDatatable` function. This function inspects the datatable for a transformed multi-term column and, if found, restores the original individual string columns and their corresponding values.
+
+```typescript
+import { restoreOriginalDatatable } from '@kbn/esql-multiterm-transformer';
+
+// Assuming 'transformedDatatable' is the result of calling 'transformEsqlMultiTermBreakdown'
+const restoredDatatable = restoreOriginalDatatable(transformedDatatable);
+
+/*
+restoredDatatable will be identical to the 'originalDatatable'
+*/
+```

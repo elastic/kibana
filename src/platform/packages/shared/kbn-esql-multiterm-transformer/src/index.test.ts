@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformEsqlMultiTermBreakdown, isMultiTermColumn } from '.';
+import { transformEsqlMultiTermBreakdown, isMultiTermColumn, restoreOriginalDatatable } from '.';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('transformEsqlMultiTermBreakdown', () => {
@@ -162,5 +162,48 @@ describe('transformEsqlMultiTermBreakdown', () => {
         cloud: 'aws',
       });
     }
+  });
+});
+
+describe('restoreOriginalDatatable', () => {
+  const statsQuery = 'TS my_index | STATS a BY b, c, d';
+
+  it('should restore a transformed datatable to its original state', () => {
+    const originalDatatable: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'date', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'metric', name: 'AVG(bytes)', meta: { type: 'number' } },
+        { id: 'host', name: 'host.name', meta: { type: 'string' } },
+        { id: 'region', name: 'region', meta: { type: 'string' } },
+      ],
+      rows: [
+        { date: 1, metric: 100, host: 'host-a', region: 'us-east-1' },
+        { date: 2, metric: 200, host: 'host-b', region: 'us-west-2' },
+      ],
+    };
+
+    const transformedResult = transformEsqlMultiTermBreakdown({
+      ...originalDatatable,
+      query: statsQuery,
+    });
+    const restoredDatatable = restoreOriginalDatatable(transformedResult);
+
+    expect(restoredDatatable.columns).toEqual(originalDatatable.columns);
+    expect(restoredDatatable.rows).toEqual(originalDatatable.rows);
+  });
+
+  it('should return the original datatable if it has not been transformed', () => {
+    const datatable: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'date', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'metric', name: 'AVG(bytes)', meta: { type: 'number' } },
+      ],
+      rows: [{ date: 1, metric: 100 }],
+    };
+
+    const result = restoreOriginalDatatable(datatable);
+    expect(result).toEqual(datatable);
   });
 });
