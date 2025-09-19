@@ -242,6 +242,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(action.secret_references[0].id).to.be.a('string');
         // Check that secrets is not stored in the action.
         expect(Object.keys(action)).to.not.contain(['secrets']);
+
+        const secretRes = await es.get({
+          index: '.fleet-secrets',
+          id: action.secret_references[0].id,
+        });
+        expect(secretRes._source).to.eql({
+          value: '1234',
+        });
       });
 
       it('should return a 403 if the agent is tamper protected', async () => {
