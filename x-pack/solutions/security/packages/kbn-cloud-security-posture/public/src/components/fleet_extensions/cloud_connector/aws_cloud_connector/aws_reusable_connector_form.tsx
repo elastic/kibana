@@ -73,7 +73,7 @@ export const AWSReusableConnectorForm: React.FC<{
       <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="cloudFormation.cloudConnectorInstructions"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.cloudConnectorInstructions"
           defaultMessage="To streamline your AWS integration process, you can reuse the same Role ARN for different use cases within Elastic. Simply choose the existing Role ARN from the options below:"
         />
       </EuiText>

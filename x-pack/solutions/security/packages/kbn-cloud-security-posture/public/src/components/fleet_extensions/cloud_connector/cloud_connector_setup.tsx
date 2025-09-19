@@ -75,7 +75,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       id: TABS.NEW_CONNECTION,
       name: (
         <FormattedMessage
-          id="securitySolutionPackages.cspmIntegration.cloudConnector.newConnectionTab"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.newConnectionTab"
           defaultMessage="New Connection"
         />
       ),
@@ -85,7 +85,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           <div>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.description.cloudConnectors"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.description.cloudConnectors"
                 defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You’ll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
                 values={{
                   learnMore: (
@@ -96,7 +96,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
                       data-test-subj="externalLink"
                     >
                       <FormattedMessage
-                        id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                        id="securitySolutionPackages.assetInventory.agentlessForm.cloudFormation.guide.learnMoreLinkText"
                         defaultMessage="Learn more about CloudFormation"
                       />
                     </EuiLink>
@@ -126,7 +126,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       id: TABS.EXISTING_CONNECTION,
       name: (
         <FormattedMessage
-          id="securitySolutionPackages.cspmIntegration.cloudConnector.existingConnectionTab"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.existingConnectionTab"
           defaultMessage="Existing Connection"
         />
       ),

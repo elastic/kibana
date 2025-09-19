@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface CloudConnectorTab {
   id: string;
@@ -43,7 +44,12 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
             isSelected={tab.id === selectedTabId}
             disabled={isEditPage && !cloudConnectorsCount}
           >
-            {tab.name}
+            {i18n.translate(
+              'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab',
+              {
+                defaultMessage: tab.name,
+              }
+            )}
           </EuiTab>
         ))}
       </EuiTabs>

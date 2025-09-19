@@ -39,10 +39,13 @@ export const CloudConnectorInputFields = ({
 
   // Helper to get error message
   const getInvalidError = (label: string) =>
-    i18n.translate('securitySolutionPackages.cspmIntegration.integration.fieldRequired', {
-      defaultMessage: '{field} is required',
-      values: { field: label },
-    });
+    i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.integration.fieldRequired',
+      {
+        defaultMessage: '{field} is required',
+        values: { field: label },
+      }
+    );
 
   return (
     <div>

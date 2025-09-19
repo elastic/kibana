@@ -68,7 +68,10 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
         iconType="launch"
         href={cloudConnectorRemoteRoleTemplate}
       >
-        <FormattedMessage id="cloudFormation.launchButton" defaultMessage="Launch CloudFormation" />
+        <FormattedMessage
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.awsCloudConnector.launchButton"
+          defaultMessage="Launch CloudFormation"
+        />
       </EuiButton>
       <EuiSpacer size="m" />
 

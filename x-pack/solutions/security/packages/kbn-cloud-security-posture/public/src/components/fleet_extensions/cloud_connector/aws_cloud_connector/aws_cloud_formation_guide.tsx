@@ -23,7 +23,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           {isOrganization ? (
             <li>
               <FormattedMessage
-                id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.organizationLogin"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an {admin} in the management account of the AWS Organization you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -33,7 +33,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.singleLogin"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.singleLogin"
                 defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -43,7 +43,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           )}
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.launch"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.launch"
               defaultMessage="Click the {launchCloudFormation} button below."
               values={{
                 launchCloudFormation: <strong>{'Launch CloudFormation'}</strong>,
@@ -52,7 +52,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           </li>
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.region"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.region"
               defaultMessage="(Optional) Change the {amazonRegion} in the upper right corner to the region you want to deploy your stack to"
               values={{
                 amazonRegion: <strong>{'AWS region'}</strong>,
@@ -61,13 +61,13 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           </li>
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.accept"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.accept"
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.accept.acknowledge"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
                   </strong>
@@ -75,7 +75,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
                 capabilities: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.accept.capabilties"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.accept.capabilties"
                       defaultMessage="capabilities"
                     />
                   </strong>
@@ -85,7 +85,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           </li>
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.create"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.create"
               defaultMessage="Click {createStack}."
               values={{
                 createStack: <strong>{'Create stack'}</strong>,
@@ -94,7 +94,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           </li>
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.steps.stackStatus"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.steps.stackStatus"
               defaultMessage="Once stack status is {createComplete} then click the Outputs tab"
               values={{
                 createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
@@ -103,7 +103,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
           </li>
           <li>
             <FormattedMessage
-              id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.steps.credentials"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.steps.credentials"
               defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
               values={{
                 role: <strong>{'Role ARN'}</strong>,
