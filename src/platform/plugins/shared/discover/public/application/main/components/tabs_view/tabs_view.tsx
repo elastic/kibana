@@ -8,7 +8,7 @@
  */
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -18,6 +18,7 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  selectHasUnsavedChanges,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
@@ -32,6 +33,12 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const { unsavedTabIds } = useInternalStateSelector((state) =>
+    selectHasUnsavedChanges(state, {
+      runtimeStateManager: props.runtimeStateManager,
+      services,
+    })
+  );
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -48,12 +55,20 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  useEffect(() => {
+    return () => {
+      // clear session when navigating away from discover main
+      services.data.search.session.clear();
+    };
+  }, [services.data.search.session]);
+
   return (
     <UnifiedTabs
       services={services}
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
+      unsavedItemIds={unsavedTabIds}
       maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}
