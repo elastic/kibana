@@ -303,8 +303,6 @@ describe('convertToWorkflowGraph', () => {
         stepId: 'testElasticsearchStep',
         stepType: 'elasticsearch.search.query',
         type: 'elasticsearch.search.query',
-        stepId: 'testElasticsearchStep',
-        stepType: 'elasticsearch.search.query',
         configuration: {
           name: 'testElasticsearchStep',
           type: 'elasticsearch.search.query',
