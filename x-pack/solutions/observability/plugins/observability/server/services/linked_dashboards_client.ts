@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { LinkedDashboard } from '@kbn/observability-schema';
+import plimit from 'p-limit';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
@@ -15,8 +16,9 @@ export class LinkedDashboardsClient {
   constructor(private logger: Logger, private dashboardClient: IContentClient<Dashboard>) {}
 
   async getLinkedDashboardsByIds(ids: string[]): Promise<LinkedDashboard[]> {
+    const limit = plimit(5);
     const linkedDashboardsResponse = await Promise.all(
-      ids.map((id) => this.getLinkedDashboardById(id))
+      ids.map((id) => limit(() => this.getLinkedDashboardById(id)))
     );
     return linkedDashboardsResponse.filter((dashboard): dashboard is LinkedDashboard =>
       Boolean(dashboard)

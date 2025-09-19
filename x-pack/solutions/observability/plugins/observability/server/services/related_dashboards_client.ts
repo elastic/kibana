@@ -4,29 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-<<<<<<< HEAD
-=======
-import { isEmpty, omit } from 'lodash';
 import type { IContentClient } from '@kbn/content-management-plugin/server/types';
->>>>>>> origin
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
-<<<<<<< HEAD
 import { ReferencedPanelManager } from './referenced_panel_manager';
 import { SuggestedDashboardsClient } from './suggested_dashboards_client';
 import { LinkedDashboardsClient } from './linked_dashboards_client';
-=======
-import type { AlertData } from './alert_data';
-import type { SuggestedDashboardsValidPanelType } from './helpers';
-import {
-  isSuggestedDashboardsValidPanelType,
-  isSuggestedDashboardsValidRuleTypeId,
-} from './helpers';
-import type { ReferencedPanelManager } from './referenced_panel_manager';
->>>>>>> origin
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
@@ -71,7 +56,7 @@ export class RelatedDashboardsClient {
       );
     }
     const linkedDashboardIds = (
-      (await await this.alertsClient.getRuleById(ruleId))?.artifacts?.dashboards || []
+      (await this.alertsClient.getRuleById(ruleId))?.artifacts?.dashboards || []
     ).map((d) => d.id);
 
     const [suggestedDashboards, linkedDashboards] = await Promise.all([
@@ -79,12 +64,12 @@ export class RelatedDashboardsClient {
       this.linkedDashboardsClient.getLinkedDashboardsByIds(linkedDashboardIds),
     ]);
 
-    const filteredSuggestedDashboards = suggestedDashboards.filter(
-      (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
-    );
+    const filteredSuggestedDashboards = suggestedDashboards
+      .filter((suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id))
+      .slice(0, 10); // limit to 10 suggested dashboards
 
     return {
-      suggestedDashboards: filteredSuggestedDashboards.slice(0, 10), // limit to 10 suggested dashboards
+      suggestedDashboards: filteredSuggestedDashboards,
       linkedDashboards,
     };
   }

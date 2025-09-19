@@ -7,12 +7,8 @@
 
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
-<<<<<<< HEAD
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
-=======
-import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
->>>>>>> origin
 
 /**
  * The ReferencedPanelManager class manages the relationship between dashboard panels and their references.
@@ -36,26 +32,30 @@ export class ReferencedPanelManager {
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
 
-  async fetchReferencedPanels(): Promise<void> {
+  async fetchReferencedPanels(): Promise<number> {
     if (this.panelsTypeById.size === 0) {
-      return;
+      return 0;
     }
 
     const panelsToFetch = [...this.panelsTypeById.entries()].map(([id, type]) => ({ id, type }));
 
+    let savedObjects;
     try {
-      const { saved_objects: savedObjects } =
-        await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
-
-      savedObjects.forEach((so) => {
-        this.panelsById.set(so.id, {
-          ...so.attributes,
-          references: so.references,
-        });
-      });
+      const response = await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
+      savedObjects = response.saved_objects;
     } catch (error) {
-      this.logger.error(`Error fetching ${panelsToFetch.length} panels : ${error.message}`);
+      this.logger.error(`Failed to fetch referenced panels: ${error}`);
+      return 0;
     }
+
+    savedObjects.forEach((so) => {
+      this.panelsById.set(so.id, {
+        ...so.attributes,
+        references: so.references,
+      });
+    });
+
+    return savedObjects.length;
   }
 
   getByIndex(panelIndex: string): ReferencedPanelAttributesWithReferences | undefined {
@@ -71,8 +71,10 @@ export class ReferencedPanelManager {
     if (!references && panel.panelIndex) {
       references = this.getByIndex(panel.panelIndex)?.references;
     }
+
+    const idxPatternMatcher = /indexpattern/;
     references
-      ?.filter((r) => r.name.match(`indexpattern`))
+      ?.filter((r) => idxPatternMatcher.test(r.name))
       .forEach((reference) => {
         res.add(reference.id);
       });

@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { SuggestedDashboard } from '@kbn/observability-schema';
+import type { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
 import type { AlertData } from './alert_data';
 import { isSuggestedDashboardsValidPanelType } from './helpers';
-import { ReferencedPanelManager } from './referenced_panel_manager';
-import { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
+import type { ReferencedPanelManager } from './referenced_panel_manager';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 
 // How many managed dashboards to allow in the suggested list before we start filtering them out
@@ -40,26 +40,31 @@ export class SuggestedDashboardsClient {
   // 2. Full-text search matches based on the rule name associated with the alert.
   // The results from both searches are merged, scored, and sorted to provide a list of relevant dashboards.
   public async fetchSuggested(alert: AlertData): Promise<SuggestedDashboard[]> {
-    // We're going to run two searches, storing the results in this map to dedup
+    // Run both searches in parallel, we'll await them later
+    const searches = [
+      this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
+      this.titleMatches(alert.getRuleName() || ''),
+    ];
+
+    // Here's where we'll store the results, using a map to dedup
     const dashboardsById = new Map<string, SuggestedDashboard>();
-    await Promise.all(
-      [
-        this.unfilteredMatches(alert.getAllRelevantFields(), alert.getRuleQueryIndex() || ''),
-        this.titleMatches(alert.getRuleName() || ''),
-      ].map(async (search) => {
-        (await search).forEach((dashboard) => {
-          const existing = dashboardsById.get(dashboard.id);
-          if (!existing) {
-            dashboardsById.set(dashboard.id, dashboard);
-          } else {
-            existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
-            existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
-            existing.matchedBy.textMatch =
-              (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
-          }
-        });
-      })
-    );
+    // This function merges the results from both searches
+    const mergeDashboards = (results: SuggestedDashboard[]) => {
+      results.forEach((dashboard) => {
+        const existing = dashboardsById.get(dashboard.id);
+        if (!existing) {
+          dashboardsById.set(dashboard.id, dashboard);
+        } else {
+          existing.matchedBy.fields.push(...(dashboard.matchedBy.fields || []));
+          existing.matchedBy.index.push(...(dashboard.matchedBy.index || []));
+          existing.matchedBy.textMatch =
+            (existing.matchedBy.textMatch || 0) + (dashboard.matchedBy.textMatch || 0);
+        }
+      });
+    };
+
+    // Wait for the search and processing to complete
+    await Promise.all(searches.map((search) => search.then(mergeDashboards)));
 
     // Return the dashboards sorted by score
     let matchedManagedDashboards = 0;
@@ -149,12 +154,11 @@ export class SuggestedDashboardsClient {
         }
       });
 
-      this.referencedPanelManager
-        .getPanelIndices(panel)
-        .forEach(
-          (index) =>
-            alertIndex === index && !matchedBy.index.includes(index) && matchedBy.index?.push(index)
-        );
+      this.referencedPanelManager.getPanelIndices(panel).forEach((index) => {
+        if (alertIndex === index && !matchedBy.index.includes(index)) {
+          matchedBy.index?.push(index);
+        }
+      });
     }
 
     return matchedBy;
