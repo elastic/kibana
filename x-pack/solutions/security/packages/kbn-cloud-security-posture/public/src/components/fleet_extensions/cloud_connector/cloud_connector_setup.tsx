@@ -56,9 +56,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   // Use the cloud connector setup hook
   const {
     newConnectionCredentials,
-    setNewConnectionCredentials,
     existingConnectionCredentials,
-    setExistingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
   } = useCloudConnectorSetup(input, newPolicy, updatePolicy);

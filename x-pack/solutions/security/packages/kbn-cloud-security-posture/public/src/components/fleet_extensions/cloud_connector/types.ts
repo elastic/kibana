@@ -107,13 +107,3 @@ export interface InputVar {
 export interface InputVars {
   [key: string]: InputVar;
 }
-
-// Type alias for the actual vars type from Fleet
-export type PackagePolicyVars =
-  | Record<
-      string,
-      | { value?: string; type?: string; [key: string]: unknown }
-      | CloudConnectorSecretVar
-      | undefined
-    >
-  | undefined;

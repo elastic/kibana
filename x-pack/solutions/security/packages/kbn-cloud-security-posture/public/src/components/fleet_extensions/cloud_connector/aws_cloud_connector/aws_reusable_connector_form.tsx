@@ -31,8 +31,8 @@ export const AWSReusableConnectorForm: React.FC<{
     label: connector.name,
     value: connector.id,
     id: connector.id,
-    roleArn: connector.vars.role_arn || connector.vars['aws.role_arn'],
-    externalId: connector.vars['aws.credentials.external_id'] || connector.vars.external_id,
+    roleArn: connector.vars.role_arn,
+    externalId: connector.vars.external_id,
   }));
 
   // Find the currently selected connector based on credentials

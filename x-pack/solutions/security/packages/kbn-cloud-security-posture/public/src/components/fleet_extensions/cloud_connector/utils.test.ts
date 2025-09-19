@@ -11,12 +11,15 @@ import {
   updatePolicyWithAwsCloudConnectorCredentials,
 } from './utils';
 
-import { type NewPackagePolicy, type NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type {
+  PackagePolicyConfigRecord,
+  type NewPackagePolicy,
+  type NewPackagePolicyInput,
+} from '@kbn/fleet-plugin/common';
 import { type CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
-import { type PackagePolicyVars } from './types';
 
 describe('updateInputVarsWithCredentials', () => {
-  let mockInputVars: PackagePolicyVars;
+  let mockInputVars: PackagePolicyConfigRecord;
 
   beforeEach(() => {
     mockInputVars = {
@@ -47,7 +50,7 @@ describe('updateInputVarsWithCredentials', () => {
 
     const result = updateInputVarsWithCredentials(mockInputVars, credentials, false);
 
-    expect(result?.external_id).toBe('updated-external-id');
+    expect(result?.external_id?.value).toBe('updated-external-id');
     expect(result?.['aws.credentials.external_id']?.value).toBe('updated-external-id');
   });
 
@@ -99,7 +102,7 @@ describe('updateInputVarsWithCredentials', () => {
   });
 
   it('should handle partial inputVars (missing some fields)', () => {
-    const partialInputVars: PackagePolicyVars = {
+    const partialInputVars: PackagePolicyConfigRecord = {
       role_arn: { value: 'arn:aws:iam::123456789012:role/OriginalRole' },
       // Missing other fields
     };
@@ -133,7 +136,7 @@ describe('updateInputVarsWithCredentials', () => {
 
 describe('updatePolicyInputs', () => {
   let mockPolicy: NewPackagePolicy;
-  let mockInputVars: PackagePolicyVars;
+  let mockInputVars: PackagePolicyConfigRecord;
 
   beforeEach(() => {
     mockPolicy = {

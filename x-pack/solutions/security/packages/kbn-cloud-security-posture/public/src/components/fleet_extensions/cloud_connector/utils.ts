@@ -9,8 +9,9 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
+  PackagePolicyConfigRecord,
 } from '@kbn/fleet-plugin/common';
-import type { GetCloudConnectorRemoteRoleTemplateParams, PackagePolicyVars } from './types';
+import type { GetCloudConnectorRemoteRoleTemplateParams } from './types';
 
 import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 import {
@@ -172,13 +173,13 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
  * @returns Updated input variables with credentials applied
  */
 export const updateInputVarsWithCredentials = (
-  inputVars: PackagePolicyVars | undefined,
+  inputVars: PackagePolicyConfigRecord | undefined,
   credentials: CloudConnectorCredentials | undefined,
   isNewCredentials: boolean = false
-): PackagePolicyVars | undefined => {
+): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
-  const updatedInputVars: PackagePolicyVars = { ...inputVars };
+  const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
   // Update role_arn fields
   if (credentials?.roleArn !== undefined) {
@@ -201,9 +202,7 @@ export const updateInputVarsWithCredentials = (
   // Update external_id fields
   if (credentials?.externalId !== undefined) {
     if (updatedInputVars.external_id) {
-      updatedInputVars.external_id = isNewCredentials
-        ? { value: credentials.externalId }
-        : credentials.externalId;
+      updatedInputVars.external_id = { value: credentials.externalId };
     }
     if (updatedInputVars['aws.credentials.external_id']) {
       updatedInputVars['aws.credentials.external_id'] = { value: credentials.externalId };
@@ -229,7 +228,7 @@ export const updateInputVarsWithCredentials = (
  */
 export const updatePolicyInputs = (
   updatedPolicy: NewPackagePolicy,
-  inputVars: PackagePolicyVars
+  inputVars: PackagePolicyConfigRecord
 ): NewPackagePolicy => {
   if (!updatedPolicy.inputs || updatedPolicy.inputs.length === 0 || !inputVars) {
     return updatedPolicy;

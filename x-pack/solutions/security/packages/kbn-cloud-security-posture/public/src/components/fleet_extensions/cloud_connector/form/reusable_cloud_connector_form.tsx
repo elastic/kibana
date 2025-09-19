@@ -14,7 +14,7 @@ export const ReusableCloudConnectorForm: React.FC<{
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   newPolicy: NewPackagePolicy;
-  cloudProvider: string;
+  cloudProvider?: string;
   isEditPage: boolean;
 }> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage }) => {
   const provider = cloudProvider || 'aws';

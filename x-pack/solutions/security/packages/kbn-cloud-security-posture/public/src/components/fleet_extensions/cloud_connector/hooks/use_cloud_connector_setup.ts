@@ -7,12 +7,16 @@
 
 import { useState, useCallback } from 'react';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type {
+  CloudConnectorSecretReference,
+  PackagePolicyConfigRecord,
+} from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
-import { updatePolicyInputs, updateInputVarsWithCredentials } from '../utils';
-import type { PackagePolicyVars } from '../types';
+import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
+
 export interface CloudConnectorCredentials {
   roleArn?: string;
-  externalId?: string;
+  externalId?: string | CloudConnectorSecretReference;
   cloudConnectorId?: string;
 }
 
@@ -55,7 +59,7 @@ export const useCloudConnectorSetup = (
 
       // Handle undefined cases safely
       const updatedInputVars = updateInputVarsWithCredentials(
-        inputVars as PackagePolicyVars,
+        inputVars as PackagePolicyConfigRecord,
         credentials,
         true
       );
@@ -65,7 +69,7 @@ export const useCloudConnectorSetup = (
       if (inputVars) {
         const updatedPolicyWithInputs = updatePolicyInputs(
           updatedPolicy,
-          updatedInputVars as PackagePolicyVars
+          updatedInputVars as PackagePolicyConfigRecord
         );
         updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
       }
@@ -84,7 +88,7 @@ export const useCloudConnectorSetup = (
 
       // Handle undefined cases safely
       const updatedInputVars = updateInputVarsWithCredentials(
-        inputVars as PackagePolicyVars,
+        inputVars as PackagePolicyConfigRecord,
         credentials
       );
       // Update existing connection credentials state
@@ -94,7 +98,7 @@ export const useCloudConnectorSetup = (
       if (inputVars) {
         const updatedPolicyWithInputs = updatePolicyInputs(
           updatedPolicy,
-          updatedInputVars as PackagePolicyVars
+          updatedInputVars as PackagePolicyConfigRecord
         );
         updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
       }

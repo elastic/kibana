@@ -9,7 +9,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import { type PackagePolicyVars, type AWSCloudConnectorFormProps } from '../types';
+import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { type AWSCloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
   updatePolicyWithAwsCloudConnectorCredentials,
@@ -45,7 +46,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
 
   // Update inputVars with current credentials using utility function or inputVars if no credentials are provided
   const updatedInputVars = credentials
-    ? updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials, true)
+    ? updateInputVarsWithCredentials(inputVars as PackagePolicyConfigRecord, credentials, true)
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);

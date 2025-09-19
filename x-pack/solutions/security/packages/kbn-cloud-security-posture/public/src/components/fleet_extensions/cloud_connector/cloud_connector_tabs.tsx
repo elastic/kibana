@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface CloudConnectorTab {
   id: string;
-  name: string;
+  name: string | React.ReactNode;
   content: React.ReactNode;
 }
 
@@ -44,12 +44,13 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
             isSelected={tab.id === selectedTabId}
             disabled={isEditPage && !cloudConnectorsCount}
           >
-            {i18n.translate(
-              'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab',
-              {
-                defaultMessage: tab.name,
-              }
-            )}
+            <FormattedMessage
+              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab"
+              defaultMessage="{name}"
+              values={{
+                name: tab.name,
+              }}
+            />
           </EuiTab>
         ))}
       </EuiTabs>
