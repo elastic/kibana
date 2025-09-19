@@ -46,7 +46,6 @@ export class BaseResolverQuery implements ResolverQueryParams {
       : {
           id: 'process.entity_id',
           parent: 'process.parent.entity_id',
-          name: 'process.name',
         };
     this.resolverFields = resolverFields(schemaOrDefault);
     this.schema = schemaOrDefault;

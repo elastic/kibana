@@ -29,11 +29,7 @@ describe('BaseResolverQuery', () => {
         shouldExcludeColdAndFrozenTiers: false,
       });
 
-      expect(query.resolverFields).toEqual(
-        expect.arrayContaining([
-          { field: 'process.name' },
-        ])
-      );
+      expect(query.resolverFields).toEqual(expect.arrayContaining([{ field: 'process.name' }]));
     });
 
     it('should not include process.name field when not present in schema', () => {
@@ -148,7 +144,6 @@ describe('BaseResolverQuery', () => {
         expect.arrayContaining([
           { field: 'process.entity_id' },
           { field: 'process.parent.entity_id' },
-          { field: 'process.name' },
         ])
       );
     });
