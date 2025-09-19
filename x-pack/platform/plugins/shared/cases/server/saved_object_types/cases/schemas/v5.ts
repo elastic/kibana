@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema } from '@kbn/config-schema';
-
 import { casesSchema as casesSchemaV4 } from './v4';
 
-export const casesSchema = casesSchemaV4.extends({
-  incremental_id: schema.maybe(schema.nullable(schema.number())), // Added to account for the .text mapping
-});
+export const casesSchema = // v5
+  casesSchemaV4.extends({
+    /* Same fields, just added new multi-type `.text` to increment_id */
+  });
