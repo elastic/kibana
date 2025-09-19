@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const markdownEditorSchema = schema.object({
   content: schema.string(),
 });
 
-export const markdownEmbeddableSchema = schema.allOf([
-  markdownEditorSchema,
-  serializedTitlesSchema
-]);
+export const markdownEmbeddableSchema = schema.allOf(
+  [markdownEditorSchema, serializedTitlesSchema],
+  {
+    meta: {
+      description: 'Markdown embeddable schema',
+    },
+  }
+);
 
 export type MarkdownEditorState = TypeOf<typeof markdownEditorSchema>;
 export type MarkdownEmbeddableState = TypeOf<typeof markdownEmbeddableSchema>;
