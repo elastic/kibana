@@ -75,10 +75,19 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     dataset,
   }: FindFieldsMetadataOptions = {}): Promise<FieldsMetadataDictionary> {
     if (!fieldNames) {
+      /**
+       * The merge order is important here.
+       * The ECS fields repository has the highest priority,
+       * followed by the OpenTel fields repository,
+       * followed by the metadata fields repository.
+       *
+       * This is because the ECS fields repository is the
+       * most authoritative source of field metadata.
+       */
       return FieldsMetadataDictionary.create({
         ...this.metadataFieldsRepository.find().getFields(),
-        ...this.ecsFieldsRepository.find().getFields(),
         ...this.otelFieldsRepository.find().getFields(),
+        ...this.ecsFieldsRepository.find().getFields(),
       });
     }
 

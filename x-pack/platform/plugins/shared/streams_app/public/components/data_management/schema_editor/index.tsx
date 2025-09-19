@@ -20,6 +20,7 @@ export function SchemaEditor({
   fields,
   isLoading,
   onFieldUpdate,
+  onAddField,
   onRefreshData,
   stream,
   withControls = false,
@@ -56,7 +57,12 @@ export function SchemaEditor({
           </EuiPortal>
         ) : null}
         {withControls && (
-          <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
+          <Controls
+            controls={controls}
+            onAddField={onAddField}
+            onChange={updateControls}
+            onRefreshData={onRefreshData}
+          />
         )}
         <FieldsTable
           isLoading={isLoading ?? false}

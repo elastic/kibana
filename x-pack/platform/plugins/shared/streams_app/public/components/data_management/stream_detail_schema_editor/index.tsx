@@ -36,6 +36,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     storedFields,
     isLoadingFields,
     refreshFields,
+    addField,
     updateField,
     pendingChangesCount,
     discardChanges,
@@ -90,6 +91,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
               : classicDefaultColumns
           }
           stream={definition.stream}
+          onAddField={addField}
           onFieldUpdate={updateField}
           onRefreshData={refreshFields}
           withControls
