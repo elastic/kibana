@@ -85,7 +85,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         <EmbeddableRenderer
           type="APM_TRACE_WATERFALL_EMBEDDABLE"
           getParentApi={getParentApi}
-          hidePanelChrome
+          panelProps={{ hidePanelChrome: true }}
         />
       </ContentFrameworkSection>
     </>
