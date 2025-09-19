@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 
-export const LAST_UPDATED_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdated.label',
-  {
-    defaultMessage: 'Last updated',
-  }
-);
+export const useConversationGridCenterColumnWidth = () => {
+  const { euiTheme } = useEuiTheme();
+  const contentMaxWidth = `calc(${euiTheme.size.xl} * 25)`;
+  return contentMaxWidth;
+};
