@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
@@ -14,6 +16,10 @@ import { i18n } from '@kbn/i18n';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { SystemEventsSparkline } from './system_events_sparkline';
 import { TableTitle } from './table_title';
+const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.generate',
+  { defaultMessage: 'Generate significant events' }
+);
 
 const columns: Array<EuiBasicTableColumn<System>> = [
   {
@@ -51,18 +57,15 @@ const columns: Array<EuiBasicTableColumn<System>> = [
     sortable: true,
   },
   {
-    name: 'Actions',
+    name: i18n.translate('xpack.streams.streamSystemsTable.columns.actionsColumnHeader', {
+      defaultMessage: 'Actions',
+    }),
     actions: [
       {
-        name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.cloneActionName', {
-          defaultMessage: 'Clone',
-        }),
-        description: i18n.translate(
-          'xpack.streams.streamSystemsTable.columns.actions.cloneActionDescription',
-          { defaultMessage: 'Clone this system' }
-        ),
+        name: GENERATE_SIGNIFICANT_EVENTS,
+        description: GENERATE_SIGNIFICANT_EVENTS,
         type: 'icon',
-        icon: 'copy',
+        icon: 'plusInSquare',
         onClick: () => '',
       },
       {
@@ -105,6 +108,7 @@ export function StreamExistingSystemsTable({
   refreshSystems: () => void;
 }) {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
+  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
 
   const toggleDetails = (system: System) => {
     setIsDetailFlyoutOpen(system);
@@ -147,14 +151,46 @@ export function StreamExistingSystemsTable({
 
   return (
     <div css={{ padding: '16px' }}>
-      <TableTitle
-        pageIndex={0}
-        pageSize={10}
-        total={systems.length}
-        label={i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
-          defaultMessage: 'Systems',
-        })}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <TableTitle
+            pageIndex={0}
+            pageSize={10}
+            total={systems.length}
+            label={i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
+              defaultMessage: 'Systems',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="plusInSquare"
+            aria-label={GENERATE_SIGNIFICANT_EVENTS}
+            isDisabled={selectedSystems.length === 0}
+          >
+            {GENERATE_SIGNIFICANT_EVENTS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="cross"
+            aria-label={CLEAR_SELECTION}
+            isDisabled={selectedSystems.length === 0}
+          >
+            {CLEAR_SELECTION}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="trash"
+            color="danger"
+            aria-label={DELETE_ALL}
+            isDisabled={selectedSystems.length === 0}
+          >
+            {DELETE_ALL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiBasicTable
         loading={isLoading}
         tableCaption={i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
@@ -163,7 +199,7 @@ export function StreamExistingSystemsTable({
         items={systems}
         itemId="name"
         columns={columnsWithExpandingRowToggle}
-        selection={{ initialSelected: [] }}
+        selection={{ initialSelected: selectedSystems, onSelectionChange: setSelectedSystems }}
       />
       {isDetailFlyoutOpen && (
         <StreamSystemDetailsFlyout
@@ -178,3 +214,12 @@ export function StreamExistingSystemsTable({
     </div>
   );
 }
+
+const CLEAR_SELECTION = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.clearSelection',
+  { defaultMessage: 'Clear selection' }
+);
+
+const DELETE_ALL = i18n.translate('xpack.streams.streamSystemsTable.columns.actions.deleteAll', {
+  defaultMessage: 'Delete all',
+});
