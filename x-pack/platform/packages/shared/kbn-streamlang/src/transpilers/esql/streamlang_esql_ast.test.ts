@@ -97,7 +97,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
     const result = transpile(dslWithAndOr);
 
     expect(result.query).toEqual(
-      `  | EVAL result_field = CASE(status == "active" AND (type == "premium" OR category == "gold"), "matched")`
+      `  | EVAL result_field = CASE(status == "active" AND (type == "premium" OR category == "gold"), "matched", result_field)`
     );
   });
 
@@ -126,7 +126,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
     const result = transpile(dslWithOrAnd);
 
     expect(result.query).toEqual(
-      `  | EVAL result_field = CASE(status == "active" OR type == "premium" AND category == "gold", "matched")`
+      `  | EVAL result_field = CASE(status == "active" OR type == "premium" AND category == "gold", "matched", result_field)`
     );
   });
 
@@ -152,7 +152,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
     const result = transpile(dslWithNotOr);
 
     expect(result.query).toEqual(
-      `  | EVAL result_field = CASE(NOT (status == "active" OR type == "premium"), "matched")`
+      `  | EVAL result_field = CASE(NOT (status == "active" OR type == "premium"), "matched", result_field)`
     );
   });
 
@@ -183,7 +183,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
     const result = transpile(dslWithNotAndOr);
 
     expect(result.query).toEqual(
-      `  | EVAL result_field = CASE(NOT (status == "active" AND (type == "premium" OR category == "gold")), "matched")`
+      `  | EVAL result_field = CASE(NOT (status == "active" AND (type == "premium" OR category == "gold")), "matched", result_field)`
     );
   });
 });
