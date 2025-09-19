@@ -13,7 +13,7 @@ import type { NoDataPageProps, NoDataPageServices } from '@kbn/shared-ux-page-no
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
 
-type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo' | 'docsLink' | 'pageTitle'>;
+type PropArguments = Pick<NoDataPageProps, 'pageTitle'>;
 
 export type Params = ArgumentParams<PropArguments, {}> & NoDataCardStorybookParams;
 
@@ -25,19 +25,6 @@ export class NoDataPageStorybookMock extends AbstractStorybookMock<
   PropArguments
 > {
   propArguments = {
-    solution: {
-      control: { control: 'text' },
-      defaultValue: 'Observability',
-    },
-    logo: {
-      control: { control: 'radio' },
-      options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
-      defaultValue: undefined,
-    },
-    docsLink: {
-      control: { control: 'text' },
-      defaultValue: 'docs/link',
-    },
     pageTitle: {
       control: { control: 'text' },
       defaultValue: '',
@@ -55,9 +42,6 @@ export class NoDataPageStorybookMock extends AbstractStorybookMock<
           title: 'Add Integrations',
         },
       },
-      solution: this.getArgumentValue('solution', params),
-      logo: this.getArgumentValue('logo', params),
-      docsLink: this.getArgumentValue('docsLink', params),
       pageTitle: this.getArgumentValue('pageTitle', params),
     };
   }
