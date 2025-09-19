@@ -9,7 +9,7 @@ import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { useForm } from 'react-hook-form';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
-import { getToolTypeDefaultValues } from '../../components/tools/tools_form_registry';
+import { getToolTypeDefaultValues } from '../../components/tools/form/tools_form_registry';
 import { useToolRegistryResolver } from './use_tool_registry_resolver';
 
 export const useToolForm = (tool?: ToolDefinitionWithSchema, initialToolType?: ToolType) => {

@@ -14,7 +14,7 @@ import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
 import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
 import { useQueryState } from '../../../../hooks/use_query_state';
-import { getToolTypeConfig, getAvailableToolTypes } from '../../tools_form_registry';
+import { getToolTypeConfig, getEditableToolTypes } from '../tools_form_registry';
 
 export const Configuration = () => {
   const {
@@ -51,7 +51,7 @@ export const Configuration = () => {
           control={control}
           name="type"
           render={({ field: { ref, ...field } }) => (
-            <EuiSelect options={getAvailableToolTypes()} {...field} inputRef={ref} />
+            <EuiSelect options={getEditableToolTypes()} {...field} inputRef={ref} />
           )}
         />
       </EuiFormRow>
