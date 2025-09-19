@@ -41,6 +41,7 @@ interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
   lastTotalParams: number;
   lastTotalMWs: number;
+  packagePoliciesRequireReformatting?: { done: boolean; maxRetries: number };
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -86,9 +87,13 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
-    let packagePoliciesRequireReformatting = Boolean(
-      taskInstance.state.packagePoliciesRequireReformatting ?? true
-    );
+    let packagePoliciesRequireReformatting = {
+      done: taskInstance.state.packagePoliciesRequireReformatting?.done ?? false,
+      maxRetries: taskInstance.state.packagePoliciesRequireReformatting?.maxRetries ?? 3,
+    };
+    const shouldAttemptPolicyReformatting =
+      !packagePoliciesRequireReformatting.done && packagePoliciesRequireReformatting.maxRetries > 0;
+
     try {
       this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
@@ -101,9 +106,11 @@ export class SyncPrivateLocationMonitorsTask {
       });
       lastTotalParams = totalParams;
       lastTotalMWs = totalMWs;
-      if (hasDataChanged || packagePoliciesRequireReformatting) {
-        if (packagePoliciesRequireReformatting) {
-          this.serverSetup.logger.info(`Reformatting synthetics package policies.`);
+      if (hasDataChanged || shouldAttemptPolicyReformatting) {
+        if (shouldAttemptPolicyReformatting) {
+          this.serverSetup.logger.info(
+            `Attempting to reformat synthetics package policies. Attempts left: ${packagePoliciesRequireReformatting.maxRetries}`
+          );
         }
         if (hasDataChanged) {
           this.debugLog(`Syncing private location monitors because data has changed`);
@@ -116,7 +123,7 @@ export class SyncPrivateLocationMonitorsTask {
             encryptedSavedObjects,
           });
         }
-        packagePoliciesRequireReformatting = false;
+        packagePoliciesRequireReformatting = { ...packagePoliciesRequireReformatting, done: true };
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
         this.debugLog(
@@ -131,7 +138,15 @@ export class SyncPrivateLocationMonitorsTask {
           lastStartedAt: startedAt.toISOString(),
           lastTotalParams,
           lastTotalMWs,
-          packagePoliciesRequireReformatting,
+          packagePoliciesRequireReformatting: packagePoliciesRequireReformatting.done
+            ? packagePoliciesRequireReformatting
+            : {
+                done: false,
+                maxRetries:
+                  packagePoliciesRequireReformatting.maxRetries > 0
+                    ? packagePoliciesRequireReformatting.maxRetries - 1
+                    : 0,
+              },
         },
       };
     }
