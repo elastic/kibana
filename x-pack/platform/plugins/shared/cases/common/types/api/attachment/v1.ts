@@ -68,11 +68,11 @@ export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentReque
  */
 
 const BasicAttachmentRequestRt = rt.union([
-  ActionsAttachmentPayloadRt,
+  UserCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
+  ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
-  UserCommentAttachmentPayloadRt,
   EventAttachmentPayloadRt,
 ]);
 

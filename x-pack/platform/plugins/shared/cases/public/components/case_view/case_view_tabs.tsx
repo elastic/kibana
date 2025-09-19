@@ -147,17 +147,15 @@ const EventsBadge = ({
   totalEvents: number | undefined;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
-  <>
-    <EuiNotificationBadge
-      css={css`
-        margin-left: ${euiTheme.size.xs};
-      `}
-      data-test-subj="case-view-events-stats-badge"
-      color={activeTab === CASE_VIEW_PAGE_TABS.EVENTS ? 'accent' : 'subdued'}
-    >
-      {totalEvents || 0}
-    </EuiNotificationBadge>
-  </>
+  <EuiNotificationBadge
+    css={css`
+      margin-left: ${euiTheme.size.xs};
+    `}
+    data-test-subj="case-view-events-stats-badge"
+    color={activeTab === CASE_VIEW_PAGE_TABS.EVENTS ? 'accent' : 'subdued'}
+  >
+    {totalEvents || 0}
+  </EuiNotificationBadge>
 );
 
 EventsBadge.displayName = 'EventsBadge';

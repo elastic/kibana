@@ -14,11 +14,9 @@ import type { EventAttachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
-import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionContentToolbar } from '../content_toolbar';
-import { AlertPropertyActions } from '../property_actions/alert_property_actions';
-import { DELETE_ALERTS_SUCCESS_TITLE, DELETE_EVENTS_SUCCESS_TITLE } from './translations';
+import { DELETE_EVENTS_SUCCESS_TITLE } from './translations';
 
 import * as i18n from '../translations';
 import { UserActionShowEvent } from './show_event';
@@ -75,51 +73,11 @@ const getSingleEventUserAction = ({
   ];
 };
 
-const getMultipleEventsUserAction = ({
-  userAction,
-  userProfiles,
-  attachment,
-  loadingCommentIds,
-  handleDeleteComment,
-}: BuilderArgs): EuiCommentProps[] => {
-  return [
-    {
-      username: (
-        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
-      ),
-      eventColor: 'subdued',
-      event: <MultipleEventsCommentEvent actionId={userAction.id} totalEvents={0} />,
-      'data-test-subj': `user-action-event-${userAction.type}-${userAction.action}-action-${userAction.id}`,
-      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineAvatar: 'bell',
-      actions: (
-        <UserActionContentToolbar id={attachment.id}>
-          <EuiFlexItem grow={false}>
-            <ShowAlertTableLink />
-          </EuiFlexItem>
-          <AlertPropertyActions
-            onDelete={() => handleDeleteComment(attachment.id, DELETE_ALERTS_SUCCESS_TITLE(0))}
-            isLoading={loadingCommentIds.includes(attachment.id)}
-            totalAlerts={0}
-          />
-        </UserActionContentToolbar>
-      ),
-    },
-  ];
-};
-
 export const createEventAttachmentUserActionBuilder = (
   params: BuilderArgs
 ): ReturnType<UserActionBuilder> => ({
   build: () => {
-    const { attachment } = params;
-    const alertId = Array.isArray(attachment.eventId) ? attachment.eventId : [attachment.eventId];
-
-    if (alertId.length === 1) {
-      return getSingleEventUserAction(params);
-    }
-
-    return getMultipleEventsUserAction(params);
+    return getSingleEventUserAction(params);
   },
 });
 

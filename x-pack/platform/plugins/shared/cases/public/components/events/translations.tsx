@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseView.events.searchPlaceholder', {
-  defaultMessage: 'Search events',
-});
-
 export const DATE_ADDED = i18n.translate('xpack.cases.caseView.events.dateAdded', {
   defaultMessage: 'Date added',
 });
