@@ -39,6 +39,49 @@ import { useTool } from '../../../hooks/tools/use_tools';
 import { ToolFormMode } from '../form/tool_form';
 import { labels } from '../../../utils/i18n';
 
+const flyoutStyles = css`
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+  }
+`;
+
+const flyoutContentStyles = css`
+  height: 100%;
+`;
+
+const inputsColumnStyles = css`
+  overflow-y: auto;
+`;
+
+const submitButtonContainerStyles = css`
+  align-self: flex-end;
+`;
+
+const i18nMessages = {
+  fieldRequiredError: (label: string) =>
+    i18n.translate('xpack.onechat.tools.testTool.fieldRequiredError', {
+      defaultMessage: '{label} is required',
+      values: { label },
+    }),
+  inputPlaceholder: (label: string) =>
+    i18n.translate('xpack.onechat.tools.testTool.inputPlaceholder', {
+      defaultMessage: 'Enter {label}',
+      values: { label },
+    }),
+  title: i18n.translate('xpack.onechat.tools.testFlyout.title', {
+    defaultMessage: 'Test Tool',
+  }),
+  inputsTitle: i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
+    defaultMessage: 'Inputs',
+  }),
+  executeButton: i18n.translate('xpack.onechat.tools.testTool.executeButton', {
+    defaultMessage: 'Submit',
+  }),
+  responseTitle: i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
+    defaultMessage: 'Response',
+  }),
+};
+
 interface ToolParameter {
   name: string;
   label: string;
@@ -111,7 +154,7 @@ const renderFormField = ({
     name,
     control,
     rules: {
-      required: !optional ? `${parameter.label} is required` : false,
+      required: !optional ? i18nMessages.fieldRequiredError(parameter.label) : false,
     },
   };
 
@@ -127,7 +170,7 @@ const renderFormField = ({
               value={(value as number) ?? ''}
               type="number"
               onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
-              placeholder={`Enter ${label.toLowerCase()}`}
+              placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
           )}
@@ -160,7 +203,7 @@ const renderFormField = ({
               {...field}
               inputRef={ref}
               value={value as string}
-              placeholder={`Enter ${label.toLowerCase()}`}
+              placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
           )}
@@ -217,24 +260,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   if (!tool) return null;
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      aria-labelledby="flyoutTitle"
-      css={css`
-        .euiFlyoutBody__overflowContent {
-          height: 100%;
-        }
-      `}
-    >
+    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" css={flyoutStyles}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">
-                {i18n.translate('xpack.onechat.tools.testFlyout.title', {
-                  defaultMessage: 'Test Tool',
-                })}
-              </h2>
+              <h2 id="flyoutTitle">{i18nMessages.title}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -258,21 +289,11 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
             <EuiFlexGroup
               gutterSize={isSmallScreen ? 'm' : 'l'}
               direction={isSmallScreen ? 'column' : 'row'}
-              css={css`
-                height: 100%;
-              `}
+              css={flyoutContentStyles}
             >
-              <EuiFlexItem
-                css={css`
-                  overflow-y: auto;
-                `}
-              >
+              <EuiFlexItem css={inputsColumnStyles}>
                 <EuiTitle size="s">
-                  <h5>
-                    {i18n.translate('xpack.onechat.tools.testTool.inputsTitle', {
-                      defaultMessage: 'Inputs',
-                    })}
-                  </h5>
+                  <h5>{i18nMessages.inputsTitle}</h5>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -303,23 +324,14 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                       );
                     })}
                     <EuiSpacer size="m" />
-                    <EuiFlexItem
-                      css={
-                        !isSmallScreen &&
-                        css`
-                          align-self: flex-end;
-                        `
-                      }
-                    >
+                    <EuiFlexItem css={!isSmallScreen && submitButtonContainerStyles}>
                       <EuiButton
                         type="submit"
                         iconType="sortRight"
                         isLoading={isExecuting}
                         disabled={!tool || hasErrors}
                       >
-                        {i18n.translate('xpack.onechat.tools.testTool.executeButton', {
-                          defaultMessage: 'Submit',
-                        })}
+                        {i18nMessages.executeButton}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -327,11 +339,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 <EuiTitle size="s">
-                  <h5>
-                    {i18n.translate('xpack.onechat.tools.testTool.responseTitle', {
-                      defaultMessage: 'Response',
-                    })}
-                  </h5>
+                  <h5>{i18nMessages.responseTitle}</h5>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiCodeBlock
