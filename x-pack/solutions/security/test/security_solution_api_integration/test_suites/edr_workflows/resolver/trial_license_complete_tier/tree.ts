@@ -56,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
     alwaysGenMaxChildrenPerNode: true,
     ancestryArraySize: 2,
   };
-  describe('@ess @serverless @serverlessQA Resolver tree', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/235697
+  describe.skip('@ess @serverless @serverlessQA Resolver tree', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {
