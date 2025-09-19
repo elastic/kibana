@@ -8,7 +8,7 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
-import { ChartType } from '@kbn/visualization-utils';
+import type { ChartType } from '@kbn/visualization-utils';
 import {
   visualizationElement,
   type TabularDataResult,
@@ -103,7 +103,7 @@ export function getVisualizationHandler({
         dataViews={startDependencies.dataViews}
         esqlQuery={query}
         esqlColumns={columns}
-        preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
+        preferredChartType={chartType as ChartType | undefined}
       />
     );
   };
