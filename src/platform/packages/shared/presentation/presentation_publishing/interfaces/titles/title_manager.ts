@@ -12,12 +12,9 @@ import { initializeStateManager } from '../../state_manager/state_manager';
 import type { StateComparators, StateManager } from '../../state_manager/types';
 import type { PublishesWritableDescription } from './publishes_description';
 import type { PublishesTitle, PublishesWritableTitle } from './publishes_title';
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
-export interface SerializedTitles {
-  title?: string;
-  description?: string;
-  hidePanelTitles?: boolean;
-}
+export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
