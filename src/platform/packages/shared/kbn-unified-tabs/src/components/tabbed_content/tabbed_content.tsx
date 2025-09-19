@@ -102,7 +102,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onSelectRecentlyClosed = useCallback(
     async (item: TabItem) => {
       const newItem = createItem();
-      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, duplicatedFromId: item.id };
+      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
       tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
       changeState((prevState) => selectRecentlyClosedTab(prevState, restoredItem));
     },
