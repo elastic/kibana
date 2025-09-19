@@ -7496,6 +7496,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/screenshotting@link:x-pack/platform/packages/shared/screenshotting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-api-keys-components@link:x-pack/solutions/search/packages/kbn-search-api-keys-components":
   version "0.0.0"
   uid ""
