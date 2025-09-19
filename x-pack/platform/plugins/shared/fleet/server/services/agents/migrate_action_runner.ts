@@ -81,10 +81,12 @@ export async function bulkMigrateAgentsBatch(
     type: 'MIGRATE',
     total,
     data: {
-      enrollment_token: options.enrollment_token,
       target_uri: options.uri,
       settings: options.settings,
     },
+    ...(options.enrollment_token && {
+      secrets: { enrollment_token: options.enrollment_token },
+    }),
     namespaces,
   });
 

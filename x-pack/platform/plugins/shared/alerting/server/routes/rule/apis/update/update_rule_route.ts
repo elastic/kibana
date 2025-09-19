@@ -75,12 +75,29 @@ export const updateRuleRoute = (
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
+          const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
           const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
           const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {
+            const rule = await rulesClient.get({ id: updateRuleParams.id });
+            const ruleType = ruleTypes.get(rule.alertTypeId);
+
+            /**
+             * Throws a bad request (400) if the rule type is internallyManaged
+             * ruleType will always exist here because ruleTypes.get will throw a 400
+             * error if the rule type is not registered.
+             */
+            if (ruleType?.internallyManaged) {
+              return res.badRequest({
+                body: {
+                  message: `Cannot update rule of type "${rule.alertTypeId}" because it is internally managed.`,
+                },
+              });
+            }
+
             /**
              * Throws an error if the group is not defined in default actions
              */
