@@ -13,12 +13,13 @@ import type {
   AxiosRequestConfig,
   AxiosHeaderValue,
 } from 'axios';
-import { AxiosHeaders } from 'axios';
+import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorUsageCollector, SSLSettings } from '../types';
+import type { ConnectorUsageCollector, SSLSettings, ErrorCategorizationOverrides } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
+import { handleActionHttpUserErrors } from './categorize_http_errors';
 
 export const request = async <T = unknown>({
   axios,
@@ -31,6 +32,7 @@ export const request = async <T = unknown>({
   sslOverrides,
   timeout,
   connectorUsageCollector,
+  errorCategorizationOverrides,
   ...config
 }: {
   axios: AxiosInstance;
@@ -43,6 +45,7 @@ export const request = async <T = unknown>({
   timeout?: number;
   sslOverrides?: SSLSettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  errorCategorizationOverrides?: ErrorCategorizationOverrides;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -88,6 +91,9 @@ export const request = async <T = unknown>({
   } catch (error) {
     if (connectorUsageCollector) {
       connectorUsageCollector.addRequestBodyBytes(error, data);
+    }
+    if (isAxiosError(error)) {
+      handleActionHttpUserErrors(error, errorCategorizationOverrides);
     }
     throw error;
   }
