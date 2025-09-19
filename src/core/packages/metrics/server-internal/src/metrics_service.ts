@@ -109,7 +109,7 @@ export class MetricsService
       )
       .subscribe(this.elu$);
     this.registerEluHistoryMetrics();
-    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
+    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value, this.logger);
 
     this.service = {
       collectionInterval,
