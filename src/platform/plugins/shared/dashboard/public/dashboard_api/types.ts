@@ -156,13 +156,14 @@ export type DashboardApi = CanExpandPanels &
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     publishFilters: () => void;
+
+    layout$: BehaviorSubject<DashboardLayout>;
+    registerChildApi: (api: DefaultEmbeddableApi) => void;
   };
 
 export interface DashboardInternalApi {
   panelsReload$: Subject<void>;
-  layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  registerChildApi: (api: DefaultEmbeddableApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
 }

@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
+import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 
 export const OptionsListStrings = {
   control: {
     getDisplayName: () =>
       i18n.translate('controls.optionsList.displayName', {
-        defaultMessage: 'Options list',
+        defaultMessage: 'options list',
       }),
     getSeparator: (type?: string) => {
       if (['date', 'number'].includes(type ?? '')) {

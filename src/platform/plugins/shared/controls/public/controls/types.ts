@@ -7,16 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-
-export const usePanelErrorCss = () => {
-  const euiTheme = useEuiTheme();
-  return css({
-    padding: euiTheme.euiTheme.size.l,
-    '& > *': {
-      maxHeight: '100%',
-      overflow: 'auto',
-    },
-  });
-};
+export interface HasCustomPrepend {
+  CustomPrependComponent: React.FC<{}>;
+}

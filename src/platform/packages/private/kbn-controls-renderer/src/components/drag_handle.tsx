@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
+
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 interface DragHandleProps {
   isEditable: boolean;

@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { map } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -19,11 +22,9 @@ import {
 } from '@kbn/presentation-publishing';
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { map } from 'rxjs';
+
 import type { CanClearSelections } from '../types';
 import { isClearableControl } from '../types';
-
 import { ACTION_CLEAR_CONTROL } from './constants';
 
 type ClearControlActionApi = HasType &
@@ -46,7 +47,7 @@ export class ClearControlAction
 {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
-  public order = 1;
+  public order = 60; // puts it before the edit action
 
   constructor() {}
 

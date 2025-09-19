@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { PanelLoader } from '@kbn/panel-loader';
-import { isPromise } from '@kbn/std';
-import React from 'react';
+import React, { useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+
+import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PanelLoader } from '@kbn/panel-loader';
+import { isPromise } from '@kbn/std';
+
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
-import { usePanelErrorCss } from './use_panel_error_css';
 
 const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
   defaultMessage: 'An error occurred while loading this panel.',
@@ -30,7 +31,7 @@ export const PresentationPanel = <
     hidePanelChrome?: boolean;
   }
 ) => {
-  const panelErrorCss = usePanelErrorCss();
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const { Component, hidePanelChrome, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
@@ -90,19 +91,13 @@ export const PresentationPanel = <
   const shouldHavePanel = !hidePanelChrome;
   if (value?.loadErrorReason || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        css={panelErrorCss}
-        className="eui-fullHeight"
-        data-test-subj="embeddableError"
-        justifyContent="center"
-      >
+      <div ref={panelRef}>
         {PanelError ? (
           <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
           value?.loadErrorReason ?? errorLoadingPanel
         )}
-      </EuiFlexGroup>
+      </div>
     );
   }
 

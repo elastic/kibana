@@ -18,7 +18,7 @@ export const editorComparators: StateComparators<EditorState> = {
 };
 
 const defaultEditorState = {
-  step: 1,
+  step: undefined,
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {

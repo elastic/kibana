@@ -56,7 +56,7 @@ describe('Presentation panel', () => {
       blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
     render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
-    await waitFor(() => expect(screen.getByTestId('embeddableStackError')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('embeddableError')).toBeInTheDocument());
   });
 
   it('renders error boundary when internal component throws during rendering', async () => {
