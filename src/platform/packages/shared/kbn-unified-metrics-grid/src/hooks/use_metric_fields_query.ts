@@ -10,25 +10,19 @@
 import type { QueryFunctionContext } from '@tanstack/react-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { useMetricsExperience } from './use_metrics_experience';
 
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
-  timeRange: TimeRange;
+  from: string;
+  to: string;
 }) => {
   const { client } = useMetricsExperience();
 
-  const { hasNextPage, data, status, fetchNextPage, isLoading, isFetchingNextPage } =
+  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
-      queryKey: [
-        'metricFields',
-        params?.fields,
-        params?.index,
-        params?.timeRange.from,
-        params?.timeRange.to,
-      ],
+      queryKey: ['metricFields', params?.fields, params?.index, params?.from, params?.to],
       queryFn: async ({
         queryKey,
         pageParam = 1,
@@ -80,6 +74,6 @@ export const useMetricFieldsQuery = (params?: {
   return {
     data: metricFieldsData,
     status,
-    isLoading,
+    isFetching,
   };
 };

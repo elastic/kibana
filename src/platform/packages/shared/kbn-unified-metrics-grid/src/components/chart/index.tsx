@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -90,7 +90,7 @@ export const Chart: React.FC<ChartProps> = ({
         border-radius: ${euiTheme.border.radius.medium};
       `}
     >
-      {lensProps && (
+      {lensProps ? (
         <LensWrapperMemo
           metric={metric}
           lensProps={lensProps}
@@ -100,6 +100,17 @@ export const Chart: React.FC<ChartProps> = ({
           abortController={abortController}
           onViewDetails={onViewDetails}
         />
+      ) : (
+        <EuiFlexGroup
+          style={{ height: '100%' }}
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </div>
   );
