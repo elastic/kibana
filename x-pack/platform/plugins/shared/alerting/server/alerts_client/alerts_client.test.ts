@@ -325,39 +325,6 @@ type InnerHit = { count?: number; url?: string } & (
   | typeof fetchedAlert3
 );
 
-const createTrackedAlertsResponse = ({
-  executions,
-}: {
-  executions: { uuid: string; innerHits: SearchHit<InnerHit>[] }[];
-}) => {
-  const getExecutionHit = () => {
-    return executions.map(({ uuid, innerHits }) => ({
-      _index: '.internal.alerts-default.alerts-default-000001',
-      _id: uuid,
-      _score: null,
-      _source: {},
-      fields: {
-        'kibana.alert.rule.execution.uuid': [uuid],
-      },
-      inner_hits: {
-        alerts: { hits: { total: innerHits.length, max_score: 0.074107975, hits: innerHits } },
-      },
-      sort: [1758029039428],
-    }));
-  };
-
-  return {
-    took: 1,
-    timed_out: false,
-    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-    hits: {
-      total: executions.reduce((sum, curr) => sum + curr.innerHits.length, 0),
-      max_score: null,
-      hits: getExecutionHit(),
-    },
-  };
-};
-
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
   let determineDelayedAlertsOpts: DetermineDelayedAlertsOpts;
@@ -489,6 +456,21 @@ describe('Alerts Client', () => {
         });
 
         test('should query for alerts', async () => {
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                },
+              ],
+            },
+          });
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -502,27 +484,38 @@ describe('Alerts Client', () => {
             ...defaultExecutionOpts,
           });
 
-          expect(clusterClient.search).toHaveBeenCalledWith({
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
+            size: 20,
+            ignore_unavailable: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
                 must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
               },
             },
+            collapse: {
+              field: ALERT_RULE_EXECUTION_UUID,
+            },
+            _source: false,
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
+            size: 2000,
+            ignore_unavailable: true,
+            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
-            collapse: {
-              field: ALERT_RULE_EXECUTION_UUID,
-              inner_hits: {
-                name: 'alerts',
-                seq_no_primary_term: true,
-                size: 2000,
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
               },
             },
-            ignore_unavailable: true,
-            size: 20,
-            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
           });
 
           spy.mockRestore();
@@ -700,24 +693,24 @@ describe('Alerts Client', () => {
         });
 
         test('should update ongoing alerts in existing index', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: fetchedAlert1,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
                 },
               ],
-            })
-          );
+            },
+          });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -776,24 +769,23 @@ describe('Alerts Client', () => {
         });
 
         test('should update unflattened ongoing alerts in existing index', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -909,22 +901,22 @@ describe('Alerts Client', () => {
             })
             .mockReturnValueOnce({})
             .mockReturnValueOnce({});
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _source: fetchedAlert1,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: fetchedAlert1,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -983,31 +975,31 @@ describe('Alerts Client', () => {
         });
 
         test('should recover recovered alerts in existing index', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: fetchedAlert1,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert2,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
                 },
               ],
-            })
-          );
+            },
+          });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1085,31 +1077,30 @@ describe('Alerts Client', () => {
         });
 
         test('should recover unflattened recovered alerts in existing index', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: expandFlattenedAlert(fetchedAlert2) as InnerHit,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: expandFlattenedAlert(fetchedAlert2) as InnerHit,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -1247,31 +1238,30 @@ describe('Alerts Client', () => {
         });
 
         test('should use startedAt time if provided', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: fetchedAlert1,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert2,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -1368,31 +1358,31 @@ describe('Alerts Client', () => {
 
         test('should use runTimestamp time if provided', async () => {
           const runTimestamp = '2023-10-01T00:00:00.000Z';
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: fetchedAlert1,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert2,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -1585,31 +1575,30 @@ describe('Alerts Client', () => {
         });
 
         test('should log if alert to update belongs to a non-standard index', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: 'partial-.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 41,
-                      _primary_term: 665,
-                      _source: fetchedAlert1,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert2,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: 'partial-.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -2982,22 +2971,22 @@ describe('Alerts Client', () => {
             [ALERT_UUID]: 'abc',
           } as InnerHit;
           const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-          newClusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+
+          newClusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _source: alertSource,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: alertSource,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<
             { count: number; url: string },
@@ -3177,26 +3166,25 @@ describe('Alerts Client', () => {
         });
 
         test('should successfully update context and payload for ongoing alert', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _source: {
-                        ...fetchedAlert1,
-                        count: 1,
-                        url: 'https://localhost:5601/abc',
-                      },
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: {
+                    ...fetchedAlert1,
+                    count: 1,
+                    url: 'https://localhost:5601/abc',
+                  },
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<
             { count: number; url: string },
@@ -3282,28 +3270,27 @@ describe('Alerts Client', () => {
         });
 
         test('should successfully update context and payload for recovered alert', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: {
-                        ...fetchedAlert1,
-                        count: 1,
-                        url: 'https://localhost:5601/abc',
-                      },
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: {
+                    ...fetchedAlert1,
+                    count: 1,
+                    url: 'https://localhost:5601/abc',
+                  },
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<
             { count: number; url: string },
@@ -3408,24 +3395,23 @@ describe('Alerts Client', () => {
         });
 
         test('should return recovered alert document with recovered alert, if it exists', async () => {
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert1,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert1,
                 },
               ],
-            })
-          );
+            },
+          });
 
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
@@ -3488,31 +3474,30 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          clusterClient.search.mockResolvedValue(
-            createTrackedAlertsResponse({
-              executions: [
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
                 {
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  innerHits: [
-                    {
-                      _id: 'abc',
-                      _index: '.internal.alerts-test.alerts-default-000001',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert1,
-                    },
-                    {
-                      _id: 'def',
-                      _index: '.internal.alerts-test.alerts-default-000002',
-                      _seq_no: 42,
-                      _primary_term: 666,
-                      _source: fetchedAlert2,
-                    },
-                  ],
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
                 },
               ],
-            })
-          );
+            },
+          });
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,

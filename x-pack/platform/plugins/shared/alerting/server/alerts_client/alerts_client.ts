@@ -188,7 +188,11 @@ export class AlertsClient<
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
       const getTrackedAlerts = async () => {
-        const result = await this.search({
+        // We can use inner_hits to get the alerts for the most recent executions
+        // but this may return too many alerts, therefore we make two queries:
+        // 1. Get the most recent execution UUIDs
+        // 2. Get the alerts for those execution UUIDs
+        const executions = await this.search({
           size: opts.flappingSettings.lookBackWindow,
           query: {
             bool: {
@@ -198,15 +202,26 @@ export class AlertsClient<
           },
           collapse: {
             field: ALERT_RULE_EXECUTION_UUID,
-            inner_hits: {
-              name: 'alerts',
-              seq_no_primary_term: true,
-              size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
-            },
           },
+          _source: false,
           sort: [{ [TIMESTAMP]: { order: 'desc' } }],
         });
-        return result.hits.map((hit) => hit.inner_hits?.alerts.hits.hits || []).flat();
+
+        const executionUuids = executions.hits
+          .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
+          .flat();
+
+        const alerts = await this.search({
+          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
+          seq_no_primary_term: true,
+          query: {
+            bool: {
+              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+              filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
+            },
+          },
+        });
+        return alerts.hits;
       };
 
       try {
