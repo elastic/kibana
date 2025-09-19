@@ -180,7 +180,8 @@ export const SearchWorkflowCommandSchema = z.object({
   limit: z.number().default(100),
   page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
-  enabled: z.array(z.boolean()).optional(),
+  // bool or number transformed to boolean
+  enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -201,7 +202,9 @@ export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
+  enabled: boolean;
   valid: boolean;
+  validationErrors: string[];
 }
 
 export interface WorkflowDetailDto {
@@ -223,7 +226,7 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
-  definition: WorkflowYaml;
+  definition: WorkflowYaml | null;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];

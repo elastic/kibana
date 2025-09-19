@@ -8,7 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowsService } from './workflows_management_service';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
@@ -17,6 +17,7 @@ describe('WorkflowsService', () => {
   let service: WorkflowsService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
+  let mockSecurity: jest.Mocked<SecurityServiceStart>;
 
   const mockWorkflowDocument = {
     _id: 'test-workflow-id',
@@ -91,6 +92,14 @@ describe('WorkflowsService', () => {
       'workflows-logs',
       false
     );
+
+    mockSecurity = {
+      authc: {
+        getCurrentUser: jest.fn((request) => ({ username: request.auth.credentials.username })),
+      },
+    } as any;
+
+    service.setSecurityService(mockSecurity);
 
     // Wait for initialization to complete
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -219,7 +228,7 @@ describe('WorkflowsService', () => {
 
       mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
 
-      await service.getWorkflows({ limit: 10, page: 1, enabled: true }, 'default');
+      await service.getWorkflows({ limit: 10, page: 1, enabled: [true] }, 'default');
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
         size: 10,
@@ -237,7 +246,7 @@ describe('WorkflowsService', () => {
                   },
                 },
               },
-              { term: { enabled: true } },
+              { terms: { enabled: [true] } },
             ],
           },
         },
@@ -379,9 +388,218 @@ describe('WorkflowsService', () => {
             name: 'New Workflow',
             enabled: true,
             yaml: 'name: New Workflow\nenabled: true\ndefinition:\n  triggers: []',
-            createdBy: 'system',
-            lastUpdatedBy: 'system',
+            createdBy: 'test-user',
+            lastUpdatedBy: 'test-user',
             spaceId: 'default',
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+  });
+
+  describe('updateWorkflow', () => {
+    it('should update workflow successfully', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - type: console\n    name: first-step\n    with:\n      message: "Hello, world!"',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.validationErrors).toEqual([]);
+      expect(result.enabled).toBe(true);
+      expect(result.valid).toBe(true);
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Updated Workflow',
+            enabled: true,
+            valid: true,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should throw error when workflow not found', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers: []',
+      };
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      await expect(
+        service.updateWorkflow('non-existent-id', command, 'default', mockRequest)
+      ).rejects.toThrow('Workflow with id non-existent-id not found in space default');
+    });
+
+    it('should save yaml not conforming to the schema, but set "enabled" and "valid" to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('Invalid trigger type. Available: manual, alert, scheduled'),
+          expect.stringContaining('No steps found. Add at least one step.'),
+        ])
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should save incomplete yaml, but set "enabled" and "valid" to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('No triggers found. Add at least one trigger.'),
+          expect.stringContaining('No steps found. Add at least one step.'),
+        ])
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should save invalid yaml, but do not update definition fields and update enabled, valid to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: '  name: Test Workflow\nenabled: true\n  triggers:\n  - type: alert',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors[0]).toEqual(
+        expect.stringContaining('Unexpected scalar at node end at line 2')
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
           }),
           refresh: 'wait_for',
           require_alias: true,

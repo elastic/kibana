@@ -24,17 +24,22 @@ import type { TableRow, SortableField } from './utils';
 import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
+import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
   NAME_COLUMN_HEADER,
-  DOCUMENTS_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
+  DATA_QUALITY_COLUMN_HEADER,
+  DOCUMENTS_COLUMN_HEADER,
 } from './translations';
+import { DiscoverBadgeButton } from '../stream_badges';
 
 export function StreamsTreeTable({
   loading,
@@ -45,6 +50,7 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
+  const { timeState } = useTimefilter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -75,6 +81,10 @@ export function StreamsTreeTable({
       setSortDirection(sort.direction);
     }
   };
+
+  const numDataPoints = 25;
+
+  const { getStreamDocCounts } = useStreamHistogramFetch(numDataPoints);
 
   const sorting = {
     sort: {
@@ -135,12 +145,29 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: DOCUMENTS_COLUMN_HEADER,
-          width: '280px',
+          width: '180px',
+          sortable: false,
+          align: 'right',
+          dataType: 'number',
+          render: (_: unknown, item: TableRow) =>
+            item.data_stream ? (
+              <DocumentsColumn
+                indexPattern={item.stream.name}
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
+                timeState={timeState}
+                numDataPoints={numDataPoints}
+              />
+            ) : null,
+        },
+        {
+          field: 'dataQuality',
+          name: DATA_QUALITY_COLUMN_HEADER,
+          width: '150px',
           sortable: false,
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DocumentsColumn indexPattern={item.stream.name} numDataPoints={25} />
+              <DataQualityColumn histogramQueryFetch={getStreamDocCounts(item.stream.name)} />
             ) : null,
         },
         {
@@ -148,10 +175,10 @@ export function StreamsTreeTable({
           name: (
             <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
           ),
-          width: '160px',
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
+          width: '220px',
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
               lifecycle={item.effective_lifecycle!}
@@ -159,6 +186,24 @@ export function StreamsTreeTable({
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
+            />
+          ),
+        },
+        {
+          field: 'definition',
+          name: 'Actions',
+          width: '60px',
+          align: 'left',
+          sortable: false,
+          dataType: 'string',
+          render: (_: unknown, item: TableRow) => (
+            <DiscoverBadgeButton
+              definition={
+                {
+                  stream: item.stream,
+                  data_stream_exists: !!item.data_stream,
+                } as Streams.ingest.all.GetResponse
+              }
             />
           ),
         },

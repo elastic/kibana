@@ -31,7 +31,10 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
@@ -256,11 +259,14 @@ const useTableListViewProps = (
   );
 
   const deleteItems = useCallback(
-    async (selectedItems: object[]) => {
-      await Promise.all(
-        // @ts-expect-error
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
+    async (items: object[]) => {
+      await deleteListItems(items, {
+        savedObjectsTagging,
+        typesService: getTypes(),
+        contentManagement,
+        http,
+        ...startServices,
+      }).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
@@ -268,9 +274,7 @@ const useTableListViewProps = (
         });
       });
     },
-    // @ts-expect-error
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [savedObjects.client, toastNotifications]
+    [contentManagement, http, savedObjectsTagging, startServices, toastNotifications]
   );
 
   const props: CustomTableViewProps = {
@@ -410,7 +414,7 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="info" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
