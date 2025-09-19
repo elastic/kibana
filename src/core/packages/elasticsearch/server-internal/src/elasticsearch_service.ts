@@ -26,6 +26,7 @@ import type {
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
+import { omit } from 'lodash';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -191,7 +192,7 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: omit(this.client!, ['close']),
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {
