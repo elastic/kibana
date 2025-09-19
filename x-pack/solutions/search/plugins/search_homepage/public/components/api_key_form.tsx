@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
+import { useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
+import { QueryKeys } from '../constants';
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
@@ -128,6 +130,11 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
   const { share } = useKibana().services;
   const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.invalidateQueries([QueryKeys.ApiKey]);
+  }, [apiKey, queryClient]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
