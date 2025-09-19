@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
@@ -49,6 +50,7 @@ export const createPersistedToolSource = ({
     getClient: ({ request }) => {
       const esClient = elasticsearch.client.asInternalUser;
       return createPersistedToolClient({
+        request,
         definitions: toolDefinitions,
         logger,
         esClient,
@@ -60,6 +62,7 @@ export const createPersistedToolSource = ({
 // persistence client
 
 export const createPersistedToolClient = ({
+  request,
   definitions,
   logger,
   esClient,
@@ -67,6 +70,7 @@ export const createPersistedToolClient = ({
   definitions: PersistedToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
+  request: KibanaRequest;
 }): ToolTypeClient<any> => {
   const toolClient = createClient({ esClient, logger });
   const definitionMap = definitions.reduce((map, def) => {
@@ -77,6 +81,7 @@ export const createPersistedToolClient = ({
   const createContext = (): ToolTypeValidatorContext => {
     return {
       esClient,
+      request,
     };
   };
 
@@ -131,10 +136,10 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = await definition.validateForCreate(
-          createRequest.configuration,
-          createContext()
-        );
+        updatedConfig = await definition.validateForCreate({
+          config: createRequest.configuration,
+          context: createContext(),
+        });
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${createRequest.type}: ${e.message}`
@@ -168,11 +173,11 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = await definition.validateForUpdate(
-          updateRequest.configuration ?? {},
-          existingTool.configuration,
-          createContext()
-        );
+        updatedConfig = await definition.validateForUpdate({
+          update: updateRequest.configuration ?? {},
+          current: existingTool.configuration,
+          context: createContext(),
+        });
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${existingTool.type}: ${e.message}`

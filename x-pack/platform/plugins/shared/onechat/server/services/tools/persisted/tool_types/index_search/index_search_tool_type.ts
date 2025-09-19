@@ -18,11 +18,11 @@ export const createIndexSearchToolType = (): PersistedToolTypeDefinition<IndexSe
     toToolDefinition,
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
-    validateForCreate: async (config, { esClient }) => {
+    validateForCreate: async ({ config, context: { esClient } }) => {
       await validateConfig({ config, esClient });
       return config;
     },
-    validateForUpdate: async (update, current, { esClient }) => {
+    validateForUpdate: async ({ update, current, context: { esClient } }) => {
       const mergedConfig = {
         ...current,
         ...update,

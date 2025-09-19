@@ -12,6 +12,7 @@ import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/serv
 import type { PersistedToolTypeDefinition } from '../types';
 import { toToolDefinitionFactory } from './to_tool_definition';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
+import { validateWorkflowId } from './validation';
 
 export const createWorkflowToolType = ({
   workflowsManagement,
@@ -23,16 +24,21 @@ export const createWorkflowToolType = ({
     toToolDefinition: toToolDefinitionFactory({ workflowsManagement }),
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
-    validateForCreate: async (config) => {
-      // TODO: validation
+    validateForCreate: async ({ config }) => {
+      await validateWorkflowId({ workflows: workflowsManagement, workflowId: config.workflow_id });
       return config;
     },
-    validateForUpdate: async (update, current) => {
-      // TODO: validation
-      return {
+    validateForUpdate: async ({ update, current }) => {
+      const mergedConfig = {
         ...current,
         ...update,
       };
+      await validateWorkflowId({
+        workflows: workflowsManagement,
+        workflowId: mergedConfig.workflow_id,
+      });
+
+      return mergedConfig;
     },
   };
 };
