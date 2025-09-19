@@ -235,8 +235,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental:
-  - privilegedUserMonitoringDisabled
+xpack.securitySolution.enableExperimental: []
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'
