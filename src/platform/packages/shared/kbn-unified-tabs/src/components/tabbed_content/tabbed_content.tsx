@@ -87,9 +87,15 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     async (item: TabItem, newLabel: string) => {
       const editedItem = { ...item, label: newLabel };
       tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
-      changeState((prevState) => replaceTabWith(prevState, item, editedItem));
+      changeState((prevState) => {
+        const nextState = replaceTabWith(prevState, item, editedItem);
 
-      onEvent('tabRenamed');
+        onEvent('tabRenamed', {
+          tabId: item.id,
+        });
+
+        return nextState;
+      });
     },
     [changeState, onEvent]
   );
