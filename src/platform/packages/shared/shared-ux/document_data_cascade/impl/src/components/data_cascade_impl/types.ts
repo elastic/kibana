@@ -64,7 +64,7 @@ export interface CascadeRowActionProps {
   hideOver?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
-      onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+      onClick: (e: React.MouseEvent<Element>) => void;
     } & (
         | {
             label?: React.ReactNode;

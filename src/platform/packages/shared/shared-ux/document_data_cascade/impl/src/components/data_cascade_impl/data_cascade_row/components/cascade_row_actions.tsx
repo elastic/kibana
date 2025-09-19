@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,12 +30,32 @@ export const CascadeRowActions = function RowActions({
     prefix: 'dataCascadeRowActions',
   });
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const defaultActionProps = useMemo<Pick<EuiButtonIconProps, 'color' | 'size'>>(
     () => ({
       color: 'text',
       size: 's',
     }),
     []
+  );
+
+  const hiddenActionsButton = useMemo(
+    () => (
+      <EuiButtonIcon
+        {...defaultActionProps}
+        aria-label={i18n.translate(
+          'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
+          {
+            defaultMessage: 'Select more options',
+          }
+        )}
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        iconType="boxesVertical"
+        data-test-subj={`expand-row-${id}-button`}
+      />
+    ),
+    [defaultActionProps, id, isPopoverOpen]
   );
 
   const visibleActions = useMemo(
@@ -55,41 +76,26 @@ export const CascadeRowActions = function RowActions({
 
   const hiddenActions = useMemo(
     () =>
-      headerRowActions.slice(hideOver).map(({ label, ...props }, index) => (
-        <EuiContextMenuPanel key={index}>
-          {label ? (
-            <EuiButtonEmpty {...defaultActionProps} {...props}>
-              {label}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButtonIcon {...defaultActionProps} {...props} />
-          )}
-        </EuiContextMenuPanel>
+      headerRowActions.slice(hideOver).map(({ label, iconType, ...props }, index) => (
+        <EuiContextMenuItem key={index} icon={iconType} {...props}>
+          {label}
+        </EuiContextMenuItem>
       )),
-    [defaultActionProps, headerRowActions, hideOver]
+    [headerRowActions, hideOver]
   );
 
   return (
-    <EuiFlexGroup alignItems="center" key="cascade-row-actions">
+    <EuiFlexGroup alignItems="center">
       <React.Fragment>{visibleActions}</React.Fragment>
       {headerRowActions.length > hideOver && (
         <EuiFlexItem>
           <EuiPopover
-            button={
-              <EuiButtonIcon
-                color="text"
-                aria-label={i18n.translate(
-                  'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
-                  {
-                    defaultMessage: 'Select more options',
-                  }
-                )}
-                iconType="boxesVertical"
-                data-test-subj={`expand-row-${id}-button`}
-              />
-            }
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            button={hiddenActionsButton}
+            panelPaddingSize="s"
           >
-            <EuiContextMenuPanel items={hiddenActions} />
+            <EuiContextMenuPanel size="m" items={hiddenActions} />
           </EuiPopover>
         </EuiFlexItem>
       )}
