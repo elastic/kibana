@@ -206,9 +206,17 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       newItem.label = nextNumber ? `${copyBaseLabel} ${nextNumber}` : copyBaseLabel;
 
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
-      changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
 
-      onEvent('tabDuplicated');
+      changeState((prevState) => {
+        const nextState = insertTabAfter(prevState, newItem, item, maxItemsCount);
+
+        onEvent('tabDuplicated', {
+          tabId: item.id,
+          totalTabsOpen: prevState.items.length,
+        });
+
+        return nextState;
+      });
     },
     [changeState, createItem, maxItemsCount, state.items, onEvent]
   );
