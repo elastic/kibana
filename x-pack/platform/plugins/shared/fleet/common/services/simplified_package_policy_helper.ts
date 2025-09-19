@@ -46,12 +46,14 @@ export interface SimplifiedPackagePolicy {
   policy_id?: string | null;
   policy_ids: string[];
   output_id?: string;
+  cloud_connector_id?: string | null;
   namespace: string;
   name: string;
   description?: string;
   vars?: SimplifiedVars;
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 
@@ -170,6 +172,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     inputs = {},
     vars: packageLevelVars,
     supports_agentless: supportsAgentless,
+    supports_cloud_connector: supportsCloudConnector,
+    cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
   } = data;
   const packagePolicy = {
@@ -181,6 +185,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       description
     ),
     supports_agentless: supportsAgentless,
+    supports_cloud_connector: supportsCloudConnector,
+    cloud_connector_id: cloudConnectorId,
     output_id: outputId,
   };
 
@@ -234,7 +240,6 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       if (!packagePolicyStream) {
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
       }
-
       if (streamEnabled === false || isInputAllowed === false) {
         packagePolicyStream.enabled = false;
       } else {
