@@ -10,7 +10,6 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 export interface RunStepButtonProps {
   onClick: () => void;
 }
@@ -26,7 +25,7 @@ export const RunStepButton: React.FC<RunStepButtonProps> = ({ onClick }) => {
         iconType="play"
         onClick={onClick}
         data-test-subj="runStep"
-        size="xs"
+        iconSize="s"
         aria-label={i18n.translate(
           'workflows.workflowDetail.yamlEditor.stepActions.runStep.ariaLabel',
           {

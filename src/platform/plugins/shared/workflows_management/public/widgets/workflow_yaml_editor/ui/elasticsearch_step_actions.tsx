@@ -8,8 +8,19 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+} from '@elastic/eui';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './step_actions/run_step/run_step_button';
 
 export interface ElasticsearchStepActionsProps {
@@ -29,11 +40,10 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   kibanaHost,
   onStepActionClicked,
 }) => {
+  const styles = useMemoCss(componentStyles);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // Use state to force re-renders when actions change
   const [, setRefreshTrigger] = useState(0);
-
-  // Get current actions directly from the unified actions provider
-  const currentActions = actionsProvider?.getCurrentActions?.() || [];
 
   // Listen for action updates - force refresh every 100ms when actions might change
   useEffect(() => {
@@ -45,9 +55,44 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   }, []);
 
   const currentStep = actionsProvider?.getCurrentElasticsearchStep();
+  const currentActions = actionsProvider?.getCurrentActions?.() || [];
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const button = (
+    <EuiButtonIcon
+      onClick={() => {
+        setIsPopoverOpen((prev) => !prev);
+      }}
+      data-test-subj="toggleConsoleMenu"
+      aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+        defaultMessage: 'Request options',
+      })}
+      iconType="boxesVertical"
+      iconSize="s"
+    />
+  );
+
+  const items = [
+    ...(currentActions?.map((action: any, index: number) => (
+      <EuiContextMenuItem
+        data-test-subj={`actionButton-${action.id}`}
+        key={action.id || index}
+        onClick={() => {
+          action.handler();
+          closePopover();
+        }}
+        icon={action.icon}
+      >
+        {action.label}
+      </EuiContextMenuItem>
+    )) || []),
+  ];
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup css={styles.buttonsGroup} gutterSize="xs" alignItems="center" responsive={false}>
       {currentStep && (
         <EuiFlexItem grow={false}>
           <RunStepButton
@@ -60,19 +105,30 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
           />
         </EuiFlexItem>
       )}
-      {currentActions?.map((action: any, index: number) => (
-        <EuiFlexItem key={action.id || index} grow={false}>
-          <EuiToolTip content={action.tooltip || action.label}>
-            <EuiButtonIcon
-              iconType={action.icon || 'console'}
-              onClick={action.handler}
-              data-test-subj={`actionButton-${action.id}`}
-              aria-label={action.label}
-              size="s"
-            />
-          </EuiToolTip>
+      {!!items.length && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id="contextMenu"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
+          </EuiPopover>
         </EuiFlexItem>
-      ))}
+      )}
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  buttonsGroup: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      padding: euiTheme.size.xs,
+      borderRadius: euiTheme.border.radius.small,
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    }),
 };
