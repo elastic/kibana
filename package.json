@@ -1764,7 +1764,7 @@
     "@types/minimist": "^1.2.5",
     "@types/mock-fs": "^4.13.1",
     "@types/moment-duration-format": "^2.2.6",
-    "@types/mustache": "^4.2.5",
+    "@types/mustache": "^4.2.6",
     "@types/nock": "^10.0.3",
     "@types/node": "22.10.5",
     "@types/node-fetch": "2.6.4",
