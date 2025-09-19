@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { SearchHit, UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertsFilter, RuleAlertData } from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
