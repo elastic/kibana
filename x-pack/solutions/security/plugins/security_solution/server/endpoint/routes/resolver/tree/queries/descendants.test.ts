@@ -127,9 +127,7 @@ describe('DescendantsQuery', () => {
       // Verify that the search was called with process.name in the fields
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          fields: expect.arrayContaining([
-            { field: 'process.name' },
-          ]),
+          fields: expect.arrayContaining([{ field: 'process.name' }]),
         }),
         index: indexPatterns,
       });
