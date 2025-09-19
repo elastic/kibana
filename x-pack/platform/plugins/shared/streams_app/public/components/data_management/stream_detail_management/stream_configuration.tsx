@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import {
@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { StreamSystemsFlyout } from './stream_systems/stream_systems_flyout';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
 
 interface StreamConfigurationProps {
@@ -25,6 +26,7 @@ interface StreamConfigurationProps {
 
 export function StreamConfiguration({ definition }: StreamConfigurationProps) {
   const { euiTheme } = useEuiTheme();
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   return (
     <EuiPanel paddingSize="none">
@@ -56,11 +58,22 @@ export function StreamConfiguration({ definition }: StreamConfigurationProps) {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="sparkles">System detection</EuiButton>
+            <EuiButton iconType="sparkles" onClick={() => setIsFlyoutVisible(!isFlyoutVisible)}>
+              {i18n.translate('xpack.streams.streamDetailView.systemDetection', {
+                defaultMessage: 'System detection',
+              })}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <StreamSystemsAccordion definition={definition} />
+        {isFlyoutVisible && (
+          <StreamSystemsFlyout
+            systems={[]}
+            isLoading={false}
+            closeFlyout={() => setIsFlyoutVisible(false)}
+          />
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

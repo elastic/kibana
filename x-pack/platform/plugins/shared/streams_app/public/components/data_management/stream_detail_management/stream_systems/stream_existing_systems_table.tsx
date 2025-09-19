@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
-import { type System } from '@kbn/streams-schema';
+import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { SystemEventsSparkline } from './system_events_sparkline';
@@ -91,7 +91,17 @@ const columns: Array<EuiBasicTableColumn<System>> = [
   },
 ];
 
-export function StreamExistingSystemsTable({ systems }: { systems: System[] }) {
+export function StreamExistingSystemsTable({
+  isLoading,
+  systems,
+  definition,
+  refreshSystems,
+}: {
+  isLoading?: boolean;
+  systems: System[];
+  definition: Streams.ClassicStream.GetResponse;
+  refreshSystems: () => void;
+}) {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
 
   const toggleDetails = (system: System) => {
@@ -134,7 +144,7 @@ export function StreamExistingSystemsTable({ systems }: { systems: System[] }) {
   ];
 
   return (
-    <>
+    <div css={{ padding: '16px' }}>
       <TableTitle
         pageIndex={0}
         pageSize={10}
@@ -144,6 +154,7 @@ export function StreamExistingSystemsTable({ systems }: { systems: System[] }) {
         })}
       />
       <EuiBasicTable
+        loading={isLoading}
         tableCaption={i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
           defaultMessage: 'List of systems',
         })}
@@ -154,12 +165,14 @@ export function StreamExistingSystemsTable({ systems }: { systems: System[] }) {
       />
       {isDetailFlyoutOpen && (
         <StreamSystemDetailsFlyout
+          definition={definition}
           system={isDetailFlyoutOpen}
           closeFlyout={() => {
             setIsDetailFlyoutOpen(undefined);
+            refreshSystems();
           }}
         />
       )}
-    </>
+    </div>
   );
 }

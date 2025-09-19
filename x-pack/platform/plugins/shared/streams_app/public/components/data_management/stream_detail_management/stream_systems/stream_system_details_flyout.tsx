@@ -20,21 +20,24 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { System } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DetectedSystemEvents } from './detected_system_events';
+import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 
 export const StreamSystemDetailsFlyout = ({
   system,
+  definition,
   closeFlyout,
 }: {
   system: System;
   closeFlyout: () => void;
+  definition: Streams.ClassicStream.GetResponse;
 }) => {
-  const addToStream = () => {};
   const [value, setValue] = React.useState(system.description);
-  const [isEditing, setIsEditing] = React.useState(false);
+  const { upsertQuery } = useStreamSystemsApi(definition);
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   return (
     <EuiFlyout
@@ -44,7 +47,7 @@ export const StreamSystemDetailsFlyout = ({
       aria-label={i18n.translate('xpack.streams.systemDetails.flyoutAriaLabel', {
         defaultMessage: 'System details',
       })}
-      size="l"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -71,7 +74,7 @@ export const StreamSystemDetailsFlyout = ({
             value={value}
             onChange={setValue}
             height={400}
-            readOnly={isEditing}
+            readOnly={false}
             initialViewMode="viewing"
           />
           <EuiSpacer size="m" />
@@ -93,6 +96,7 @@ export const StreamSystemDetailsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              isLoading={isUpdating}
               iconType="cross"
               onClick={closeFlyout}
               flush="left"
@@ -107,7 +111,19 @@ export const StreamSystemDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={addToStream} fill>
+            <EuiButton
+              isLoading={isUpdating}
+              onClick={() => {
+                setIsUpdating(true);
+                upsertQuery(system.name, { description: value, filter: system.filter }).finally(
+                  () => {
+                    setIsUpdating(false);
+                    closeFlyout();
+                  }
+                );
+              }}
+              fill
+            >
               <FormattedMessage
                 id="xpack.streams.systemDetails.saveChanges"
                 defaultMessage="Save changes"

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiAccordion } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useStreamSystems } from './use_stream_systems';
+import { useStreamSystems } from './hooks/use_stream_systems';
 import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
 export const StreamSystemsAccordion = ({
@@ -17,7 +17,7 @@ export const StreamSystemsAccordion = ({
 }: {
   definition: Streams.ClassicStream.GetResponse;
 }) => {
-  const { systems } = useStreamSystems(definition);
+  const { systems, refresh, loading } = useStreamSystems(definition);
 
   return (
     <EuiAccordion
@@ -26,7 +26,12 @@ export const StreamSystemsAccordion = ({
         defaultMessage: 'Stream systems',
       })}
     >
-      <StreamExistingSystemsTable systems={systems} />
+      <StreamExistingSystemsTable
+        isLoading={loading}
+        systems={systems}
+        definition={definition}
+        refreshSystems={refresh}
+      />
     </EuiAccordion>
   );
 };

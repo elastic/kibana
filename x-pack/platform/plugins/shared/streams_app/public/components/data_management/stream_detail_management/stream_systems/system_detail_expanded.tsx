@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiMarkdownEditor, EuiTitle, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import type { System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 
 export const SystemDetailExpanded = ({ system }: { system: System }) => {
-  const [value, setValue] = React.useState(system.description);
-  const [isEditing, setIsEditing] = React.useState(false);
+  const [value, setValue] = useState(system.description);
 
   return (
     <div>
@@ -32,7 +31,7 @@ export const SystemDetailExpanded = ({ system }: { system: System }) => {
         value={value}
         onChange={setValue}
         height={400}
-        readOnly={isEditing}
+        readOnly={false}
         initialViewMode="viewing"
       />
       <EuiSpacer size="m" />

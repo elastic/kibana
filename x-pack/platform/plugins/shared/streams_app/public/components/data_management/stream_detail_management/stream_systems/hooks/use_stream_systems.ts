@@ -6,13 +6,13 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 export const useStreamSystems = (definition: Streams.ClassicStream.GetResponse) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
-  const { value, loading, error } = useStreamsAppFetch(
+  const { value, loading, error, refresh } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems', {
         signal,
@@ -26,6 +26,7 @@ export const useStreamSystems = (definition: Streams.ClassicStream.GetResponse) 
     [definition.stream.name, streamsRepositoryClient]
   );
   return {
+    refresh,
     systems: value?.systems ?? [],
     loading,
     error,
