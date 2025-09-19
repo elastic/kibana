@@ -129,3 +129,27 @@ export const getMissingAssistantKibanaPrivilegesError = ({
     statusCode: 403,
   };
 };
+
+export const getMissingScheduleKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution-updateAttackDiscoverySchedule]`,
+    statusCode: 403,
+  };
+};
+
+export const getMissingAssistantAndScheduleKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant,securitySolution-updateAttackDiscoverySchedule]`,
+    statusCode: 403,
+  };
+};
