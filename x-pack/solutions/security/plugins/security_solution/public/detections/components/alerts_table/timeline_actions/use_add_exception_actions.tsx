@@ -13,7 +13,7 @@ import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 
-interface UseExceptionActionProps {
+export interface UseExceptionActionProps {
   isEndpointAlert: boolean;
   onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
 }
