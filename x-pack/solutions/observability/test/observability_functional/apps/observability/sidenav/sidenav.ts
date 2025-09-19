@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         await retry.waitFor('redirect or status response', async () => {
-          await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+          await solutionNavigation.sidenav.clickLink({ navId: 'aiAssistantContainer' }); // click on AI Assistant link
           return (await browser.getCurrentUrl()).includes('/app/observabilityAIAssistant');
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
