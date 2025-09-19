@@ -312,7 +312,13 @@ export default function ({ getService }: FtrProviderContext) {
               'update_anonymization',
               'manage_global_knowledge_base',
             ],
-            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAttackDiscovery: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'update_schedule',
+            ],
             securitySolutionCases: [
               'all',
               'read',
