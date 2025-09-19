@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
-import { load as yamlLoad } from 'js-yaml';
+import { safeLoad as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
