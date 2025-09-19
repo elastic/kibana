@@ -7,6 +7,7 @@
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
@@ -92,33 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(400);
       });
-    });
 
-    // ToDo: bulk create
-    describe('#bulk_create', () => {
-      it('should create a read only object', async () => {
-        const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
-        const response = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        expect(response.body.type).to.eql('read_only_type');
-        expect(response.body).to.have.property('accessControl');
-        expect(response.body.accessControl).to.have.property('accessMode', 'read_only');
-        expect(response.body.accessControl).to.have.property('owner', profileUid);
-      });
-
-      it('should throw when trying to create read only object with no user', async () => {
-        await supertest
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(400);
-      });
-
-      it('should update read only objects owned by the same user', async () => {
+      it('should allow overwriting an object owned by current user', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -127,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -135,45 +111,89 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
-        const updateResponse = await supertestWithoutAuth
-          .put('/read_only_objects/update')
+        const overwriteResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create?overwrite=true')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
 
-        expect(updateResponse.body.id).to.eql(objectId);
-        expect(updateResponse.body.attributes).to.have.property(
-          'description',
-          'updated description'
-        );
+        const overwriteId = overwriteResponse.body.id;
+        expect(createResponse.body).to.have.property('id', overwriteId);
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
       });
 
-      it('should throw when updating read only objects owned by a different user when not admin', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+      it('should allow overwriting an object owned by another user if admin', async () => {
+        const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
+          'test_user',
+          'changeme'
+        );
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
+
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
-        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
-        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
-        const updateResponse = await supertestWithoutAuth
-          .put('/read_only_objects/update')
+        const { cookie: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
+
+        const overwriteResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create?overwrite=true')
           .set('kbn-xsrf', 'true')
-          .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
-          .expect(403);
-        expect(updateResponse.body).to.have.property('message');
-        expect(updateResponse.body.message).to.contain('Unable to update read_only_type');
+          .set('cookie', adminCookie.cookieString())
+          .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
+          .expect(200);
+
+        const overwriteId = overwriteResponse.body.id;
+        expect(createResponse.body).to.have.property('id', overwriteId);
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
       });
 
-      // ToDo: 'should update read only objects if admin'?
+      it('should reject when attempting to overwrite an object owned by another user', async () => {
+        const { cookie: objectOwnerCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .expect(200);
+
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
+
+        const { cookie: otherOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+
+        const overwriteResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create?overwrite=true')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', otherOwnerCookie.cookieString())
+          .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
+          .expect(400);
+
+        expect(overwriteResponse.body).to.have.property('error', 'Bad Request');
+        expect(overwriteResponse.body).to.have.property(
+          'message',
+          'Unable to create read_only_type'
+        );
+      });
+    });
+
+    // ToDo: bulk create
+    describe('#bulk_create', () => {
+      // it('should create read only objects', async () => {
+      // it('should throw when trying to create read only objects with no user', async () => {
+      // it('should allow overwriting objects owned by current user', async () => {
+      // it('should allow overwriting objects owned by another user if admin', async () => {
+      // it('should reject when attempting to overwrite objects owned by another user', async () => {
     });
 
     describe('#update', () => {
@@ -238,8 +258,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // ToDo: bulk update
-    // ToDo: 'should not remove existing access control properties'
-    describe('#bulk_update', () => {});
+    describe('#bulk_update', () => {
+      // it('should allow updating access control objects in default mode by non owner', async () => {
+      // it('should allow updating read only objects owned by current user', async () => {
+      // it('should allow updating read only objects owned by other user if admin', async () => {
+      // it('should disallow updating read only objects owned by other user if not admin', async () => {
+      // it('should not remove or overwrite access control metadata on update', async () => {
+    });
 
     describe('#delete', () => {
       it('allow owner to delete object marked as read only', async () => {

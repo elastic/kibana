@@ -46,6 +46,7 @@ import type {
   SavedObject,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
+import type { GetTypesRequiringAccessControlCheckResult } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
@@ -55,6 +56,7 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
+import { SecurityAction } from '.';
 import { AccessControlService, MANAGE_ACCESS_CONTROL_ACTION } from './access_control_service';
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
@@ -67,32 +69,6 @@ interface Params {
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry?: ISavedObjectTypeRegistry;
-}
-
-/**
- * The SecurityAction enumeration contains values for all valid shared object
- * security actions. The string for each value correlates to the ES operation.
- */
-export enum SecurityAction {
-  CHECK_CONFLICTS,
-  CLOSE_POINT_IN_TIME,
-  COLLECT_MULTINAMESPACE_REFERENCES,
-  COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
-  CREATE,
-  BULK_CREATE,
-  DELETE,
-  BULK_DELETE,
-  FIND,
-  GET,
-  BULK_GET,
-  INTERNAL_BULK_RESOLVE,
-  OPEN_POINT_IN_TIME,
-  REMOVE_REFERENCES,
-  UPDATE,
-  BULK_UPDATE,
-  UPDATE_OBJECTS_SPACES,
-  CHANGE_OWNERSHIP,
-  CHANGE_ACCESS_MODE,
 }
 
 /**
@@ -718,6 +694,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects: accessControlObjects || [],
         typeRegistry: this.typeRegistry,
+        actions: params.actions,
       });
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
@@ -1176,6 +1153,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry: this.typeRegistry,
+        actions: new Set([action]),
       });
 
     /**
@@ -1222,6 +1200,17 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       status: 'fully_authorized',
       typeMap: new Map(),
     };
+  }
+
+  getTypesRequiringAccessControlCheck(
+    objects: AuthorizeObject[],
+    action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
+  ) {
+    return this._accessControlService.getTypesRequiringPrivilegeCheck({
+      objects,
+      typeRegistry: this.typeRegistry,
+      actions: new Set([action]),
+    }) as GetTypesRequiringAccessControlCheckResult;
   }
 
   auditClosePointInTime() {

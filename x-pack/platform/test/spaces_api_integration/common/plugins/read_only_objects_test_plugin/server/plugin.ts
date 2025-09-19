@@ -56,20 +56,31 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           },
         },
         validate: {
-          body: schema.object({
-            type: schema.maybe(
-              schema.oneOf([schema.literal(READ_ONLY_TYPE), schema.literal(NON_READ_ONLY_TYPE)])
-            ),
-            isReadOnly: schema.maybe(schema.boolean()),
-          }),
+          request: {
+            query: schema.object({
+              overwrite: schema.boolean({
+                defaultValue: false,
+              }),
+            }),
+            body: schema.object({
+              id: schema.maybe(schema.string()),
+              type: schema.maybe(
+                schema.oneOf([schema.literal(READ_ONLY_TYPE), schema.literal(NON_READ_ONLY_TYPE)])
+              ),
+              isReadOnly: schema.maybe(schema.boolean()),
+            }),
+          },
         },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
-
-        const options = isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {};
+        const options = {
+          overwrite: request.query.overwrite ?? false,
+          ...(request.body.id ? { id: request.body.id } : {}),
+          ...(isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+        };
         try {
           const result = await soClient.create(
             objType,

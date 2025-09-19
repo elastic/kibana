@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
+  AuthorizeObject,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsCheckConflictsObject,
@@ -99,6 +100,24 @@ export const performCheckConflicts = async <T>(
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
+
+  const accessControlObjectsToAuthorize: AuthorizeObject[] = [];
+  for (const doc of bulkGetResponse?.body.docs ?? []) {
+    if (isMgetDoc(doc) && doc.found) {
+      const docSource = doc as SavedObjectsRawDoc;
+      if (docSource?._source.accessControl) {
+        accessControlObjectsToAuthorize.push({
+          type: docSource._source.type,
+          id: doc._id.substring(docSource._source.type.length + 1),
+          ...(docSource._source.name && { name: docSource._source.name }),
+          accessControl: docSource._source.accessControl,
+        });
+      }
+    }
+  }
+
+  // const { typesRequiringAccessControl, results } =
+  //   securityExtension?.getTypesRequiringAccessControlCheck(accessControlObjectsToAuthorize);
 
   // const authzObjects = ???
   // const accessAuthz = securityExtension?.authorizeChangeAccessControl(
