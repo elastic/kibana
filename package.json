@@ -1785,7 +1785,7 @@
     "content-security-policy-parser": "^0.6.0",
     "cpy": "^8.1.1",
     "css-loader": "^7.1.2",
-    "cssnano": "^7.0.7",
+    "cssnano": "^7.1.1",
     "cssnano-preset-default": "^7.0.7",
     "cssstyle": "^4.1.0",
     "csstype": "^3.0.2",
