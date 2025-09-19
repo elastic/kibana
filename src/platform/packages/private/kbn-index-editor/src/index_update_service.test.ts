@@ -209,13 +209,12 @@ describe('IndexUpdateService', () => {
   });
 
   describe('flush operations', () => {
-    // mock success response
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 0,
-    } satisfies BulkResponse);
     it('should call telemetry on successful flush', async () => {
+      (http.post as jest.Mock).mockResolvedValue({
+        errors: false,
+        items: [],
+        took: 0,
+      } satisfies BulkResponse);
       const telemetrySpy = jest.spyOn(indexEditorTelemetryService, 'trackSaveSubmitted');
 
       service.setIndexName('my-index');
