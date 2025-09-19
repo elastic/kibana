@@ -7,6 +7,7 @@
 
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -16,6 +17,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { initTour } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
+import { createSpacesQueryClient } from '../services/query_client';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(
@@ -25,6 +27,8 @@ export function initSpacesNavControl(
   eventTracker: EventTracker
 ) {
   const { showTour$, onFinishTour } = initTour(core, spacesManager);
+  const queryClient = createSpacesQueryClient();
+  spacesManager.setQueryClient(queryClient);
 
   core.chrome.navControls.registerLeft({
     order: 1000,
@@ -41,30 +45,32 @@ export function initSpacesNavControl(
 
       ReactDOM.render(
         core.rendering.addContext(
-          <Suspense
-            fallback={
-              <EuiSkeletonRectangle
-                css={css`
-                  margin-inline: ${euiThemeVars.euiSizeS};
-                `}
-                borderRadius="m"
-                contentAriaLabel="Loading navigation"
+          <QueryClientProvider client={queryClient}>
+            <Suspense
+              fallback={
+                <EuiSkeletonRectangle
+                  css={css`
+                    margin-inline: ${euiThemeVars.euiSizeS};
+                  `}
+                  borderRadius="m"
+                  contentAriaLabel="Loading navigation"
+                />
+              }
+            >
+              <LazyNavControlPopover
+                spacesManager={spacesManager}
+                serverBasePath={core.http.basePath.serverBasePath}
+                anchorPosition="downLeft"
+                capabilities={core.application.capabilities}
+                navigateToApp={core.application.navigateToApp}
+                navigateToUrl={core.application.navigateToUrl}
+                allowSolutionVisibility={config.allowSolutionVisibility}
+                eventTracker={eventTracker}
+                showTour$={showTour$}
+                onFinishTour={onFinishTour}
               />
-            }
-          >
-            <LazyNavControlPopover
-              spacesManager={spacesManager}
-              serverBasePath={core.http.basePath.serverBasePath}
-              anchorPosition="downLeft"
-              capabilities={core.application.capabilities}
-              navigateToApp={core.application.navigateToApp}
-              navigateToUrl={core.application.navigateToUrl}
-              allowSolutionVisibility={config.allowSolutionVisibility}
-              eventTracker={eventTracker}
-              showTour$={showTour$}
-              onFinishTour={onFinishTour}
-            />
-          </Suspense>
+            </Suspense>
+          </QueryClientProvider>
         ),
         targetDomElement
       );
