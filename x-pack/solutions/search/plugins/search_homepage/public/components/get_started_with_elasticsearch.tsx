@@ -53,48 +53,46 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
     return true;
   });
 
-  return (
-      {filteredCards.map((card) => (
-        <EuiFlexItem key={card.dataTestSubj}>
-          <EuiCard
-            hasBorder={hoveredCard === card.dataTestSubj}
-            display={hoveredCard === card.dataTestSubj ? 'plain' : 'subdued'}
-            onMouseEnter={() => onCardHover(card.dataTestSubj)}
-            onMouseLeave={() => onCardHover(null)}
-            paddingSize="s"
-            textAlign="left"
-            titleSize="xs"
-            data-test-subj={card.dataTestSubj}
-            title={
-              card.badgeText !== undefined ? (
-                <EuiFlexGroup>
-                  <EuiFlexItem>{card.title}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span>
-                      <EuiBadge color="subdued">{card.badgeText}</EuiBadge>
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                card.title
-              )
-            }
-          >
-            <EuiFlexGroup
-              gutterSize="s"
-              direction="column"
-              justifyContent="center"
-              alignItems="flexStart"
-            >
+  return filteredCards.map((card) => (
+    <EuiFlexItem key={card.dataTestSubj}>
+      <EuiCard
+        hasBorder={hoveredCard === card.dataTestSubj}
+        display={hoveredCard === card.dataTestSubj ? 'plain' : 'subdued'}
+        onMouseEnter={() => onCardHover(card.dataTestSubj)}
+        onMouseLeave={() => onCardHover(null)}
+        paddingSize="s"
+        textAlign="left"
+        titleSize="xs"
+        data-test-subj={card.dataTestSubj}
+        title={
+          card.badgeText !== undefined ? (
+            <EuiFlexGroup>
+              <EuiFlexItem>{card.title}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="relative">{card.description}</EuiText>
+                <span>
+                  <EuiBadge color="subdued">{card.badgeText}</EuiBadge>
+                </span>
               </EuiFlexItem>
-              <EuiFlexItem>{card.buttonComponent}</EuiFlexItem>
             </EuiFlexGroup>
-          </EuiCard>
-        </EuiFlexItem>
-      ))}
-  );
+          ) : (
+            card.title
+          )
+        }
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+          direction="column"
+          justifyContent="center"
+          alignItems="flexStart"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="relative">{card.description}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>{card.buttonComponent}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCard>
+    </EuiFlexItem>
+  ));
 };
 
 export const GetStartedWithElasticsearch = () => {
