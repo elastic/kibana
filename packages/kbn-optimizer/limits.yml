@@ -2,8 +2,8 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   aiAssistantManagementSelection: 6917
-  aiops: 19890
-  alerting: 28395
+  aiops: 15371
+  alerting: 28353
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12584
@@ -21,8 +21,8 @@ pageLoadAssetSize:
   console: 31337
   contentConnectors: 33036
   contentManagement: 8350
-  controls: 13000
-  core: 602071
+  controls: 12234
+  core: 575888
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -58,7 +58,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 11834
   expressionMetricVis: 17490
   expressionPartitionVis: 29826
-  expressions: 105121
+  expressions: 105117
   expressionTagcloud: 12643
   expressionXY: 45000
   features: 4341
@@ -74,22 +74,22 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 10014
   grokdebugger: 5484
-  home: 13710
+  home: 13622
   imageEmbeddable: 6000
   indexLifecycleManagement: 29870
-  indexManagement: 35861
+  indexManagement: 35858
   inference: 10368
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
   inspectComponent: 4900
-  inspector: 18000
+  inspector: 17954
   interactiveSetup: 42153
   intercepts: 19011
   kibanaOverview: 6339
-  kibanaReact: 25470
+  kibanaReact: 24701
   kibanaUsageCollection: 1736
-  kibanaUtils: 62813
+  kibanaUtils: 54846
   lens: 66734
   licenseManagement: 13558
   licensing: 10078
@@ -106,7 +106,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 13598
+  navigation: 10247
   newsfeed: 12371
   noDataPage: 1749
   observability: 176467
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3074
+  productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -148,15 +148,15 @@ pageLoadAssetSize:
   searchprofiler: 18361
   searchQueryRules: 6689
   searchSynonyms: 6371
-  security: 79987
+  security: 79984
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
-  serverless: 10682
+  securitySolutionEss: 43319
+  securitySolutionServerless: 56245
+  serverless: 7854
   serverlessChat: 5133
   serverlessObservability: 16307
   serverlessSearch: 35000
-  sessionView: 47938
+  sessionView: 47912
   share: 58677
   slo: 36645
   snapshotRestore: 28452
@@ -172,9 +172,9 @@ pageLoadAssetSize:
   timelines: 200384
   transform: 22722
   triggersActionsUi: 110000
-  uiActions: 24712
+  uiActions: 24670
   uiActionsEnhanced: 20189
-  unifiedDocViewer: 14513
+  unifiedDocViewer: 14446
   unifiedSearch: 23000
   upgradeAssistant: 6898
   uptime: 48184
