@@ -357,11 +357,23 @@ export function getDiscoverStateContainer({
     });
   };
 
+  const clearTimeFieldFromSort = (
+    sort: DiscoverAppState['sort'],
+    timeFieldName: string | undefined
+  ) => {
+    if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+    const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+    return filteredSort;
+  };
+
   const transitionFromDataViewToESQL = (dataView: DataView) => {
     const appState = appStateContainer.get();
-    const { query } = appState;
+    const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
     const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     appStateContainer.update({
       query: { esql: queryString },
@@ -370,6 +382,7 @@ export function getDiscoverStateContainer({
         type: DataSourceType.Esql,
       },
       columns: [],
+      sort: clearedSort,
     });
 
     // clears pinned filters
