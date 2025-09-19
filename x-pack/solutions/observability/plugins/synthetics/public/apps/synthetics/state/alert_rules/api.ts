@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type {
   StatusRuleInspect,
   TLSRuleInspect,
@@ -31,30 +32,22 @@ export async function getDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
 }
 
 export async function enableDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return retry(() => apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING));
+  return pRetry(async () => apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING), {
+    retries: 3,
+    onFailedAttempt,
+  });
 }
 
 export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
-  return retry(() => apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING));
+  return pRetry(() => apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING), {
+    retries: 3,
+    onFailedAttempt,
+  });
 }
 
-export async function retry<T>(
-  fn: () => Promise<T>,
-  retries = 2,
-  delay = 100,
-  backoff = 1.2
-): Promise<T> {
-  let currentDelay = delay;
-  for (let i = 0; ; i++) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (i >= retries - 1) {
-        if (error instanceof Error) throw error;
-        throw new Error(String(error));
-      }
-      await new Promise((resolve) => setTimeout(resolve, currentDelay));
-      currentDelay *= backoff;
-    }
-  }
+function onFailedAttempt(error: pRetry.FailedAttemptError) {
+  // eslint-disable-next-line no-console
+  console.error(
+    `Attempted to update default alerting API. Attempt ${error.attemptNumber} failed. Remaining retries: ${error.retriesLeft}.`
+  );
 }
