@@ -43,7 +43,7 @@ export function MachineLearningNavigationProviderObservability({
       await navigateToArea('management:trained_models', 'mlTrainedModelsList');
     },
     async navigateToMemoryUsage() {
-      await navigateToArea('management:overview', 'mlStackManagementOverviewPage');
+      await navigateViaPanel('management:overview', 'mlStackManagementOverviewPage');
       await testSubjects.existOrFail('mlMemoryUsagePanel', { timeout: 2500 });
     },
     async navigateToNotifications() {
