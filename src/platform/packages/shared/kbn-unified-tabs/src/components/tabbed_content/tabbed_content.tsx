@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { escapeRegExp, debounce } from 'lodash';
-
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TabsEventPayload } from '@kbn/discover-plugin/public';

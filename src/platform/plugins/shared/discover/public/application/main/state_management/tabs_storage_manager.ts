@@ -401,15 +401,10 @@ export const createTabsStorageManager = ({
       fromSavedObjectTabToTabState({ tab })
     );
 
-    const locallyLoadedTabs = storedTabsState.openTabs.map((tab) =>
-      toTabState(tab, defaultTabState)
-    );
-
     const openTabs =
       persistedDiscoverSession?.id === storedTabsState.discoverSessionId
-        ? locallyLoadedTabs
+        ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
         : persistedTabs ?? [];
-
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
