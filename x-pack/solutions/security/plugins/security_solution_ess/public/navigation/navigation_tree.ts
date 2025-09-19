@@ -124,6 +124,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               children: [
                 {
+                  id: 'launchpad_get_started',
                   link: securityLink(SecurityPageName.landing),
                   sideNavVersion: 'v2',
                 },
