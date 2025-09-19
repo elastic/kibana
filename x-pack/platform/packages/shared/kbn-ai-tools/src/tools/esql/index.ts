@@ -55,7 +55,6 @@ export async function executeAsEsqlAgent({
   end?: number;
   signal: AbortSignal;
   prompt: string;
-  tools?: Record<string, ToolDefinition>;
   toolCallbacks?: ToolCallbacksOfToolOptions<ToolOptions>;
 }): Promise<PromptResponse> {
   const docBase = await loadEsqlDocBase();
@@ -163,7 +162,7 @@ export async function executeAsEsqlAgent({
 
         return {
           response: {
-            queries: results,
+            results,
           },
         };
       },
