@@ -115,7 +115,7 @@ export class AIAssistantManagementSelectionPlugin
     const { cloud } = plugins;
     const serverlessProjectType = cloud?.serverless.projectType;
 
-    // Do not register the setting if not in a serverless project
+    // Do not register the setting in a serverless project
     if (!serverlessProjectType) {
       core.uiSettings.register({
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
