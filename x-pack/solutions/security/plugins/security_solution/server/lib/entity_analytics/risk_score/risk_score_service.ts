@@ -83,6 +83,7 @@ export const riskScoreServiceFactory = ({
       esClient,
       logger,
       experimentalFeatures,
+      filters: params.filters || [],
     }).catch((err) => {
       logger.error(`Error calculating risk scores: ${err}`);
       throw err;
