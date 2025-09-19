@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -80,6 +81,11 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     fetchSuggestions,
   } = useReviewSuggestionsForm();
+
+  // Reset suggestions when navigating to a different stream
+  useUpdateEffect(() => {
+    resetForm();
+  }, [definition.stream.name]);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {

@@ -70,7 +70,6 @@ export function useMatchRate(
             )
             .pipe(
               map((probabilityResult) => {
-                console.log(definition.stream.name, 'probabilityResult', probabilityResult);
                 if (probabilityResult.rawResponse.aggregations) {
                   // We need to divide this by the sampling / probability factor:
                   // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
