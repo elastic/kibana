@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -480,7 +479,6 @@ export function LensEditConfigurationFlyout({
                     canEditTextBasedQuery={canEditTextBasedQuery}
                     editorContainer={editorContainer.current || undefined}
                   />
-                  <EuiSpacer />
                 </>
               </EuiAccordion>
             </EuiFlexItem>
