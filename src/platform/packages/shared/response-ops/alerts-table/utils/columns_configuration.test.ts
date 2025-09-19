@@ -11,34 +11,34 @@ import { applyColumnsConfiguration } from './columns_configuration';
 
 describe('applyColumnsConfiguration', () => {
   it('should return original columns if no configuredColumns are provided', () => {
-    const columns = [{ id: 'a' }, { id: 'b' }];
-    const result = applyColumnsConfiguration({ columns });
-    expect(result).toEqual(columns);
+    const defaultColumns = [{ id: 'a' }, { id: 'b' }];
+    const result = applyColumnsConfiguration({ defaultColumns });
+    expect(result).toEqual(defaultColumns);
   });
 
   it('should return original columns if configuredColumns is empty', () => {
-    const columns = [{ id: 'a' }, { id: 'b' }];
-    const result = applyColumnsConfiguration({ columns, configuredColumns: [] });
-    expect(result).toEqual(columns);
+    const defaultColumns = [{ id: 'a' }, { id: 'b' }];
+    const result = applyColumnsConfiguration({ defaultColumns, configuredColumns: [] });
+    expect(result).toEqual(defaultColumns);
   });
 
   it('should merge configuredColumns with original columns', () => {
-    const columns = [
+    const defaultColumns = [
       { id: 'a', initialWidth: 100 },
       { id: 'b', initialWidth: 200 },
     ];
     const configuredColumns = [{ id: 'a', initialWidth: 150 }];
-    const result = applyColumnsConfiguration({ columns, configuredColumns });
+    const result = applyColumnsConfiguration({ defaultColumns, configuredColumns });
     expect(result).toEqual([{ id: 'a', initialWidth: 150 }]);
   });
 
   it('should add new columns from configuredColumns that are not in original columns', () => {
-    const columns = [{ id: 'a', initialWidth: 100 }];
+    const defaultColumns = [{ id: 'a', initialWidth: 100 }];
     const configuredColumns = [
       { id: 'a', initialWidth: 150 },
       { id: 'b', initialWidth: 200 },
     ];
-    const result = applyColumnsConfiguration({ columns, configuredColumns });
+    const result = applyColumnsConfiguration({ defaultColumns, configuredColumns });
     expect(result).toEqual([
       { id: 'a', initialWidth: 150 },
       { id: 'b', initialWidth: 200 },
@@ -46,9 +46,9 @@ describe('applyColumnsConfiguration', () => {
   });
 
   it('should handle case where configuredColumns has no matching ids in original columns', () => {
-    const columns = [{ id: 'a', initialWidth: 100 }];
+    const defaultColumns = [{ id: 'a', initialWidth: 100 }];
     const configuredColumns = [{ id: 'b', initialWidth: 200 }];
-    const result = applyColumnsConfiguration({ columns, configuredColumns });
+    const result = applyColumnsConfiguration({ defaultColumns, configuredColumns });
     expect(result).toEqual([{ id: 'b', initialWidth: 200 }]);
   });
 });

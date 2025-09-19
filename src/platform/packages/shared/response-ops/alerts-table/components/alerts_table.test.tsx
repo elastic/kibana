@@ -43,6 +43,7 @@ import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows'
 import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { defaultAlertsTableColumns } from '../configuration';
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -335,7 +336,65 @@ describe('AlertsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStorageData.clear();
     mockSearchAlerts.mockResolvedValue(mockSearchAlertsResponse);
+  });
+
+  describe('Columns', () => {
+    describe('with no saved configuration', () => {
+      it('should show the default columns if the columns prop is not set', async () => {
+        render(<AlertsTable {...tableProps} columns={undefined} />);
+
+        for (const { id: columnId } of defaultAlertsTableColumns) {
+          expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
+        }
+      });
+
+      it('should show the columns defined in the columns prop', async () => {
+        render(<AlertsTable {...tableProps} />);
+
+        for (const { id: columnId } of columns) {
+          expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
+        }
+      });
+    });
+
+    describe('with saved configuration', () => {
+      it('should show the columns saved in the configuration regardless of the columns prop value', async () => {
+        mockStorageData.set(
+          tableProps.id,
+          JSON.stringify({
+            columns: [{ id: 'savedColumnId' }],
+            visibleColumns: ['savedColumnId'],
+            sort: [],
+          })
+        );
+
+        render(<AlertsTable {...tableProps} />);
+
+        expect(await screen.findByTestId('dataGridHeaderCell-savedColumnId')).toBeInTheDocument();
+        for (const { id: columnId } of defaultAlertsTableColumns) {
+          expect(screen.queryByTestId(`dataGridHeaderCell-${columnId}`)).not.toBeInTheDocument();
+        }
+      });
+
+      it('should add default properties to saved columns', async () => {
+        mockStorageData.set(
+          tableProps.id,
+          JSON.stringify({
+            columns: [{ id: AlertsField.name }],
+            visibleColumns: [AlertsField.name],
+            sort: [],
+          })
+        );
+
+        render(<AlertsTable {...tableProps} />);
+
+        expect(
+          (await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)).textContent
+        ).toEqual('Name');
+      });
+    });
   });
 
   describe('Cases', () => {
@@ -783,7 +842,8 @@ describe('AlertsTable', () => {
     });
 
     it('should restore a default field that had been removed', async () => {
-      mockStorageWrapper.get.mockReturnValueOnce(
+      mockStorageData.set(
+        tableProps.id,
         JSON.stringify({
           columns: [{ id: AlertsField.reason }],
           sort: [
@@ -809,7 +869,7 @@ describe('AlertsTable', () => {
       const titles = Array.from(
         screen.getByTestId('dataGridHeader').querySelectorAll('.euiDataGridHeaderCell__content')
       ).map((n) => n?.getAttribute('title') ?? '');
-      expect(titles).toContain('Rule');
+      expect(titles).toContain('Name');
     });
 
     it('should insert a new field as column when its not a default one', async () => {
