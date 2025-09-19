@@ -29,7 +29,7 @@ import type {
   QueryCommandTagParametrized,
 } from './types';
 import { Walker } from '../walker';
-import { isColumn, isFunctionExpression, isSource } from '../ast/is';
+import { isColumn, isFunctionExpression } from '../ast/is';
 import { replaceProperties } from '../walker/helpers';
 
 export class ComposerQuery {

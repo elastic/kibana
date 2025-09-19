@@ -674,6 +674,41 @@ describe('.inlineParams()', () => {
       expect(query.getParams()).toEqual({});
     });
   });
+
+  describe('scenarios', () => {
+    test('docs example', () => {
+      const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{
+        limit: 100,
+      }}`;
+
+      expect(query.print('basic')).toBe('FROM logs | WHERE user == ?userName | LIMIT ?limit');
+      expect(query.getParams()).toEqual({ userName: 'admin', limit: 100 });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM logs | WHERE user == "admin" | LIMIT 100');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('original request', () => {
+      const query = esql(`FROM support_ticket | WHERE priority == ?priority | LIMIT ?limit`, {
+        limit: 100,
+        priority: 'high',
+      });
+
+      expect(query.print('basic')).toBe(
+        'FROM support_ticket | WHERE priority == ?priority | LIMIT ?limit'
+      );
+      expect(query.getParams()).toEqual({ priority: 'high', limit: 100 });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe(
+        'FROM support_ticket | WHERE priority == "high" | LIMIT 100'
+      );
+      expect(query.getParams()).toEqual({});
+    });
+  });
 });
 
 describe('.toRequest()', () => {
