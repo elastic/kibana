@@ -10,10 +10,12 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.4>>
 * <<release-notes-8.19.3>>
 * <<release-notes-8.19.2>>
 * <<release-notes-8.19.1>>
 * <<release-notes-8.19.0>>
+* <<release-notes-8.18.7>>
 * <<release-notes-8.18.6>>
 * <<release-notes-8.18.5>>
 * <<release-notes-8.18.4>>
@@ -107,6 +109,29 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.4]]
+== {kib} 8.19.4
+
+The 8.19.4 release includes the following fixes.
+
+[float]
+[[enhancement-v8.19.4]]
+=== Enhancements
+Stack management::
+* Adds IPv6 support to remote clusters address fields ({kibana-pull}233415[#233415]).
+
+[float]
+[[fixes-v8.19.4]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the Save modal that allowed duplicate saves of dashboards, visualizations, and other objects when clicking the **Save** button multiple times ({kibana-pull}233933[#233933]).
+Elastic Security solution::
+For the Elastic Security 8.19.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names ({kibana-pull}234083[#234083]).
+Search solution::
+* Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML ({kibana-pull}234079[#234079]).
 
 [[release-notes-8.19.3]]
 == {kib} 8.19.3
@@ -597,6 +622,21 @@ Management::
 Search::
 * Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console ({kibana-pull}224708[#224708]).
+
+[[release-notes-8.18.7]]
+== {kib} 8.18.7
+
+The 8.18.7 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.7]]
+=== Fixes
+Elastic Security solution::
+For the Elastic Security 8.18.7 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names ({kibana-pull}234083[#234083]).
+Search solution::
+* Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML ({kibana-pull}234079[#234079]).
 
 [[release-notes-8.18.6]]
 == {kib} 8.18.6
