@@ -275,7 +275,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           if (isOptionsListESQLControlState(lastSaved?.rawState)) {
             throw new Error('ES|QL control state handling not yet implemented');
           }
-          console.log({ lastSaved });
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);

@@ -47,12 +47,7 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
   }
   // then compare control state that layout manages (order, width, and grow; other state is managed by the control embeddable itself)
   for (const controlId of Object.keys(newLayout?.controls ?? {})) {
-    if (
-      !deepEqual(
-        pick(originalLayout?.controls[controlId], ['grow', 'width', 'order']),
-        pick(newLayout?.controls[controlId], ['grow', 'width', 'order'])
-      )
-    ) {
+    if (!deepEqual(originalLayout?.controls[controlId], newLayout?.controls[controlId])) {
       return false;
     }
   }
