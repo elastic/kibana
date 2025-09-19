@@ -14265,7 +14265,7 @@
               },
               ", options?: { user?: ",
               "AuthenticatedUser",
-              " | undefined; force?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; bumpRevision?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -14391,6 +14391,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipUniqueNameVerification",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.update.$5.bumpRevision",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "bumpRevision",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -24678,7 +24692,7 @@
             "label": "secret_references",
             "description": [],
             "signature": [
-              "PolicySecretReference",
+              "SecretReference",
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
@@ -27391,7 +27405,7 @@
             "label": "secret_references",
             "description": [],
             "signature": [
-              "PolicySecretReference",
+              "SecretReference",
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
