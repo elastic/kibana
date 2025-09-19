@@ -71,7 +71,6 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import { warmupModel } from '../inference_endpoint';
@@ -690,14 +689,6 @@ export class ObservabilityAIAssistantClient {
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-    });
-  };
-
-  runStartupMigrations = () => {
-    return runStartupMigrations({
-      core: this.dependencies.core,
-      logger: this.dependencies.logger,
-      config: this.dependencies.config,
     });
   };
 

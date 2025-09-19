@@ -102,19 +102,6 @@ const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
 });
 
-const startupMigrationsKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
-  security: {
-    authz: {
-      requiredPrivileges: ['ai_assistant'],
-    },
-  },
-  handler: async (resources): Promise<void> => {
-    const client = await resources.service.getClient({ request: resources.request });
-    return client.runStartupMigrations();
-  },
-});
-
 const getKnowledgeBaseInferenceEndpoints = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/inference_endpoints',
   security: {
@@ -301,7 +288,6 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 
 export const knowledgeBaseRoutes = {
   ...reIndexKnowledgeBase,
-  ...startupMigrationsKnowledgeBase,
   ...setupKnowledgeBase,
   ...reIndexKnowledgeBase,
   ...getKnowledgeBaseStatus,

@@ -24,7 +24,7 @@ import type {
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
+import { updateExistingIndexAssets } from './service/index_assets/update_existing_index_assets';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -119,11 +119,10 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    runStartupMigrations({
-      core,
-      logger: this.logger,
-      config: this.config,
-    }).catch((e) => this.logger.error(`Error while running startup migrations: ${e.message}`));
+
+    updateExistingIndexAssets({ logger: this.logger, core }).catch((e) =>
+      this.logger.error(`Error while running startup migrations: ${e.message}`)
+    );
 
     service.register(registerFunctions);
 

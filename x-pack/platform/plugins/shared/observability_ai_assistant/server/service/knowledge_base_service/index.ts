@@ -31,7 +31,6 @@ import type { ObservabilityAIAssistantPluginStartDependencies } from '../../type
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import { hasKbWriteIndex } from './has_kb_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
-import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
 import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
@@ -428,24 +427,6 @@ export class KnowledgeBaseService {
       this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error);
-      }
-
-      if (isSemanticTextUnsupportedError(error)) {
-        reIndexKnowledgeBaseWithLock({
-          core: this.dependencies.core,
-          logger: this.dependencies.logger,
-          esClient: this.dependencies.esClient,
-        }).catch((e) => {
-          if (isLockAcquisitionError(e)) {
-            this.dependencies.logger.info(`Re-indexing operation is already in progress`);
-            return;
-          }
-          this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
-        });
-
-        throw serverUnavailable(
-          `The index "${resourceNames.writeIndexAlias.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
-        );
       }
 
       throw error;
