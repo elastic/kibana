@@ -47,7 +47,11 @@ export function registerConversationRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { query: schema.object({ agent_id: schema.maybe(schema.string()) }) },
+          request: { query: schema.object({ 
+            agent_id: schema.maybe(schema.string({
+              meta: { description: 'Optional agent ID to filter conversations by a specific agent.' }
+            })) 
+          }) },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/conversations_list.yaml')
@@ -91,7 +95,9 @@ export function registerConversationRoutes({
         validate: {
           request: {
             params: schema.object({
-              conversation_id: schema.string(),
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation to retrieve.' }
+              }),
             }),
           },
         },
@@ -135,7 +141,9 @@ export function registerConversationRoutes({
         validate: {
           request: {
             params: schema.object({
-              conversation_id: schema.string(),
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation to delete.' }
+              }),
             }),
           },
         },

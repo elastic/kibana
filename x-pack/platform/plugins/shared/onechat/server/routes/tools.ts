@@ -47,7 +47,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
     })
     .addVersion(
-      { 
+      {
         version: '2023-10-31',
         validate: false,
         options: {
@@ -89,7 +89,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to retrieve.' }
+              }),
             }),
           },
         },
@@ -131,13 +133,27 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'Unique identifier for the tool.' }
+              }),
               // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
-              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
-              description: schema.string({ defaultValue: '' }),
-              tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type)), {
+                meta: { description: 'The type of tool to create (e.g., esql, index_search).' }
+              }),
+              description: schema.string({
+                defaultValue: '',
+                meta: { description: 'Description of what the tool does.' }
+              }),
+              tags: schema.arrayOf(schema.string({
+                meta: { description: 'Tag for categorizing the tool.' }
+              }), {
+                defaultValue: [],
+                meta: { description: 'Optional tags for categorizing and organizing tools.' }
+              }),
               // actual config validation is done in the tool service
-              configuration: schema.recordOf(schema.string(), schema.any()),
+              configuration: schema.recordOf(schema.string(), schema.any(), {
+                meta: { description: 'Tool-specific configuration parameters. See examples for details.' }
+              }),
             }),
           },
         },
@@ -179,13 +195,23 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              toolId: schema.string(),
+              toolId: schema.string({
+                meta: { description: 'The unique identifier of the tool to update.' }
+              }),
             }),
             body: schema.object({
-              description: schema.maybe(schema.string()),
-              tags: schema.maybe(schema.arrayOf(schema.string())),
+              description: schema.maybe(schema.string({
+                meta: { description: 'Updated description of what the tool does.' }
+              })),
+              tags: schema.maybe(schema.arrayOf(schema.string({
+                meta: { description: 'Updated tag for categorizing the tool.' }
+              }), {
+                meta: { description: 'Updated tags for categorizing and organizing tools.' }
+              })),
               // actual config validation is done in the tool service
-              configuration: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+              configuration: schema.maybe(schema.recordOf(schema.string(), schema.any(), {
+                meta: { description: 'Updated tool-specific configuration parameters. See examples for details.' }
+              })),
             }),
           },
         },
@@ -228,7 +254,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The unique identifier of the tool to delete.' }
+              }),
             }),
           },
         },
@@ -268,9 +296,15 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             body: schema.object({
-              tool_id: schema.string({}),
-              tool_params: schema.recordOf(schema.string(), schema.any()),
-              connector_id: schema.maybe(schema.string()),
+              tool_id: schema.string({
+                meta: { description: 'The ID of the tool to execute.' }
+              }),
+              tool_params: schema.recordOf(schema.string(), schema.any(), {
+                meta: { description: 'Parameters to pass to the tool execution. See examples for details' }
+              }),
+              connector_id: schema.maybe(schema.string({
+                meta: { description: 'Optional connector ID for tools that require external integrations.' }
+              })),
             }),
           },
         },

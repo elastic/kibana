@@ -56,7 +56,9 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: { description: 'The unique identifier of the agent to get A2A metadata for.' }
+              }),
             }),
           },
         },
@@ -92,9 +94,14 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: { description: 'The unique identifier of the agent to send the A2A task to.' }
+              }),
             }),
-            body: schema.object({}, { unknowns: 'allow' }),
+            body: schema.object({}, { 
+              unknowns: 'allow',
+              meta: { description: 'JSON-RPC 2.0 request payload for A2A communication.' }
+            }),
           },
         },
         options: {
