@@ -43,6 +43,7 @@ import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { SplitButton } from '@kbn/split-button';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -195,6 +196,37 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
 
+  /**
+   * Optional configuration for ES|QL variables.
+   *
+   * This prop allows you to define and manage variables used within ES|QL queries,
+   * typically bound to UI controls like dropdowns or input fields (Dashboard controls).
+   */
+  esqlVariablesConfig?: {
+    /**
+     * An array of control variables, each defining a key, an initial value,
+     * and its data type, which are used to parameterize the ES|QL query.
+     */
+    esqlVariables: ESQLControlVariable[];
+    /**
+     * Callback function invoked when control changes are to be saved.
+     * It receives the current state of the UI controls and the updated ES|QL query string.
+     * @param controlState - A record containing the current values of the UI controls.
+     * @param updatedQuery - The ES|QL query string updated with the new variable values.
+     */
+    onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+    /**
+     * Callback function invoked when the user cancels changes to the controls.
+     * This function reverts the UI to its previous state or closes a modal.
+     */
+    onCancelControl?: () => void;
+    /**
+     * A React Node that will be rendered as a wrapper for the UI controls
+     * associated with the ES|QL variables. This allows for custom layout or
+     * additional elements around the controls.
+     */
+    controlsWrapper: React.ReactNode;
+  };
   useBackgroundSearchButton?: boolean;
 }
 
@@ -856,6 +888,16 @@ export const QueryBarTopRow = React.memo(
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
             onInitialStateChange={props.onEsqlEditorInitialStateChange}
+            controlsContext={
+              props.esqlVariablesConfig
+                ? {
+                    onSaveControl: props.esqlVariablesConfig.onSaveControl,
+                    onCancelControl: props.esqlVariablesConfig.onCancelControl ?? (() => {}),
+                    supportsControls: true,
+                  }
+                : undefined
+            }
+            esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
           />
         )
       );
@@ -897,6 +939,10 @@ export const QueryBarTopRow = React.memo(
                   }}
                   adHocDataview={props.indexPatterns?.[0]}
                 />
+              )}
+              {/* Optional wrapper for the ES|QL controls elements */}
+              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                <EuiFlexItem grow={false}>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
               )}
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
