@@ -8,11 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type {
-  DecoratedError,
-  AuthorizeCreateObject,
-  SavedObjectsRawDoc,
-} from '@kbn/core-saved-objects-server';
+import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -41,6 +37,7 @@ import {
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
@@ -93,27 +90,39 @@ export const performBulkCreate = async <T>(
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
-    let error: DecoratedError | undefined;
+
     let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
     const objectManaged = managed;
     if (!allowedTypes.includes(type)) {
-      error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      return left({ id: requestId, type, error: errorContent(error) });
     } else {
       try {
         id = commonHelper.getValidId(type, requestId, version, overwrite);
         validationHelper.validateInitialNamespaces(type, initialNamespaces);
         validationHelper.validateOriginId(type, object);
       } catch (e) {
-        error = e;
+        return left({ id: requestId, type, error: errorContent(e) });
       }
     }
+    const method = requestId && overwrite ? 'index' : 'create';
+    const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+    const accessMode = options.accessControl?.accessMode;
+    const typeSupportsAccessControl = registry.supportsAccessControl(type);
 
-    if (error) {
+    if (!typeSupportsAccessControl && accessMode) {
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
+        `The "accessMode" field is not supported for saved objects of type "${type}".`
+      );
       return left({ id: requestId, type, error: errorContent(error) });
     }
 
-    const method = requestId && overwrite ? 'index' : 'create';
-    const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+    if (!createdBy && accessMode === 'read_only') {
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+      );
+      return left({ id: requestId, type, error: errorContent(error) });
+    }
 
     return right({
       method,
@@ -121,6 +130,11 @@ export const performBulkCreate = async <T>(
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
+        accessControl: setAccessControl({
+          typeSupportsAccessControl,
+          createdBy,
+          accessMode,
+        }),
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
@@ -237,6 +251,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+        accessControl: object.accessControl,
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),
