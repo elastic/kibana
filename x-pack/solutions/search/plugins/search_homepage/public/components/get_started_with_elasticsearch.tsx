@@ -54,7 +54,6 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
   });
 
   return (
-    <>
       {filteredCards.map((card) => (
         <EuiFlexItem key={card.dataTestSubj}>
           <EuiCard
@@ -95,7 +94,6 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
           </EuiCard>
         </EuiFlexItem>
       ))}
-    </>
   );
 };
 
