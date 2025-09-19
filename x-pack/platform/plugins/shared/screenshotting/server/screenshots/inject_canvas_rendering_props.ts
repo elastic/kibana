@@ -32,18 +32,7 @@ export const injectCanvasRenderingProps = async (
     await browser.evaluate(
       {
         fn: () => {
-          const originalGetContext = HTMLCanvasElement.prototype.getContext;
-          HTMLCanvasElement.prototype.getContext = function (contextType: any, options?: any): any {
-            const context = originalGetContext.call(this, contextType, options);
-
-            if (contextType === '2d' && context) {
-              const ctx2d = context as CanvasRenderingContext2D;
-              ctx2d.textRendering = 'geometricPrecision';
-            }
-            return context;
-          };
-
-          // fillText override to reassert textRendering - fix for lens reports
+          // fixes report kerning issues in canvas text
           const originalFillText = CanvasRenderingContext2D.prototype.fillText;
           CanvasRenderingContext2D.prototype.fillText = function (
             text: string,
