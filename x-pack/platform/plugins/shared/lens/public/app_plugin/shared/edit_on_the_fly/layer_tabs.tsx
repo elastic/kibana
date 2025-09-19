@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
@@ -225,7 +225,10 @@ export function LayerTabs(
   ]);
 
   /* Render layer tabs only if the chart type supports multiple layers */
-  return !hideAddLayerButton ? <EuiTabs>{renderTabs()}</EuiTabs> : null;
-
-  return <div>Layer Tabs: {selectedLayerId}</div>;
+  return !hideAddLayerButton ? (
+    <>
+      <EuiSpacer size="s" />
+      <EuiTabs css={{ paddingLeft: '16px' }}>{renderTabs()}</EuiTabs>
+    </>
+  ) : null;
 }
