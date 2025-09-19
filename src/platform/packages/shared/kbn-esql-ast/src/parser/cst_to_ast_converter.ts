@@ -1405,9 +1405,8 @@ export class CstToAstConverter {
    * Parses a single RERANK field entry.
    *
    * Supports three forms:
-   * 1) Assignment:     qualifiedName '=' booleanExpression
-   * 2) Expression:      qualifiedName booleanExpression
-   * 3) Column only:     qualifiedName
+   * 1) Assignment: qualifiedName '=' booleanExpression
+   * 2) Column only: qualifiedName
    */
   private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
     try {
@@ -1418,29 +1417,45 @@ export class CstToAstConverter {
       }
 
       // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN() && ctx.booleanExpression()) {
+      if (ctx.ASSIGN()) {
         const left = this.toColumn(qualifiedNameCtx);
-        const right = this.collectBooleanExpression(ctx.booleanExpression());
         const assignment = this.toFunction(
           ctx.ASSIGN().getText(),
           ctx,
           undefined,
           'binary-expression'
         ) as ast.ESQLBinaryExpression;
-        assignment.args.push(left, right);
-        assignment.location = this.computeLocationExtends(assignment);
+
+        if (ctx.booleanExpression()) {
+          const right = this.collectBooleanExpression(ctx.booleanExpression());
+          // Mark as incomplete if RHS is empty, contains incomplete items, or the parser raised an exception
+          const hasItems = right.length > 0;
+          const hasIncompleteItem = right.some((item) =>
+            Array.isArray(item) ? false : !!item?.incomplete
+          );
+          const hasException = !!ctx.booleanExpression()?.exception;
+
+          if (!hasItems || hasIncompleteItem || hasException) {
+            assignment.incomplete = true;
+          }
+
+          assignment.args.push(left, right);
+          assignment.location = this.computeLocationExtends(assignment);
+        } else {
+          // User typed something like `ON col0 =` and stopped.
+          // Build an assignment with only the left operand, mark it as incomplete,
+          assignment.args.push(left, []);
+          assignment.incomplete = true;
+          assignment.location = {
+            min: left.location.min,
+            max: ctx.ASSIGN()!.symbol.stop,
+          };
+        }
 
         return assignment;
       }
 
-      // 2) expression following a qualified name
-      if (ctx.booleanExpression()) {
-        return this.collectBooleanExpression(ctx.booleanExpression())[0] as
-          | ast.ESQLAstField
-          | undefined;
-      }
-
-      // 3) simple column reference
+      // 2) simple column reference
       return this.toColumn(qualifiedNameCtx);
     } catch (e) {
       // do nothing
