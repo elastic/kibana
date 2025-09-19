@@ -35,7 +35,7 @@ export const ControlClone = ({
     return width ? css({ width: `${width}px` }) : undefined;
   }, [width]);
 
-  return !state ? null : (
+  return (
     <EuiFlexItem css={[styles.container, widthStyle]}>
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>

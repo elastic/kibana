@@ -75,7 +75,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* EUI CSS util for the generating the underline background-image/gradient */
       ${euiFormControlDefaultShadow(euiThemeContext, {
         withBorder: false,
-        withBackgroundColor: true,
+        withBackgroundColor: false,
         withBackgroundAnimation: true,
       })}
 
@@ -132,7 +132,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       // unset the red underline for values between steps
       valid: css`
         &:invalid:not(:focus) {
-          --euiFormControlStateColor: red;
+          --euiFormControlStateColor: transparent;
         }
       `,
     },

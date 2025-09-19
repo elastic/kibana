@@ -52,6 +52,7 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState();
+
       // check ref equality
       if (checkRefEquality) {
         const lastSavedRefs = sortBy(lastSavedState?.references ?? [], 'id');

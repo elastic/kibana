@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import { map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -19,14 +20,11 @@ import {
   type EmbeddableApiContext,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { map } from 'rxjs';
+
 import type { CanClearSelections } from '../types';
 import { isClearableControl } from '../types';
-
 import { ACTION_CLEAR_CONTROL } from './constants';
 
 type ClearControlActionApi = HasType &

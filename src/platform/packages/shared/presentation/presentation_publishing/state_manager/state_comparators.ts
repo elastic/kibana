@@ -77,9 +77,8 @@ export const areComparatorsEqual = <StateType extends object = object>(
       currentValue
     );
 
-    if (!areEqual && shouldLogStateDiff()) {
+    if (!areEqual && shouldLogStateDiff())
       logStateDiff(getCustomLogLabel ? getCustomLogLabel(key) : key, lastSavedValue, currentValue);
-    }
     return areEqual;
   });
 };

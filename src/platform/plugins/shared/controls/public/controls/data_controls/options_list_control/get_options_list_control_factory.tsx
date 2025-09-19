@@ -26,7 +26,7 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { type PublishingSubject, type SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
