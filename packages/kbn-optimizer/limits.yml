@@ -150,8 +150,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79987
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
+  securitySolutionEss: 43319
+  securitySolutionServerless: 56245
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
