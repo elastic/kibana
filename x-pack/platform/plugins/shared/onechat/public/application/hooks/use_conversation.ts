@@ -7,12 +7,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
+import { storageKeys } from '../storage_keys';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -45,8 +47,13 @@ export const useConversationStatus = () => {
 };
 
 export const useAgentId = () => {
-  const { conversation } = useConversation();
-  return conversation?.agent_id;
+  const { conversation, isLoading } = useConversation();
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const agentId = conversation?.agent_id;
+  if (!agentId && !isLoading && agentIdStorage) {
+    return agentIdStorage;
+  }
+  return agentId;
 };
 
 export const useConversationTitle = () => {

@@ -44,6 +44,7 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
     iconType="arrowDown"
     onClick={onClick}
     aria-haspopup="menu"
+    aria-labelledby="agentBuilderAgentSelect"
   >
     {selectedAgentName}
   </EuiButtonEmpty>
@@ -110,6 +111,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable
+        id="agentBuilderAgentSelect"
         aria-label={labels.conversations.selectAgentAriaLabel}
         searchable={false}
         options={options}
