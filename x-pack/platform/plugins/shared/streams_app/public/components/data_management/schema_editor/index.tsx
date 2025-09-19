@@ -6,17 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPortal,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPortal, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { getRegularEcsField } from '@kbn/streams-schema';
 import { useControls } from './hooks/use_controls';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { SchemaEditorProps, SchemaField } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
@@ -37,6 +32,32 @@ export function SchemaEditor({
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
+  const {
+    dependencies: {
+      start: { fieldsMetadata },
+    },
+  } = useKibana();
+
+  const getRecommendations = React.useCallback(async () => {
+    const client = await fieldsMetadata.getClient();
+    const ecsToOriginalField = selectedFields.reduce((acc, name) => {
+      acc[getRegularEcsField(name)] = name;
+      return acc;
+    }, {} as Record<string, string>);
+
+    const response = await client.find({
+      attributes: ['type'],
+      fieldNames: Object.keys(ecsToOriginalField),
+    });
+
+    Object.entries(response.fields).forEach(([key, value]) => {
+      const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
+      onFieldUpdate({
+        ...originalField,
+        type: value.type ?? originalField.type,
+      } as SchemaField);
+    });
+  }, [selectedFields]);
 
   return (
     <SchemaEditorContextProvider
@@ -89,6 +110,7 @@ export function SchemaEditor({
               ]}
               onChange={(id) => {
                 if (id === 'guess') {
+                  getRecommendations();
                 } else if (id === 'unmap') {
                   selectedFields.forEach((fieldName) => {
                     const field = fields.find(({ name }) => name === fieldName)!;
