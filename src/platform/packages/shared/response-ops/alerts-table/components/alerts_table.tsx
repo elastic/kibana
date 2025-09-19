@@ -560,7 +560,6 @@ const AlertsTableContent = typedForwardRef(
         columnVisibility: {
           visibleColumns,
           setVisibleColumns,
-          canDragAndDropColumns: true,
         },
         additionalToolbarControls,
         leadingControlColumns,
