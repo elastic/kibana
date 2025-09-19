@@ -22,6 +22,7 @@ import type {
 } from '../commands_registry/types';
 import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
@@ -138,6 +139,7 @@ export function getFunctionSignaturesByReturnType(
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
+    timeseriesAgg,
     grouping,
     scalar,
     operators,
@@ -146,6 +148,7 @@ export function getFunctionSignaturesByReturnType(
     skipAssign,
   }: {
     agg?: boolean;
+    timeseriesAgg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
@@ -165,6 +168,9 @@ export function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...aggFunctionDefinitions);
+  }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);

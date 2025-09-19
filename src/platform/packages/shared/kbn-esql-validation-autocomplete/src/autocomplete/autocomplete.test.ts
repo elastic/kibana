@@ -87,8 +87,7 @@ describe('autocomplete', () => {
     },
   });
 
-  // const sourceCommands = ['row', 'from', 'show', 'ts']; Uncomment when ts is being released
-  const sourceCommands = ['row', 'from', 'show'];
+  const sourceCommands = ['row', 'from', 'show', 'ts'];
 
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
@@ -473,7 +472,7 @@ describe('autocomplete', () => {
     );
     // Source command
     testSuggestions('F/', [
-      ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
+      ...['FROM ', 'ROW ', 'SHOW ', 'TS '].map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
