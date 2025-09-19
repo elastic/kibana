@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
+import { getAncestors, getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
@@ -59,12 +59,11 @@ export function filterStreamsByQuery(
     // Add the match
     resultSet.set(stream.stream.name, stream);
     // Add all ancestors
-    const segments = stream.stream.name.split('.');
-    for (let i = 1; i < segments.length; ++i) {
-      const ancestorName = segments.slice(0, i).join('.');
-      const ancestor = nameToStream.get(ancestorName);
+    const ancestors = getAncestors(stream.stream.name);
+    for (let i = 0; i < ancestors.length; ++i) {
+      const ancestor = nameToStream.get(ancestors[i]);
       if (ancestor) {
-        resultSet.set(ancestorName, ancestor);
+        resultSet.set(ancestors[i], ancestor);
       }
     }
   }
@@ -81,11 +80,10 @@ export function filterCollapsedStreamRows(
   const result: TableRow[] = [];
   for (const row of rows) {
     // If any ancestor is collapsed, skip this row
-    const segments = row.stream.name.split('.');
+    const ancestors = getAncestors(row.stream.name);
     let skip = false;
-    for (let i = 1; i < segments.length; ++i) {
-      const ancestor = segments.slice(0, i).join('.');
-      if (collapsedStreams.has(ancestor)) {
+    for (let i = 0; i < ancestors.length; ++i) {
+      if (collapsedStreams.has(ancestors[i])) {
         skip = true;
         break;
       }

@@ -250,7 +250,6 @@ export function StreamsTreeTable({
                         }
                       )}
                       onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
                         handleToggleCollapse(item.stream.name);
                       }}
                       tabIndex={0}
