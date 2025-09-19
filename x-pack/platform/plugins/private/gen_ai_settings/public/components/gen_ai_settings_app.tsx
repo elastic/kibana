@@ -201,7 +201,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   async function handleSave() {
     try {
       await saveAll();
-      // TODO: Figure out if we need to reload after each UI setting change.
       window.location.reload();
     } catch (e) {
       const error = e as Error;
