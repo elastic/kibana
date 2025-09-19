@@ -93,6 +93,7 @@ export interface TabsStorageManager {
     previousOpenTabs: TabState[];
     previousRecentlyClosedTabs: RecentlyClosedTabState[];
     nextOpenTabs: TabState[];
+    justRemovedTabs?: TabState[];
   }) => RecentlyClosedTabState[];
 }
 
@@ -244,8 +245,9 @@ export const createTabsStorageManager = ({
     previousOpenTabs,
     previousRecentlyClosedTabs,
     nextOpenTabs,
+    justRemovedTabs,
   }) => {
-    const removedTabs = differenceBy(previousOpenTabs, nextOpenTabs, 'id');
+    const removedTabs = justRemovedTabs ?? differenceBy(previousOpenTabs, nextOpenTabs, 'id');
 
     const closedAt = Date.now();
     const newRecentlyClosedTabs: RecentlyClosedTabState[] = removedTabs.map((tab) => ({

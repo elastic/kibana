@@ -51,8 +51,19 @@ export const setTabs: InternalStateThunkActionCreator<
     const previousTabs = selectAllTabs(previousState);
     const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
     const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
+    const justRemovedTabs = [];
 
     for (const tab of removedTabs) {
+      const newRecentlyClosedTab = { ...tab };
+      // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
+      newRecentlyClosedTab.initialInternalState =
+        selectTabRuntimeInternalState(runtimeStateManager, tab.id) ??
+        cloneDeep(tab.initialInternalState);
+      newRecentlyClosedTab.initialAppState =
+        selectTabRuntimeAppState(runtimeStateManager, tab.id) ?? cloneDeep(tab.initialAppState);
+      newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
+      justRemovedTabs.push(newRecentlyClosedTab);
+
       dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
     }
@@ -85,6 +96,7 @@ export const setTabs: InternalStateThunkActionCreator<
           previousOpenTabs: previousTabs,
           previousRecentlyClosedTabs: params.recentlyClosedTabs,
           nextOpenTabs: params.allTabs,
+          justRemovedTabs,
         }),
       })
     );
@@ -144,6 +156,19 @@ export const updateTabs: InternalStateThunkActionCreator<
             cloneDeep(existingTabToDuplicateFrom.initialAppState);
           tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
           tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        } else if (item.restoredFromId) {
+          // the new tab was created by restoring a recently closed tab
+          const recentlyClosedTabToRestore = selectRecentlyClosedTabs(currentState).find(
+            (t) => t.id === item.restoredFromId
+          );
+
+          if (!recentlyClosedTabToRestore) {
+            return tab;
+          }
+
+          tab.initialInternalState = cloneDeep(recentlyClosedTabToRestore.initialInternalState);
+          tab.initialAppState = cloneDeep(recentlyClosedTabToRestore.initialAppState);
+          tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
         } else {
           // the new tab is a fresh one
           const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
@@ -355,6 +380,18 @@ export const openInNewTab: InternalStateThunkActionCreator<
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
+  function clearRecentlyClosedTabsThunkFn(dispatch, getState) {
+    const currentState = getState();
+    return dispatch(
+      setTabs({
+        allTabs: selectAllTabs(currentState),
+        selectedTabId: currentState.tabs.unsafeCurrentId,
+        recentlyClosedTabs: [],
+      })
     );
   };
 

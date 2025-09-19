@@ -28,7 +28,8 @@ import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT } from '../../constants';
 
-export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
+export interface TabbedContentProps
+  extends Pick<TabsBarProps, 'maxItemsCount' | 'onClearRecentlyClosed'> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: TabItem[];
@@ -56,6 +57,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  onClearRecentlyClosed,
   getPreviewData,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
@@ -100,7 +102,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onSelectRecentlyClosed = useCallback(
     async (item: TabItem) => {
       const newItem = createItem();
-      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id };
+      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, duplicatedFromId: item.id };
       tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
       changeState((prevState) => selectRecentlyClosedTab(prevState, restoredItem));
     },
@@ -192,6 +194,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onLabelEdited={onLabelEdited}
             onSelect={onSelect}
             onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onClearRecentlyClosed={onClearRecentlyClosed}
             onReorder={onReorder}
             onClose={onClose}
             getPreviewData={getPreviewData}

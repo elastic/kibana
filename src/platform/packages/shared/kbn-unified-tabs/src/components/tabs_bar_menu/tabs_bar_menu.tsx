@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { differenceBy } from 'lodash';
 import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -20,6 +19,9 @@ import {
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
 
@@ -38,6 +40,7 @@ const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] =
   return tabItems.map((tab) => ({
     label: tab.label,
     key: tab.id,
+    'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
   }));
 };
 
@@ -47,22 +50,26 @@ export interface TabsBarMenuProps {
   recentlyClosedItems: TabItem[];
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
+  onClearRecentlyClosed: () => void;
 }
 
 export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
-  ({ items, selectedItem, recentlyClosedItems, onSelect, onSelectRecentlyClosed }) => {
+  ({
+    items,
+    selectedItem,
+    recentlyClosedItems,
+    onSelect,
+    onSelectRecentlyClosed,
+    onClearRecentlyClosed,
+  }) => {
     const openedTabsList = useMemo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
     );
-    const recentlyClosedTabsList = useMemo(() => {
-      const recentlyClosedItemsExcludingCurrentlyOpenTabs = differenceBy(
-        recentlyClosedItems,
-        items,
-        'id'
-      );
-      return getRecentlyClosedTabsList(recentlyClosedItemsExcludingCurrentlyOpenTabs);
-    }, [recentlyClosedItems, items]);
+    const recentlyClosedTabsList = useMemo(
+      () => getRecentlyClosedTabsList(recentlyClosedItems),
+      [recentlyClosedItems]
+    );
 
     const [isPopoverOpen, setPopover] = useState(false);
     const contextMenuPopoverId = useGeneratedHtmlId();
@@ -93,6 +100,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         hasArrow={false}
         panelProps={{
           css: popoverCss,
+          ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
         }}
         button={
           <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
@@ -155,9 +163,36 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               {(tabs) => (
                 <>
                   <EuiPopoverTitle paddingSize="s">
-                    {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
-                      defaultMessage: 'Recently closed',
-                    })}
+                    <EuiFlexGroup
+                      responsive={false}
+                      alignItems="center"
+                      gutterSize="s"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow>
+                        {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
+                          defaultMessage: 'Recently closed',
+                        })}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="both"
+                          data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
+                          aria-label={i18n.translate(
+                            'unifiedTabs.tabsBarMenu.clearRecentlyClosed',
+                            {
+                              defaultMessage: 'Clear',
+                            }
+                          )}
+                          onClick={onClearRecentlyClosed}
+                        >
+                          {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                            defaultMessage: 'Clear',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiPopoverTitle>
                   {tabs}
                 </>
