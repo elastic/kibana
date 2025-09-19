@@ -18,7 +18,8 @@ const mockUseIsExperimentalFeatureEnabled = jest.fn();
 describe('InvestigateInResolverAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useExperimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock) = mockUseIsExperimentalFeatureEnabled;
+    (useExperimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock) =
+      mockUseIsExperimentalFeatureEnabled;
     // Default to disabled for most tests
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
