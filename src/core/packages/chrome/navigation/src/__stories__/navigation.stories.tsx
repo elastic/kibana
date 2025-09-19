@@ -22,7 +22,7 @@ import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/ob
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
   }
 
   #storybook-root {
