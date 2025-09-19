@@ -9,8 +9,9 @@
 
 import { z } from '@kbn/zod';
 import { IfStepSchema } from '../../../spec/schema';
+import { GraphNodeSchema } from './base';
 
-export const EnterIfNodeSchema = z.object({
+export const EnterIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-if'),
   exitNodeId: z.string(),
@@ -21,21 +22,21 @@ export const EnterIfNodeSchema = z.object({
 });
 export type EnterIfNode = z.infer<typeof EnterIfNodeSchema>;
 
-export const EnterConditionBranchNodeSchema = z.object({
+export const EnterConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.union([z.literal('enter-then-branch'), z.literal('enter-else-branch')]),
   condition: z.union([z.string(), z.undefined()]),
 });
 export type EnterConditionBranchNode = z.infer<typeof EnterConditionBranchNodeSchema>;
 
-export const ExitConditionBranchNodeSchema = z.object({
+export const ExitConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.union([z.literal('exit-then-branch'), z.literal('exit-else-branch')]),
   startNodeId: z.string(),
 });
 export type ExitConditionBranchNode = z.infer<typeof ExitConditionBranchNodeSchema>;
 
-export const ExitIfNodeSchema = z.object({
+export const ExitIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-if'),
   startNodeId: z.string(),
