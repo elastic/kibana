@@ -28,5 +28,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/utils",
     "@kbn/dev-utils",
+    "@kbn/core-saved-objects-server-internal",
   ]
 }
