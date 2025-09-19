@@ -744,8 +744,12 @@ class BrowserService extends FtrService {
 
   public async setScrollLeft(scrollSize: number | string) {
     await this.driver.executeScript(`
-      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
-      scrollContainer.scrollLeft = ${scrollSize};
+      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+      if (container) {
+        container.scrollLeft = ${scrollSize};
+      } else {
+        document.documentElement.scrollLeft = ${scrollSize};
+      }
     `);
     return this.getScrollLeft();
   }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
 import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import {
   addIntegration,
@@ -60,8 +62,18 @@ function getAllIntegrations() {
   const cardItems = new Set<string>();
 
   for (let i = 0; i < 10; i++) {
-    cy.scrollTo(0, i * 600);
+    cy.window().then((win) => {
+      const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      } else {
+        cy.scrollTo(0, i * 600);
+      }
+    });
+
     cy.wait(50);
+
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
       .each((element) => {
@@ -72,9 +84,7 @@ function getAllIntegrations() {
       });
   }
 
-  return cy.then(() => {
-    return [...cardItems.values()];
-  });
+  return cy.then(() => [...cardItems.values()]);
 }
 
 describe('Add Integration - Real API', () => {
