@@ -135,7 +135,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, showPanelChrome, withDefaultActions, extraActions, lensApi]);
 
   return (
     <EmbeddableRenderer<LensSerializedState, LensApi>
