@@ -51,7 +51,10 @@ export function openSearchSessionsFlyout({
           <KibanaReactContextProvider>
             <Flyout
               onClose={() => flyout.close()}
-              onBackgroundSearchOpened={attrs.onBackgroundSearchOpened}
+              onBackgroundSearchOpened={(params) => {
+                attrs.onBackgroundSearchOpened?.(params);
+                flyout.close();
+              }}
               appId={attrs.appId}
               api={api}
               coreStart={coreStart}
