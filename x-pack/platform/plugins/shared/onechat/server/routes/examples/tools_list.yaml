@@ -1,0 +1,176 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          listToolsResponseExample:
+            results:
+            - id: platform.core.search
+              type: builtin
+              description: "A powerful tool for searching and analyzing data within your Elasticsearch cluster.\nIt supports both full-text relevance searches and structured analytical queries.\n\nUse this tool for any query that involves finding documents, counting, aggregating, or summarizing data from a known index.\n\nExamples of queries:\n- \"find articles about serverless architecture\"\n- \"search for support tickets mentioning 'billing issue' or 'refund request'\"\n- \"what is our policy on parental leave?\"\n- \"list all products where the category is 'electronics'\"\n- \"show me the last 5 documents from that index\"\n- \"show me the sales over the last year break down by month\"\n\nNote:\n- The 'index' parameter can be used to specify which index to search against.\n If not provided, the tool will decide itself which is the best index to use.\n- It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already\n know about the index and fields you want to search on, e.g. if the user explicitly specified it."
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: A natural language query expressing the search request
+                  index:
+                    type: string
+                    description: "(optional) Index to search against. If not provided, will automatically
+                      select the best index to use based on the query."
+                required:
+                - query
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.get_document_by_id
+              type: builtin
+              description: Retrieve the full content (source) of an Elasticsearch document based
+                on its ID and index name.
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the document to retrieve
+                  index:
+                    type: string
+                    description: Name of the index to retrieve the document from
+                required:
+                - id
+                - index
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.execute_esql
+              type: builtin
+              description: |-
+                Execute an ES|QL query and return the results in a tabular format.
+
+                **IMPORTANT**: This tool only **runs** queries; it does not write them.
+                Think of this as the final step after a query has been prepared.
+
+                You **must** get the query from one of two sources before calling this tool:
+                1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
+                2.  A verbatim query provided directly by the user.
+
+                Under no circumstances should you invent, guess, or modify a query yourself for this tool.
+                If you need a query, use the `platform.core.generate_esql` tool first.
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: The ES|QL query to execute
+                required:
+                - query
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.generate_esql
+              type: builtin
+              description: Generate an ES|QL query from a natural language query.
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: A natural language query to generate an ES|QL query from.
+                  index:
+                    type: string
+                    description: "(optional) Index to search against. If not provided, will use
+                      the index explorer to find the best index to use."
+                  context:
+                    type: string
+                    description: "(optional) Additional context that could be useful to generate
+                      the ES|QL query"
+                required:
+                - query
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.get_index_mapping
+              type: builtin
+              description: Retrieve mappings for the specified index or indices.
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  indices:
+                    type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: List of indices to retrieve mappings for.
+                required:
+                - indices
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.list_indices
+              type: builtin
+              description: |-
+                List the indices, aliases and datastreams from the Elasticsearch cluster.
+
+                The 'pattern' optional parameter is an index pattern which can be used to filter resources.
+                This parameter should only be used when you already know of a specific pattern to filter on,
+                e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  pattern:
+                    type: string
+                    default: "*"
+                    description: |-
+                      Index pattern to match Elasticsearch indices, aliases and datastream names.
+                            - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
+                            - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
+                            - Defaults to '*' to match all indices.
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+            - id: platform.core.index_explorer
+              type: builtin
+              description: |
+                List relevant indices, aliases and datastreams based on a natural language query.
+
+                The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
+                This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
+                Otherwise, leave it empty to search against all indices.
+
+                *Example:*
+                User: "Show me my latest alerts"
+                You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
+                Tool result: [{ type: "index", name: '.alerts' }]
+              tags: []
+              configuration: {}
+              readonly: true
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: A natural language query to infer which indices, aliases or datastreams
+                      to use.
+                  limit:
+                    type: number
+                    description: "(optional) Limit the max number of indices to return. Defaults
+                      to 1."
+                  indexPattern:
+                    type: string
+                    description: "(optional) Index pattern to filter indices by. Defaults to *."
+                required:
+                - query
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#

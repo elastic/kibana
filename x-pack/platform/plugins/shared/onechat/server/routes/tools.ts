@@ -94,7 +94,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/tools_get.yaml')
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_get_by_id.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -141,6 +141,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_create.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
@@ -186,6 +189,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_update.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
@@ -226,6 +232,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_delete.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { id } = request.params;
@@ -264,6 +273,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               connector_id: schema.maybe(schema.string()),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_execute.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
