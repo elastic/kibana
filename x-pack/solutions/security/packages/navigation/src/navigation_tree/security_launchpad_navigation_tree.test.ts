@@ -47,6 +47,7 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
       });
     });
 
@@ -58,6 +59,7 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
       });
     });
 
@@ -69,6 +71,7 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
       });
     });
   });
@@ -82,6 +85,7 @@ describe('createLaunchpadNavigationTree', () => {
         title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
         renderAs: 'panelOpener',
         icon: 'launch',
+        iconV2: 'launch',
         children: [
           {
             id: SecurityPageName.landing,
