@@ -6,9 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable @kbn/imports/no_unresolvable_imports */
+// @ts-expect-error
+import { foo } from './barrel';
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
-
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+describe('Barrel Import Test', () => {
+  test('should import from barrel and get rewritten to source', () => {
+    expect(foo).toBe('foo');
+  });
+});

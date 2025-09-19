@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import chalk from 'chalk';
+import { formatFilepath } from './format_filepath';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export function formatRequireStack(stack: string[], max: number) {
+  const uniq = Array.from(new Set<string>(stack));
+
+  if (uniq.length === 0) return [chalk.dim('(none)')];
+
+  return uniq.map((file) => {
+    const prefix = `  → `;
+    return `${prefix}${formatFilepath(file, max - prefix.length)}`;
+  });
+}
