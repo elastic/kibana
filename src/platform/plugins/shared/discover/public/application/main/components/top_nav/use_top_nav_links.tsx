@@ -22,6 +22,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import useObservable from 'react-use/lib/useObservable';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -34,6 +35,7 @@ import {
   getShareAppMenuItem,
   getInspectAppMenuItem,
   convertAppMenuItemToTopNavItem,
+  getBackgroundSearchFlyout,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
@@ -72,6 +74,7 @@ export const useTopNavLinks = ({
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
+  const appId = useObservable(services.application.currentAppId$);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
@@ -122,6 +125,13 @@ export const useTopNavLinks = ({
           stateContainer: state,
         });
         items.push(alertsAppMenuItem);
+      }
+
+      if (!!appId && services.data.search.isBackgroundSearchEnabled) {
+        const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
+          onClick: () => services.data.search.showSearchSessionsFlyout({ appId }),
+        });
+        items.push(backgroundSearchFlyoutMenuItem);
       }
 
       if (!defaultMenu?.newItem?.disabled) {
@@ -175,6 +185,7 @@ export const useTopNavLinks = ({
       isEsqlMode,
       currentDataView,
       hasShareIntegration,
+      appId,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
