@@ -6,7 +6,7 @@ responses:
           updateToolResponseExample:
             id: search.esql.search
             type: index_search
-            description: This tool searches over the data in the "financial_data" index
+            description: Updated description - This tool searches over the data in the "financial_data" index
             tags: []
             configuration:
               pattern: financial_data

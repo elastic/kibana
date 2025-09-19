@@ -7,7 +7,7 @@ responses:
             id: created-agent-id
             type: chat
             name: Search Index Helper
-            description: Search for anything in "content-*" indices!
+            description: Updated description - Search for anything in "content-*" indices!
             labels:
             - custom-indices
             - department-search
