@@ -344,6 +344,12 @@ describe('metric chart transformations', () => {
             color: '#0000FF',
           },
           empty_as_null: false,
+          compare: {
+            to: 'primary',
+            icon: false,
+            value: false,
+            palette: 'compare_to',
+          },
         },
         breakdown_by: {
           operation: 'terms',
@@ -431,6 +437,12 @@ describe('metric chart transformations', () => {
           },
           "sampling": 0.8,
           "secondary_metric": Object {
+            "compare": Object {
+              "icon": false,
+              "palette": "compare_to",
+              "to": "primary",
+              "value": true,
+            },
             "empty_as_null": false,
             "label": "Request Count",
             "operation": "count",
