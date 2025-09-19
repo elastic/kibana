@@ -13,59 +13,84 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
+  EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
+import { getPercentageFormatter } from '../../../../util/formatters';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useMatchRate } from './use_match_rate';
+import { ConditionPanel } from './condition_panel';
+
+const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
 export function SuggestedStreamPanel({
+  definition,
   partition,
-  parentName,
   onDismiss,
   onPreview,
+  onSuccess,
 }: {
-  partition: ReviewSuggestionsInputs['partitions'][number];
-  parentName: string;
+  definition: Streams.WiredStream.GetResponse;
+  partition: ReviewSuggestionsInputs['suggestions'][number];
   onDismiss(): void;
   onPreview(): void;
+  onSuccess(): void;
 }) {
-  const [isOpen, toggle] = useToggle(false);
+  const [isModalOpen, toggleModal] = useToggle(false);
+  const { timeState } = useTimefilter();
+  const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
 
   return (
     <>
-      {isOpen && (
+      {isModalOpen && (
         <CreateStreamConfirmationModal
+          definition={definition}
           partition={partition}
-          parentName={parentName}
-          onClose={toggle}
+          onSuccess={() => {
+            toggleModal(false);
+            onSuccess();
+          }}
+          onClose={() => toggleModal(false)}
         />
       )}
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h4>{`${parentName}.${partition.name}`}</h4>
+              <h4>{`${definition.stream.name}.${partition.name}`}</h4>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="inspect" color="text" size="s" onClick={onPreview}>
-              {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.preview', {
-                defaultMessage: 'Preview',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {matchRate.loading ? (
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+          ) : matchRate.value !== undefined ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="check" color="success" size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="success">
+                  {percentageFormatter.format(matchRate.value)}
+                </EuiText>
+              </EuiFlexItem>
+            </>
+          ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiPanel color="subdued" hasShadow={false} hasBorder={false} paddingSize="s">
-          {JSON.stringify(partition.condition)}
-        </EuiPanel>
+        <ConditionPanel condition={partition.condition} />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="inspect" color="text" size="s" onClick={onPreview}>
-              {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.preview', {
+            <EuiButtonEmpty iconType="inspect" isSelected={false} size="s" onClick={onPreview}>
+              {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
                 defaultMessage: 'Preview',
               })}
             </EuiButtonEmpty>
@@ -74,14 +99,17 @@ export function SuggestedStreamPanel({
             <EuiFlexGroup gutterSize="m" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="s" onClick={onDismiss}>
-                  {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.dismiss', {
-                    defaultMessage: 'Reject',
-                  })}
+                  {i18n.translate(
+                    'xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss',
+                    {
+                      defaultMessage: 'Reject',
+                    }
+                  )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton iconType="check" size="s" onClick={toggle} fill>
-                  {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.accept', {
+                <EuiButton iconType="check" size="s" onClick={() => toggleModal(true)} fill>
+                  {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
                     defaultMessage: 'Accept',
                   })}
                 </EuiButton>

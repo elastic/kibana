@@ -13,7 +13,7 @@ import { useFetchSuggestedPartitions } from './use_fetch_suggested_partitions';
 export { FormProvider } from 'react-hook-form';
 
 export interface ReviewSuggestionsInputs {
-  partitions: Array<{
+  suggestions: Array<{
     name: string;
     condition: Condition;
     selected?: boolean;
@@ -21,33 +21,41 @@ export interface ReviewSuggestionsInputs {
 }
 
 export function useReviewSuggestionsForm() {
-  const [suggestedPartitionsState, fetchSuggestedPartitions] = useFetchSuggestedPartitions();
+  const [suggestedPartitionsState, fetchSuggestions] = useFetchSuggestedPartitions();
   const reviewSuggestionsForm = useForm<ReviewSuggestionsInputs>({
-    defaultValues: { partitions: [] },
+    defaultValues: { suggestions: [] },
   });
-  const { fields: partitions, remove: removePartition } = useFieldArray({
+  const { fields: suggestions, remove: removeSuggestion } = useFieldArray({
     control: reviewSuggestionsForm.control,
-    name: 'partitions',
+    name: 'suggestions',
   });
 
+  const resetForm = () => fetchSuggestions(null);
+  const isEmpty = suggestedPartitionsState.value && suggestions.length === 0;
+
+  // Update form values when suggestions are fetched or reset
   useUpdateEffect(() => {
     if (suggestedPartitionsState.value) {
-      reviewSuggestionsForm.setValue('partitions', suggestedPartitionsState.value.partitions);
+      reviewSuggestionsForm.setValue('suggestions', suggestedPartitionsState.value.partitions);
     } else {
-      // reviewSuggestionsForm.reset();
+      reviewSuggestionsForm.reset();
     }
   }, [suggestedPartitionsState.value]);
 
+  // Reset form when all partitions are removed
+  useUpdateEffect(() => {
+    if (suggestions.length === 0) {
+      resetForm();
+    }
+  }, [suggestions.length]);
+
   return {
     reviewSuggestionsForm,
-    partitions,
-    removePartition,
-    isEmpty: suggestedPartitionsState.value && partitions.length === 0,
-    isLoadingSuggestedPartitions: suggestedPartitionsState.loading,
-    fetchSuggestedPartitions,
-    reset: () => {
-      reviewSuggestionsForm.reset();
-      fetchSuggestedPartitions(null);
-    },
+    suggestions,
+    removeSuggestion,
+    isEmpty,
+    isLoadingSuggestions: suggestedPartitionsState.loading,
+    fetchSuggestions,
+    resetForm,
   };
 }

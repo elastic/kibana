@@ -82,6 +82,10 @@ export async function partitionStream({
         return { response: { partitions: partitionsResponse } };
       },
     },
+    finalToolChoice: {
+      type: 'function',
+      function: 'partition_logs',
+    },
     abortSignal: signal,
   });
 

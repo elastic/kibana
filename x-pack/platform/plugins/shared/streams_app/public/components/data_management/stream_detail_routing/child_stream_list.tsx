@@ -73,12 +73,12 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
   const {
     reviewSuggestionsForm,
-    isEmpty: isEmptyPartitions,
-    reset: resetForm,
-    partitions,
-    removePartition,
-    isLoadingSuggestedPartitions,
-    fetchSuggestedPartitions,
+    isEmpty: isEmptySuggestions,
+    resetForm,
+    suggestions,
+    removeSuggestion,
+    isLoadingSuggestions,
+    fetchSuggestions,
   } = useReviewSuggestionsForm();
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -185,7 +185,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
         {aiFeatures && shouldDisplayCreateButton && (
           <>
-            {isEmptyPartitions ? (
+            {isEmptySuggestions ? (
               <EuiCallOut
                 title={i18n.translate(
                   'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsTitle',
@@ -199,36 +199,36 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   {i18n.translate(
                     'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsDescription',
                     {
-                      defaultMessage: 'Retry using a different time range or stream.',
+                      defaultMessage: 'Retry using a different time range.',
                     }
                   )}
                 </EuiText>
               </EuiCallOut>
-            ) : partitions.length === 0 ? (
-                <EuiFlexGroup justifyContent="center" alignItems="flexStart">
-                  <EuiFlexItem grow={false}>
-                    <GenerateSuggestionButton
-                      size="s"
-                      onClick={(connectorId) =>
-                        fetchSuggestedPartitions({
-                          streamName: definition.stream.name,
-                          connectorId,
-                          start: timeState.start,
-                          end: timeState.end,
-                        })
+            ) : suggestions.length === 0 || isLoadingSuggestions ? (
+              <EuiFlexGroup justifyContent="center" alignItems="flexStart">
+                <EuiFlexItem grow={false}>
+                  <GenerateSuggestionButton
+                    size="s"
+                    onClick={(connectorId) =>
+                      fetchSuggestions({
+                        streamName: definition.stream.name,
+                        connectorId,
+                        start: timeState.start,
+                        end: timeState.end,
+                      })
+                    }
+                    isLoading={isLoadingSuggestions}
+                    aiFeatures={aiFeatures}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
+                      {
+                        defaultMessage: 'Suggest partitions with AI',
                       }
-                      isLoading={isLoadingSuggestedPartitions}
-                      aiFeatures={aiFeatures}
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
-                        {
-                          defaultMessage: 'Suggest partitions with AI',
-                        }
-                      )}
-                    </GenerateSuggestionButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                    )}
+                  </GenerateSuggestionButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : (
               <FormProvider {...reviewSuggestionsForm}>
                 <EuiCallOut
@@ -248,12 +248,25 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     )}
                   </EuiText>
                   <EuiSpacer size="m" />
-                  {partitions.map((partition, index) => (
-                    <NestedView key={partition.id} last={index === partitions.length - 1}>
+                  {suggestions.map((partition, index) => (
+                    <NestedView key={partition.id} last={index === suggestions.length - 1}>
                       <SuggestedStreamPanel
+                        definition={definition}
                         partition={partition}
-                        parentName={definition.stream.name}
-                        onDismiss={() => removePartition(index)}
+                        onDismiss={() => removeSuggestion(index)}
+                        onSuccess={() => {
+                          streamsRoutingActorRef.send({
+                            type: 'suggestion.append',
+                            definitions: [
+                              {
+                                destination: `${definition.stream.name}.${partition.name}`,
+                                where: partition.condition,
+                                status: 'enabled',
+                              },
+                            ],
+                          });
+                          removeSuggestion(index);
+                        }}
                         onPreview={() =>
                           streamsRoutingActorRef.send({
                             type: 'suggestion.preview',
@@ -269,14 +282,14 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     iconType="refresh"
                     size="s"
                     onClick={(connectorId) =>
-                      fetchSuggestedPartitions({
+                      fetchSuggestions({
                         streamName: definition.stream.name,
                         connectorId,
                         start: timeState.start,
                         end: timeState.end,
                       })
                     }
-                    isLoading={isLoadingSuggestedPartitions}
+                    isLoading={isLoadingSuggestions}
                     aiFeatures={aiFeatures}
                   >
                     {i18n.translate(

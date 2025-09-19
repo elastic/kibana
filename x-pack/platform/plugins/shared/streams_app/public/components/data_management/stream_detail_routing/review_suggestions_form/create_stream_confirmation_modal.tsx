@@ -12,47 +12,35 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiText,
-  EuiPanel,
+  EuiFormRow,
   EuiModalFooter,
+  EuiSpacer,
   useGeneratedHtmlId,
+  EuiTitle,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
+import React from 'react';
+import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
 import { useForkStream } from './use_fork_stream';
+import { ConditionPanel } from './condition_panel';
 
 export function CreateStreamConfirmationModal({
+  definition,
   partition,
-  parentName,
   onClose,
+  onSuccess,
 }: {
-  partition: ReviewSuggestionsInputs['partitions'][number];
-  parentName: string;
+  definition: Streams.WiredStream.GetResponse;
+  partition: ReviewSuggestionsInputs['suggestions'][number];
   onClose: () => void;
+  onSuccess: () => void;
 }) {
-  const streamsRoutingActorRef = useStreamsRoutingActorRef();
-  const [forkStreamState, forkStream] = useForkStream();
+  const [forkStreamState, forkStream] = useForkStream(onSuccess);
   const modalTitleId = useGeneratedHtmlId();
 
-  const name = `${parentName}.${partition.name}`;
-
-  // Append created stream to the list of child streams
-  useEffect(() => {
-    if (forkStreamState.value) {
-      streamsRoutingActorRef.send({
-        type: 'suggestion.append',
-        definitions: [
-          {
-            destination: name,
-            where: partition.condition,
-            status: 'enabled',
-          },
-        ],
-      });
-    }
-  }, [forkStreamState.value]); // eslint-disable-line react-hooks/exhaustive-deps
+  const name = `${definition.stream.name}.${partition.name}`;
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
@@ -64,14 +52,26 @@ export function CreateStreamConfirmationModal({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmMessage', {
-            defaultMessage: 'Are you sure you want to create this stream?',
-          })}
-        </EuiText>
-        <EuiPanel color="subdued" hasShadow={false} hasBorder={false} paddingSize="s">
-          {JSON.stringify(partition.condition)}
-        </EuiPanel>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.streams.streamDetailRouting.partitionSuggestion.streamName',
+            {
+              defaultMessage: 'Stream name',
+            }
+          )}
+        >
+          <EuiFieldText value={name} readOnly />
+        </EuiFormRow>
+        <EuiSpacer />
+        <EuiTitle size="xxxs">
+          <h5>
+            {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.condition', {
+              defaultMessage: 'Condition',
+            })}
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <ConditionPanel condition={partition.condition} />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} isDisabled={forkStreamState.loading}>
@@ -83,7 +83,7 @@ export function CreateStreamConfirmationModal({
           isLoading={forkStreamState.loading}
           onClick={() =>
             forkStream({
-              parentName,
+              parentName: definition.stream.name,
               name,
               condition: partition.condition,
             })

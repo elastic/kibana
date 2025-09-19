@@ -463,7 +463,11 @@ function buildDocumentsSearchParams({
   };
 }
 
-function buildDocumentCountSearchParams({ start, end, definition }: SearchParams) {
+export function buildDocumentCountSearchParams({
+  start,
+  end,
+  definition,
+}: Pick<SearchParams, 'start' | 'end' | 'definition'>) {
   return {
     index: definition.stream.name,
     query: createTimestampRangeQuery(start, end),
@@ -472,13 +476,13 @@ function buildDocumentCountSearchParams({ start, end, definition }: SearchParams
   };
 }
 
-function buildDocumentCountProbabilitySearchParams({
+export function buildDocumentCountProbabilitySearchParams({
   condition,
   definition,
   docCount,
   end,
   start,
-}: SearchParams & { docCount?: number }) {
+}: Pick<SearchParams, 'condition' | 'start' | 'end' | 'definition'> & { docCount?: number }) {
   const finalCondition = processCondition(condition);
   const runtimeMappings = getRuntimeMappings(definition, finalCondition);
   const query = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
