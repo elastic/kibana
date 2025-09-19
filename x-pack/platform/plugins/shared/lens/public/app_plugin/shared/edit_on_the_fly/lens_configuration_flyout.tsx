@@ -28,6 +28,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { SettingsPanelWrapper } from '../../../editor_frame_service/editor_frame/settings_panel';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -67,6 +68,7 @@ export function LensEditConfigurationFlyout({
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [isSettingsAccordionOpen, setIsSettingsAccordionOpen] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
 
@@ -488,10 +490,44 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem
+              grow={isSettingsAccordionOpen ? 1 : false}
+              data-test-subj="InlineEditingSettings"
+              css={css`
+                border-top: ${euiTheme.euiTheme.border.thin};
+                border-bottom: ${euiTheme.euiTheme.border.thin};
+                padding-left: ${euiTheme.euiTheme.size.base};
+                padding-right: ${euiTheme.euiTheme.size.base};
+                .euiAccordion__childWrapper {
+                  flex: ${isSettingsAccordionOpen ? 1 : 'none'};
+                }
+              `}
+            >
+              <SettingsPanelWrapper
+                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                framePublicAPI={framePublicAPI}
+                core={coreStart}
+                nowProvider={startDependencies.data.nowProvider}
+                showOnlyIcons
+                isAccordionOpen={isSettingsAccordionOpen}
+                toggleAccordionCb={(status) => {
+                  if (!status && isLayerAccordionOpen) {
+                    setIsLayerAccordionOpen(false);
+                  }
+                  if (status && isESQLResultsAccordionOpen) {
+                    setIsESQLResultsAccordionOpen(!false);
+                  }
+                  setIsSettingsAccordionOpen(!isSettingsAccordionOpen);
+                  setIsSuggestionsAccordionOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem
               grow={isSuggestionsAccordionOpen ? 1 : false}
               data-test-subj="InlineEditingSuggestions"
               css={css`
-                border-top: ${euiTheme.euiTheme.border.thin};
                 border-bottom: ${euiTheme.euiTheme.border.thin};
                 padding-left: ${euiTheme.euiTheme.size.base};
                 padding-right: ${euiTheme.euiTheme.size.base};
@@ -512,11 +548,12 @@ export function LensEditConfigurationFlyout({
                 isAccordionOpen={isSuggestionsAccordionOpen}
                 toggleAccordionCb={(status) => {
                   if (!status && isLayerAccordionOpen) {
-                    setIsLayerAccordionOpen(status);
+                    setIsLayerAccordionOpen(false);
                   }
                   if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
+                    setIsESQLResultsAccordionOpen(!false);
                   }
+                  setIsSettingsAccordionOpen(false);
                   setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
                 }}
               />
