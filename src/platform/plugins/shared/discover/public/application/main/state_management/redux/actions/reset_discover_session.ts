@@ -43,7 +43,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+        const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
 
         if (tabStateContainer) {
           const savedSearch = await fromSavedObjectTabToSavedSearch({
