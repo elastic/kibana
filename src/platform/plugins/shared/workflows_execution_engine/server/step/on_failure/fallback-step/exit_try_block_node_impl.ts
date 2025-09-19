@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitTryBlockNode } from '@kbn/workflows/graph';
 import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class ExitTryBlockNodeImpl implements NodeImplementation {
-  constructor(
-    private node: ExitTryBlockNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
-  ) {}
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
     const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};

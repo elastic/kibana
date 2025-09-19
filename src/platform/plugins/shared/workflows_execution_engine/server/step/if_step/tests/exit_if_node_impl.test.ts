@@ -7,28 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitIfNode } from '@kbn/workflows/graph';
 import { ExitIfNodeImpl } from '../exit_if_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('ExitIfNodeImpl', () => {
-  let step: ExitIfNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: ExitIfNodeImpl;
 
   beforeEach(() => {
-    step = {
-      id: 'testStep',
-      type: 'exit-if',
-      stepId: 'testStep',
-      stepType: 'if',
-      startNodeId: 'enterIfNode',
-    };
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
     wfExecutionRuntimeManagerMock.finishStep = jest.fn();
     wfExecutionRuntimeManagerMock.exitScope = jest.fn();
-    impl = new ExitIfNodeImpl(step, wfExecutionRuntimeManagerMock);
+    impl = new ExitIfNodeImpl(wfExecutionRuntimeManagerMock);
   });
 
   it('should exit scope', async () => {

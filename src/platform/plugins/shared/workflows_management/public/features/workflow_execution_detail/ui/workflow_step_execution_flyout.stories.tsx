@@ -30,8 +30,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionFlyout> = {
       status: ExecutionStatus.FAILED,
       startedAt: '2025-09-01T17:34:54.542Z',
       id: 'd5c942d5-c788-46ce-961d-5dbab6cf1246',
-      path: [],
+      scopeStack: [],
       stepExecutionIndex: 0,
+      globalExecutionIndex: 0,
       workflowRunId: 'e2387d33-d626-42f0-a402-c379d4d30d42',
       workflowId: 'e484eac2-f8ea-4e5b-8e80-0df74f2c42c6',
       input: {

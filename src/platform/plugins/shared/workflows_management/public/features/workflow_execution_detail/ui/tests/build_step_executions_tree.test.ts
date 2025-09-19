@@ -24,6 +24,7 @@ const createStepExecution = (
   status: ExecutionStatus.COMPLETED,
   startedAt: '2023-01-01T00:00:00Z',
   topologicalIndex: 0,
+  globalExecutionIndex: 0,
   stepExecutionIndex: 0,
   ...overrides,
 });
@@ -153,7 +154,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '0' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
             },
           ],
         }),
@@ -166,7 +167,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '1' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '1' }],
             },
           ],
         }),
@@ -256,7 +257,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'if-1',
-              nestedScopes: [{ nodeId: 'if-1', scopeId: 'true' }],
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach', scopeId: 'true' }],
             },
           ],
         }),
@@ -339,7 +340,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '0' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
             },
           ],
         }),
@@ -352,11 +353,11 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '1' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '1' }],
             },
             {
               stepId: 'if-1',
-              nestedScopes: [{ nodeId: 'if-1' }],
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach' }],
             },
           ],
         }),
@@ -431,7 +432,9 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: 'missing-iteration' }],
+              nestedScopes: [
+                { nodeId: 'foreach-1', nodeType: 'foreach', scopeId: 'missing-iteration' },
+              ],
             },
           ],
         }),
@@ -479,7 +482,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'if-1',
-              nestedScopes: [{ nodeId: 'if-1', scopeId: 'missing-branch' }],
+              nestedScopes: [{ nodeId: 'if-1', nodeType: 'foreach', scopeId: 'missing-branch' }],
             },
           ],
         }),
@@ -527,7 +530,9 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'custom-step',
-              nestedScopes: [{ nodeId: 'custom-step', scopeId: 'missing-child' }],
+              nestedScopes: [
+                { nodeId: 'custom-step', nodeType: 'foreach', scopeId: 'missing-child' },
+              ],
             },
           ],
         }),
@@ -585,7 +590,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '0' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
             },
           ],
         }),
@@ -704,7 +709,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach-1',
-              nestedScopes: [{ nodeId: 'foreach-1', scopeId: '0' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
             },
           ],
         }),

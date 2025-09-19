@@ -133,6 +133,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.PENDING,
           startedAt: '2025-09-02T20:43:57.466Z',
           id: '61d229be-d8d8-4af5-adeb-5454564bf000',
+          globalExecutionIndex: 0,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -148,7 +149,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
-          path: [],
+          scopeStack: [],
         },
         {
           stepId: 'debug_ai_response',
@@ -156,6 +157,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-09-02T20:44:02.142Z',
           id: '6b035884-16ec-4df7-ac72-8de259b2e8a4',
+          globalExecutionIndex: 1,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -169,7 +171,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:02.167Z',
           executionTimeMs: 25,
-          path: [],
+          scopeStack: [],
         },
         {
           stepId: 'print-enter-dash',
@@ -177,6 +179,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:03.171Z',
           id: '765f1b7a-34ed-4716-9418-175e2c8543f4',
+          globalExecutionIndex: 2,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -188,7 +191,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
-          path: [],
+          scopeStack: [],
         },
         {
           stepId: 'foreachstep',
@@ -196,6 +199,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.SKIPPED,
           startedAt: '2025-09-02T20:44:05.233Z',
           id: '58ecc47e-3a98-4b6e-b018-2b44b6e366a6',
+          globalExecutionIndex: 3,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -227,7 +231,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
-          path: [],
+          scopeStack: [],
         },
         {
           stepId: 'log-name-surname',
@@ -235,6 +239,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.WAITING_FOR_INPUT,
           startedAt: '2025-09-02T20:44:12.598Z',
           id: 'f71b2778-a92d-4d4d-a5e7-8cbf5c0794e4',
+          globalExecutionIndex: 4,
           stepExecutionIndex: 3,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -246,7 +251,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:12.694Z',
           executionTimeMs: 96,
-          path: ['foreachstep', '0'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
         },
         {
           stepId: 'log-name-surname',
@@ -254,6 +264,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.WAITING,
           startedAt: '2025-09-02T20:44:10.456Z',
           id: 'aedd1aff-54d2-4238-ba05-6f72a82d6613',
+          globalExecutionIndex: 5,
           stepExecutionIndex: 2,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -265,7 +276,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:10.491Z',
           executionTimeMs: 35,
-          path: ['foreachstep', '1'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '1' }],
+            },
+          ],
         },
         {
           stepId: 'log-name-surname',
@@ -273,6 +289,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:08.396Z',
           id: 'e8739d72-5a1e-4a19-8382-a15ffaf12bb0',
+          globalExecutionIndex: 6,
           stepExecutionIndex: 1,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -284,7 +301,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:08.423Z',
           executionTimeMs: 27,
-          path: ['foreachstep', '2'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '3' }],
+            },
+          ],
         },
         {
           stepId: 'log-name-surname',
@@ -292,6 +314,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.FAILED,
           startedAt: '2025-09-02T20:44:06.265Z',
           id: '7e36c4c3-6d99-4d2f-a0b8-8229904ef0cf',
+          globalExecutionIndex: 7,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -303,7 +326,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:06.293Z',
           executionTimeMs: 28,
-          path: ['foreachstep', '3'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '4' }],
+            },
+          ],
         },
         {
           stepId: 'slack_it',
@@ -311,6 +339,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:13.480Z',
           id: 'a44f84d1-0b7f-4aed-8060-b7ef12aa267c',
+          globalExecutionIndex: 8,
           stepExecutionIndex: 3,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -322,7 +351,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:13.895Z',
           executionTimeMs: 415,
-          path: ['foreachstep', '0'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '5' }],
+            },
+          ],
         },
         {
           stepId: 'slack_it',
@@ -330,6 +364,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:11.422Z',
           id: 'fe7786c2-95f4-49d6-9935-b1a897ed9390',
+          globalExecutionIndex: 9,
           stepExecutionIndex: 2,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -341,7 +376,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:11.823Z',
           executionTimeMs: 401,
-          path: ['foreachstep', '1'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '6' }],
+            },
+          ],
         },
         {
           stepId: 'slack_it',
@@ -349,6 +389,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:09.363Z',
           id: '57b14a10-93c6-471a-b9d2-d027cf340d31',
+          globalExecutionIndex: 10,
           stepExecutionIndex: 1,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -360,7 +401,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:09.756Z',
           executionTimeMs: 393,
-          path: ['foreachstep', '2'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '7' }],
+            },
+          ],
         },
         {
           stepId: 'slack_it',
@@ -368,6 +414,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:07.300Z',
           id: '4e76f94d-2092-41bb-9c07-171b9207de98',
+          globalExecutionIndex: 11,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -379,7 +426,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:07.692Z',
           executionTimeMs: 392,
-          path: ['foreachstep', '3'],
+          scopeStack: [
+            {
+              stepId: 'foreachstep',
+              nestedScopes: [{ nodeId: 'enterForeach', nodeType: 'foreach', scopeId: '8' }],
+            },
+          ],
         },
         {
           stepId: 'print-exit-dash',
@@ -387,6 +439,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:15.553Z',
           id: '16b8cb55-9946-4adb-b086-ebc37c60fa86',
+          globalExecutionIndex: 12,
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
@@ -398,7 +451,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
-          path: [],
+          scopeStack: [],
         },
       ],
     },

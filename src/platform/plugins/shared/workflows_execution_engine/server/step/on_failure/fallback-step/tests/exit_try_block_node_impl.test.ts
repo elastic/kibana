@@ -7,23 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitTryBlockNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
 
 describe('ExitTryBlockNodeImpl', () => {
   let underTest: ExitTryBlockNodeImpl;
-  let node: ExitTryBlockNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    node = {
-      id: 'exitOnFailureZone1',
-      type: 'exit-try-block',
-      stepId: 'exitOnFailureZone1',
-      stepType: 'on-failure',
-      enterNodeId: 'onFailureZone1',
-    };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.getCurrentStepState = jest.fn();
     workflowRuntime.failStep = jest.fn();
@@ -32,7 +23,7 @@ describe('ExitTryBlockNodeImpl', () => {
     workflowRuntime.exitScope = jest.fn();
     workflowRuntime.navigateToNextNode = jest.fn();
 
-    underTest = new ExitTryBlockNodeImpl(node, workflowRuntime);
+    underTest = new ExitTryBlockNodeImpl(workflowRuntime);
   });
 
   describe('run', () => {
