@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import { createBadRequestError } from '@kbn/onechat-common';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-export const validateWorkflowId = async ({}: {
+export const validateWorkflowId = async ({
+  workflows,
+  workflowId,
+  spaceId,
+}: {
   workflows: WorkflowsPluginSetup;
   workflowId: string;
+  spaceId: string;
 }) => {
-  // TODO
+  const workflow = await workflows.management.getWorkflow(workflowId, spaceId);
+  if (!workflow) {
+    throw createBadRequestError(`Workflow '${workflowId}' not found`);
+  }
 };

@@ -19,13 +19,20 @@ export const createWorkflowToolType = ({
 }: {
   workflowsManagement: WorkflowsPluginSetup;
 }): PersistedToolTypeDefinition<WorkflowToolConfig> => {
+  // TODO: fix and get spaceId from request
+  const spaceId = 'default';
+
   return {
     toolType: ToolType.workflow,
     toToolDefinition: toToolDefinitionFactory({ workflowsManagement }),
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
     validateForCreate: async ({ config }) => {
-      await validateWorkflowId({ workflows: workflowsManagement, workflowId: config.workflow_id });
+      await validateWorkflowId({
+        workflows: workflowsManagement,
+        workflowId: config.workflow_id,
+        spaceId,
+      });
       return config;
     },
     validateForUpdate: async ({ update, current }) => {
@@ -36,6 +43,7 @@ export const createWorkflowToolType = ({
       await validateWorkflowId({
         workflows: workflowsManagement,
         workflowId: mergedConfig.workflow_id,
+        spaceId,
       });
 
       return mergedConfig;
