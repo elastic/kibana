@@ -18,6 +18,7 @@ import type {
   BulkDeleteToolResponse,
   ExecuteToolResponse,
   ResolveSearchSourcesResponse,
+  ListWorkflowsResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -74,5 +75,11 @@ export class ToolsService {
       `${internalApiPath}/tools/_resolve_search_sources`,
       { query: { pattern } }
     );
+  }
+
+  async listWorkflows({ page, limit }: { page?: number; limit?: number }) {
+    return await this.http.get<ListWorkflowsResponse>(`${internalApiPath}/tools/_list_workflows`, {
+      query: { page, limit },
+    });
   }
 }
