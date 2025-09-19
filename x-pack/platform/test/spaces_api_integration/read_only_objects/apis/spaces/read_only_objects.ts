@@ -644,7 +644,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
           .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
+          .set('cookie', ownerCookie.cookieString())
           .expect(200);
 
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
