@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConfigSchema } from './config';
-
-export type { CreateSAMLResponseParams } from './plugin';
-export { plugin } from './plugin';
-
-export const config = {
-  schema: ConfigSchema,
-  exposeToBrowser: { uiam: true },
-};
+export interface ConfigType {
+  uiam?: { enabled: boolean };
+}
