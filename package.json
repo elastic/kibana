@@ -1956,7 +1956,7 @@
     "playwright": "1.53.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.6",
-    "postcss-loader": "^8.1.1",
+    "postcss-loader": "^8.2.0",
     "postcss-prefix-selector": "^1.16.0",
     "postcss-scss": "^4.0.9",
     "prettier": "^2.8.8",
