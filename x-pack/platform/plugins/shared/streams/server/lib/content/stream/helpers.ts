@@ -8,7 +8,7 @@
 import { intersectionBy } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
-import { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
 

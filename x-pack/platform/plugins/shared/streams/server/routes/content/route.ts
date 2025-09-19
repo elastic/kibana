@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 import { z } from '@kbn/zod';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import type { FieldDefinition, FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
