@@ -15,7 +15,6 @@ import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -107,7 +106,6 @@ export class StreamsPlugin
       }),
       order: 600,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [STREAMS_FEATURE_ID],
       privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
         defaultMessage: 'All Spaces is required for Streams access.',
