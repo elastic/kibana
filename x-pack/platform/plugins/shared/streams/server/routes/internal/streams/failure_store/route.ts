@@ -15,6 +15,7 @@ import {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 
 export interface UpdateFailureStoreResponse {
   acknowledged: true;
@@ -96,7 +97,7 @@ export const updateFailureStoreRoute = createServerRoute({
     const stream = await streamsClient.getStream(name);
 
     if (Streams.WiredStream.Definition.is(stream)) {
-      throw new Error('Failure store cannot be configured for wired streams');
+      throw new StatusError('Only wired streams can be exported', 400);
     }
 
     // Check if user has failure store manage privileges

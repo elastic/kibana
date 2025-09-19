@@ -100,12 +100,14 @@ interface Props {
   onCloseModal: () => void;
   onSaveModal: (data: FailureStoreFormData) => void;
   failureStoreProps: FailureStoreFormProps;
+  isSaveButtonLoading: boolean;
 }
 
 export const FailureStoreModal: FunctionComponent<Props> = ({
   onCloseModal,
   onSaveModal,
   failureStoreProps,
+  isSaveButtonLoading,
 }) => {
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -284,7 +286,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButton
           fill
           type="submit"
-          isLoading={false}
+          isLoading={isSaveButtonLoading}
           data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}

@@ -29,6 +29,7 @@ export const StreamDetailFailureStore = ({
   definition: Streams.ingest.all.GetResponse;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
+  const [isRequestInProgress, setIsRequestInProgress] = useState(false);
   const { updateFailureStore } = useUpdateFailureStore();
   const {
     core: { notifications },
@@ -56,6 +57,7 @@ export const StreamDetailFailureStore = ({
     failureStoreEnabled: boolean;
     customRetentionPeriod?: string;
   }) => {
+    setIsRequestInProgress(true);
     try {
       await updateFailureStore(definition.stream.name, {
         failureStoreEnabled: update.failureStoreEnabled,
@@ -77,6 +79,7 @@ export const StreamDetailFailureStore = ({
         text: error.message,
       });
     }
+    setIsRequestInProgress(false);
     closeModal();
   };
 
@@ -88,6 +91,7 @@ export const StreamDetailFailureStore = ({
             <FailureStoreModal
               onCloseModal={closeModal}
               onSaveModal={handleSaveModal}
+              isSaveButtonLoading={isRequestInProgress}
               failureStoreProps={{
                 failureStoreEnabled: data?.config.enabled,
                 defaultRetentionPeriod: data?.config.retentionPeriod.default,
