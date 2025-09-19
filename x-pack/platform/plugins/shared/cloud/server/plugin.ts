@@ -265,8 +265,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                         ),
                       })
                     ),
-                    // Can be added in the future if needed:
-                    // deployment: schema.maybe(schema.object({})),
+                    deployment: schema.maybe(
+                      schema.object({
+                        id: schema.maybe(schema.string()),
+                        name: schema.maybe(schema.string()),
+                      })
+                    ),
                   })
                 ),
               },
