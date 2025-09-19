@@ -20,6 +20,10 @@ export {
 
 export { DiscoverEBTManager } from './discover_ebt_manager';
 
-export { type ScopedDiscoverEBTManager, TabsEventName } from './scoped_discover_ebt_manager';
+export {
+  type ScopedDiscoverEBTManager,
+  type TabsEventPayload,
+  TabsEventName,
+} from './scoped_discover_ebt_manager';
 
 export type { DiscoverEBTContextProps, DiscoverEBTContext } from './types';

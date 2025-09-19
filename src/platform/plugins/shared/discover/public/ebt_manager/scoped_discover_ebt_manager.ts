@@ -87,6 +87,8 @@ interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_ID]: string;
 }
 
+export type TabsEventPayload = Record<string, string | number>;
+
 export class ScopedDiscoverEBTManager {
   private lastResolvedContextProfiles: {
     [ContextualProfileLevel.rootLevel]: string | undefined;
@@ -355,8 +357,13 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
-  // TODO better type for payload
-  public trackTabs({ eventName, payload }: { eventName: TabsEventName; payload: any }) {
+  public trackTabs({
+    eventName,
+    payload,
+  }: {
+    eventName: TabsEventName;
+    payload?: TabsEventPayload;
+  }) {
     if (!this.reportEvent) {
       return;
     }
@@ -364,7 +371,7 @@ export class ScopedDiscoverEBTManager {
       [TABS_EVENT_NAME]: eventName,
       ...payload,
     };
-    console.log({ TABS_EVENT_TYPE, eventData });
+
     this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

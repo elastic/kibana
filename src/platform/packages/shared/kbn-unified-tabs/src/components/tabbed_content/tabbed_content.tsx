@@ -12,6 +12,7 @@ import { escapeRegExp, debounce } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { TabsEventPayload } from '@kbn/discover-plugin/public';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
@@ -40,7 +41,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
-  onEvent: (eventName: string, payload?: any) => void; // TODO better type for payload
+  onEvent: (eventName: string, payload?: TabsEventPayload) => void;
 }
 
 export interface TabbedContentState {
@@ -102,7 +103,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   // Debounced tabSwitched EBT event sender
   const debouncedTabSwitched = useMemo(
-    () => debounce((payload: any) => onEvent('tabSwitched', payload), TAB_SWITCH_DEBOUNCE_MS),
+    () =>
+      debounce(
+        (payload: TabsEventPayload) => onEvent('tabSwitched', payload),
+        TAB_SWITCH_DEBOUNCE_MS
+      ),
     [onEvent]
   );
 
