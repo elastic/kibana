@@ -77,7 +77,7 @@ export const PrivMonUtils = (
   };
 
   const expectTimestampsHaveBeenUpdated = (userBefore?: PrivmonUser, userAfter?: PrivmonUser) => {
-    _expectDateToBeGreaterThan(userAfter?.event?.['@timestamp'], userBefore?.event?.['@timestamp']);
+    _expectDateToBeGreaterThan(userAfter?.['@timestamp'], userBefore?.['@timestamp']);
     _expectDateToBeGreaterThan(userAfter?.event?.ingested, userBefore?.event?.ingested);
   };
 

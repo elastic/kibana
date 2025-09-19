@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
@@ -16,6 +17,11 @@ import {
   createIndexEntitySource,
   createIntegrationEntitySource,
 } from './utils';
+
+type PrivmonUser = ListPrivMonUsersResponse[number] & {
+  '@timestamp'?: string;
+};
+
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
@@ -422,8 +428,8 @@ export default ({ getService }: FtrProviderContext) => {
         const user1AfterSecondSync = privMonUtils.findUser(usersAfterSecondSync, user1.name);
         log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
-        expect(user1AfterSecondSync?.event?.['@timestamp']).toEqual(
-          user1AfterFirstSync?.event?.['@timestamp']
+        expect((user1AfterSecondSync as PrivmonUser)?.['@timestamp']).toEqual(
+          (user1AfterFirstSync as PrivmonUser)?.['@timestamp']
         );
         expect(user1AfterSecondSync?.event?.ingested).toEqual(user1AfterFirstSync?.event?.ingested);
       });
