@@ -37,7 +37,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {label && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">

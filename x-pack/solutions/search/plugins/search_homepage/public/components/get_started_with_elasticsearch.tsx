@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiButton,
   EuiFlexGrid,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +62,6 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
         display={hoveredCard === card._id ? 'plain' : 'subdued'}
         onMouseEnter={() => onCardHover(card._id)}
         onMouseLeave={() => onCardHover(null)}
-        paddingSize="s"
         textAlign="left"
         titleSize="xs"
         data-test-subj={card.dataTestSubj}
@@ -122,6 +122,7 @@ export const GetStartedWithElasticsearch = () => {
 
   const indexName = useMemo(() => generateRandomIndexName(), []);
   const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const gettingStartedCards: GettingStartedCardMetadata[] = [
     // Upload file card
@@ -181,7 +182,7 @@ export const GetStartedWithElasticsearch = () => {
       description: (
         <FormattedMessage
           id="xpack.searchHomepage.createIndexDescription"
-          defaultMessage="Create an index to store your data."
+          defaultMessage="Start with a blank index and customize to match your needs."
         />
       ),
       buttonComponent: (
@@ -290,7 +291,7 @@ export const GetStartedWithElasticsearch = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGrid columns={4} gutterSize="l">
+        <EuiFlexGrid columns={isSmallScreen ? 2 : 4} gutterSize="l" responsive={false}>
           <GettingStartedCards
             cards={gettingStartedCards}
             hoveredCard={hoveredCard}
