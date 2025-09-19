@@ -152,7 +152,6 @@ describe('FieldSelector', () => {
     });
   });
 
-
   describe('Disabled State', () => {
     it('disables the combobox when disabled prop is true', () => {
       render(<FieldSelector {...defaultProps} disabled />);
