@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { type CoreSetup, type Plugin, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export const READ_ONLY_TYPE = 'read_only_type';
 export const NON_READ_ONLY_TYPE = 'non_read_only_type';
@@ -46,6 +46,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
 
     const router = core.http.createRouter();
 
+    // Create
     router.post(
       {
         path: '/read_only_objects/create',
@@ -101,6 +102,73 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Bulk Create
+    router.post(
+      {
+        path: '/read_only_objects/bulk_create',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          request: {
+            query: schema.object({
+              overwrite: schema.boolean({
+                defaultValue: false,
+              }),
+            }),
+            body: schema.object({
+              objects: schema.arrayOf(
+                schema.object({
+                  id: schema.maybe(schema.string()),
+                  type: schema.maybe(
+                    schema.oneOf([
+                      schema.literal(READ_ONLY_TYPE),
+                      schema.literal(NON_READ_ONLY_TYPE),
+                    ])
+                  ),
+                  isReadOnly: schema.maybe(schema.boolean()),
+                })
+              ),
+              force: schema.maybe(schema.boolean({ defaultValue: false })),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const overwrite = request.query.overwrite ?? false;
+        try {
+          const createObjects = request.body.objects.map((obj) => ({
+            type: obj.type || READ_ONLY_TYPE,
+            ...(obj.id ? { id: obj.id } : {}),
+            ...(obj.isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+            attributes: {
+              description: 'description',
+            },
+          }));
+          const result = await soClient.bulkCreate(createObjects, { overwrite });
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
+        }
+      }
+    );
+
+    // FIND READ_ONLY_TYPE
     router.get(
       {
         path: '/read_only_objects/_find',
@@ -122,6 +190,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         });
       }
     );
+
+    // Get READ_ONLY_TYPE
     router.get(
       {
         path: '/read_only_objects/{objectId}',
@@ -156,6 +226,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Update
     router.put(
       {
         path: '/read_only_objects/update',
@@ -193,6 +265,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Transfer
     router.put(
       {
         path: '/read_only_objects/transfer',
@@ -234,6 +308,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Change access mode
     router.put(
       {
         path: '/read_only_objects/change_access_mode',
@@ -274,6 +350,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Delete
     router.delete(
       {
         path: '/read_only_objects/{objectId}',
@@ -304,7 +382,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       }
     );
 
-    // non read only routes
+    // Get NON_READ_ONLY_TYPE
     router.get(
       {
         path: '/non_read_only_objects/{objectId}',
@@ -339,6 +417,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // FIND NON_READ_ONLY_TYPE
     router.get(
       {
         path: '/non_read_only_objects/_find',
