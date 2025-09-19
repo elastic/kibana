@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 
 // To make compatible with ToolDefinition['configuration']
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
