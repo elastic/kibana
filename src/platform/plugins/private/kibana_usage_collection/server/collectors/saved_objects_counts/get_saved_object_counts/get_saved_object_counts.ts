@@ -39,6 +39,15 @@ export interface SavedObjectsCounts {
   by_access_control_type: Array<{ key: string; doc_count: number }>;
 }
 
+type BucketWithAccessControl = estypes.AggregationsStringTermsBucketKeys & {
+  access_control_count: estypes.AggregationsFilterAggregate;
+};
+
+interface TypesAgg {
+  buckets: BucketWithAccessControl[];
+  sum_other_doc_count?: number;
+}
+
 /**
  * Returns the total number of Saved Objects indexed in Elasticsearch.
  * It also returns a break-down of the document count for all the built-in SOs in Kibana (or the types specified in `soTypes`).
@@ -63,8 +72,7 @@ export async function getSavedObjectsCounts(
   const body = await soClient.find<
     void,
     {
-      types: estypes.AggregationsStringTermsAggregate;
-      has_access_control: estypes.AggregationsStringTermsAggregate;
+      types: TypesAgg;
     }
   >({
     type: soTypes,
@@ -80,19 +88,16 @@ export async function getSavedObjectsCounts(
             ? { size: soTypes.length }
             : { missing: MISSING_TYPE_KEY, size: soTypes.length + 1 }),
         },
-      },
-      has_access_control: {
-        filter: { exists: { field: 'accessControl' } },
+        aggs: {
+          access_control_count: {
+            filter: { exists: { field: 'accessControl' } },
+          },
+        },
       },
     },
   });
 
-  const buckets =
-    (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
-
-  const accessControlBuckets =
-    (body.aggregations?.has_access_control
-      ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
+  const buckets = body.aggregations?.types?.buckets || [];
 
   const nonExpectedTypes: string[] = [];
 
@@ -106,10 +111,11 @@ export async function getSavedObjectsCounts(
     return { key: perTypeEntry.key, doc_count: perTypeEntry.doc_count };
   });
 
-  const accessControlPerType = accessControlBuckets.map((perTypeEntry) => {
-    const key = perTypeEntry.key as string;
-    return { key, doc_count: perTypeEntry.doc_count };
-  });
+  const accessControlPerType =
+    buckets.map((b) => ({
+      key: b.key as string,
+      doc_count: b?.access_control_count?.doc_count ?? 0,
+    })) ?? [];
 
   return {
     total: body.total,

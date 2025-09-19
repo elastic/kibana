@@ -50,9 +50,7 @@ describe('getSavedObjectsCounts', () => {
             size: 3,
             missing: 'missing_so_type',
           },
-        },
-        has_access_control: {
-          filter: { exists: { field: 'accessControl' } },
+          aggs: { access_control_count: { filter: { exists: { field: 'accessControl' } } } },
         },
       },
     });
@@ -66,8 +64,10 @@ describe('getSavedObjectsCounts', () => {
       namespaces: ['*'],
       perPage: 0,
       aggs: {
-        types: { terms: { field: 'type', size: 2 } },
-        has_access_control: { filter: { exists: { field: 'accessControl' } } },
+        types: {
+          terms: { field: 'type', size: 2 },
+          aggs: { access_control_count: { filter: { exists: { field: 'accessControl' } } } },
+        },
       },
     });
   });
@@ -93,16 +93,31 @@ describe('getSavedObjectsCounts', () => {
       ],
       non_expected_types: [],
       others: 10,
-      by_access_control_type: [],
+      by_access_control_type: [
+        {
+          doc_count: 0,
+          key: 'type_one',
+        },
+        {
+          doc_count: 0,
+          key: 'type-two',
+        },
+      ],
     });
   });
 
   test('list non_expected_types if they show up in the breakdown but they are not listed in the SO Types list', async () => {
     const buckets = [
-      { key: 'type_one', doc_count: 1, max_score: { value: 1 } },
-      { key: 'type-two', doc_count: 2 },
-      { key: 'type-3', doc_count: 2 },
-      { key: 'type-four', doc_count: 2 },
+      {
+        key: 'type_one',
+        doc_count: 1,
+        max_score: { value: 1 },
+        access_control_count: { doc_count: 0 },
+      },
+      { key: 'type-two', doc_count: 2, access_control_count: { doc_count: 0 } },
+      { key: 'type-3', doc_count: 2, access_control_count: { doc_count: 0 } },
+      { key: 'type-four', doc_count: 2, access_control_count: { doc_count: 0 } },
+      { key: 'type-five', doc_count: 2, access_control_count: { doc_count: 1 } },
     ];
 
     soClient.find.mockResolvedValueOnce({
@@ -119,10 +134,17 @@ describe('getSavedObjectsCounts', () => {
         { key: 'type-two', doc_count: 2 },
         { key: 'type-3', doc_count: 2 },
         { key: 'type-four', doc_count: 2 },
+        { key: 'type-five', doc_count: 2 },
       ],
-      non_expected_types: ['type-3', 'type-four'],
+      non_expected_types: ['type-3', 'type-four', 'type-five'],
       others: 6,
-      by_access_control_type: [],
+      by_access_control_type: [
+        { key: 'type_one', doc_count: 0 },
+        { key: 'type-two', doc_count: 0 },
+        { key: 'type-3', doc_count: 0 },
+        { key: 'type-four', doc_count: 0 },
+        { key: 'type-five', doc_count: 1 },
+      ],
     });
   });
 });
