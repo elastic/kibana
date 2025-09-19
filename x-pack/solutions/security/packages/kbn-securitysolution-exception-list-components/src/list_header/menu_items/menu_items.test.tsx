@@ -90,7 +90,7 @@ describe('MenuItems', () => {
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
   });
 
-  it('should disable Manage rules when read only', () => {
+  it('should not render Manage rules when read only', () => {
     const wrapper = render(
       <MenuItems
         isReadonly={true}
@@ -104,7 +104,7 @@ describe('MenuItems', () => {
       />
     );
 
-    expect(wrapper.getByTestId('LinkRulesButton')).toBeDisabled();
+    expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
   });
 
   it('should not render Manage rules if user cannot edit list', () => {

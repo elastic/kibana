@@ -88,7 +88,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
         )}
       </EuiFlexItem>
 
-      {canUserEditList && (
+      {canUserEditList && !isReadonly && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj={`${dataTestSubj || ''}LinkRulesButton`}
@@ -96,7 +96,6 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             onClick={() => {
               if (typeof onManageRules === 'function') onManageRules();
             }}
-            disabled={isReadonly}
           >
             {i18n.EXCEPTION_LIST_HEADER_LINK_RULES_BUTTON}
           </EuiButton>
