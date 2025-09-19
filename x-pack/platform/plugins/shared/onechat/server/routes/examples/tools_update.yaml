@@ -1,0 +1,23 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          updateToolResponseExample:
+            id: search.esql.search
+            type: index_search
+            description: This tool searches over the data in the "financial_data" index
+            tags: []
+            configuration:
+              pattern: financial_data
+            readonly: false
+            schema:
+              type: object
+              properties:
+                nlQuery:
+                  type: string
+                  description: A natural language query expressing the search request
+              required:
+              - nlQuery
+              additionalProperties: false
+              "$schema": http://json-schema.org/draft-07/schema#

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -51,6 +52,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       {
         version: '2023-10-31',
         validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_list.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents: agentsService } = getInternalServices();
@@ -82,6 +86,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: { params: schema.object({ id: schema.string() }) },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_get_by_id.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -128,6 +135,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_create.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -176,6 +186,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_update.yaml')
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
@@ -207,6 +220,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: { params: schema.object({ id: schema.string() }) },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_delete.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {

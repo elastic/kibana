@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -46,7 +47,13 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
     })
     .addVersion(
-      { version: '2023-10-31', validate: false },
+      { 
+        version: '2023-10-31',
+        validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_list.yaml')
+        },
+      },
       wrapHandler(async (ctx, request, response) => {
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -85,6 +92,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string(),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/tools_get.yaml')
         },
       },
       wrapHandler(async (ctx, request, response) => {
