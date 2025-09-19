@@ -69,3 +69,13 @@ export interface ResolveSearchSourcesResponse {
   results: ResolveSearchSourceItem[];
   total: number;
 }
+
+export interface WorkflowItem {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface ListWorkflowsResponse {
+  results: WorkflowItem[];
+}

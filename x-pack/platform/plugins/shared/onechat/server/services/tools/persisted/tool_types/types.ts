@@ -18,7 +18,7 @@ export type ToolDefinitionConverter<
   TSchema extends z.ZodObject<any> = z.ZodObject<any>
 > = (
   persisted: ToolPersistedDefinition<ToolTypeConfig>
-) => InternalToolDefinition<ToolTypeConfig, TSchema>;
+) => MaybePromise<InternalToolDefinition<ToolTypeConfig, TSchema>>;
 
 export interface ToolTypeValidatorContext {
   esClient: ElasticsearchClient;

@@ -13,14 +13,17 @@ import type {
   BulkDeleteToolResponse,
   BulkDeleteToolResult,
   ResolveSearchSourcesResponse,
+  ListWorkflowsResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 
 export function registerInternalToolsRoutes({
   router,
+  coreSetup,
   getInternalServices,
   logger,
+  pluginsSetup: { workflowsManagement },
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -109,6 +112,52 @@ export function registerInternalToolsRoutes({
         body: {
           results,
           total: results.length,
+        },
+      });
+    })
+  );
+
+  // resolve search sources (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_list_workflows`,
+      validate: {
+        query: schema.object({
+          page: schema.number({ defaultValue: 1 }),
+          limit: schema.number({ defaultValue: 10000 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      if (!workflowsManagement) {
+        return response.ok<ListWorkflowsResponse>({
+          body: {
+            results: [],
+          },
+        });
+      }
+
+      const [, { spaces }] = await coreSetup.getStartServices();
+      const currentSpace = spaces
+        ? (await spaces.spacesService.getActiveSpace(request)).id
+        : 'default';
+
+      const { results } = await workflowsManagement.management.getWorkflows(
+        { page: request.query.page, limit: request.query.limit, enabled: [true] },
+        currentSpace
+      );
+
+      return response.ok<ListWorkflowsResponse>({
+        body: {
+          results: results.map((workflow) => ({
+            id: workflow.id,
+            name: workflow.name,
+            description: workflow.description,
+          })),
         },
       });
     })

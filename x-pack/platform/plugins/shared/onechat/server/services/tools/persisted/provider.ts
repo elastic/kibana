@@ -8,6 +8,7 @@
 import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
@@ -15,20 +16,30 @@ import type {
 import type { ToolTypeClient, ToolSource } from '../tool_provider';
 import type { ToolPersistedDefinition } from './client';
 import { createClient } from './client';
-import { createEsqlToolType, createIndexSearchToolType } from './tool_types';
+import {
+  createEsqlToolType,
+  createIndexSearchToolType,
+  createWorkflowToolType,
+} from './tool_types';
 import type { PersistedToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
 
 export const createPersistedToolSource = ({
   logger,
   elasticsearch,
+  workflowsManagement,
 }: {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
+  workflowsManagement?: WorkflowsPluginSetup;
 }): ToolSource => {
   const toolDefinitions: PersistedToolTypeDefinition<any>[] = [
     createEsqlToolType(),
     createIndexSearchToolType(),
   ];
+  if (workflowsManagement) {
+    toolDefinitions.push(createWorkflowToolType({ workflowsManagement }));
+  }
+
   const toolTypes = toolDefinitions.map((def) => def.toolType);
 
   return {
@@ -93,13 +104,15 @@ export const createPersistedToolClient = ({
 
     async list() {
       const tools = await toolClient.list();
-      return tools.map((tool) => {
-        const definition = definitionMap[tool.type];
-        if (!definition) {
-          throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
-        }
-        return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
-      });
+      return Promise.all(
+        tools.map((tool) => {
+          const definition = definitionMap[tool.type];
+          if (!definition) {
+            throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
+          }
+          return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+        })
+      );
     },
 
     async create(createRequest) {

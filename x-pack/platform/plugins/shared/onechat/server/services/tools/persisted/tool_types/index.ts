@@ -14,3 +14,4 @@ export type {
 } from './types';
 export { createEsqlToolType } from './esql';
 export { createIndexSearchToolType } from './index_search';
+export { createWorkflowToolType } from './workflow';
