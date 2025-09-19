@@ -149,9 +149,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           },
         },
         {
-          name: i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
-            defaultMessage: 'Control',
-          }),
+          name: getControlButtonTitle(),
           icon: 'controlsHorizontal',
           'data-test-subj': 'dashboard-controls-menu-button',
           panel: 1,
