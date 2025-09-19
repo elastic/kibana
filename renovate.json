@@ -3753,7 +3753,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "main",
+        "8.19"
       ],
       "matchDepNames": [
         "@pmmmwh/react-refresh-webpack-plugin",
@@ -3767,8 +3768,9 @@
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:prev-minor"
+        "backport:skip"
       ],
+      "allowedVersions": "<9.0.0",
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
