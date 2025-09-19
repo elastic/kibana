@@ -66,7 +66,7 @@ describe(
           'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
           'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
           'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
-          'Endpoint Exceptions Manage Endpoint Exceptions.Endpoint Exceptions sub-feature privilegeAllReadNone',
+          'Endpoint Exceptions Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.Endpoint Exceptions sub-feature privilegeAllReadNone',
           'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
           'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',
           'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
