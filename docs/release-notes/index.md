@@ -21,6 +21,19 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.0.7 [kibana-9.0.7-release-notes]
+
+### Fixes [kibana-9.0.7-fixes]
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana security**:
+* Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names [#234083]({{kib-pull}}234083).
+
+**Search solution**:
+* Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML [#234079]({{kib-pull}}234079).
+
 ## 9.0.6 [kibana-9.0.6-release-notes]
 
 :::{important}
