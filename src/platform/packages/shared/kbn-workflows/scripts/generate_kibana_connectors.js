@@ -115,6 +115,7 @@ function extractEndpointSummaries() {
         }
       }
     }
+    console.log(`📊 Extracted ${endpointSummaries.size} endpoint summaries`);
   } catch (error) {
     console.warn('⚠️ Error extracting endpoint summaries:', error.message);
   }
