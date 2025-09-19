@@ -235,9 +235,9 @@ describe('KibanaMigrator', () => {
       expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
 
-    it('does not log intermediate steps when `useCummulativeLogger: true`', async () => {
+    it('does not log intermediate steps when `useCumulativeLogger: true`', async () => {
       const options = mockOptions();
-      (options.soMigrationsConfig.useCummulativeLogger as boolean) = true; // casting because soMigrationsConfig are readonly
+      (options.soMigrationsConfig.useCumulativeLogger as boolean) = true; // casting because soMigrationsConfig are readonly
       const migrator = new KibanaMigrator(options);
       migrator.prepareMigrations();
       await migrator.runMigrations();
@@ -252,9 +252,9 @@ describe('KibanaMigrator', () => {
       );
     });
 
-    it('logs the intermediate steps when `useCummulativeLogger: false`', async () => {
+    it('logs the intermediate steps when `useCumulativeLogger: false`', async () => {
       const options = mockOptions();
-      (options.soMigrationsConfig.useCummulativeLogger as boolean) = false; // casting because soMigrationsConfig are readonly
+      (options.soMigrationsConfig.useCumulativeLogger as boolean) = false; // casting because soMigrationsConfig are readonly
       const migrator = new KibanaMigrator(options);
       migrator.prepareMigrations();
       await migrator.runMigrations();
@@ -357,7 +357,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
-      useCummulativeLogger: true,
+      useCumulativeLogger: true,
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),

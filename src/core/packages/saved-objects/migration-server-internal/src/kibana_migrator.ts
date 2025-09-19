@@ -184,7 +184,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
     let logger: Logger & { dump?: () => void; clear?: () => void } = this.log;
 
-    if (this.soMigrationsConfig.useCummulativeLogger) {
+    if (this.soMigrationsConfig.useCumulativeLogger) {
       logger = createCummulativeLogger(this.log);
     }
 

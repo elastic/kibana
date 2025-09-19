@@ -76,7 +76,7 @@ describe('migrationsStateActionMachine', () => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
-      useCummulativeLogger: false,
+      useCumulativeLogger: false,
     },
     typeRegistry,
     docLinks,
