@@ -169,7 +169,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           tab.initialInternalState = cloneDeep(recentlyClosedTabToRestore.initialInternalState);
           tab.initialAppState = cloneDeep(recentlyClosedTabToRestore.initialAppState);
           tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
-        } else {
+        } else if (!tab.initialAppState) {
           // the new tab is a fresh one
           const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
           const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
@@ -253,7 +253,8 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
-    const { userId: existingUserId, spaceId: existingSpaceId } = getState();
+    const currentState = getState();
+    const { userId: existingUserId, spaceId: existingSpaceId } = currentState;
 
     const getUserId = async () => {
       try {
