@@ -110,6 +110,26 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
 }) as ComposerQueryTag & ParametrizedComposerQueryTag & ComposerQueryGenerator;
 
 /**
+ * Constructs a new {@linkcode ComposerQuery} instance using a `FROM` or `TS`
+ * command with the specified list of sources.
+ */
+const fromLikeSourceCommandStarter = (cmd: 'FROM' | 'TS', sources: ComposerSourceShorthand[]) => {
+  const nodes: ESQLSource[] = [];
+
+  for (const source of sources) {
+    if (typeof source === 'string') {
+      nodes.push(synth.src(source));
+    } else if (isSource(source)) {
+      nodes.push(source);
+    } else {
+      throw new Error(`Invalid source: ${source}`);
+    }
+  }
+
+  return esql`${synth.kwd(cmd)} ${nodes}`;
+};
+
+/**
  * ESQL query composer tag function.
  *
  * This function allows you to create ESQL queries using template literals.
@@ -158,19 +178,11 @@ export const esql: ComposerQueryTag &
     dpar: (value: unknown, name?: string) => new DoubleParameterHole(value, name),
 
     from: (...sources: ComposerSourceShorthand[]) => {
-      const nodes: ESQLSource[] = [];
+      return fromLikeSourceCommandStarter('FROM', sources);
+    },
 
-      for (const source of sources) {
-        if (typeof source === 'string') {
-          nodes.push(synth.src(source));
-        } else if (isSource(source)) {
-          nodes.push(source);
-        } else {
-          throw new Error(`Invalid source: ${source}`);
-        }
-      }
-
-      return esql`FROM ${nodes}`;
+    ts: (...sources: ComposerSourceShorthand[]) => {
+      return fromLikeSourceCommandStarter('TS', sources);
     },
 
     get nop() {

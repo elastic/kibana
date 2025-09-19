@@ -99,7 +99,7 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
   dpar: (value: unknown, name?: string) => DoubleParameterHole;
 
   /**
-   * Creates a new {@link ComposerQuery} instance with a `FROM` command with
+   * Creates a new {@linkcode ComposerQuery} instance with a `FROM` command with
    * the specified list of sources.
    *
    * Example:
@@ -117,6 +117,23 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
     source: ComposerSourceShorthand,
     ...moreSources: ComposerSourceShorthand[]
   ) => ComposerQuery;
+
+  /**
+   * Creates a new {@linkcode ComposerQuery} instance with a `TS` command with
+   * the specified list of sources.
+   *
+   * Example:
+   *
+   * ```typescript
+   * const query = esql.ts('kibana_ecommerce_index', 'kibana_logs_index');
+   * // TS kibana_ecommerce_index, kibana_logs_index
+   * ```
+   *
+   * @param source The source to use in the `TS` command, at least one source
+   *     is required.
+   * @param moreSources Additional sources to include in the `TS` command.
+   */
+  ts: (source: ComposerSourceShorthand, ...moreSources: ComposerSourceShorthand[]) => ComposerQuery;
 
   /**
    * An AST no-op command that can be used in the query, for example in
