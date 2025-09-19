@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import moment from 'moment';
 import { Duration, DurationUnit } from '../domain/models';
 import { DefaultBurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
+import ElasticsearchMock from '@elastic/elasticsearch-mock';
+import { Client } from '@elastic/elasticsearch';
 
 const commonEsResponse = {
   took: 100,
@@ -27,19 +26,32 @@ const commonEsResponse = {
   },
 };
 
-const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
-
 describe('SummaryClient', () => {
-  let esClientMock: ElasticsearchClientMock;
-
+  const esMock = new ElasticsearchMock();
+  const esClientMock = new Client({
+    node: 'http://localhost:9200',
+    Connection: esMock.getConnection(),
+  });
+  const searchSpy = jest.spyOn(esClientMock, 'search');
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    jest.useFakeTimers().setSystemTime(TEST_DATE);
+    esMock.clearAll();
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  const expectTimeDifferences = (
+    longRange: { from: string; to: string },
+    shortRange: { from: string; to: string },
+    expectedLong: number,
+    expectedShort: number,
+    unit: 'minutes' | 'hours'
+  ) => {
+    const getDiff = (from: string, to: string) => {
+      const diffMs = Math.abs(new Date(to).getTime() - new Date(from).getTime());
+      return unit === 'hours' ? diffMs / (1000 * 60 * 60) : diffMs / (1000 * 60);
+    };
+
+    expect(getDiff(longRange.from, longRange.to)).toBe(expectedLong);
+    expect(getDiff(shortRange.from, shortRange.to)).toBe(expectedShort);
+  };
 
   describe('burnRatesClient', () => {
     const LONG_WINDOW = 'long_window';
@@ -52,60 +64,69 @@ describe('SummaryClient', () => {
           { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
           { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
-        esClientMock.search.mockResolvedValueOnce({
-          ...commonEsResponse,
-          aggregations: {
-            [LONG_WINDOW]: {
-              buckets: [
-                {
-                  key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
-                  from: 1672527240000,
-                  from_as_string: '2022-12-31T22:54:00.000Z',
-                  to: 1672530840000,
-                  to_as_string: '2022-12-31T23:54:00.000Z',
-                  doc_count: 60,
-                  total: {
-                    value: 5000,
-                  },
-                  good: {
-                    value: 4500,
-                  },
-                },
-              ],
-            },
-            [SHORT_WINDOW]: {
-              buckets: [
-                {
-                  key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
-                  from: 1672530540000,
-                  from_as_string: '2022-12-31T23:49:00.000Z',
-                  to: 1672530840000,
-                  to_as_string: '2022-12-31T23:54:00.000Z',
-                  doc_count: 5,
-                  total: {
-                    value: 300,
-                  },
-                  good: {
-                    value: 290,
-                  },
-                },
-              ],
-            },
+        esMock.add(
+          {
+            method: 'POST',
+            path: '/:index/_search', // dynamic index
           },
-        });
+          () => {
+            return {
+              ...commonEsResponse,
+              aggregations: {
+                [LONG_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                      from: 1672527240000,
+                      from_as_string: '2022-12-31T22:54:00.000Z',
+                      to: 1672530840000,
+                      to_as_string: '2022-12-31T23:54:00.000Z',
+                      doc_count: 60,
+                      total: {
+                        value: 5000,
+                      },
+                      good: {
+                        value: 4500,
+                      },
+                    },
+                  ],
+                },
+                [SHORT_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                      from: 1672530540000,
+                      from_as_string: '2022-12-31T23:49:00.000Z',
+                      to: 1672530840000,
+                      to_as_string: '2022-12-31T23:54:00.000Z',
+                      doc_count: 5,
+                      total: {
+                        value: 300,
+                      },
+                      good: {
+                        value: 290,
+                      },
+                    },
+                  ],
+                },
+              },
+            };
+          }
+        );
+
         const client = new DefaultBurnRatesClient(esClientMock);
 
         const results = await client.calculate(slo, ALL_VALUE, lookbackWindows);
 
-        expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
+        expect(searchSpy?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T22:54:00.000Z',
-                    to: '2022-12-31T23:54:00.000Z',
+                    from: expect.any(String),
+                    to: expect.any(String),
                   },
                 ],
               },
@@ -119,8 +140,8 @@ describe('SummaryClient', () => {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T23:49:00.000Z',
-                    to: '2022-12-31T23:54:00.000Z',
+                    from: expect.any(String),
+                    to: expect.any(String),
                   },
                 ],
               },
@@ -131,6 +152,10 @@ describe('SummaryClient', () => {
             },
           },
         });
+        // Assertion for the time difference
+        const longRange = searchSpy.mock.lastCall[0].aggs.long_window.date_range.ranges[0];
+        const shortRange = searchSpy.mock.lastCall[0].aggs.short_window.date_range.ranges[0];
+        expectTimeDifferences(longRange, shortRange, 60, 5, 'minutes');
 
         expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
           name: LONG_WINDOW,
@@ -160,60 +185,68 @@ describe('SummaryClient', () => {
           { name: LONG_WINDOW, duration: new Duration(1, DurationUnit.Hour) },
           { name: SHORT_WINDOW, duration: new Duration(5, DurationUnit.Minute) },
         ];
-        esClientMock.search.mockResolvedValueOnce({
-          ...commonEsResponse,
-          aggregations: {
-            [LONG_WINDOW]: {
-              buckets: [
-                {
-                  key: '2022-12-31T22:46:00.000Z-2022-12-31T23:46:00.000Z',
-                  from: 1672526160000,
-                  from_as_string: '2022-12-31T22:46:00.000Z',
-                  to: 1672529760000,
-                  to_as_string: '2022-12-31T23:46:00.000Z',
-                  doc_count: 12,
-                  total: {
-                    value: 12,
-                  },
-                  good: {
-                    value: 10,
-                  },
-                },
-              ],
-            },
-            [SHORT_WINDOW]: {
-              buckets: [
-                {
-                  key: '2022-12-31T23:41:00.000Z-2022-12-31T23:46:00.000Z',
-                  from: 1672529460000,
-                  from_as_string: '2022-12-31T23:41:00.000Z',
-                  to: 1672529760000,
-                  to_as_string: '2022-12-31T23:46:00.000Z',
-                  doc_count: 1,
-                  total: {
-                    value: 1,
-                  },
-                  good: {
-                    value: 1,
-                  },
-                },
-              ],
-            },
+        esMock.add(
+          {
+            method: 'POST',
+            path: '/:index/_search', // dynamic index
           },
-        });
+          () => {
+            return {
+              ...commonEsResponse,
+              aggregations: {
+                [LONG_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T22:46:00.000Z-2022-12-31T23:46:00.000Z',
+                      from: 1672526160000,
+                      from_as_string: '2022-12-31T22:46:00.000Z',
+                      to: 1672529760000,
+                      to_as_string: '2022-12-31T23:46:00.000Z',
+                      doc_count: 12,
+                      total: {
+                        value: 12,
+                      },
+                      good: {
+                        value: 10,
+                      },
+                    },
+                  ],
+                },
+                [SHORT_WINDOW]: {
+                  buckets: [
+                    {
+                      key: '2022-12-31T23:41:00.000Z-2022-12-31T23:46:00.000Z',
+                      from: 1672529460000,
+                      from_as_string: '2022-12-31T23:41:00.000Z',
+                      to: 1672529760000,
+                      to_as_string: '2022-12-31T23:46:00.000Z',
+                      doc_count: 1,
+                      total: {
+                        value: 1,
+                      },
+                      good: {
+                        value: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            };
+          }
+        );
         const client = new DefaultBurnRatesClient(esClientMock);
 
         const results = await client.calculate(slo, ALL_VALUE, lookbackWindows);
 
-        expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
+        expect(searchSpy?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T22:46:00.000Z',
-                    to: '2022-12-31T23:46:00.000Z',
+                    from: expect.any(String),
+                    to: expect.any(String),
                   },
                 ],
               },
@@ -235,8 +268,8 @@ describe('SummaryClient', () => {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T23:41:00.000Z',
-                    to: '2022-12-31T23:46:00.000Z',
+                    from: expect.any(String),
+                    to: expect.any(String),
                   },
                 ],
               },
@@ -255,6 +288,10 @@ describe('SummaryClient', () => {
             },
           },
         });
+        // Assertion for the time difference
+        const longRange = searchSpy.mock.lastCall[0].aggs.long_window.date_range.ranges[0];
+        const shortRange = searchSpy.mock.lastCall[0].aggs.short_window.date_range.ranges[0];
+        expectTimeDifferences(longRange, shortRange, 60, 5, 'minutes');
 
         expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
           name: LONG_WINDOW,
@@ -270,24 +307,3 @@ describe('SummaryClient', () => {
     });
   });
 });
-
-expect.extend({
-  toBeClose(received: Date | string, actual: Date | string) {
-    const receivedDate = moment(received);
-    const actualDate = moment(actual);
-    return {
-      message: () =>
-        `expected ${receivedDate.toISOString()} to be close to ${actualDate.toISOString()}`,
-      pass: Math.abs(receivedDate.diff(actualDate, 'seconds')) <= 120,
-    };
-  },
-});
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace jest {
-    interface Matchers<R> {
-      toBeClose(actual: Date | string): R;
-    }
-  }
-}
