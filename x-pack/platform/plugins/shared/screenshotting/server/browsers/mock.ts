@@ -13,6 +13,7 @@ import {
   CONTEXT_GETRENDERERRORS,
   CONTEXT_GETTIMERANGE,
   CONTEXT_INJECTCSS,
+  CONTEXT_INJECTCANVASRENDERINGPROPS,
   CONTEXT_SKIPTELEMETRY,
   CONTEXT_WAITFORRENDER,
 } from '../screenshots/constants';
@@ -44,6 +45,7 @@ export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
       case CONTEXT_DEBUG:
       case CONTEXT_SKIPTELEMETRY:
       case CONTEXT_INJECTCSS:
+      case CONTEXT_INJECTCANVASRENDERINGPROPS:
       case CONTEXT_WAITFORRENDER:
       case CONTEXT_GETRENDERERRORS:
         return;
