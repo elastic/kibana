@@ -57,6 +57,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
+          aiAssistantManagementSelection,
         },
       },
     },
@@ -116,6 +117,18 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       conversationSubscription.unsubscribe();
     };
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
+
+  useEffect(() => {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((event) => {
+      if (event.assistant === 'observability') {
+        service.conversations.openNewConversation({ messages: [] });
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [aiAssistantManagementSelection.openChat$, service.conversations]);
 
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$

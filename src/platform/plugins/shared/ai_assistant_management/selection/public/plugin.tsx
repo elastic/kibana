@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import type { Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { type CoreSetup, type CoreStart } from '@kbn/core/public';
@@ -17,16 +19,19 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
+  openChat$: Observable<{ assistant: AIAssistantType }>;
 }
 
 export interface SetupDependencies {
@@ -37,6 +42,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   licensing: LicensingPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class AIAssistantManagementPlugin
@@ -52,6 +58,7 @@ export class AIAssistantManagementPlugin
   private readonly buildFlavor: BuildFlavor;
   private registeredAiAssistantManagementSelectionApp?: ManagementApp;
   private licensingSubscription?: Subscription;
+  private aiAssistantTypeSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
@@ -111,13 +118,21 @@ export class AIAssistantManagementPlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, { licensing }: StartDependencies) {
+  public start(coreStart: CoreStart, startDeps: StartDependencies) {
+    const { licensing } = startDeps;
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
       AIAssistantType.Default
     );
 
-    const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
+    const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
+    // Keep aiAssistantType$ in sync with UI setting without page reload
+    this.aiAssistantTypeSubscription = coreStart.uiSettings
+      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+      .subscribe((nextValue) => {
+        aiAssistantType$.next(nextValue);
+      });
+    const openChatSubject = new ReplaySubject<{ assistant: AIAssistantType }>(1);
 
     const isAiAssistantManagementSelectionEnabled =
       coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
@@ -134,12 +149,52 @@ export class AIAssistantManagementPlugin
       });
     }
 
+    const isObservabilityAIAssistantEnabled =
+      coreStart.application.capabilities.observabilityAIAssistant?.show === true;
+    const isSecurityAIAssistantEnabled =
+      coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+
+    const isUntouchedUiSetting = coreStart.uiSettings.isDefault(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    if (
+      isUntouchedUiSetting &&
+      (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled)
+    ) {
+      coreStart.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <NavControlInitiator
+              isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+              isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+              coreStart={coreStart}
+              triggerOpenChat={(event: { assistant: AIAssistantType }) =>
+                openChatSubject.next(event)
+              }
+              spaces={startDeps.spaces}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // before the user profile
+        order: 1001,
+      });
+    }
+
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
+      openChat$: openChatSubject.asObservable(),
     };
   }
 
   public stop() {
     this.licensingSubscription?.unsubscribe();
+    this.aiAssistantTypeSubscription?.unsubscribe();
   }
 }

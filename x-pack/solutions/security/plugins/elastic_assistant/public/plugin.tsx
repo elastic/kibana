@@ -105,7 +105,10 @@ export class ElasticAssistantPublicPlugin
             <NavigationProvider core={services}>
               <ReactQueryClientProvider>
                 <AssistantSpaceIdProvider>
-                  <AssistantProvider isServerless={this.isServerless}>
+                  <AssistantProvider
+                    isServerless={this.isServerless}
+                    openChatTrigger$={services.aiAssistantManagementSelection.openChat$}
+                  >
                     <Suspense fallback={null}>
                       <AssistantNavLink />
                       <AssistantOverlay />
