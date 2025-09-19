@@ -124,9 +124,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelectRecentlyClosed = useCallback(
     async (item: TabItem) => {
-      changeState((prevState) => selectRecentlyClosedTab(prevState, item));
+      changeState((prevState) => {
+        const newState = selectRecentlyClosedTab(prevState, item);
+
+        onEvent('tabSelectRecentlyClosed', {
+          tabId: item.id,
+          totalTabsOpen: prevState.items.length,
+        });
+
+        return newState;
+      });
     },
-    [changeState]
+    [changeState, onEvent]
   );
 
   const onClose = useCallback(

@@ -64,6 +64,7 @@ export enum TabsEventName {
   tabsLimitReached = 'tabsLimitReached',
   tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
   tabsRestoredOnLoad = 'tabsRestoredOnLoad',
+  tabSelectRecentlyClosed = 'tabSelectRecentlyClosed',
 }
 
 interface FieldUsageEventData {
