@@ -28,7 +28,6 @@ export interface DashboardsFileUploadProps {
   migrationName: string | undefined;
   apiError: string | undefined;
   onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
-  createMigration: CreateMigration;
 }
 export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
   ({
@@ -55,7 +54,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     const createDashboards = useCallback(() => {
       if (migrationName) {
         filePickerRef.current?.removeFiles();
-        createMigration?.(uploadedDashboards);
+        createMigration?.(migrationName, uploadedDashboards);
       }
     }, [migrationName, createMigration, uploadedDashboards]);
 
@@ -111,7 +110,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
               <UploadFileButton
                 onClick={createDashboards}
                 isLoading={showLoader}
-                disabled={isButtonDisabled}
+                disabled={false}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
