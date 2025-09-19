@@ -11,6 +11,7 @@
     "server": true,
     "requiredPlugins": [
       "presentationUtil",
+      "presentationPanel",
       "embeddable",
       "dashboard",
       "dataViews",

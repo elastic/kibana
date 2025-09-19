@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ACTION_EDIT_CONTROL = 'editDataControl';
 export const ACTION_CLEAR_CONTROL = 'clearControl';
-export const ACTION_DELETE_CONTROL = 'deleteControl';
 export const ACTION_CREATE_CONTROL = 'createControl';
 export const OPTIONS_LIST_ACTION = 'addOptionsList';
 export const RANGE_SLIDER_ACTION = 'addRangeSlider';

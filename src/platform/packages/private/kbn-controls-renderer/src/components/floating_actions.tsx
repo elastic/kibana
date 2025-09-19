@@ -33,7 +33,7 @@ export interface FloatingActionsProps {
 }
 
 export type FloatingActionItem = Omit<AnyApiAction, 'MenuItem'> & {
-  MenuItem: ReactElement;
+  MenuItem: FC<{}>;
 };
 
 const getFloatingActionItem = (
@@ -42,25 +42,27 @@ const getFloatingActionItem = (
   context: ActionExecutionContext<EmbeddableApiContext>
 ): FloatingActionItem => ({
   ...omit(action, 'MenuItem'),
-  MenuItem: action.MenuItem ? (
-    <>
-      {React.createElement(action.MenuItem, {
-        key: action.id,
-        context,
-      })}
-    </>
-  ) : (
-    <EuiToolTip
-      key={`control-action-${uuid}-${action.id}`}
-      content={action.getDisplayNameTooltip?.(context) ?? action.getDisplayName(context)}
-    >
-      <EuiButtonIcon
-        iconType={action.getIconType(context) ?? 'empty'}
-        color="text"
-        onClick={() => action.execute(context)}
-      />
-    </EuiToolTip>
-  ),
+  MenuItem: () => {
+    return action.MenuItem ? (
+      <>
+        {React.createElement(action.MenuItem, {
+          key: action.id,
+          context,
+        })}
+      </>
+    ) : (
+      <EuiToolTip
+        key={`control-action-${uuid}-${action.id}`}
+        content={action.getDisplayNameTooltip?.(context) || action.getDisplayName(context)}
+      >
+        <EuiButtonIcon
+          iconType={action.getIconType(context) ?? 'empty'}
+          color="text"
+          onClick={() => action.execute(context)}
+        />
+      </EuiToolTip>
+    );
+  },
 });
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
@@ -89,16 +91,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
-      // return [];
-      const actions = (
-        await uiActions.getTriggerCompatibleActions('CONTROL_HOVER_TRIGGER', context)
-      )
+      return (await uiActions.getTriggerCompatibleActions('CONTROL_HOVER_TRIGGER', context))
         .filter((action) => {
           return (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort(sortByOrder)
         .map((action) => getFloatingActionItem(uuid, action, context));
-      return actions as FloatingActionItem[];
     };
 
     const subscriptions = new Subscription();
@@ -123,12 +121,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       const actions = await getActions();
       if (canceled) return;
       setFloatingActions(actions);
-
       const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
         'CONTROL_HOVER_TRIGGER',
         context
       );
-      await uiActions.getFrequentlyChangingActionsForTrigger('CONTROL_HOVER_TRIGGER', context);
       if (canceled) return;
 
       for (const action of frequentlyChangingActions) {
@@ -169,7 +165,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           )}
           css={styles.floatingActions}
         >
-          <>{floatingActions.map((action) => action.MenuItem)}</>
+          <>
+            {floatingActions.map(({ MenuItem, id }) => (
+              <MenuItem key={`${uuid}-${id}`} />
+            ))}
+          </>
         </div>
       )}
     </div>
