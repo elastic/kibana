@@ -14,7 +14,7 @@ import useToggle from 'react-use/lib/useToggle';
 import type { SchemaField } from '../types';
 
 interface FieldFormFormatProps {
-  field: SchemaField;
+  value: SchemaField['format'];
   onChange: (format: SchemaField['format']) => void;
 }
 
@@ -35,32 +35,27 @@ export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
   return ['date'].includes(type);
 };
 
-export const FieldFormFormat = (props: FieldFormFormatProps) => {
-  if (!typeSupportsFormat(props.field.type)) {
-    return null;
-  }
-  return <FieldFormFormatSelection {...props} />;
-};
-
-const FieldFormFormatSelection = (props: FieldFormFormatProps) => {
-  const [isFreeform, toggleIsFreeform] = useToggle(
-    props.field.format !== undefined && !isPopularFormat(props.field.format)
-  );
+export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
+  const [isFreeform, toggleIsFreeform] = useToggle(value !== undefined && !isPopularFormat(value));
 
   const onToggle = useCallback(
     (e: EuiSwitchEvent) => {
-      if (!e.target.checked && !isPopularFormat(props.field.format)) {
-        props.onChange(undefined);
+      if (!e.target.checked && !isPopularFormat(value)) {
+        onChange(undefined);
       }
       toggleIsFreeform();
     },
-    [props, toggleIsFreeform]
+    [onChange, value, toggleIsFreeform]
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        {isFreeform ? <FreeformFormatInput {...props} /> : <PopularFormatsSelector {...props} />}
+        {isFreeform ? (
+          <FreeformFormatInput value={value} onChange={onChange} />
+        ) : (
+          <PopularFormatsSelector value={value} onChange={onChange} />
+        )}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSwitch
@@ -75,32 +70,32 @@ const FieldFormFormatSelection = (props: FieldFormFormatProps) => {
   );
 };
 
-const PopularFormatsSelector = (props: FieldFormFormatProps) => {
+const PopularFormatsSelector = ({ onChange, value }: FieldFormFormatProps) => {
   return (
     <EuiSelect
-      hasNoInitialSelection={
-        props.field.format === undefined || !isPopularFormat(props.field.format)
-      }
+      hasNoInitialSelection={value === undefined || !isPopularFormat(value)}
       data-test-subj="streamsAppSchemaEditorFieldFormatPopularFormats"
       onChange={(event) => {
-        props.onChange(event.target.value as PopularFormatOption);
+        onChange(event.target.value as PopularFormatOption);
       }}
-      value={props.field.format}
+      value={value}
       options={POPULAR_FORMATS.map((format) => ({
         text: format,
         value: format,
       }))}
+      fullWidth
     />
   );
 };
 
-const FreeformFormatInput = (props: FieldFormFormatProps) => {
+const FreeformFormatInput = ({ value, onChange }: FieldFormFormatProps) => {
   return (
     <EuiFieldText
       data-test-subj="streamsAppFieldFormFormatField"
       placeholder="yyyy/MM/dd"
-      value={props.field.format ?? ''}
-      onChange={(e) => props.onChange(e.target.value)}
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+      fullWidth
     />
   );
 };

@@ -16,19 +16,26 @@ import {
   EuiButton,
   EuiFormRow,
   EuiComboBox,
+  EuiForm,
+  EuiLink,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { isSchema, recursiveRecord, type Streams } from '@kbn/streams-schema';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UseFieldsMetadataReturnType } from '@kbn/fields-metadata-plugin/public/hooks/use_fields_metadata';
-import { isEmpty } from 'lodash';
+import type { SubmitHandler } from 'react-hook-form';
+import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { CodeEditor } from '@kbn/code-editor';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
-import { AdvancedFieldMappingOptions } from './advanced_field_mapping_options';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
-import { useSchemaEditorContext } from '../schema_editor_context';
-import { FieldTypeSelector } from './field_form_type';
+import { SchemaEditorContextProvider, useSchemaEditorContext } from '../schema_editor_context';
+import { FieldTypeSelector as FieldTypeSelectorComponent } from './field_form_type';
+import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
+import { deserializeJson, serializeXJson } from '../../stream_detail_enrichment/helpers';
 
 export interface AddFieldFlyoutProps {
   onClose: () => void;
@@ -38,7 +45,7 @@ export interface AddFieldFlyoutProps {
 
 export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddField'>) => {
   const context = useKibana();
-  const { stream } = useSchemaEditorContext();
+  const schemaEditorContext = useSchemaEditorContext();
 
   const { core } = context;
 
@@ -46,7 +53,13 @@ export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddF
     const overlay = core.overlays.openFlyout(
       toMountPoint(
         <StreamsAppContextProvider context={context}>
-          <AddFieldFlyout onClose={() => overlay.close()} onAddField={onAddField} stream={stream} />
+          <SchemaEditorContextProvider {...schemaEditorContext}>
+            <AddFieldFlyout
+              onClose={() => overlay.close()}
+              onAddField={onAddField}
+              stream={schemaEditorContext.stream}
+            />
+          </SchemaEditorContextProvider>
         </StreamsAppContextProvider>,
         core
       ),
@@ -55,43 +68,44 @@ export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddF
   };
 
   return (
-    <>
-      <EuiButton
-        data-test-subj="streamsAppContentAddFieldButton"
-        iconType="plus"
-        onClick={openFlyout}
-        fill
-      >
-        {i18n.translate('xpack.streams.schemaEditor.addFieldButtonLabel', {
-          defaultMessage: 'Add field',
-        })}
-      </EuiButton>
-    </>
+    <EuiButton
+      data-test-subj="streamsAppContentAddFieldButton"
+      iconType="plus"
+      onClick={openFlyout}
+      fill
+    >
+      {i18n.translate('xpack.streams.schemaEditor.addFieldButtonLabel', {
+        defaultMessage: 'Add field',
+      })}
+    </EuiButton>
   );
 };
 
-export const AddFieldFlyout = ({ stream, onClose, onAddField }: AddFieldFlyoutProps) => {
+export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutProps) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
-  const { fieldsMetadata, loading } = useFieldsMetadata({ attributes: ['ignore_above', 'type'] });
+  const { fieldsMetadata } = useFieldsMetadata({
+    attributes: ['ignore_above', 'type'],
+    source: ['ecs', 'otel'],
+  });
 
-  const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
-
-  const [field, setField] = useReducer(
-    (prev: SchemaField, updated: Partial<SchemaField>) =>
-      ({
-        ...prev,
-        ...updated,
-      } as SchemaField),
-    {
-      status: 'unmapped',
+  const methods = useForm<SchemaField>({
+    defaultValues: {
+      status: 'mapped',
       name: '',
+      type: undefined,
       parent: stream.name,
-    }
-  );
+      additionalParameters: {},
+    },
+    mode: 'onChange',
+  });
 
-  const hasValidFieldName = !isEmpty(field.name);
-  const hasValidFieldType = !isEmpty(field.type);
+  const type = useWatch({ control: methods.control, name: 'type' });
+
+  const handleSubmit: SubmitHandler<SchemaField> = (data) => {
+    onAddField(data);
+    onClose();
+  };
 
   return (
     <>
@@ -106,41 +120,14 @@ export const AddFieldFlyout = ({ stream, onClose, onAddField }: AddFieldFlyoutPr
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <FieldNameSelector
-          value={field.name}
-          onChange={(name) => {
-            setField({ name });
-
-            const type = fieldsMetadata?.[name]?.type as MappedSchemaField['type'] | undefined;
-            if (type) setField({ type });
-          }}
-          fields={fieldsMetadata}
-          // isInvalid={field.name === ''}
-          // error={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldNameError', {
-          //   defaultMessage: 'A field name is required.',
-          // })}
-        />
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeLabel', {
-            defaultMessage: 'Field type',
-          })}
-          helpText={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeHelpText', {
-            defaultMessage: 'We prefill the field type when matching an ECS or OTel field name.',
-          })}
-          fullWidth
-        >
-          <FieldTypeSelector
-            value={field.type}
-            onChange={(type) => setField({ type })}
-            isLoading={loading}
-          />
-        </EuiFormRow>
-        <AdvancedFieldMappingOptions
-          field={field}
-          onChange={setField}
-          onValidate={setValidAdvancedFieldMappings}
-          isEditing
-        />
+        <FormProvider {...methods}>
+          <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+            <FieldNameSelector fieldsMetadata={fieldsMetadata} />
+            <FieldTypeSelector />
+            {typeSupportsFormat(type) && <FieldFormatSelector />}
+            <AdvancedFieldMappingEditor />
+          </EuiForm>
+        </FormProvider>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -157,14 +144,7 @@ export const AddFieldFlyout = ({ stream, onClose, onAddField }: AddFieldFlyoutPr
           </EuiButtonEmpty>
           <EuiButton
             data-test-subj="streamsAppSchemaEditorAddFieldButton"
-            disabled={!hasValidFieldName || !hasValidFieldType || !isValidAdvancedFieldMappings}
-            onClick={() => {
-              onAddField({
-                ...field,
-                status: 'mapped',
-              } as SchemaField);
-              onClose();
-            }}
+            onClick={methods.handleSubmit(handleSubmit)}
           >
             {i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.addButtonLabel', {
               defaultMessage: 'Add field',
@@ -177,53 +157,67 @@ export const AddFieldFlyout = ({ stream, onClose, onAddField }: AddFieldFlyoutPr
 };
 
 interface FieldSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
-  fields: UseFieldsMetadataReturnType['fieldsMetadata'];
-  isInvalid?: boolean;
-  error?: string;
+  fieldsMetadata: UseFieldsMetadataReturnType['fieldsMetadata'];
 }
 
-export const FieldNameSelector = ({
-  value,
-  onChange,
-  fields,
-  isInvalid,
-  error,
-}: FieldSelectorProps) => {
-  const suggestions = useMemo(() => {
-    if (!fields) return [];
+export const FieldNameSelector = ({ fieldsMetadata }: FieldSelectorProps) => {
+  const { fields } = useSchemaEditorContext();
 
-    return Object.keys(fields).map((label) => ({
+  const { setValue } = useFormContext<SchemaField>();
+
+  const { field, fieldState } = useController<SchemaField, 'name'>({
+    name: 'name',
+    rules: {
+      required: i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldNameRequiredError', {
+        defaultMessage: 'A field name is required.',
+      }),
+      validate: (name) => {
+        if (fields.some((f) => f.name === name)) {
+          return i18n.translate(
+            'xpack.streams.schemaEditor.addFieldFlyout.fieldNameAlreadyExistsError',
+            { defaultMessage: 'A field with this name already exists.' }
+          );
+        }
+        return true;
+      },
+    },
+  });
+
+  const suggestions = useMemo(() => {
+    if (!fieldsMetadata) return [];
+
+    return Object.keys(fieldsMetadata).map((label) => ({
       label,
     }));
-  }, [fields]);
+  }, [fieldsMetadata]);
 
   const selectedOptions = useMemo(() => {
-    if (!value) return [];
+    if (!field.value) return [];
 
-    const matchingSuggestion = suggestions.find((suggestion) => suggestion.label === value);
-    return matchingSuggestion ? [matchingSuggestion] : [{ label: value }];
-  }, [value, suggestions]);
+    const matchingSuggestion = suggestions.find((suggestion) => suggestion.label === field.value);
+    return matchingSuggestion ? [matchingSuggestion] : [{ label: field.value }];
+  }, [field.value, suggestions]);
 
-  const handleSelectionChange = useCallback(
-    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const selectedOption = newSelectedOptions[0];
-      const newFieldValue = selectedOption?.label ?? '';
-      onChange(newFieldValue);
-    },
-    [onChange]
-  );
+  const handleSelectionChange = (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const selectedOption = newSelectedOptions[0];
+    const newFieldValue = selectedOption?.label ?? '';
+    field.onChange(newFieldValue);
 
-  const handleCreateOption = useCallback(
-    (searchValue: string) => {
-      const normalizedValue = searchValue.trim();
-      if (normalizedValue) {
-        handleSelectionChange([{ label: normalizedValue }]);
-      }
-    },
-    [handleSelectionChange]
-  );
+    const fieldMetadata = fieldsMetadata?.[newFieldValue] as FieldMetadata | undefined;
+    if (fieldMetadata?.type) {
+      setValue('type', fieldMetadata.type as MappedSchemaField['type']);
+    }
+    if (fieldMetadata?.ignore_above) {
+      setValue('additionalParameters', { ignore_above: fieldMetadata.ignore_above });
+    }
+  };
+
+  const handleCreateOption = (searchValue: string) => {
+    const normalizedValue = searchValue.trim();
+    if (normalizedValue) {
+      handleSelectionChange([{ label: normalizedValue }]);
+    }
+  };
 
   return (
     <EuiFormRow
@@ -233,8 +227,8 @@ export const FieldNameSelector = ({
       helpText={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeHelpText', {
         defaultMessage: 'We suggest general naming conventions like ECS or OTel.',
       })}
-      isInvalid={isInvalid}
-      error={error}
+      isInvalid={fieldState.invalid}
+      error={fieldState.error?.message}
       fullWidth
     >
       <EuiComboBox
@@ -248,13 +242,138 @@ export const FieldNameSelector = ({
         onChange={handleSelectionChange}
         onCreateOption={handleCreateOption}
         singleSelection={{ asPlainText: true }}
-        isInvalid={isInvalid}
+        isInvalid={fieldState.invalid}
         isClearable
         fullWidth
         customOptionText={i18n.translate('xpack.streams.fieldSelector.customOptionText', {
           defaultMessage: 'Add {searchValue} as a custom field',
           values: { searchValue: '{searchValue}' },
         })}
+      />
+    </EuiFormRow>
+  );
+};
+
+export const FieldTypeSelector = () => {
+  const { field, fieldState } = useController<SchemaField, 'type'>({
+    name: 'type',
+    rules: {
+      required: i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldNameRequiredError', {
+        defaultMessage: 'A field type is required.',
+      }),
+    },
+  });
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeLabel', {
+        defaultMessage: 'Field type',
+      })}
+      helpText={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeHelpText', {
+        defaultMessage: 'We prefill the field type when matching an ECS or OTel field name.',
+      })}
+      fullWidth
+      isInvalid={fieldState.invalid}
+      error={fieldState.error?.message}
+    >
+      <FieldTypeSelectorComponent value={field.value} onChange={field.onChange} />
+    </EuiFormRow>
+  );
+};
+
+export const FieldFormatSelector = () => {
+  const { field } = useController<SchemaField, 'format'>({ name: 'format' });
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldFormatSelector.label', {
+        defaultMessage: 'Field format',
+      })}
+      fullWidth
+    >
+      <FieldFormFormat onChange={field.onChange} value={field.value} />
+    </EuiFormRow>
+  );
+};
+
+export const AdvancedFieldMappingEditor = () => {
+  const { core } = useKibana();
+
+  const { field, fieldState } = useController<SchemaField, 'additionalParameters'>({
+    name: 'additionalParameters',
+    rules: {
+      validate: (value) => {
+        const isValid = Boolean(!value || value === '' || isSchema(recursiveRecord, value));
+        if (!isValid) {
+          return i18n.translate(
+            'xpack.streams.schemaEditor.addFieldFlyout.advancedFieldMappingOptions.error',
+            {
+              defaultMessage:
+                'Invalid advanced field mapping parameters. It should be defined as a JSON object.',
+            }
+          );
+        }
+        return true;
+      },
+    },
+  });
+
+  /**
+   * To have the editor properly handle the set xjson language
+   * we need to avoid the continuous parsing/serialization of the editor value
+   * using a parallel state always setting a string make the editor format well the content.
+   */
+  const serializedValue = useMemo(() => serializeXJson(field.value), [field.value]);
+  const [value, setValue] = React.useState(serializedValue);
+  // Sync internal state for edito with the form value controlled by the form
+  if (value !== serializedValue) {
+    setValue(serializedValue);
+  }
+
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    field.onChange(deserializeJson(newValue));
+  };
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.schemaEditor.addFieldFlyout.advancedFieldMappingOptions.label',
+        { defaultMessage: 'Advanced field mapping parameters' }
+      )}
+      helpText={
+        <FormattedMessage
+          id="xpack.streams.schemaEditor.addFieldFlyout.advancedFieldMappingOptions.docs.label"
+          defaultMessage="Parameters can be defined with JSON. {link}"
+          values={{
+            link: (
+              <EuiLink
+                data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
+                href={core.docLinks.links.elasticsearch.mappingParameters}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.streams.indexPattern.randomSampling.learnMore"
+                  defaultMessage="View documentation."
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+      fullWidth
+      isInvalid={fieldState.invalid}
+      error={fieldState.error?.message}
+    >
+      <CodeEditor
+        height={120}
+        languageId="xjson"
+        value={value}
+        onChange={handleChange}
+        options={{
+          automaticLayout: true,
+        }}
       />
     </EuiFormRow>
   );

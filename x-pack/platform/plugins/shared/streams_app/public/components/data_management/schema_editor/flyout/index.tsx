@@ -74,8 +74,8 @@ export const SchemaEditorFlyout = ({
             stream={stream}
           />
           <AdvancedFieldMappingOptions
-            field={nextField}
-            onChange={setNextField}
+            value={nextField.additionalParameters}
+            onChange={(additionalParameters) => setNextField({ additionalParameters })}
             onValidate={setValidAdvancedFieldMappings}
             isEditing={isEditing}
           />
