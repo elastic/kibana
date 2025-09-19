@@ -8,7 +8,6 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   KibanaFeatureConfig,
-  KibanaFeatureScope,
   ElasticsearchFeatureConfig,
 } from '@kbn/features-plugin/common';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
@@ -17,7 +16,6 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   id: PLUGIN_FEATURE_ID,
   name: PLUGIN_NAME,
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
   privileges: {
     all: {
