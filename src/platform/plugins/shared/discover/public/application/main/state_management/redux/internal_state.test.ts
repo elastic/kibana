@@ -6,15 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
   selectTabRuntimeState,
+  selectTab,
 } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
@@ -29,7 +30,7 @@ describe('InternalStateStore', () => {
       storage: services.storage,
     });
     const store = createInternalStateStore({
-      services: createDiscoverServicesMock(),
+      services,
       customizationContext: mockCustomizationContext,
       runtimeStateManager,
       urlStateStorage,
@@ -83,5 +84,30 @@ describe('InternalStateStore', () => {
       timeRangeAbsolute: undefined,
       timeRangeRelative: undefined,
     });
+  });
+
+  it('should set control state', async () => {
+    const services = createDiscoverServicesMock();
+    const urlStateStorage = createKbnUrlStateStorage();
+    const runtimeStateManager = createRuntimeStateManager();
+    const tabsStorageManager = createTabsStorageManager({
+      urlStateStorage,
+      storage: services.storage,
+    });
+    const store = createInternalStateStore({
+      services,
+      customizationContext: mockCustomizationContext,
+      runtimeStateManager,
+      urlStateStorage,
+      tabsStorageManager,
+    });
+    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    expect(selectTab(store.getState(), tabId).controlGroupState).toBeUndefined();
+
+    store.dispatch(
+      internalStateActions.setControlGroupState({ tabId, controlGroupState: mockControlState })
+    );
+    expect(selectTab(store.getState(), tabId).controlGroupState).toEqual(mockControlState);
   });
 });
