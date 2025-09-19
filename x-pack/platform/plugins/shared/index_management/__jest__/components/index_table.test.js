@@ -173,7 +173,9 @@ describe('index table', () => {
         executionContext: executionContextServiceMock.createStartContract(),
         chrome: chromeServiceMock.createStartContract(),
       },
-      plugins: {},
+      plugins: {
+        reindexService: {},
+      },
       url: urlServiceMock,
       // Default stateful configuration
       config: {
