@@ -1055,7 +1055,7 @@
     "@opentelemetry/otlp-exporter-base": "^0.202.0",
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@reduxjs/toolkit": "1.9.7",
-    "@slack/webhook": "^7.0.1",
+    "@slack/webhook": "^7.0.6",
     "@smithy/eventstream-codec": "^4.0.1",
     "@smithy/eventstream-serde-node": "^4.0.1",
     "@smithy/middleware-stack": "^4.0.1",
