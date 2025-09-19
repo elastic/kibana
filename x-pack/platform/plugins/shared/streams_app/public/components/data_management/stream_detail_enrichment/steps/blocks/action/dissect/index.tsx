@@ -17,7 +17,7 @@ import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 export const DissectProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector fieldKey={'from'} />
+      <ProcessorFieldSelector fieldKey="from" processorType="dissect" />
       <DissectPatternDefinition />
       <EuiSpacer size="m" />
       <FieldsAccordion>

@@ -26,9 +26,9 @@ import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
+  getAllFieldsInOrder,
   getSourceField,
   getTableColumns,
-  getUniqueDetectedFields,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
@@ -220,18 +220,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
-    // Get all fields from the preview documents
-    const fields = new Set<string>();
-    previewDocuments.forEach((doc) => {
-      Object.keys(doc).forEach((key) => {
-        fields.add(key);
-      });
-    });
-    // Keep the detected fields as first columns on the table and sort the rest alphabetically
-    const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
-
-    return [...uniqDetectedFields, ...otherFields.sort()];
+    return getAllFieldsInOrder(previewDocuments, detectedFields);
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>

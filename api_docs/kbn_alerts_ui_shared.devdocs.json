@@ -2464,7 +2464,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"recovered\" | \"active\" | \"untracked\""
+              "\"active\" | \"recovered\" | \"untracked\""
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
@@ -6587,22 +6587,6 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          ", \"name\">; \"alerts.recovered.count\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
-          ", \"name\">; \"alerts.recovered.data\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
           ", \"name\">; \"alerts.new.count\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
@@ -6612,6 +6596,22 @@
             "text": "ActionVariable"
           },
           ", \"name\">; \"alerts.new.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.data\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

@@ -25,7 +25,7 @@ import type {
   ParsedFormattingDecorationLines,
 } from './types';
 import { HIDDEN_CHANNEL } from './constants';
-import { findVisibleToken, isLikelyPunctuation } from './helpers';
+import { findVisibleToken, isLikelyPunctuation } from './tokens';
 
 const commentSubtype = (text: string): ESQLAstComment['subtype'] | undefined => {
   if (text[0] === '/') {

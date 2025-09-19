@@ -6,21 +6,32 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
-import { KnowledgeBaseClient } from './knowledge_base_client';
+import { KnowledgeBaseClient } from './clients/knowledge_base_client';
+import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 
 export const evaluate = base.extend<
   {},
   {
     knowledgeBaseClient: KnowledgeBaseClient;
+    conversationsClient: ConversationsClient;
     chatClient: ObservabilityAIAssistantEvaluationChatClient;
   }
 >({
   knowledgeBaseClient: [
-    async ({ fetch, log }, use) => {
-      const kbClient = new KnowledgeBaseClient(fetch, log);
+    async ({ fetch, log, esClient }, use) => {
+      const kbClient = new KnowledgeBaseClient(fetch, log, esClient);
 
       await use(kbClient);
+    },
+    {
+      scope: 'worker',
+    },
+  ],
+  conversationsClient: [
+    async ({ log, esClient }, use) => {
+      const convClient = new ConversationsClient(log, esClient);
+      await use(convClient);
     },
     {
       scope: 'worker',

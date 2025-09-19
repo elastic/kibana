@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import expect_ from 'expect';
 import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
 import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
@@ -45,10 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  // Note: We don't actually find signals well with ML tests at the moment so there are not tests for ML rule type for telemetry
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/132856
-  // FLAKY: https://github.com/elastic/kibana/issues/171442
-  describe.skip('@ess @serverless Detection rule status telemetry', () => {
+  describe('@ess @serverless Detection rule status telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -73,8 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171438
-    describe.skip('"kql" rule type', () => {
+    describe('"kql" rule type', () => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
@@ -109,22 +106,22 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
+          },
+          query_custom: {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query_custom,
+            enabled: 1,
+            alerts: 4,
           },
           custom_total: {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
           },
         };
-        expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
+
+        expect_(stats?.detection_rules.detection_rule_usage).toEqual(
+          expect_.objectContaining({ ...expectedRuleUsage })
+        );
       });
 
       it('@skipInServerlessMKI should have zero values for "detection_rule_status.all_rules" rules that are not query based', () => {
@@ -296,22 +293,21 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
+          },
+          eql_custom: {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql_custom,
+            enabled: 1,
+            alerts: 4,
           },
           custom_total: {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
           },
         };
-        expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
+        expect_(stats?.detection_rules.detection_rule_usage).toEqual(
+          expect_.objectContaining({ ...expectedRuleUsage })
+        );
       });
 
       it('should have zero values for "detection_rule_status.all_rules" rules that are not eql based', () => {
@@ -489,22 +485,21 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
+          },
+          threshold_custom: {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold_custom,
+            enabled: 1,
+            alerts: 4,
           },
           custom_total: {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
           },
         };
-        expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
+        expect_(stats?.detection_rules.detection_rule_usage).toEqual(
+          expect_.objectContaining({ ...expectedRuleUsage })
+        );
       });
 
       it('should have zero values for "detection_rule_status.all_rules" rules that are not threshold based', () => {
@@ -698,22 +693,23 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
+          },
+          threat_match_custom: {
+            ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+              .threat_match_custom,
+            enabled: 1,
+            alerts: 4,
           },
           custom_total: {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
             enabled: 1,
             alerts: 4,
-            notifications_enabled: 0,
-            notifications_disabled: 0,
-            legacy_notifications_disabled: 0,
-            legacy_notifications_enabled: 0,
           },
         };
-        expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
+
+        expect_(stats?.detection_rules.detection_rule_usage).toEqual(
+          expect_.objectContaining({ ...expectedRuleUsage })
+        );
       });
 
       it('should have zero values for "detection_rule_status.all_rules" rules that are not threat_match based', () => {

@@ -27,11 +27,36 @@
       "type": "Interface",
       "tags": [],
       "label": "OnechatPluginStart",
-      "description": [],
+      "description": [
+        "\nPublic start contract for the browser-side onechat plugin."
+      ],
       "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTool service contract, can be used to list or execute tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/onechat-browser",
+              "scope": "common",
+              "docId": "kibKbnOnechatBrowserPluginApi",
+              "section": "def-common.ToolServiceStartContract",
+              "text": "ToolServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

@@ -14,7 +14,7 @@ import {
   isLiteral,
   isParamLiteral,
 } from '../../ast/is';
-import type { ESQLAstItem } from '../../types';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../types';
 import { lastItem } from '../../visitor/utils';
 import type {
   FunctionDefinition,
@@ -26,6 +26,8 @@ import { getFunctionDefinition } from './functions';
 import { isArrayType } from './operators';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
+import { Walker } from '../../walker';
+import { isMarkerNode } from './ast';
 
 // #region type detection
 
@@ -351,3 +353,60 @@ export function isExpressionComplete(
 }
 
 // #endregion expression completeness
+
+/**
+ * Returns the left or right operand of a binary expression function.
+ */
+export function getBinaryExpressionOperand(
+  binaryExpression: ESQLFunction,
+  side: 'left' | 'right'
+): ESQLSingleAstItem | ESQLSingleAstItem[] | undefined {
+  const left = binaryExpression.args[0] as ESQLSingleAstItem | ESQLSingleAstItem[] | undefined;
+  const right = binaryExpression.args[1] as ESQLSingleAstItem | ESQLSingleAstItem[] | undefined;
+
+  return side === 'left' ? left : right;
+}
+
+/**
+ * Extracts a valid expression root from an assignment RHS, handling arrays and marker nodes.
+ */
+export function extractValidExpressionRoot(
+  assignmentRhs: ESQLSingleAstItem | ESQLSingleAstItem[] | undefined
+): ESQLSingleAstItem | undefined {
+  let root: ESQLSingleAstItem | undefined;
+
+  if (Array.isArray(assignmentRhs)) {
+    root = assignmentRhs[0] || undefined;
+  } else {
+    root = assignmentRhs;
+  }
+
+  if (!root || isMarkerNode(root)) {
+    return undefined;
+  }
+
+  return getRightmostNonVariadicOperator(root);
+}
+
+/**
+ * Finds the rightmost non-variadic operator in an expression tree.
+ * Useful for locating the most specific node near the cursor.
+ */
+export function getRightmostNonVariadicOperator(root: ESQLSingleAstItem): ESQLSingleAstItem {
+  if (root?.type !== 'function') {
+    return root;
+  }
+
+  let rightmostFn = root;
+  const walker = new Walker({
+    visitFunction: (fn) => {
+      if (fn.subtype !== 'variadic-call' && fn.location.min > rightmostFn.location.min) {
+        rightmostFn = fn;
+      }
+    },
+  });
+
+  walker.walkFunction(root);
+
+  return rightmostFn;
+}

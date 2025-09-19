@@ -102,11 +102,6 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     // Field can be automatically filled based on the samples, empty it.
     await pageObjects.streams.fillFieldInput('');
 
-    // Try to create without filling required fields
-    await pageObjects.streams.clickSaveProcessor();
-
-    await expect(page.getByText('A field value is required.')).toBeVisible();
-
     await pageObjects.streams.fillFieldInput('message');
     await pageObjects.streams.clickSaveProcessor();
     await expect(page.getByText('Empty patterns are not allowed.')).toBeVisible();

@@ -36,10 +36,12 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
+import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
+  isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
 }
 
@@ -47,7 +49,11 @@ const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = true }) => {
+export const AuthConfig: FunctionComponent<Props> = ({
+  readOnly,
+  isPfxEnabled = true,
+  isOAuth2Enabled = false,
+}) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
@@ -78,6 +84,41 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
+  const options = [
+    {
+      value: null,
+      label: i18n.AUTHENTICATION_NONE,
+      'data-test-subj': 'authNone',
+    },
+    {
+      value: AuthType.Basic,
+      label: i18n.AUTHENTICATION_BASIC,
+      children: authType === AuthType.Basic && <BasicAuthFields readOnly={readOnly} />,
+      'data-test-subj': 'authBasic',
+    },
+    {
+      value: AuthType.SSL,
+      label: i18n.AUTHENTICATION_SSL,
+      children: authType === AuthType.SSL && (
+        <SSLCertFields
+          readOnly={readOnly}
+          certTypeDefaultValue={certTypeDefaultValue}
+          certType={certType}
+          isPfxEnabled={isPfxEnabled}
+        />
+      ),
+      'data-test-subj': 'authSSL',
+    },
+    (isOAuth2Enabled || authType === AuthType.OAuth2ClientCredentials) && {
+      value: AuthType.OAuth2ClientCredentials,
+      label: i18n.AUTHENTICATION_OAUTH2,
+      children: authType === AuthType.OAuth2ClientCredentials && (
+        <OAuth2Fields readOnly={readOnly} />
+      ),
+      'data-test-subj': 'authOAuth2',
+    },
+  ].filter(Boolean);
+
   return (
     <>
       <EuiFlexGroup>
@@ -94,32 +135,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
         defaultValue={authTypeDefaultValue}
         component={CardRadioGroupField}
         componentProps={{
-          options: [
-            {
-              value: null,
-              label: i18n.AUTHENTICATION_NONE,
-              'data-test-subj': 'authNone',
-            },
-            {
-              value: AuthType.Basic,
-              label: i18n.AUTHENTICATION_BASIC,
-              children: authType === AuthType.Basic && <BasicAuthFields readOnly={readOnly} />,
-              'data-test-subj': 'authBasic',
-            },
-            {
-              value: AuthType.SSL,
-              label: i18n.AUTHENTICATION_SSL,
-              children: authType === AuthType.SSL && (
-                <SSLCertFields
-                  readOnly={readOnly}
-                  certTypeDefaultValue={certTypeDefaultValue}
-                  certType={certType}
-                  isPfxEnabled={isPfxEnabled}
-                />
-              ),
-              'data-test-subj': 'authSSL',
-            },
-          ],
+          options,
         }}
       />
       <EuiSpacer size="m" />
@@ -281,3 +297,6 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = 
     </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default AuthConfig;

@@ -24,38 +24,11 @@ import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@ela
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
-
-const mockTimeHistory = {
-  get: () => {
-    return [];
-  },
-  add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
-};
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const noop = jest.fn();
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 const kqlQuery = {
   query: 'response:200',
@@ -77,7 +50,7 @@ function wrapSearchBarInContext(
 ) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: mockTimeHistory,
+    timeHistory: createMockTimeHistory(),
     intl: null as any,
   };
 
@@ -111,11 +84,10 @@ function wrapSearchBarInContext(
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
-      search: {
-        ...searchServiceMock.createStartContract(),
+      search: searchServiceMock.createStartContract({
         isBackgroundSearchEnabled: backgroundSearchEnabled,
-        session: { state$: sessionState$ },
-      },
+        session: getSessionServiceMock({ state$: sessionState$ }),
+      }),
       query: {
         savedQueries: {
           findSavedQueries: () =>

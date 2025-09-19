@@ -22,6 +22,7 @@ import { MigrateActionRunner, bulkMigrateAgentsBatch } from './migrate_action_ru
 
 export async function migrateSingleAgent(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentId: string,
   agentPolicy: AgentPolicy | undefined,
   agent: Agent,
@@ -31,7 +32,7 @@ export async function migrateSingleAgent(
   if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
   }
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'MIGRATE',
