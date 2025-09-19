@@ -10,15 +10,5 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV4 } from './v4';
 
 export const casesSchema = casesSchemaV4.extends({
-  incremental_id: schema.maybe(
-    schema.nullable(
-      schema.oneOf([
-        schema.number(),
-        schema.object({
-          keyword: schema.maybe(schema.string()),
-          text: schema.maybe(schema.string()),
-        }),
-      ])
-    )
-  ),
+  incremental_id: schema.maybe(schema.nullable(schema.number())), // Added to account for the .text mapping
 });

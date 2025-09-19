@@ -14,14 +14,5 @@ export const casesSchema = casesSchemaV3.extends({
   time_to_acknowledge: schema.maybe(schema.nullable(schema.number())),
   time_to_investigate: schema.maybe(schema.nullable(schema.number())),
   time_to_resolve: schema.maybe(schema.nullable(schema.number())),
-  incremental_id: schema.maybe(
-    schema.nullable(
-      schema.oneOf([
-        schema.number(),
-        schema.object({
-          keyword: schema.maybe(schema.string()),
-        }),
-      ])
-    )
-  ),
+  incremental_id: schema.maybe(schema.nullable(schema.number())), // Added again to account for the .keyword mapping
 });
