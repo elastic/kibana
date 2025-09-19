@@ -7,12 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConfigSchema } from './config';
-
-export type { CreateSAMLResponseParams } from './plugin';
-export { plugin } from './plugin';
-
-export const config = {
-  schema: ConfigSchema,
-  exposeToBrowser: { uiam: true },
-};
+require('../src/setup_node_env');
+require('@kbn/uiam-dev-cli/scripts/uiam');
