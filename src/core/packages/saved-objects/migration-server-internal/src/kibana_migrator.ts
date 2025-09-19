@@ -182,7 +182,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private async runMigrationsInternal({
     skipVersionCheck = false,
   }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
-    let logger: Logger & { dump?: () => void } = this.log;
+    let logger: Logger & { dump?: () => void; clear?: () => void } = this.log;
 
     if (this.soMigrationsConfig.useCummulativeLogger) {
       logger = createCummulativeLogger(this.log);
@@ -233,6 +233,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       throw error;
     } finally {
       process.removeListener('uncaughtExceptionMonitor', dumpLogs);
+      logger.clear?.();
     }
   }
 

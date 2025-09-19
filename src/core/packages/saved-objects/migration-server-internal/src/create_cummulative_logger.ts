@@ -10,7 +10,9 @@
 import type { Logger, LogLevelId, LogMessageSource, LogMeta, LogRecord } from '@kbn/logging';
 import type { MigrationLog } from './types';
 
-export function createCummulativeLogger(logger: Logger): Logger & { dump: () => void } {
+export function createCummulativeLogger(
+  logger: Logger
+): Logger & { dump: () => void; clear: () => void } {
   const migrationLogs: MigrationLog[] = [];
 
   return {
@@ -28,6 +30,9 @@ export function createCummulativeLogger(logger: Logger): Logger & { dump: () => 
     },
     isLevelEnabled(level: LogLevelId): boolean {
       return logger.isLevelEnabled(level);
+    },
+    clear(): void {
+      migrationLogs.length = 0;
     },
     dump(): void {
       migrationLogs.forEach((log) => {
