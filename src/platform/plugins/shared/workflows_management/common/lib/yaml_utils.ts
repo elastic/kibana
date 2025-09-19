@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { z } from '@kbn/zod';
+import type { ZodError, z } from '@kbn/zod';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -23,28 +23,36 @@ import {
   visit,
 } from 'yaml';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
+import type { FormattedZodError, MockZodError } from './errors/invalid_yaml_schema';
+
+interface FormatValidationErrorResult {
+  message: string;
+  formattedError: FormattedZodError;
+}
 
 /**
  * Custom error message formatter for Zod validation errors
  * Transforms overwhelming error messages into user-friendly ones and creates a new ZodError
  */
-export function formatValidationError(error: any): { message: string; formattedError: any } {
+export function formatValidationError(error: ZodError | MockZodError): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
   if (!error?.issues || !Array.isArray(error.issues)) {
     const message = error?.message || String(error);
     return { message, formattedError: error };
   }
 
-  const formattedIssues = error.issues.map((issue: any) => {
+  const formattedIssues = error.issues.map((issue) => {
     let formattedMessage: string;
 
     // Handle discriminated union errors for type field
-    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
+    if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('triggers')) {
+      formattedMessage = `Invalid trigger type. Available: manual, alert, scheduled`;
+    } else if (issue.code === 'invalid_union_discriminator' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
     }
     // Handle literal type errors for type field (avoid listing all 1000+ options)
     else if (issue.code === 'invalid_literal' && issue.path?.includes('type')) {
-      const receivedValue = issue.received;
+      const receivedValue = issue.received as string;
       if (receivedValue?.startsWith?.('elasticsearch.')) {
         formattedMessage = `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
       } else if (receivedValue?.startsWith?.('kibana.')) {
@@ -56,6 +64,18 @@ export function formatValidationError(error: any): { message: string; formattedE
     // Handle union errors with too many options
     else if (issue.code === 'invalid_union' && issue.path?.includes('type')) {
       formattedMessage = 'Invalid connector type. Use Ctrl+Space to see available options.';
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'triggers'
+    ) {
+      formattedMessage = `No triggers found. Add at least one trigger.`;
+    } else if (
+      issue.code === 'invalid_type' &&
+      issue.path.length === 1 &&
+      issue.path[0] === 'steps'
+    ) {
+      formattedMessage = `No steps found. Add at least one step.`;
     }
     // Return original message for other errors
     else {
@@ -78,7 +98,7 @@ export function formatValidationError(error: any): { message: string; formattedE
 
   return {
     message: formattedError.message,
-    formattedError,
+    formattedError: formattedError as FormattedZodError,
   };
 }
 
@@ -148,6 +168,13 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   try {
     let error: Error | undefined;
     const doc = parseDocument(yamlString);
+
+    if (doc.errors.length > 0) {
+      return {
+        success: false,
+        error: new InvalidYamlSyntaxError(doc.errors.map((err) => err.message).join(', ')),
+      };
+    }
 
     // Visit all pairs, and check if there're any non-scalar keys
     // TODO: replace with parseDocument(yamlString, { stringKeys: true }) when 'yaml' package updated to 2.6.1

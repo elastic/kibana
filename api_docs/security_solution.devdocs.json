@@ -2497,6 +2497,23 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAnalytics",
+            "type": "Function",
+            "tags": [],
+            "label": "getAnalytics",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnalyticsServiceSetup"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getServerBasePath",
             "type": "Function",
             "tags": [],

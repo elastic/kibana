@@ -50,7 +50,6 @@ import type {
   InferenceConnectorsResponse,
 } from '../../../common/types/api';
 import { CaseStatuses } from '../../../common/types/domain';
-import type { AlertAttachment } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
@@ -140,7 +139,8 @@ export const deleteComment = async (
 export const patchComment = async (
   caseId: string,
   commentId: string,
-  alertAttachment: AlertAttachment,
+  commentUpdate: string,
+  version: string,
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
 
