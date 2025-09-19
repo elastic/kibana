@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DefaultValue } from './type';
 import { Type } from './type';
 import { internals } from '../internals';
 
 /**
  * Use this type to construct recursive runtime schemas.
  */
-export class Lazy<T> extends Type<T> {
+export class Lazy<T, D extends DefaultValue<T>> extends Type<T, D> {
   constructor(id: string) {
     super(internals.link(`#${id}`));
   }

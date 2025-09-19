@@ -10,43 +10,128 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type { TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
 import { Type } from './type';
 import { ValidationError } from '../errors';
+import { Reference } from '../references';
 
-export type Props = Record<string, Type<any>>;
+export type ObjectDefaultValue<T extends ObjectProps<Props>> = DefaultValue<
+  ObjectResultTypeInput<T>
+>;
 
+export type Props = Record<string, Type<any, DefaultValue<any>>>;
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
+/**
+ * A type used to constrain the object props to preserve the exact type for D
+ *
+ * Without this the defaults will be stripped away from the defined types
+ */
+export type ObjectProps<P extends Props> = {
+  [K in keyof P]: P[K] extends Type<infer V, infer D> ? D : never;
+};
 
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
-  ? ReturnType<RT>['type']
-  : RT extends Type<any>
-  ? RT['type']
+export type TypeOrLazyType<T = any, D extends DefaultValue<T> = never> =
+  | Type<T, D>
+  | (() => Type<T, D>);
+
+export type ObjectTypeOrLazyType<
+  P extends ObjectProps<Props> = any,
+  D extends ObjectDefaultValue<P> = any
+> = ObjectType<P, D> | (() => ObjectType<P, D>);
+
+/**
+ * @internal
+ */
+type TypeOf<RT extends TypeOrLazyType> = RT extends () => TypeOrLazyType<infer V, infer D>
+  ? Type<V, D>['_output']
   : never;
 
-type OptionalProperties<Base extends Props> = Pick<
+type TypeOfOutput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> =
+  RT extends ObjectTypeOrLazyType<infer V, infer D>
+    ? ObjectResultType<V>
+    : RT extends TypeOrLazyType<infer V, infer D>
+    ? Type<V, D>['_output']
+    : never;
+
+/**
+ * @internal
+ *
+ * Need to avoid circular ref
+ */
+type TypeOfInput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> =
+  RT extends ObjectTypeOrLazyType<infer V, infer D>
+    ? ObjectResultTypeInput<V>
+    : RT extends TypeOrLazyType<infer V, infer D>
+    ? Type<V, D>['_input']
+    : never;
+
+type UndefinedPropertyKeys<Base extends ObjectProps<Props>> = {
+  [Key in keyof Base]: Base[Key] extends Type<infer V, infer D>
+    ? V extends undefined
+      ? Key
+      : never
+    : never;
+}[keyof Base];
+
+type OptionalProperties<Base extends ObjectProps<Props>> = Pick<
   Base,
   {
     [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? Key : never;
   }[keyof Base]
 >;
 
-type RequiredProperties<Base extends Props> = Pick<
+type DefaultProperties<Base extends ObjectProps<Props>> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: Base[Key] extends Type<any, infer D>
+      ? [D] extends [never]
+        ? never
+        : Key
+      : never;
+  }[keyof Base]
+>;
+
+type RequiredProperties<Base extends ObjectProps<Props>> = Pick<
   Base,
   {
     [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? never : Key;
   }[keyof Base]
 >;
 
-// Because of https://github.com/Microsoft/TypeScript/issues/14041
-// this might not have perfect _rendering_ output, but it will be typed.
-export type ObjectResultType<P extends Props> = Readonly<
-  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } & {
-    [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
-  }
->;
+export type ObjectResultType<P extends ObjectProps<Props>> = {
+  [K in keyof OptionalProperties<P>]?: TypeOfOutput<P[K]>;
+} & {
+  [K in keyof RequiredProperties<P>]: TypeOfOutput<P[K]>;
+};
+
+export type TypeOfDefault<RT extends TypeOrLazyType> = RT extends TypeOrLazyType<infer V, infer D>
+  ? [D] extends [never]
+    ? V
+    : V | D // generalize default (i.e. 'foo' to string)
+  : 1;
+
+export type ObjectResultDefaults<P extends ObjectProps<Props>> = {
+  [K in keyof OptionalProperties<P>]?: TypeOfDefault<P[K]>;
+} & {
+  [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOfDefault<P[K]>;
+} & {
+  [K in keyof DefaultProperties<P>]?: TypeOfDefault<P[K]>;
+};
+
+export type ObjectResultTypeInput<P extends ObjectProps<Props>> = {
+  [K in keyof OptionalProperties<P>]?: TypeOfInput<P[K]>;
+} & {
+  // Omit default and undefined (not defined with ?) values from required list
+  [K in Exclude<
+    keyof RequiredProperties<P>,
+    keyof DefaultProperties<P> | UndefinedPropertyKeys<P>
+  >]: TypeOfInput<P[K]>;
+} & {
+  [K in keyof DefaultProperties<P>]?: TypeOfInput<P[K]>;
+} & {
+  [K in UndefinedPropertyKeys<P>]?: TypeOfInput<P[K]>;
+};
 
 type DefinedProperties<Base extends NullableProps> = Pick<
   Base,
@@ -55,17 +140,18 @@ type DefinedProperties<Base extends NullableProps> = Pick<
   }[keyof Base]
 >;
 
-type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> & {
+type ExtendedProps<P extends ObjectProps<Props>, NP extends NullableProps> = Omit<P, keyof NP> & {
   [K in keyof DefinedProperties<NP>]: NP[K];
 };
 
-type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
+type ExtendedObjectType<P extends ObjectProps<Props>, NP extends NullableProps> = ObjectType<
   ExtendedProps<P, NP>
 >;
 
-type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = ObjectTypeOptions<
-  ExtendedProps<P, NP>
->;
+type ExtendedObjectTypeOptions<
+  P extends ObjectProps<Props>,
+  NP extends NullableProps
+> = ObjectTypeOptions<ExtendedProps<P, NP>, ObjectDefaultValue<ExtendedProps<P, NP>>>;
 
 interface ObjectTypeOptionsMeta {
   /**
@@ -75,17 +161,22 @@ interface ObjectTypeOptionsMeta {
   id?: string;
 }
 
-export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
-  UnknownOptions & { meta?: TypeOptions<ObjectResultType<P>>['meta'] & ObjectTypeOptionsMeta };
+export type ObjectTypeOptions<
+  P extends ObjectProps<Props>,
+  D extends ObjectDefaultValue<P | any>
+> = TypeOptions<ObjectResultType<P>, D, ObjectTypeOptionsMeta> & UnknownOptions;
 
-export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
+export class ObjectType<
+  P extends ObjectProps<Props>,
+  D extends ObjectDefaultValue<P | any> = never
+> extends Type<ObjectResultType<P>, D> {
   private props: P;
-  private options: ObjectTypeOptions<P>;
+  private options: ObjectTypeOptions<P, D>;
   private propSchemas: Record<string, AnySchema>;
 
-  constructor(props: P, options: ObjectTypeOptions<P> = {}) {
+  constructor(props: P, options: ObjectTypeOptions<P, D> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
-    const { unknowns, ...typeOptions } = options;
+    const { unknowns, defaultValue, ...typeOptions } = options;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
@@ -104,6 +195,24 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
     if (options.meta?.id) {
       schema = schema.id(options.meta.id);
+    }
+
+    // Validate defaultValue object to fill defaults
+    if (defaultValue !== undefined) {
+      if (typeof defaultValue === 'function') {
+        const defaultValueFn = defaultValue;
+        const newDefaultFn = () => {
+          // @ts-expect-error - need to fix this error
+          return schema.validate(defaultValueFn());
+        };
+        schema = schema.default(newDefaultFn);
+      } else if (Reference.isReference(defaultValue)) {
+        // Ref typings are ambagious, cannot validate but probably a rare case.
+        schema = schema.default(defaultValue.getSchema());
+      } else {
+        const newDefault = schema.validate(defaultValue).value;
+        schema = schema.default(newDefault);
+      }
     }
 
     super(schema, typeOptions);
@@ -190,6 +299,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       ...newOptions,
     } as ExtendedObjectTypeOptions<P, NP>;
 
+    // @ts-expect-error - figure this out, likely due to D not extending V
     return new ObjectType(extendedProps, extendedOptions);
   }
 
@@ -204,7 +314,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       return memo;
     }, {} as P);
 
-    const extendedOptions: ObjectTypeOptions<P> = {
+    const extendedOptions: ObjectTypeOptions<P, D> = {
       ...this.options,
       ...(options.unknowns ? { unknowns: options.unknowns } : {}),
     };
