@@ -114,7 +114,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             <EuiSpacer size="m" />
             <LogsOverviewHeader
               formattedDoc={parsedDoc}
-              doc={hit}
+              hit={hit}
               renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
               filter={filter}
               onAddColumn={onAddColumn}

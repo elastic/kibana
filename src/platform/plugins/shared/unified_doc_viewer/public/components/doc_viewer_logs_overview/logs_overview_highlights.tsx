@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiBadge, EuiPanel } from '@elastic/eui';
 import type { FieldConfiguration } from '../content_framework';
@@ -20,21 +19,22 @@ import { TraceIdLink } from '../observability/traces/components/trace_id_link';
 import { fieldLabels } from '../observability/constants';
 
 interface LogsOverviewHighlightsProps
-  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
+  extends Pick<
+    DocViewRenderProps,
+    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'dataView' | 'hit'
+  > {
   formattedDoc: LogDocumentOverview;
-  doc: DataTableRecord;
-  dataView: DataView;
 }
 
 export function LogsOverviewHighlights({
   formattedDoc,
-  doc,
+  hit,
   dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: LogsOverviewHighlightsProps) {
-  const flattenedDoc = doc.flattened;
+  const flattenedDoc = hit.flattened;
   const shouldRenderSection = (fields: Array<keyof LogDocumentOverview>) => {
     return fields.some((field) => Boolean(formattedDoc[field] && flattenedDoc[field]));
   };
@@ -52,7 +52,7 @@ export function LogsOverviewHighlights({
           filter={filter}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
-          hit={doc}
+          hit={hit}
           dataView={dataView}
           id="logs-highlights"
           data-test-subj="unifiedDocViewLogsOverview"

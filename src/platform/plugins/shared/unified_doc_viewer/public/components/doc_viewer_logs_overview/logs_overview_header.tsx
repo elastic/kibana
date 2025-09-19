@@ -17,32 +17,32 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
-import { ContentFrameworkSection } from '../..';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
+import { ContentFrameworkSection } from '../content_framework/lazy_content_framework_section';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
 });
 
 interface LogsOverviewHeaderProps
-  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
+  extends Pick<
+    DocViewRenderProps,
+    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'hit' | 'dataView'
+  > {
   formattedDoc: LogDocumentOverview;
-  doc: DataTableRecord;
-  dataView: DataView;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
 }
 
 export function LogsOverviewHeader({
-  doc,
+  hit,
   formattedDoc,
   dataView,
   filter,
@@ -55,7 +55,7 @@ export function LogsOverviewHeader({
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
   });
-  const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
+  const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
@@ -71,7 +71,7 @@ export function LogsOverviewHeader({
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc })}
+        renderFlyoutStreamProcessingLink({ doc: hit })}
       {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
           value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
@@ -120,7 +120,7 @@ export function LogsOverviewHeader({
     </EuiFlexGroup>
   );
 
-  return hasFlyoutHeader ? (
+  return (
     <ContentFrameworkSection
       id={accordionId}
       title={contentLabel}
@@ -128,18 +128,23 @@ export function LogsOverviewHeader({
       hasBorder={false}
       hasPadding={false}
     >
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
-        {hasMessageField ? contentField : badges}
-      </EuiPanel>
-      <EuiSpacer size="m" />
+      {hasFlyoutHeader ? (
+        <>
+          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+            {hasMessageField ? contentField : badges}
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
       <LogsOverviewHighlights
         formattedDoc={formattedDoc}
-        doc={doc}
+        hit={hit}
         dataView={dataView}
         filter={filter}
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
       />
     </ContentFrameworkSection>
-  ) : null;
+  );
 }

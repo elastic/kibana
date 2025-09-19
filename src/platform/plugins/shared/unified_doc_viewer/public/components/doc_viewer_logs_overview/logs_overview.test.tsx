@@ -179,7 +179,12 @@ const renderLogsOverview = (
 };
 
 describe('LogsOverview', () => {
-  beforeEach(() => renderLogsOverview());
+  beforeEach(
+    async () =>
+      await act(async () => {
+        renderLogsOverview();
+      })
+  );
   describe('Header section', () => {
     it('should display a timestamp badge', async () => {
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
@@ -196,8 +201,8 @@ describe('LogsOverview', () => {
 
   describe('Highlights section', () => {
     it('should load the service container with all fields', async () => {
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewService')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTrace')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewServiceName')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTraceID')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewHostName')).toBeInTheDocument();
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewOrchestratorClusterName')
