@@ -45,7 +45,7 @@ import {
   getToolTypeConfig,
   getCreatePayloadFromData,
   getUpdatePayloadFromData,
-} from './form/tools_form_registry';
+} from './form/registry/tools_form_registry';
 import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
 import { ToolTestFlyout } from './execute/test_tools';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';

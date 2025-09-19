@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { ToolType } from '@kbn/onechat-common';
 import type { Resolver } from 'react-hook-form';
-import { getToolTypeConfig } from '../../components/tools/form/tools_form_registry';
+import { getToolTypeConfig } from '../../components/tools/form/registry/tools_form_registry';
 import { useOnechatServices } from '../use_onechat_service';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
 

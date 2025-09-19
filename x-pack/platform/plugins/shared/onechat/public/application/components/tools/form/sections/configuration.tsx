@@ -14,7 +14,7 @@ import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
 import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
 import { useQueryState } from '../../../../hooks/use_query_state';
-import { getToolTypeConfig, getEditableToolTypes } from '../tools_form_registry';
+import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
 
 export const Configuration = () => {
   const {
