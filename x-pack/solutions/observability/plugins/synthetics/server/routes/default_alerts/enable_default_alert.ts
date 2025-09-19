@@ -24,11 +24,10 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     context,
     server,
     savedObjectsClient,
-    request,
     response,
+    spaceId,
   }): Promise<DEFAULT_ALERT_RESPONSE | IKibanaResponse<{}>> => {
     try {
-      const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
       const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
 
       const [statusRule, tlsRule] = await Promise.all([
@@ -42,7 +41,7 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         };
       }
       // do not delete this `await`, or we will skip the custom exception handling
-      const result = await defaultAlertService.setupDefaultRules(activeSpace?.id ?? 'default');
+      const result = await defaultAlertService.setupDefaultRules(spaceId);
       return result;
     } catch (error) {
       if (error instanceof LockAcquisitionError) {
