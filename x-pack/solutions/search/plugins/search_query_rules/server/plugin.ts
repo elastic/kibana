@@ -13,8 +13,6 @@ import {
   Logger,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   SearchQueryRulesPluginSetup,
   SearchQueryRulesPluginSetupDependencies,
@@ -44,7 +42,6 @@ export class SearchQueryRulesPlugin
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       catalogue: [PLUGIN_ID],
       privileges: {
         all: {
