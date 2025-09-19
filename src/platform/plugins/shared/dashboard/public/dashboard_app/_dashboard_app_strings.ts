@@ -256,14 +256,9 @@ export const topNavStrings = {
   },
 };
 
-export const getControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
-    defaultMessage: 'Controls',
-  });
-
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Control',
+    defaultMessage: 'Controls',
   });
 
 export const getAddESQLControlButtonTitle = () =>

@@ -27,7 +27,6 @@ import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_libra
 import { uiActionsService } from '../../../services/kibana_services';
 import {
   getAddControlButtonTitle,
-  getControlButtonTitle,
   getAddESQLControlButtonTitle,
   getAddTimeSliderControlButtonTitle,
   getCreateVisualizationButtonTitle,
@@ -174,7 +173,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
     },
     {
       id: 1,
-      title: getControlButtonTitle(),
+      title: getAddControlButtonTitle(),
       initialFocusedItemIndex: 0,
       items: [
         {
