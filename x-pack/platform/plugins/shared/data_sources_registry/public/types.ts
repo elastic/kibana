@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { ChatDataRegistryPlugin } from './plugin';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataSourcesRegistryPluginSetup {}
 
-export function plugin() {
-  return new ChatDataRegistryPlugin();
-}
-
-export type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataSourcesRegistryPluginStart {}

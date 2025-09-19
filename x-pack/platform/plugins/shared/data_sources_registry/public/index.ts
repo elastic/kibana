@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'chatDataRegistry';
-export const PLUGIN_NAME = 'chatDataRegistry';
+import { DataSourcesRegistryPlugin } from './plugin';
+
+export function plugin() {
+  return new DataSourcesRegistryPlugin();
+}
+
+export type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';

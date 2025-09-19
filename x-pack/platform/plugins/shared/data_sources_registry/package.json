@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/chat-data-registry-plugin",
+  "name": "@kbn/data-sources-registry-plugin",
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "private": true,

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChatDataRegistryPluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChatDataRegistryPluginStart {}
+export const PLUGIN_ID = 'dataSourcesRegistry';
+export const PLUGIN_NAME = 'dataSourcesRegistry';

@@ -10,12 +10,12 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import { PLUGIN_NAME } from '../../common';
 
-export const ChatDataRegistryApp = () => {
+export const DataSourcesRegistryApp = () => {
   return (
     <I18nProvider>
       <h1>
         <FormattedMessage
-          id="chatDataRegistry.helloWorldText"
+          id="dataSourcesRegistry.helloWorldText"
           defaultMessage="{name}"
           values={{ name: PLUGIN_NAME }}
         />
