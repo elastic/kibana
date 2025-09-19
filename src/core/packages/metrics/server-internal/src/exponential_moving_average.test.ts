@@ -60,14 +60,12 @@ describe('exponentialMovingAverage', () => {
       });
     });
   });
-  // remove
+
   describe('transition from mean to exponential moving average', () => {
     // Using realistic ELU values from Kibana startup
-    // TODO: change inputs back to originally used values: { a: 1, b: 1, c: 2, d: 2, e: 1, f: 1} for easier maths
     it('should switch to EMA after mean period (short window)', () => {
       // Short window: after 3 intervals, switches to EMA
       testScheduler.run(({ cold, expectObservable }) => {
-        // change inputs back to originally used values: { a: 1, b: 1, c: 2, d: 2, e: 1, f: 1}
         const observable = cold('abcd|', { a: 1.0, b: 1.0, c: 0.48, d: 0.03 }).pipe(
           exponentialMovingAverage(15, 5)
         );
@@ -149,7 +147,6 @@ describe('exponentialMovingAverage', () => {
       });
     });
   });
-  // remove
   describe('EMA time window behavior', () => {
     it('should calculate different smoothing factors for different windows', () => {
       const shortAlpha = 1 - Math.exp(-5 / 15); // ≈ 0.283
