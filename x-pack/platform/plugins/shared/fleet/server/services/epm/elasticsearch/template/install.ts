@@ -414,7 +414,7 @@ export function buildComponentTemplates(params: {
 
   const mappingsDynamicTemplates = uniqBy(
     concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
-    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+    (dynamicTemplate) => Object.keys(dynamicTemplate)[0]
   );
   const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
@@ -426,6 +426,9 @@ export function buildComponentTemplates(params: {
     (experimentalDataStreamFeature?.features.synthetic_source === true ||
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
+
+  const isPkgConfiguringDynamicSettings =
+    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings.dynamic === false;
 
   templatesMap[packageTemplateName] = {
     template: {
@@ -460,9 +463,16 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
-        // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case of otel input packages
-        ...(isOtelInputType ? { dynamic: true } : {}),
-        ...(isOtelInputType && type === 'traces' ? { subobjects: undefined } : {}),
+        // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
+        // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
+        ...(isOtelInputType && !isPkgConfiguringDynamicSettings ? { dynamic: true } : {}),
+        // Override `subobjects: false` to avoid clonflicts with traces-otel@mappings
+        ...(isOtelInputType &&
+        !isPkgConfiguringDynamicSettings &&
+        type === 'traces' &&
+        !indexTemplateMappings.runtime
+          ? { subobjects: undefined }
+          : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
