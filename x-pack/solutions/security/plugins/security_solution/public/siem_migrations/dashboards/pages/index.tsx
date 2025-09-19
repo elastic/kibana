@@ -23,6 +23,9 @@ import { MigrationDashboardsTable } from '../components/dashboard_table';
 import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { PageTitle } from '../../common/components/page_title';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
+import { DashboardMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 
 export type MigrationDashboardsPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -78,15 +81,18 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
+
       return (
         <>
+          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+            <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+          )}
           {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
             <>
-              {/* TODO: uncomment once panels are merged */}
-              {/* <DashboardMigrationsUploadMissingPanel
+              <DashboardMigrationsUploadMissingPanel
                 migrationStats={migrationStats}
                 topSpacerSize="s"
-              /> */}
+              />
               <EuiSpacer size="m" />
               <MigrationDashboardsTable refetchData={refetchData} migrationStats={migrationStats} />
             </>
@@ -96,14 +102,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
             SiemMigrationTaskStatus.INTERRUPTED,
             SiemMigrationTaskStatus.STOPPED,
           ].includes(migrationStats.status) && (
-            // TODO: uncomment once panels are merged
-            // <MigrationReadyPanel migrationStats={migrationStats} />
-            <>{'Migration read panel...'}</>
-          )}
-          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-            // TODO: uncomment once panels are merged
-            // <MigrationProgressPanel migrationStats={migrationStats} />
-            <>{'Migration progress panel...'}</>
+            <MigrationReadyPanel migrationStats={migrationStats} />
           )}
         </>
       );

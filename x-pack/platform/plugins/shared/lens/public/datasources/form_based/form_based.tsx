@@ -104,7 +104,8 @@ import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { isColumnOfType } from './operations/definitions/helpers';
+import type { DateRange } from '../../../common/types';
+import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import type { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
@@ -251,7 +252,8 @@ export function getFormBasedDatasource({
       references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>
+      indexPatterns?: Record<string, IndexPattern>,
+      dateRange?: DateRange
     ) {
       return loadInitialState({
         persistedState,
@@ -261,11 +263,14 @@ export function getFormBasedDatasource({
         initialContext,
         indexPatternRefs,
         indexPatterns,
+        dateRange,
       });
     },
 
     getPersistableState(state: FormBasedPrivateState) {
-      return extractReferences(state);
+      const { references, state: persistableState } = extractReferences(state);
+      const newPersistableState = cleanupFormulaColumns(persistableState);
+      return { references, state: newPersistableState };
     },
 
     insertLayer(

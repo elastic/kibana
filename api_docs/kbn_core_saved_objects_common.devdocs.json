@@ -1955,6 +1955,14 @@
             "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
           },
           {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
