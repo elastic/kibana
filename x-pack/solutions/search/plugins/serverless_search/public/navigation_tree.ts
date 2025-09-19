@@ -118,7 +118,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           {
             iconV2: 'comment',
             link: 'agent_builder',
-            renderAs: 'panelOpener',
             sideNavVersion: 'v2',
             title: AGENTS_TITLE,
           },
