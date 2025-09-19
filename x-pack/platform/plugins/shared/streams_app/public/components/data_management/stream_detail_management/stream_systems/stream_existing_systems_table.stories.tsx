@@ -9,6 +9,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import type { System } from '@kbn/streams-schema';
 import { faker } from '@faker-js/faker';
+import { testStreamDefinition } from '../stream_configuration.stories';
 import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
 const stories: Meta<{}> = {
@@ -44,5 +45,12 @@ The editor also ships with some built in plugins. For example it can handle chec
 It can also handle emojis! :smile:
 And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip content!)}
 `;
-  return <StreamExistingSystemsTable systems={systems} />;
+  return (
+    <StreamExistingSystemsTable
+      systems={systems}
+      isLoading={false}
+      refreshSystems={() => {}}
+      definition={testStreamDefinition}
+    />
+  );
 };
