@@ -36,6 +36,7 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
+import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -365,12 +366,11 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
 
   const adHocDataViews = getAdhocDataviews(usedDataviews);
   const regularDataViews = Object.values(usedDataviews).filter((v) => v.type === 'dataView');
-  const references = buildReferences({ layer_0: regularDataViews[0]?.id ?? adHocDataViews[0].id });
+  const references = buildReferences({ layer_0: regularDataViews[0]?.id ?? adHocDataViews[0]?.id });
 
   return {
-    title: config.title ?? '',
-    description: config.description ?? '',
     visualizationType: 'lnsMetric',
+    ...getSharedChartAPIToLensState(config),
     references,
     state: {
       datasourceStates: layers,
@@ -394,8 +394,7 @@ export function fromLensStateToAPI(
   const [layerId, layer] = Object.entries(layers)[0];
 
   const visualizationState = {
-    title: config.title,
-    description: config.description ?? '',
+    ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,

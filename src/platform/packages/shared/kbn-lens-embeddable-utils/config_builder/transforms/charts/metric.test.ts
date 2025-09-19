@@ -37,7 +37,7 @@ describe('metric chart transformations', () => {
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(basicMetricConfig);
+      const lensState = fromAPItoLensState(basicMetricConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -84,7 +84,7 @@ describe('metric chart transformations', () => {
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(metricWithSecondaryConfig);
+      const lensState = fromAPItoLensState(metricWithSecondaryConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -133,7 +133,7 @@ describe('metric chart transformations', () => {
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(metricWithBreakdownConfig);
+      const lensState = fromAPItoLensState(metricWithBreakdownConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -178,7 +178,7 @@ describe('metric chart transformations', () => {
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(metricWithBarConfig);
+      const lensState = fromAPItoLensState(metricWithBarConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -203,27 +203,18 @@ describe('metric chart transformations', () => {
         metric: {
           operation: 'value',
           column: 'count',
-          // label: 'Count',
-          // show_array_values: false,
           alignments: {
             labels: 'left',
             value: 'left',
           },
           fit: true,
-          //   background_chart: {
-          //     type: 'bar',
-          //     goal_value: {
-          //       operation: 'value',
-          //       column: 'max_count',
-          //     },
-          //   },
         },
         sampling: 1,
         ignore_global_filters: true,
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(esqlMetricConfig);
+      const lensState = fromAPItoLensState(esqlMetricConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -234,20 +225,12 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('dataset');
       expect(convertedConfig).toHaveProperty('title');
       expect(lensState).toHaveProperty('references');
-      expect(lensState.references).toHaveLength(1);
-
-      const referenceId = lensState.references[0].id;
+      expect(lensState.references).toHaveLength(0);
 
       expect(lensState).toMatchInlineSnapshot(`
         Object {
           "description": "A test metric chart using ESQL",
-          "references": Array [
-            Object {
-              "id": "${referenceId}",
-              "name": "indexpattern-datasource-layer-layer_0",
-              "type": "index-pattern",
-            },
-          ],
+          "references": Array [],
           "state": Object {
             "adHocDataViews": Object {},
             "datasourceStates": Object {
@@ -320,7 +303,7 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toEqual(esqlMetricConfig);
     });
 
-    it('comprehensive metric chart', async () => {
+    it('comprehensive metric chart with ad hoc data view', async () => {
       const comprehensiveMetricConfig: MetricState = {
         type: 'metric',
         title: 'Comprehensive Test Metric',
@@ -373,7 +356,7 @@ describe('metric chart transformations', () => {
       };
 
       // Convert API config to Lens state
-      const lensState = await fromAPItoLensState(comprehensiveMetricConfig);
+      const lensState = fromAPItoLensState(comprehensiveMetricConfig);
 
       // Convert back from Lens state to API config
       const convertedConfig = fromLensStateToAPI(lensState);
@@ -387,200 +370,11 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('title');
 
       expect(lensState).toHaveProperty('references');
-      expect(lensState.references).toHaveLength(1);
+      expect(lensState.references).toHaveLength(0);
 
-      const referenceId = lensState.references[0].id;
+      // there are 2 ad hoc dataViews instead of 1 as there's the hidden trend layer defined
+      expect(Object.keys(lensState.state.adHocDataViews ?? {})).toHaveLength(2);
 
-      expect(lensState).toMatchInlineSnapshot(`
-        Object {
-          "description": "A comprehensive metric chart with all features",
-          "references": Array [
-            Object {
-              "id": "${referenceId}",
-              "name": "indexpattern-datasource-layer-layer_0",
-              "type": "index-pattern",
-            },
-          ],
-          "state": Object {
-            "adHocDataViews": Object {
-              "${referenceId}": Object {
-                "allowHidden": false,
-                "allowNoIndex": false,
-                "fieldAttrs": Object {},
-                "fieldFormats": Object {},
-                "id": "${referenceId}",
-                "name": "comprehensive-index",
-                "runtimeFieldMap": Object {},
-                "sourceFilters": Array [],
-                "timeFieldName": "@timestamp",
-                "title": "comprehensive-index",
-              },
-            },
-            "datasourceStates": Object {
-              "formBased": Object {
-                "layers": Object {
-                  "layer_0": Object {
-                    "columnOrder": Array [
-                      "metric_formula_accessor_breakdown",
-                      "metric_formula_accessor",
-                      "metric_formula_accessor_secondary",
-                    ],
-                    "columns": Object {
-                      "metric_formula_accessor": Object {
-                        "customLabel": true,
-                        "dataType": "number",
-                        "filter": undefined,
-                        "isBucketed": false,
-                        "label": "Avg Response Time",
-                        "operationType": "average",
-                        "params": Object {},
-                        "sourceField": "response_time",
-                      },
-                      "metric_formula_accessor_breakdown": Object {
-                        "customLabel": false,
-                        "dataType": "string",
-                        "isBucketed": true,
-                        "label": "",
-                        "operationType": "terms",
-                        "params": Object {
-                          "accuracyMode": false,
-                          "exclude": Array [],
-                          "excludeIsRegex": false,
-                          "format": undefined,
-                          "include": Array [],
-                          "includeIsRegex": false,
-                          "missingBucket": undefined,
-                          "orderAgg": undefined,
-                          "orderBy": Object {
-                            "fallback": true,
-                            "type": "alphabetical",
-                          },
-                          "orderDirection": "asc",
-                          "otherBucket": false,
-                          "parentFormat": Object {
-                            "id": "terms",
-                          },
-                          "secondaryFields": Array [],
-                          "size": 10,
-                        },
-                        "sourceField": "service_name",
-                      },
-                      "metric_formula_accessor_secondary": Object {
-                        "customLabel": true,
-                        "dataType": "number",
-                        "filter": undefined,
-                        "isBucketed": false,
-                        "label": "Request Count",
-                        "operationType": "count",
-                        "params": Object {
-                          "emptyAsNull": false,
-                        },
-                        "sourceField": "___records___",
-                      },
-                    },
-                    "ignoreGlobalFilters": true,
-                    "sampling": 0.8,
-                  },
-                  "layer_0_trendline": Object {
-                    "columnOrder": Array [
-                      "metric_formula_accessor_breakdown_trendline",
-                      "metric_formula_accessor_trendline",
-                      "metric_formula_accessor_secondary_trendlineX0",
-                    ],
-                    "columns": Object {
-                      "metric_formula_accessor_breakdown_trendline": Object {
-                        "customLabel": false,
-                        "dataType": "string",
-                        "isBucketed": true,
-                        "label": "",
-                        "operationType": "terms",
-                        "params": Object {
-                          "accuracyMode": false,
-                          "exclude": Array [],
-                          "excludeIsRegex": false,
-                          "format": undefined,
-                          "include": Array [],
-                          "includeIsRegex": false,
-                          "missingBucket": undefined,
-                          "orderAgg": undefined,
-                          "orderBy": Object {
-                            "fallback": true,
-                            "type": "alphabetical",
-                          },
-                          "orderDirection": "asc",
-                          "otherBucket": false,
-                          "parentFormat": Object {
-                            "id": "terms",
-                          },
-                          "secondaryFields": Array [],
-                          "size": 10,
-                        },
-                        "sourceField": "service_name",
-                      },
-                      "metric_formula_accessor_secondary_trendlineX0": Object {
-                        "customLabel": true,
-                        "dataType": "number",
-                        "filter": undefined,
-                        "isBucketed": false,
-                        "label": "Request Count",
-                        "operationType": "count",
-                        "params": Object {
-                          "emptyAsNull": false,
-                        },
-                        "sourceField": "___records___",
-                      },
-                      "metric_formula_accessor_trendline": Object {
-                        "customLabel": true,
-                        "dataType": "number",
-                        "filter": undefined,
-                        "isBucketed": false,
-                        "label": "Avg Response Time",
-                        "operationType": "average",
-                        "params": Object {},
-                        "sourceField": "response_time",
-                      },
-                    },
-                    "ignoreGlobalFilters": true,
-                    "sampling": 0.8,
-                  },
-                },
-              },
-            },
-            "filters": Array [],
-            "internalReferences": Array [],
-            "query": Object {
-              "language": "kuery",
-              "query": "",
-            },
-            "visualization": Object {
-              "breakdownByAccessor": "metric_formula_accessor_breakdown",
-              "color": "#00FF00",
-              "icon": "clock",
-              "iconAlign": "right",
-              "layerId": "layer_0",
-              "layerType": "data",
-              "maxCols": 5,
-              "metricAccessor": "metric_formula_accessor",
-              "secondaryAlign": "right",
-              "secondaryMetricAccessor": "metric_formula_accessor_secondary",
-              "secondaryPrefix": "Requests: ",
-              "showBar": false,
-              "subtitle": "milliseconds",
-              "titlesTextAlign": "center",
-              "trendlineBreakdownByAccessor": "metric_formula_accessor_breakdown_trendline",
-              "trendlineLayerId": "layer_0_trendline",
-              "trendlineLayerType": "metricTrendline",
-              "trendlineMetricAccessor": "metric_formula_accessor_trendline",
-              "trendlineSecondaryMetricAccessor": "metric_formula_accessor_secondary_trendline",
-              "trendlineTimeAccessor": "x_date_histogram",
-              "valueFontMode": "fit",
-              "valuesTextAlign": "right",
-            },
-          },
-          "title": "Comprehensive Test Metric",
-          "visualizationType": "lnsMetric",
-        }
-      `);
       expect(convertedConfig).toMatchInlineSnapshot(`
         Object {
           "breakdown_by": Object {
@@ -608,7 +402,7 @@ describe('metric chart transformations', () => {
             "size": 10,
           },
           "dataset": Object {
-            "name": undefined,
+            "id": undefined,
             "type": "dataView",
           },
           "description": "A comprehensive metric chart with all features",
@@ -618,7 +412,144 @@ describe('metric chart transformations', () => {
               "labels": "center",
               "value": "right",
             },
-            "background_chart": Object {},
+            "background_chart": Object {
+              "type": "trend",
+            },
+            "color": Object {
+              "color": "#00FF00",
+              "type": "static",
+            },
+            "field": "response_time",
+            "fit": true,
+            "icon": Object {
+              "align": "right",
+              "name": "clock",
+            },
+            "label": "Avg Response Time",
+            "operation": "average",
+            "sub_label": "milliseconds",
+          },
+          "sampling": 0.8,
+          "secondary_metric": Object {
+            "empty_as_null": false,
+            "label": "Request Count",
+            "operation": "count",
+            "prefix": "Requests: ",
+          },
+          "title": "Comprehensive Test Metric",
+          "type": "metric",
+        }
+      `);
+    });
+
+    it('comprehensive metric chart with data view', async () => {
+      const comprehensiveMetricConfig: MetricState = {
+        type: 'metric',
+        title: 'Comprehensive Test Metric',
+        description: 'A comprehensive metric chart with all features',
+        dataset: {
+          type: 'dataView',
+          id: 'my-custom-data-view-id',
+        },
+        metric: {
+          operation: 'average',
+          field: 'response_time',
+          label: 'Avg Response Time',
+          sub_label: 'milliseconds',
+          alignments: {
+            labels: 'center',
+            value: 'right',
+          },
+          fit: true,
+          icon: {
+            name: 'clock',
+            align: 'right',
+          },
+          color: {
+            type: 'static',
+            color: '#00FF00',
+          },
+          background_chart: {
+            type: 'trend',
+          },
+        },
+        secondary_metric: {
+          operation: 'count',
+          label: 'Request Count',
+          prefix: 'Requests: ',
+          color: {
+            type: 'static',
+            color: '#0000FF',
+          },
+          empty_as_null: false,
+        },
+        breakdown_by: {
+          operation: 'terms',
+          fields: ['service_name'],
+          columns: 5,
+          size: 10,
+        },
+        sampling: 0.8,
+        ignore_global_filters: true,
+      };
+
+      // Convert API config to Lens state
+      const lensState = fromAPItoLensState(comprehensiveMetricConfig);
+
+      // Convert back from Lens state to API config
+      const convertedConfig = fromLensStateToAPI(lensState);
+
+      // Verify the result has the same type as the input
+      expect(convertedConfig.type).toBe(comprehensiveMetricConfig.type);
+      expect(convertedConfig).toHaveProperty('metric');
+      expect(convertedConfig).toHaveProperty('secondary_metric');
+      expect(convertedConfig).toHaveProperty('breakdown_by');
+      expect(convertedConfig).toHaveProperty('dataset');
+      expect(convertedConfig).toHaveProperty('title');
+
+      expect(lensState).toHaveProperty('references');
+      expect(lensState.references).toHaveLength(1);
+
+      expect(convertedConfig).toMatchInlineSnapshot(`
+        Object {
+          "breakdown_by": Object {
+            "excludes": Object {
+              "as_regex": false,
+              "values": Array [],
+            },
+            "fields": Array [
+              "service_name",
+            ],
+            "includes": Object {
+              "as_regex": false,
+              "values": Array [],
+            },
+            "increase_accuracy": false,
+            "label": undefined,
+            "operation": "terms",
+            "other_bucket": Object {
+              "include_documents_without_field": false,
+            },
+            "rank_by": Object {
+              "direction": "asc",
+              "type": "alphabetical",
+            },
+            "size": 10,
+          },
+          "dataset": Object {
+            "id": "my-custom-data-view-id",
+            "type": "dataView",
+          },
+          "description": "A comprehensive metric chart with all features",
+          "ignore_global_filters": true,
+          "metric": Object {
+            "alignments": Object {
+              "labels": "center",
+              "value": "right",
+            },
+            "background_chart": Object {
+              "type": "trend",
+            },
             "color": Object {
               "color": "#00FF00",
               "type": "static",
