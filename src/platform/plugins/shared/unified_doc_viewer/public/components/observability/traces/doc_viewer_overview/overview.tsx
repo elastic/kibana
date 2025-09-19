@@ -133,16 +133,13 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
               isOtelSpan={isOtelSpan}
               duration={duration || 0}
             />
-            {showWaterfall && docId ? (
-              <>
-                <EuiSpacer size="m" />
-                <TraceWaterfall
-                  dataView={dataView}
-                  traceId={traceId}
-                  serviceName={serviceName || ''}
-                  docId={docId}
-                />
-              </>
+            {showWaterfall ? (
+              <TraceWaterfall
+                dataView={dataView}
+                traceId={traceId}
+                serviceName={serviceName}
+                docId={docId}
+              />
             ) : null}
             <EuiSpacer size="m" />
             <ErrorsTable ref={setErrorsTableSectionRef} traceId={traceId} docId={docId} />

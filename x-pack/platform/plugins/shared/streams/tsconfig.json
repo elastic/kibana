@@ -63,6 +63,7 @@
     "@kbn/sse-utils",
     "@kbn/global-search-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/otel-semantic-conventions"
+    "@kbn/otel-semantic-conventions",
+    "@kbn/streams-ai"
   ]
 }
