@@ -195,10 +195,10 @@ export function conditionToStatement(condition: Condition, nested = false): stri
     return `!(${conditionToStatement(condition.not, true)})`;
   }
   // Always/never conditions (if you have them)
-  if ('always' in condition && condition.always === true) {
+  if ('always' in condition) {
     return `true`;
   }
-  if ('never' in condition && condition.never === true) {
+  if ('never' in condition) {
     return `false`;
   }
   throw new Error('Unsupported condition');

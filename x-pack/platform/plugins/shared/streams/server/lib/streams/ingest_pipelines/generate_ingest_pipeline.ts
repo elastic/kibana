@@ -55,8 +55,12 @@ export function generateIngestPipeline(
         },
       },
     ],
-    // @ts-expect-error @elastic/elasticsearch field - missing in types
-    field_access_pattern: 'flexible',
+    // root doesn't need flexible access pattern because it can't contain custom processing and default special case processing doesn't work properly with it
+    ...(!isRoot(definition.name)
+      ? {
+          field_access_pattern: 'flexible',
+        }
+      : {}),
     _meta: {
       description: `Default pipeline for the ${name} stream`,
       managed: true,
