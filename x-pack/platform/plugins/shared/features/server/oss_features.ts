@@ -30,7 +30,6 @@ export const buildOSSFeatures = ({
       },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
       privileges: {
@@ -127,7 +126,6 @@ export const buildOSSFeatures = ({
       },
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['visualize', 'lens', 'kibana'],
       catalogue: ['visualize'],
       privileges: {
@@ -194,7 +192,6 @@ export const buildOSSFeatures = ({
       },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['dashboards', 'kibana'],
       catalogue: ['dashboard'],
       privileges: {

@@ -175,7 +175,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
       }),
       order: 400,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
