@@ -159,6 +159,7 @@ export const HeadersFields: React.FC<Props> = ({ readOnly }) => {
                             display: 'flex',
                             flexDirection: 'column',
                           }}
+                          data-test-subj="webhookHeaderPanel"
                         >
                           <EuiFlexGroup>
                             <EuiFlexItem>

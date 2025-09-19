@@ -215,7 +215,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   }, [isFormModified, onFormModifiedChange]);
 
   useEffect(() => {
-    if (!isWebhookConnector) return;
+    if (!isWebhookConnector || !connector.id) return;
 
     const currentFormData = form.getFormData() as InternalConnectorForm;
 
