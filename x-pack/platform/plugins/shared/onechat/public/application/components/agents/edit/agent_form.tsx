@@ -204,6 +204,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     http,
     navigateToUrl,
     openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   const agentTools = watch('configuration.tools');
@@ -347,6 +348,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.onechat.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
@@ -388,7 +390,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             {!isCreateMode && (
               <EuiFlexItem grow={false}>
                 <AgentAvatar
-                  size="xl"
+                  size="l"
                   agent={{
                     name: agentName,
                     avatar_symbol: agentAvatarSymbol,
@@ -559,10 +561,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
-              {i18n.translate('xpack.onechat.agents.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
+            <EuiButtonEmpty
+              aria-label={labels.agents.settings.cancelButtonLabel}
+              size="s"
+              iconType="cross"
+              color="text"
+              onClick={handleCancel}
+            >
+              {labels.agents.settings.cancelButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>

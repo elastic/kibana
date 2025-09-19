@@ -24,7 +24,7 @@ import type {
   DownloadSource,
   DownloadSourceSOAttributes,
   DownloadSourceBase,
-  PolicySecretReference,
+  SecretReference,
 } from '../types';
 import {
   DownloadSourceError,
@@ -176,7 +176,7 @@ class DownloadSourceService {
     id: string,
     newData: Partial<DownloadSource>
   ) {
-    let secretsToDelete: PolicySecretReference[] = [];
+    let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
     logger.debug(`Updating download source ${id} with ${newData}`);
