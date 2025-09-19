@@ -27,22 +27,22 @@ export function generateBuiltInStepSnippet(
   switch (stepType) {
     case 'foreach':
       parameters = `\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
-
+      break;
     case 'if':
       parameters = `\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
-
+      break;
     case 'parallel':
       parameters = `\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
-
+      break;
     case 'merge':
       parameters = `\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
-
+      break;
     case 'http':
       parameters = `\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
-
+      break;
     case 'wait':
       parameters = `\nwith:\n  duration: "5s"`;
-
+      break;
     default:
       parameters = `\nwith:\n  # Add parameters here`;
   }
