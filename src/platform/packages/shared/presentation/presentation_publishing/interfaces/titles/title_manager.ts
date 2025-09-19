@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 import type { WithAllKeys } from '../../state_manager';
 import { initializeStateManager } from '../../state_manager/state_manager';
 import type { StateComparators, StateManager } from '../../state_manager/types';
 import type { PublishesWritableDescription } from './publishes_description';
 import type { PublishesTitle, PublishesWritableTitle } from './publishes_title';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 

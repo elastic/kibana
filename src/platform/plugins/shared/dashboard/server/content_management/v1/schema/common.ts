@@ -65,7 +65,7 @@ export const panelSchema = schema.object({
       {
         unknowns: 'allow',
       }
-    )
+    ),
   ]),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   gridData: panelGridDataSchema,
