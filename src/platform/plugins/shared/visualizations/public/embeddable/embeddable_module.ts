@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  extractReferences,
-  injectReferences,
-  convertSavedObjectAttributesToReferences,
-} from './saved_visualization_references';
+export { getTransforms } from '../../common/embeddable/transforms/get_transforms';
+export { getVisualizeEmbeddableFactory } from './visualize_embeddable';
