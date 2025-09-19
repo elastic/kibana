@@ -203,6 +203,28 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     }
                   )}
                 </EuiText>
+                <EuiSpacer size="m" />
+                <GenerateSuggestionButton
+                  iconType="refresh"
+                  size="s"
+                  onClick={(connectorId) =>
+                    fetchSuggestions({
+                      streamName: definition.stream.name,
+                      connectorId,
+                      start: timeState.start,
+                      end: timeState.end,
+                    })
+                  }
+                  isLoading={isLoadingSuggestions}
+                  aiFeatures={aiFeatures}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                    {
+                      defaultMessage: 'Regenerate',
+                    }
+                  )}
+                </GenerateSuggestionButton>
               </EuiCallOut>
             ) : suggestions.length === 0 || isLoadingSuggestions ? (
               <EuiFlexGroup justifyContent="center" alignItems="flexStart">
