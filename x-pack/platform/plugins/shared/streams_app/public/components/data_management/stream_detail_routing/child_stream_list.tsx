@@ -74,9 +74,9 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           alignItems="center"
           className={css`
             padding: ${euiTheme.size.l};
-            padding-bottom: ${euiTheme.size.xxxl};
+            padding-bottom: ${euiTheme.size.xxl};
             flex-grow: 1;
-            min-height: 120px;
+            min-height: 80px;
           `}
         >
           <EuiToolTip
@@ -115,7 +115,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           display: flex;
           flex-direction: column;
           overflow-y: auto;
-          max-height: calc(100% - 120px);
+          max-height: calc(100% - 80px);
         `}
       >
         <EuiFlexGroup
