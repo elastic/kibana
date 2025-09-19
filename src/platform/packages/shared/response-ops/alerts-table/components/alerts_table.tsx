@@ -235,7 +235,9 @@ const AlertsTableContent = typedForwardRef(
       onChange: onVisibleColumnsChange,
       defaultValue: defaultVisibleColumns,
     });
-    const [sort, setSort] = useState<AlertsTableSortCombinations[]>(initialSort);
+    const [sort, setSort] = useState<AlertsTableSortCombinations[]>(
+      configuration?.sort ?? initialSort
+    );
 
     // Persist table configuration on changes (using useUpdateEffect to avoid saving on first render)
     useUpdateEffect(() => {
