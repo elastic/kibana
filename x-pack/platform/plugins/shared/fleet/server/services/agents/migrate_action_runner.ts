@@ -74,7 +74,7 @@ export async function bulkMigrateAgentsBatch(
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentIds,
     created_at: now,
