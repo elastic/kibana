@@ -283,11 +283,18 @@ export function initializeLayoutManager(
   };
 
   const removePanel = (uuid: string) => {
-    const panels = { ...layout$.value.panels };
+    const currentLayout = layout$.value;
+    const panels = { ...currentLayout.panels };
     if (panels[uuid]) {
       delete panels[uuid];
       layout$.next({ ...layout$.value, panels });
     }
+    const controls = { ...currentLayout.controls };
+    if (controls[uuid]) {
+      delete controls[uuid];
+      layout$.next({ ...layout$.value, controls });
+    }
+
     const children = { ...children$.value };
     if (children[uuid]) {
       delete children[uuid];
