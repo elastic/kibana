@@ -593,7 +593,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService.setup({
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
-      isFeatureEnabled: config.experimentalFeatures.defendInsights,
       endpointContext: this.endpointContext.service,
     });
 
