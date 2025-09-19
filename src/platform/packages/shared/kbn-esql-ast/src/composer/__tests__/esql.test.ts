@@ -156,6 +156,71 @@ describe('query.from()', () => {
   });
 });
 
+describe('query.ts()', () => {
+  test('errors on no arguments', () => {
+    expect(() => {
+      // @ts-expect-error - .from() requires at least one argument
+      esql.ts();
+    }).toThrow();
+  });
+
+  test('can create a query with one source', () => {
+    const query = esql.ts('index');
+
+    expect(query.print()).toBe('TS index');
+  });
+
+  test('can provide AST nodes as arguments', () => {
+    const query = esql.ts(esql.src('index', 'cluster1'), esql.src('index2', void 0, 'selector'));
+
+    expect(query.print()).toBe('TS cluster1:index, index2::selector');
+  });
+
+  test('can create a query with with multiple sources', () => {
+    const query = esql.ts('index, index2, cluster:index3');
+
+    expect(query.print()).toBe('TS index, index2, cluster:index3');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'ts',
+          args: [
+            { type: 'source', index: { type: 'literal', value: 'index' } },
+            { type: 'source', index: { type: 'literal', value: 'index2' } },
+            {
+              type: 'source',
+              prefix: { type: 'literal', value: 'cluster' },
+              index: { type: 'literal', value: 'index3' },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  test('index with selector', () => {
+    const query = esql.ts('index::selector');
+
+    expect(query.print()).toBe('TS index::selector');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [
+        {
+          name: 'ts',
+          args: [
+            {
+              type: 'source',
+              index: { type: 'literal', value: 'index' },
+              selector: { type: 'literal', value: 'selector' },
+            },
+          ],
+        },
+      ],
+    });
+  });
+});
+
 describe('processing holes', () => {
   test('various hole input construction methods result into equivalent query', () => {
     const input = 42;
