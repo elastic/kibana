@@ -142,21 +142,21 @@ export class WorkflowContextManager {
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
     const stepContextMock: StepContext | undefined =
-      this.workflowExecutionRuntime.getWorkflowExecution().context?.stepContextMock;
+      this.workflowExecutionState.getWorkflowExecution().context?.stepContextMock;
 
     if (stepContextMock) {
-      stepContextMock.execution = {
-        ...stepContextMock.execution,
+      stepContext.execution = {
+        ...stepContext.execution,
         ...(stepContextMock.execution || {}),
       };
 
-      stepContextMock.workflow = {
-        ...stepContextMock.workflow,
+      stepContext.workflow = {
+        ...stepContext.workflow,
         ...(stepContextMock.workflow || {}),
       };
 
-      if (!stepContextMock.foreach) {
-        stepContextMock.foreach = stepContextMock.foreach;
+      if (!stepContext.foreach) {
+        stepContext.foreach = stepContextMock.foreach;
       }
 
       Object.entries(stepContextMock.steps || {}).forEach(([stepId, stepData]) => {
