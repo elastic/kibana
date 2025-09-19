@@ -95,12 +95,12 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
     }
     addCombinedField(
       createSemanticTextCombinedField(renameToFieldOption, selectedFieldOption),
-      (mappings2: MappingTypeMapping) => {
+      (initialMappings: MappingTypeMapping) => {
         if (renameToFieldOption === undefined || selectedFieldOption === undefined) {
-          return mappings2;
+          return initialMappings;
         }
 
-        const newMappings = cloneDeep(mappings2);
+        const newMappings = cloneDeep(initialMappings);
         newMappings.properties![renameToFieldOption ?? selectedFieldOption] = {
           // @ts-ignore types are missing semantic_text
           type: 'semantic_text',

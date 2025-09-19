@@ -43,7 +43,6 @@ export const FileDataVisualizer: FC<Props> = ({
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
-  // const existingIndex = undefined;
   const autoAddInference = undefined;
   const autoCreateDataView = true;
   const indexSettings = undefined;
