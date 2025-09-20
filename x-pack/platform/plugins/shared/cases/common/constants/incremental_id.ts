@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './v5';
+export const DEFAULT_TASK_INTERVAL_MINUTES = 10;
+export const DEFAULT_TASK_START_DELAY_MINUTES = 10;
