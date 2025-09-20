@@ -14,21 +14,24 @@ import type {
 import { isToolCallStep } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import { useConversationId } from './use_conversation_id';
-import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
-import { useNavigation } from './use_navigation';
+import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import { useConversationId } from './use_conversation_id';
+import { useNavigation } from './use_navigation';
 
 const pendingRoundId = '__pending__';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -102,6 +105,7 @@ export const useConversationActions = () => {
           draft.agent_id = agentId;
         })
       );
+      setAgentIdStorage(agentId);
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
