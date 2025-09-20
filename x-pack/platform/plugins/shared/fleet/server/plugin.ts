@@ -153,6 +153,7 @@ import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operati
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
 import { registerSetupTasks } from './tasks/setup';
+import { AlertingPluginsStart, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -175,6 +176,7 @@ export interface FleetStartDeps {
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export interface FleetAppContext {
@@ -212,6 +214,7 @@ export interface FleetAppContext {
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
+  alertingStart?: AlertingServerStart;
 }
 
 export type FleetSetupContract = void;
@@ -711,12 +714,14 @@ export class FleetPlugin
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     this.spacesPluginsStart = plugins.spaces;
+
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+
     const uninstallTokenService = new UninstallTokenService(
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
@@ -759,6 +764,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
