@@ -337,12 +337,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -350,6 +352,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError, queryParams]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -436,6 +448,22 @@ const AlertsTableContent = typedForwardRef(
       },
       [id, visibleColumns]
     );
+
+    // allow to reset to previous sort state in case of sorting error
+    const handleResetSortToPreviousState = useCallback(() => {
+      if (fieldWithSortingError) {
+        const newSort = queryParams.sort.filter(
+          (sortField) => !deepEqual(sortField, fieldWithSortingError)
+        );
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
+      }
+    }, [setSort, storageRef, queryParams, id, fieldWithSortingError]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -627,6 +655,10 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              onResetSortToPreviousState={
+                fieldWithSortingError ? handleResetSortToPreviousState : undefined
+              }
             />
           </InspectButtonContainer>
         )}
