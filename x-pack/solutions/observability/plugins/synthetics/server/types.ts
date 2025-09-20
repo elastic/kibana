@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -60,6 +60,7 @@ export interface SyntheticsServerSetup {
   coreStart: CoreStart;
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
+  coreSetup: CoreSetup;
   isElasticsearchServerless: boolean;
 }
 
