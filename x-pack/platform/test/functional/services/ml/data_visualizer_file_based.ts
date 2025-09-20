@@ -34,7 +34,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
         await testSubjects.existOrFail('~dataVisualizerFileUploadErrorCallout');
       } else {
         await testSubjects.missingOrFail('~dataVisualizerFileUploadErrorCallout');
-        await testSubjects.existOrFail('dataVisualizerPageFileResults');
+        await testSubjects.existOrFail('dataVisualizerPageAdvancedSettings');
       }
     },
 
