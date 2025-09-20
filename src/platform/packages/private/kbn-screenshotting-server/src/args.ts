@@ -84,7 +84,7 @@ export const args = ({
     flags.push('--disable-gpu');
   }
 
-  if (os.arch() === 'linux') {
+  if (os.platform() === 'linux') {
     flags.push('--disable-setuid-sandbox');
   }
 
