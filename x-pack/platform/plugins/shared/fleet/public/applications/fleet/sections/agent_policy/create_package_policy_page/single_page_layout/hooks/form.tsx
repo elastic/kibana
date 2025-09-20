@@ -147,9 +147,9 @@ export const updateAgentlessCloudConnectorConfig = (
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   )[0];
 
-  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
   if (
-    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !==
+      packagePolicy.supports_cloud_connector &&
     newAgentPolicy?.supports_agentless
   ) {
     let targetCsp;
@@ -179,13 +179,16 @@ export const updateAgentlessCloudConnectorConfig = (
       return;
     }
 
-    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
+    if (
+      newAgentPolicy.agentless?.cloud_connectors?.enabled !==
+      packagePolicy?.supports_cloud_connector
+    ) {
       setNewAgentPolicy({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
           cloud_connectors: {
-            enabled,
+            enabled: packagePolicy?.supports_cloud_connector || false,
             target_csp: targetCsp,
           },
         },
