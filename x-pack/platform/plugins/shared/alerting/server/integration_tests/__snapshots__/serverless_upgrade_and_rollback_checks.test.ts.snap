@@ -419,6 +419,7 @@ Object {
     "sourceFields": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The sourceFields param is ignored.",
         "error": [Function],
         "presence": "optional",
       },
