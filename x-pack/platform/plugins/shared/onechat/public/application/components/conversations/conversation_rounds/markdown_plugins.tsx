@@ -8,7 +8,7 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
-import { ChartType } from '@kbn/visualization-utils';
+import type { ChartType } from '@kbn/visualization-utils';
 import {
   visualizationElement,
   type TabularDataResult,
@@ -36,16 +36,24 @@ export const visualizationPlugin = () => {
       return;
     }
 
-    // extract attributes
-    const toolResultRegex = new RegExp(
+    // extract attribute: tool-result-id
+    const toolResultIdRegex = new RegExp(
       `${visualizationElement.attributes.toolResultId}="([^"]*)"`,
       'i'
     );
-    const toolResultId = value.match(toolResultRegex)?.[1];
+    const toolResultId = value.match(toolResultIdRegex)?.[1];
+
+    // extract attribute: chart-type
+    const chartTypeRegex = new RegExp(
+      `${visualizationElement.attributes.chartType}="([^"]*)"`,
+      'i'
+    );
+    const chartType = value.match(chartTypeRegex)?.[1];
 
     // transform the node from type `html` to (custom) type `visualization`
     (node as any).type = visualizationElement.tagName;
     (node as any).toolResultId = toolResultId;
+    (node as any).chartType = chartType;
     delete (node as any).value; // remove the raw HTML value
   };
 
@@ -63,7 +71,7 @@ export function getVisualizationHandler({
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
-  return (props: any) => {
+  return (props: { toolResultId?: string; chartType?: ChartType }) => {
     const { toolResultId, chartType } = props;
 
     if (!toolResultId) {
@@ -95,7 +103,7 @@ export function getVisualizationHandler({
         dataViews={startDependencies.dataViews}
         esqlQuery={query}
         esqlColumns={columns}
-        preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
+        preferredChartType={chartType}
       />
     );
   };
