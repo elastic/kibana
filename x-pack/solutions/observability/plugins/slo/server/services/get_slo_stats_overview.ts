@@ -8,14 +8,32 @@
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type KueryNode, nodeBuilder } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
+import type {
+  AggregationsAggregate,
+  FieldValue,
+  QueryDslQueryContainer,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+
+const ES_PAGESIZE_LIMIT = 5000;
+
+function getAfterKey(
+  agg: AggregationsAggregate | undefined
+): Record<string, FieldValue> | undefined {
+  if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
+    return agg.after_key as Record<string, FieldValue>;
+  }
+  return undefined;
+}
 
 export class GetSLOStatsOverview {
   constructor(
@@ -31,9 +49,142 @@ export class GetSLOStatsOverview {
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
-    const kqlQuery = params.kqlQuery ?? '';
-    const filters = params.filters ?? '';
+    const kqlQuery = params?.kqlQuery ?? '';
+    const filters = params?.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
+
+    let ruleFilters: KueryNode = {
+      type: 'literal',
+      def: true,
+    };
+    let burnRateFilters: QueryDslQueryContainer[] = [];
+
+    let querySLOsForIds = false;
+
+    const kqlQueriesProvided = !!params?.kqlQuery && params?.kqlQuery?.length > 0;
+
+    try {
+      querySLOsForIds = !!(
+        (!!parsedFilters &&
+          parsedFilters.some((value: Array<string>) => Array.isArray(value) && value.length > 0)) ||
+        kqlQueriesProvided
+      );
+    } catch (error) {
+      querySLOsForIds = kqlQueriesProvided;
+      this.logger.error(`Error parsing filters: ${error}`);
+    }
+
+    let sloKeysFromES: QueryDslQueryContainer[] = [];
+    const sloRuleKeysFromES: string[] = [];
+    let afterKey: AggregationsAggregate | undefined;
+
+    let totalHits = 0;
+
+    const boolFilters = parsedFilters;
+    if (params.kqlQuery) {
+      boolFilters.must.push({
+        kql: { query: params.kqlQuery },
+      });
+    }
+
+    const instanceIdIncluded = Object.values(params).find(
+      (value) => typeof value === 'string' && value.includes('slo.instanceId')
+    );
+
+    try {
+      if (querySLOsForIds) {
+        do {
+          const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
+            size: 0,
+            aggs: {
+              sloIds: {
+                composite: {
+                  after: afterKey as Record<string, FieldValue>,
+                  size: ES_PAGESIZE_LIMIT,
+                  sources: [
+                    {
+                      sloId: { terms: { field: 'slo.id' } },
+                    },
+                    ...(instanceIdIncluded
+                      ? [
+                          {
+                            sloInstanceId: { terms: { field: 'slo.instanceId' } },
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              },
+            },
+            index: '.slo-observability.summary-*',
+            _source: ['slo.id', 'slo.instanceId'],
+            ...(Object.values(boolFilters).some((value) => Array.isArray(value) && value.length > 0)
+              ? {
+                  query: {
+                    bool: boolFilters,
+                  },
+                }
+              : {}),
+          });
+
+          totalHits = (sloIdCompositeQueryResponse.hits?.total as SearchTotalHits).value || 0;
+          afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
+
+          const buckets = (
+            sloIdCompositeQueryResponse.aggregations?.sloIds as {
+              buckets?: Array<{ key: { sloId: string; sloInstanceId: string } }>;
+            }
+          )?.buckets;
+          if (buckets && buckets.length > 0) {
+            sloKeysFromES = sloKeysFromES.concat(
+              ...buckets.map((bucket) => {
+                sloRuleKeysFromES.push(bucket.key.sloId);
+                return {
+                  bool: {
+                    must: [
+                      { term: { 'kibana.alert.rule.parameters.sloId': bucket.key.sloId } },
+                      ...(instanceIdIncluded
+                        ? [
+                            {
+                              term: {
+                                'kibana.alert.instance.id': bucket.key.sloInstanceId,
+                              },
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                };
+              })
+            );
+          }
+        } while (afterKey);
+
+        const resultNodes =
+          sloRuleKeysFromES.length > 0
+            ? nodeBuilder.or(
+                sloRuleKeysFromES.map((sloId) =>
+                  nodeBuilder.is(`alert.attributes.params.sloId`, sloId)
+                )
+              )
+            : nodeBuilder.is(`alert.attributes.params.sloId`, '%NO%MATCHES%');
+
+        ruleFilters = resultNodes;
+
+        burnRateFilters = [
+          {
+            bool: {
+              should: [...sloKeysFromES],
+            },
+          },
+        ];
+      } else {
+        totalHits = -1;
+      }
+    } catch (error) {
+      this.logger.error(`Error querying SLOs for IDs: ${error}`);
+      throw error;
+    }
 
     const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
@@ -105,6 +256,7 @@ export class GetSLOStatsOverview {
         options: {
           ruleTypeIds: SLO_RULE_TYPE_IDS,
           consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
+          ...(ruleFilters?.def ? {} : { filter: ruleFilters }),
         },
       }),
 
@@ -113,6 +265,11 @@ export class GetSLOStatsOverview {
         consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         gte: moment().subtract(24, 'hours').toISOString(),
         lte: moment().toISOString(),
+        ...(burnRateFilters?.length
+          ? {
+              filter: burnRateFilters,
+            }
+          : {}),
       }),
     ]);
 
@@ -125,8 +282,8 @@ export class GetSLOStatsOverview {
       noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
       burnRateRules: rules.total,
-      burnRateActiveAlerts: alerts.activeAlertCount,
-      burnRateRecoveredAlerts: alerts.recoveredAlertCount,
+      burnRateActiveAlerts: totalHits ? alerts.activeAlertCount : 0,
+      burnRateRecoveredAlerts: totalHits ? alerts.recoveredAlertCount : 0,
     };
   }
 }
