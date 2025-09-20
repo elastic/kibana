@@ -547,25 +547,28 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
   }
 
   // Now scan from the with line forward to collect existing parameters
-  const expectedParamIndent = withIndent + 2; // Parameters should be indented 2 spaces from with:
+  // Be more flexible with indentation - parameters should be indented MORE than with:
+  const minParamIndent = withIndent + 1; // At least 1 space more than with:
 
   for (let lineNumber = withLineNumber + 1; lineNumber <= model.getLineCount(); lineNumber++) {
     const line = model.getLineContent(lineNumber);
     const lineIndent = getIndentLevel(line);
 
-    // Stop if we've gone past the with block (less indentation) or hit another major structure
+    // Stop if we've gone past the with block (less or equal indentation to with:)
     if (line.trim() !== '' && lineIndent <= withIndent) {
       // Exited with block due to indentation
       break;
     }
 
-    // Look for parameters at the expected indentation level
-    if (lineIndent === expectedParamIndent) {
-      const paramMatch = line.match(/^\s*(\w+):/);
+    // Look for parameters at any indentation level greater than with:
+    // This handles both 2-space and 4-space indentation styles
+    if (lineIndent > withIndent && line.trim() !== '') {
+      // More flexible regex that handles various parameter name formats
+      const paramMatch = line.match(/^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/);
       if (paramMatch) {
         const paramName = paramMatch[1];
         existingParams.add(paramName);
-        // Found existing parameter
+        console.log(`Found existing parameter: ${paramName} at line ${lineNumber}`);
       }
     }
 
@@ -576,6 +579,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
     }
   }
 
+  console.log('Existing parameters found:', Array.from(existingParams));
   return existingParams;
 }
 
