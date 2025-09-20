@@ -2,7 +2,9 @@
 
 exports[`getUnitedEntityDefinition generic entityManagerDefinition 1`] = `
 Object {
-  "capabilities": Array [],
+  "capabilities": Array [
+    "CRUD_API",
+  ],
   "displayNameTemplate": "{{entity.id}}",
   "filter": "",
   "id": "security_generic_test",
@@ -78,6 +80,26 @@ Object {
       },
       "destination": "entity.url",
       "source": "entity.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Privileged",
+      "source": "entity.attributes.Privileged",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.First_seen",
+      "source": "entity.lifecycle.First_seen",
     },
     Object {
       "aggregation": Object {
@@ -698,8 +720,14 @@ Object {
     "cloud.service.name": Object {
       "type": "keyword",
     },
+    "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
     "entity.id": Object {
       "type": "keyword",
+    },
+    "entity.lifecycle.First_seen": Object {
+      "type": "date",
     },
     "entity.name": Object {
       "type": "keyword",
@@ -861,7 +889,9 @@ Object {
 
 exports[`getUnitedEntityDefinition host entityManagerDefinition 1`] = `
 Object {
-  "capabilities": Array [],
+  "capabilities": Array [
+    "CRUD_API",
+  ],
   "displayNameTemplate": "{{host.name}}",
   "filter": "",
   "id": "security_host_test",
@@ -1010,6 +1040,76 @@ Object {
       "destination": "host.risk.calculated_score_norm",
       "source": "host.risk.calculated_score_norm",
     },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.name",
+      "source": "host.entity.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "host.entity.source",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.type",
+      "source": "host.entity.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.sub_type",
+      "source": "host.entity.sub_type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.url",
+      "source": "host.entity.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Privileged",
+      "source": "host.entity.attributes.Privileged",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.First_seen",
+      "source": "host.entity.lifecycle.First_seen",
+    },
   ],
   "name": "Security 'host' Entity Store Definition",
   "type": "host",
@@ -1026,10 +1126,25 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.lifecycle.First_seen": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
     },
     "entity.source": Object {
+      "type": "keyword",
+    },
+    "entity.sub_type": Object {
+      "type": "keyword",
+    },
+    "entity.type": Object {
+      "type": "keyword",
+    },
+    "entity.url": Object {
       "type": "keyword",
     },
     "host.architecture": Object {
@@ -1082,7 +1197,9 @@ Object {
 
 exports[`getUnitedEntityDefinition service entityManagerDefinition 1`] = `
 Object {
-  "capabilities": Array [],
+  "capabilities": Array [
+    "CRUD_API",
+  ],
   "displayNameTemplate": "{{service.name}}",
   "filter": "",
   "id": "security_service_test",
@@ -1243,6 +1360,76 @@ Object {
       "destination": "service.risk.calculated_score_norm",
       "source": "service.risk.calculated_score_norm",
     },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.name",
+      "source": "service.entity.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "service.entity.source",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.type",
+      "source": "service.entity.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.sub_type",
+      "source": "service.entity.sub_type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.url",
+      "source": "service.entity.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Privileged",
+      "source": "service.entity.attributes.Privileged",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.First_seen",
+      "source": "service.entity.lifecycle.First_seen",
+    },
   ],
   "name": "Security 'service' Entity Store Definition",
   "type": "service",
@@ -1259,10 +1446,25 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.lifecycle.First_seen": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
     },
     "entity.source": Object {
+      "type": "keyword",
+    },
+    "entity.sub_type": Object {
+      "type": "keyword",
+    },
+    "entity.type": Object {
+      "type": "keyword",
+    },
+    "entity.url": Object {
       "type": "keyword",
     },
     "service.address": Object {
@@ -1313,7 +1515,9 @@ Object {
 
 exports[`getUnitedEntityDefinition user entityManagerDefinition 1`] = `
 Object {
-  "capabilities": Array [],
+  "capabilities": Array [
+    "CRUD_API",
+  ],
   "displayNameTemplate": "{{user.name}}",
   "filter": "",
   "id": "security_user_test",
@@ -1438,6 +1642,76 @@ Object {
       "destination": "user.risk.calculated_score_norm",
       "source": "user.risk.calculated_score_norm",
     },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.name",
+      "source": "user.entity.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.source",
+      "source": "user.entity.source",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.type",
+      "source": "user.entity.type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.sub_type",
+      "source": "user.entity.sub_type",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.url",
+      "source": "user.entity.url",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Privileged",
+      "source": "user.entity.attributes.Privileged",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.First_seen",
+      "source": "user.entity.lifecycle.First_seen",
+    },
   ],
   "name": "Security 'user' Entity Store Definition",
   "type": "user",
@@ -1454,10 +1728,25 @@ Object {
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.lifecycle.First_seen": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
     },
     "entity.source": Object {
+      "type": "keyword",
+    },
+    "entity.sub_type": Object {
+      "type": "keyword",
+    },
+    "entity.type": Object {
+      "type": "keyword",
+    },
+    "entity.url": Object {
       "type": "keyword",
     },
     "user.domain": Object {

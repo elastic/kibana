@@ -285,11 +285,14 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'transform' }),
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'index_template' }),
+            expect.objectContaining({ resource: 'index_template' }),
             expect.objectContaining({ resource: 'task' }),
             expect.objectContaining({ resource: 'task' }),
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'enrich_policy' }),
             expect.objectContaining({ resource: 'index' }),
+            expect.objectContaining({ resource: 'data_stream' }),
+            expect.objectContaining({ resource: 'component_template' }),
             expect.objectContaining({ resource: 'component_template' }),
           ]);
         });
@@ -336,6 +339,7 @@ export default ({ getService }: FtrProviderContext) => {
                   'test-*',
                   '.asset-criticality.asset-criticality-default',
                   'risk-score.risk-score-latest-default',
+                  '.entities.v1.updates.security_host_default*',
                 ],
               },
             },

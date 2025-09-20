@@ -63,7 +63,8 @@ export const initEntityEngineRoute = (
           const securitySolutionIndices = await buildIndexPatterns(
             getSpaceId(),
             getAppClient(),
-            getDataViewsService()
+            getDataViewsService(),
+            request.params.entityType
           );
 
           const privileges = await entityStoreClient.getEntityStoreInitPrivileges(

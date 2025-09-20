@@ -16,6 +16,7 @@ import { entitiesEntityComponentTemplateConfig } from '../templates/components/e
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
 import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
+import { generateEntitiesUpdatesIndexTemplateConfig } from './entities/templates/entities_updates_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -79,9 +80,18 @@ export async function createAndInstallTemplates(
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'template'; id: string }>> {
-  const template = generateEntitiesLatestIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template, logger });
-  return [{ type: 'template', id: template.name }];
+  const latestTemplate = generateEntitiesLatestIndexTemplateConfig(definition);
+  const updatesTemplate = generateEntitiesUpdatesIndexTemplateConfig(definition);
+
+  await Promise.all([
+    upsertTemplate({ esClient, template: latestTemplate, logger }),
+    upsertTemplate({ esClient, template: updatesTemplate, logger }),
+  ]);
+
+  return [
+    { type: 'template', id: latestTemplate.name },
+    { type: 'template', id: updatesTemplate.name },
+  ];
 }
 
 export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {

@@ -132,6 +132,7 @@
             ".fleet-actions*",
             "risk-score.risk-score-*",
             ".entities.v1.latest.security_*",
+            ".entities.v1.updates.security_*"
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
