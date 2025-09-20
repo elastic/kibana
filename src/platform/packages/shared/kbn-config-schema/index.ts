@@ -248,13 +248,20 @@ function siblingRef<T = any>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A extends ConditionalTypeValue, B, C>(
+function conditional<
+  A extends ConditionalTypeValue,
+  B,
+  C,
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DV extends DefaultValue<B | C> = never
+>(
   leftOperand: Reference<A>,
   rightOperand: Reference<A> | A | Type<unknown>,
-  equalType: Type<B>,
-  notEqualType: Type<C>,
-  options?: TypeOptions<B | C>
-) {
+  equalType: Type<B, B, BDV>,
+  notEqualType: Type<C, C, CDV>,
+  options?: TypeOptions<B | C, B | C, DV>
+): ConditionalType<A, B, C, BDV, CDV, DV> {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
