@@ -856,6 +856,8 @@
       "@kbn/dependency-injection-example-plugin/*": ["examples/dependency_injection/*"],
       "@kbn/dependency-ownership": ["packages/kbn-dependency-ownership"],
       "@kbn/dependency-ownership/*": ["packages/kbn-dependency-ownership/*"],
+      "@kbn/dependency-tree": ["packages/kbn-dependency-tree"],
+      "@kbn/dependency-tree/*": ["packages/kbn-dependency-tree/*"],
       "@kbn/dependency-usage": ["packages/kbn-dependency-usage"],
       "@kbn/dependency-usage/*": ["packages/kbn-dependency-usage/*"],
       "@kbn/dev-cli-errors": ["src/platform/packages/shared/kbn-dev-cli-errors"],
