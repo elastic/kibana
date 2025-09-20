@@ -119,25 +119,8 @@ describe('saveSavedSearch', () => {
     expect(cmApi.create).toHaveBeenCalledWith({
       contentTypeId: 'search',
       data: {
-        breakdownField: undefined,
-        columns: [],
         description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
         title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
         tabs: [
           {
             id: expect.any(String),
@@ -172,25 +155,8 @@ describe('saveSavedSearch', () => {
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
       data: {
-        breakdownField: undefined,
-        columns: [],
         description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        isTextBasedQuery: false,
-        hideChart: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        timeRange: undefined,
-        sort: [],
         title: 'title',
-        timeRestore: false,
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
         tabs: [
           {
             id: expect.any(String),
@@ -240,25 +206,8 @@ describe('saveSavedSearch', () => {
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
       data: {
-        breakdownField: undefined,
-        columns: [],
         description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
         title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
         tabs: [
           {
             id: expect.any(String),
