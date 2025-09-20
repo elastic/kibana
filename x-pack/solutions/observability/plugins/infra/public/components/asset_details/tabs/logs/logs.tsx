@@ -93,16 +93,14 @@ export const Logs = () => {
         from: moment(state.startTimestamp).toISOString(),
         to: moment(state.currentTimestamp).toISOString(),
       },
-      logView,
     });
   }, [
     logsLocator,
-    asset.id,
     asset.type,
+    asset.id,
+    textQueryDebounced,
     state.startTimestamp,
     state.currentTimestamp,
-    textQueryDebounced,
-    logView,
   ]);
 
   return (
