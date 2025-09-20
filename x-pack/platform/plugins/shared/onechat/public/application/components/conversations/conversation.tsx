@@ -33,6 +33,7 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
+  const prevConversationIdRef = useRef<string>();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -48,13 +49,14 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  // Stick to bottom only on initial conversation load or when {conversationId} is changed
+  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
-    if (isFetched && conversationId) {
+    if (isFetched && conversationId && prevConversationIdRef.current !== undefined) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
+    prevConversationIdRef.current = conversationId;
   }, [stickToBottom, isFetched, conversationId]);
 
   const scrollContainerStyles = css`
