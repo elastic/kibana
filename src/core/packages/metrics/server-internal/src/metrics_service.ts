@@ -28,6 +28,7 @@ import { exponentialMovingAverage } from './exponential_moving_average';
 
 /**
  * The period of time for the average ELU calculation.
+ * ElasticPodAutoscaler bases its decisions on the elu.history.long metric: elu.history.long > 0.6 triggers scaling up.
  * @public
  */
 export enum EluTerm {
@@ -53,6 +54,7 @@ export class MetricsService
 {
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
+  private readonly eluLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
@@ -66,6 +68,7 @@ export class MetricsService
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
+    this.eluLogger = coreContext.logger.get('metrics', 'elu');
   }
 
   public async setup({
@@ -106,14 +109,13 @@ export class MetricsService
       )
       .subscribe(this.elu$);
     this.registerEluHistoryMetrics();
-    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
+    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value, this.logger);
 
     this.service = {
       collectionInterval,
       getOpsMetrics$: () => this.metrics$,
       getEluMetrics$: () => this.elu$,
     };
-
     return this.service;
   }
 
@@ -130,6 +132,13 @@ export class MetricsService
     if (this.opsMetricsLogger.isLevelEnabled('debug')) {
       const { message, meta } = getEcsOpsMetricsLog(opsMetrics);
       this.opsMetricsLogger.debug(message!, meta);
+    }
+    if (this.eluLogger.isLevelEnabled('debug')) {
+      const elu = this.elu$.value;
+      const eluAverage = (elu.short + elu.medium + elu.long) / 3;
+      this.eluLogger.debug(
+        `ELU short:${elu.short} medium:${elu.medium} long:${elu.long} average: ${eluAverage}`
+      );
     }
     this.metricsCollector!.reset();
     this.metrics$.next(opsMetrics);

@@ -327,6 +327,7 @@ export const getTopNavConfig = (
                 pdfReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
@@ -345,6 +346,7 @@ export const getTopNavConfig = (
                 imageReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.imageReports.warning.title', {
@@ -363,6 +365,7 @@ export const getTopNavConfig = (
                 csvReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.csvReports.warning.title', {

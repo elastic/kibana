@@ -86,6 +86,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiFlexItem grow>
               {isAccessControlIndexNotFound ? (
                 <EuiCallOut
+                  announceOnMount
                   size="m"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
@@ -114,6 +115,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                     />
                   ) : (
                     <EuiCallOut
+                      announceOnMount
                       color="danger"
                       iconType="warn"
                       title={i18n.translate(

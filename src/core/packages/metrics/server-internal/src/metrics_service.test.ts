@@ -186,15 +186,15 @@ describe('MetricsService', () => {
 
       await nextEmission();
       const opsLogs = loggingSystemMock.collect(opsLogger).debug;
-      expect(opsLogs.length).toEqual(2);
+      expect(opsLogs.length).toEqual(4);
       expect(opsLogs[0][1]).not.toEqual(opsLogs[1][1]);
     });
 
     it('emits average ELU values on getEluMetrics$ call', async () => {
       mockOpsCollector.collect
-        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 0.1))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9));
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.5));
 
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getEluMetrics$ } = await metricsService.start();
@@ -206,19 +206,19 @@ describe('MetricsService', () => {
 
       await expect(eluMetricsPromise).resolves.toEqual([
         expect.objectContaining({
-          short: expect.closeTo(0.1),
-          medium: expect.closeTo(0.1),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0067, 3),
+          medium: expect.closeTo(0.0033, 3),
+          long: expect.closeTo(0.0017, 3),
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.11),
-          medium: expect.closeTo(0.1),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0133, 3),
+          medium: expect.closeTo(0.0067, 3),
+          long: expect.closeTo(0.0033, 3),
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.11),
-          medium: expect.closeTo(0.11),
-          long: expect.closeTo(0.1),
+          short: expect.closeTo(0.0167, 3),
+          medium: expect.closeTo(0.0083, 3),
+          long: expect.closeTo(0.0042, 3),
         }),
       ]);
     });
