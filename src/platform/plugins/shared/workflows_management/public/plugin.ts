@@ -15,7 +15,6 @@ import {
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 // Lazy import to avoid bundling connector dependencies in main plugin
 import type {
@@ -46,8 +45,7 @@ export class WorkflowsPlugin
     // Register the connector type immediately but load it lazily
     registerConnectorType();
 
-    // Check if workflows UI is enabled
-    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+    const isWorkflowsUiEnabled = true; // core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
     if (isWorkflowsUiEnabled) {
       const storage = this.storage;
