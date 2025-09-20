@@ -16,15 +16,6 @@ import type { ObservabilityAIAssistantApiClient } from '../../../services/observ
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import { getConcreteWriteIndexFromAlias } from './knowledge_base';
 
-export async function runStartupMigrations(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
-) {
-  const { status } = await observabilityAIAssistantAPIClient.editor({
-    endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
-  });
-  expect(status).to.be(200);
-}
-
 export async function createOrUpdateIndexAssets(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
 ) {
