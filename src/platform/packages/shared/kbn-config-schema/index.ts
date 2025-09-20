@@ -107,7 +107,7 @@ function uri<D extends DefaultValue<string> = never>(options?: URIOptions<D>): U
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean | null>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null>(value: T): LiteralType<T> {
   return new LiteralType(value);
 }
 
