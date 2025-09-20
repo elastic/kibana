@@ -26,7 +26,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { getInitialState } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -1054,11 +1054,18 @@ describe('Discover state', () => {
           globalState: { filters },
         })
       );
-      state.appState.set({ query });
-      await state.actions.transitionFromDataViewToESQL(dataViewMock);
+      state.appState.set({
+        query,
+        sort: [
+          ['@timestamp', 'asc'],
+          ['bytes', 'desc'],
+        ],
+      });
+      await state.actions.transitionFromDataViewToESQL(dataViewMockWithTimeField);
       expect(state.appState.getState().query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
       });
+      expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
       expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
       expect(state.appState.getState().filters).toStrictEqual([]);
     });
