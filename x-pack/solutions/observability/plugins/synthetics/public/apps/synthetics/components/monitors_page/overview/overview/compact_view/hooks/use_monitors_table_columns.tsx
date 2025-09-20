@@ -20,7 +20,6 @@ import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import {
   STATUS,
@@ -42,7 +41,7 @@ export const useMonitorsTableColumns = ({
   items,
 }: {
   items: OverviewStatusMetaData[];
-  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  setFlyoutConfigCallback: (params: OverviewStatusMetaData) => void;
 }) => {
   const history = useHistory();
   const { histogramsById, minInterval } = useMonitorHistogram({ items });
@@ -69,16 +68,7 @@ export const useMonitorsTableColumns = ({
 
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
-      const { configId, locationLabel, locationId } = monitor;
-      dispatch(
-        setFlyoutConfigCallback({
-          configId,
-          id: configId,
-          location: locationLabel,
-          locationId,
-          spaces: monitor.spaces,
-        })
-      );
+      dispatch(setFlyoutConfigCallback(monitor));
     },
     [dispatch, setFlyoutConfigCallback]
   );

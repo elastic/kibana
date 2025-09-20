@@ -22,7 +22,6 @@ import { OverviewPaginationInfo } from './overview_pagination_info';
 import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
-import type { FlyoutParamProps } from './types';
 import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
@@ -45,7 +44,7 @@ export const OverviewGrid = memo(
     useOverviewTrendsRequests(monitorsSortedByStatus, maxItem);
 
     const setFlyoutConfigCallback = useCallback(
-      (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
+      (params: OverviewStatusMetaData) => dispatch(setFlyoutConfig(params)),
       [dispatch]
     );
     const { lastRefresh } = useSyntheticsRefreshContext();

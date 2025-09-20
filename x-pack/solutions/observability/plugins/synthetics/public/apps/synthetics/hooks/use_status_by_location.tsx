@@ -7,7 +7,6 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { useMemo } from 'react';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -71,53 +70,40 @@ export function useStatusByLocation({
     { name: 'getMonitorStatusByLocation' }
   );
 
-  return useMemo(() => {
-    const getColor = (status: string) => {
-      const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+  const getColor = (status: string) => {
+    const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
 
-      switch (status) {
-        case 'up':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
-        case 'down':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
-        default:
-          return euiTheme.colors.backgroundBaseSubdued;
+    switch (status) {
+      case 'up':
+        return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
+      case 'down':
+        return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
+      default:
+        return euiTheme.colors.backgroundBaseSubdued;
+    }
+  };
+
+  const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
+    return loc.summary.hits.hits?.[0]._source as Ping;
+  });
+  const locations = (monitorLocations ?? [])
+    .map((loc) => {
+      const fullLoc = allLocations.find((l) => l.id === loc.id);
+      if (fullLoc) {
+        const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
+        const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
+        return {
+          status,
+          id: fullLoc?.id,
+          label: fullLoc?.label,
+          color: getColor(status),
+        };
       }
-    };
+    })
+    .filter(Boolean) as LocationsStatus;
 
-    const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as Ping;
-    });
-    const locations = (monitorLocations ?? [])
-      .map((loc) => {
-        const fullLoc = allLocations.find((l) => l.id === loc.id);
-        if (fullLoc) {
-          const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
-          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
-          return {
-            status,
-            id: fullLoc?.id,
-            label: fullLoc?.label,
-            color: getColor(status),
-          };
-        }
-      })
-      .filter(Boolean) as LocationsStatus;
-
-    return {
-      locations,
-      loading,
-    };
-  }, [
-    allLocations,
-    data?.aggregations?.locations.buckets,
+  return {
+    locations,
     loading,
-    monitorLocations,
-    euiTheme.themeName,
-    euiTheme.colors.success,
-    euiTheme.colors.vis.euiColorVis0,
-    euiTheme.colors.vis.euiColorVis6,
-    euiTheme.colors.vis.euiColorVis9,
-    euiTheme.colors.backgroundBaseSubdued,
-  ]);
+  };
 }

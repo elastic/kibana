@@ -171,14 +171,7 @@ export function ActionsPopover({
     disabled: !locationName,
     onClick: () => {
       if (locationName) {
-        dispatch(
-          setFlyoutConfig({
-            configId: monitor.configId,
-            location: locationName,
-            id: monitor.configId,
-            locationId: monitor.locationId,
-          })
-        );
+        dispatch(setFlyoutConfig(monitor));
         setIsPopoverOpen(false);
       }
     },

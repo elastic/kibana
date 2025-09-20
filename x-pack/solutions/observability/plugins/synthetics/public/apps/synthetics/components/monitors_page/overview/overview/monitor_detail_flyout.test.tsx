@@ -73,10 +73,19 @@ describe('Monitor Detail Flyout', () => {
     const onCloseMock = jest.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
-        configId="123456"
-        id="test-id"
-        location="US East"
-        locationId="us-east"
+        overviewItem={{
+          monitorQueryId: 'test-id',
+          locationId: 'us-east-1',
+          locationLabel: 'US East',
+          status: 'up',
+          type: 'http',
+          name: 'test monitor',
+          configId: 'test-id',
+          isEnabled: true,
+          tags: ['tag1', 'tag2'],
+          isStatusAlertEnabled: true,
+          schedule: '1m',
+        }}
         onClose={onCloseMock}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -92,10 +101,19 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByText } = render(
       <MonitorDetailFlyout
-        configId="123456"
-        id="test-id"
-        location="US East"
-        locationId="us-east"
+        overviewItem={{
+          monitorQueryId: 'test-id',
+          locationId: 'us-east-1',
+          locationLabel: 'US East',
+          status: 'up',
+          type: 'http',
+          name: 'test monitor',
+          configId: 'test-id',
+          isEnabled: true,
+          tags: ['tag1', 'tag2'],
+          isStatusAlertEnabled: true,
+          schedule: '1m',
+        }}
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -114,10 +132,19 @@ describe('Monitor Detail Flyout', () => {
   it('renders loading state while fetching', () => {
     const { getByRole } = render(
       <MonitorDetailFlyout
-        configId="123456"
-        id="test-id"
-        location="US East"
-        locationId="us-east"
+        overviewItem={{
+          monitorQueryId: 'test-id',
+          locationId: 'us-east-1',
+          locationLabel: 'US East',
+          status: 'up',
+          type: 'http',
+          name: 'test monitor',
+          configId: 'test-id',
+          isEnabled: true,
+          tags: ['tag1', 'tag2'],
+          isStatusAlertEnabled: true,
+          schedule: '1m',
+        }}
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
@@ -141,10 +168,19 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
-        configId="123456"
-        id="test-id"
-        location="US East"
-        locationId="us-east"
+        overviewItem={{
+          monitorQueryId: 'test-id',
+          locationId: 'us-east-1',
+          locationLabel: 'US East',
+          status: 'pending',
+          type: 'http',
+          name: 'test-monitor',
+          configId: 'test-id',
+          isEnabled: true,
+          tags: ['prod'],
+          isStatusAlertEnabled: true,
+          schedule: '1m',
+        }}
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
         onLocationChange={jest.fn()}
