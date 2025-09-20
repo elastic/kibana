@@ -7,7 +7,12 @@
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchRequest,
+  SearchResponseBody,
+  BulkOperationType,
+  BulkResponseItem,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -74,7 +79,6 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts'
@@ -82,7 +86,10 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
-  persistAlerts(): Promise<void>;
+  persistAlerts(): Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void>;
   updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
     alertIds: string[];
     maintenanceWindowIds: string[];
@@ -160,6 +167,11 @@ export interface PublicAlertsClient<
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
+  search: (queryBody: SearchRequest) => Promise<SearchResult<AlertData>>;
+  flushAlerts: () => Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void>;
 }
 
 export interface ReportedAlert<
@@ -169,6 +181,7 @@ export interface ReportedAlert<
   ActionGroupIds extends string
 > {
   id: string; // alert instance id
+  uuid?: string; // optional alert UUID, if not provided one will be generated
   actionGroup: ActionGroupIds;
   state?: State;
   context?: Context;

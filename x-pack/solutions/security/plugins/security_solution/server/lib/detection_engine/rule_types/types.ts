@@ -25,7 +25,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { PersistenceServices, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Filter } from '@kbn/es-query';
@@ -74,6 +74,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
 }
 
 export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
+  executionId: string;
   completeRule: CompleteRule<TParams>;
   tuple: {
     to: Moment;
@@ -105,7 +106,7 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
-type SecurityActionGroupId = 'default';
+export type SecurityActionGroupId = 'default';
 
 export type SecurityExecutorOptions<
   TParams extends RuleParams,
@@ -117,7 +118,6 @@ export type SecurityExecutorOptions<
   AlertInstanceContext,
   WithoutReservedActionGroups<SecurityActionGroupId, never>
 > & {
-  services: PersistenceServices;
   sharedParams: SecuritySharedParams<TParams>;
 };
 
@@ -164,7 +164,14 @@ export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <TParams extends RuleParams, TState extends RuleTypeState>(
   type: SecurityAlertType<TParams, TState>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
+) => RuleType<
+  TParams,
+  TParams,
+  TState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  SecurityActionGroupId
+>;
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
@@ -310,8 +317,7 @@ export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
   AlertInstanceContext,
   'default'
-> &
-  PersistenceServices;
+>;
 
 export interface SearchAfterAndBulkCreateParams {
   sharedParams: SecuritySharedParams;

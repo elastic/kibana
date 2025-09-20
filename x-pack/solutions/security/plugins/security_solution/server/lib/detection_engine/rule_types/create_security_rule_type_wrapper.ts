@@ -11,13 +11,16 @@ import agent from 'elastic-apm-node';
 import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
-import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
+import type {
+  FormatAlert,
+  GetViewInAppRelativeUrlFnOpts,
+  RuleTypeParams,
+} from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   checkPrivilegesFromEsClient,
@@ -88,6 +91,35 @@ const addApmLabelsFromParams = (params: RuleParams) => {
   );
 };
 
+export const getViewInAppRelativeUrl = <TParams extends RuleTypeParams>({
+  rule,
+  start,
+  end,
+}: GetViewInAppRelativeUrlFnOpts<TParams>) => {
+  let startTime = null;
+  let endTime = null;
+
+  if (start && end) {
+    startTime = new Date(start).toISOString();
+    endTime = new Date(end).toISOString();
+  } else if (rule.schedule?.interval) {
+    startTime = `now-${rule.schedule?.interval}`;
+    endTime = 'now';
+  }
+  if (!startTime || !endTime) {
+    return '';
+  }
+
+  const fromInMs = parseScheduleDates(startTime)?.format('x');
+  const toInMs = parseScheduleDates(endTime)?.format('x');
+
+  return getNotificationResultsLink({
+    from: fromInMs,
+    to: toInMs,
+    id: rule.id,
+  });
+};
+
 export const securityRuleTypeFieldMap = {
   ...technicalRuleFieldMap,
   ...alertsFieldMap,
@@ -118,13 +150,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
-    const persistenceRuleType = createPersistenceRuleTypeWrapper({
-      ruleDataClient,
-      logger,
-      formatAlert: formatAlertForNotificationActions,
-    });
 
-    return persistenceRuleType({
+    return {
       ...type,
       cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
@@ -133,30 +160,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           injectReferences({ logger, params, savedObjectReferences }),
       },
       autoRecoverAlerts: false,
-      getViewInAppRelativeUrl: ({ rule, start, end }) => {
-        let startTime = null;
-        let endTime = null;
-
-        if (start && end) {
-          startTime = new Date(start).toISOString();
-          endTime = new Date(end).toISOString();
-        } else if (rule.schedule?.interval) {
-          startTime = `now-${rule.schedule?.interval}`;
-          endTime = 'now';
-        }
-        if (!startTime || !endTime) {
-          return '';
-        }
-
-        const fromInMs = parseScheduleDates(startTime)?.format('x');
-        const toInMs = parseScheduleDates(endTime)?.format('x');
-
-        return getNotificationResultsLink({
-          from: fromInMs,
-          to: toInMs,
-          id: rule.id,
-        });
-      },
+      getViewInAppRelativeUrl,
       async executor(options) {
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {
@@ -472,6 +476,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   services,
                   state: runState,
                   sharedParams: {
+                    executionId,
                     completeRule,
                     inputIndex,
                     exceptionFilter,
@@ -640,16 +645,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         });
       },
       alerts: {
+        shouldWrite: true,
         context: 'security',
-        mappings: {
-          dynamic: false,
-          fieldMap: securityRuleTypeFieldMap,
-        },
+        mappings: { dynamic: false, fieldMap: securityRuleTypeFieldMap },
         useEcs: true,
         useLegacyAlerts: true,
         isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
         formatAlert: formatAlertForNotificationActions as unknown as FormatAlert<never>,
       },
-    });
+    };
   };

@@ -3482,6 +3482,7 @@ describe('Alerts Client', () => {
             'getAlertLimitValue',
             'setAlertLimitReached',
             'getRecoveredAlerts',
+            'search',
           ]);
         });
 

@@ -113,6 +113,7 @@ import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { TaskRunnerTimer } from './task_runner_timer';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -349,6 +350,8 @@ describe('Task Runner', () => {
           ruleType: ruleTypeWithAlerts,
           spaceId: 'default',
           namespace: 'default',
+          ruleRunMetricsStore,
+          timer: expect.any(TaskRunnerTimer),
           rule: {
             alertDelay: 0,
             consumer: 'bar',
@@ -712,6 +715,8 @@ describe('Task Runner', () => {
           ruleType: ruleTypeWithAlerts,
           maintenanceWindowsService,
           spaceId: 'default',
+          ruleRunMetricsStore,
+          timer: expect.any(TaskRunnerTimer),
         });
 
         testCorrectAlertsClientUsed({
@@ -803,6 +808,8 @@ describe('Task Runner', () => {
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
           maintenanceWindowsService,
+          ruleRunMetricsStore,
+          timer: expect.any(TaskRunnerTimer),
         });
 
         testCorrectAlertsClientUsed({
@@ -991,14 +998,11 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith();
-
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
 
-      expect(alertsClientNotToUse.processAlerts).not.toHaveBeenCalled();
       expect(alertsClientNotToUse.logAlerts).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();

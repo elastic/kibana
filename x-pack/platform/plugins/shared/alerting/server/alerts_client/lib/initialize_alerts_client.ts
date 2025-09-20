@@ -20,6 +20,8 @@ import type {
 } from '../../types';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
+import type { TaskRunnerTimer } from '../../task_runner/task_runner_timer';
+import type { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,
@@ -34,9 +36,11 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   maxAlerts: number;
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
+  ruleRunMetricsStore: RuleRunMetricsStore;
   runTimestamp?: Date;
   startedAt: Date | null;
   taskInstance: RuleTaskInstance;
+  timer: TaskRunnerTimer;
 }
 
 export const initializeAlertsClient = async <
@@ -54,9 +58,11 @@ export const initializeAlertsClient = async <
   maxAlerts,
   rule,
   ruleType,
+  ruleRunMetricsStore,
   runTimestamp,
   startedAt,
   taskInstance,
+  timer,
 }: InitializeAlertsClientOpts<Params>) => {
   const {
     state: {
@@ -71,8 +77,10 @@ export const initializeAlertsClient = async <
     logger,
     maintenanceWindowsService: context.maintenanceWindowsService,
     request: context.request,
+    ruleRunMetricsStore,
     ruleType,
     spaceId: context.spaceId,
+    timer,
   };
 
   // Create AlertsClient if rule type has registered an alerts context
