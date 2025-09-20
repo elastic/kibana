@@ -351,6 +351,9 @@ export const useActionsLogFilter = ({
           ) {
             return false;
           }
+          if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
+            return false;
+          }
 
           return true;
         }).map((commandName) => ({
