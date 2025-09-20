@@ -1384,68 +1384,127 @@ export const WorkflowYAMLEditor = ({
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
-        {hasChanges ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.accent,
-              cursor: 'pointer',
-              borderRadius: euiTheme.border.radius.small,
-              '&:hover': {
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              },
-            }}
-            onClick={() => setShowDiffHighlight(!showDiffHighlight)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={showDiffHighlight}
-            aria-label={
-              showDiffHighlight
-                ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
-                    defaultMessage: 'Hide diff highlighting',
-                  })
-                : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
-                    defaultMessage: 'Show diff highlighting',
-                  })
-            }
-            onKeyDown={() => {}}
-            title={
-              showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
-            }
-          >
-            <EuiIcon type="dot" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                defaultMessage="Unsaved changes"
-              />
-            </span>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.textSubdued,
-            }}
-          >
-            <EuiIcon type="check" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.saved"
-                defaultMessage="Saved"
-              />{' '}
-              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-            </span>
-          </div>
-        )}
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {/* Debug: Download Schema Button */}
+          <EuiFlexItem grow={false}>
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 6px',
+                color: euiTheme.colors.textSubdued,
+                cursor: 'pointer',
+                borderRadius: euiTheme.border.radius.small,
+                fontSize: '12px',
+                '&:hover': {
+                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  color: euiTheme.colors.primaryText,
+                },
+              }}
+              onClick={() => {
+                try {
+                  const zodSchema = getWorkflowZodSchema();
+                  const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
+                  
+                  const blob = new Blob([JSON.stringify(jsonSchema, null, 2)], {
+                    type: 'application/json',
+                  });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'workflow-schema.json';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Failed to download schema:', error);
+                  notifications?.toasts.addError(error as Error, {
+                    title: 'Failed to download schema',
+                  });
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              title="Download JSON schema for debugging"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.currentTarget.click();
+                }
+              }}
+            >
+              <EuiIcon type="download" size="s" />
+              <span>Schema</span>
+            </div>
+          </EuiFlexItem>
+          
+          {/* Status indicator */}
+          <EuiFlexItem grow={false}>
+            {hasChanges ? (
+              <div
+                css={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.accent,
+                  cursor: 'pointer',
+                  borderRadius: euiTheme.border.radius.small,
+                  '&:hover': {
+                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  },
+                }}
+                onClick={() => setShowDiffHighlight(!showDiffHighlight)}
+                role="button"
+                tabIndex={0}
+                aria-pressed={showDiffHighlight}
+                aria-label={
+                  showDiffHighlight
+                    ? i18n.translate('workflows.workflowDetail.yamlEditor.hideDiff', {
+                        defaultMessage: 'Hide diff highlighting',
+                      })
+                    : i18n.translate('workflows.workflowDetail.yamlEditor.showDiff', {
+                        defaultMessage: 'Show diff highlighting',
+                      })
+                }
+                onKeyDown={() => {}}
+                title={
+                  showDiffHighlight ? 'Hide diff highlighting' : 'Click to highlight changed lines'
+                }
+              >
+                <EuiIcon type="dot" />
+                <span>
+                  <FormattedMessage
+                    id="workflows.workflowDetail.yamlEditor.unsavedChanges"
+                    defaultMessage="Unsaved changes"
+                  />
+                </span>
+              </div>
+            ) : (
+              <div
+                css={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.textSubdued,
+                }}
+              >
+                <EuiIcon type="check" />
+                <span>
+                  <FormattedMessage
+                    id="workflows.workflowDetail.yamlEditor.saved"
+                    defaultMessage="Saved"
+                  />{' '}
+                  {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
+                </span>
+              </div>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       <div css={styles.editorContainer}>
         <YamlEditor

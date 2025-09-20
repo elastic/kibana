@@ -404,7 +404,7 @@ describe('convertToWorkflowGraph', () => {
             type: 'kibana.cases.get',
             with: {
               request: {
-                method: 'GET',
+                method: 'GET',  
                 path: '/api/cases/test-case-id',
                 headers: {
                   'kbn-xsrf': 'true',
