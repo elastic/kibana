@@ -210,6 +210,31 @@ describe('WorkflowContextManager', () => {
         expect(context.workflow.enabled).toBe(false);
       });
     });
+
+    it('should enrich workflow context with mocked data', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        workflowId: 'fake-workflow-id',
+        spaceId: 'fake-space-id',
+        scopeStack: [] as StackFrame[],
+        context: {
+          stepContextMock: {
+            workflow: {
+              id: 'mocked-workflow-id',
+              name: 'Mocked Workflow Name',
+              enabled: false,
+              spaceId: 'mocked-space-id',
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.workflow.id).toBe('mocked-workflow-id');
+      expect(context.workflow.name).toBe('Mocked Workflow Name');
+      expect(context.workflow.enabled).toBe(false);
+      expect(context.workflow.spaceId).toBe('mocked-space-id');
+    });
   });
 
   describe('execution context', () => {
@@ -270,6 +295,29 @@ describe('WorkflowContextManager', () => {
           expect(context.execution.isTestRun).toBe(false);
         }
       );
+
+      it('should enrich execution context with mocked data', () => {
+        testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+          workflowDefinition: workflow,
+          id: 'fake-execution-id',
+          scopeStack: [] as StackFrame[],
+          startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
+          context: {
+            stepContextMock: {
+              execution: {
+                id: 'mocked-execution-id',
+                isTestRun: true,
+                startedAt: new Date('2024-01-01T00:00:00Z'),
+              },
+            },
+          } as Record<string, any>,
+        } as EsWorkflowExecution);
+
+        const context = testContainer.underTest.getContext();
+        expect(context.execution.id).toBe('mocked-execution-id');
+        expect(context.execution.isTestRun).toBe(true);
+        expect(context.execution.startedAt).toEqual(new Date('2024-01-01T00:00:00Z'));
+      });
     });
   });
 
@@ -500,6 +548,36 @@ describe('WorkflowContextManager', () => {
       );
       expect(context.steps.secondLogStep).toEqual(
         expect.objectContaining({ output: null, error: new Error('Error in second step') })
+      );
+    });
+
+    it('should enrich steps context with mocked data', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          stepContextMock: {
+            steps: {
+              fourthLogStep: {
+                state: 'fourth',
+                output: 'output4',
+                error: null,
+              },
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(Object.keys(context.steps).sort()).toEqual(
+        ['firstLogStep', 'secondLogStep', 'fourthLogStep'].sort()
+      );
+      expect(context.steps.fourthLogStep).toEqual(
+        expect.objectContaining({
+          state: 'fourth',
+          output: 'output4',
+          error: null,
+        })
       );
     });
   });

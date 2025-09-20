@@ -7,38 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import React, { useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { ExecutionDetail } from './execution_detail';
 
-export interface WorkflowExecutionProps {
-  workflowExecutionId: string;
+export interface SingleStepExecution {
+  stepExecutionId: string;
   workflowYaml: string;
-  fields?: Array<keyof EsWorkflowStepExecution>;
   onClose?: () => void;
 }
 
-export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
-  workflowExecutionId,
+export const SingleStepExecution: React.FC<SingleStepExecution> = ({
+  stepExecutionId: executionId,
   workflowYaml,
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [selectedStepExecutionId, setSelectedStepExecution] = useState<string | undefined>(
+    undefined
+  );
 
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedStep } =
-    useWorkflowUrlState();
   return (
     <>
       <EuiFlexGroup
@@ -50,35 +40,13 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
         justifyContent="flexStart"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false}>
-          <header
-            css={css({
-              minHeight: `32px`,
-              display: 'flex',
-              alignItems: 'center',
-            })}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <EuiButtonEmpty iconType="arrowLeft" onClick={onClose} size="xs">
-                    <FormattedMessage
-                      id="workflows.workflowStepExecutionList.backToExecution"
-                      defaultMessage="Back to executions"
-                    />
-                  </EuiButtonEmpty>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </header>
-        </EuiFlexItem>
         <EuiFlexItem>
           <ExecutionDetail
-            workflowExecutionId={workflowExecutionId}
+            workflowExecutionId={executionId}
             workflowYaml={workflowYaml}
             selectedStepExecutionId={selectedStepExecutionId}
-            setSelectedStep={setSelectedStep}
-            setSelectedStepExecution={setSelectedStepExecution}
+            setSelectedStep={() => {}}
+            setSelectedStepExecution={setSelectedStepExecution as any}
             onClose={onClose}
           />
         </EuiFlexItem>

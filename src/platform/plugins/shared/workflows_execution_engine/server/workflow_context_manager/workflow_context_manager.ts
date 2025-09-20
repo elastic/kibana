@@ -77,6 +77,7 @@ export class WorkflowContextManager {
       }
     });
 
+    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
     return stepContext;
   }
@@ -137,6 +138,33 @@ export class WorkflowContextManager {
       event: workflowExecution.context?.event,
       inputs: workflowExecution.context?.inputs,
     };
+  }
+
+  private enrichStepContextWithMockedData(stepContext: StepContext): void {
+    const stepContextMock: StepContext | undefined =
+      this.workflowExecutionState.getWorkflowExecution().context?.stepContextMock;
+
+    if (stepContextMock) {
+      stepContext.execution = {
+        ...stepContext.execution,
+        ...(stepContextMock.execution || {}),
+      };
+
+      stepContext.workflow = {
+        ...stepContext.workflow,
+        ...(stepContextMock.workflow || {}),
+      };
+
+      if (!stepContext.foreach) {
+        stepContext.foreach = stepContextMock.foreach;
+      }
+
+      Object.entries(stepContextMock.steps || {}).forEach(([stepId, stepData]) => {
+        if (!stepContext.steps[stepId]) {
+          stepContext.steps[stepId] = stepData;
+        }
+      });
+    }
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {

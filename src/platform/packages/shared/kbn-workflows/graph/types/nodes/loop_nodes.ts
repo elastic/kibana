@@ -14,6 +14,7 @@ import { GraphNodeSchema } from './base';
 export const EnterForeachNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-foreach'),
+
   exitNodeId: z.string(),
   configuration: ForEachStepSchema.omit({
     steps: true,
@@ -25,6 +26,7 @@ export type EnterForeachNode = z.infer<typeof EnterForeachNodeSchema>;
 export const ExitForeachNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-foreach'),
+
   startNodeId: z.string(),
 });
 
