@@ -57,6 +57,27 @@ interface AppearancePopoverProps {
 }
 
 export function AppearancePopover({ state, setState, groupPosition }: AppearancePopoverProps) {
+  return (
+    <ToolbarPopover
+      title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
+        defaultMessage: 'Appearance',
+      })}
+      type="titlesAndText"
+      groupPosition={groupPosition}
+      buttonDataTestSubj="lnsTextOptionsButton"
+    >
+      <SettingsContent state={state} setState={setState} />
+    </ToolbarPopover>
+  );
+}
+
+export function SettingsContent({
+  state,
+  setState,
+}: {
+  state: MetricVisualizationState;
+  setState: (newState: MetricVisualizationState) => void;
+}) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
 
@@ -67,14 +88,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
   };
 
   return (
-    <ToolbarPopover
-      title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
-        defaultMessage: 'Appearance',
-      })}
-      type="titlesAndText"
-      groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTextOptionsButton"
-    >
+    <>
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.primaryMetric.title', {
           defaultMessage: 'Primary metric',
@@ -216,7 +230,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
           dataTestSubj="lens-metric-appearance-other-icon-position-btn"
         />
       </AppearanceOptionGroup>
-    </ToolbarPopover>
+    </>
   );
 }
 
@@ -289,7 +303,7 @@ function AppearanceOption<OptionType extends string>({
   };
 
   return (
-    <EuiFormRow display="columnCompressed" label={label}>
+    <EuiFormRow display="columnCompressed" fullWidth label={label}>
       <EuiButtonGroup
         isFullWidth
         legend={label}

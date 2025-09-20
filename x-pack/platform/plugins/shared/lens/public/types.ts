@@ -1231,6 +1231,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationToolbarProps<T>
   ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
+  SettingsPanelToolbar?: (
+    props: VisualizationToolbarProps<T>
+  ) => null | ReactElement<VisualizationToolbarProps<T>>;
+
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
    * groupId is coming from the groupId provided in getConfiguration
