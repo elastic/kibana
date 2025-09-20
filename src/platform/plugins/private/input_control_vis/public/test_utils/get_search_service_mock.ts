@@ -7,28 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
+
 export const getSearchSourceMock = (esSearchResponse?: any) =>
   jest.fn().mockImplementation(() => ({
     setParent: jest.fn(),
     setField: jest.fn(),
-    fetch: jest.fn().mockResolvedValue(
-      esSearchResponse
-        ? esSearchResponse
-        : {
-            aggregations: {
-              termsAgg: {
-                buckets: [
-                  {
-                    key: 'Zurich Airport',
-                    doc_count: 691,
+    fetch$: jest.fn().mockReturnValue(
+      of(
+        esSearchResponse
+          ? { rawResponse: esSearchResponse }
+          : {
+              rawResponse: {
+                aggregations: {
+                  termsAgg: {
+                    buckets: [
+                      {
+                        key: 'Zurich Airport',
+                        doc_count: 691,
+                      },
+                      {
+                        key: 'Xi an Xianyang International Airport',
+                        doc_count: 526,
+                      },
+                    ],
                   },
-                  {
-                    key: 'Xi an Xianyang International Airport',
-                    doc_count: 526,
-                  },
-                ],
+                },
               },
-            },
-          }
+            }
+      )
     ),
   }));

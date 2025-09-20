@@ -7,7 +7,7 @@
 
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const createSearchSourceClientMock = () => {
@@ -45,7 +45,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await wrappedSearchClient.createEmpty();
-    await wrappedSearchSource.fetch();
+    await lastValueFrom(wrappedSearchSource.fetch$());
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       abortSignal: abortController.signal,
@@ -61,7 +61,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await wrappedSearchClient.create();
-    await wrappedSearchSource.fetch({ isStored: true });
+    await lastValueFrom(wrappedSearchSource.fetch$({ isStored: true }));
 
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       isStored: true,
@@ -81,7 +81,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await wrappedSearchClient.create();
-    const fetch = wrappedSearchSource.fetch();
+    const fetch = lastValueFrom(wrappedSearchSource.fetch$());
 
     await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot('"something went wrong!"');
   });
@@ -99,7 +99,7 @@ describe('wrapSearchSourceClient', () => {
       abortController,
     });
     const wrappedSearchSource = await wrappedSearchClient.create();
-    const fetch = wrappedSearchSource.fetch();
+    const fetch = lastValueFrom(wrappedSearchSource.fetch$());
 
     await expect(fetch).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Search has been aborted due to cancelled execution"'
