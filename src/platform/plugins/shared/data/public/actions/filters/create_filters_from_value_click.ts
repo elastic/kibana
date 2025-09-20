@@ -236,14 +236,11 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
       if (table?.columns?.[columnIndex]) {
         const column = table.columns[columnIndex];
         const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-        if (value == null) {
-          return;
-        }
         const queryWithWhere = appendWhereClauseToESQLQuery(
           queryString,
           column.name,
           value,
-          negate ? '-' : '+',
+          value == null ? 'is_null' : negate ? '-' : '+',
           column.meta?.type
         );
 
