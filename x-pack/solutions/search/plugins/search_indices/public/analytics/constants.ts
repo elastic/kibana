@@ -7,8 +7,6 @@
 
 export enum AnalyticsEvents {
   startPageOpened = 'start_page_opened',
-  startPageShowCodeClick = 'start_page_show_code',
-  startPageShowCreateIndexUIClick = 'start_page_show_create_index_ui',
   startCreateIndexPageModifyIndexName = 'start_modify_index_name',
   startCreateIndexClick = 'start_create_index',
   startCreateIndexWorkflowSelect = 'start_workflow_select',
@@ -27,8 +25,6 @@ export enum AnalyticsEvents {
   indexDetailsNavSettingsTab = 'index_details_nav_settings_tab',
   indexDetailsNavMappingsTab = 'index_details_nav_mappings_tab',
   createIndexPageOpened = 'create_index_page_opened',
-  createIndexShowCodeClick = 'create_index_show_code',
-  createIndexShowUIClick = 'create_index_show_create_index_ui',
   createIndexPageModifyIndexName = 'create_index_modify_index_name',
   createIndexCreateIndexClick = 'create_index_click_create',
   createIndexLanguageSelect = 'create_index_code_lang_select',
