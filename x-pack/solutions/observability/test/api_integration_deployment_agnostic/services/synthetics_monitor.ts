@@ -105,7 +105,7 @@ export class SyntheticsMonitorTestService {
     return apiResponse.body;
   }
 
-  async addMonitor(monitor: any, user: RoleCredentials) {
+  async createMonitor(monitor: any, user: RoleCredentials) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
       .set(user.apiKeyHeader)
@@ -114,6 +114,14 @@ export class SyntheticsMonitorTestService {
       .expect(200);
 
     return res.body as EncryptedSyntheticsSavedMonitor;
+  }
+
+  async testNowMonitor(id: string, user: RoleCredentials) {
+    await this.supertest
+      .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${id}`)
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
   }
 
   async inspectMonitor(user: RoleCredentials, monitor: any, hideParams: boolean = true) {
