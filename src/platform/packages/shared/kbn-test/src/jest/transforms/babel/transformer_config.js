@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+console.log(process.env.NODE_ENV);
+
 module.exports = {
+  plugins: [
+    [require.resolve('babel-plugin-transform-react-remove-prop-types'), { removeImport: true }],
+  ],
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
@@ -27,7 +32,7 @@ module.exports = {
         [
           require.resolve('@emotion/babel-preset-css-prop'),
           {
-            autoLabel: 'always',
+            autoLabel: process.env.NODE_ENV === 'test' ? 'never' : 'always',
             labelFormat: '[local]',
             sourceMap: false,
           },
