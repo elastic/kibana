@@ -41,5 +41,6 @@ export {
   type NonPersistedDisplayOptions,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
+export type { TabsEventPayload } from './ebt_manager';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

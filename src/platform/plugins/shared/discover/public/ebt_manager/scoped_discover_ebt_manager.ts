@@ -25,6 +25,8 @@ import {
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  TABS_EVENT_NAME,
+  TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
@@ -50,6 +52,21 @@ enum QueryFieldsUsageEventName {
   kqlQuery = 'kqlQuery',
   esqlQuery = 'esqlQuery',
 }
+
+export enum TabsEventName {
+  tabCreated = 'tabCreated',
+  tabClosed = 'tabClosed',
+  tabSwitched = 'tabSwitched',
+  tabReordered = 'tabReordered',
+  tabDuplicated = 'tabDuplicated',
+  tabClosedOthers = 'tabClosedOthers',
+  tabRenamed = 'tabRenamed',
+  tabsLimitReached = 'tabsLimitReached',
+  tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
+  tabsRestoredOnLoad = 'tabsRestoredOnLoad',
+  tabSelectRecentlyClosed = 'tabSelectRecentlyClosed',
+}
+
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
@@ -61,10 +78,16 @@ interface QueryFieldsUsageEventData {
   [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
+interface TabsEventData {
+  [TABS_EVENT_NAME]: TabsEventName;
+}
+
 interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXTUAL_PROFILE_ID]: string;
 }
+
+export type TabsEventPayload = Record<string, string | number>;
 
 export class ScopedDiscoverEBTManager {
   private lastResolvedContextProfiles: {
@@ -332,5 +355,23 @@ export class ScopedDiscoverEBTManager {
         });
       },
     };
+  }
+
+  public trackTabs({
+    eventName,
+    payload,
+  }: {
+    eventName: TabsEventName;
+    payload?: TabsEventPayload;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: TabsEventData = {
+      [TABS_EVENT_NAME]: eventName,
+      ...payload,
+    };
+
+    this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

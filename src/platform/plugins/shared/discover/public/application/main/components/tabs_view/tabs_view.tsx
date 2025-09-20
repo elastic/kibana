@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -21,6 +21,7 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { TabsEventName } from '../../../../ebt_manager';
 
 const MAX_TABS_COUNT = 25;
 
@@ -32,6 +33,20 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+
+  const tabsEbtManager = useMemo(
+    () => services.ebtManager.createScopedEBTManager(),
+    [services.ebtManager]
+  );
+
+  const onEvent: UnifiedTabsProps['onEvent'] = useCallback(
+    (eventName, payload) => {
+      if (Object.values(TabsEventName).includes(eventName as TabsEventName)) {
+        void tabsEbtManager.trackTabs({ eventName: eventName as TabsEventName, payload });
+      }
+    },
+    [tabsEbtManager]
+  );
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -60,6 +75,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
+      onEvent={onEvent}
     />
   );
 };

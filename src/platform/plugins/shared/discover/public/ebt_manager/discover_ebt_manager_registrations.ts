@@ -31,6 +31,19 @@ export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 /**
+ * Tabs actions, i.e. when user renames tab, reorders tabs, closes tab, reaches tabs limit etc
+ */
+export const TABS_EVENT_TYPE = 'discover_tabs';
+export const TABS_EVENT_NAME = 'eventName';
+export const TAB_ID = 'tabId';
+export const TOTAL_TABS_OPEN = 'totalTabsOpen';
+export const REMAINING_TABS_COUNT = 'remainingTabsCount';
+export const CLOSED_TABS_COUNT = 'closedTabsCount';
+export const FROM_INDEX = 'fromIndex';
+export const TO_INDEX = 'toIndex';
+export const KEY_USED = 'keyUsed';
+
+/**
  * This function is statically imported since analytics registrations must happen at setup,
  * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
  */
@@ -122,6 +135,68 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The resolved name of the active profile',
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: TABS_EVENT_TYPE,
+    schema: {
+      [TABS_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
+        },
+      },
+      [TOTAL_TABS_OPEN]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of total tabs open at the time of an event',
+          optional: true,
+        },
+      },
+      [REMAINING_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of remaining tabs after an event',
+          optional: true,
+        },
+      },
+      [CLOSED_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of tabs closed in a single action',
+          optional: true,
+        },
+      },
+      [TAB_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The unique identifier of the tab',
+          optional: true,
+        },
+      },
+      [FROM_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The original index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TO_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The new index of the tab being moved',
+          optional: true,
+        },
+      },
+      [KEY_USED]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The keyboard key used for tab navigation',
+          optional: true,
         },
       },
     },

@@ -19,6 +19,7 @@ import React, {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
+import type { TabsEventPayload } from '@kbn/discover-plugin/public';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -62,6 +63,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
+  onEvent: (eventName: string, payload?: TabsEventPayload) => void;
 };
 
 export interface TabsBarApi {
@@ -85,6 +87,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onReorder,
       onClose,
       getPreviewData,
+      onEvent,
     },
     componentRef
   ) => {
@@ -96,6 +99,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     tabsContainerRef.current = tabsContainerElement;
     const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
     const moveFocusToItemIdRef = useRef<string | null>(null);
+    const hasSentMaxReachedEventRef = useRef(false);
 
     const moveFocusToNextSelectedItem = useCallback((item: TabItem) => {
       moveFocusToItemIdRef.current = item.id;
@@ -120,6 +124,15 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         tabsContainerWithPlusElement,
         tabsContainerElement,
       });
+
+    useEffect(() => {
+      if (hasReachedMaxItemsCount && !hasSentMaxReachedEventRef.current) {
+        hasSentMaxReachedEventRef.current = true;
+        onEvent('tabsLimitReached');
+      } else if (!hasReachedMaxItemsCount) {
+        hasSentMaxReachedEventRef.current = false;
+      }
+    }, [hasReachedMaxItemsCount, onEvent]);
 
     useEffect(() => {
       if (selectedItem && tabsContainerRef.current) {
@@ -174,6 +187,10 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex > 0 ? selectedItemIndex - 1 : lastItemIndex
           );
+
+          onEvent('tabsKeyboardShortcutsUsed', {
+            keyUsed: event.key,
+          });
           return;
         }
 
@@ -181,16 +198,28 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex < lastItemIndex ? selectedItemIndex + 1 : firstItemIndex
           );
+
+          onEvent('tabsKeyboardShortcutsUsed', {
+            keyUsed: event.key,
+          });
           return;
         }
 
         if (event.key === keys.HOME && items.length > 0) {
           await selectAndMoveFocusToItemIndex(0);
+
+          onEvent('tabsKeyboardShortcutsUsed', {
+            keyUsed: event.key,
+          });
           return;
         }
 
         if (event.key === keys.END && items.length > 0) {
           await selectAndMoveFocusToItemIndex(lastItemIndex);
+
+          onEvent('tabsKeyboardShortcutsUsed', {
+            keyUsed: event.key,
+          });
           return;
         }
 
@@ -200,10 +229,14 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           items.length > 1
         ) {
           await onClose?.(selectedItem);
+
+          onEvent('tabsKeyboardShortcutsUsed', {
+            keyUsed: event.key,
+          });
           return;
         }
       },
-      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose]
+      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose, onEvent]
     );
 
     const mainTabsBarContent = (
