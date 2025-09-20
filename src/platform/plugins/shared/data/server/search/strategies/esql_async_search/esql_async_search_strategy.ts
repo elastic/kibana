@@ -103,7 +103,7 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   async function submitEsqlSearch(
-    { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
+    request: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
     { esClient }: SearchStrategyDependencies
   ) {
@@ -141,14 +141,15 @@ export const esqlAsyncSearchStrategyProvider = (
     const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
-        ? submitEsqlSearch({ id, ...request }, options, deps)
+        ? submitEsqlSearch(request, options, deps)
         : options.retrieveResults
         ? stopEsqlAsyncSearch(id, options, deps)
         : getEsqlAsyncSearch({ id, ...request }, options, deps));
 
       const { body, headers, meta } = response;
-
-      return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
+      const kibanaResponse = toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
+      // Workaround because the async search API doesn't always return the id in the response (see https://github.com/elastic/elasticsearch/issues/135042)
+      return { ...kibanaResponse, id: id ?? kibanaResponse.id };
     };
 
     const cancel = async () => {
