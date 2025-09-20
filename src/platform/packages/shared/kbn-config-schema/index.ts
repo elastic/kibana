@@ -91,7 +91,9 @@ function buffer<D extends DefaultValue<Buffer> = never>(
   return new BufferType(options);
 }
 
-function stream(options?: TypeOptions<Stream>): Type<Stream> {
+function stream<D extends DefaultValue<Stream> = never>(
+  options?: TypeOptions<Stream, Stream, D>
+): StreamType<D> {
   return new StreamType(options);
 }
 
