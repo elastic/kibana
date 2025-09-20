@@ -38,6 +38,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
@@ -59,6 +60,7 @@ interface AuthenticationServiceStartParams {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
+  uiam?: UiamServicePublic;
   loggers: LoggerFactory;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
@@ -341,6 +343,7 @@ export class AuthenticationService {
     isElasticCloudDeployment,
     customLogoutURL,
     buildFlavor = 'traditional',
+    uiam,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -382,6 +385,7 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
+      uiam,
     }));
 
     return {

@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import type { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
-import type { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue, Type } from '@kbn/config-schema';
 import { schema, offeringBasedSchema, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
@@ -27,6 +27,29 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 export const DEFAULT_API_VERSION = 'master';
 
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
+
+const requestHeadersWhitelistSchemas = [
+  schema.string({
+    // can't use `validate` option on union types, forced to validate each individual subtypes
+    // see https://github.com/elastic/kibana/issues/64906
+    validate: (headersWhitelist) => {
+      const reservedHeaders = getReservedHeaders([headersWhitelist]);
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
+  }),
+  schema.arrayOf(schema.string(), {
+    // can't use `validate` option on union types, forced to validate each individual subtypes
+    // see https://github.com/elastic/kibana/issues/64906
+    validate: (headersWhitelist) => {
+      const reservedHeaders = getReservedHeaders(headersWhitelist);
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
+  }),
+] as [Type<string>, Type<string[]>];
 
 /**
  * Validation schema for elasticsearch service config. It can be reused when plugins allow users
@@ -75,33 +98,14 @@ export const configSchema = schema.object({
       })
     )
   ),
-  requestHeadersWhitelist: schema.oneOf(
-    [
-      schema.string({
-        // can't use `validate` option on union types, forced to validate each individual subtypes
-        // see https://github.com/elastic/kibana/issues/64906
-        validate: (headersWhitelist) => {
-          const reservedHeaders = getReservedHeaders([headersWhitelist]);
-          if (reservedHeaders.length) {
-            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
-          }
-        },
-      }),
-      schema.arrayOf(schema.string(), {
-        // can't use `validate` option on union types, forced to validate each individual subtypes
-        // see https://github.com/elastic/kibana/issues/64906
-        validate: (headersWhitelist) => {
-          const reservedHeaders = getReservedHeaders(headersWhitelist);
-          if (reservedHeaders.length) {
-            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
-          }
-        },
-      }),
-    ],
-    {
+  requestHeadersWhitelist: offeringBasedSchema({
+    serverless: schema.oneOf(requestHeadersWhitelistSchemas, {
+      defaultValue: ['authorization', 'es-client-authentication', 'x-client-authentication'],
+    }),
+    traditional: schema.oneOf(requestHeadersWhitelistSchemas, {
       defaultValue: ['authorization', 'es-client-authentication'],
-    }
-  ),
+    }),
+  }),
   customHeaders: schema.recordOf(schema.string(), schema.string(), {
     defaultValue: {},
     validate: (customHeaders) => {
