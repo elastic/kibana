@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useLogReadinessTask } from './use_log_readiness_task';
+import { useReadinessTasks } from './use_readiness_tasks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { POST_SIEM_READINESS_TASK_API_PATH } from './constants';
 import type { SiemReadinessTask } from './types';
@@ -22,7 +22,7 @@ jest.mock('./validate_task', () => ({
   validateTask: jest.fn(),
 }));
 
-describe('useLogReadinessTask', () => {
+describe('useReadinessTasks', () => {
   const mockPost = jest.fn();
   const queryClient = new QueryClient();
 
@@ -42,7 +42,7 @@ describe('useLogReadinessTask', () => {
   });
 
   it('should call http.post with the correct arguments when logging a task', async () => {
-    const { result } = renderHook(() => useLogReadinessTask(), { wrapper });
+    const { result } = renderHook(() => useReadinessTasks(), { wrapper });
 
     const task: SiemReadinessTask = {
       task_id: 'enable-endpoint-visibility',
@@ -61,7 +61,7 @@ describe('useLogReadinessTask', () => {
 
   it('should handle an error response from http.post', async () => {
     mockPost.mockRejectedValue(new Error('HTTP error'));
-    const { result } = renderHook(() => useLogReadinessTask({ onError: jest.fn() }), { wrapper });
+    const { result } = renderHook(() => useReadinessTasks({ onError: jest.fn() }), { wrapper });
 
     const task: SiemReadinessTask = {
       task_id: 'ingest-cloud-audit-logs',
@@ -85,7 +85,7 @@ describe('useLogReadinessTask', () => {
   it('should call onSuccess callback when mutation succeeds', async () => {
     const onSuccess = jest.fn();
     mockPost.mockResolvedValue({});
-    const { result } = renderHook(() => useLogReadinessTask({ onSuccess }), { wrapper });
+    const { result } = renderHook(() => useReadinessTasks({ onSuccess }), { wrapper });
 
     const task: SiemReadinessTask = {
       task_id: 'ingest-asset-inventory',
