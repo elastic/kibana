@@ -14,6 +14,7 @@ export const config = {
   path: 'i18n',
   schema: schema.object({
     locale: schema.string({ defaultValue: 'en' }),
+    autoDetectLocale: schema.boolean({ defaultValue: false }),
   }),
 };
 
