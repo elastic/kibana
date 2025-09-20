@@ -20,10 +20,12 @@ import * as i18n from './translations';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../common/styles';
 import { useUploadPanelStyles } from '../../../common/styles/upload_panel.styles';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
+import type { DashboardMigrationStats } from '../../types';
 
 export interface UploadDashboardsPanelProps {
   isUploadMore?: boolean;
   isDisabled?: boolean;
+  migrationStats?: DashboardMigrationStats;
 }
 
 export interface UploadDashboardsSectionPanelProps extends UploadDashboardsPanelProps {
@@ -105,12 +107,13 @@ export const UploadDashboardsPanel = React.memo<UploadDashboardsPanelProps>(
   function UploadDashboardsPanel({
     isUploadMore = false,
     isDisabled = false,
+    migrationStats,
   }: UploadDashboardsPanelProps) {
     const { openFlyout } = useMigrationDataInputContext();
 
     const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-      openFlyout();
-    }, [openFlyout]);
+      openFlyout(migrationStats);
+    }, [openFlyout, migrationStats]);
 
     return (
       <UploadDashboardsSectionPanel

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export enum DashboardUploadSteps {
-  DashboardsUpload = 1,
-  MacrosUpload = 2,
-  LookupsUpload = 3,
-  End = 4,
-}
+import { i18n } from '@kbn/i18n';
+
+export const MACROS_DATA_INPUT_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.title',
+  { defaultMessage: 'Upload macros' }
+);

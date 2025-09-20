@@ -189,7 +189,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     return result;
   }
 
-  protected async startMigrationFromStats(
+  public async startMigrationFromStats(
     connectorId: string,
     taskStats: DashboardMigrationStats
   ): Promise<void> {
@@ -199,20 +199,20 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     });
   }
 
-  protected async fetchMigrationStats({
+  public async fetchMigrationStats({
     migrationId,
   }: GetMigrationStatsParams): Promise<DashboardMigrationStats> {
     const stats = await api.getDashboardMigrationStats({ migrationId });
     return stats;
   }
-  protected async fetchMigrationsStatsAll(
+  public async fetchMigrationsStatsAll(
     params: GetMigrationsStatsAllParams = {}
   ): Promise<DashboardMigrationStats[]> {
     const allStats = await api.getDashboardMigrationAllStats(params);
     return allStats;
   }
 
-  protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
+  public sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
     this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
   }
 

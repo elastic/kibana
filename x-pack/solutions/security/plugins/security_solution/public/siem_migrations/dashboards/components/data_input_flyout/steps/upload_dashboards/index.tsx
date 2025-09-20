@@ -9,15 +9,23 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { DashboardUploadSteps } from '../constants';
+import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
+import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
 
 interface DashboardsUploadStepProps {
   dataInputStep?: number;
+  migrationStats?: DashboardMigrationTaskStats;
+  onMigrationCreated: OnMigrationCreated;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 
 export const DashboardsUploadStep = ({
   dataInputStep = 1, // Default value if not provided
+  migrationStats,
+  onMigrationCreated,
+  onMissingResourcesFetched,
 }: DashboardsUploadStepProps) => {
   const dataInputStatus = useMemo(
     () => getEuiStepStatus(DashboardUploadSteps.DashboardsUpload, dataInputStep),
@@ -39,7 +47,11 @@ export const DashboardsUploadStep = ({
         </EuiFlexItem>
         {dataInputStatus === 'current' && (
           <EuiFlexItem>
-            <DashboardsUploadSubSteps />
+            <DashboardsUploadSubSteps
+              migrationStats={migrationStats}
+              onMigrationCreated={onMigrationCreated}
+              onMissingResourcesFetched={onMissingResourcesFetched}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

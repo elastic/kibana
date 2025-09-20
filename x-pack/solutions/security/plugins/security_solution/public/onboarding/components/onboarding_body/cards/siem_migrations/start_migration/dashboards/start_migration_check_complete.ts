@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../../../types';
 import type { StartMigrationCardMetadata } from '../common/types';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 
 const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
   i18n.translate('xpack.securitySolution.onboarding.siemMigrations.startMigration.completeBadge', {
@@ -32,7 +33,6 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
       (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
     );
     migrationsCount = migrationsStats.length;
-    isComplete = false; // Placeholder for actual completion logic
   }
 
   return {

@@ -58,7 +58,7 @@ export const createDashboardMigration = async ({
   signal,
   name,
 }: WithSignal<CreateDashboardMigrationRequestBody>): Promise<CreateDashboardMigrationResponse> => {
-  return KibanaServices.get().http.post<CreateDashboardMigrationResponse>(
+  return KibanaServices.get().http.put<CreateDashboardMigrationResponse>(
     SIEM_DASHBOARD_MIGRATIONS_PATH,
     {
       version: VERSION,

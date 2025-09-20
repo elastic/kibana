@@ -315,7 +315,6 @@ describe('SiemDashboardMigrationsService', () => {
         { id: 'mig-2', status: SiemMigrationTaskStatus.FINISHED, name: 'test 2' },
       ];
       mockGetDashboardMigrationAllStats.mockResolvedValue(statsArray);
-      /* @ts-expect-error acccessing protected property */
       const result = await service.fetchMigrationsStatsAll();
       expect(api.getDashboardMigrationAllStats).toHaveBeenCalled();
       expect(result).toHaveLength(2);

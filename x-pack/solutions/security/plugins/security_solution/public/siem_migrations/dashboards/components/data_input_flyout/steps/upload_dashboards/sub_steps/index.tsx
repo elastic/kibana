@@ -7,28 +7,40 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
-import type { RuleMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useMigrationNameStep } from '../../../../../../common/components/migration_name_step';
 import { MigrationDataInputSubSteps } from '../../../../../../common/components/migration_data_input_sub_steps';
 import { useCopyExportQueryStep } from './copy_export_query';
-import type { SplunkDashboardsResult } from '../../../types';
+import type {
+  SplunkDashboardsResult,
+  OnMigrationCreated,
+  OnMissingResourcesFetched,
+} from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
-
+import { useCheckResourcesStep } from './check_resources';
 interface DashboardsUploadSubStepsProps {
-  migrationStats?: RuleMigrationTaskStats;
+  migrationStats?: DashboardMigrationTaskStats;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
+  onMigrationCreated: OnMigrationCreated;
 }
 
 const END = 4 as const;
 
-type SubStep = 1 /* name */ | 2 /* copy query */ | 3 /* file */ | typeof END /* END */;
+type SubStep =
+  | 1 /* name */
+  | 2 /* copy query */
+  | 3 /* file */
+  | 4 /* check resources */
+  | typeof END /* END */;
 
 export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubSteps({
   migrationStats,
+  onMissingResourcesFetched,
+  onMigrationCreated,
 }: DashboardsUploadSubStepsProps) {
   const [currentSubStep, setCurrentSubStep] = useState<SubStep>(1);
   const [migrationName, setMigrationName] = useState<string | undefined>(migrationStats?.name);
   const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
-  const [, setSelectedDashboards] = useState<SplunkDashboardsResult[]>([]);
 
   const onUploadedDashboards = useCallback(
     (dashboards: SplunkDashboardsResult[]) => {
@@ -45,18 +57,17 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
     [setCurrentSubStep, currentSubStep]
   );
 
+  const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
+    (stats) => {
+      onMigrationCreated(stats);
+      setCurrentSubStep(4);
+    },
+    [onMigrationCreated]
+  );
+
   const onDashboardsFileChanged = useCallback((files: FileList | null) => {
     if (!files?.length) {
       setUploadedDashboards([]);
-    }
-  }, []);
-
-  const onSelectedDashboardsChange = useCallback((newSelection: SplunkDashboardsResult[]) => {
-    setSelectedDashboards(newSelection);
-    if (newSelection.length > 0) {
-      setCurrentSubStep(END);
-    } else {
-      setCurrentSubStep(4);
     }
   }, []);
 
@@ -94,13 +105,21 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   const dashboardsFileUploadStep = useDashboardsFileUploadStep({
     status: getEuiStepStatus(3, currentSubStep),
     migrationName,
+    migrationStats,
     onFileUpload: onUploadedDashboards,
     onDashboardsFileChanged,
+    onMigrationCreated: onMigrationCreatedStep,
+  });
+
+  const resourcesStep = useCheckResourcesStep({
+    status: getEuiStepStatus(4, currentSubStep),
+    migrationStats,
+    onMissingResourcesFetched,
   });
 
   const steps = useMemo(() => {
-    return [nameStep, copyQueryStep, dashboardsFileUploadStep];
-  }, [nameStep, copyQueryStep, dashboardsFileUploadStep]);
+    return [nameStep, copyQueryStep, dashboardsFileUploadStep, resourcesStep];
+  }, [nameStep, copyQueryStep, dashboardsFileUploadStep, resourcesStep]);
 
   return <MigrationDataInputSubSteps steps={steps} />;
 });
