@@ -15,6 +15,7 @@
     "@kbn/logging-mocks",
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": ["target/**/*"]
 }
