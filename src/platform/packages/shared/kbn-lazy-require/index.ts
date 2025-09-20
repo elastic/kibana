@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+export { __lazyRequire } from './src/helper';
 
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export type { LazyRequirePluginOptions } from './src/plugin/types';
