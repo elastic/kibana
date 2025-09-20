@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
@@ -56,13 +57,22 @@ export const panelGridDataSchema = schema.object({
   ),
 });
 
+const fooSchema = schema.object({
+  foo: schema.string(),
+});
+
+const embeddableSchemas: Array<ObjectType> = [fooSchema];
+
 export const panelSchema = schema.object({
-  panelConfig: schema.object(
-    {},
-    {
-      unknowns: 'allow',
-    }
-  ),
+  panelConfig: schema.oneOf([
+    ...embeddableSchemas,
+    schema.object(
+      {},
+      {
+        unknowns: 'allow',
+      }
+    ),
+  ]),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
