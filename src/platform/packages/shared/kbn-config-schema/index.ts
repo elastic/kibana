@@ -105,7 +105,9 @@ function literal<T extends string | number | boolean | null>(value: T): Type<T> 
   return new LiteralType(value);
 }
 
-function number(options?: NumberOptions): Type<number> {
+function number<D extends DefaultValue<number> = never>(
+  options?: NumberOptions<D>
+): Type<number, number, D> {
   return new NumberType(options);
 }
 
