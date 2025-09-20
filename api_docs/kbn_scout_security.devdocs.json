@@ -4367,7 +4367,12 @@
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
-                    "references": []
+                    "references": [
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/integration_tests/fixtures/eui_helpers.ts"
+                      }
+                    ]
                   }
                 ]
               }
