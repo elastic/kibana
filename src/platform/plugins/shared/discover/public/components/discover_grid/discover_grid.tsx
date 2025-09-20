@@ -17,9 +17,12 @@ import {
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import { ESQLDataCascade } from '../../application/context/components/data_cascade/esql_data_cascade';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
+  viewModeToggle?: React.ReactNode;
+  cascadeGroups?: string[] | null;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
 }
 
@@ -30,6 +33,8 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
+  cascadeGroups,
+  viewModeToggle,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
 }) => {
@@ -73,7 +78,15 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     return getColumnsConfigurationAccessor(() => ({}))();
   }, [getColumnsConfigurationAccessor]);
 
-  return (
+  return Boolean(cascadeGroups?.length) ? (
+    <ESQLDataCascade
+      {...props}
+      cascadeGroups={cascadeGroups!}
+      dataView={dataView}
+      // stateContainer={stateContainer}
+      viewModeToggle={viewModeToggle}
+    />
+  ) : (
     <UnifiedDataTable
       showColumnTokens
       canDragAndDropColumns

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   type UseEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -24,6 +25,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
@@ -85,6 +87,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { getESQLStatsQueryMeta } from '../../../context/components/data_cascade/esql_data_cascade';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -166,6 +169,12 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  // Determine the cascade groups from the query if it's of ESQL type
+  const cascadeGroups = useMemo(() => {
+    if (!isOfAggregateQueryType(query)) return [];
+    return getESQLStatsQueryMeta(query.esql).groupByFields.map((group) => group.field);
+  }, [query]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
     stateContainer,
@@ -301,20 +310,21 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
+      customColumnsMeta?: DataTableColumnsMeta,
+      onClose: () => void = setExpandedDoc.bind(null, undefined)
     ) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
-        onClose={() => setExpandedDoc(undefined)}
+        onClose={onClose}
         setExpandedDoc={setExpandedDoc}
         query={query}
         initialTabId={initialDocViewerTabId}
@@ -340,6 +350,16 @@ function DiscoverDocumentsComponent({
       dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
     },
     [dispatch, setDataGridUiState]
+  );
+
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+
+  // support cascade layout unless explicitly disabled
+  const supportsCascadeLayout = useMemo(
+    () => layoutUiState?.supportsCascade ?? true,
+    [layoutUiState]
   );
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
@@ -500,6 +520,30 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            viewModeToggle={viewModeToggle}
+            cascadeGroups={supportsCascadeLayout ? cascadeGroups : null}
+            externalAdditionalControls={
+              !supportsCascadeLayout && Boolean(cascadeGroups?.length) ? (
+                <EuiButton
+                  iconType="inspect"
+                  color="text"
+                  size="s"
+                  onClick={() => {
+                    dispatch(
+                      setLayoutUiState({
+                        layoutUiState: { supportsCascade: true },
+                      })
+                    );
+                  }}
+                  data-test-subj="discoverEnableCascadeLayoutSwitch"
+                >
+                  <FormattedMessage
+                    id="discover.enableCascadeLayoutSwitchLabel"
+                    defaultMessage="Try cascade layout"
+                  />
+                </EuiButton>
+              ) : null
+            }
           />
         </CellActionsProvider>
       </div>

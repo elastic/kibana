@@ -11,6 +11,8 @@ import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 export interface DiscoverLayoutRestorableState {
   sidebarWidth: number;
+  supportsCascade: boolean;
+  availableCascadeFields: string[];
 }
 
 export const { withRestorableState, useRestorableState } =

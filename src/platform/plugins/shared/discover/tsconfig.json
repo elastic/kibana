@@ -1,3 +1,4 @@
+
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
@@ -119,6 +120,7 @@
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
+    "@kbn/shared-ux-document-data-cascade",
   ],
   "exclude": ["target/**/*"]
 }
