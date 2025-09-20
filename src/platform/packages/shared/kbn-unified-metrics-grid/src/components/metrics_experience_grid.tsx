@@ -23,7 +23,7 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';

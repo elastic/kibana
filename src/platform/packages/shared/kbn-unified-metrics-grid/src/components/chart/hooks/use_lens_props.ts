@@ -24,6 +24,7 @@ import {
   type Observable,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { useChartLayers } from './use_chart_layers';
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -52,7 +53,7 @@ export const useLensProps = ({
   query: string;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   color?: string;
-  unit?: string;
+  unit?: MetricUnit;
   getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   abortController?: AbortController;

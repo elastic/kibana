@@ -12,17 +12,27 @@ import type { ErrorResponseBase, MsearchRequestItem } from '@elastic/elasticsear
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
+import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import type { DataStreamFieldCapsMap } from '../../types';
 import type { Dimension, MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
+import { normalizeUnit } from './normalize_unit';
 
-export type SampleMetricDocumentsResults = Promise<Map<string, string[]>>;
+export interface MetricMetadata {
+  dimensions: string[];
+  unitFromSample?: string;
+}
+export type MetricMetadataMap = Map<string, MetricMetadata>;
 
 function isErrorResponseBase(subject: any): subject is ErrorResponseBase {
   return subject.error != null;
 }
 
-function getDimensionsByMetricFieldMap(
+function generateMapKey(indexName: string, fieldName: string) {
+  return `${indexName}-${fieldName}`;
+}
+
+function buildMetricMetadataMap(
   response: {
     responses: InferSearchResponseOf<
       {
@@ -33,30 +43,54 @@ function getDimensionsByMetricFieldMap(
   },
   metricFields: MetricField[],
   logger: Logger
-) {
-  // Process responses for each metric
-  const dimensionsByMetricField = new Map<string, string[]>(
-    metricFields.map(({ name }, index) => {
+): MetricMetadataMap {
+  const entries = new Map<string, MetricMetadata>(
+    metricFields.map(({ name, index: indexName }, index) => {
       const searchResult = response.responses[index];
+
+      const mapKey = generateMapKey(indexName, name);
 
       if (isErrorResponseBase(searchResult)) {
         logger.error(`Error sampling document for metric ${name}: ${searchResult.error}`);
-        return [name, []];
+        return [mapKey, { dimensions: [] }];
       }
 
-      if (searchResult?.hits.hits?.length) {
-        const fields = searchResult.hits.hits[0].fields ?? {};
-        return [name, Object.keys(fields)];
+      if (!searchResult?.hits.hits?.length) {
+        return [mapKey, { dimensions: [] }];
       }
 
-      return [name, []];
+      const fields = searchResult.hits.hits[0].fields ?? {};
+      const { dimensions, unitFromSample } = Object.entries(fields).reduce<MetricMetadata>(
+        (acc, [fieldName, fieldValue]) => {
+          if (fieldName === semconvFlat.unit.name) {
+            const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+
+            if (typeof value === 'string') {
+              acc.unitFromSample = value;
+            }
+          } else {
+            acc.dimensions.push(fieldName);
+          }
+
+          return acc;
+        },
+        { dimensions: [], unitFromSample: undefined }
+      );
+
+      return [
+        mapKey,
+        {
+          dimensions,
+          unitFromSample,
+        },
+      ];
     })
   );
 
-  return dimensionsByMetricField;
+  return new Map(entries);
 }
 
-export async function getSampleMetricsWithDimensions({
+export async function sampleMetricMetadata({
   esClient,
   metricFields,
   logger,
@@ -64,7 +98,7 @@ export async function getSampleMetricsWithDimensions({
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
-}): SampleMetricDocumentsResults {
+}): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
   }
@@ -83,7 +117,7 @@ export async function getSampleMetricsWithDimensions({
           },
         },
         _source: false,
-        fields: dimensions.map((dimension) => dimension.name),
+        fields: dimensions.map((dimension) => dimension.name).concat(semconvFlat.unit.name),
       });
     }
     const response = await esClient.msearch<{ fields: Record<string, any> }>(
@@ -91,17 +125,18 @@ export async function getSampleMetricsWithDimensions({
       { body }
     );
 
-    return getDimensionsByMetricFieldMap(response, metricFields, logger);
+    return buildMetricMetadataMap(response, metricFields, logger);
   } catch (error) {
-    const dimensionsByMetricFieldMap = new Map<string, string[]>();
+    const metricMetadataMap: MetricMetadataMap = new Map();
+
     for (const { name } of metricFields) {
-      dimensionsByMetricFieldMap.set(name, []);
+      metricMetadataMap.set(name, { dimensions: [] });
     }
-    return dimensionsByMetricFieldMap;
+    return metricMetadataMap;
   }
 }
 
-export async function sampleAndProcessMetricFields({
+export async function enrichMetricFields({
   esClient,
   metricFields,
   dataStreamFieldCapsMap,
@@ -116,31 +151,33 @@ export async function sampleAndProcessMetricFields({
     return metricFields;
   }
 
-  const dimensionsByMetricMap = await getSampleMetricsWithDimensions({
+  const metricMetadataMap = await sampleMetricMetadata({
     esClient,
     metricFields,
     logger,
   });
 
-  // Pre-compute all unique dimension field combinations to avoid repeated extraction
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
   return metricFields.map((field) => {
-    // Get the sampled document fields for this metric
-    const dimensionFieldNames = dimensionsByMetricMap.get(field.name) || [];
+    const { dimensions, unitFromSample } =
+      metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
     const fieldCaps = dataStreamFieldCapsMap.get(field.index);
 
-    if (dimensionFieldNames.length > 0) {
-      // Create cache key from sorted field names
-      const cacheKey = [...dimensionFieldNames].sort().join(',');
-
-      if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
-        uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensionFieldNames));
-      }
-
-      return { ...field, dimensions: uniqueDimensionSets.get(cacheKey)!, noData: false };
-    } else {
+    if (!dimensions || dimensions.length === 0) {
       return { ...field, dimensions: [], noData: true };
     }
+
+    const cacheKey = [...dimensions].sort().join(',');
+    if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
+      uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
+    }
+
+    return {
+      ...field,
+      dimensions: uniqueDimensionSets.get(cacheKey)!,
+      noData: false,
+      unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
+    };
   });
 }
