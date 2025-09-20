@@ -8,8 +8,8 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 
 import { type Services } from '../common/services';
 import { createStackManagementNavigationTree } from './stack_management_navigation';
@@ -58,6 +58,15 @@ export const createNavigationTree = async (
               {
                 id: SecurityPageName.alerts,
                 link: securityLink(SecurityPageName.alerts),
+              },
+              {
+                link: 'workflows',
+                withBadge: true,
+                badgeTypeV2: 'techPreview' as const,
+                badgeOptions: {
+                  icon: 'beaker',
+                  tooltip: i18nStrings.workflows.badgeTooltip,
+                },
               },
               {
                 id: SecurityPageName.attackDiscovery,
