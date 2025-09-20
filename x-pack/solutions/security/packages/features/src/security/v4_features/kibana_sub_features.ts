@@ -6,9 +6,7 @@
  */
 
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import { SECURITY_FEATURE_ID_V4 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import {
   endpointListSubFeature,
@@ -26,58 +24,14 @@ import {
   executeActionSubFeature,
   scanActionSubFeature,
   workflowInsightsSubFeature,
+  trustedDevicesSubFeature,
 } from '../kibana_sub_features';
-import type { SubFeatureReplacements } from '../../types';
-import { addSubFeatureReplacements } from '../../utils';
-
-const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
-  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.trustedApplications]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { trusted_applications_all: ['global_artifact_management_all'] },
-    },
-  ],
-  [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { host_isolation_exceptions_all: ['global_artifact_management_all'] },
-    },
-  ],
-  [SecuritySubFeatureId.blocklist]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { blocklist_all: ['global_artifact_management_all'] },
-    },
-  ],
-  [SecuritySubFeatureId.eventFilters]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { event_filters_all: ['global_artifact_management_all'] },
-    },
-  ],
-  [SecuritySubFeatureId.endpointExceptions]: [
-    {
-      feature: SECURITY_FEATURE_ID_V4,
-      additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
-    },
-  ],
-  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-};
 
 /**
  * Sub-features that will always be available for Security
  * regardless of the product type.
  */
-export const getSecurityV2BaseKibanaSubFeatureIds = (
+export const getSecurityV4BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [];
 
@@ -85,7 +39,7 @@ export const getSecurityV2BaseKibanaSubFeatureIds = (
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getSecurityV2SubFeaturesMap = ({
+export const getSecurityV4SubFeaturesMap = ({
   experimentalFeatures,
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
@@ -96,6 +50,7 @@ export const getSecurityV2SubFeaturesMap = ({
       globalArtifactManagementSubFeature(experimentalFeatures),
     ],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature()],
+    [SecuritySubFeatureId.trustedDevices, trustedDevicesSubFeature()],
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
@@ -113,11 +68,6 @@ export const getSecurityV2SubFeaturesMap = ({
     securitySubFeaturesList.map(([id, originalSubFeature]) => {
       let subFeature = originalSubFeature;
 
-      const featureReplacements = replacements[id];
-      if (featureReplacements) {
-        subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
-      }
-
       // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
       if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
@@ -128,8 +78,8 @@ export const getSecurityV2SubFeaturesMap = ({
   );
 
   // Remove disabled experimental features
-  if (!experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    securitySubFeaturesMap.delete(SecuritySubFeatureId.globalArtifactManagement);
+  if (!experimentalFeatures.trustedDevices) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.trustedDevices);
   }
 
   return Object.freeze(securitySubFeaturesMap);
