@@ -70,14 +70,14 @@ describe('getMonacoCommandString', () => {
       canEditIndex: true,
     });
     expect(result).toBe(
-      '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Atrue%7D)'
+      '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Atrue%2C%22invocationSource%22%3A%22esql_hover%22%7D)'
     );
   });
 
   it('should return edit command for existing index with edit permissions', () => {
     const result = getMonacoCommandString('test-index', true, { canEditIndex: true });
     expect(result).toBe(
-      '[Edit lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Atrue%7D)'
+      '[Edit lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Atrue%2C%22invocationSource%22%3A%22esql_hover%22%7D)'
     );
   });
 
@@ -87,7 +87,7 @@ describe('getMonacoCommandString', () => {
       canEditIndex: false,
     });
     expect(result).toBe(
-      '[View lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Afalse%7D)'
+      '[View lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Afalse%2C%22invocationSource%22%3A%22esql_hover%22%7D)'
     );
   });
 
@@ -252,7 +252,7 @@ describe('useLookupIndexCommand', () => {
           options: expect.objectContaining({
             hoverMessage: expect.objectContaining({
               value:
-                '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%7D)',
+                '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%2C%22invocationSource%22%3A%22esql_hover%22%7D)',
             }),
           }),
         }),

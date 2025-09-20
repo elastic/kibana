@@ -45,6 +45,10 @@ import {
 } from '@kbn/index-editor';
 import type { EditLookupIndexFlyoutDeps } from '@kbn/index-editor';
 
+// Register the index editor telemetry events inside setup
+registerIndexEditorAnalyticsEvents(core.analytics);
+
+
 // Register the index editor actions with required dependencies
 const deps: EditLookupIndexFlyoutDeps = {
   coreStart,
@@ -69,9 +73,10 @@ import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 
 // Create context for the index editor
 const context: EditLookupIndexContentContext = {
-  indexName: 'my-lookup-index', // Set to 
+  indexName: 'my-lookup-index',
   doesIndexExist: true,
   canEditIndex: true,
+  invocationSource: 'your_source', // Used only for telemetry
   onClose: (result) => {
     console.log('Index editor closed:', result);
   }
