@@ -20,6 +20,10 @@ export class StreamsApp {
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
+  async gotoStreamMainPage() {
+    await this.page.gotoApp(`streams`);
+  }
+
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
   }
@@ -46,6 +50,57 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  // Streams table utility methods
+  async expectStreamsTableVisible() {
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should not be present in the table`
+      ).not.toBeVisible();
+    }
+  }
+
+  async collapseExpandAllStreams(collapse: boolean) {
+    if (collapse) {
+      const collapseAllButton = this.page.locator(`[data-test-subj="streamsCollapseAllButton"]`);
+      if (await collapseAllButton.isVisible()) {
+        await collapseAllButton.click();
+      }
+    } else {
+      const expandAllButton = this.page.locator(`[data-test-subj="streamsExpandAllButton"]`);
+      if (await expandAllButton.isVisible()) {
+        await expandAllButton.click();
+      }
+    }
+  }
+
+  async collapseExpandStream(streamName: string, collapse: boolean) {
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
   }
 
   // Routing-specific utility methods

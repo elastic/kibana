@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Direction, Criteria, EuiSearchBarProps } from '@elastic/eui';
+import type { Direction, EuiSearchBarProps, CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,13 +15,20 @@ import {
   EuiInMemoryTable,
   useEuiTheme,
   EuiHighlight,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { isEmpty } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import type { TableRow, SortableField } from './utils';
-import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
+import {
+  buildStreamRows,
+  asTrees,
+  enrichStream,
+  shouldComposeTree,
+  filterStreamsByQuery,
+  filterCollapsedStreamRows,
+} from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
@@ -55,31 +62,101 @@ export function StreamsTreeTable({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
+  // Collapsed state: Set of collapsed node names
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number }>({
+    pageIndex: 0,
+    pageSize: 25,
+  });
+
+  // Filter streams by query, including ancestors of matches
+  const filteredStreams = React.useMemo(
+    () =>
+      filterStreamsByQuery(
+        streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+        searchQuery
+      ),
+    [streams, searchQuery]
+  );
 
   const enrichedStreams = React.useMemo(() => {
-    const ingestStreams = streams.filter((stream) =>
-      Streams.ingest.all.Definition.is(stream.stream)
-    );
-    const streamList = shouldComposeTree(sortField, searchQuery)
-      ? asTrees(ingestStreams)
-      : ingestStreams;
+    const streamList = shouldComposeTree(sortField) ? asTrees(filteredStreams) : filteredStreams;
     return streamList.map(enrichStream);
-  }, [sortField, searchQuery, streams]);
+  }, [sortField, filteredStreams]);
 
-  const items = React.useMemo(
+  const flattenTreeWithCollapse = React.useCallback(
+    (rows: TableRow[]) => filterCollapsedStreamRows(rows, collapsed, sortField),
+    [collapsed, sortField]
+  );
+
+  const allRows = React.useMemo(
     () => buildStreamRows(enrichedStreams, sortField, sortDirection),
     [enrichedStreams, sortField, sortDirection]
+  );
+
+  // Only pass filtered rows if tree mode is active
+  const items = React.useMemo(
+    () => (shouldComposeTree(sortField) ? flattenTreeWithCollapse(allRows) : allRows),
+    [allRows, flattenTreeWithCollapse, sortField]
   );
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query.text);
   };
 
-  const handleTableChange = ({ sort }: Criteria<TableRow>) => {
+  const handleTableChange = ({ sort, page }: CriteriaWithPagination<TableRow>) => {
     if (sort) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
     }
+    if (page) {
+      setPagination({
+        pageIndex: page.index,
+        pageSize: page.size,
+      });
+    }
+  };
+
+  const handleToggleCollapse = (name: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  };
+
+  // Compute all expandable node names for expand/collapse all
+  const allExpandableNodeNames = React.useMemo(() => {
+    const names: string[] = [];
+    const collect = (rows: TableRow[]) => {
+      for (const row of rows) {
+        if (row.children && row.children.length > 0) {
+          names.push(row.stream.name);
+        }
+      }
+    };
+    collect(allRows);
+    return names;
+  }, [allRows]);
+
+  // Determine if all are expanded or not
+  const allExpanded = allExpandableNodeNames.every((name) => !collapsed.has(name));
+  const hasExpandable = allExpandableNodeNames.length > 0;
+
+  const handleExpandCollapseAll = () => {
+    setCollapsed((prev) => {
+      if (allExpanded) {
+        // Collapse all
+        return new Set(allExpandableNodeNames);
+      } else {
+        // Expand all
+        return new Set();
+      }
+    });
   };
 
   const numDataPoints = 25;
@@ -93,54 +170,116 @@ export function StreamsTreeTable({
     },
   };
 
+  // Reset pagination if streams change (e.g., after search/filter)
+  React.useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [streams, searchQuery, sortField, sortDirection]);
+
+  // Expand/Collapse all button for the name column header
+  const expandCollapseAllButton = (
+    <EuiButtonIcon
+      size="xs"
+      iconType={allExpanded ? 'fold' : 'unfold'}
+      color="text"
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        handleExpandCollapseAll();
+      }}
+      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+      aria-label={
+        allExpanded
+          ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+              defaultMessage: 'Collapse all',
+            })
+          : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+              defaultMessage: 'Expand all',
+            })
+      }
+    />
+  );
+
   return (
     <EuiInMemoryTable<TableRow>
       loading={loading}
+      data-test-subj="streamsTable"
       columns={[
         {
           field: 'nameSortKey',
-          name: NAME_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {shouldComposeTree(sortField) && hasExpandable && (
+                <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
+              )}
+              <EuiFlexItem>{NAME_COLUMN_HEADER}</EuiFlexItem>
+            </EuiFlexGroup>
+          ),
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) => (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              className={css`
-                margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
-              `}
-            >
-              {item.children && (
-                <EuiFlexItem grow={false}>
-                  {isEmpty(item.children) ? (
-                    <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
-                  ) : (
+          render: (_: unknown, item: TableRow) => {
+            // Only show expand/collapse if tree mode is active and has children
+            const treeMode = shouldComposeTree(sortField);
+            const hasChildren = !!item.children && item.children.length > 0;
+            const isCollapsed = collapsed.has(item.stream.name);
+            return (
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                className={css`
+                  margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
+                `}
+              >
+                {treeMode && item.children && hasChildren && (
+                  <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type="arrowDown"
+                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
                       color="text"
                       size="m"
+                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                        item.stream.name
+                      }`}
                       aria-label={i18n.translate(
-                        'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                        isCollapsed
+                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
+                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
                         {
-                          defaultMessage: 'Expanded node with {childCount} children',
+                          defaultMessage: isCollapsed
+                            ? 'Collapsed node with {childCount} children'
+                            : 'Expanded node with {childCount} children',
                           values: { childCount: item.children.length },
                         }
                       )}
+                      onClick={(e: React.MouseEvent) => {
+                        handleToggleCollapse(item.stream.name);
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleToggleCollapse(item.stream.name);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
                     />
-                  )}
+                  </EuiFlexItem>
+                )}
+                {treeMode && !hasChildren && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    data-test-subj={`streamsNameLink-${item.stream.name}`}
+                    href={router.link('/{key}', { path: { key: item.stream.name } })}
+                  >
+                    <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
+                  </EuiLink>
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="streamsAppStreamNodeLink"
-                  href={router.link('/{key}', { path: { key: item.stream.name } })}
-                >
-                  <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+              </EuiFlexGroup>
+            );
+          },
         },
         {
           field: 'documentsCount',
@@ -216,7 +355,10 @@ export function StreamsTreeTable({
       pagination={{
         initialPageSize: 25,
         pageSizeOptions: [25, 50, 100],
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
       }}
+      executeQueryOptions={{ enabled: false }}
       search={{
         query: searchQuery,
         onChange: handleQueryChange,
