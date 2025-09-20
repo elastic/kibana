@@ -38,8 +38,12 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 
 export const addRoundCompleteEvent = ({
   userInput,
+  startTime,
+  endTime,
 }: {
   userInput: RoundInput;
+  startTime: Date;
+  endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -48,7 +52,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({ events, input: userInput });
+          const round = createRoundFromEvents({ events, input: userInput, startTime, endTime });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -67,14 +71,22 @@ export const addRoundCompleteEvent = ({
 const createRoundFromEvents = ({
   events,
   input,
+  startTime,
+  endTime,
 }: {
   events: SourceEvents[];
   input: RoundInput;
+  startTime: Date;
+  endTime?: Date;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
   const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
+
+  if (!endTime) {
+    endTime = new Date();
+  }
 
   const eventToStep = (event: StepEvents): ConversationRoundStep => {
     if (isToolCallEvent(event)) {
@@ -113,6 +125,8 @@ const createRoundFromEvents = ({
     input,
     steps: stepEvents.map(eventToStep),
     trace_id: getCurrentTraceId(),
+    started_at: startTime.toISOString(),
+    took: endTime.getTime() - startTime.getTime(),
     response: { message: messages[messages.length - 1].message_content },
   };
 
