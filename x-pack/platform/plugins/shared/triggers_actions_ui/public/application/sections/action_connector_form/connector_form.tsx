@@ -6,11 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
+
+import { isEmpty, isEqual } from 'lodash';
+import { useSecretHeaders } from '@kbn/stack-connectors-plugin/public/common';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
   useForm,
+  useFormData,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
@@ -26,6 +29,19 @@ export interface ConnectorFormState {
   isSubmitting: boolean;
   submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
+}
+
+export interface InternalHeader {
+  key: string;
+  value: string;
+  type: 'config' | 'secret';
+}
+
+// this type needs to be improved
+interface InternalConnectorForm extends ConnectorFormSchema {
+  __internal__?: {
+    headers?: Array<InternalHeader>;
+  };
 }
 
 export type ResetForm = (
@@ -76,17 +92,17 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
     return data;
   }
 
-  const webhookData = data as { config: { headers?: Record<string, string> } };
-  const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
+  const configHeaders = Object.entries(data?.config.headers ?? {}).map(([key, value]) => ({
     key,
     value,
+    type: 'config' as const,
   }));
 
   return {
-    ...data,
-    config: {
-      ...data.config,
-      headers: isEmpty(headers) ? undefined : headers,
+    ...(data as any),
+    __internal__: {
+      ...((data as any).__internal__ ?? {}),
+      headers: configHeaders,
     },
   };
 };
@@ -108,24 +124,44 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
 
   const webhookFormData = formData as {
     config: { headers?: Array<{ key: string; value: string }> };
+    __internal__?: {
+      headers?: Array<{
+        key: string;
+        value: string;
+        type: 'config' | 'secret';
+      }>;
+    };
   };
-  const headers = (webhookFormData?.config?.headers ?? []).reduce(
-    (acc, header) => ({
-      ...acc,
-      [header.key]: header.value,
-    }),
-    {}
-  );
+
+  const headers = webhookFormData?.__internal__?.headers ?? [];
+
+  const configHeaders = headers
+    .filter((header) => header.type === 'config' && header.key)
+    .reduce((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, string>);
+
+  const secretHeaders = headers
+    .filter((h) => h.type === 'secret' && h.key && h.key.trim())
+    .reduce((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, string>);
 
   return {
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(headers)
+      headers: isEmpty(configHeaders)
         ? formData.actionTypeId !== '.gen-ai'
           ? null
           : undefined
-        : headers,
+        : configHeaders,
+    },
+    secrets: {
+      ...formData.secrets,
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };
 };
@@ -138,11 +174,20 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onFormModifiedChange,
   setResetForm,
 }) => {
+  const isWebhookConnector = ['.webhook', '.cases_webhook', '.gen-ai'].includes(
+    connector.actionTypeId
+  );
+  const secretHeaders: Array<InternalHeader> = useSecretHeaders(
+    isWebhookConnector ? connector.id : undefined
+  );
+
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,
     deserializer: formDeserializer,
   });
+
+  const [{ __internal__ }] = useFormData({ form, watch: '__internal__' });
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting, reset } = form;
   const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
     null
@@ -168,6 +213,45 @@ const ConnectorFormComponent: React.FC<Props> = ({
       onFormModifiedChange(isFormModified);
     }
   }, [isFormModified, onFormModifiedChange]);
+
+  useEffect(() => {
+    if (!isWebhookConnector || !connector.id) return;
+
+    const currentFormData = form.getFormData() as InternalConnectorForm;
+
+    const configHeaders = Object.keys(
+      (connector.config?.headers ?? {}) as Record<string, string>
+    ).map(
+      (key) =>
+        ({
+          key,
+          value: (connector.config?.headers as Record<string, string>)[key],
+          type: 'config' as const,
+        } as InternalHeader)
+    );
+
+    const mergedHeaders = configHeaders?.length
+      ? configHeaders.concat(secretHeaders)
+      : secretHeaders;
+
+    const prevHeaders = currentFormData.__internal__?.headers ?? [];
+
+    if (!isEqual(mergedHeaders, prevHeaders)) {
+      form.updateFieldValues(
+        {
+          ...currentFormData,
+          __internal__: {
+            ...__internal__,
+            hasHeaders: mergedHeaders.length > 0,
+            headers: mergedHeaders,
+          },
+        },
+        { runDeserializer: false }
+      );
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [secretHeaders, __internal__]);
 
   useEffect(() => {
     if (setResetForm) {

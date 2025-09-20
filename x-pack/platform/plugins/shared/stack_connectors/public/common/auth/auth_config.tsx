@@ -8,24 +8,14 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import {
-  UseArray,
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   ToggleField,
-  TextField,
   CardRadioGroupField,
   HiddenField,
   FilePickerField,
@@ -33,9 +23,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
+import { HeadersFields } from './headers_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 
@@ -63,6 +54,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       'config.verificationMode',
       '__internal__.hasHeaders',
       '__internal__.hasCA',
+      '__internal__.headers',
     ],
   });
 
@@ -72,6 +64,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
@@ -153,71 +146,9 @@ export const AuthConfig: FunctionComponent<Props> = ({
           },
         }}
       />
-      {hasHeaders && (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
-                  <h5>{i18n.HEADERS_TITLE}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.KEY_LABEL,
-                        }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: {
-                            readOnly,
-                            ['data-test-subj']: 'webhookHeadersValueInput',
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.DELETE_BUTTON}
-                        css={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  data-test-subj="webhookAddHeaderButton"
-                >
-                  {i18n.ADD_BUTTON}
-                </EuiButtonEmpty>
-                <EuiSpacer />
-              </>
-            );
-          }}
-        </UseArray>
-      )}
+
+      {hasHeaders && <HeadersFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}
+
       <EuiSpacer size="m" />
       <UseField
         path="__internal__.hasCA"
