@@ -20407,7 +20407,8 @@
         "summary": "Get cloud connectors",
         "tags": [
           "Fleet cloud connectors"
-        ]
+        ],
+        "x-state": "Technical Preview"
       },
       "post": {
         "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
@@ -20596,7 +20597,383 @@
         "summary": "Create cloud connector",
         "tags": [
           "Fleet cloud connectors"
-        ]
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/fleet/cloud_connectors/{cloudConnectorId}": {
+      "delete": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
+        "operationId": "delete-fleet-cloud-connectors-cloudconnectorid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "cloudConnectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "force",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a bad request call."
+          }
+        },
+        "summary": "Delete cloud connector (supports force deletion)",
+        "tags": [
+          "Fleet cloud connectors"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.",
+        "operationId": "get-fleet-cloud-connectors-cloudconnectorid",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cloudConnectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "cloudProvider": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    },
+                    "packagePolicyCount": {
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "vars": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "cloudProvider",
+                    "vars",
+                    "packagePolicyCount",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a bad request call."
+          }
+        },
+        "summary": "Get cloud connector",
+        "tags": [
+          "Fleet cloud connectors"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
+        "operationId": "put-fleet-cloud-connectors-cloudconnectorid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "cloudConnectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "vars": {
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "maxLength": 1000,
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "frozen": {
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "maxLength": 50,
+                              "type": "string"
+                            },
+                            "value": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 1000,
+                                  "type": "string"
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "maxLength": 255,
+                                      "type": "string"
+                                    },
+                                    "isSecretRef": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "isSecretRef",
+                                    "id"
+                                  ],
+                                  "type": "object"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "cloudProvider": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    },
+                    "packagePolicyCount": {
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "vars": {
+                      "additionalProperties": {},
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "cloudProvider",
+                    "vars",
+                    "packagePolicyCount",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a bad request call."
+          }
+        },
+        "summary": "Update cloud connector",
+        "tags": [
+          "Fleet cloud connectors"
+        ],
+        "x-state": "Technical Preview"
       }
     },
     "/api/fleet/data_streams": {
