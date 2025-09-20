@@ -99,7 +99,7 @@ function string<D extends DefaultValue<string> = never>(
   return new StringType(options);
 }
 
-function uri(options?: URIOptions): Type<string> {
+function uri<D extends DefaultValue<string> = never>(options?: URIOptions<D>): URIType<D> {
   return new URIType(options);
 }
 
