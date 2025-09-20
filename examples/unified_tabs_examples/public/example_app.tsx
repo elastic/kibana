@@ -129,6 +129,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               items={managedItems}
               selectedItemId={managedSelectedItemId}
               recentlyClosedItems={[]}
+              onClearRecentlyClosed={() => {}} // not implemented in this example
               maxItemsCount={25}
               services={services}
               onChanged={(updatedState) =>

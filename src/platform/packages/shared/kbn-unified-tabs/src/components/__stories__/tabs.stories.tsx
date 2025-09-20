@@ -54,6 +54,7 @@ const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
           managedSelectedItemId: updatedState.selectedItem?.id,
         });
       }}
+      onClearRecentlyClosed={action('onClearRecentlyClosed')}
       renderContent={(item) => (
         <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
       )}

@@ -211,4 +211,47 @@ export class UnifiedTabsPageObject extends FtrService {
   public async isTabsBarVisible() {
     return await this.testSubjects.exists('unifiedTabs_tabsBar');
   }
+
+  public async openTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to open', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
+    });
+  }
+
+  public async closeTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to close', async () => {
+      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
+    });
+  }
+
+  public async getRecentlyClosedTabLabels() {
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    const labels = [];
+    for (const item of recentlyClosedItems) {
+      labels.push(await item.getVisibleText());
+    }
+    await this.closeTabsBarMenu();
+    return labels;
+  }
+
+  public async restoreRecentlyClosedTab(index: number) {
+    const currentNumberOfTabs = await this.getNumberOfTabs();
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    if (index < 0 || index >= recentlyClosedItems.length) {
+      throw new Error(`Recently closed tab index ${index} is out of bounds`);
+    }
+    await recentlyClosedItems[index].click();
+    await this.retry.waitFor('the tab to be restored', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === currentNumberOfTabs + 1;
+    });
+  }
 }
