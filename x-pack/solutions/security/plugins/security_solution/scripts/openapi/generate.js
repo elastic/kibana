@@ -31,7 +31,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/test/api_integration/services/security_solution_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/api/security_solution_api.gen.ts'
       ),
     },
   });

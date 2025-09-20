@@ -25,8 +25,8 @@ import type { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysoluti
 import type { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
 import type { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
 
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
-import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
