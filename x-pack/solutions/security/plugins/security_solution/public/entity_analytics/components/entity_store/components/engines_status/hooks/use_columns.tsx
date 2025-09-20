@@ -43,6 +43,7 @@ const RESOURCE_TO_TEXT: Record<EngineComponentResource, string> = {
   entity_definition: 'Entity Definition',
   entity_engine: 'Engine',
   index_template: 'Index Template',
+  ilm_policy: 'ILM Policy',
 };
 
 export const useColumns = (
@@ -180,6 +181,10 @@ const getResourcePath = (id: string, resource: EngineComponentResource) => {
 
   if (resource === EngineComponentResourceEnum.transform) {
     return `data/transform?_a=(transform:(queryText:'${id}'))`;
+  }
+
+  if (resource === EngineComponentResourceEnum.ilm_policy) {
+    return `data/index_lifecycle_management/policies?policy=${id}`;
   }
   return null;
 };
