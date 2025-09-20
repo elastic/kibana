@@ -30,6 +30,7 @@ export const useGetCaseConfigurationsQuery = <T,>({
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       initialData: [initialConfiguration],
+      refetchOnWindowFocus: false,
     }
   );
 };
