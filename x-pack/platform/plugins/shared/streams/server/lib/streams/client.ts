@@ -516,6 +516,8 @@ export class StreamsClient {
       'manage',
       'monitor',
       'manage_data_stream_lifecycle',
+      'read_failure_store',
+      'manage_failure_store',
     ];
     if (!isServerless) {
       REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
@@ -544,6 +546,8 @@ export class StreamsClient {
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
       // text structure is always available for the internal user, but not for the current user
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
+      read_failure_store: privileges.index[name].read_failure_store,
+      manage_failure_store: privileges.index[name].manage_failure_store,
     };
   }
 

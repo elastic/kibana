@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -107,10 +107,13 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   onSaveModal,
   failureStoreProps,
 }) => {
+  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const onSubmitForm = async () => {
+    setIsSaveInProgress(true);
     const { isValid, data } = await form.submit();
 
     if (!isValid) {
+      setIsSaveInProgress(false);
       return;
     }
 
@@ -121,7 +124,8 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         newFailureStoreConfig.customRetentionPeriod = `${data.retentionPeriodValue}${data.retentionPeriodUnit}`;
       }
     }
-    onSaveModal(newFailureStoreConfig);
+    await onSaveModal(newFailureStoreConfig);
+    setIsSaveInProgress(false);
   };
 
   const modalTitleId = useGeneratedHtmlId();
@@ -284,7 +288,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButton
           fill
           type="submit"
-          isLoading={false}
+          isLoading={isSaveInProgress}
           data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}

@@ -28,25 +28,55 @@ import { formatBytes } from '../helpers/format_bytes';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
+import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 
-interface ChartComponentProps {
+interface BaseChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
 }
+
+interface MainStreamChartProps extends BaseChartComponentProps {
+  stats?: DataStreamStats;
+  isFailureStore?: false;
+}
+
+interface FailureStoreChartProps extends BaseChartComponentProps {
+  stats?: FailureStoreStats;
+  isFailureStore: true;
+}
+
+type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
+type ChartPhasesComponentProps = MainStreamChartProps | FailureStoreChartProps;
 
 export function ChartBarSeries({
   definition,
   stats,
   timeState,
   isLoadingStats,
+  isFailureStore = false,
 }: ChartComponentProps) {
+  // Use the appropriate hook based on isFailureStore flag
+  const mainStreamResult = useIngestionRate({
+    definition,
+    stats: !isFailureStore ? (stats as DataStreamStats) : undefined,
+    timeState,
+  });
+
+  const failureStoreResult = useIngestionRate({
+    definition,
+    stats: isFailureStore ? (stats as FailureStoreStats) : undefined,
+    timeState,
+    isFailureStore: true,
+  });
+
   const {
     ingestionRate,
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
-  } = useIngestionRate({ definition, stats, timeState });
+  } = isFailureStore ? failureStoreResult : mainStreamResult;
+
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
@@ -62,8 +92,10 @@ export function ChartBarSeries({
         <BarSeries
           id="ingestionRate"
           name="Ingestion rate"
-          data={ingestionRate.buckets}
-          color={euiTheme.colors.severity.success}
+          data={ingestionRate.buckets as Array<{ key: any; value: any }>}
+          color={
+            isFailureStore ? euiTheme.colors.severity.danger : euiTheme.colors.severity.success
+          }
           // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           xAccessor={'key'}
@@ -87,17 +119,17 @@ export function ChartBarSeries({
   );
 }
 
-export function ChartBarPhasesSeries({
-  definition,
-  stats,
-  timeState,
+function ChartBarPhasesSeriesBase({
+  ingestionRate,
+  isLoadingIngestionRate,
+  ingestionRateError,
   isLoadingStats,
-}: ChartComponentProps) {
-  const {
-    ingestionRate,
-    isLoading: isLoadingIngestionRate,
-    error: ingestionRateError,
-  } = useIngestionRatePerTier({ definition, stats, timeState });
+}: {
+  ingestionRate: any;
+  isLoadingIngestionRate: boolean;
+  ingestionRateError: Error | undefined;
+  isLoadingStats: boolean;
+}) {
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const chartBaseTheme = useElasticChartsTheme();
 
@@ -125,7 +157,7 @@ export function ChartBarPhasesSeries({
                 id={`ingestionRate-${tier}`}
                 key={`ingestionRate-${tier}`}
                 name={capitalize(tier)}
-                data={buckets}
+                data={buckets as Array<{ key: any; value: any }>}
                 color={ilmPhases[tier as PhaseName].color}
                 // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
@@ -149,6 +181,46 @@ export function ChartBarPhasesSeries({
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
+  );
+}
+
+export function ChartBarPhasesSeries({
+  definition,
+  stats,
+  timeState,
+  isLoadingStats,
+  isFailureStore = false,
+}: ChartPhasesComponentProps) {
+  const { timeState: defaultTimeState } = useTimefilter();
+  const currentTimeState = timeState || defaultTimeState;
+
+  // Use the appropriate hook based on isFailureStore flag
+  const mainStreamResult = useIngestionRatePerTier({
+    definition,
+    stats: !isFailureStore ? (stats as DataStreamStats) : undefined,
+    timeState: currentTimeState,
+  });
+
+  const failureStoreResult = useIngestionRatePerTier({
+    definition,
+    stats: isFailureStore ? (stats as FailureStoreStats) : undefined,
+    timeState: currentTimeState,
+    isFailureStore: true,
+  });
+
+  const {
+    ingestionRate,
+    isLoading: isLoadingIngestionRate,
+    error: ingestionRateError,
+  } = isFailureStore ? failureStoreResult : mainStreamResult;
+
+  return (
+    <ChartBarPhasesSeriesBase
+      ingestionRate={ingestionRate}
+      isLoadingIngestionRate={isLoadingIngestionRate}
+      ingestionRateError={ingestionRateError}
+      isLoadingStats={isLoadingStats}
+    />
   );
 }
 
