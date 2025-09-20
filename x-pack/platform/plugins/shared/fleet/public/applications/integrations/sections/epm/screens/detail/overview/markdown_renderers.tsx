@@ -6,19 +6,20 @@
  */
 
 import {
+  EuiAccordion,
   EuiCode,
   EuiCodeBlock,
   EuiLink,
-  EuiTableHeaderCell,
+  EuiSpacer,
   EuiTable,
+  EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiAccordion,
-  EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
 import type { MutableRefObject } from 'react';
-import type { TransformOptions } from 'react-markdown';
+import React from 'react';
+import type { Components } from 'react-markdown';
+
 import styled from 'styled-components';
 
 import { getAnchorId } from './overview';
@@ -55,8 +56,9 @@ const StyledH6 = styled.h5`
   Refs passed from the parent component are needed to handle scrolling on selected header in the overviewPage
 */
 export const markdownRenderers = (
-  refs: MutableRefObject<Map<string, HTMLDivElement | null>>
-): TransformOptions['components'] => {
+  refs: MutableRefObject<Map<string, HTMLDivElement | null>>,
+  transformImageUri?: (uri: string) => string
+): Components => {
   return {
     table: ({ children }) => <EuiTable>{children}</EuiTable>,
     tr: ({ children }) => <EuiTableRow>{children}</EuiTableRow>,
@@ -64,24 +66,36 @@ export const markdownRenderers = (
     td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
     // the headings used in markdown don't match our page so mapping them to the appropriate one
     h1: ({ children, node }) => {
-      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      const id = getAnchorId(
+        React.Children.toArray(children)[0]?.toString(),
+        node?.position?.start.line
+      );
       return <StyledH3 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH3>;
     },
     h2: ({ children, node }) => {
-      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      const id = getAnchorId(
+        React.Children.toArray(children)[0]?.toString(),
+        node?.position?.start.line
+      );
       return <StyledH4 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH4>;
     },
     h3: ({ children, node }) => {
-      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      const id = getAnchorId(
+        React.Children.toArray(children)[0]?.toString(),
+        node?.position?.start.line
+      );
       return <StyledH5 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH5>;
     },
     h4: ({ children, node }) => {
-      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      const id = getAnchorId(
+        React.Children.toArray(children)[0]?.toString(),
+        node?.position?.start.line
+      );
       return <StyledH6 ref={(element) => refs.current.set(`${id}`, element)}>{children}</StyledH6>;
     },
     h5: ({ children }) => <h6>{children}</h6>,
     h6: ({ children }) => <h6>{children}</h6>,
-    a: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+    a: ({ children, href }) => (
       <EuiLink
         href={href}
         target="_blank"
@@ -90,9 +104,12 @@ export const markdownRenderers = (
         {children}
       </EuiLink>
     ),
-    code: ({ className, children, inline }) => {
+    code: ({ className, children, node }) => {
+      if (!node || !children) {
+        return;
+      }
       let parsedLang = /language-(\w+)/.exec(className || '')?.[1] ?? '';
-
+      const inline = node?.position?.start.line === node?.position?.end.line;
       // Some integrations export code block content that includes language tags that have since
       // been removed or deprecated in `prism.js`, the upstream depedency that handles syntax highlighting
       // in EuiCodeBlock components
@@ -114,7 +131,9 @@ export const markdownRenderers = (
     img: (
       props: React.ClassAttributes<HTMLImageElement> & React.ImgHTMLAttributes<HTMLImageElement>
     ) => {
-      return <img style={{ maxWidth: '100%' }} {...props} alt={props.alt} />;
+      const transformedSrc =
+        transformImageUri && props.src ? transformImageUri(props.src) : props.src;
+      return <img style={{ maxWidth: '100%' }} {...props} src={transformedSrc} alt={props.alt} />;
     },
     details: ({ children, node }) => {
       const [summaryNode, ...bodyNodes] = React.Children.toArray(children).reduce<
@@ -133,7 +152,10 @@ export const markdownRenderers = (
         ? React.Children.toArray(summaryNode.props.children).join('')
         : '';
 
-      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+      const id = getAnchorId(
+        React.Children.toArray(children)[0]?.toString(),
+        node?.position?.start.line
+      );
 
       return (
         <>
