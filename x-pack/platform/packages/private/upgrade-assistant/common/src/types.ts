@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export * from './src/constants';
-export * from './src/types';
-export { Version } from './src/version';
+export enum ReindexStatus {
+  inProgress,
+  completed,
+  failed,
+  paused,
+  cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
+  fetchFailed,
+}
