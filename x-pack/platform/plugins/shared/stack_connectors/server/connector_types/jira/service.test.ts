@@ -15,10 +15,12 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
   response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
+  status?: number;
 }
 
 jest.mock('axios');
@@ -204,7 +206,7 @@ describe('Jira service', () => {
         throw error;
       });
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Jira]: Unable to get incident with id 1. Error: An error has occurred Reason: Required field'
+        '[Action][Jira]: Unable to get incident with id 1. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -214,7 +216,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Jira]: Unable to get incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json Reason: unknown: errorResponse was null'
+        '[Action][Jira]: Unable to get incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
 
@@ -222,8 +224,20 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Jira]: Unable to get incident with id 1. Error: Response is missing at least one of the expected fields: id,key Reason: unknown: errorResponse was null'
+        '[Action][Jira]: Unable to get incident with id 1. Error: Response is missing at least one of the expected fields: id,key. Reason: unknown: errorResponse was null'
       );
+    });
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getIncident('1');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -437,6 +451,19 @@ describe('Jira service', () => {
       );
     });
 
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.createIncident(incident);
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
+
     describe('otherFields', () => {
       test('it should call request with correct arguments', async () => {
         const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
@@ -570,6 +597,19 @@ describe('Jira service', () => {
       );
     });
 
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.updateIncident(incident);
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
+
     describe('otherFields', () => {
       const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
 
@@ -694,6 +734,19 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response is missing at least one of the expected fields: id,created. Reason: unknown: errorResponse was null'
       );
     });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.createComment(commentReq);
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('getIssueTypes', () => {
@@ -782,6 +835,19 @@ describe('Jira service', () => {
         url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
         connectorUsageCollector,
       });
+    });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getIssueTypes();
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -932,6 +998,19 @@ describe('Jira service', () => {
         },
       });
     });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getFieldsByIssueType('10006');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('getIssues', () => {
@@ -1069,6 +1148,19 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get issues. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getIssues('<hj>"');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('getIssue', () => {
@@ -1128,6 +1220,19 @@ describe('Jira service', () => {
       await expect(service.getIssue('Test title')).rejects.toThrow(
         '[Action][Jira]: Unable to get issue with id Test title. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
+    });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getIssue('RJ-107');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -1222,6 +1327,19 @@ describe('Jira service', () => {
       await expect(service.getFields()).rejects.toThrow(
         '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Required field'
       );
+    });
+
+    it('should throw a user error in case of 429 status', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('Too Many Requests');
+        error.status = 429;
+        throw error;
+      });
+      try {
+        await service.getFields();
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 });

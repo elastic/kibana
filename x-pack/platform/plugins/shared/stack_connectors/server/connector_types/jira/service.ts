@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import type { AxiosError } from 'axios';
+import axios, { HttpStatusCode } from 'axios';
 import { isEmpty } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
@@ -17,6 +18,8 @@ import {
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { createTaskRunError } from '@kbn/task-manager-plugin/server';
 import type {
   CreateCommentParams,
   CreateIncidentParams,
@@ -175,6 +178,22 @@ export const createExternalService = (
     title: issue.fields?.summary ?? null,
   });
 
+  const wrapError = (error: AxiosError, message: string) => {
+    return createTaskRunError(
+      new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `${message}. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data as ResponseError
+          )}`
+        )
+      ),
+      error.status === HttpStatusCode.TooManyRequests
+        ? TaskErrorSource.USER
+        : TaskErrorSource.FRAMEWORK
+    );
+  };
+
   const getIncident = async (id: string) => {
     try {
       const res = await request({
@@ -194,14 +213,7 @@ export const createExternalService = (
 
       return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get incident with id ${id}. Error: ${
-            error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw wrapError(error, `Unable to get incident with id ${id}`);
     }
   };
 
@@ -253,14 +265,7 @@ export const createExternalService = (
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw wrapError(error, `Unable to create incident`);
     }
   };
 
@@ -299,14 +304,7 @@ export const createExternalService = (
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to update incident with id ${incidentId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw wrapError(error, `Unable to update incident with id ${incidentId}`);
     }
   };
 
@@ -336,14 +334,7 @@ export const createExternalService = (
         pushedDate: new Date(res.data.created).toISOString(),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw wrapError(error, `Unable to create comment at incident with id ${incidentId}`);
     }
   };
 
@@ -366,14 +357,7 @@ export const createExternalService = (
       const { issueTypes, values } = res.data;
       return normalizeIssueTypes(issueTypes || values);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw wrapError(error, `Unable to get issue types`);
     }
   };
 
@@ -402,14 +386,7 @@ export const createExternalService = (
       );
       return normalizeFields(fields);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw wrapError(error, `Unable to get fields`);
     }
   };
 
@@ -459,14 +436,7 @@ export const createExternalService = (
 
       return normalizeSearchResults(res.data?.issues ?? []);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw wrapError(error, `Unable to get issues`);
     }
   };
 
@@ -488,14 +458,7 @@ export const createExternalService = (
 
       return normalizeIssue(res.data ?? {});
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw wrapError(error, `Unable to get issue with id ${id}`);
     }
   };
 
