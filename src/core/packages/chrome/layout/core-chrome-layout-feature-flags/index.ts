@@ -18,7 +18,7 @@ export const LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY = 'core.chrome.projectSideN
 export const getSideNavVersion = (featureFlags: FeatureFlagsStart): LayoutProjectSideNavVersion => {
   const featureFlag = featureFlags.getStringValue<LayoutProjectSideNavVersion>(
     LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-    'v1'
+    'v2'
   );
 
   // both is temporarily supported hidden option to allow for a smooth transition
