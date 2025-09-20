@@ -158,6 +158,38 @@ describe('agentless_policy_helper', () => {
 
       expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(false);
     });
+
+    it('should return true if the specified integration has agentless inputs but no explicit deployment_modes (backward compatibility)', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            inputs: [
+              {
+                type: 'logs',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'metrics',
+                deployment_modes: ['default'],
+              },
+            ],
+          },
+          {
+            name: 'template2',
+            inputs: [
+              {
+                type: 'filebeat',
+                deployment_modes: ['default'],
+              },
+            ],
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(true);
+      expect(isAgentlessIntegration(packageInfo, 'template2')).toBe(false);
+    });
   });
 
   describe('getAgentlessAgentPolicyNameFromPackagePolicyName', () => {
@@ -430,7 +462,7 @@ describe('agentless_policy_helper', () => {
       ).toBe(true);
     });
 
-    it('should return false for input without a policy_template deployment_mode enabled for agentless when the requested mode is agentless', () => {
+    it('should return true for input with agentless deployment_modes when policy_template has no explicit deployment_mode (backward compatibility)', () => {
       const packageInfoWithoutPolicyTemplateDeploymentModes = {
         name: 'test-package',
         version: '1.0.0',
@@ -451,7 +483,7 @@ describe('agentless_policy_helper', () => {
           'agentless',
           packageInfoWithoutPolicyTemplateDeploymentModes
         )
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('should return false for input with a policy_template deployment mode that overrides the requested mode', () => {
