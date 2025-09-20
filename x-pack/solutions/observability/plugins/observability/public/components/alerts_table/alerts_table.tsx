@@ -9,6 +9,7 @@ import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { AlertsTableExpandedAlertView } from '../alerts_flyout/alerts_table_expanded_alert_view';
 import type { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
@@ -19,9 +20,6 @@ import type {
   ObservabilityAlertsTableProps,
 } from './types';
 import { AlertsTableCellValue } from './common/cell_value';
-import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
-import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
-import { AlertsFlyoutFooter } from '../alerts_flyout/alerts_flyout_footer';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
@@ -48,7 +46,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-      initialSort={initialSort}
+      sort={initialSort}
       casesConfiguration={caseConfiguration}
       additionalContext={{
         observabilityRuleTypeRegistry:
@@ -58,9 +56,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
       actionsColumnWidth={120}
-      renderFlyoutHeader={AlertsFlyoutHeader}
-      renderFlyoutBody={AlertsFlyoutBody}
-      renderFlyoutFooter={AlertsFlyoutFooter}
+      renderExpandedAlertView={AlertsTableExpandedAlertView}
       showAlertStatusWithFlapping
       {...props}
     />
