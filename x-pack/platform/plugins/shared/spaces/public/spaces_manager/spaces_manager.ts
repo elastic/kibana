@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryClient } from '@tanstack/react-query';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skipWhile } from 'rxjs';
 
@@ -20,6 +21,7 @@ import {
   type Space,
 } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+import { SPACES_QUERY_KEY } from '../nav_control/hooks/use_spaces';
 import type { SpaceContentTypeSummaryItem } from '../types';
 
 interface SavedObjectTarget {
@@ -37,12 +39,24 @@ export class SpacesManager {
 
   private readonly _onActiveSpaceChange$: Observable<Space>;
 
+  private queryClient?: QueryClient;
+
   constructor(private readonly http: HttpSetup) {
     this.serverBasePath = http.basePath.serverBasePath;
 
     this._onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
+  }
+
+  private invalidateSpacesCache(): void {
+    if (this.queryClient) {
+      this.queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
+    }
+  }
+
+  public setQueryClient(queryClient: QueryClient): void {
+    this.queryClient = queryClient;
   }
 
   public get onActiveSpaceChange$() {
@@ -77,6 +91,7 @@ export class SpacesManager {
       body: JSON.stringify(space),
       version,
     });
+    this.invalidateSpacesCache();
   }
 
   public async updateSpace(space: Space) {
@@ -93,10 +108,13 @@ export class SpacesManager {
     if (space.id === activeSpaceId) {
       this.refreshActiveSpace();
     }
+
+    this.invalidateSpacesCache();
   }
 
   public async deleteSpace(space: Space) {
     await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`, { version });
+    this.invalidateSpacesCache();
   }
 
   public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
