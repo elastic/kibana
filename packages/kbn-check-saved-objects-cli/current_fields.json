@@ -817,6 +817,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",

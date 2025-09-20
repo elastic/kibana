@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { maintenanceWindowCategoryIdTypes, maintenanceWindowStatus } from './v1';
+export * from './v1';
