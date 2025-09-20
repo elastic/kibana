@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { offeringBasedSchema, schema } from '../..';
-import type { Props, TypeOf } from './object_type';
+import type { ObjectRawProps, TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -185,7 +185,7 @@ describe('#getPropSchemas', () => {
     const props = {
       str: schema.string(),
       num: schema.number(),
-    } satisfies Props;
+    } satisfies ObjectRawProps;
     const type = schema.object(props);
 
     expect(type.getPropSchemas()).not.toBe(props);

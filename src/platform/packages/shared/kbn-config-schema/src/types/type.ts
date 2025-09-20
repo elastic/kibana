@@ -21,6 +21,11 @@ import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
 /**
+ * Generic schema type
+ */
+export type SomeType = Type<any, any, any>;
+
+/**
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
@@ -40,10 +45,25 @@ export interface TypeMeta {
   'x-discontinued'?: string;
 }
 
-export interface TypeOptions<T> {
-  defaultValue?: T | Reference<T> | (() => T);
-  validate?: (value: T) => string | void;
-  meta?: TypeMeta;
+export type DefaultValue<T> = T | (() => T) | Reference<T>;
+
+export interface TypeOptions<
+  Output,
+  Input = Output,
+  D extends DefaultValue<Input> = never,
+  M extends Record<string, any> = {}
+> {
+  /**
+   * Default value of type
+   */
+  defaultValue?: D;
+  /**
+   * Supplemental validation, only called if primary validation is successful.
+   *
+   * @returns {string | void} a string error message if the validation failed, or `undefined` if successful.
+   */
+  validate?: (value: Output) => string | void;
+  meta?: TypeMeta & M;
 }
 
 export interface SchemaStructureEntry {
@@ -96,11 +116,10 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<V> {
-  // This is just to enable the `TypeOf` helper, and because TypeScript would
-  // fail if it wasn't initialized we use a "trick" to which basically just
-  // sets the value to `null` while still keeping the type.
-  public readonly type: V = null! as V;
+export abstract class Type<Output = any, Input = Output, D extends DefaultValue<Input> = never> {
+  public readonly type!: Output;
+  public readonly _output!: Output;
+  public readonly _input!: [D] extends [never] ? Input : Input | undefined;
 
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
@@ -111,7 +130,7 @@ export abstract class Type<V> {
    */
   protected readonly internalSchema: Schema;
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: Schema, options: TypeOptions<Output, Input, D> = {}) {
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -151,7 +170,7 @@ export abstract class Type<V> {
     this.internalSchema = schema;
   }
 
-  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
+  public extendsDeep(newOptions: ExtendsDeepOptions): Type<Output, Input, D> {
     return this;
   }
 
@@ -164,7 +183,7 @@ export abstract class Type<V> {
     context: Record<string, unknown> = {},
     namespace?: string,
     validationOptions?: SchemaValidationOptions
-  ): V {
+  ): Output {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',

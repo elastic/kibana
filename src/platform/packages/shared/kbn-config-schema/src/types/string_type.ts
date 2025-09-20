@@ -9,20 +9,20 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type, convertValidationFunction } from './type';
 
 import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 
-export type StringOptions = TypeOptions<string> & {
+export type StringOptions<D extends DefaultValue<string>> = TypeOptions<string, string, D> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
   coerceFromNumber?: boolean;
 };
 
-export class StringType extends Type<string> {
-  constructor(options: StringOptions = {}) {
+export class StringType<D extends DefaultValue<string>> extends Type<string, string, D> {
+  constructor(options: StringOptions<D> = {}) {
     // We want to allow empty strings, however calling `allow('')` causes
     // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
