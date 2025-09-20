@@ -49,10 +49,15 @@ async function updatePackageJsonEngines(log: ToolingLog, rootDir: string, nodeVe
   }
 }
 
-async function writeVersionFile(log: ToolingLog, path: string, nodeVersion: string) {
+async function writeVersionFile(
+  log: ToolingLog,
+  path: string,
+  nodeVersion: string,
+  trim: boolean = false
+) {
   const filename = Path.basename(path);
   log.verbose(`Updating ${filename} with current node version v${nodeVersion}`);
-  await Fs.writeFile(path, nodeVersion + '\n', 'utf8').catch((error) => {
+  await Fs.writeFile(path, nodeVersion + (trim ? '' : '\n'), 'utf8').catch((error) => {
     throw new Error(
       `Failed to update ${filename} with current node version in ${Path.dirname(path)}`,
       { cause: error }
@@ -69,8 +74,8 @@ export async function bootstrap({ dir, log }: CheckoutAndBootstrapOptions) {
 
   await updatePackageJsonEngines(log, dir, currentNodeVersion);
 
-  await writeVersionFile(log, Path.join(dir, '.node-version'), currentNodeVersion);
-  await writeVersionFile(log, Path.join(dir, '.nvmrc'), currentNodeVersion);
+  await writeVersionFile(log, Path.join(dir, '.node-version'), currentNodeVersion, false);
+  await writeVersionFile(log, Path.join(dir, '.nvmrc'), currentNodeVersion, true);
 
   // set ignore-engines to true to prevent validation errors from other spawned processes
   await exec(`yarn config set ignore-engines true`, {

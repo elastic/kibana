@@ -12,6 +12,7 @@ import { ensureClonedRepo } from './ensure_cloned_repo';
 import { WorkspaceController } from './workspace_controller';
 import type { WorktreeWorkspace } from './worktree_workspace';
 import type { WorkspaceSettings } from './types';
+import { getSha } from './utils/get_sha';
 
 export async function activateWorktree({
   log,
@@ -31,7 +32,7 @@ export async function activateWorktree({
 
   const workspaceController = new WorkspaceController(context);
 
-  const workspace = await workspaceController.activateWorktree(ref);
+  const workspace = await workspaceController.activateWorktree(await getSha(context.repoRoot, ref));
 
   return workspace;
 }
