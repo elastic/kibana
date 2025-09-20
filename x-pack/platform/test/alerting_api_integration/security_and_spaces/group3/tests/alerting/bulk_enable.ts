@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_UUID } from '@kbn/rule-data-utils';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -22,9 +24,12 @@ const defaultSuccessfulResponse = {
   task_ids_failed_to_be_enabled: [],
 };
 
+const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('bulkEnableRules', () => {
@@ -746,6 +751,112 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     }
+
+    describe('Clearing flapping tests', () => {
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: alertAsDataIndex,
+          query: {
+            match_all: {},
+          },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        await objectRemover.removeAll();
+      });
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should clear flapping history when enabling rules', async () => {
+        const rule1 = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.always-firing-alert-as-data',
+              schedule: { interval: '24h' },
+              throttle: undefined,
+              notify_when: undefined,
+              params: {
+                index: ES_TEST_INDEX_NAME,
+                reference: 'test',
+              },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule1.body.id, 'rule', 'alerting');
+
+        const rule2 = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.always-firing-alert-as-data',
+              schedule: { interval: '24h' },
+              throttle: undefined,
+              notify_when: undefined,
+              params: {
+                index: ES_TEST_INDEX_NAME,
+                reference: 'test',
+              },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule2.body.id, 'rule', 'alerting');
+
+        let ids: string[] = [];
+        await retry.try(async () => {
+          const result = await es.search({
+            index: alertAsDataIndex,
+            query: {
+              match_all: {},
+            },
+          });
+          expect(result.hits.hits.length).eql(4);
+          result.hits.hits.forEach((alert: any) => {
+            expect(alert._source[ALERT_FLAPPING]).eql(false);
+            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([true]);
+          });
+          ids = result.hits.hits.map((alert: any) => alert._source[ALERT_UUID]);
+        });
+
+        await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({ ids: [rule1.body.id, rule2.body.id] })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({ ids: [rule1.body.id, rule2.body.id] })
+          .expect(200);
+
+        await retry.try(async () => {
+          const result = await es.search({
+            index: alertAsDataIndex,
+            query: {
+              bool: {
+                must: {
+                  terms: {
+                    [ALERT_UUID]: ids,
+                  },
+                },
+              },
+            },
+          });
+
+          expect(result.hits.hits.length).eql(4);
+          result.hits.hits.forEach((alert: any) => {
+            expect(alert._source[ALERT_FLAPPING]).eql(false);
+            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([]);
+          });
+        });
+      });
+    });
 
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
