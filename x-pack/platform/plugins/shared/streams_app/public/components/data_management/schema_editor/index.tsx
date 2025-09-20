@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPortal, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
+import { getRegularEcsField } from '@kbn/streams-schema';
 import { useControls } from './hooks/use_controls';
-import type { SchemaEditorProps } from './types';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { SchemaEditorProps, SchemaField } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
@@ -28,6 +31,43 @@ export function SchemaEditor({
   withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
+  const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
+  const {
+    dependencies: {
+      start: { fieldsMetadata },
+    },
+  } = useKibana();
+
+  const getRecommendations = React.useCallback(async () => {
+    setIsLoadingRecommendations(true);
+    const client = await fieldsMetadata.getClient();
+    const ecsToOriginalField = selectedFields.reduce((acc, name) => {
+      acc[getRegularEcsField(name)] = name;
+      return acc;
+    }, {} as Record<string, string>);
+
+    try {
+      const response = await client.find({
+        attributes: ['type'],
+        fieldNames: Object.keys(ecsToOriginalField),
+      });
+
+      Object.entries(response.fields).forEach(([key, value]) => {
+        const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
+        const type = value.type ?? originalField.type;
+        onFieldUpdate({
+          ...originalField,
+          type,
+          status: type ? 'mapped' : 'unmapped',
+        } as SchemaField);
+      });
+      setSelectedFields([]);
+    } catch (err) {
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
+  }, [selectedFields]);
 
   return (
     <SchemaEditorContextProvider
@@ -58,6 +98,47 @@ export function SchemaEditor({
         {withControls && (
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>{selectedFields.length} selected</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              type="single"
+              legend=""
+              options={[
+                {
+                  id: 'guess',
+                  label: i18n.translate('dataManagement.schemaEditor.guessType', {
+                    defaultMessage: 'Guess type',
+                  }),
+                  isLoading: isLoadingRecommendations,
+                },
+                {
+                  id: 'unmap',
+                  label: i18n.translate('dataManagement.schemaEditor.removeType', {
+                    defaultMessage: 'Remove type (unmap)',
+                  }),
+                },
+              ]}
+              onChange={(id) => {
+                if (id === 'guess') {
+                  getRecommendations();
+                } else if (id === 'unmap') {
+                  selectedFields.forEach((fieldName) => {
+                    const field = fields.find(({ name }) => name === fieldName)!;
+                    onFieldUpdate({
+                      name: field.name,
+                      parent: field.parent,
+                      status: 'unmapped',
+                    } as SchemaField);
+                  });
+
+                  setSelectedFields([]);
+                }
+              }}
+              idSelected=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <FieldsTable
           isLoading={isLoading ?? false}
           controls={controls}
@@ -66,6 +147,16 @@ export function SchemaEditor({
           fields={fields}
           stream={stream}
           withTableActions={withTableActions}
+          selectedFields={selectedFields}
+          onFieldSelection={(name, checked) => {
+            setSelectedFields((selection) => {
+              if (checked) {
+                return [...selection, name];
+              } else {
+                return selection.filter((field) => field !== name);
+              }
+            });
+          }}
         />
       </EuiFlexGroup>
     </SchemaEditorContextProvider>
