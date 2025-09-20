@@ -57,6 +57,27 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
     );
   }
 
+  public getInputSchema(): MapOfType<K, V> | import('./maybe_type').MaybeType<Map<K, V>> {
+    // For maps, create a new map with the input schemas of key and value types
+    const inputKeyType = this.keyType.getInputSchema();
+    const inputValueType = this.valueType.getInputSchema();
+    
+    // Create new options without defaultValue to avoid circular default handling
+    const { defaultValue, ...optionsWithoutDefault } = this.mapOptions;
+    const inputMapType = new MapOfType(
+      inputKeyType as Type<K>, 
+      inputValueType as Type<V>, 
+      optionsWithoutDefault
+    );
+    
+    // If this map has a default value, wrap it in MaybeType
+    if (defaultValue !== undefined) {
+      return new (require('./maybe_type').MaybeType)(inputMapType);
+    }
+    
+    return inputMapType;
+  }
+
   protected handleError(
     type: string,
     { entryKey, reason, value }: Record<string, any>,

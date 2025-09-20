@@ -36,6 +36,10 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
     );
   }
 
+  public getInputSchema() {
+    return new UnionType(this.unionTypes.map((type) => type.getInputSchema()), this.typeOptions);
+  }
+
   protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
