@@ -25,6 +25,8 @@ interface RouterProps {
   history: History;
 }
 
+const features = { observables: { enabled: true, autoExtract: true } } as const;
+
 const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
@@ -51,7 +53,7 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
               component={AlertDetailsRedirect}
             />
             <Route path="/">
-              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions} features={features}>
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>

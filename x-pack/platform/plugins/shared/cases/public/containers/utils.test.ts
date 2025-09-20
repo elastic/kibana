@@ -25,6 +25,7 @@ const caseBeforeUpdate = {
   ],
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
 } as CaseUI;
 
@@ -56,10 +57,23 @@ describe('utils', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
         syncAlerts: true,
+        extractObservables: false,
       });
 
       expect(toast).toEqual({
         title: 'Alerts in "My case" have been synced',
+        className: 'eui-textBreakWord',
+      });
+    });
+
+    it('creates the correct toast when extract observables is turned on', () => {
+      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
+        syncAlerts: false,
+        extractObservables: true,
+      });
+
+      expect(toast).toEqual({
+        title: 'Auto-extract observables in "My case" have been updated',
         className: 'eui-textBreakWord',
       });
     });
@@ -72,6 +86,7 @@ describe('utils', () => {
         'settings',
         {
           syncAlerts: true,
+          extractObservables: false,
         }
       );
 
@@ -85,6 +100,7 @@ describe('utils', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
         syncAlerts: false,
+        extractObservables: false,
       });
 
       expect(toast).toEqual({
@@ -112,7 +128,7 @@ describe('utils', () => {
     it('creates the correct toast when the status change, case has alerts, and sync alerts is off', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(
-        { ...caseBeforeUpdate, settings: { syncAlerts: false } },
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: true } },
         caseAfterUpdate,
         'status',
         'closed'

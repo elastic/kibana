@@ -24,6 +24,7 @@ export interface CreateCaseParams {
   };
   settings?: {
     syncAlerts: boolean;
+    extractObservables: boolean;
   };
   owner?: string;
   category: string | null;

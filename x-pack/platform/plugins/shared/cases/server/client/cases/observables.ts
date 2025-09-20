@@ -16,6 +16,9 @@ import {
   type AddObservableRequest,
   type UpdateObservableRequest,
   UpdateObservableRequestRt,
+  type BulkAddObservablesRequest,
+  BulkAddObservablesRequestRt,
+  type ObservablePost,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
@@ -239,5 +242,78 @@ export const deleteObservable = async (
     });
   } catch (error) {
     throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
+  }
+};
+
+export const bulkAddObservables = async (
+  params: BulkAddObservablesRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+) => {
+  const {
+    services: { caseService, licensingService },
+    authorization,
+  } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+
+  try {
+    const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
+    const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
+    await ensureUpdateAuthorized(authorization, retrievedCase);
+
+    await Promise.all(
+      params.observables.map((observable: ObservablePost) =>
+        validateObservableTypeKeyExists(casesClient, {
+          caseOwner: retrievedCase.attributes.owner,
+          observableTypeKey: observable.typeKey,
+        })
+      )
+    );
+
+    const currentObservables = retrievedCase.attributes.observables ?? [];
+    const updatedObservables = [...currentObservables];
+
+    paramArgs.observables.forEach((observable) => {
+      const isExistingObservable = updatedObservables.some((obs) => obs.value === observable.value);
+      if (!isExistingObservable) {
+        updatedObservables.push({
+          ...observable,
+          id: v4(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    });
+    const finalObservables = updatedObservables.slice(0, MAX_OBSERVABLES_PER_CASE);
+
+    const updatedCase = await caseService.patchCase({
+      caseId: retrievedCase.id,
+      originalCase: retrievedCase,
+      updatedAttributes: {
+        observables: finalObservables,
+      },
+    });
+
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...retrievedCase,
+        ...updatedCase,
+        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
+        references: retrievedCase.references,
+      },
+    });
+
+    return decodeOrThrow(CaseRt)(res);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to add observable: ${error}`);
   }
 };

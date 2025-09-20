@@ -98,6 +98,7 @@ const basicCase: Case = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -150,6 +151,7 @@ describe('CasePostRequestRt', () => {
     },
     settings: {
       syncAlerts: true,
+      extractObservables: true,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,

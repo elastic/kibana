@@ -115,6 +115,21 @@ export const getPayload = (
    */
 
   const { id, ...noneConnector } = getNoneCaseConnector();
+
+  let migratedSettings = {};
+  if (isEmpty(payload.settings)) {
+    migratedSettings = {
+      syncAlerts: true,
+      extractObservables: false,
+    };
+  } else {
+    const settings = payload.settings as Record<string, unknown>;
+    migratedSettings = {
+      syncAlerts: settings.syncAlerts ?? true,
+      extractObservables: settings.extractObservables ?? false,
+    };
+  }
+
   return {
     ...payload,
     ...(payload.connector == null &&
@@ -124,8 +139,7 @@ export const getPayload = (
     ...(isEmpty(payload.status) &&
       type === UserActionTypes.create_case && { status: CaseStatuses.open }),
     ...(type === UserActionTypes.create_case && isEmpty(payload.owner) && { owner }),
-    ...(type === UserActionTypes.create_case &&
-      isEmpty(payload.settings) && { settings: { syncAlerts: true } }),
+    ...(type === UserActionTypes.create_case && { settings: migratedSettings }),
   };
 };
 
