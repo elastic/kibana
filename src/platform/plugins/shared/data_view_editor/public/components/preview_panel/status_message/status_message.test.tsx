@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { StatusMessage } from '.';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import { IntlProvider } from 'react-intl';
 
 const tagsPartial = {
   tags: [],
@@ -27,17 +28,20 @@ const matchedIndices = {
 };
 
 describe('StatusMessage', () => {
+  const Wrapper = (props) => <IntlProvider locale="en">{props.children}</IntlProvider>;
+
   it('should render without a query', () => {
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={matchedIndices}
         query={''}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should render with exact matches', () => {
@@ -46,29 +50,31 @@ describe('StatusMessage', () => {
       exactMatchedIndices: [{ name: 'kibana', ...tagsPartial }] as unknown as MatchedItem[],
     };
 
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={localMatchedIndices}
         query={'k*'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should render with partial matches', () => {
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={matchedIndices}
         query={'k'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should render with no partial matches', () => {
@@ -77,20 +83,21 @@ describe('StatusMessage', () => {
       partialMatchedIndices: [],
     };
 
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={localMatchedIndices}
         query={'k'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should show that system indices exist', () => {
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={{
           allIndices: [],
@@ -101,14 +108,15 @@ describe('StatusMessage', () => {
         isIncludingSystemIndices={false}
         query={''}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should show that no indices exist', () => {
-    const component = shallow(
+    const { container } = render(
       <StatusMessage
         matchedIndices={{
           allIndices: [],
@@ -119,9 +127,10 @@ describe('StatusMessage', () => {
         isIncludingSystemIndices={true}
         query={''}
         showSystemIndices={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
