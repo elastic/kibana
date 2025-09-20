@@ -77,7 +77,7 @@ export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
-function any(options?: TypeOptions<any>) {
+function any<D extends DefaultValue<any> = never>(options?: TypeOptions<any, any, D>): AnyType<D> {
   return new AnyType(options);
 }
 
