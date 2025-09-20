@@ -13,11 +13,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
+import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
 import { type DataCatalog, createDataCatalog } from './data_catalog';
 
-export class ChatDataRegistryPlugin
-  implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
+export class DataSourcesRegistryPlugin
+  implements Plugin<DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart>
 {
   private readonly logger: Logger;
   private dataCatalog: DataCatalog;
@@ -27,16 +27,16 @@ export class ChatDataRegistryPlugin
     this.dataCatalog = createDataCatalog();
   }
 
-  public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
-    this.logger.debug('chatDataRegistry: Setup');
+  public setup(core: CoreSetup): DataSourcesRegistryPluginSetup {
+    this.logger.debug('dataSourcesRegistry: Setup');
 
     return {
       register: (dataType) => this.dataCatalog.register(dataType),
     };
   }
 
-  public start(core: CoreStart): ChatDataRegistryPluginStart {
-    this.logger.debug('chatDataRegistry: Started');
+  public start(core: CoreStart): DataSourcesRegistryPluginStart {
+    this.logger.debug('dataSourcesRegistry: Started');
 
     const registeredTypes = this.dataCatalog.list();
     this.logger.debug(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);

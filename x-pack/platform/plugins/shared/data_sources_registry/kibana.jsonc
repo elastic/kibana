@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/chat-data-registry-plugin",
+  "id": "@kbn/data-sources-registry-plugin",
   "owner": [
     "@elastic/workchat-eng"
   ],
@@ -8,10 +8,10 @@
   "visibility": "shared",
   "description": "Data Sources Registry for Chat",
   "plugin": {
-    "id": "chatDataRegistry",
+    "id": "dataSourcesRegistry",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "chatDataRegistry"],
+    "configPath": ["xpack", "dataSourcesRegistry"],
     "requiredPlugins": [],
     "optionalPlugins": [],
     "requiredBundles": []

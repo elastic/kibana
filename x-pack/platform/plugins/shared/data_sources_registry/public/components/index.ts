@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { ChatDataRegistryPlugin } from './plugin';
-
-export function plugin() {
-  return new ChatDataRegistryPlugin();
-}
-
-export type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
+// TODO: Add components here when they are ready, e.g. per data source type
