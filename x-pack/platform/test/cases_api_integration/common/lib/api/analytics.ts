@@ -8,32 +8,32 @@
 import type SuperTest from 'supertest';
 
 import {
-  CAI_ACTIVITY_BACKFILL_TASK_ID,
-  CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
+  getCAIActivityBackfillTaskId,
+  getCAIActivitySynchronizationTaskId,
   CAI_ACTIVITY_SOURCE_INDEX,
-  CAI_ACTIVITY_INDEX_NAME,
-  CAI_ACTIVITY_SOURCE_QUERY,
+  getActivityDestinationIndexName,
+  getActivitySourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/activity_index/constants';
 import {
-  CAI_ATTACHMENTS_BACKFILL_TASK_ID,
-  CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+  getCAIAttachmentsBackfillTaskId,
+  getCAIAttachmentsSynchronizationTaskId,
   CAI_ATTACHMENTS_SOURCE_INDEX,
-  CAI_ATTACHMENTS_INDEX_NAME,
-  CAI_ATTACHMENTS_SOURCE_QUERY,
+  getAttachmentsDestinationIndexName,
+  getAttachmentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/attachments_index/constants';
 import {
-  CAI_CASES_BACKFILL_TASK_ID,
-  CAI_CASES_SYNCHRONIZATION_TASK_ID,
+  getCAICasesBackfillTaskId,
+  getCAICasesSynchronizationTaskId,
   CAI_CASES_SOURCE_INDEX,
-  CAI_CASES_INDEX_NAME,
-  CAI_CASES_SOURCE_QUERY,
+  getCasesDestinationIndexName,
+  getCasesSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/cases_index/constants';
 import {
-  CAI_COMMENTS_BACKFILL_TASK_ID,
-  CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+  getCAICommentsBackfillTaskId,
+  getCAICommentsSynchronizationTaskId,
   CAI_COMMENTS_SOURCE_INDEX,
-  CAI_COMMENTS_INDEX_NAME,
-  CAI_COMMENTS_SOURCE_QUERY,
+  getCommentsDestinationIndexName,
+  getCommentsSourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/comments_index/constants';
 
 export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
@@ -41,10 +41,10 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: CAI_CASES_BACKFILL_TASK_ID,
+      taskId: getCAICasesBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_CASES_SOURCE_INDEX,
-      destIndex: CAI_CASES_INDEX_NAME,
-      sourceQuery: JSON.stringify(CAI_CASES_SOURCE_QUERY),
+      destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
+      sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -53,7 +53,7 @@ export const runCasesSynchronizationTask = async (supertest: SuperTest.Agent) =>
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: CAI_CASES_SYNCHRONIZATION_TASK_ID })
+    .send({ taskId: getCAICasesSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -62,11 +62,19 @@ export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => 
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: CAI_ATTACHMENTS_BACKFILL_TASK_ID,
+      taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-      destIndex: CAI_ATTACHMENTS_INDEX_NAME,
-      sourceQuery: JSON.stringify(CAI_ATTACHMENTS_SOURCE_QUERY),
+      destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
+      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolution')),
     })
+    .expect(200);
+};
+
+export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
+  await supertest
+    .post('/api/analytics_index/scheduler/run_soon')
+    .set('kbn-xsrf', 'xxx')
+    .send()
     .expect(200);
 };
 
@@ -74,7 +82,7 @@ export const runAttachmentsSynchronizationTask = async (supertest: SuperTest.Age
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID })
+    .send({ taskId: getCAIAttachmentsSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -83,10 +91,10 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: CAI_COMMENTS_BACKFILL_TASK_ID,
+      taskId: getCAICommentsBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-      destIndex: CAI_COMMENTS_INDEX_NAME,
-      sourceQuery: JSON.stringify(CAI_COMMENTS_SOURCE_QUERY),
+      destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
+      sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -95,7 +103,7 @@ export const runCommentsSynchronizationTask = async (supertest: SuperTest.Agent)
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID })
+    .send({ taskId: getCAICommentsSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
 
@@ -104,10 +112,10 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: CAI_ACTIVITY_BACKFILL_TASK_ID,
+      taskId: getCAIActivityBackfillTaskId('default', 'securitySolution'),
       sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-      destIndex: CAI_ACTIVITY_INDEX_NAME,
-      sourceQuery: JSON.stringify(CAI_ACTIVITY_SOURCE_QUERY),
+      destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
+      sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -116,6 +124,6 @@ export const runActivitySynchronizationTask = async (supertest: SuperTest.Agent)
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID })
+    .send({ taskId: getCAIActivitySynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
