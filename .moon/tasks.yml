@@ -5,3 +5,10 @@ fileGroups:
     - "/tsconfig.json"
     - "/tsconfig.base.json"
     - "/tsconfig.browser.json"
+
+tasks:
+  noop:
+    command: echo "This is a no-op task"
+    description: A task that does nothing
+    options:
+      runInCI: affected
