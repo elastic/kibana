@@ -190,8 +190,18 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, prompt, context } = resources.params.body;
+    const { request, plugins } = resources;
 
+    const actionsClient = await (
+      await plugins.actions.start()
+    ).getActionsClientWithRequest(request);
+
+    const { connectorId, prompt, context, scopes } = resources.params.body;
+
+    const connector = await actionsClient.get({
+      id: connectorId,
+      throwIfSystemAction: true,
+    });
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
@@ -210,6 +220,8 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
         userPrompt: prompt,
         recall: client.recall,
         signal,
+        connector,
+        scopes,
       })
     ).pipe(
       map(({ scores, suggestions, relevantDocuments }) => {
