@@ -10,6 +10,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { UploadDashboardsPanel } from './upload_panel';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -26,7 +27,9 @@ const renderTestComponent = (props: ComponentProps<typeof UploadDashboardsPanel>
 
   return render(
     <IntlProvider locale="en">
-      <UploadDashboardsPanel {...finalProps} />
+      <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+        <UploadDashboardsPanel {...finalProps} />
+      </MigrationDataInputContextProvider>
     </IntlProvider>
   );
 };

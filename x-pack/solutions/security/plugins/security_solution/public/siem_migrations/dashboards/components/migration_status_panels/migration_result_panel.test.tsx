@@ -13,6 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import type { DashboardMigrationStats } from '../../types';
 import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
+import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -57,7 +58,13 @@ const renderTestComponent = (
   props: Partial<React.ComponentProps<typeof DashboardMigrationResultPanel>> = {}
 ) => {
   return render(<DashboardMigrationResultPanel {...baseProps} {...props} />, {
-    wrapper: TestProviders,
+    wrapper: ({ children }) => (
+      <TestProviders>
+        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+          {children}
+        </MigrationDataInputContextProvider>
+      </TestProviders>
+    ),
   });
 };
 
