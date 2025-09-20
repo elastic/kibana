@@ -6,15 +6,16 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type AgentDefinition, AgentType } from '@kbn/onechat-common';
-import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
+import { AgentType } from '@kbn/onechat-common';
+import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
+import type { PersistedAgentDefinition } from '../types';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
 const defaultAgentType = AgentType.chat;
 
-export const fromEs = (document: Document): AgentDefinition => {
+export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
