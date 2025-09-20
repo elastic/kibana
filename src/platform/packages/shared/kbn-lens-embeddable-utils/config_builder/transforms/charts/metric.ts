@@ -121,6 +121,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
   layer: FormBasedLayer | TextBasedLayer,
+  layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[]
 ): MetricState {
@@ -128,7 +129,7 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, 'layer_0');
+  const dataset = buildDatasetState(layer, adHocDataViews, references, layerId);
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -191,11 +192,19 @@ function reverseBuildVisualizationState(
       ...props,
       metric: {
         ...metric,
-        background_chart: {
-          ...(max_value
-            ? { type: 'bar', goal_value: max_value, direction: visualization.progressDirection }
-            : {}),
-        },
+        ...(max_value || props.metric?.background_chart
+          ? {
+              background_chart: {
+                ...(max_value
+                  ? {
+                      type: 'bar',
+                      goal_value: max_value,
+                      direction: visualization.progressDirection,
+                    }
+                  : props.metric?.background_chart),
+              },
+            }
+          : {}),
       },
       ...(secondary_metric ? { secondary_metric: { ...secondary_metric } } : {}),
       ...(breakdown_by ? { breakdown_by } : {}),
@@ -208,8 +217,8 @@ function reverseBuildVisualizationState(
     props.metric!.sub_label = visualization.subtitle;
   }
 
-  if (visualization.secondaryTrend) {
-    props.metric!.background_chart!.type = 'trend';
+  if (visualization.trendlineLayerType) {
+    props.metric!.background_chart = { ...props.metric!.background_chart, type: 'trend' };
   }
 
   if (props.secondary_metric) {
@@ -347,24 +356,16 @@ function getValueColumns(layer: MetricStateESQL) {
 }
 
 export function fromAPItoLensState(config: MetricState): LensAttributes {
-  const dataviews: Record<string, { id: string; index: string; timeFieldName: string }> = {};
-
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
-  const datasourceStates = buildDatasourceStates(
-    config,
-    dataviews,
-    _buildDataLayer,
-    getValueColumns
-  );
+  const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
   const visualization = buildVisualizationState(config);
 
-  const adHocDataViews = getAdhocDataviews(dataviews);
-  const references = buildReferences(
-    Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ['layer_0', value.id]))
-  );
+  const adHocDataViews = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.values(usedDataviews).filter((v) => v.type === 'dataView');
+  const references = buildReferences({ layer_0: regularDataViews[0]?.id ?? adHocDataViews[0].id });
 
   return {
     title: config.title ?? '',
@@ -372,7 +373,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     visualizationType: 'lnsMetric',
     references,
     state: {
-      datasourceStates,
+      datasourceStates: layers,
       internalReferences: [],
       filters: [],
       query: { language: 'kuery', query: '' },
@@ -390,7 +391,7 @@ export function fromLensStateToAPI(
   const layers =
     state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
 
-  const layer = Object.values(layers)[0];
+  const [layerId, layer] = Object.entries(layers)[0];
 
   const visualizationState = {
     title: config.title,
@@ -398,6 +399,7 @@ export function fromLensStateToAPI(
     ...reverseBuildVisualizationState(
       visualization,
       layer,
+      layerId ?? 'layer_0',
       config.state.adHocDataViews ?? {},
       config.references
     ),
