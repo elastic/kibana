@@ -87,7 +87,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    indexSyncService = createIndexSyncService(dataClient);
+    indexSyncService = createIndexSyncService(dataClient, 100);
   });
 
   describe('syncAllIndexUsers', () => {
