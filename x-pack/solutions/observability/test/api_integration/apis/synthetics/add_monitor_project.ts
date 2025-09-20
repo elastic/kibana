@@ -459,7 +459,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - formats custom id appropriately', async () => {
-      const project = `test project ${uuidv4()}`;
+      const project = `test-project-${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
