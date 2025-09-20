@@ -12,6 +12,6 @@ import objectHash from 'object-hash';
 import type { IndexStorageSettings } from '..';
 
 export function getSchemaVersion(storage: IndexStorageSettings): string {
-  const version = objectHash(stringify(storage.schema.properties));
+  const version = objectHash(stringify(storage.mappings.properties));
   return version;
 }

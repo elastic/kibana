@@ -49,7 +49,8 @@ function getBackingIndexPattern(name: string) {
   return `${name}-*`;
 }
 
-function getBackingIndexName(name: string, count: number) {
+/** Intended to allow for optionally migrating this data to a time-series use case */
+function getIndexName(name: string, count: number) {
   const countId = padStart(count.toString(), 6, '0');
   return `${name}-${countId}`;
 }
@@ -95,7 +96,8 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
    * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
    * This should be used as rarely as possible - in most cases, new properties should be added as optional.
    */
-  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+  deserialize?: (document: Record<string, unknown>) => TApplicationType;
+  serialize?: (document: TApplicationType) => Record<string, unknown>;
 }
 
 /**
@@ -138,7 +140,7 @@ export class StorageIndexAdapter<
         },
         dynamic: 'strict',
         properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+          ...mapValues(this.storage.mappings.properties, toElasticsearchMappingProperty),
         },
       },
       aliases: {
@@ -225,24 +227,24 @@ export class StorageIndexAdapter<
     return writeIndex?.name;
   }
 
-  private async createNextBackingIndex(): Promise<void> {
+  private async createIndex(): Promise<void> {
     const writeIndex = await this.getCurrentWriteIndexName();
 
-    const nextIndexName = getBackingIndexName(
+    const indexName = getIndexName(
       this.storage.name,
       writeIndex ? parseInt(last(writeIndex.split('-'))!, 10) : 1
     );
 
     await wrapEsCall(
       this.esClient.indices.create({
-        index: nextIndexName,
+        index: indexName,
       })
     ).catch(catchConflictError);
   }
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getBackingIndexName(this.storage.name, 999999),
+      name: getIndexName(this.storage.name, 999999),
     });
 
     if (simulateIndexTemplateResponse.template.mappings) {
@@ -257,72 +259,25 @@ export class StorageIndexAdapter<
    * Validates whether:
    * - an index template exists
    * - the index template has the right version (if not, update it)
-   * - a write index exists (if it doesn't, create it)
-   * - the write index has the right version (if not, update it)
+   * - the index exists (if it doesn't, create it)
+   * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    const [writeIndex, existingIndexTemplate] = await Promise.all([
-      this.getCurrentWriteIndex(),
-      this.getExistingIndexTemplate(),
-    ]);
-
     const expectedSchemaVersion = getSchemaVersion(this.storage);
+    await this.createOrUpdateIndexTemplate();
 
-    if (!existingIndexTemplate) {
-      this.logger.info(`Creating index template as it does not exist`);
-      await this.createOrUpdateIndexTemplate();
-    } else if (existingIndexTemplate._meta?.version !== expectedSchemaVersion) {
-      this.logger.info(`Updating existing index template`);
-      await this.createOrUpdateIndexTemplate();
-    }
-
+    const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
-      this.logger.info(`Creating first backing index`);
-      await this.createNextBackingIndex();
+      this.logger.debug(`Creating index`);
+      await this.createIndex();
     } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.info(`Updating mappings of existing write index due to schema version mismatch`);
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
       await this.updateMappingsOfExistingIndex({
         name: writeIndex.name,
       });
     }
 
     return await cb();
-  }
-
-  /**
-   * Get items from all non-write indices for the specified ids.
-   */
-  private async getDanglingItems({ ids }: { ids: string[] }) {
-    if (!ids.length) {
-      return [];
-    }
-
-    const writeIndex = await this.getCurrentWriteIndexName();
-
-    if (writeIndex) {
-      const danglingItemsResponse = await this.search({
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [{ terms: { _id: ids } }],
-            must_not: [
-              {
-                term: {
-                  _index: writeIndex,
-                },
-              },
-            ],
-          },
-        },
-        size: 10_000,
-      });
-
-      return danglingItemsResponse.hits.hits.map((hit) => ({
-        id: hit._id!,
-        index: hit._index,
-      }));
-    }
-    return [];
   }
 
   private search: StorageClientSearch<TApplicationType> = async (request) => {
@@ -340,7 +295,7 @@ export class StorageIndexAdapter<
               ...response.hits,
               hits: response.hits.hits.map((hit) => ({
                 ...hit,
-                _source: this.maybeMigrateSource(hit._source),
+                _source: this.deserializeSource(hit._source),
               })),
             },
           };
@@ -375,28 +330,15 @@ export class StorageIndexAdapter<
     ...request
   }): Promise<StorageClientIndexResponse> => {
     const attemptIndex = async (): Promise<IndexResponse> => {
-      const [danglingItem] = id ? await this.getDanglingItems({ ids: [id] }) : [undefined];
-
-      const [indexResponse] = await Promise.all([
-        wrapEsCall(
-          this.esClient.index({
-            ...request,
-            id,
-            refresh,
-            index: this.getWriteTarget(),
-            require_alias: true,
-          })
-        ),
-        danglingItem
-          ? wrapEsCall(
-              this.esClient.delete({
-                id: danglingItem.id,
-                index: danglingItem.index,
-                refresh,
-              })
-            )
-          : Promise.resolve(),
-      ]);
+      const indexResponse = await wrapEsCall(
+        this.esClient.index({
+          ...request,
+          id,
+          refresh,
+          index: this.getWriteTarget(),
+          require_alias: true,
+        })
+      );
 
       return indexResponse;
     };
@@ -441,33 +383,11 @@ export class StorageIndexAdapter<
     });
 
     const attemptBulk = async () => {
-      const indexedIds =
-        bulkOperations.flatMap((operation) => {
-          if (
-            'index' in operation &&
-            operation.index &&
-            typeof operation.index === 'object' &&
-            '_id' in operation.index &&
-            typeof operation.index._id === 'string'
-          ) {
-            return operation.index._id ?? [];
-          }
-          return [];
-        }) ?? [];
-
-      const danglingItems = await this.getDanglingItems({ ids: indexedIds });
-
-      if (danglingItems.length) {
-        this.logger.debug(`Deleting ${danglingItems.length} dangling items`);
-      }
-
       return wrapEsCall(
         this.esClient.bulk({
           ...request,
           refresh,
-          operations: bulkOperations.concat(
-            danglingItems.map((item) => ({ delete: { _index: item.index, _id: item.id } }))
-          ),
+          operations: bulkOperations,
           index: this.getWriteTarget(),
           require_alias: true,
         })
@@ -590,7 +510,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: this.maybeMigrateSource(hit._source),
+      _source: this.deserializeSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -600,13 +520,13 @@ export class StorageIndexAdapter<
     };
   };
 
-  private maybeMigrateSource = (_source: unknown): TApplicationType => {
+  private deserializeSource = (_source: unknown): TApplicationType => {
     // check whether source is an object, if not fail
     if (typeof _source !== 'object' || _source === null) {
       throw new Error(`Source must be an object, got ${typeof _source}`);
     }
-    if (this.options.migrateSource) {
-      return this.options.migrateSource(_source as Record<string, unknown>);
+    if (this.options.deserialize) {
+      return this.options.deserialize(_source as Record<string, unknown>);
     }
     return _source as TApplicationType;
   };
