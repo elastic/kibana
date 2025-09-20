@@ -33,6 +33,7 @@ import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
+import { docLinks } from '../../../../../common/doc_links';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
@@ -269,7 +270,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href="#" external>
+            <EuiLink href={`${docLinks.tools}#testing-your-tools`} target="_blank">
               {i18n.translate('xpack.onechat.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
               })}
