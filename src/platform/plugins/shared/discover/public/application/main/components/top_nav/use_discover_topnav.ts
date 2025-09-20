@@ -8,7 +8,6 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -20,7 +19,12 @@ import {
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
-import { useAdHocDataViews, useCurrentDataView } from '../../state_management/redux';
+import {
+  selectHasUnsavedChanges,
+  useAdHocDataViews,
+  useCurrentDataView,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
@@ -30,9 +34,15 @@ export const useDiscoverTopNav = ({
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
-  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
-  const hasUnsavedChanges = Boolean(
-    hasSavedSearchChanges && stateContainer.savedSearchState.getId()
+  // const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
+  // const hasUnsavedChanges = Boolean(
+  //   hasSavedSearchChanges && stateContainer.savedSearchState.getId()
+  // );
+  const { hasUnsavedChanges } = useInternalStateSelector((state) =>
+    selectHasUnsavedChanges(state, {
+      runtimeStateManager: stateContainer.runtimeStateManager,
+      services,
+    })
   );
 
   const topNavBadges = useMemo(

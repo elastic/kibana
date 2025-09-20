@@ -51,6 +51,7 @@ export interface TabState extends TabItem {
    * ESQL query variables
    */
   esqlVariables: ESQLControlVariable[] | undefined;
+  forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving

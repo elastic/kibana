@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_views';
-export * from './initialize_single_tab';
-export * from './tabs';
-export * from './save_discover_session';
-export * from './reset_discover_session';
+export { selectAllTabs, selectRecentlyClosedTabs, selectTab, selectIsTabsBarHidden } from './tabs';
+export { selectHasUnsavedChanges } from './unsaved_changes';
