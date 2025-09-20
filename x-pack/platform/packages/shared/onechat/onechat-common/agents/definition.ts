@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ToolSelection } from '../tools';
+import { TOOL_SELECTION_SCHEMA } from '../tools';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 /**
  * The type of an agent.
@@ -30,51 +31,22 @@ export interface AgentDescriptor {
   description: string;
 }
 
-/**
- * Definition of a onechat agent.
- */
-export interface AgentDefinition {
-  /**
-   * Id of the agent
-   */
-  id: string;
-  /**
-   * The type of the agent (only for type for now, here for future-proofing)
-   */
-  type: AgentType;
-  /**
-   * Human-readable name for the agent.
-   */
-  name: string;
-  /**
-   * Human-readable description for the agent.
-   */
-  description: string;
-  /**
-   * Optional labels used to organize or filter agents
-   */
-  labels?: string[];
-  /**
-   * Optional color used to represent the agent in the UI
-   */
-  avatar_color?: string;
-  /**
-   * Optional symbol used to represent the agent in the UI
-   */
-  avatar_symbol?: string;
-  /**
-   * Configuration associated with this agent
-   */
-  configuration: AgentConfiguration;
-}
+export const AGENT_CONFIGURATION_SCHEMA = schema.object({
+  instructions: schema.maybe(schema.string()),
+  tools: TOOL_SELECTION_SCHEMA,
+});
 
-export interface AgentConfiguration {
-  /**
-   * Custom instruction for the agent
-   */
-  instructions?: string;
-  /**
-   * List of tools exposed to the agent
-   */
-  tools: ToolSelection[];
-}
+export const AGENT_DEFINITION_SCHEMA = schema.object({
+  id: schema.string(),
+  type: schema.literal('chat'),
+  name: schema.string(),
+  description: schema.string(),
+  labels: schema.maybe(schema.arrayOf(schema.string())),
+  avatar_color: schema.maybe(schema.string()),
+  avatar_symbol: schema.maybe(schema.string()),
+  configuration: AGENT_CONFIGURATION_SCHEMA
+});
+
+export type AgentDefinition = TypeOf<typeof AGENT_DEFINITION_SCHEMA>;
+
+export type AgentConfiguration = TypeOf<typeof AGENT_CONFIGURATION_SCHEMA>;
