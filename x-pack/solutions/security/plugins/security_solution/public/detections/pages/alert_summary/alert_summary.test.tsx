@@ -12,14 +12,14 @@ import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integr
 import { LANDING_PAGE_PROMPT_TEST_ID } from '../../components/alert_summary/landing_page/landing_page';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DATA_VIEW_LOADING_PROMPT_TEST_ID } from '../../components/alert_summary/wrapper';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../hooks/alert_summary/use_fetch_integrations');
 jest.mock('../../../common/hooks/use_add_integrations_url');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../common/hooks/use_create_data_view');
 
 describe('<AlertSummaryPage />', () => {

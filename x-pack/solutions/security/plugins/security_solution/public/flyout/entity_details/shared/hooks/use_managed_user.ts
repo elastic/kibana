@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useIntegrations } from '../../../../detection_engine/common/components/related_integrations/use_integrations';
 import { UsersQueries } from '../../../../../common/api/search_strategy';

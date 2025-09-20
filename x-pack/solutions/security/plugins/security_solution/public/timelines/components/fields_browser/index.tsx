@@ -13,9 +13,9 @@ import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/response-ops-alerts-fields-browser/types';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { browserFieldsManager } from '../../../data_view_manager/utils/security_browser_fields_manager';
 import type { ColumnHeaderOptions } from '../../../../common/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataView as useDataViewOld } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';

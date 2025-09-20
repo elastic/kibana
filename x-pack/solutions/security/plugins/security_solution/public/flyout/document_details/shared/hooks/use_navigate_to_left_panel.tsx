@@ -8,11 +8,11 @@
 import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { useDocumentDetailsContext } from '../context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 export interface UseNavigateToLeftPanelParams {
   /**
    * The tab to navigate to

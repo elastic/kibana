@@ -37,6 +37,10 @@ import {
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 // TODO These tests need revisting, they are not finishing
 // upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
@@ -68,7 +72,10 @@ describe.skip('When using `upload` response action', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
-    mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      responseActionUploadEnabled: true,
+    });
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
     endpointCapabilities = [...ENDPOINT_CAPABILITIES];

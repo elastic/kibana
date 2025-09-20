@@ -6,19 +6,19 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { FormattedEntry } from './types';
 import * as i18n from './translations';
 import {
   getEntryOnFieldChange,
-  getEntryOnThreatFieldChange,
   getEntryOnMatchChange,
+  getEntryOnThreatFieldChange,
 } from './helpers';
 
 interface EntryItemProps {

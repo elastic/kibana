@@ -15,7 +15,7 @@ import { useHighlightedFields } from './use_highlighted_fields';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parseEcsFieldPath } from '../../../../common/lib/endpoint';
 
-jest.mock('../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 

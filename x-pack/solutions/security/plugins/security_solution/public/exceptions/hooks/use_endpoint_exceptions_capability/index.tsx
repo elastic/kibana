@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 export const useEndpointExceptionsCapability = (

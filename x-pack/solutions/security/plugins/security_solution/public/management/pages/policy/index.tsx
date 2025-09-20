@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useLicense } from '../../../common/hooks/use_license';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,

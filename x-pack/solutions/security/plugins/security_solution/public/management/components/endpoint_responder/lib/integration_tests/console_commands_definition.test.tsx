@@ -15,12 +15,12 @@ import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/dat
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { sortBy } from 'lodash';
 import { HELP_GROUPS } from '../console_commands_definition';
-import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
 import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
 
-jest.mock('../../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 describe('When displaying Endpoint Response Actions', () => {
   let render: ConsoleTestSetup['renderConsole'];

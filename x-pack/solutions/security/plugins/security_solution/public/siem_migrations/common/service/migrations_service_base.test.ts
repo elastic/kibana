@@ -27,7 +27,7 @@ jest.mock('./capabilities', () => ({
   getMissingCapabilitiesChecker: jest.fn(() => () => []),
 }));
 
-jest.mock('../../../common/experimental_features_service', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn(() => ({ siemMigrationsDisabled: false })),
   },

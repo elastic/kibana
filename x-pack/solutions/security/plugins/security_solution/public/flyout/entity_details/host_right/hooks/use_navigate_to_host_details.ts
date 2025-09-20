@@ -7,12 +7,12 @@
 
 import { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { EntityType } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { HostDetailsPanelKey } from '../../host_details_left';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {

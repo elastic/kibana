@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import type {
   CreateDashboardMigrationDashboardsRequestBody,
   StartDashboardsMigrationResponse,
@@ -14,7 +15,6 @@ import type {
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type { StartPluginsDependencies } from '../../../types';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import * as i18n from './translations';
 import * as api from '../api';

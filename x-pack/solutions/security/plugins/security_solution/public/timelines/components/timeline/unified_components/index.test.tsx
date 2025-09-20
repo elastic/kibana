@@ -26,9 +26,11 @@ import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../store';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { allowedExperimentalValues } from '../../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import {
+  allowedExperimentalValues,
+  useIsExperimentalFeatureEnabled,
+} from '@kbn/experimental-features';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
@@ -53,7 +55,7 @@ jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
 
 jest.mock('../../../../common/lib/kuery');
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

@@ -13,12 +13,12 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana/kibana_react');
-jest.mock('../../../../common/hooks/use_experimental_features', () => {
+jest.mock('@kbn/experimental-features', () => {
   return { useIsExperimentalFeatureEnabled: jest.fn(), useEnableExperimental: () => jest.fn() };
 });
 

@@ -24,7 +24,7 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
     "@kbn/test",
@@ -70,5 +70,6 @@
     "@kbn/openapi-common",
     "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/experimental-features"
   ]
 }

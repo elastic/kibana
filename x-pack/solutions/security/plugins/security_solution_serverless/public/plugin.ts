@@ -15,21 +15,21 @@ import type {
 import { BehaviorSubject } from 'rxjs';
 import { AppStatus } from '@kbn/core-application-browser';
 
+import {
+  type ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '@kbn/experimental-features';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type { ServerlessSecurityPublicConfig } from '../common/config';
 import type {
   SecuritySolutionServerlessPluginSetup,
-  SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { startNavigation } from './navigation';
-import {
-  parseExperimentalConfigValue,
-  type ExperimentalFeatures,
-} from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';

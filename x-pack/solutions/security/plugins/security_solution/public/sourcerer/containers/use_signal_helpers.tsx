@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { sourcererSelectors, sourcererActions } from '../store';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../store/model';
@@ -17,7 +18,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */

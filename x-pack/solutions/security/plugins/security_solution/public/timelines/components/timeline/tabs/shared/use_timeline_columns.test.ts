@@ -11,9 +11,8 @@ import { useTimelineColumns } from './use_timeline_columns';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-  useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 
 describe('useTimelineColumns', () => {

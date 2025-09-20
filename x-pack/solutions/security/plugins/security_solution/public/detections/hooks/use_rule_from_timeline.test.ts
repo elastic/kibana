@@ -23,7 +23,7 @@ import {
 } from '../../data_view_manager/mocks/mock_data_view';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../common/utils/global_query_string/helpers');
 jest.mock('../../timelines/containers/api');
 jest.mock('../../common/hooks/use_app_toasts');

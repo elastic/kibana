@@ -8,8 +8,8 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ProcessDescendantsTooltip } from '../../../../pages/event_filters/view/components/process_descendant_tooltip';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';

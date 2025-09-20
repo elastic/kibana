@@ -15,6 +15,7 @@ import type { OnTimeChangeProps } from '@elastic/eui';
 import { EuiLink, EuiLoadingSpinner, EuiText, EuiToolTip, EuiSuperDatePicker } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
 import { useThemes } from '../../common/components/charts/common';
@@ -33,7 +34,6 @@ import {
   type ReportDataQualityIndexCheckedParams,
   DataQualityEventTypes,
 } from '../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../common/components/page_loader';

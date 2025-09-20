@@ -20,7 +20,7 @@ jest.mock('@kbn/elastic-assistant', () => ({
   AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
 }));
 
-jest.mock('../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'space-id',
 }));

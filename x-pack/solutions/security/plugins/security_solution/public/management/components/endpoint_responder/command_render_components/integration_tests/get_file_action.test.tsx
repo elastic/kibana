@@ -33,8 +33,12 @@ import {
 } from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/components/user_privileges');
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using get-file action from response actions console', () => {
   let user: UserEvent;
@@ -244,13 +248,15 @@ describe('When using get-file action from response actions console', () => {
   describe('And agent type is SentinelOne', () => {
     beforeEach(() => {
       getConsoleCommandsOptions.agentType = 'sentinel_one';
-      mockedContext.setExperimentalFlag({
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         responseActionsSentinelOneGetFileEnabled: true,
       });
     });
 
     it('should display error if feature flag is not enabled', async () => {
-      mockedContext.setExperimentalFlag({
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         responseActionsSentinelOneGetFileEnabled: false,
       });
       await render();

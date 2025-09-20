@@ -10,7 +10,7 @@ import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import type { EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -19,7 +19,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';

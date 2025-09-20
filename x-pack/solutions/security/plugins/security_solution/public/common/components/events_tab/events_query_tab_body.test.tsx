@@ -16,11 +16,11 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
 import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useUserPrivileges } from '../user_privileges';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../user_privileges');
 
 const mockGetDefaultControlColumn = jest.fn();

@@ -21,7 +21,7 @@ import type { EndpointCapabilities } from '../../../../../../common/endpoint/ser
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
-jest.mock('../../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 const prepareTest = () => {
   // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841

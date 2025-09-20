@@ -10,6 +10,7 @@
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   analyticsServiceMock,
+  coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -17,7 +18,6 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
-  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -51,6 +51,10 @@ import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+} from '@kbn/experimental-features';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
@@ -68,10 +72,6 @@ import type {
 import type { ManifestManager } from '../services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from '../services/artifacts/manifest_manager/manifest_manager.mock';
 import type { EndpointAppContext } from '../types';
-import {
-  allowedExperimentalValues,
-  parseExperimentalConfigValue,
-} from '../../../common/experimental_features';
 import { requestContextFactoryMock } from '../../request_context_factory.mock';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../../lib/detection_engine/routes/__mocks__/request_context';

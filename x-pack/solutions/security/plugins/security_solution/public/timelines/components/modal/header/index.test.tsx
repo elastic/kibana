@@ -15,7 +15,7 @@ import { useInspect } from '../../../../common/components/inspect/use_inspect';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store';
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
   useEnableExperimental: jest.fn(() => jest.fn()),
 }));

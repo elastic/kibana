@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
+import * as useIsExperimentalFeatureEnabledMock from '@kbn/experimental-features';
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {

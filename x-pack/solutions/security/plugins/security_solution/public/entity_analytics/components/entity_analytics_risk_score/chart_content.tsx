@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import type { SeverityCount } from '../severity/types';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';

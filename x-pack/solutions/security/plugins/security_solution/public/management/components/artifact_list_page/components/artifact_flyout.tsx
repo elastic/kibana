@@ -27,8 +27,8 @@ import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useLocation } from 'react-router-dom';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
@@ -469,6 +469,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         </EuiFlyoutHeader>
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
+            announceOnMount
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
             iconType="question"

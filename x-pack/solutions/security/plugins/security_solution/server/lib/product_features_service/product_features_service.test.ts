@@ -12,7 +12,7 @@ import type {
   ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';

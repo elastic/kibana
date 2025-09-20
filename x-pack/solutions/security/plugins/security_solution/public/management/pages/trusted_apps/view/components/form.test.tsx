@@ -30,6 +30,7 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
@@ -44,6 +45,9 @@ jest.mock('../../../../../common/hooks/use_license', () => {
     },
   };
 });
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
@@ -183,7 +187,10 @@ describe('Trusted apps form', () => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
+      trustedAppsAdvancedMode: true,
+    });
     latestUpdatedItem = createItem();
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,

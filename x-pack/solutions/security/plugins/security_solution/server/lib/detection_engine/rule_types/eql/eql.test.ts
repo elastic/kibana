@@ -6,7 +6,7 @@
  */
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 import { getEqlRuleParams } from '../../rule_schema/mocks';

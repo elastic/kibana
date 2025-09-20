@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
   },
 });
 
-jest.mock('../../../../experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 const useKibanaMock = mockUseKibana as jest.Mock;
 jest.mock('../../../../lib/kibana');

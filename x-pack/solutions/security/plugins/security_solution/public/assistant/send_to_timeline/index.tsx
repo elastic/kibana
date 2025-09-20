@@ -12,6 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
@@ -38,7 +39,6 @@ import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export interface SendToTimelineButtonProps {

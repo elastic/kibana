@@ -15,13 +15,13 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
 } from '../../../common/constants';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../../common/lib/kibana';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
 

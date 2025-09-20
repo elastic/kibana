@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
@@ -16,7 +17,6 @@ import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();

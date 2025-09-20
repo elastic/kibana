@@ -18,7 +18,7 @@ import { TestProviders } from '../../../common/mock';
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../sourcerer/containers');
 jest.mock('react-router-dom', () => ({

@@ -13,11 +13,11 @@ import { useCreateDataView } from '../../../../../../common/hooks/use_create_dat
 import { TestProviders } from '../../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
 jest.mock('../../../../../../sourcerer/containers');
-jest.mock('../../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<

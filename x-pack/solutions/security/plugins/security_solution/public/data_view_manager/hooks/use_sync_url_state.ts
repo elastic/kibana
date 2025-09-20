@@ -7,13 +7,13 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { SourcererScopeName, type SourcererUrlState } from '../../sourcerer/store/model';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import type { State } from '../../common/store/types';
 import { sourcererSelectors } from '../../common/store/selectors';
 import { sourcererActions } from '../../common/store/actions';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 
 // TODO: remove this in cleanup phase Remove deprecated sourcerer code https://github.com/elastic/security-team/issues/12665

@@ -16,7 +16,7 @@ import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
-import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { getExceptionProviderMock, getTrustedAppProviderMock } from './test_utils';
 import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
 import type { TrustedApp } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -27,9 +27,13 @@ import {
   buildSpaceOwnerIdTag,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -323,7 +327,10 @@ describe.each([
     });
 
     beforeEach(() => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointManagementSpaceAwarenessEnabled: true,
+      });
       authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
       authzMock.set({ canManageGlobalArtifacts: false });
       (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
@@ -334,7 +341,10 @@ describe.each([
     });
 
     it('should render menu if feature flag is disabled', () => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        endpointManagementSpaceAwarenessEnabled: false,
+      });
       render({ actions });
 
       expect(

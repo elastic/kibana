@@ -7,9 +7,9 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
-import { allowedExperimentalValues } from '../common/experimental_features';
-import type { PluginStart, PluginSetup, ContractStartServices } from './types';
+import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import { OnboardingService } from './onboarding/service';
 
 const upselling = new UpsellingService();

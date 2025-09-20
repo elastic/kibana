@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled as _useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled as _useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useHasSecurityCapability as _useHasSecurityCapability } from '../../../helper_hooks';
 import { renderHook as reactRenderHook } from '@testing-library/react';
 import { useEndpointExceptionsCapability } from '.';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../helper_hooks');
 
 const useIsExperimentalFeatureEnabledMock = _useIsExperimentalFeatureEnabled as jest.Mock;

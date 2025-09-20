@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { SecuritySolutionServerlessPluginStartDeps } from '../../types';
 import type { Services } from './types';
 

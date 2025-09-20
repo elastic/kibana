@@ -19,9 +19,9 @@ import { NotesList } from './notes_list';
 import { ReqStatus } from '../store/notes.slice';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import type { Note } from '../../../common/api/timeline';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

@@ -14,19 +14,19 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import {
+  type CapabilitiesLevel,
   getMissingCapabilitiesChecker,
   type MissingCapability,
-  type CapabilitiesLevel,
 } from './capabilities';
 import { MigrationsStorage } from './storage';
 import * as i18n from './translations';
-import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../types';
+import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../types';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 
 // use the default assistant namespace since it's the only one we use

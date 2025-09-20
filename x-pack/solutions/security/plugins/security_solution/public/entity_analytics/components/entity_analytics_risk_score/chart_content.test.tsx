@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { TestProviders } from '../../../common/mock';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
@@ -18,7 +18,7 @@ import { mockSeverityCount } from './__mocks__';
 import { RiskSeverity } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 jest.mock('../../../common/hooks/use_space_id', () => ({

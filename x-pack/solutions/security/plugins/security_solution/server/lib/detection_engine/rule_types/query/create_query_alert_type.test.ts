@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';

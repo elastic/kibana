@@ -6,17 +6,17 @@
  */
 
 import { useNavigateToLeftPanel } from './use_navigate_to_left_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { renderHook } from '@testing-library/react';
 import { useDocumentDetailsContext } from '../context';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
-import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
+import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 jest.mock('../../../../common/lib/kibana');
 

@@ -24,7 +24,7 @@ import {
   useExpandableFlyoutHistory,
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 const expandDetails = jest.fn();
 
@@ -39,7 +39,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 
 const flyoutContextValue = {
   closeLeftPanel: jest.fn(),

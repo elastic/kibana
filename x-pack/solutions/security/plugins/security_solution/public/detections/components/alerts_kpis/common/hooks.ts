@@ -12,7 +12,7 @@ import type { IFieldSubTypeNested } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../sourcerer/containers';

@@ -19,7 +19,7 @@ import { useRuleCustomizationsContext } from '../../../../rule_management/compon
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
 jest.mock(
