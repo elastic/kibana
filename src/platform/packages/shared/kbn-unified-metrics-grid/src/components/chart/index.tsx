@@ -88,6 +88,9 @@ export const Chart: React.FC<ChartProps> = ({
         height: ${ChartSizes[size]}px;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
+        figcaption {
+          display: none;
+        }
       `}
     >
       {lensProps && (
@@ -98,6 +101,7 @@ export const Chart: React.FC<ChartProps> = ({
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
           abortController={abortController}
+          metricName={metric.name}
           onViewDetails={onViewDetails}
         />
       )}
