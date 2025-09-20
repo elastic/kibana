@@ -32,6 +32,7 @@
     "@kbn/core-rendering-browser-mocks",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/core-di-mocks",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",
