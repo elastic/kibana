@@ -170,5 +170,6 @@
     "@kbn/reindex-service-plugin",
     "@kbn/streamlang",
     "@kbn/onechat-plugin",
+    "@kbn/reporting-test-routes",
   ]
 }
