@@ -6,17 +6,26 @@ _search_ai_lake_analyst:
     _public: true
     _reserved: true
   cluster:
-    - "monitor_ml"
+    - "manage_inference"
     - "monitor_connector"
+    - "monitor_inference"
+    - "monitor_ml"
   indices:
     - names:
         - ".alerts-security*"
+        - ".internal.alerts-security*"
+      privileges:
+        - "index"
+        - "read"
+        - "view_index_metadata"
+        - "write"
+        - "maintenance"
+    - names:
         - ".siem-signals-*"
         - ".preview.alerts-security*"
         - ".internal.preview.alerts-security*"
         - ".adhoc.alerts-security*"
         - ".internal.adhoc.alerts-security*"
-        - ".internal.alerts-security*"
         - "security_solution-alert-*"
       privileges:
         - "read"
@@ -64,8 +73,10 @@ _search_ai_lake_soc_manager:
     _public: true
     _reserved: true
   cluster:
-    - "monitor_ml"
+    - "manage_inference"
     - "monitor_connector"
+    - "monitor_inference"
+    - "monitor_ml"
   indices:
     - names:
         - "apm-*-transaction*"
