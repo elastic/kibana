@@ -15,7 +15,7 @@ describe('Dataset Schema', () => {
     it('validates a valid dataView configuration', () => {
       const input = {
         type: 'dataView' as const,
-        name: 'my-data-view',
+        id: 'my-data-view',
       };
 
       const validated = datasetTypeSchema.validate(input);
@@ -27,7 +27,7 @@ describe('Dataset Schema', () => {
         type: 'dataView' as const,
       };
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(/\[0.name\]: expected value of type/);
+      expect(() => datasetTypeSchema.validate(input)).toThrow(/\[0.id\]: expected value of type/);
     });
   });
 
@@ -132,7 +132,7 @@ describe('Dataset Schema', () => {
       const input = {
         dataset: {
           type: 'dataView' as const,
-          name: 'my-data-view',
+          id: 'my-data-view',
         },
       };
 
@@ -144,7 +144,7 @@ describe('Dataset Schema', () => {
       const input = {
         dataset: {
           type: 'invalid' as const,
-          name: 'my-data-view',
+          id: 'my-data-view',
         },
       };
 

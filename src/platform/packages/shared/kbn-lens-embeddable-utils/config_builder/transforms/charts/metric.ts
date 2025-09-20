@@ -36,14 +36,43 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
+import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+
+type MetricApiCompareType = Extract<
+  Required<MetricState['secondary_metric']>,
+  { compare: any }
+>['compare'];
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
+const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
+const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
+
+function convertToCompareToLensState(compareToConfig: MetricApiCompareType): {
+  secondaryTrend: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>;
+} {
+  return {
+    secondaryTrend: {
+      type: 'dynamic',
+      baselineValue:
+        compareToConfig.to === 'primary' ? compareToConfig.to : compareToConfig.baseline,
+      visuals:
+        compareToConfig.icon && compareToConfig.value
+          ? 'both'
+          : compareToConfig.icon
+          ? 'icon'
+          : 'value',
+      reversed: compareToConfig.palette?.includes('reversed') ?? LENS_METRIC_COMPARE_TO_REVERSED,
+      paletteId: compareToConfig.palette ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+    },
+  };
+}
+
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
 
@@ -78,9 +107,11 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           secondaryAlign: layer.metric.alignments.value,
           // secondaryLabelPosition: layer.metric.alignments.labels,
           // secondaryLabel: '',
+          ...(layer.secondary_metric.compare
+            ? convertToCompareToLensState(layer.secondary_metric.compare)
+            : {}),
         }
       : {}),
-
     ...(layer.breakdown_by
       ? {
           breakdownByAccessor: getAccessorName('breakdown'),
@@ -118,9 +149,31 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   };
 }
 
+function getCompareToApi(
+  compare: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>
+): MetricApiCompareType {
+  const sharedProps = {
+    palette: `${compare.paletteId}${compare.reversed ? '_reversed' : ''}`,
+    icon: compare.visuals === 'icon' || compare.visuals === 'both',
+    value: compare.visuals === 'value' || compare.visuals === 'both',
+  };
+  if (compare.baselineValue === 'primary') {
+    return {
+      to: 'primary',
+      ...sharedProps,
+    };
+  }
+  return {
+    to: 'baseline',
+    baseline: compare.baselineValue,
+    ...sharedProps,
+  };
+}
+
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
   layer: FormBasedLayer | TextBasedLayer,
+  layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[]
 ): MetricState {
@@ -128,7 +181,7 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, 'layer_0');
+  const dataset = buildDatasetState(layer, adHocDataViews, references, layerId);
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -191,11 +244,19 @@ function reverseBuildVisualizationState(
       ...props,
       metric: {
         ...metric,
-        background_chart: {
-          ...(max_value
-            ? { type: 'bar', goal_value: max_value, direction: visualization.progressDirection }
-            : {}),
-        },
+        ...(max_value || props.metric?.background_chart
+          ? {
+              background_chart: {
+                ...(max_value
+                  ? {
+                      type: 'bar',
+                      goal_value: max_value,
+                      direction: visualization.progressDirection,
+                    }
+                  : props.metric?.background_chart),
+              },
+            }
+          : {}),
       },
       ...(secondary_metric ? { secondary_metric: { ...secondary_metric } } : {}),
       ...(breakdown_by ? { breakdown_by } : {}),
@@ -208,12 +269,14 @@ function reverseBuildVisualizationState(
     props.metric!.sub_label = visualization.subtitle;
   }
 
-  if (visualization.secondaryTrend) {
-    props.metric!.background_chart!.type = 'trend';
+  if (visualization.trendlineLayerType) {
+    props.metric!.background_chart = { ...props.metric!.background_chart, type: 'trend' };
   }
 
   if (props.secondary_metric) {
-    // props.secondary_metric.compare_to
+    if (visualization.secondaryTrend?.type === 'dynamic') {
+      props.secondary_metric.compare = getCompareToApi(visualization.secondaryTrend);
+    }
 
     if (visualization.secondaryPrefix) {
       props.secondary_metric.prefix = visualization.secondaryPrefix;
@@ -347,32 +410,23 @@ function getValueColumns(layer: MetricStateESQL) {
 }
 
 export function fromAPItoLensState(config: MetricState): LensAttributes {
-  const dataviews: Record<string, { id: string; index: string; timeFieldName: string }> = {};
-
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
-  const datasourceStates = buildDatasourceStates(
-    config,
-    dataviews,
-    _buildDataLayer,
-    getValueColumns
-  );
+  const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
   const visualization = buildVisualizationState(config);
 
-  const adHocDataViews = getAdhocDataviews(dataviews);
-  const references = buildReferences(
-    Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ['layer_0', value.id]))
-  );
+  const adHocDataViews = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.values(usedDataviews).filter((v) => v.type === 'dataView');
+  const references = buildReferences({ layer_0: regularDataViews[0]?.id ?? adHocDataViews[0]?.id });
 
   return {
-    title: config.title ?? '',
-    description: config.description ?? '',
     visualizationType: 'lnsMetric',
+    ...getSharedChartAPIToLensState(config),
     references,
     state: {
-      datasourceStates,
+      datasourceStates: layers,
       internalReferences: [],
       filters: [],
       query: { language: 'kuery', query: '' },
@@ -390,14 +444,14 @@ export function fromLensStateToAPI(
   const layers =
     state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
 
-  const layer = Object.values(layers)[0];
+  const [layerId, layer] = Object.entries(layers)[0];
 
   const visualizationState = {
-    title: config.title,
-    description: config.description ?? '',
+    ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
+      layerId ?? 'layer_0',
       config.state.adHocDataViews ?? {},
       config.references
     ),

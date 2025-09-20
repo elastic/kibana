@@ -134,7 +134,7 @@ describe('addLayerColumn', () => {
 
 describe('buildDatasourceStates', () => {
   test('correctly builds esql layer', async () => {
-    const results = await buildDatasourceStates(
+    const results = buildDatasourceStates(
       {
         type: 'metric',
         title: 'test',
@@ -152,27 +152,35 @@ describe('buildDatasourceStates', () => {
         sampling: 1,
         ignore_global_filters: false,
       },
-      {},
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
     );
     expect(results).toMatchInlineSnapshot(`
       Object {
-        "textBased": Object {
-          "layers": Object {
-            "layer_0": Object {
-              "columns": Array [
-                Object {
-                  "columnId": "test",
-                  "fieldName": "test",
+        "layers": Object {
+          "textBased": Object {
+            "layers": Object {
+              "layer_0": Object {
+                "columns": Array [
+                  Object {
+                    "columnId": "test",
+                    "fieldName": "test",
+                  },
+                ],
+                "index": "test",
+                "query": Object {
+                  "esql": "from test | limit 10",
                 },
-              ],
-              "index": "test",
-              "query": Object {
-                "esql": "from test | limit 10",
+                "timeField": "@timestamp",
               },
-              "timeField": "@timestamp",
             },
+          },
+        },
+        "usedDataviews": Object {
+          "layer_0": Object {
+            "index": "test",
+            "timeFieldName": "@timestamp",
+            "type": "adHocDataView",
           },
         },
       }
@@ -276,7 +284,7 @@ describe('buildDatasetState', () => {
     const result = buildDatasetState(formBasedLayer, {}, [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "name": "my-dataview-id",
+        "id": "my-dataview-id",
         "type": "dataView",
       }
     `);
