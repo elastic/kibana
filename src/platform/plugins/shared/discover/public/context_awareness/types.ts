@@ -26,9 +26,11 @@ import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { SidebarToggleState } from '../application/types';
 
 /**
  * Supports extending the Discover app menu
@@ -363,6 +365,11 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Sidebar
+   */
+  getSidebarToggleState: () => BehaviorSubject<SidebarToggleState>;
 
   /**
    * Chart
