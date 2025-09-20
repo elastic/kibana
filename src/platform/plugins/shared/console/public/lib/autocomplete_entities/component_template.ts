@@ -12,6 +12,6 @@ import { BaseTemplate } from './base_template';
 
 export class ComponentTemplate extends BaseTemplate<ClusterGetComponentTemplateResponse> {
   loadTemplates = (templates: ClusterGetComponentTemplateResponse) => {
-    this.templates = (templates.component_templates ?? []).map(({ name }) => name).sort();
+    this.templates = (templates?.component_templates ?? []).map(({ name }) => name).sort();
   };
 }

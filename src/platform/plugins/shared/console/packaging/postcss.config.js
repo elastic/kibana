@@ -7,11 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
-import { BaseTemplate } from './base_template';
+const autoprefixer = require('autoprefixer');
+const prefixer = require('postcss-prefix-selector');
 
-export class IndexTemplate extends BaseTemplate<IndicesGetIndexTemplateResponse> {
-  loadTemplates = (templates: IndicesGetIndexTemplateResponse) => {
-    this.templates = (templates?.index_templates ?? []).map(({ name }) => name).sort();
-  };
-}
+module.exports = {
+  plugins: [
+    prefixer({
+      prefix: '.kbnConsole',
+      transform: function (prefix, selector, prefixedSelector) {
+        if (selector === 'body' || selector === 'html') {
+          return prefix;
+        } else {
+          return prefixedSelector;
+        }
+      },
+    }),
+    autoprefixer(),
+  ],
+};

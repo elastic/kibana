@@ -60,9 +60,13 @@ export class MonacoEditorActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    // NEW: Optional custom parser provider for packaging environments
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
-    this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
+    // Use custom provider if provided, otherwise fallback to default
+    this.parsedRequestsProvider =
+      customParsedRequestsProvider || getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
@@ -180,7 +184,6 @@ export class MonacoEditorActionsProvider {
 
   private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
-
     if (!model) {
       return [];
     }

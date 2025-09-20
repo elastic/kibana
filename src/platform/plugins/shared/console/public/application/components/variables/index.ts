@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import { VariablesEditor as VariablesEditorComponent } from './variables_editor';
+// import { withSuspense } from '@kbn/shared-ux-utility';
 
 export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
@@ -28,4 +29,5 @@ export const VariablesEditorLazy = React.lazy(() =>
  * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const VariablesEditor = withSuspense(VariablesEditorLazy);
+// export const VariablesEditor = withSuspense(VariablesEditorLazy);
+export const VariablesEditor = VariablesEditorComponent;
