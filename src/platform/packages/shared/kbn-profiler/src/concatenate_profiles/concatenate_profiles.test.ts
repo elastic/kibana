@@ -24,9 +24,16 @@ function makeProfile(partial: Partial<CpuProfile>): CpuProfile {
   } as CpuProfile;
 }
 
+const TMP_OUTPUT_DIR = Path.join(tmpdir(), 'kbn-profiler-tests');
+
+async function createProfileDir() {
+  await Fs.mkdir(TMP_OUTPUT_DIR, { recursive: true });
+}
+
 async function writeProfile(p: CpuProfile): Promise<string> {
-  const file = Path.join(tmpdir(), 'kbn-profiler-tests', `${randomUUID()}.cpuprofile`);
-  await Fs.mkdir(Path.dirname(file), { recursive: true });
+  await createProfileDir();
+
+  const file = Path.join(TMP_OUTPUT_DIR, `${randomUUID()}.cpuprofile`);
   await Fs.writeFile(file, JSON.stringify(p), 'utf8');
   return file;
 }
@@ -35,9 +42,14 @@ describe('concatenateProfiles', () => {
   const log = new ToolingLog({ level: 'silent', writeTo: process.stdout });
 
   it('writes empty profile when none provided', async () => {
-    const out = Path.join(tmpdir(), 'kbn-profiler-tests', `${randomUUID()}.cpuprofile`);
+    const out = Path.join(TMP_OUTPUT_DIR, `${randomUUID()}.cpuprofile`);
+
+    await createProfileDir();
+
     await concatenateProfiles({ log, name: 'empty', out, profilePaths: [] });
+
     const json = JSON.parse(await Fs.readFile(out, 'utf8'));
+
     expect(json.samples).toEqual([]);
     expect(json.timeDeltas).toEqual([]);
     expect(json.title).toBe('empty');
@@ -46,7 +58,7 @@ describe('concatenateProfiles', () => {
   it('copies single profile (just sets title)', async () => {
     const p = makeProfile({ startTime: 0, endTime: 10, nodes: [], samples: [], timeDeltas: [] });
     const inFile = await writeProfile(p);
-    const out = Path.join(tmpdir(), 'kbn-profiler-tests', `${randomUUID()}.cpuprofile`);
+    const out = Path.join(TMP_OUTPUT_DIR, `${randomUUID()}.cpuprofile`);
     await concatenateProfiles({ log, name: 'single', out, profilePaths: [inFile] });
     const json = JSON.parse(await Fs.readFile(out, 'utf8'));
     expect(json.title).toBe('single');
@@ -69,9 +81,10 @@ describe('concatenateProfiles', () => {
       samples: [1],
       timeDeltas: [20],
     });
+
     const f1 = await writeProfile(p1);
     const f2 = await writeProfile(p2);
-    const out = Path.join(tmpdir(), 'kbn-profiler-tests', `${randomUUID()}.cpuprofile`);
+    const out = Path.join(TMP_OUTPUT_DIR, `${randomUUID()}.cpuprofile`);
     await concatenateProfiles({ log, name: 'multi', out, profilePaths: [f1, f2] });
     const json = JSON.parse(await Fs.readFile(out, 'utf8'));
     expect(json.title).toBe('multi');

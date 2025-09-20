@@ -93,9 +93,12 @@ describe('read_profile', () => {
     // minimal valid JSON string, but we'll force JSON.parse to throw RangeError
     await Fs.writeFile(file, '{}', 'utf8');
 
-    const originalParse = JSON.parse;
-    (JSON.parse as any) = jest.fn(() => {
-      throw new RangeError('Invalid string length');
+    const original = JSON.parse;
+    jest.spyOn(JSON, 'parse').mockImplementation((str) => {
+      if (str === '{}') {
+        throw new RangeError('Invalid string length');
+      }
+      return original(str);
     });
 
     try {
@@ -107,7 +110,7 @@ describe('read_profile', () => {
         })
       ).rejects.toThrow(/KBN_PROFILER_SAMPLING_INTERVAL/);
     } finally {
-      JSON.parse = originalParse as any;
+      jest.spyOn(JSON, 'parse').mockRestore();
     }
   });
 });

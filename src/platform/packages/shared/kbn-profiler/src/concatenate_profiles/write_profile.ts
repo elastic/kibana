@@ -10,35 +10,68 @@
 import { createWriteStream } from 'fs';
 import type { CpuProfile } from './types';
 
+/**
+ * Write profile in a streaming manner to prevent issues with large profiles
+ */
 export async function writeProfile(path: string, profile: CpuProfile): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const ws = createWriteStream(path, { encoding: 'utf8' });
-    ws.on('error', reject);
-    ws.on('finish', () => resolve());
+
+    ws.on('error', (error) => {
+      reject(error);
+    });
+    ws.on('finish', () => {
+      resolve();
+    });
 
     ws.write('{');
     ws.write('"nodes":[');
+
     profile.nodes.forEach((n, i) => {
-      if (i) ws.write(',');
+      if (i > 0) {
+        ws.write(',');
+      }
       ws.write(JSON.stringify(n));
     });
+
     ws.write('],');
     ws.write('"samples":[');
+
     profile.samples.forEach((s, i) => {
-      if (i) ws.write(',');
+      if (i > 0) {
+        ws.write(',');
+      }
+
       ws.write(String(s));
     });
+
     ws.write('],');
     ws.write('"timeDeltas":[');
+
     profile.timeDeltas.forEach((d, i) => {
-      if (i) ws.write(',');
+      if (i > 0) {
+        ws.write(',');
+      }
+
       ws.write(String(d));
     });
-    if (typeof profile.startTime === 'number') ws.write(`],"startTime":${profile.startTime}`);
-    else ws.write('],"startTime":0');
-    if (typeof profile.endTime === 'number') ws.write(`,"endTime":${profile.endTime}`);
-    else ws.write(',"endTime":0');
-    if (typeof profile.title === 'string') ws.write(`,"title":${JSON.stringify(profile.title)}`);
+
+    if (typeof profile.startTime === 'number') {
+      ws.write(`],"startTime":${profile.startTime}`);
+    } else {
+      ws.write('],"startTime":0');
+    }
+
+    if (typeof profile.endTime === 'number') {
+      ws.write(`,"endTime":${profile.endTime}`);
+    } else {
+      ws.write(',"endTime":0');
+    }
+
+    if (typeof profile.title === 'string') {
+      ws.write(`,"title":${JSON.stringify(profile.title)}`);
+    }
+
     ws.write('}');
     ws.end();
   });
