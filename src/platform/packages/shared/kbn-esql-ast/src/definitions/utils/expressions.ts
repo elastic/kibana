@@ -227,6 +227,8 @@ export function argMatchesParamType(
     // all ES|QL functions accept null, but this is not reflected
     // in our function definitions so we let it through here
     givenType === 'null' ||
+    // Check array types
+    givenType === unwrapArrayOneLevel(expectedType) ||
     // all functions accept keywords for text parameters
     bothStringTypes(givenType, expectedType)
   ) {
