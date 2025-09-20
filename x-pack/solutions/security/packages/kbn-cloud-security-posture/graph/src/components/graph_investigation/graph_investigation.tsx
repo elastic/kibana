@@ -123,6 +123,11 @@ export interface GraphInvestigationProps {
   onOpenEventPreview?: (node: NodeViewModel) => void;
 
   /**
+   * Callback when show group preview is clicked.
+   */
+  onOpenGroupPreview?: (node: NodeViewModel) => void;
+
+  /**
    * Whether to show investigate in timeline action button. Defaults value is false.
    */
   showInvestigateInTimeline?: boolean;
@@ -155,6 +160,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showToggleSearch = false,
     onInvestigateInTimeline,
     onOpenEventPreview,
+    onOpenGroupPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);

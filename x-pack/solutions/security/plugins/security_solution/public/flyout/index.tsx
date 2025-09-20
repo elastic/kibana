@@ -36,6 +36,7 @@ import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
+  DocumentDetailsGroupPreviewPanelKey,
   DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
@@ -47,6 +48,10 @@ import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
 import { LeftPanel } from './document_details/left';
 import { PreviewPanel } from './document_details/preview';
+import {
+  GroupPreviewPanel,
+  type DocumentDetailsGroupPreviewPanelProps,
+} from './document_details/group_preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
@@ -111,6 +116,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
         <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
       </DocumentDetailsProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsGroupPreviewPanelKey,
+    // TODO Wrap GroupPreviewPanel with context provider
+    component: (props) => (
+      <GroupPreviewPanel {...(props as DocumentDetailsGroupPreviewPanelProps).params} />
     ),
   },
   {
