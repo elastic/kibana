@@ -1,0 +1,7 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          deleteAgentResponseExample:
+            success: true

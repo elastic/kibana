@@ -1,0 +1,11 @@
+responses:
+  405:
+    content:
+      application/json:
+        examples:
+          mcpMethodNotAllowedExample:
+            statusCode: 405
+            error: "Method Not Allowed"
+            message: "Method not allowed"
+            attributes:
+              code: -32000

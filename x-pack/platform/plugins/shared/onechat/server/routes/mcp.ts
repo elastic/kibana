@@ -8,6 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -45,7 +46,18 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       {
         version: '2023-10-31',
         validate: {
-          request: { body: schema.object({}, { unknowns: 'allow' }) },
+          request: {
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for MCP server communication.' },
+              }
+            ),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize_request.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -148,6 +160,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       {
         version: '2023-10-31',
         validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
+        },
       },
       wrapHandler(async (ctx, _, response) => {
         return response.customError({
@@ -183,6 +198,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       {
         version: '2023-10-31',
         validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
+        },
       },
       wrapHandler(async (ctx, _, response) => {
         return response.customError({
