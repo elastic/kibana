@@ -14,16 +14,24 @@ import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
 import { Type } from './type';
 
-export interface ByteSizeOptions {
-  // we need to special-case defaultValue as we want to handle string inputs too
+export type ByteSizeValueType = ByteSizeValue | string | number;
+
+/**
+ * Does not support function or `Reference` as `defaultValue`
+ */
+export interface ByteSizeOptions<D extends ByteSizeValueType> {
+  defaultValue?: D;
   validate?: (value: ByteSizeValue) => string | void;
-  defaultValue?: ByteSizeValue | string | number;
   min?: ByteSizeValue | string | number;
   max?: ByteSizeValue | string | number;
 }
 
-export class ByteSizeType extends Type<ByteSizeValue> {
-  constructor(options: ByteSizeOptions = {}) {
+export class ByteSizeType<D extends ByteSizeValueType> extends Type<
+  ByteSizeValue,
+  ByteSizeValue,
+  [D] extends [never] ? never : ByteSizeValue
+> {
+  constructor(options: ByteSizeOptions<D> = {}) {
     let schema = internals.bytes();
 
     if (options.min !== undefined) {
@@ -35,7 +43,9 @@ export class ByteSizeType extends Type<ByteSizeValue> {
     }
 
     super(schema, {
-      defaultValue: ensureByteSizeValue(options.defaultValue),
+      defaultValue: ensureByteSizeValue(options.defaultValue) as [D] extends [never]
+        ? never
+        : ByteSizeValue,
       validate: options.validate,
     });
   }

@@ -115,7 +115,9 @@ function number<D extends DefaultValue<number> = never>(
   return new NumberType(options);
 }
 
-function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
+function byteSize<D extends ByteSizeValueType = never>(
+  options?: ByteSizeOptions<D>
+): ByteSizeType<D> {
   return new ByteSizeType(options);
 }
 
