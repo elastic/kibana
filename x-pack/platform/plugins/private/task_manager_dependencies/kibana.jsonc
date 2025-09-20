@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "taskManager",
       "encryptedSavedObjects",
+      "eventLog"
     ],
   },
 }
