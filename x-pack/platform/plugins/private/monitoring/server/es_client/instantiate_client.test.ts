@@ -6,6 +6,12 @@
  */
 
 import { instantiateClient, hasMonitoringCluster } from './instantiate_client';
+import {
+  elasticsearchServiceMock,
+  type MockedElasticSearchServiceStart,
+} from '@kbn/core-elasticsearch-server-mocks';
+import type { MonitoringElasticsearchConfig } from '../config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const server = {
   monitoring: {
@@ -14,11 +20,10 @@ const server = {
         hosts: [],
         username: 'monitoring-user-internal-test',
         password: 'monitoring-p@ssw0rd!-internal-test',
-        ssl: {},
         customHeaders: {
           'x-custom-headers-test': 'connection-monitoring',
         },
-      },
+      } as Partial<MonitoringElasticsearchConfig> as MonitoringElasticsearchConfig,
     },
   },
 };
@@ -29,56 +34,56 @@ const serverWithUrl = {
         hosts: ['http://monitoring-cluster.test:9200'],
         username: 'monitoring-user-internal-test',
         password: 'monitoring-p@ssw0rd!-internal-test',
-        ssl: {},
         customHeaders: {
           'x-custom-headers-test': 'connection-monitoring',
         },
-      },
+      } as Partial<MonitoringElasticsearchConfig> as MonitoringElasticsearchConfig,
     },
   },
 };
 
-const createClient = jest.fn();
-const log = { info: jest.fn() };
+const log = loggerMock.create();
 
 describe('Instantiate Client', () => {
+  let elasticsearchStart: MockedElasticSearchServiceStart;
+  beforeAll(() => {
+    elasticsearchStart = elasticsearchServiceMock.createStart();
+  });
+
   afterEach(() => {
-    createClient.mockReset();
+    elasticsearchStart.createClient.mockReset();
     log.info.mockReset();
   });
 
   describe('Logging', () => {
     it('logs that the config was sourced from the production options', () => {
-      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(server.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
       expect(log.info.mock.calls[0]).toEqual(['config sourced from: production cluster']);
     });
 
     it('logs that the config was sourced from the monitoring options', () => {
-      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
       expect(log.info.mock.calls[0]).toEqual(['config sourced from: monitoring cluster']);
     });
   });
 
   describe('Custom Headers Configuration', () => {
-    it('Does not add xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
-      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
+    it('Does not create a new client if connected to production cluster', () => {
+      instantiateClient(server.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
-      const createClusterCall = createClient.mock.calls[0];
-      expect(createClient).toHaveBeenCalledTimes(1);
-      expect(createClusterCall[0]).toBe('monitoring');
-      expect(createClusterCall[1].customHeaders).toEqual(undefined);
+      expect(elasticsearchStart.createClient).toHaveBeenCalledTimes(0);
     });
 
     it('Adds xpack.monitoring.elasticsearch.customHeaders if connected to monitoring cluster', () => {
-      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
-      const createClusterCall = createClient.mock.calls[0];
+      const createClusterCall = elasticsearchStart.createClient.mock.calls[0];
 
-      expect(createClient).toHaveBeenCalledTimes(1);
+      expect(elasticsearchStart.createClient).toHaveBeenCalledTimes(1);
       expect(createClusterCall[0]).toBe('monitoring');
-      expect(createClusterCall[1].customHeaders).toEqual({
+      expect(createClusterCall[1]?.customHeaders).toEqual({
         'x-custom-headers-test': 'connection-monitoring',
       });
     });
@@ -86,28 +91,30 @@ describe('Instantiate Client', () => {
 
   describe('Use a connection to production cluster', () => {
     it('exposes an authenticated client using production host settings', () => {
-      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
+      const client = instantiateClient(server.monitoring.ui.elasticsearch, log, elasticsearchStart);
 
-      const createClusterCall = createClient.mock.calls[0];
-      const createClientOptions = createClusterCall[1];
-
-      expect(createClient).toHaveBeenCalledTimes(1);
-      expect(createClusterCall[0]).toBe('monitoring');
-      expect(createClientOptions.hosts).toEqual(undefined);
+      expect(elasticsearchStart.createClient).toHaveBeenCalledTimes(0);
+      expect(client).toEqual(elasticsearchStart.client);
     });
   });
 
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
-      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
-      const createClusterCall = createClient.mock.calls[0];
+      const client = instantiateClient(
+        serverWithUrl.monitoring.ui.elasticsearch,
+        log,
+        elasticsearchStart
+      );
+      const createClusterCall = elasticsearchStart.createClient.mock.calls[0];
       const createClientOptions = createClusterCall[1];
 
-      expect(createClient).toHaveBeenCalledTimes(1);
+      expect(elasticsearchStart.createClient).toHaveBeenCalledTimes(1);
       expect(createClusterCall[0]).toBe('monitoring');
-      expect(createClientOptions.hosts[0]).toEqual('http://monitoring-cluster.test:9200');
-      expect(createClientOptions.username).toEqual('monitoring-user-internal-test');
-      expect(createClientOptions.password).toEqual('monitoring-p@ssw0rd!-internal-test');
+      expect(createClientOptions?.hosts?.[0]).toEqual('http://monitoring-cluster.test:9200');
+      expect(createClientOptions?.username).toEqual('monitoring-user-internal-test');
+      expect(createClientOptions?.password).toEqual('monitoring-p@ssw0rd!-internal-test');
+
+      expect(client).toEqual(elasticsearchStart.createClient.mock.results[0].value);
     });
   });
 
