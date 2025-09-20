@@ -29,7 +29,7 @@ export interface MonitorConfigUpdate {
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
 
-async function syncUpdatedMonitors({
+export async function syncUpdatedMonitors({
   spaceId,
   privateLocations,
   routeContext,

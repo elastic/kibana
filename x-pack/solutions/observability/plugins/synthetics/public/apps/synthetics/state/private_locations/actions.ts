@@ -34,6 +34,10 @@ export const deletePrivateLocationAction = createAsyncAction<string, SyntheticsP
   'DELETE PRIVATE LOCATION'
 );
 
+export const resetPrivateLocationAction = createAsyncAction<string, SyntheticsPrivateLocations>(
+  'RESET PRIVATE LOCATION'
+);
+
 export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');
 
 export const setIsPrivateLocationFlyoutVisible = createAction<boolean>(

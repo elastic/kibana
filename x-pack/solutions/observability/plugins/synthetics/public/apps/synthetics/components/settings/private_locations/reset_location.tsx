@@ -9,40 +9,38 @@ import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectPrivateLocationsState } from '../../../state/private_locations/selectors';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
-export const DeleteLocation = ({
+export const ResetLocation = ({
   id,
   label,
-  onDelete,
+  onReset,
   setIsModalOpen,
 }: {
   id: string;
   label: string;
-  onDelete: (id: string) => void;
+  onReset: (id: string) => void;
   setIsModalOpen: (isOpen: PrivateLocation | null) => void;
 }) => {
-  const { deleteLoading } = useSelector(selectPrivateLocationsState);
-
   const confirmModalTitleId = useGeneratedHtmlId();
-
+  const { resetLoading } = useSelector(selectPrivateLocationsState);
   return (
     <>
       <EuiConfirmModal
         aria-labelledby={confirmModalTitleId}
-        title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
-          defaultMessage: 'Delete "{location}"',
+        title={i18n.translate('xpack.synthetics.monitorManagement.resetLocationName', {
+          defaultMessage: 'Reset "{location}"',
           values: { location: label },
         })}
         titleProps={{ id: confirmModalTitleId }}
         onCancel={() => setIsModalOpen(null)}
-        onConfirm={() => onDelete(id)}
+        onConfirm={() => onReset(id)}
         cancelButtonText={CANCEL_LABEL}
-        confirmButtonText={DELETE_LABEL}
+        confirmButtonText={RESET_LABEL}
         buttonColor="danger"
         defaultFocusedButton="confirm"
-        isLoading={deleteLoading}
+        isLoading={resetLoading}
       >
         <p>{ARE_YOU_SURE_LABEL}</p>
       </EuiConfirmModal>
@@ -50,14 +48,15 @@ export const DeleteLocation = ({
   );
 };
 
-const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.deleteLocation', {
-  defaultMessage: 'Delete location',
+const RESET_LABEL = i18n.translate('xpack.synthetics.monitorManagement.resetLocation', {
+  defaultMessage: 'Reset location',
 });
 
 const CANCEL_LABEL = i18n.translate('xpack.synthetics.monitorManagement.cancelLabel', {
   defaultMessage: 'Cancel',
 });
 
-const ARE_YOU_SURE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.areYouSure', {
-  defaultMessage: 'Are you sure you want to delete this location?',
+const ARE_YOU_SURE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.resetConfirmation', {
+  defaultMessage:
+    'Are you sure you want to reset this location? Monitors resources will be recreated. This will not deleted any existing data, only fleet resources will be reset. This should be done when facing issues running monitors in a particular private location.',
 });
