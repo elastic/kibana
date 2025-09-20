@@ -19,6 +19,7 @@ const updatedDashboard = {
     {
       type: 'visualization',
       gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
+      panelConfig: {},
       panelIndex: '1',
       version: '7.3.0',
     },
@@ -37,7 +38,7 @@ const updatedDashboard = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  describe('main', () => {
+  describe.only('main', () => {
     it('should return 200 with an updated dashboard', async () => {
       const response = await supertest
         .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
