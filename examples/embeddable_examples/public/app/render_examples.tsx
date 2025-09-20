@@ -115,7 +115,7 @@ export const RenderExamples = () => {
   onApiAvailable={(newApi) => {
     setApi(newApi);
   }}
-  hidePanelChrome={hidePanelChrome}
+  panelProps={{ hidePanelChrome }}
 />`}
           </EuiCodeBlock>
 
@@ -136,7 +136,7 @@ export const RenderExamples = () => {
             onApiAvailable={(newApi) => {
               setApi(newApi);
             }}
-            hidePanelChrome={hidePanelChrome}
+            panelProps={{ hidePanelChrome }}
           />
         </EuiFlexItem>
 

@@ -100,7 +100,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
               getParentApi={() => ({
                 getSerializedStateForChild: () => undefined,
               })}
-              hidePanelChrome={true}
+              panelProps={{ hidePanelChrome: true }}
             />
           </div>
         </EuiFlexItem>

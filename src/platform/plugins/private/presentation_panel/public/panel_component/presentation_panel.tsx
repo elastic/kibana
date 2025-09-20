@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
@@ -26,20 +26,12 @@ export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 >(
-  props: PresentationPanelProps<ApiType, PropsType> & {
-    hidePanelChrome?: boolean;
-  }
+  props: PresentationPanelProps<ApiType, PropsType>
 ) => {
   const panelErrorCss = usePanelErrorCss();
-  const { Component, hidePanelChrome, ...passThroughProps } = props;
+  const { Component, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
-    if (hidePanelChrome) {
-      return {
-        unwrappedComponent: isPromise(Component) ? await Component : Component,
-      };
-    }
-
     const startServicesPromise = untilPluginStartServicesReady();
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
     const results = await Promise.allSettled([
@@ -87,8 +79,7 @@ export const PresentationPanel = <
   const Panel = value?.Panel;
   const PanelError = value?.PanelError;
   const UnwrappedComponent = value?.unwrappedComponent;
-  const shouldHavePanel = !hidePanelChrome;
-  if (value?.loadErrorReason || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
+  if (value?.loadErrorReason || !Panel || !UnwrappedComponent) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -106,15 +97,5 @@ export const PresentationPanel = <
     );
   }
 
-  return shouldHavePanel && Panel ? (
-    <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
-  ) : (
-    <EuiErrorBoundary>
-      <UnwrappedComponent
-        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
-          typeof UnwrappedComponent
-        >)}
-      />
-    </EuiErrorBoundary>
-  );
+  return <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />;
 };

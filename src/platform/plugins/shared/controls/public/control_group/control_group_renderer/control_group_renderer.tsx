@@ -164,8 +164,11 @@ export const ControlGroupRenderer = ({
         setControlGroup(controlGroupRendererApi);
         onApiAvailable(controlGroupRendererApi);
       }}
-      hidePanelChrome
-      panelProps={{ hideLoader: true }}
+      panelProps={{
+        disableReportingAttributes: true,
+        hideLoader: true,
+        hidePanelChrome: true,
+      }}
     />
   );
 };
