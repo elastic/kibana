@@ -16,9 +16,7 @@ interface StreamSystemsApi {
   ) => Promise<void>;
 }
 
-export function useStreamSystemsApi(
-  definition: Streams.ClassicStream.GetResponse
-): StreamSystemsApi {
+export function useStreamSystemsApi(definition: Streams.all.GetResponse): StreamSystemsApi {
   const {
     dependencies: {
       start: {

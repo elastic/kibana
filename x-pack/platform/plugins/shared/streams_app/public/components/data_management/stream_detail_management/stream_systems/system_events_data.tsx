@@ -12,12 +12,12 @@ import { Chart, BarSeries, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSystemEvents } from './hooks/use_system_events';
+import { useStreamSystemEventsData } from './hooks/use_stream_system_events_data';
 
 export const SystemEventsData = ({ system }: { system: System }) => {
   const chartBaseTheme = useElasticChartsTheme();
 
-  const events = useSystemEvents(system);
+  const events = useStreamSystemEventsData(system);
 
   return (
     <>
