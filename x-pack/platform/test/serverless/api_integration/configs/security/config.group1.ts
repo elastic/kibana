@@ -36,6 +36,7 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Security Platform API Integration Tests - Common Group 1',
   },
+  enableFleetDockerRegistry: false,
   suiteTags: { exclude: ['skipSvlSec'] },
 
   // include settings from project controller
