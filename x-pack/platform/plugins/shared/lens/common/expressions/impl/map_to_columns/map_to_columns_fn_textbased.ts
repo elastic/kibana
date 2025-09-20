@@ -5,36 +5,58 @@
  * 2.0.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { transformEsqlMultiTermBreakdown } from '@kbn/esql-multiterm-transformer';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type {
   OriginalColumn,
   MapToColumnsExpressionFunction,
+  MapToColumnsExpressionFunctionArgs,
 } from '../../defs/map_to_columns/types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
-  data,
-  { idMap: encodedIdMap }
+  data: Datatable,
+  { idMap: encodedIdMap, query: queryStr }: MapToColumnsExpressionFunctionArgs
 ) => {
+  const query = queryStr ? (JSON.parse(queryStr) as { esql: string }) : undefined;
+  const { columns, rows, transformed, newColumnName, originalStringColumns } =
+    transformEsqlMultiTermBreakdown({ ...data, query: query?.esql });
+  const table = { ...data, columns, rows };
+
   const isOriginalColumn = (item: OriginalColumn | undefined): item is OriginalColumn => {
     return !!item;
   };
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn[]>;
 
+  // Backwards compatibility for saved objects:
+  // If a transformation occurred, the column IDs in the datatable have changed.
+  // We need to check if the saved configuration (`idMap`) was using one of the
+  // original, now-removed columns. If it was, we remap that configuration
+  // on-the-fly to point to the new, combined column. This ensures that visualizations
+  // saved before this change will still load correctly.
+  if (transformed && newColumnName) {
+    for (const originalCol of originalStringColumns) {
+      if (idMap[originalCol.id]) {
+        idMap[newColumnName] = idMap[originalCol.id];
+        delete idMap[originalCol.id];
+      }
+    }
+  }
+
   // extract all the entries once
   const idMapColEntries = Object.entries(idMap);
   // create a lookup id => column
-  const colLookups = new Map<string, DatatableColumn>(data.columns.map((c) => [c.id, c]));
+  const colLookups = new Map<string, DatatableColumn>(table.columns.map((c) => [c.id, c]));
 
   // now create a lookup to get the original columns for each variable
   const colVariableLookups = new Map<string, OriginalColumn[]>(
-    idMapColEntries.flatMap(([id, columns]) =>
-      columns.filter(({ variable }) => variable).map(({ variable }) => [`${variable}`, columns])
+    idMapColEntries.flatMap(([_id, cols]) =>
+      cols.filter(({ variable }) => variable).map(({ variable }) => [`${variable}`, cols])
     )
   );
 
   return {
-    ...data,
-    rows: data.rows.map((row) => {
+    ...table,
+    rows: table.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
 
       for (const id in row) {
@@ -57,13 +79,13 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
 
       return mappedRow;
     }),
-    columns: data.columns.flatMap((column) => {
+    columns: table.columns.flatMap((column) => {
       if (!(column.id in idMap) && !column.variable) {
         return [];
       }
       if (column.variable) {
         const originalColumn = idMapColEntries
-          .map(([_id, columns]) => columns.find((c) => c.variable === column.variable))
+          .map(([_id, cols]) => cols.find((c) => c.variable === column.variable))
           .filter(isOriginalColumn);
 
         if (!originalColumn) {

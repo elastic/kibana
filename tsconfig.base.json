@@ -982,6 +982,8 @@
       "@kbn/esql-datagrid/*": ["src/platform/plugins/shared/esql_datagrid/*"],
       "@kbn/esql-editor": ["src/platform/packages/private/kbn-esql-editor"],
       "@kbn/esql-editor/*": ["src/platform/packages/private/kbn-esql-editor/*"],
+      "@kbn/esql-multiterm-transformer": ["src/platform/packages/shared/kbn-esql-multiterm-transformer"],
+      "@kbn/esql-multiterm-transformer/*": ["src/platform/packages/shared/kbn-esql-multiterm-transformer/*"],
       "@kbn/esql-types": ["src/platform/packages/shared/kbn-esql-types"],
       "@kbn/esql-types/*": ["src/platform/packages/shared/kbn-esql-types/*"],
       "@kbn/esql-utils": ["src/platform/packages/shared/kbn-esql-utils"],

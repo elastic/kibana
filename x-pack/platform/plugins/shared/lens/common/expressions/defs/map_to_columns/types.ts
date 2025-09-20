@@ -18,12 +18,15 @@ export type OriginalColumn = {
   | { operationType: string; sourceField?: string; interval: never }
 );
 
+export interface MapToColumnsExpressionFunctionArgs {
+  idMap: string;
+  isTextBased?: boolean;
+  query?: string;
+}
+
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<
   'lens_map_to_columns',
   Datatable,
-  {
-    idMap: string;
-    isTextBased?: boolean;
-  },
+  MapToColumnsExpressionFunctionArgs,
   Datatable | Promise<Datatable>
 >;

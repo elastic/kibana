@@ -39,6 +39,11 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import {
+  transformEsqlMultiTermBreakdown,
+  getMultiTermsFormatterParams,
+} from '@kbn/esql-multiterm-transformer';
+
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -81,6 +86,7 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
+  const fieldFormats = services.data.fieldFormats;
 
   /**
    * API initialization
@@ -219,14 +225,15 @@ export const useDiscoverHistogram = (
   // don't frequently change, such as when the user modifies the table
   // columns, which would trigger unnecessary refetches.
   const esqlFetchComplete$ = useMemo(
-    () => createFetchCompleteObservable(stateContainer),
-    [stateContainer]
+    () => createFetchCompleteObservable(stateContainer, fieldFormats),
+    [stateContainer, fieldFormats]
   );
 
   const [initialEsqlProps] = useState(() =>
     getUnifiedHistogramPropsForEsql({
       documentsValue: documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
+      fieldFormats,
     })
   );
 
@@ -482,7 +489,10 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
   );
 };
 
-const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
+const createFetchCompleteObservable = (
+  stateContainer: DiscoverStateContainer,
+  fieldFormats: FieldFormatsStart
+) => {
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
@@ -490,6 +500,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
       return getUnifiedHistogramPropsForEsql({
         documentsValue,
         savedSearch: stateContainer.savedSearchState.getState(),
+        fieldFormats,
       });
     })
   );
@@ -515,18 +526,32 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
 function getUnifiedHistogramPropsForEsql({
   documentsValue,
   savedSearch,
+  fieldFormats,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
+  fieldFormats: FieldFormatsStart;
 }) {
-  const columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const initialColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const initialRows = documentsValue?.result ? documentsValue.result.map((r) => r.raw) : [];
   const query = savedSearch.searchSource.getField('query');
   const isEsqlMode = isOfAggregateQueryType(query);
+
+  const { columns, rows } = transformEsqlMultiTermBreakdown({
+    columns: initialColumns,
+    rows: initialRows,
+    query: isEsqlMode && typeof query.esql === 'string' ? query.esql : undefined,
+    formatter: fieldFormats.getInstance(
+      'multi_terms',
+      getMultiTermsFormatterParams(initialColumns)
+    ),
+  });
+
   const table: Datatable | undefined =
     isEsqlMode && documentsValue?.result
       ? {
           type: 'datatable',
-          rows: documentsValue.result.map((r) => r.raw),
+          rows,
           columns,
           meta: { type: ESQL_TABLE_TYPE },
         }

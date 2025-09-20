@@ -547,6 +547,7 @@
     "@kbn/esql-composer": "link:src/platform/packages/shared/kbn-esql-composer",
     "@kbn/esql-datagrid": "link:src/platform/plugins/shared/esql_datagrid",
     "@kbn/esql-editor": "link:src/platform/packages/private/kbn-esql-editor",
+    "@kbn/esql-multiterm-transformer": "link:src/platform/packages/shared/kbn-esql-multiterm-transformer",
     "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",
     "@kbn/esql-validation-autocomplete": "link:src/platform/packages/shared/kbn-esql-validation-autocomplete",

@@ -18,6 +18,10 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import {
+  transformEsqlMultiTermBreakdown,
+  getMultiTermsFormatterParams,
+} from '@kbn/esql-multiterm-transformer';
 import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
@@ -225,7 +229,17 @@ export function getTextBasedDatasource({
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
+      const initialColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
+      const { columns: textBasedQueryColumns } = transformEsqlMultiTermBreakdown({
+        columns: initialColumns,
+        rows: [],
+        query: context.query.esql,
+        formatter: data.fieldFormats.getInstance(
+          'multi_terms',
+          getMultiTermsFormatterParams(initialColumns)
+        ),
+      });
+
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
       // will not return number fields. In these cases we want to suggest a datatable
       // Datatable works differently in this case. On the metrics dimension can be all type of fields
@@ -237,7 +251,7 @@ export function getTextBasedDatasource({
         );
         return {
           columnId: c.variable ?? c.id,
-          fieldName: c.variable ? `??${c.variable}` : c.id,
+          fieldName: c.id,
           variable: c.variable,
           label: c.name,
           customLabel: c.id !== c.name,
@@ -509,7 +523,9 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      return (
+        <TextBasedDimensionEditor {...props} expressions={expressions} core={core} data={data} />
+      );
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {

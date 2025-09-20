@@ -36,6 +36,7 @@
     "esQuery": "src/platform/packages/shared/kbn-es-query/src",
     "kbnGridLayout": "src/platform/packages/private/kbn-grid-layout",
     "esUi": "src/platform/plugins/shared/es_ui_shared",
+    "esqlMultiTermTransformer": "src/platform/packages/shared/kbn-esql-multiterm-transformer",
     "expandableFlyout": "packages/kbn-expandable-flyout",
     "expressionGauge": "src/platform/plugins/shared/chart_expressions/expression_gauge",
     "expressionHeatmap": "src/platform/plugins/shared/chart_expressions/expression_heatmap",
