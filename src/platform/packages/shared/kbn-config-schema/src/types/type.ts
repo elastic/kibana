@@ -121,6 +121,9 @@ export abstract class Type<Output = any, Input = Output, D extends DefaultValue<
   public readonly _output!: Output;
   public readonly _input!: [D] extends [never] ? Input : Input | undefined;
 
+  // @ts-ignore - This is needed to preserve the type of D, otherwise it will become ambiguous
+  private readonly _default!: D;
+
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
 
