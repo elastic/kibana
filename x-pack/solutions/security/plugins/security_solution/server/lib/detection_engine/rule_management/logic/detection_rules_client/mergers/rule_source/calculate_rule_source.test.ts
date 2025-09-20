@@ -66,6 +66,8 @@ describe('calculateRuleSource', () => {
       expect.objectContaining({
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       })
     );
   });
@@ -87,6 +89,8 @@ describe('calculateRuleSource', () => {
       expect.objectContaining({
         type: 'external',
         is_customized: true,
+        customized_fields: [{ field_name: 'name' }],
+        has_base_version: true,
       })
     );
   });
@@ -110,6 +114,8 @@ describe('calculateRuleSource', () => {
       expect.objectContaining({
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       })
     );
   });
@@ -131,6 +137,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -141,6 +149,8 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       // No base version
@@ -155,6 +165,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -165,6 +177,8 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       // No base version
@@ -179,6 +193,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -189,6 +205,8 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       const nextRule = {
@@ -208,6 +226,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });

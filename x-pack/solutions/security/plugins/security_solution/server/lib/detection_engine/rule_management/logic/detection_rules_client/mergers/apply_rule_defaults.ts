@@ -21,6 +21,7 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { createDefaultExternalRuleSource } from './rule_source/create_default_external_rule_source';
 
 export const RULE_DEFAULTS = {
   enabled: false,
@@ -63,10 +64,7 @@ export function applyRuleDefaults(
 
 const convertImmutableToRuleSource = (immutable: boolean): RuleSource => {
   if (immutable) {
-    return {
-      type: 'external',
-      is_customized: false,
-    };
+    return createDefaultExternalRuleSource();
   }
 
   return {

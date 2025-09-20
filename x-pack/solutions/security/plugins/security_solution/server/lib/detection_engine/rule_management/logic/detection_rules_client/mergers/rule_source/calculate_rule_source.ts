@@ -11,7 +11,7 @@ import type {
 } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { calculateIsCustomized } from './calculate_is_customized';
+import { calculateExternalRuleSource } from './calculate_external_rule_source';
 
 interface CalculateRuleSourceProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
@@ -35,16 +35,11 @@ export async function calculateRuleSource({
     ]);
     const baseRule: PrebuiltRuleAsset | undefined = prebuiltRulesResponse.at(0);
 
-    const isCustomized = calculateIsCustomized({
+    return calculateExternalRuleSource({
       baseRule,
       nextRule,
       currentRule,
     });
-
-    return {
-      type: 'external',
-      is_customized: isCustomized,
-    };
   }
 
   return {
