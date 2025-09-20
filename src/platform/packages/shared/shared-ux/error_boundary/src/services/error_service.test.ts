@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaErrorService } from './error_service';
+import { KibanaErrorService, MONITOR_NAVIGATION_WITHIN_MS } from './error_service';
 
 describe('KibanaErrorBoundary Error Service', () => {
   beforeEach(() => {
@@ -82,6 +82,8 @@ describe('KibanaErrorBoundary Error Service', () => {
 
   it('captures the error event for telemetry', () => {
     jest.resetAllMocks();
+    jest.useFakeTimers();
+
     const testFatal = new Error('This is an outrageous and fatal error');
 
     const errorInfo = {
@@ -91,17 +93,25 @@ describe('KibanaErrorBoundary Error Service', () => {
     };
 
     service.registerError(testFatal, errorInfo);
+
+    // Fast-forward time by the monitoring navigation window to ensure error is committed
+    jest.advanceTimersByTime(MONITOR_NAVIGATION_WITHIN_MS);
 
     expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'OutrageousMaker',
       error_message: 'Error: This is an outrageous and fatal error',
+      has_subsequent_navigation: false,
     });
+
+    jest.useRealTimers();
   });
 
   it('captures component stack trace and error stack trace for telemetry', () => {
     jest.resetAllMocks();
+    jest.useFakeTimers();
+
     const testFatal = new Error('This is an outrageous and fatal error');
 
     const errorInfo = {
@@ -111,6 +121,9 @@ describe('KibanaErrorBoundary Error Service', () => {
     };
 
     service.registerError(testFatal, errorInfo);
+
+    // Fast-forward time by the monitoring navigation window to ensure error is committed
+    jest.advanceTimersByTime(MONITOR_NAVIGATION_WITHIN_MS);
 
     expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
@@ -124,5 +137,7 @@ describe('KibanaErrorBoundary Error Service', () => {
         'Error: This is an outrageous and fatal error'
       )
     ).toBe(true);
+
+    jest.useRealTimers();
   });
 });
