@@ -251,7 +251,10 @@ export const DiscoverTopNav = ({
     <>
       <SearchBar
         {...topNavProps}
-        useBackgroundSearchButton={services.data.search.isBackgroundSearchEnabled}
+        useBackgroundSearchButton={
+          services.data.search.isBackgroundSearchEnabled &&
+          services.capabilities.discover_v2.storeSearchSession
+        }
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
