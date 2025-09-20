@@ -301,8 +301,6 @@ describe('convertToWorkflowGraph', () => {
       expect(node).toEqual({
         id: 'testElasticsearchStep',
         type: 'elasticsearch.search.query',
-        stepId: 'testElasticsearchStep',
-        stepType: 'elasticsearch.search.query',
         configuration: {
           name: 'testElasticsearchStep',
           type: 'elasticsearch.search.query',
