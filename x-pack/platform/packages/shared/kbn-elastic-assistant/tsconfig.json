@@ -47,5 +47,6 @@
     "@kbn/inference-common",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-user-profile-common",
+    "@kbn/ai-assistant-management-plugin",
   ]
 }
