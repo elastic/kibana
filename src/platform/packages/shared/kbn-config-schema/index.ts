@@ -56,6 +56,8 @@ import {
   StreamType,
   Lazy,
 } from './src/types';
+import type { DurationDefaultValue } from './src/types/duration_type';
+import type { ByteSizeValueType } from './src/types/byte_size_type';
 
 import type { DefaultValue, SomeType } from './src/types/type';
 import type { ObjectInputType, ObjectOutputType, SomeObjectType } from './src/types/object_type';
@@ -238,11 +240,11 @@ function intersection<
   return new IntersectionType(types, options);
 }
 
-function contextRef<T>(key: string): ContextReference<T> {
+function contextRef<T = any>(key: string): ContextReference<T> {
   return new ContextReference(key);
 }
 
-function siblingRef<T>(key: string): SiblingReference<T> {
+function siblingRef<T = any>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
