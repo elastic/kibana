@@ -17,6 +17,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
+import { getUserAccessControlData } from './get_user_access_control_data';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -28,9 +29,12 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
-    id: savedObjectId,
-  });
+  const [savedObjectResult, user] = await Promise.all([
+    getDashboardContentManagementService().loadDashboardState({
+      id: savedObjectId,
+    }),
+    getUserAccessControlData(),
+  ]);
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -85,6 +89,7 @@ export async function loadDashboardApi({
     },
     savedObjectResult,
     savedObjectId,
+    user,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {

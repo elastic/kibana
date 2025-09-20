@@ -20,6 +20,7 @@ import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
 } from './control_group_manager';
+import { initializeAccessControlManager } from './access_control_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
@@ -31,7 +32,12 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardInternalApi,
+  DashboardUser,
+} from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
@@ -43,19 +49,23 @@ export function getDashboardApi({
   initialState,
   savedObjectResult,
   savedObjectId,
+  user,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
+  user?: DashboardUser;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
+  const accessControlManager = initializeAccessControlManager(savedObjectResult, savedObjectId$);
+
+  const viewModeManager = initializeViewModeManager(user, incomingEmbeddable, savedObjectResult);
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
@@ -163,6 +173,7 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode$.value,
+        accessControl: accessControlManager.api.accessControl$.value,
         ...getState(),
       });
 
@@ -215,6 +226,11 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
+    createdBy: savedObjectResult?.createdBy,
+    user,
+    // TODO: accessControl$ and changeAccessMode should be moved to internalApi
+    accessControl$: accessControlManager.api.accessControl$,
+    changeAccessMode: accessControlManager.api.changeAccessMode,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

@@ -70,19 +70,23 @@ export class DashboardStorage {
     logger,
     throwOnResultValidationError,
     savedObjectsTagging,
+    isAccessControlEnabled,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
     savedObjectsTagging?: SavedObjectTaggingStart;
+    isAccessControlEnabled: boolean;
   }) {
     this.savedObjectsTagging = savedObjectsTagging;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
+    this.isAccessControlEnabled = isAccessControlEnabled;
   }
 
   private logger: Logger;
   private savedObjectsTagging?: SavedObjectTaggingStart;
   private throwOnResultValidationError: boolean;
+  private isAccessControlEnabled: boolean;
 
   private getTagNamesFromReferences(references: SavedObjectReference[], allTags: Tag[]) {
     return Array.from(
@@ -271,11 +275,23 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
     }
 
+    const accessControl = this.isAccessControlEnabled
+      ? {
+          accessMode: optionsToLatest?.accessControl?.accessMode || 'default',
+        }
+      : undefined;
+
     // Save data in DB
+    const createOptions = {
+      ...optionsToLatest,
+      references: soReferences,
+      accessControl,
+    };
+
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      createOptions
     );
 
     const { item, error: itemError } = savedObjectToItem(savedObject, false, {
