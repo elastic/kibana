@@ -23,6 +23,7 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -41,13 +42,15 @@ export const MetricsExperienceGrid = ({
   requestParams,
   services,
   input$: originalInput$,
-}: ChartSectionProps) => {
+  isChartLoading,
+  timeRange,
+}: ChartSectionProps & { isChartLoading: boolean; timeRange: TimeRange }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
   const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
 
-  const { getTimeRange, updateTimeRange } = requestParams;
+  const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -60,9 +63,10 @@ export const MetricsExperienceGrid = ({
   });
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isLoading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching } = useMetricFieldsQuery({
     index: indexPattern,
-    timeRange: getTimeRange(),
+    from: timeRange.from,
+    to: timeRange.to,
   });
 
   const { leftSideActions, rightSideActions } = useToolbarActions({
@@ -100,8 +104,8 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  if (fields.length === 0) {
-    return <EmptyState isLoading={isLoading} />;
+  if (isChartLoading) {
+    return <EmptyState isLoading={isChartLoading} />;
   }
 
   return (
@@ -130,7 +134,7 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {isLoading ? (
+              {isFetching ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
                 <EuiText size="s">
