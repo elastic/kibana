@@ -4416,6 +4416,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-access-control-server@link:src/platform/packages/shared/content-management/access_control/access_control_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -7181,6 +7189,10 @@
   uid ""
 
 "@kbn/react-mute-legacy-root-warning@link:src/platform/packages/private/kbn-react-mute-legacy-root-warning":
+  version "0.0.0"
+  uid ""
+
+"@kbn/read-only-objects-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin":
   version "0.0.0"
   uid ""
 

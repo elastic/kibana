@@ -213,6 +213,41 @@ describe('SavedObjectTypeRegistry', () => {
         );
       }).not.toThrow();
     });
+
+    it('throws when `supportsAccessControl` is true and access control feature is disabled', () => {
+      registry.setAccessControlEnabled(false);
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeAC1',
+            supportsAccessControl: true,
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeAC1: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration"`
+      );
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeAC1',
+            supportsAccessControl: false,
+          })
+        );
+      }).not.toThrow();
+
+      registry.setAccessControlEnabled(true);
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeAC2',
+            supportsAccessControl: true,
+          })
+        );
+      }).not.toThrow();
+    });
+
     // TODO: same test with 'onImport'
   });
 

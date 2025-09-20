@@ -9,11 +9,10 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -37,51 +36,43 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
-
+  const accessControlClient = getAccessControlClient();
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
+  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
       dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardApi.accessControl$
     );
+
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
+  const canManageAccessControl = useMemo(() => {
+    const userAccessControl = accessControlClient.checkUserAccessControl({
+      accessControl,
+      createdBy: dashboardApi.createdBy,
+      userId: dashboardApi.user?.uid,
+    });
+    return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
+  }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
 
-  /**
-   * Show the Dashboard app's share menu
-   */
-  const showShare = useCallback(
-    (anchorElement: HTMLElement, asExport?: boolean) => {
-      ShowShareModal({
-        asExport,
-        dashboardTitle,
-        anchorElement,
-        savedObjectId: lastSavedId,
-        isDirty: Boolean(hasUnsavedChanges),
-      });
-    },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
-  );
+  const isEditButtonDisabled = useMemo(() => {
+    if (disableTopNav) return true;
+    if (canManageAccessControl) return false;
+    return !isInEditAccessMode;
+  }, [disableTopNav, isInEditAccessMode, canManageAccessControl]);
 
-  /**
-   * Save the dashboard without any UI or popups.
-   */
-  const quickSaveDashboard = useCallback(() => {
-    setIsSaveInProgress(true);
-    dashboardApi.runQuickSave().then(() => setTimeout(() => setIsSaveInProgress(false), 100));
-  }, [dashboardApi]);
-
-  /**
-   * initiate interactive dashboard copy action
-   */
-  const dashboardInteractiveSave = useCallback(() => {
-    dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardApi]);
+  const isQuickSaveButtonDisabled = useMemo(() => {
+    if (disableTopNav || !hasUnsavedChanges) return true;
+    if (canManageAccessControl) return false;
+    return !isInEditAccessMode;
+  }, [disableTopNav, hasUnsavedChanges, canManageAccessControl, isInEditAccessMode]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -113,6 +104,81 @@ export const useDashboardMenuItems = ({
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
+
+  /**
+   * initiate interactive dashboard copy action
+   */
+  const dashboardInteractiveSave = useCallback(async () => {
+    const result = await dashboardApi.runInteractiveSave();
+    maybeRedirect(result);
+    if (result && !result.error) {
+      return result;
+    }
+  }, [maybeRedirect, dashboardApi]);
+
+  /**
+   * Save the dashboard without any UI or popups.
+   */
+  const quickSaveDashboard = useCallback(() => {
+    setIsSaveInProgress(true);
+    dashboardApi.runQuickSave().then(() =>
+      setTimeout(() => {
+        setIsSaveInProgress(false);
+      }, 100)
+    );
+  }, [dashboardApi]);
+
+  const saveFromShareModal = useCallback(async () => {
+    if (lastSavedId) {
+      quickSaveDashboard();
+      return Promise.resolve({});
+    } else {
+      return dashboardInteractiveSave();
+    }
+  }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
+
+  /**
+   * Show the Dashboard app's share menu
+   */
+  const showShare = useCallback(
+    (anchorElement: HTMLElement, asExport?: boolean) => {
+      ShowShareModal({
+        asExport,
+        dashboardTitle,
+        anchorElement,
+        savedObjectId: lastSavedId,
+        isDirty: Boolean(hasUnsavedChanges),
+        canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        accessControlClient,
+        saveDashboard: saveFromShareModal,
+        changeAccessMode: dashboardApi.changeAccessMode,
+      });
+    },
+    [
+      dashboardTitle,
+      hasUnsavedChanges,
+      lastSavedId,
+      isInEditAccessMode,
+      canManageAccessControl,
+      accessControl,
+      saveFromShareModal,
+      dashboardApi.changeAccessMode,
+      dashboardApi.createdBy,
+      accessControlClient,
+    ]
+  );
+
+  const getEditTooltip = useCallback(() => {
+    if (dashboardApi.isManaged) {
+      return topNavStrings.edit.managedDashboardTooltip;
+    }
+    if (isInEditAccessMode || canManageAccessControl) {
+      return undefined;
+    }
+    return topNavStrings.edit.readOnlyTooltip;
+  }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
@@ -147,7 +213,8 @@ export const useDashboardMenuItems = ({
           dashboardApi.setViewMode('edit');
           dashboardApi.clearOverlays();
         },
-        disableButton: disableTopNav,
+        disableButton: isEditButtonDisabled,
+        tooltip: getEditTooltip(),
       } as TopNavMenuData,
 
       quickSave: {
@@ -157,7 +224,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
+        disableButton: isQuickSaveButtonDisabled,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -196,6 +263,9 @@ export const useDashboardMenuItems = ({
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
+        tooltip: isInEditAccessMode
+          ? topNavStrings.share.editModeTooltipContent
+          : topNavStrings.share.readOnlyModeTooltipContent,
       } as TopNavMenuData,
 
       export: {
@@ -220,7 +290,6 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
-    hasUnsavedChanges,
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
@@ -231,6 +300,10 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     resetChanges,
     isResetting,
+    isEditButtonDisabled,
+    isInEditAccessMode,
+    isQuickSaveButtonDisabled,
+    getEditTooltip,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

@@ -14,6 +14,8 @@ const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
 > => {
   const mock = {
+    setAccessControlEnabled: jest.fn(),
+    isAccessControlEnabled: jest.fn(),
     registerType: jest.fn(),
     getLegacyTypes: jest.fn(),
     getType: jest.fn(),
@@ -30,6 +32,7 @@ const createRegistryMock = (): jest.Mocked<
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
+    supportsAccessControl: jest.fn(),
   };
 
   mock.getVisibleTypes.mockReturnValue([]);
@@ -49,6 +52,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isImportableAndExportable.mockReturnValue(true);
   mock.getVisibleToHttpApisTypes.mockReturnValue(false);
   mock.getNameAttribute.mockReturnValue(undefined);
+  mock.isAccessControlEnabled.mockReturnValue(true);
 
   return mock;
 };

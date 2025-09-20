@@ -12,6 +12,12 @@ import type { SavedObjectsType } from './saved_objects_type';
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  */
 export interface ISavedObjectTypeRegistry {
+  /** Internal only function to set whether access control is enabled */
+  setAccessControlEnabled(enabled: boolean): void;
+
+  /** Internal only function to get whether access control is enabled */
+  isAccessControlEnabled(): boolean;
+
   /** Return legacy types, this types can't be registered */
   getLegacyTypes(): string[];
 
@@ -98,4 +104,9 @@ export interface ISavedObjectTypeRegistry {
    * the property/type is not registered.
    */
   getNameAttribute(type: string): string;
+
+  /**
+   * Returns whether the type supports access control.
+   */
+  supportsAccessControl(type: string): boolean;
 }

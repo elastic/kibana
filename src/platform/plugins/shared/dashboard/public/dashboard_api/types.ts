@@ -48,6 +48,7 @@ import type { PublishesSearchSession } from '@kbn/presentation-publishing/interf
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import type {
@@ -155,6 +156,10 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
+    changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+    createdBy?: string;
+    user?: DashboardUser;
   };
 
 export interface DashboardInternalApi {
@@ -168,4 +173,9 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
+}
+
+export interface DashboardUser {
+  uid: string;
+  hasGlobalAccessControlPrivilege: boolean;
 }
