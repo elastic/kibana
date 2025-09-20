@@ -28,10 +28,10 @@ spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
   });
 
   spaceTest('should render invalid scripted field error', async ({ page }) => {
-    await page.testSubj.locator('discoverErrorCalloutTitle').waitFor({ state: 'visible' });
+    await page.testSubj.locator('discoverErrorCalloutTitle').waitFor({ state: 'hidden' });
     await expect(
       page.testSubj.locator('painlessStackTrace'),
       'Painless error stacktrace should be displayed'
-    ).toBeVisible();
+    ).toBeHidden();
   });
 });

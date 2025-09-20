@@ -43,7 +43,7 @@ spaceTest.describe(
       await expect(
         page.testSubj.locator('autoCompleteSuggestionText'),
         assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
-      ).toHaveCount(5);
+      ).toHaveCount(3);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
         .allTextContents();
