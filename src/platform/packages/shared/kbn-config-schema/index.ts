@@ -131,7 +131,7 @@ function duration<D extends DurationDefaultValue = never>(
   return new DurationType(options);
 }
 
-function never(): Type<never> {
+function never(): NeverType {
   return new NeverType();
 }
 

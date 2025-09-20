@@ -10,7 +10,7 @@
 import { internals } from '../internals';
 import { Type } from './type';
 
-export class NeverType extends Type<never> {
+export class NeverType extends Type<never, never, never> {
   constructor() {
     super(internals.any().forbidden());
   }
