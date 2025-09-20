@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
-
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { TriggerTypes, getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import YAML, { isMap, isPair, isScalar, visit } from 'yaml';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import YAML, { isPair, isScalar } from 'yaml';
+import {
+  getStepNodesWithType,
+  getTriggerNodes,
+  getTriggerNodesWithType,
+} from '../../../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -42,150 +44,12 @@ import { useYamlValidation } from '../lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
+import { ActionsMenuPopover } from '../../actions_menu_popover';
+import type { ActionOptionData } from '../../actions_menu_popover/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-
-const getTriggerNodes = (
-  yamlDocument: YAML.Document
-): Array<{ node: any; triggerType: string; typePair: any }> => {
-  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
-
-  if (!yamlDocument?.contents) return triggerNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
-
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
-      }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        const triggerType = pair.value.value as string;
-        // Find the parent map node that contains this trigger
-        const triggerMapNode = ancestors[ancestors.length - 1];
-        triggerNodes.push({
-          node: triggerMapNode,
-          triggerType,
-          typePair: pair, // Store the actual type pair for precise positioning
-        });
-      }
-    },
-  });
-
-  return triggerNodes;
-};
-
-const getStepNodesWithType = (yamlDocument: YAML.Document): any[] => {
-  const stepNodes: any[] = [];
-
-  if (!yamlDocument?.contents) return stepNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a step (not nested inside 'with' or other blocks)
-      const path = ancestors.slice();
-      let isMainStepType = false;
-
-      // Walk up the ancestors to see if we're in a steps array
-      // and ensure this type field is a direct child of a step, not nested in 'with'
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-
-        // If we encounter a 'with' field before finding 'steps', this is a nested type
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'with') {
-          return; // Skip this type field - it's inside a 'with' block
-        }
-
-        // If we find 'steps', this could be a main step type
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'steps') {
-          isMainStepType = true;
-          break;
-        }
-      }
-
-      if (isMainStepType && isScalar(pair.value)) {
-        // Find the step node (parent containing the type) - should be the immediate parent map
-        const immediateParent = ancestors[ancestors.length - 1];
-        if (isMap(immediateParent) && 'items' in immediateParent && immediateParent.items) {
-          // Ensure this is a step node by checking it has both 'name' and 'type' fields
-          const hasName = immediateParent.items.some(
-            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'name'
-          );
-          const hasType = immediateParent.items.some(
-            (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-          );
-
-          if (hasName && hasType) {
-            stepNodes.push(immediateParent);
-          }
-        }
-      }
-    },
-  });
-
-  return stepNodes;
-};
-
-const getTriggerNodesWithType = (yamlDocument: YAML.Document): any[] => {
-  const triggerNodes: any[] = [];
-
-  if (!yamlDocument?.contents) return triggerNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
-
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
-      }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        // Find the trigger node (parent containing the type)
-        for (let i = path.length - 1; i >= 0; i--) {
-          const ancestor = path[i];
-          if (isMap(ancestor) && 'items' in ancestor && ancestor.items) {
-            // Check if this map contains a type field
-            const hasType = ancestor.items.some(
-              (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-            );
-            if (hasType) {
-              triggerNodes.push(ancestor);
-              break;
-            }
-          }
-        }
-      }
-    },
-  });
-
-  return triggerNodes;
-};
+import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
+import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -263,6 +127,7 @@ export const WorkflowYAMLEditor = ({
     services: { http, notifications },
   } = useKibana<CoreStart>();
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const workflowJsonSchema = useWorkflowJsonSchema();
@@ -449,12 +314,60 @@ export const WorkflowYAMLEditor = ({
     [onChange, changeSideEffects]
   );
 
+  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
+
+  const openActionsPopover = () => {
+    setActionsPopoverOpen(true);
+  };
+  const closeActionsPopover = () => {
+    setActionsPopoverOpen(false);
+  };
+
+  const onActionSelected = (action: ActionOptionData) => {
+    const model = editorRef.current?.getModel();
+    const yamlDocumentCurrent = yamlDocumentRef.current;
+    const cursorPosition = editorRef.current?.getPosition();
+    const editor = editorRef.current;
+    if (!model || !yamlDocumentCurrent || !editor) {
+      return;
+    }
+    if (TriggerTypes.includes(action.id)) {
+      insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+    } else {
+      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
+    }
+    closeActionsPopover();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'k' && event.metaKey) {
+        openActionsPopover();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
 
     editor.updateOptions({
       glyphMargin: true,
     });
+
+    // TODO: handle unmounting of the editor
+    // CMD+K shortcut, while focus is on the editor
+    editor.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+      () => {
+        openActionsPopover();
+      },
+      'Open actions popover'
+    );
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -813,9 +726,11 @@ export const WorkflowYAMLEditor = ({
           return isPair(item) && isScalar(item.key) && item.key.value === 'type';
         });
 
-        if (!typePair?.value?.value) continue;
+        if (!typePair || !isScalar(typePair.value)) {
+          continue;
+        }
 
-        const connectorType = typePair.value.value;
+        const connectorType = typePair.value.value as string;
         // console.log('🎨 Processing connector type:', connectorType);
 
         // Skip decoration for very short connector types to avoid false matches
@@ -1356,7 +1271,17 @@ export const WorkflowYAMLEditor = ({
   }, [handleMarkersChanged]);
 
   return (
-    <div css={styles.container}>
+    <div css={styles.container} ref={containerRef}>
+      <ActionsMenuPopover
+        anchorPosition="upCenter"
+        offset={32}
+        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        container={containerRef.current ?? undefined}
+        closePopover={closeActionsPopover}
+        onActionSelected={onActionSelected}
+        isOpen={actionsPopoverOpen}
+        panelProps={{ css: styles.actionsMenuPopoverPanel }}
+      />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       {unifiedProvidersRef.current?.actions && (
@@ -1468,6 +1393,7 @@ export const WorkflowYAMLEditor = ({
             }
             navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
           }}
+          rightSide={<WorkflowYAMLEditorShortcuts />}
         />
       </div>
     </div>
@@ -1475,6 +1401,9 @@ export const WorkflowYAMLEditor = ({
 };
 
 const componentStyles = {
+  actionsMenuPopoverPanel: css({
+    minInlineSize: '600px',
+  }),
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,

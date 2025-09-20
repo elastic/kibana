@@ -25,23 +25,17 @@ import {
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getAllConnectors } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
-
-// Global cache for connectors (they don't change during runtime)
-let allConnectorsCache: any[] | null = null;
-
-function getCachedAllConnectors(): any[] {
-  if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
-  }
-  return allConnectorsCache;
-}
+import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
+import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
+import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
+import { getCachedAllConnectors } from './connectors_cache';
+import { getIndentLevel } from './get_indent_level';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -176,28 +170,6 @@ function isInTriggersContext(path: any[]): boolean {
   return path.length > 0 && path[0] === 'triggers';
 }
 
-/**
- * Generate a snippet template for trigger types with appropriate parameters
- */
-function generateTriggerSnippet(triggerType: string, shouldBeQuoted: boolean): string {
-  const quotedType = shouldBeQuoted ? `"${triggerType}"` : triggerType;
-
-  // Generate appropriate snippets based on trigger type
-  switch (triggerType) {
-    case 'alert':
-      return `${quotedType}`;
-
-    case 'scheduled':
-      return `${quotedType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
-
-    case 'manual':
-      return `${quotedType}`;
-
-    default:
-      return `${quotedType}`;
-  }
-}
-
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
@@ -257,99 +229,6 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     matchType: null,
     match: null,
   };
-}
-
-/**
- * Generate a snippet template for a connector type with required parameters
- */
-function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean): string {
-  const quotedType = shouldBeQuoted ? `"${connectorType}"` : connectorType;
-
-  // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType);
-
-  if (requiredParams.length === 0) {
-    // No required params, just add empty with block with a placeholder
-    const snippet = `${quotedType}\nwith:\n  # Add parameters here. Click Ctrl+Space (Ctrl+I on Mac) to see all available options\n  `;
-    return snippet;
-  }
-
-  // Create with block with required parameters as placeholders
-  let withBlock = `${quotedType}\nwith:`;
-  requiredParams.forEach((param) => {
-    const placeholder = param.example || param.defaultValue || '';
-
-    // Handle complex objects (like body) by formatting as YAML
-    if (typeof placeholder === 'object' && placeholder !== null) {
-      const yamlContent = formatObjectAsYaml(placeholder, 2);
-      withBlock += `\n  ${param.name}:\n${yamlContent}`;
-    } else {
-      withBlock += `\n  ${param.name}: ${placeholder}`;
-    }
-  });
-
-  return withBlock;
-}
-
-/**
- * Generate a snippet template for built-in step types
- */
-function generateBuiltInStepSnippet(stepType: string, shouldBeQuoted: boolean): string {
-  const quotedType = shouldBeQuoted ? `"${stepType}"` : stepType;
-
-  // Generate appropriate snippets based on step type
-  switch (stepType) {
-    case 'foreach':
-      return `${quotedType}\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
-
-    case 'if':
-      return `${quotedType}\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
-
-    case 'parallel':
-      return `${quotedType}\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
-
-    case 'merge':
-      return `${quotedType}\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
-
-    case 'http':
-      return `${quotedType}\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
-
-    case 'wait':
-      return `${quotedType}\nwith:\n  duration: "5s"`;
-
-    default:
-      return `${quotedType}\nwith:\n  # Add parameters here`;
-  }
-}
-
-/**
- * Format an object as YAML with proper indentation
- */
-function formatObjectAsYaml(obj: any, indentLevel: number = 0): string {
-  const indent = '  '.repeat(indentLevel);
-  const lines: string[] = [];
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      lines.push(`${indent}${key}:`);
-      lines.push(formatObjectAsYaml(value, indentLevel + 1));
-    } else if (Array.isArray(value)) {
-      lines.push(`${indent}${key}:`);
-      value.forEach((item) => {
-        if (typeof item === 'string') {
-          lines.push(`${indent}  - "${item}"`);
-        } else {
-          lines.push(`${indent}  - ${item}`);
-        }
-      });
-    } else if (typeof value === 'string') {
-      lines.push(`${indent}${key}: "${value}"`);
-    } else {
-      lines.push(`${indent}${key}: ${value}`);
-    }
-  }
-
-  return lines.join('\n');
 }
 
 /**
@@ -493,14 +372,6 @@ function findConnectorTypeInStep(model: any, currentLineNumber: number): string 
   }
 
   return null;
-}
-
-/**
- * Get the indentation level (number of spaces) for a line
- */
-function getIndentLevel(line: string): number {
-  const match = line.match(/^(\s*)/);
-  return match ? match[1].length : 0;
 }
 
 /**
@@ -683,225 +554,6 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
     connectorSchemaCache.set(connectorType, null);
     return null;
   }
-}
-
-/**
- * Extract example for body parameter based on its schema
- */
-function extractBodyExample(bodySchema: z.ZodType): any {
-  try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
-    }
-
-    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
-    if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
-      const example: any = {};
-
-      // Extract examples from each field
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        const field = fieldSchema as z.ZodType;
-        const description = (field as any)?._def?.description || '';
-
-        // Extract example from description if available
-        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
-
-        if (stringExampleMatch) {
-          example[key] = stringExampleMatch[1];
-        } else if (objectExampleMatch) {
-          try {
-            example[key] = JSON.parse(objectExampleMatch[1]);
-          } catch {
-            // If JSON parse fails, use as string
-            example[key] = objectExampleMatch[1];
-          }
-        }
-        // No fallback - only use examples explicitly defined in enhanced connectors
-      }
-
-      if (Object.keys(example).length > 0) {
-        return example; // Return object, not JSON string
-      }
-    }
-  } catch (error) {
-    // Fallback to empty object
-  }
-
-  return {};
-}
-
-/**
- * Extract required parameters from a Zod schema
- */
-function extractRequiredParamsFromSchema(
-  schema: z.ZodType
-): Array<{ name: string; example?: string; defaultValue?: string; required: boolean }> {
-  const params: Array<{
-    name: string;
-    example?: string;
-    defaultValue?: string;
-    required: boolean;
-  }> = [];
-
-  if (schema instanceof z.ZodObject) {
-    const shape = schema.shape;
-    for (const [key, fieldSchema] of Object.entries(shape)) {
-      const zodField = fieldSchema as z.ZodType;
-
-      // Skip common non-parameter fields
-      if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
-        continue;
-      }
-
-      // Check if field is required (not optional)
-      const isOptional = zodField instanceof z.ZodOptional;
-      const isRequired = !isOptional;
-
-      // Extract description for examples
-      let description = '';
-      let example = '';
-
-      if ('description' in zodField && typeof zodField.description === 'string') {
-        description = zodField.description;
-        // Try to extract example from description
-        const exampleMatch = description.match(
-          /example[:\s]+['"]*([^'"]+)['"]*|default[:\s]+['"]*([^'"]+)['"]*/i
-        );
-        if (exampleMatch) {
-          example = exampleMatch[1] || exampleMatch[2] || '';
-        }
-      }
-
-      // Add some default examples based on common parameter names
-      if (!example) {
-        if (key === 'index') {
-          example = 'my-index';
-        } else if (key === 'id') {
-          example = 'doc-id';
-        } else if (key === 'body') {
-          // Try to extract body structure from schema
-          example = extractBodyExample(zodField);
-        } else if (key === 'query') {
-          example = '{}';
-        } else if (key.includes('name')) {
-          example = 'my-name';
-        }
-      }
-
-      // Only include required parameters or very common ones
-      if (isRequired || ['index', 'id', 'body'].includes(key)) {
-        params.push({
-          name: key,
-          example,
-          required: isRequired,
-        });
-      }
-    }
-  }
-
-  return params;
-}
-
-/**
- * Get required parameters for a connector type from generated schemas
- */
-function getRequiredParamsForConnector(
-  connectorType: string
-): Array<{ name: string; example?: string; defaultValue?: string }> {
-  // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors();
-
-  // Find the connector by type
-  const connector = allConnectors.find((c: any) => c.type === connectorType);
-
-  if (connector && connector.paramsSchema) {
-    try {
-      // Check if this connector has enhanced examples
-      const hasEnhancedExamples = (connector as any).examples?.params;
-
-      // Processing enhanced examples for connector
-
-      if (hasEnhancedExamples) {
-        // Use examples directly from enhanced connector
-        const exampleParams = (connector as any).examples.params;
-        // Using enhanced examples
-        const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
-
-        for (const [key, value] of Object.entries(exampleParams)) {
-          // Include common important parameters for ES APIs
-          if (
-            [
-              'index',
-              'id',
-              'body',
-              'query',
-              'size',
-              'from',
-              'sort',
-              'aggs',
-              'aggregations',
-              'format',
-            ].includes(key)
-          ) {
-            result.push({ name: key, example: value });
-            // Added enhanced example
-          }
-        }
-
-        if (result.length > 0) {
-          // Returning enhanced examples
-          return result;
-        }
-      }
-
-      // Fallback to extracting from schema
-      const params = extractRequiredParamsFromSchema(connector.paramsSchema);
-
-      // Return only required parameters, or most important ones if no required ones
-      const requiredParams = params.filter((p) => p.required);
-      if (requiredParams.length > 0) {
-        return requiredParams.map((p) => ({ name: p.name, example: p.example }));
-      }
-
-      // If no required params, return the most important ones for ES APIs
-      const importantParams = params.filter((p) =>
-        [
-          'index',
-          'id',
-          'body',
-          'query',
-          'size',
-          'from',
-          'sort',
-          'aggs',
-          'aggregations',
-          'format',
-        ].includes(p.name)
-      );
-      if (importantParams.length > 0) {
-        return importantParams.slice(0, 3).map((p) => ({ name: p.name, example: p.example }));
-      }
-    } catch (error) {
-      // Silently continue with fallback parameters
-    }
-  }
-
-  // Fallback to basic hardcoded ones for non-ES connectors
-  const basicConnectorParams: Record<string, Array<{ name: string; example?: string }>> = {
-    console: [{ name: 'message', example: 'Hello World' }],
-    slack: [{ name: 'message', example: 'Hello Slack' }],
-    http: [
-      { name: 'url', example: 'https://api.example.com' },
-      { name: 'method', example: 'GET' },
-    ],
-    wait: [{ name: 'duration', example: '5s' }],
-  };
-
-  return basicConnectorParams[connectorType] || [];
 }
 
 /**

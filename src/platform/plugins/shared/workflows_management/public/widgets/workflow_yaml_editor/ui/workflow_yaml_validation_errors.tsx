@@ -30,6 +30,7 @@ interface WorkflowYAMLValidationErrorsProps {
   error: Error | null;
   validationErrors: YamlValidationError[] | null;
   onErrorClick?: (error: YamlValidationError) => void;
+  rightSide?: React.ReactNode;
 }
 
 export function WorkflowYAMLValidationErrors({
@@ -37,6 +38,7 @@ export function WorkflowYAMLValidationErrors({
   error: errorValidating,
   validationErrors,
   onErrorClick,
+  rightSide,
 }: WorkflowYAMLValidationErrorsProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
@@ -105,7 +107,12 @@ export function WorkflowYAMLValidationErrors({
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-          <EuiFlexItem css={styles.buttonContentText}>{buttonContent}</EuiFlexItem>
+          <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
+            {buttonContent}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} justifySelf="flexEnd">
+            {rightSide}
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
       arrowDisplay={validationErrors !== null && validationErrors.length > 0 ? 'left' : 'none'}
@@ -170,6 +177,18 @@ const componentStyles = {
       padding: `0 ${euiTheme.size.m}`,
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
+
+      '& .euiAccordion__buttonContent': {
+        width: '100%',
+      },
+
+      // apply underline only to the button content text, not the right side
+      '& .euiAccordion__button:hover, & .euiAccordion__button:focus': {
+        textDecoration: 'none !important',
+        '& .button-content-text': {
+          textDecoration: 'underline',
+        },
+      },
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
@@ -177,9 +196,11 @@ const componentStyles = {
     color: ${euiTheme.colors.textParagraph};
     flex-wrap: nowrap !important;
   `,
-  buttonContentText: css({
-    whiteSpace: 'nowrap',
-  }),
+  buttonContentText: (euiThemeContext: UseEuiTheme) =>
+    css({
+      ...euiFontSize(euiThemeContext, 'xs'),
+      whiteSpace: 'nowrap',
+    }),
   accordionContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: '200px',
@@ -193,9 +214,9 @@ const componentStyles = {
     }),
   validationError: (euiThemeContext: UseEuiTheme) =>
     css({
+      ...euiFontSize(euiThemeContext, 'xs'),
       // override default button styles
       textAlign: 'left',
-      fontSize: euiFontSize(euiThemeContext, 's').fontSize,
       cursor: 'pointer',
       display: 'flex',
       flexDirection: 'row',
