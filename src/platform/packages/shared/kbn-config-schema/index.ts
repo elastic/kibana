@@ -79,7 +79,9 @@ function any(options?: TypeOptions<any>) {
   return new AnyType(options);
 }
 
-function boolean(options?: TypeOptions<boolean>): Type<boolean> {
+function boolean<D extends DefaultValue<boolean> = never>(
+  options?: TypeOptions<boolean, boolean, D>
+): BooleanType<D> {
   return new BooleanType(options);
 }
 
