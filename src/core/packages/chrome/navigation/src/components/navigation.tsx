@@ -58,6 +58,10 @@ export interface NavigationProps {
    * Optional data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
+  /**
+   * Optional children to display inside the navigation.
+   */
+  children?: React.ReactNode;
 }
 
 export const Navigation = ({
@@ -68,6 +72,7 @@ export const Navigation = ({
   onItemClick,
   setWidth,
   sidePanelFooter,
+  children,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -298,7 +303,6 @@ export const Navigation = ({
             </SideNav.Popover>
           )}
         </SideNav.PrimaryMenu>
-
         <SideNav.Footer isCollapsed={isCollapsed}>
           {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => {
             const { sections, ...itemProps } = item;
@@ -350,6 +354,7 @@ export const Navigation = ({
             );
           })}
         </SideNav.Footer>
+        {children}
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (

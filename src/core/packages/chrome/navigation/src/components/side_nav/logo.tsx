@@ -44,9 +44,23 @@ export const SideNavLogoComponent = ({
    * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
    */
   const wrapperStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: ${euiTheme.size.m};
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    &::after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: ${isCollapsed ? euiTheme.size.l : euiTheme.size.xxxxl};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+      position: absolute;
+      bottom: 0;
+    }
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};

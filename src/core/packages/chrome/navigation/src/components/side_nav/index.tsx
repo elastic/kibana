@@ -38,20 +38,22 @@ interface SideNavComponent extends FC<SideNavProps> {
 export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
 
+  const style = css`
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    height: 100%;
+    padding-bottom: ${euiTheme.size.base};
+    width: ${isCollapsed ? euiTheme.size.xxxl : '86px'};
+
+    .iconWrapper {
+      background-color: transparent;
+    }
+  `;
+
   return (
-    <div
-      className="side-nav"
-      css={css`
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-        height: 100%;
-        padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? euiTheme.size.xxxl : '86px'};
-      `}
-    >
+    <div className="side-nav" css={style}>
       {children}
     </div>
   );
