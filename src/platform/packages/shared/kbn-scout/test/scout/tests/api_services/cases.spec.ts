@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect } from '../../../src/playwright';
+import { apiTest, expect } from '../../../../src/playwright';
 import { createCasePayload } from '../../fixtures/constants';
 
 apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
