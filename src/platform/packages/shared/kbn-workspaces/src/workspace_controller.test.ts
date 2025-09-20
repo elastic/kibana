@@ -99,11 +99,17 @@ describe('@kbn/workspaces controller', () => {
     const execa = (await import('execa')).default;
     await Fs.writeFile(Path.join(context.baseCloneDir, 'NEW.txt'), 'hello');
     await execa('git', ['add', '.'], { cwd: context.baseCloneDir });
-    await execa('git', ['commit', '-m', 'new'], { cwd: context.baseCloneDir });
+    // use inline git config to avoid relying on global/local git identity in CI
+    await execa(
+      'git',
+      ['-c', 'user.email=you@example.com', '-c', 'user.name=Your Name', 'commit', '-m', 'new'],
+      { cwd: context.baseCloneDir }
+    );
     // fetch the new commit into the worktree so rev-parse in base clone reflects new sha
     await execa('git', ['fetch', '--all', '--prune', '--quiet'], { cwd: context.baseCloneDir });
 
     await wt.ensureCheckout();
+
     const secondKey = (wt as any).getCacheKey ? await (wt as any).getCacheKey() : 'none';
     expect(firstKey).not.toEqual(secondKey);
   });
