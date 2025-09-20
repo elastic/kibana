@@ -78,6 +78,15 @@ export const ActionTypeMenu = ({
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
         }
+        for (const connectorType of actionTypeRegistry.list()) {
+          if (connectorType.aliasFor) {
+            index[connectorType.id] = {
+              ...index[connectorType.aliasFor],
+              id: connectorType.id,
+              name: connectorType.aliasName || '',
+            };
+          }
+        }
         setActionTypesIndex(index);
         if (setAllActionTypes) {
           setAllActionTypes(index);
