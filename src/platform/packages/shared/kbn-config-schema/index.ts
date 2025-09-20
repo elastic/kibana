@@ -85,7 +85,9 @@ function boolean<D extends DefaultValue<boolean> = never>(
   return new BooleanType(options);
 }
 
-function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
+function buffer<D extends DefaultValue<Buffer> = never>(
+  options?: TypeOptions<Buffer, Buffer, D>
+): BufferType<D> {
   return new BufferType(options);
 }
 
