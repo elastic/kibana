@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -14,7 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { mountWithProviders } from '../../../../../test_utils/test_utils';
+import { mountWithProviders, renderWithProviders } from '../../../../../test_utils/test_utils';
 import type { FormBasedLayer } from '../../../types';
 import { rangeOperation } from '..';
 import type { RangeIndexPatternColumn } from './ranges';
@@ -29,6 +30,7 @@ import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 import type { IndexPattern } from '../../../../../types';
+import userEvent from '@testing-library/user-event';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -366,129 +368,122 @@ describe('ranges', () => {
   });
 
   describe('paramEditor', () => {
+    function renderComponent(
+      propsOverrides: Partial<React.ComponentProps<typeof InlineOptions>> = {}
+    ) {
+      const props: React.ComponentProps<typeof InlineOptions> = {
+        ...defaultOptions,
+        layer,
+        columnId: 'col1',
+        currentColumn: layer.columns.col1 as RangeIndexPatternColumn,
+        paramEditorUpdater: jest.fn(),
+        ...propsOverrides,
+      };
+      const { rerender, ...rtlRest } = renderWithProviders(<InlineOptions {...props} />);
+      return {
+        ...rtlRest,
+        rerender: (overrides: Partial<React.ComponentProps<typeof InlineOptions>>) => {
+          const newProps = { ...props, ...overrides } as React.ComponentProps<typeof InlineOptions>;
+          return renderWithProviders(<InlineOptions {...newProps} />);
+        },
+      };
+    }
+
     describe('Modify intervals in basic mode', () => {
       beforeEach(() => {
         layer = getDefaultLayer();
       });
 
       it('should start update the state with the default maxBars value', () => {
-        const updateLayerSpy = jest.fn();
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        expect(instance.find(EuiRange).prop('value')).toEqual(String(GRANULARITY_DEFAULT_VALUE));
+        renderComponent();
+        const input = screen.getByTestId('lns-indexPattern-range-maxBars-field');
+        expect(input).toHaveValue(String(GRANULARITY_DEFAULT_VALUE));
       });
 
-      it('should update state when changing Max bars number', () => {
+      it('should update state when changing Max bars number', async () => {
         const updateLayerSpy = jest.fn();
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
 
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
+        const input = screen.getByTestId('lns-indexPattern-range-maxBars-field');
+
+        screen.debug();
 
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          instance.find(EuiRange).prop('onChange')!(
-            {
-              currentTarget: {
-                value: '' + MAX_HISTOGRAM_VALUE,
-              },
-            } as React.ChangeEvent<HTMLInputElement>,
-            true
-          );
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                maxBars: MAX_HISTOGRAM_VALUE,
-              },
-            } as RangeIndexPatternColumn,
-          },
+        fireEvent.change(input, { target: { value: String(MAX_HISTOGRAM_VALUE) } });
+
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  maxBars: MAX_HISTOGRAM_VALUE,
+                },
+              } as RangeIndexPatternColumn,
+            },
+          });
         });
       });
 
-      it('should update the state using the plus or minus buttons by the step amount', () => {
+      it('should update the state using the plus or minus buttons by the step amount', async () => {
         const updateLayerSpy = jest.fn();
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
 
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
+        const minusButton = screen.getByTestId('lns-indexPattern-range-maxBars-minus');
+        const plusButton = screen.getByTestId('lns-indexPattern-range-maxBars-plus');
 
         act(() => {
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          // minus button
-          instance
-            .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
-            .find('button')
-            .simulate('click');
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          instance.update();
         });
 
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
-              },
-            },
-          },
-        });
-
+        // Click minus
+        fireEvent.click(minusButton);
         act(() => {
-          // plus button
-          instance
-            .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
-            .find('button')
-            .simulate('click');
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-          instance.update();
         });
 
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                maxBars: GRANULARITY_DEFAULT_VALUE,
-              },
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
+                },
+              } as RangeIndexPatternColumn,
             },
-          },
+          });
+        });
+
+        // Click plus
+        fireEvent.click(plusButton);
+        act(() => {
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
+
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  maxBars: GRANULARITY_DEFAULT_VALUE,
+                },
+              } as RangeIndexPatternColumn,
+            },
+          });
         });
       });
     });
@@ -500,436 +495,219 @@ describe('ranges', () => {
       beforeEach(() => setToRangeMode());
 
       it('should show one range interval to start with', () => {
-        const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        expect(instance.find(DragDropBuckets).children).toHaveLength(1);
+        renderComponent();
+        expect(screen.getAllByTestId('droppable').length).toBe(1);
       });
 
       it('should use the parentFormat to create the trigger label', () => {
-        const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        expect(
-          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
-        ).toBe('0 - 1000');
+        renderComponent();
+        expect(screen.getByTestId('indexPattern-ranges-popover').textContent).toBe('0 - 1000');
       });
 
       it('should not print error if the parentFormat is not provided', () => {
-        // while in the actual React implementation will print an error, here
-        // we intercept the formatter without an id assigned an print "Error"
-        const updateLayerSpy = jest.fn();
+        renderComponent({
+          currentColumn: {
+            ...layer.columns.col1,
+            params: {
+              ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+              parentFormat: undefined,
+            },
+          } as RangeIndexPatternColumn,
+        });
+        expect(screen.getByTestId('indexPattern-ranges-popover').textContent).not.toBe('Error');
+      });
 
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={
-              {
+      it('should add a new range', async () => {
+        const updateLayerSpy = jest.fn();
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
+        // Click the add range button
+        fireEvent.click(screen.getByRole('button', { name: /add range/i }));
+        // There should now be two popovers (ranges)
+        expect(screen.getAllByTestId('indexPattern-ranges-popover').length).toBe(2);
+        // Find the new range's number input (the second one)
+        const numberInputs = screen.getAllByRole('spinbutton');
+        fireEvent.change(numberInputs[numberInputs.length - 2], { target: { value: '50' } });
+        act(() => {
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        });
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
                 ...layer.columns.col1,
                 params: {
                   ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  parentFormat: undefined,
+                  ranges: [
+                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                    { from: 50, to: Infinity, label: '' },
+                  ],
                 },
-              } as RangeIndexPatternColumn
-            }
-          />
-        );
-
-        expect(
-          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
-        ).not.toBe('Error');
-      });
-
-      it('should add a new range', () => {
-        const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        instance.find(EuiButtonEmpty).simulate('click');
-
-        act(() => {
-          instance.update();
-        });
-
-        expect(instance.find(RangePopover)).toHaveLength(2);
-
-        // edit the range and check
-        instance
-          .find('RangePopover input[type="number"]')
-          .first()
-          .simulate('change', {
-            target: {
-              value: '50',
+              } as RangeIndexPatternColumn,
             },
           });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-        act(() => {
-          instance.update();
-        });
-
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                ranges: [
-                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                  { from: 50, to: Infinity, label: '' },
-                ],
-              },
-            },
-          },
         });
       });
 
-      it('should add a new range with custom label', () => {
+      it('should add a new range with custom label', async () => {
         const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        instance.find(EuiButtonEmpty).simulate('click');
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
+        fireEvent.click(screen.getByRole('button', { name: /add range/i }));
+        expect(screen.getAllByTestId('indexPattern-ranges-popover').length).toBe(2);
+        // Find the new label input (the second text input)
+        const textInputs = screen.getAllByRole('textbox');
+        fireEvent.change(textInputs[textInputs.length - 1], { target: { value: 'customlabel' } });
         act(() => {
-          instance.update();
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
-        expect(instance.find(RangePopover)).toHaveLength(2);
-
-        // edit the label and check
-        instance
-          .find('RangePopover input[type="text"]')
-          .first()
-          .simulate('change', {
-            target: {
-              value: 'customlabel',
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  ranges: [
+                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                    { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
+                  ],
+                },
+              } as RangeIndexPatternColumn,
             },
           });
-
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-        act(() => {
-          instance.update();
-        });
-
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                ranges: [
-                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                  { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
-                ],
-              },
-            },
-          },
         });
       });
 
-      it('should open a popover to edit an existing range', () => {
+      it('should open a popover to edit an existing range', async () => {
         const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
+        // Open the popover for the first range
+        fireEvent.click(screen.getByTestId('dataView-ranges-popover-trigger'));
+        // Change the last number input (the "to" value)
+        const numberInputs = screen.getAllByRole('spinbutton');
+        fireEvent.change(numberInputs[numberInputs.length - 1], { target: { value: '50' } });
         act(() => {
-          instance.update();
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
-
-        instance
-          .find('RangePopover input[type="number"]')
-          .last()
-          .simulate('change', {
-            target: {
-              value: '50',
+        await waitFor(() => {
+          expect(updateLayerSpy).toHaveBeenCalledWith({
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  ranges: [{ from: 0, to: 50, label: '' }],
+                },
+              } as RangeIndexPatternColumn,
             },
           });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-        act(() => {
-          instance.update();
-        });
-
-        expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col1: {
-              ...layer.columns.col1,
-              params: {
-                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                ranges: [{ from: 0, to: 50, label: '' }],
-              },
-            },
-          },
         });
       });
 
-      it('should not accept invalid ranges', () => {
-        const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          // edit the range "to" field
-          instance
-            .find('RangePopover input[type="number"]')
-            .last()
-            .simulate('change', {
-              target: {
-                value: '-1',
-              },
-            });
-        });
-
-        act(() => {
-          instance.update();
-
-          // and check
-          expect(instance.find(RangePopover).find(EuiFieldNumber).last().prop('isInvalid')).toBe(
-            true
-          );
+      it('should not accept invalid ranges', async () => {
+        renderComponent();
+        // Open the popover for the first range (click the trigger button)
+        fireEvent.click(screen.getByTestId('dataView-ranges-popover-trigger'));
+        // Now the number inputs should be present
+        const numberInputs = screen.getAllByRole('spinbutton');
+        fireEvent.change(numberInputs[numberInputs.length - 1], { target: { value: '-1' } });
+        // Check for invalid state (aria-invalid or similar)
+        await waitFor(() => {
+          expect(numberInputs[numberInputs.length - 1]).toHaveAttribute('aria-invalid', 'true');
         });
       });
 
-      it('should be possible to remove a range if multiple', () => {
+      it('should be possible to remove a range if multiple', async () => {
         const updateLayerSpy = jest.fn();
-
         // Add an extra range
         (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
           from: DEFAULT_INTERVAL,
           to: 2 * DEFAULT_INTERVAL,
           label: '',
         });
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        expect(instance.find(RangePopover)).toHaveLength(2);
-
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance
-            .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
-            .at(0)
-            .simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          expect(instance.find(RangePopover)).toHaveLength(1);
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
+        expect(screen.getAllByTestId('indexPattern-ranges-popover').length).toBe(2);
+        // Click the remove button for the second range
+        fireEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+        // There should now be only one popover
+        await waitFor(() => {
+          expect(screen.getAllByTestId('indexPattern-ranges-popover').length).toBe(1);
         });
       });
 
-      it('should handle correctly open ranges when saved', () => {
-        const updateLayerSpy = jest.fn();
-
+      it('should handle correctly open ranges when saved', async () => {
         // Add an extra open range:
         (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
           from: null,
           to: null,
           label: '',
         });
+        renderComponent();
 
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        act(() => {
-          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-
-          // Check UI values for open ranges
-          expect(
-            instance.find(RangePopover).last().find(EuiFieldNumber).first().prop('value')
-          ).toBe('');
-
-          expect(instance.find(RangePopover).last().find(EuiFieldNumber).last().prop('value')).toBe(
-            ''
-          );
-        });
+        const triggers = screen.getAllByTestId('dataView-ranges-popover-trigger');
+        fireEvent.click(triggers[triggers.length - 1]);
+        // Check UI values for open ranges (should be empty string)
+        const numberInputs = screen.getAllByRole('spinbutton');
+        expect(numberInputs[numberInputs.length - 2]).toHaveValue(null);
+        expect(numberInputs[numberInputs.length - 1]).toHaveValue(null);
       });
 
       it('should correctly handle the default formatter for the field', () => {
-        const updateLayerSpy = jest.fn();
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-            indexPattern={{
-              ...defaultOptions.indexPattern,
-              fieldFormatMap: {
-                MyField: { id: 'custom', params: {} },
-              },
-            }}
-          />
-        );
-
-        expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
-          /^Custom format:/
-        );
+        renderComponent({
+          indexPattern: {
+            ...defaultOptions.indexPattern,
+            fieldFormatMap: {
+              MyField: { id: 'custom', params: {} },
+            },
+          },
+        });
+        // The formatter label should be visible in the popover
+        expect(screen.getByText(/^Custom format:/)).toBeInTheDocument();
       });
 
       it('should correctly pick the dimension formatter for the field', () => {
-        const updateLayerSpy = jest.fn();
-
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'bytes',
           params: { decimals: 0 },
         };
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-            indexPattern={{
-              ...defaultOptions.indexPattern,
-              fieldFormatMap: {
-                MyField: { id: 'custom', params: {} },
-              },
-            }}
-          />
-        );
-
-        expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
-          /^Bytes format:/
-        );
+        renderComponent({
+          indexPattern: {
+            ...defaultOptions.indexPattern,
+            fieldFormatMap: {
+              MyField: { id: 'custom', params: {} },
+            },
+          },
+        });
+        expect(screen.getByText(/^Bytes format:/)).toBeInTheDocument();
       });
 
       it('should not update the state on mount', () => {
         const updateLayerSpy = jest.fn();
-
-        mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
         expect(updateLayerSpy.mock.calls.length).toBe(0);
       });
 
-      it('should not reset formatters when switching between custom ranges and auto histogram', () => {
+      it('should not reset formatters when switching between custom ranges and auto histogram', async () => {
         const updateLayerSpy = jest.fn();
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'bytes',
           params: { decimals: 3 },
         };
-
-        const instance = mountWithProviders(
-          <InlineOptions
-            {...defaultOptions}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
-          />
-        );
-
-        // This series of act closures are made to make it work properly the update flush
-        act(() => {
-          instance.find(EuiLink).first().find('button').simulate('click');
-        });
-
-        expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
-          id: 'bytes',
-          params: { decimals: 3 },
+        renderComponent({ paramEditorUpdater: updateLayerSpy });
+        // Simulate switching to custom ranges (open popover)
+        fireEvent.click(screen.getByTestId('dataView-ranges-popover-trigger'));
+        await waitFor(() => {
+          expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({
+            id: 'bytes',
+            params: { decimals: 3 },
+          });
         });
       });
     });
