@@ -2797,8 +2797,7 @@
         "@types/extract-zip",
         "@types/pdfmake",
         "extract-zip",
-        "pdfmake",
-        "puppeteer"
+        "pdfmake"
       ],
       "reviewers": [
         "team:kibana-presentation",
@@ -2815,6 +2814,26 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "reporting dependencies - puppeteer",
+      "matchDepNames": [
+        "puppeteer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Reporting Services",
+        "Team:ResponseOps",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
     },
     {
       "groupName": "turf",
