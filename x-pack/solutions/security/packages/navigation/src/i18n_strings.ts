@@ -236,4 +236,61 @@ export const i18nStrings = {
       }),
     },
   },
+  launchPad: {
+    title: i18n.translate('securitySolutionPackages.navLinks.launchPad', {
+      defaultMessage: 'Launchpad',
+    }),
+    migrations: {
+      title: i18n.translate('securitySolutionPackages.navLinks.launchPad.migrations', {
+        defaultMessage: 'Migrations',
+      }),
+    },
+  },
+  ingestAndManageData: {
+    title: i18n.translate('securitySolutionPackages.navLinks.ingestAndManageData', {
+      defaultMessage: 'Ingest and Manage Data',
+    }),
+    ingestAndIntegrations: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.ingestAndIntegrations',
+        {
+          defaultMessage: 'Ingest and Integrations',
+        }
+      ),
+    },
+    indicesDsAndRollups: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesDsAndRollups',
+        {
+          defaultMessage: 'Indices, Data Streams, and roll ups',
+        }
+      ),
+    },
+  },
+  // rename this key to stackManagement once we switch to v2 completely
+  stackManagementV2: {
+    title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
+      defaultMessage: 'Stack Management',
+    }),
+    alertsAndInsights: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
+        defaultMessage: 'Alerts and Insights',
+      }),
+    },
+    security: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.security', {
+        defaultMessage: 'Security',
+      }),
+    },
+    data: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.data', {
+        defaultMessage: 'Data',
+      }),
+    },
+    kibana: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
+        defaultMessage: 'Kibana',
+      }),
+    },
+  },
 };

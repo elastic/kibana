@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (): NodeDefinition => ({
+const LazyIconBriefcase = lazy(() =>
+  import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+
+export const createCasesNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
   renderAs: 'item',
+  iconV2: LazyIconBriefcase,
+  sideNavVersion,
   children: [
     {
       id: SecurityPageName.caseCreate,
