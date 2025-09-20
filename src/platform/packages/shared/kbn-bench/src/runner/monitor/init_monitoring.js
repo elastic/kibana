@@ -18,7 +18,7 @@ const MONITOR_KEY = '__KBN_BENCH_MONITOR';
   const interval = Number(process.env.KBN_BENCH_MONITOR_INTERVAL ?? 250);
   // If a previous monitor instance exists, stop it and detach its listeners
   if (global[MONITOR_KEY]) {
-    global[MONITOR_KEY].stop && global[MONITOR_KEY].stop();
+    global[MONITOR_KEY]?.stop();
     global[MONITOR_KEY] = undefined;
   }
 
@@ -124,6 +124,9 @@ const MONITOR_KEY = '__KBN_BENCH_MONITOR';
     clearInterval(timer);
     stream.end();
     gcObserver.disconnect();
+    process.off('exit', stop);
+    process.off('SIGINT', stop);
+    process.off('SIGTERM', stop);
   }
 
   process.on('exit', stop);

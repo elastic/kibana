@@ -10,7 +10,6 @@ import Path from 'path';
 import { exec } from './exec';
 import { exists } from './utils/exists';
 import type { WorkspaceGlobalContext } from './types';
-import { getSha } from './utils/get_sha';
 
 /**
  * Create a git worktree at the given path for the provided ref if it does not already exist.
@@ -35,7 +34,7 @@ export async function ensureWorktree(
 
   log.info(`Creating worktree at ${path} for ref ${ref}`);
 
-  await exec(`git worktree add --detach ../${path} ${await getSha(context.repoRoot, ref)}`, {
+  await exec(`git worktree add --detach ../${path} ${ref}`, {
     log,
     cwd: baseCloneDir,
   });

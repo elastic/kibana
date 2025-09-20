@@ -103,15 +103,10 @@ export abstract class AbstractWorkspace implements IWorkspace {
   }
 
   async getCommitLine(): Promise<string> {
-    const { stdout, exitCode, stderr } = await this.exec(
-      'git',
-      ['show', '-s', '--pretty=%s', 'HEAD'],
-      {
-        log: this.context.log,
-        cwd: this.getDir(),
-        buffer: true,
-      }
-    );
+    const { stdout } = await this.exec('git', ['show', '-s', '--pretty=%s', 'HEAD'], {
+      log: this.context.log,
+      cwd: this.getDir(),
+    });
     return stdout;
   }
 }
