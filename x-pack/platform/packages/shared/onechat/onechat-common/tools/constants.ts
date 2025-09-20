@@ -28,7 +28,7 @@ export const platformCoreTools = {
 /**
  * List of tool types which can be created / edited by a user.
  */
-export const editableToolTypes: ToolType[] = [ToolType.esql, ToolType.index_search];
+export const editableToolTypes: ToolType[] = [ToolType.esql, ToolType.index_search, ToolType.workflow];
 
 export const defaultAgentToolIds = [
   platformCoreTools.search,

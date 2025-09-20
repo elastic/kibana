@@ -40,13 +40,14 @@ export class OnechatPlugin
 
   setup(
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
+    setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
+      workflowsManagement: setupDeps.workflowsManagement,
     });
 
-    registerFeatures({ features: pluginsSetup.features });
+    registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
@@ -55,7 +56,7 @@ export class OnechatPlugin
       router,
       coreSetup,
       logger: this.logger,
-      pluginsSetup,
+      pluginsSetup: setupDeps,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {

@@ -13,7 +13,7 @@ import type {
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
-  results: ToolDefinitionWithSchema[];
+  results: ToolDefinition[];
 }
 
 export type GetToolResponse = ToolDefinitionWithSchema;
@@ -68,4 +68,14 @@ export interface ResolveSearchSourceItem {
 export interface ResolveSearchSourcesResponse {
   results: ResolveSearchSourceItem[];
   total: number;
+}
+
+export interface WorkflowItem {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface ListWorkflowsResponse {
+  results: WorkflowItem[];
 }

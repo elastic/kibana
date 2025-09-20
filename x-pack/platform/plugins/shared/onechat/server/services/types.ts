@@ -11,6 +11,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
@@ -32,6 +33,7 @@ export interface InternalStartServices {
 
 export interface ServiceSetupDeps {
   logger: Logger;
+  workflowsManagement?: WorkflowsPluginSetup;
 }
 
 export interface ServicesStartDeps {
