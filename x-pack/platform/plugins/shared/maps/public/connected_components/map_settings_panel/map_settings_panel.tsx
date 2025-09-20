@@ -35,6 +35,7 @@ export interface Props {
   updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
+  ariaLabelId?: string;
 }
 
 export function MapSettingsPanel({
@@ -48,12 +49,13 @@ export function MapSettingsPanel({
   updateCustomIcons,
   deleteCustomIcon,
   zoom,
+  ariaLabelId,
 }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
-          <h2>
+          <h2 id={ariaLabelId}>
             <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>
