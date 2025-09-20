@@ -9,6 +9,10 @@ import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+// Note: ElasticAssistantPublicPluginStart is a type that returns an empty object {}
+// We'll use a simple object type instead since we don't need specific methods from it
+type ElasticAssistantPublicPluginStart = Record<string, any>;
 import type { Observable } from 'rxjs';
 import type { EventReporter } from '../telemetry';
 
@@ -20,4 +24,6 @@ export interface SearchBarProps {
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   chromeStyle$: Observable<ChromeStyle>;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  elasticAssistant?: ElasticAssistantPublicPluginStart;
 }

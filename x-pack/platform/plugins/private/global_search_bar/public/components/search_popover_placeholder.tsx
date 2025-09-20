@@ -11,12 +11,12 @@ import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface PopoverPlaceholderProps {
+interface SearchPopoverPlaceholderProps {
   basePath: string;
   customPlaceholderMessage?: React.ReactNode;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
+export const SearchPopoverPlaceholder: FC<SearchPopoverPlaceholderProps> = ({
   basePath,
   customPlaceholderMessage,
 }) => {
