@@ -127,7 +127,7 @@ function never(): Type<never> {
   return new NeverType();
 }
 
-function ip(options?: IpOptions): Type<string> {
+function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): IpType<D> {
   return new IpType(options);
 }
 
