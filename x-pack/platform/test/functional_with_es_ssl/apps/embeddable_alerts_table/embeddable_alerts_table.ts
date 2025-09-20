@@ -84,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
         await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       });
@@ -115,7 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it(`should only be able to create panels with ${solution} rule types`, async () => {
           await pageObjects.dashboard.gotoDashboardURL();
           await toasts.dismissIfExists();
-          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.openAddPanelFlyout();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
           await retry.try(() => testSubjects.exists(FILTERS_FORM_SUBJ));
           if (solution === 'stack' || solution === 'observability') {
@@ -148,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       await find.clickByCssSelector(`button#observability`);
@@ -168,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the security area when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await find.clickByCssSelector(`button#security`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);

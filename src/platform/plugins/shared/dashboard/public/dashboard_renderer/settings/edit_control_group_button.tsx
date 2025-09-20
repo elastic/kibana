@@ -8,29 +8,27 @@
  */
 
 import React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { getEditControlGroupButtonTitle } from '../../_dashboard_app_strings';
+import { EuiButton } from '@elastic/eui';
+import { getEditControlGroupButtonTitle } from '../../dashboard_app/_dashboard_app_strings';
 
 interface Props {
-  closePopover: () => void;
   controlGroupApi?: ControlGroupApi;
 }
 
-export const EditControlGroupButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
+export const EditControlGroupButton = ({ controlGroupApi, ...rest }: Props) => {
   return (
-    <EuiContextMenuItem
+    <EuiButton
       {...rest}
-      icon="gear"
+      iconType="controlsHorizontal"
       data-test-subj="controls-settings-button"
       disabled={!controlGroupApi}
       aria-label={getEditControlGroupButtonTitle()}
       onClick={() => {
         controlGroupApi?.onEdit();
-        closePopover();
       }}
     >
       {getEditControlGroupButtonTitle()}
-    </EuiContextMenuItem>
+    </EuiButton>
   );
 };

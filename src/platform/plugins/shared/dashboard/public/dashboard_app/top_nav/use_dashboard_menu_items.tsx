@@ -9,20 +9,21 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
+import { showAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
 
 export const useDashboardMenuItems = ({
@@ -216,6 +217,20 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      add: {
+        ...topNavStrings.add,
+        id: 'add',
+        iconType: 'plusInCircle',
+        color: 'success',
+        fill: false,
+        emphasize: true,
+        type: 'button',
+        testId: 'dashboardAddTopNavButton',
+        disableButton: disableTopNav,
+        run: (anchorElement: HTMLElement) =>
+          showAddMenu({ dashboardApi, anchorElement, coreServices }),
+      },
     };
   }, [
     disableTopNav,
@@ -322,15 +337,15 @@ export const useDashboardMenuItems = ({
         editModeItems.push(resetChangesMenuItem);
       }
 
-      editModeItems.push(menuItems.quickSave);
+      editModeItems.push(menuItems.add, menuItems.quickSave);
     } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
+      editModeItems.push(menuItems.switchToViewMode, menuItems.add, menuItems.interactiveSave);
     }
 
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
@@ -342,6 +357,7 @@ export const useDashboardMenuItems = ({
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
     menuItems.quickSave,
+    menuItems.add,
     hasExportIntegration,
     lastSavedId,
     showResetChange,
