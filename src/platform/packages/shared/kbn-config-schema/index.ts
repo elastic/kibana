@@ -115,7 +115,9 @@ function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
   return new ByteSizeType(options);
 }
 
-function duration(options?: DurationOptions): Type<Duration> {
+function duration<D extends DurationDefaultValue = never>(
+  options?: DurationOptions<D>
+): Type<Duration, Duration, [D] extends [never] ? never : Duration> {
   return new DurationType(options);
 }
 
