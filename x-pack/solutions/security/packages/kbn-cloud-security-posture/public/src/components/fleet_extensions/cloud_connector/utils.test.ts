@@ -13,8 +13,8 @@ import {
 
 import type {
   PackagePolicyConfigRecord,
-  type NewPackagePolicy,
-  type NewPackagePolicyInput,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { type CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
