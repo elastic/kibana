@@ -19,6 +19,7 @@ import { UploadFileButton } from '../../../common/upload_file_button';
 import * as i18n from './translations';
 import type { SplunkDashboardsResult, OnMigrationCreated } from '../../../../types';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
+import type { SplunkOriginalDashboardExport } from '../../../../../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 
 export interface DashboardsFileUploadProps {
   createMigration: CreateMigration;
@@ -27,7 +28,7 @@ export interface DashboardsFileUploadProps {
   onDashboardsFileChanged?: (files: FileList | null) => void;
   migrationName: string | undefined;
   apiError: string | undefined;
-  onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
+  onFileUpload?: (dashboards: SplunkOriginalDashboardExport[]) => void;
   onMigrationCreated: OnMigrationCreated;
 }
 export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
@@ -40,7 +41,9 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     onFileUpload,
     createMigration,
   }) => {
-    const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
+    const [uploadedDashboards, setUploadedDashboards] = useState<SplunkOriginalDashboardExport[]>(
+      []
+    );
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const onFileParsed = useCallback(
@@ -122,9 +125,11 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
 );
 DashboardsFileUpload.displayName = 'DashboardsFileUpload';
 
-const formatDashboardRow = (row: SplunkRow<SplunkDashboardsResult>): SplunkDashboardsResult => {
+const formatDashboardRow = (
+  row: SplunkRow<SplunkDashboardsResult>
+): SplunkOriginalDashboardExport => {
   if (!isPlainObject(row.result)) {
     throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
   }
-  return row;
+  return row as SplunkOriginalDashboardExport;
 };

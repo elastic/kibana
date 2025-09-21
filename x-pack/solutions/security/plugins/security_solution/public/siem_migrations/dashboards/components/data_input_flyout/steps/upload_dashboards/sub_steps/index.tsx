@@ -40,7 +40,7 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
 }: DashboardsUploadSubStepsProps) {
   const [currentSubStep, setCurrentSubStep] = useState<SubStep>(1);
   const [migrationName, setMigrationName] = useState<string | undefined>(migrationStats?.name);
-  const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
+  const [_, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
 
   const onUploadedDashboards = useCallback(
     (dashboards: SplunkDashboardsResult[]) => {

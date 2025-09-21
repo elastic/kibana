@@ -30,7 +30,7 @@ export const SplunkOriginalDashboardExportProperties = z.object({
   /**
    * The label of the dashboard
    */
-  label: z.string().optional(),
+  label: z.string(),
   /**
    * The title of the dashboard
    */
@@ -38,7 +38,7 @@ export const SplunkOriginalDashboardExportProperties = z.object({
   /**
    * The description of the dashboard
    */
-  description: z.string().optional(),
+  description: z.string(),
   /**
    * The EAI data of the dashboard, typically in XML format
    */
@@ -46,19 +46,23 @@ export const SplunkOriginalDashboardExportProperties = z.object({
   /**
    * The application associated with the EAI ACL
    */
-  'eai:acl.app': z.string().optional(),
+  'eai:acl.app': z.string(),
   /**
    * The sharing model of the EAI ACL (e.g., app, global)
    */
-  'eai:acl.sharing': z.string().optional(),
+  'eai:acl.sharing': z.string(),
   /**
    * The owner of the EAI ACL
    */
-  'eai:acl.owner': z.string().optional(),
+  'eai:acl.owner': z.string(),
   /**
    * The last updated timestamp of the dashboard
    */
-  updated: z.string().optional(),
+  updated: z.string(),
+  /**
+   * The version of the dashboard
+   */
+  version: z.string(),
 });
 
 /**

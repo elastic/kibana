@@ -24,6 +24,13 @@ components:
       required:
         - id
         - title
+        - label
+        - description
+        - updated
+        - version
+        - eai:acl.app
+        - eai:acl.sharing
+        - eai:acl.owner
         - eai:data
       properties:
         id:
@@ -53,6 +60,9 @@ components:
         updated:
           type: string
           description: The last updated timestamp of the dashboard
+        version:
+          type: string
+          description: The version of the dashboard
 
 
 
