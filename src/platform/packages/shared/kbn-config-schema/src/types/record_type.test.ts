@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
 import { schema } from '../..';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
@@ -208,6 +210,28 @@ describe('#extendsDeep', () => {
     expect(() =>
       forbidSchema.validate({ key: { foo: 'test', bar: 'test' } })
     ).toThrowErrorMatchingInlineSnapshot(`"[key.bar]: definition for this key is missing"`);
+  });
+});
+
+describe('#validate', () => {
+  test('should validate with correct type', () => {
+    schema.recordOf(schema.string(), schema.string(), {
+      validate: (value) => {
+        const expected: Record<string, string> = { foo: 'test' };
+        expectType<typeof value>(expected);
+      },
+    });
+  });
+});
+
+describe('#defaultValue', () => {
+  // TODO: The defaultValue should be respected
+  test.failing('should validate with correct defaultValue', () => {
+    const defaultValue = { foo: 'test' };
+    const type = schema.recordOf(schema.string(), schema.string(), {
+      defaultValue,
+    });
+    expect(type.validate(undefined)).toEqual(defaultValue);
   });
 });
 

@@ -210,15 +210,16 @@ describe('#validate', () => {
 describe('#defaultValue', () => {
   // TODO: The defaultValue should be respected
   test.failing('should validate with correct defaultValue', () => {
+    const defaultValue = [{ foo: 'test' }];
     const type = schema.arrayOf(
       schema.object({
         foo: schema.string(),
       }),
       {
-        defaultValue: [{ foo: 'test' }],
+        defaultValue,
       }
     );
-    expect(type.validate(undefined)).toEqual([{ foo: 'test' }]);
+    expect(type.validate(undefined)).toEqual(defaultValue);
   });
 });
 

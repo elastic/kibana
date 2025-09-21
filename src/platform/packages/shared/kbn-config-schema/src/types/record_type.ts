@@ -56,8 +56,11 @@ export class RecordOfType<
   }
 
   public extendsDeep(options: ExtendsDeepOptions): RecordOfType<K, T, D> {
-    const newValueType = this.valueType.extendsDeep(options) as T;
-    return new RecordOfType(this.keyType.extendsDeep(options), newValueType, this.options);
+    return new RecordOfType(
+      this.keyType.extendsDeep(options),
+      this.valueType.extendsDeep(options) as T,
+      this.options
+    );
   }
 
   protected handleError(

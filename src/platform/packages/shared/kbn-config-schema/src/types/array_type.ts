@@ -57,8 +57,7 @@ export class ArrayType<
   }
 
   public extendsDeep(options: ExtendsDeepOptions): ArrayType<T, D> {
-    const newItemType = this.itemType.extendsDeep(options) as T;
-    return new ArrayType(newItemType, this.arrayOptions);
+    return new ArrayType(this.itemType.extendsDeep(options) as T, this.arrayOptions);
   }
 
   protected handleError(type: string, { limit, reason, value }: Record<string, any>) {
