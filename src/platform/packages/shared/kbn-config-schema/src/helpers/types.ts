@@ -41,3 +41,14 @@ export type OptionalizeObject<T extends object> = Simplify<
  * Simplifies complex object types
  */
 export type Simplify<T extends object> = { [k in keyof T]: T[k] } & {};
+
+/**
+ * Check if `T` is of type `any`.
+ *
+ * This uses the fact that `any` will absorb all types.
+ *
+ * For example:
+ * - If `T` is `any`, `1 & any` resolves to `any`, and `0 extends any` is `true` (since `any` accepts any type).
+ * - If `T` is not `any` (e.g. `string`, `number`, `{}`), `1 & T` is `never` (because `1` is a literal type that can't intersect with most types), so `0 extends never` is `false`.
+ */
+export type IsAny<T> = 0 extends 1 & T ? true : false;

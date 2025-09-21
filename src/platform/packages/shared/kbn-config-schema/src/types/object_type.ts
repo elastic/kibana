@@ -25,15 +25,6 @@ export type SomeObjectType = ObjectType<any, any, any, any>;
 
 export type ObjectRawProps = Record<string, SomeType>;
 
-/**
- * Needed to constrain the object raw props to preserve the exact type for D
- *
- * Without this the defaults will be stripped away when defined directly in the object.
- */
-export type PreciseObjectProps<P extends ObjectRawProps> = {
-  [K in keyof P]: P[K] extends Type<infer O, infer I, infer D> ? D : never;
-};
-
 export type ObjectOutputType<Props extends ObjectRawProps> = OptionalizeObject<{
   [k in keyof Props]: Props[k]['_output'];
 }>;
@@ -41,8 +32,6 @@ export type ObjectOutputType<Props extends ObjectRawProps> = OptionalizeObject<{
 export type ObjectInputType<Props extends ObjectRawProps> = OptionalizeObject<{
   [k in keyof Props]: Props[k]['_input'];
 }>;
-
-// new stuff above
 
 export type NullableProps = Record<string, Type<any, any, any> | undefined | null>;
 
@@ -185,6 +174,7 @@ export class ObjectType<
    * const extended = origin.extends({
    *   added: schema.number(),
    * }, { defaultValue: { initial: 'foo', added: 'bar' }});
+   * ```
    *
    * @remarks
    * `extends` only support extending first-level properties. It's currently not possible to perform deep/nested extensions.
@@ -204,7 +194,7 @@ export class ObjectType<
    *   }),
    * });
    *
-   * // TypeOf<typeof extended> is `{ foo: string; nested: { c: string } }`
+   * // TypeOf<typeof extended> -> { foo: string; nested: { c: string } }
    * ```
    */
   public extends<NP extends NullableProps>(

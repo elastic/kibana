@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExtendsDeepOptions } from './type';
+import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
+import type { ExtendsDeepOptions, SomeType } from './type';
 import { Type } from './type';
 
-import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
-export class MaybeType<V> extends Type<V | undefined> {
-  private readonly maybeType: Type<V>;
+export class MaybeType<T extends SomeType> extends Type<
+  T['_output'] | undefined,
+  T['_input'] | undefined
+> {
+  private readonly maybeType: Type<T['_output'] | undefined, T['_input'] | undefined, any>;
 
-  constructor(type: Type<V>) {
+  constructor(type: T) {
     super(
       type
         .getSchema()
@@ -25,7 +28,9 @@ export class MaybeType<V> extends Type<V | undefined> {
     this.maybeType = type;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
+  public extendsDeep(
+    options: ExtendsDeepOptions
+  ): Type<T['_output'] | undefined, T['_input'] | undefined> {
     return new MaybeType(this.maybeType.extendsDeep(options));
   }
 }

@@ -26,6 +26,26 @@ import { Reference } from '../references';
 export type SomeType = Type<any, any, any>;
 
 /**
+ * Resolve the default value based on the type of D.
+ *
+ * We need to check if `D` is `never` to conditionally set the `_input` type.
+ *
+ * Additionally, Since `SomeType` sets `D` to type `any`, the type of `D` will sometimes default to `any`.
+ * So if `D` is not `never` we need to check if `D` is `any`, but only when `Input` is not `any`.
+ *
+ * @note
+ * This is only needed because we nest the `defaultValue` in the options. A purely functional transform
+ * such as `schema.number().default(123)` would not need this.
+ */
+export type ResolveDefaultValue<D, Input> = [D] extends [never]
+  ? never
+  : IsAny<D> extends true
+  ? IsAny<Input> extends true
+    ? D
+    : never
+  : D;
+
+/**
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */

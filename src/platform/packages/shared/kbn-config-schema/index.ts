@@ -10,7 +10,6 @@
 import type { Duration } from 'moment';
 import type { Stream } from 'stream';
 
-import type { ByteSizeValue } from './src/byte_size_value';
 import type { Reference } from './src/references';
 import { ContextReference, SiblingReference } from './src/references';
 import type {
@@ -99,9 +98,7 @@ function stream<D extends DefaultValue<Stream> = never>(
   return new StreamType(options);
 }
 
-function string<D extends DefaultValue<string> = never>(
-  options?: StringOptions<D>
-): Type<string, string, D> {
+function string<D extends DefaultValue<string> = never>(options?: StringOptions<D>): StringType<D> {
   return new StringType(options);
 }
 
@@ -140,9 +137,11 @@ function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): IpT
 }
 
 /**
- * Create an optional type
+ * Creates an optional type
+ *
+ * @note wrapping with `maybe` ignores the `defaultValue` on `type` when validating.
  */
-function maybe<V>(type: Type<V>): Type<V | undefined> {
+function maybe<T extends SomeType>(type: T): MaybeType<T> {
   return new MaybeType(type);
 }
 
