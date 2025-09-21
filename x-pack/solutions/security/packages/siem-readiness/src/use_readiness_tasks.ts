@@ -31,7 +31,6 @@ export const useReadinessTasks = () => {
       });
     },
     onSuccess: () => {
-      console.log('invalidateQueries called');
       queryClient.invalidateQueries({ queryKey: GET_LATEST_TASKS_QUERY_KEY });
     },
   });
@@ -39,7 +38,6 @@ export const useReadinessTasks = () => {
   const getLatestTasks = useQuery({
     queryKey: GET_LATEST_TASKS_QUERY_KEY,
     queryFn: () => {
-      console.log('query called');
       return http.get<TaskSource[]>(GET_LATEST_SIEM_READINESS_TASKS_API_PATH);
     },
   });
