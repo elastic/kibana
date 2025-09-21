@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import type { Simplify, IsAny } from './types';
+import type { Simplify } from './types';
 
 const types = {
   string: 'some-string',
@@ -42,26 +42,6 @@ describe('helper types', () => {
           num: types.number,
         },
       });
-    });
-  });
-
-  describe('IsAny', () => {
-    it('should treat any types as any', () => {
-      expectType<IsAny<any>>(true);
-    });
-    it('should treat all other types as non-any', () => {
-      expectType<IsAny<number>>(false);
-      expectType<IsAny<string>>(false);
-      expectType<IsAny<boolean>>(false);
-      expectType<IsAny<true>>(false);
-      expectType<IsAny<false>>(false);
-      expectType<IsAny<0>>(false);
-      expectType<IsAny<1>>(false);
-      expectType<IsAny<'string'>>(false);
-      expectType<IsAny<{}>>(false);
-      expectType<IsAny<number[]>>(false);
-      expectType<IsAny<unknown>>(false);
-      expectType<IsAny<never>>(false);
     });
   });
 });
