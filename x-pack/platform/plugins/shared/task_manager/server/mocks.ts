@@ -16,6 +16,7 @@ const createSetupMock = () => {
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
     registerCanEncryptedSavedObjects: jest.fn(),
+    registerEventLogService: jest.fn(),
   };
   return mock;
 };

@@ -27,6 +27,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { type IEventLogger, type IEvent, millisToNanos } from '@kbn/event-log-plugin/server';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -127,6 +128,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  eventLogger: IEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -181,6 +183,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private eventLogger: IEventLogger;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -208,6 +211,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    eventLogger,
   }: Opts) {
     this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
@@ -229,6 +233,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.eventLogger = eventLogger;
   }
 
   /**
@@ -352,11 +357,45 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
+
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
+
+    const kibanaProperties = {
+      saved_objects: [
+        {
+          type: 'task',
+          id: this.id,
+        },
+      ],
+      task: {
+        id: this.instance.task.id,
+        scheduled: this.instance.task.scheduledAt.toISOString(),
+        schedule_delay: millisToNanos(Date.now() - this.instance.task.runAt.getTime()),
+        task_type: this.instance.task.taskType,
+      },
+    };
+    const startEvent: IEvent = {
+      event: {
+        kind: 'task',
+        action: 'execute-start',
+      },
+      kibana: kibanaProperties,
+      message: `Task ${this} is starting to run`,
+    };
+    const doneEvent: IEvent = {
+      event: {
+        kind: 'task',
+        action: 'execute',
+        outcome: 'unknown',
+      },
+      kibana: kibanaProperties,
+    };
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    this.eventLogger.logEvent(startEvent);
+    this.eventLogger.startTiming(doneEvent);
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
@@ -374,6 +413,17 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'failure',
+      };
+      doneEvent.message = `Task ${this} failed due to the task state being invalid: ${stateValidationResult.error.message}`;
+      doneEvent.error = {
+        message: stateValidationResult.error.message,
+        stack_trace: stateValidationResult.error.stack,
+      };
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     }
 
@@ -425,6 +475,13 @@ export class TaskManagerRunner implements TaskRunner {
         this.processResult(validatedResult, stopTaskTimer())
       );
       if (apmTrans) apmTrans.end('success');
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'success',
+      };
+      doneEvent.message = `Task ${this} ran successfully`;
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     } catch (err) {
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
@@ -441,6 +498,17 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'failure',
+      };
+      doneEvent.message = `Task ${this} failed: ${err}`;
+      doneEvent.error = {
+        message: err.message,
+        stack_trace: err.stack,
+      };
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });

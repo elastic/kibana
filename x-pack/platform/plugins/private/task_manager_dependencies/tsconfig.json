@@ -10,6 +10,7 @@
     "@kbn/core",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/event-log-plugin"
   ],
   "exclude": [
     "target/**/*",

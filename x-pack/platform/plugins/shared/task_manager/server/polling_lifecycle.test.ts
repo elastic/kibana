@@ -7,6 +7,11 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+
+const eventLogger = eventLogMock.createSetup().getLogger({
+  event: { provider: 'task_manager' },
+});
 
 import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
@@ -118,6 +123,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    eventLogger,
   };
 
   beforeEach(() => {
