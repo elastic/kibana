@@ -176,11 +176,15 @@ function mapOf<K, V>(
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<K extends string, V>(
-  keyType: Type<K>,
-  valueType: Type<V>,
-  options?: RecordOfOptions<K, V>
-): Type<Record<K, V>> {
+function recordOf<
+  K extends string,
+  T extends SomeType,
+  D extends DefaultValue<Record<K, T['_input']>>
+>(
+  keyType: Type<K, K>,
+  valueType: T,
+  options?: RecordOfOptions<K, T['_input'], D>
+): RecordOfType<K, T, D> {
   return new RecordOfType(keyType, valueType, options);
 }
 
