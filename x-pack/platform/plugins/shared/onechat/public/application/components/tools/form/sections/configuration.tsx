@@ -9,6 +9,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { ToolType } from '@kbn/onechat-common';
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
@@ -50,7 +51,7 @@ export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProp
       description={i18nMessages.configuration.documentation.description}
       documentation={{
         title: i18nMessages.configuration.documentation.documentationLink,
-        href: '#', // TODO: add documentation link when available
+        href: docLinks.tools,
       }}
     >
       <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>
