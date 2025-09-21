@@ -16,6 +16,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/esql-ast",
+    "@kbn/field-formats-plugin"
   ]
 }

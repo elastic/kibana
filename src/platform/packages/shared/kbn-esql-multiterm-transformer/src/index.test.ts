@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DatatableColumnMetaWithOriginalStringColumns } from '.';
 import { transformEsqlMultiTermBreakdown, isMultiTermColumn, restoreOriginalDatatable } from '.';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -156,7 +157,11 @@ describe('transformEsqlMultiTermBreakdown', () => {
     const { meta } = result.columns[2];
     expect(isMultiTermColumn({ meta } as any)).toBe(true);
     if (isMultiTermColumn({ meta } as any)) {
-      expect(meta.originalValueLookup.get('host-a › us-east-1 › aws')).toEqual({
+      expect(
+        (meta as DatatableColumnMetaWithOriginalStringColumns).originalValueLookup.get(
+          'host-a › us-east-1 › aws'
+        )
+      ).toEqual({
         host: 'host-a',
         region: 'us-east-1',
         cloud: 'aws',

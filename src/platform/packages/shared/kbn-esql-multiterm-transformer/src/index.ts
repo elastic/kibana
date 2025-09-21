@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './is_multi_term_column';
 export * from './get_multi_terms_formatter_params';
 export * from './transform_esql_multi_term_breakdown';
