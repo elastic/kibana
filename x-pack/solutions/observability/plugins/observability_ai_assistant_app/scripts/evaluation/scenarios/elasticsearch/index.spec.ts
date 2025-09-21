@@ -237,7 +237,7 @@ describe('Elasticsearch function', () => {
 
     it('returns a list of ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'List all Machine Learning (ML) jobs',
+        messages: 'List all machine learning jobs',
         scope: 'all',
       });
 
