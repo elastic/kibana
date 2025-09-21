@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
 import { schema } from '../..';
 
 test('returns value if it matches the type', () => {
@@ -187,6 +189,36 @@ describe('#maxSize', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { maxSize: 1 }).validate(['foo', 'bar'])
     ).toThrowErrorMatchingInlineSnapshot(`"array size is [2], but cannot be greater than [1]"`);
+  });
+});
+
+describe('#validate', () => {
+  test('should validate with correct type', () => {
+    const type = schema.arrayOf(
+      schema.object({
+        foo: schema.string(),
+      }),
+      {
+        validate: (value) => {
+          expectType<typeof value>([{ foo: 'test' }]);
+        },
+      }
+    );
+  });
+});
+
+describe('#defaultValue', () => {
+  // TODO: The defaultValue should be respected
+  test.failing('should validate with correct defaultValue', () => {
+    const type = schema.arrayOf(
+      schema.object({
+        foo: schema.string(),
+      }),
+      {
+        defaultValue: [{ foo: 'test' }],
+      }
+    );
+    expect(type.validate(undefined)).toEqual([{ foo: 'test' }]);
   });
 });
 

@@ -161,7 +161,10 @@ function object<P extends ObjectRawProps, D extends DefaultValue<ObjectInputType
   return new ObjectType(props, options);
 }
 
-function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
+function arrayOf<T extends SomeType, D extends DefaultValue<T['_input'][]> = never>(
+  itemType: T,
+  options?: ArrayOptions<T, D>
+): ArrayType<T, D> {
   return new ArrayType(itemType, options);
 }
 
