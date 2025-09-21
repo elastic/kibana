@@ -25,6 +25,15 @@ export type SomeObjectType = ObjectType<any, any, any, any>;
 
 export type ObjectRawProps = Record<string, SomeType>;
 
+/**
+ * Needed to constrain the object raw props to preserve the exact type for D
+ *
+ * Without this the defaults will be stripped away when defined directly in the object.
+ */
+export type PreciseObjectProps<P extends ObjectRawProps> = {
+  [K in keyof P]: P[K] extends Type<infer O, infer I, infer D> ? D : never;
+};
+
 export type ObjectOutputType<Props extends ObjectRawProps> = OptionalizeObject<{
   [k in keyof Props]: Props[k]['_output'];
 }>;
@@ -35,13 +44,13 @@ export type ObjectInputType<Props extends ObjectRawProps> = OptionalizeObject<{
 
 // new stuff above
 
-export type NullableProps = Record<string, Type<any> | undefined | null>;
+export type NullableProps = Record<string, Type<any, any, any> | undefined | null>;
 
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
+export type TypeOrLazyType = Type<any, any, any> | (() => Type<any, any, any>);
 
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
+export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any, any, any>
   ? ReturnType<RT>['type']
-  : RT extends Type<any>
+  : RT extends Type<any, any, any>
   ? RT['type']
   : never;
 
@@ -220,7 +229,7 @@ export class ObjectType<
     return new ObjectType(extendedProps, extendedOptions);
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
+  public extendsDeep(options: ExtendsDeepOptions): Type<Output, Input, D> {
     const extendedProps = Object.entries(this.#props).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
         return {
