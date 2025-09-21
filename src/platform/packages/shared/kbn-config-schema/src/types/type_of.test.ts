@@ -600,6 +600,7 @@ describe('schema types', () => {
 
         expectType<SchemaType>(null);
         expectType<SchemaType>(types.string);
+        expectType<SchemaType>(undefined);
         // @ts-expect-error
         expectType<SchemaType>(types.number);
       });
@@ -649,6 +650,8 @@ describe('schema types', () => {
         });
         // @ts-expect-error
         expectType<SchemaType>(undefined);
+        // @ts-expect-error
+        expectType<SchemaType>({});
       });
       test('should input object types with object default', () => {
         const testSchema = schema.object(

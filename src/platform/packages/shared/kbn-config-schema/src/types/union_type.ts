@@ -22,24 +22,22 @@ export type UnionTypeOptions<
 
 export class UnionType<
   T extends Readonly<[SomeType, ...SomeType[]]>,
-  D extends DefaultValue<T[number]['_input']>
-> extends Type<T[number]['_output'], T[number]['_input']> {
+  D extends DefaultValue<T[number]['_input']> = never
+> extends Type<T[number]['_output'], T[number]['_input'], D> {
   private readonly unionTypes: T;
   private readonly typeOptions?: UnionTypeOptions<T, D>;
 
   constructor(types: T, options?: UnionTypeOptions<T, D>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
-    super(schema, options as any);
+    super(schema, options);
     this.unionTypes = types;
     this.typeOptions = options;
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
-    return new UnionType(
-      this.unionTypes.map((t) => t.extendsDeep(options)),
-      this.typeOptions
-    );
+    const newTypes = this.unionTypes.map((t) => t.extendsDeep(options)) as any;
+    return new UnionType(newTypes, this.typeOptions);
   }
 
   protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
