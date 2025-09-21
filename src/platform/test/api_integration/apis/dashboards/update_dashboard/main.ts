@@ -38,7 +38,7 @@ const updatedDashboard = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  describe.only('main', () => {
+  describe('main', () => {
     it('should return 200 with an updated dashboard', async () => {
       const response = await supertest
         .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
