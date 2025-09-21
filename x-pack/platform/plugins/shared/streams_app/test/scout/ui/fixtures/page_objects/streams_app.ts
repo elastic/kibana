@@ -75,18 +75,16 @@ export class StreamsApp {
     }
   }
 
-  async collapseExpandAllStreams(collapse: boolean) {
-    if (collapse) {
-      const collapseAllButton = this.page.locator(`[data-test-subj="streamsCollapseAllButton"]`);
-      if (await collapseAllButton.isVisible()) {
-        await collapseAllButton.click();
-      }
-    } else {
-      const expandAllButton = this.page.locator(`[data-test-subj="streamsExpandAllButton"]`);
-      if (await expandAllButton.isVisible()) {
-        await expandAllButton.click();
-      }
-    }
+  async expandAllStreams() {
+    const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
+    await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();
+    await expandAllButton.click();
+  }
+
+  async collapseAllStreams() {
+    const collapseAllButton = this.page.getByTestId('streamsCollapseAllButton');
+    await expect(collapseAllButton, 'Collapse all button should be visible').toBeVisible();
+    await collapseAllButton.click();
   }
 
   async collapseExpandStream(streamName: string, collapse: boolean) {

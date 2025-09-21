@@ -61,16 +61,16 @@ test.describe(
       // Collapse the 'logs.child1' stream node
       await pageObjects.streams.collapseExpandStream('logs.child1', true);
 
-      // // Verify that the child streams are no longer visible
+      // Verify that the child streams are no longer visible
       await pageObjects.streams.verifyStreamsAreNotInTable([
         'logs.child1.child1',
         'logs.child1.child2',
       ]);
 
-      // // Expand the 'logs.child1' stream node
+      // Expand the 'logs.child1' stream node
       await pageObjects.streams.collapseExpandStream('logs.child1', false);
 
-      // // Verify that the child streams are visible again
+      // Verify that the child streams are visible again
       await pageObjects.streams.verifyStreamsAreInTable([
         'logs.child1',
         'logs.child1.child1',
@@ -81,8 +81,19 @@ test.describe(
     test('should expand and collapse all stream nodes in the table', async ({ pageObjects }) => {
       // Wait for the streams table to load
       await pageObjects.streams.expectStreamsTableVisible();
+
+      // Collapse all stream nodes
+      await pageObjects.streams.collapseAllStreams();
+
+      // Verify that all child streams are no longer visible
+      await pageObjects.streams.verifyStreamsAreNotInTable([
+        'logs.child1',
+        'logs.child2',
+        'logs.child3',
+      ]);
+
       // Expand all stream nodes
-      await pageObjects.streams.collapseExpandAllStreams(false);
+      await pageObjects.streams.expandAllStreams();
 
       // Verify that all child streams are visible
       await pageObjects.streams.verifyStreamsAreInTable([
@@ -92,25 +103,15 @@ test.describe(
         'logs.child3',
       ]);
 
-      // Collapse all stream nodes
-      await pageObjects.streams.collapseExpandAllStreams(true);
-
-      // Verify that all child streams are no longer visible
+      // Collapse a single stream node to verify individual expand/collapse still works
+      await pageObjects.streams.collapseExpandStream('logs.child1', true);
       await pageObjects.streams.verifyStreamsAreNotInTable([
-        'logs.child1',
-        'logs.child2',
-        'logs.child3',
-      ]);
-
-      // Expand a single stream node to verify individual expand/collapse still works
-      await pageObjects.streams.collapseExpandStream('logs.child1', false);
-      await pageObjects.streams.verifyStreamsAreInTable([
         'logs.child1.child1',
         'logs.child1.child2',
       ]);
 
       // Expand all again to verify all nodes expand
-      await pageObjects.streams.collapseExpandAllStreams(false);
+      await pageObjects.streams.expandAllStreams();
       // Verify that all child streams are visible
       await pageObjects.streams.verifyStreamsAreInTable([
         'logs.child1.child1',
