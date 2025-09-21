@@ -2,7 +2,6 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "stripInternal": true,
     "types": [
       "jest",
       "node"
