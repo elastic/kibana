@@ -146,8 +146,13 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
 }
 
-function nullable<V>(type: Type<V>): Type<V | null> {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+/**
+ * Creates an nullable type, defaults to `null`.
+ *
+ * @note wrapping with `nullable` ignores the `defaultValue` from the `type` when validating.
+ */
+function nullable<T extends SomeType>(type: T) {
+  return union([type, literal(null)], { defaultValue: null });
 }
 
 function object<P extends ObjectRawProps, D extends DefaultValue<ObjectInputType<P>> = never>(
