@@ -88,7 +88,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           is_system_action: false,
-          is_deprecated: false,
+          is_deprecated: true,
           name,
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
