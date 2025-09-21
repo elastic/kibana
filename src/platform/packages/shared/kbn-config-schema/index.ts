@@ -272,7 +272,7 @@ function conditional<
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string) {
+function lazy<T>(id: string): Lazy<T> {
   return new Lazy<T>(id);
 }
 
