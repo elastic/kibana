@@ -11,17 +11,31 @@ import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type {
+  TypeOptions,
+  ExtendsDeepOptions,
+  UnknownOptions,
+  DefaultValue,
+  SomeType,
+} from './type';
 import { Type } from './type';
 
-export type MapOfOptions<K, V> = TypeOptions<Map<K, V>> & UnknownOptions;
+export type MapOfOptions<
+  K,
+  T extends SomeType,
+  D extends DefaultValue<Map<K, T['_input']>>
+> = TypeOptions<Map<K, T['_output']>, Map<K, T['_input']>, D> & UnknownOptions;
 
-export class MapOfType<K, V> extends Type<Map<K, V>> {
+export class MapOfType<
+  K,
+  T extends SomeType,
+  D extends DefaultValue<Map<K, T['_input']>>
+> extends Type<Map<K, T['_output']>, Map<K, T['_input']>, D> {
   private readonly keyType: Type<K>;
-  private readonly valueType: Type<V>;
-  private readonly mapOptions: MapOfOptions<K, V>;
+  private readonly valueType: T;
+  private readonly mapOptions: MapOfOptions<K, T, D>;
 
-  constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
+  constructor(keyType: Type<K>, valueType: T, options: MapOfOptions<K, T, D> = {}) {
     const defaultValue = options.defaultValue;
     let schema = internals
       .map()
@@ -42,17 +56,17 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
       // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
       // The only way to avoid cloning and hence the bug is to use function for
       // default value instead.
-      defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
+      defaultValue: (defaultValue instanceof Map ? () => defaultValue : defaultValue) as D,
     });
     this.keyType = keyType;
     this.valueType = valueType;
     this.mapOptions = options;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
+  public extendsDeep(options: ExtendsDeepOptions): MapOfType<K, T, D> {
     return new MapOfType(
       this.keyType.extendsDeep(options),
-      this.valueType.extendsDeep(options),
+      this.valueType.extendsDeep(options) as T,
       this.mapOptions
     );
   }

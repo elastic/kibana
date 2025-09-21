@@ -168,11 +168,11 @@ function arrayOf<T extends SomeType, D extends DefaultValue<T['_input'][]> = nev
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V>(
+function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>>>(
   keyType: Type<K>,
-  valueType: Type<V>,
-  options?: MapOfOptions<K, V>
-): Type<Map<K, V>> {
+  valueType: T,
+  options?: MapOfOptions<K, T, D>
+): MapOfType<K, T, D> {
   return new MapOfType(keyType, valueType, options);
 }
 
@@ -181,7 +181,7 @@ function recordOf<
   T extends SomeType,
   D extends DefaultValue<Record<K, T['_input']>>
 >(
-  keyType: Type<K, K>,
+  keyType: Type<K>,
   valueType: T,
   options?: RecordOfOptions<K, T['_input'], D>
 ): RecordOfType<K, T, D> {
