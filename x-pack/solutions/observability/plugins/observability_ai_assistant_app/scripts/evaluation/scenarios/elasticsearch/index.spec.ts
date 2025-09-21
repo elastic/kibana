@@ -243,9 +243,9 @@ describe('Elasticsearch function', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'no error calling the Elasticsearch function',
-        'Returns the list of ML jobs based on the response from the Elasticsearch function',
-        `Includes ${TEST_JOB_ID} in the list of ML jobs`,
+        'No errors are encountered when calling the Elasticsearch function',
+        'Returns the list of machine learning jobs based on the response from the Elasticsearch function',
+        `Includes ${TEST_JOB_ID} in the list of machine learning jobs`,
       ]);
 
       expect(result.passed).to.be(true);
@@ -253,15 +253,15 @@ describe('Elasticsearch function', () => {
 
     it('returns the ML jobs stats', async () => {
       const conversation = await chatClient.complete({
-        messages: 'List all the Machine Learning (ML) job statistics?',
+        messages: 'List all the machine learning job statistics?',
         scope: 'all',
       });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'no error calling the Elasticsearch function',
-        'Returns the ML job stats based on the response from the Elasticsearch function',
-        `Includes ${TEST_JOB_ID} in the ML job stats`,
+        'No errors are encountered when calling the Elasticsearch function',
+        'Returns the machine learning job stats based on the response from the Elasticsearch function',
+        `Includes ${TEST_JOB_ID} in the machine learning job stats`,
       ]);
 
       expect(result.passed).to.be(true);
@@ -269,15 +269,15 @@ describe('Elasticsearch function', () => {
 
     it('returns open ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Which Machine Learning (ML) jobs are open?',
+        messages: 'Which machine learning jobs are open?',
         scope: 'all',
       });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'no error calling the Elasticsearch function',
-        'Returns the open ML jobs based on the response from the Elasticsearch function',
-        `Includes ${TEST_JOB_ID} in the list of open ML jobs`,
+        'The Elasticsearch function executes without any errors',
+        'Returns the open machine learning jobs based on the response from the Elasticsearch function',
+        `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
       ]);
 
       expect(result.passed).to.be(true);
@@ -285,7 +285,7 @@ describe('Elasticsearch function', () => {
 
     it('returns closed ML jobs', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Which Machine Learning (ML) jobs are closed?',
+        messages: 'Which machine learning jobs are closed?',
         scope: 'all',
       });
 
@@ -301,7 +301,7 @@ describe('Elasticsearch function', () => {
 
     it('returns specific ML job status', async () => {
       const conversation = await chatClient.complete({
-        messages: `What is the status of Machine Learning (ML) job id: ${TEST_JOB_ID}?`,
+        messages: `What is the status of machine learning job with the ID ${TEST_JOB_ID}?`,
         scope: 'all',
       });
 
@@ -316,14 +316,14 @@ describe('Elasticsearch function', () => {
 
     it('lists open ML jobs for specific apps', async () => {
       const conversation = await chatClient.complete({
-        messages: `List all opened Machine Learning (ML) jobs for app ${SERVICE_TEST_NAME}`,
+        messages: `List all open machine learning jobs for app ${SERVICE_TEST_NAME}`,
         scope: 'all',
       });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or uses the query function',
         'Filters jobs by the service name',
-        `Includes ${TEST_JOB_ID} in the list of open ML jobs`,
+        `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
       ]);
 
       expect(result.passed).to.be(true);
@@ -331,7 +331,7 @@ describe('Elasticsearch function', () => {
 
     it('returns ML job anomalies in index in the last 3 hours? and explain what the anomaly is about?', async () => {
       const conversation = await chatClient.complete({
-        messages: `List anomalies in ${TEST_INDEX} index in the last 3 hours? and explain what the anomaly is about?`,
+        messages: `List anomalies in ${TEST_INDEX} index in the last 3 hours and explain what the anomaly is about.`,
         scope: 'all',
       });
 
@@ -339,7 +339,7 @@ describe('Elasticsearch function', () => {
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats or try to find anomalies by running ES|QL queries',
         'no error calling the Elasticsearch or query function',
         'Returns the anomalies found in the last 3 hours based on the response from the Elasticsearch function',
-        `Includes ${TEST_JOB_ID} in the anomalies`,
+        `Includes job with ID ${TEST_JOB_ID} in the anomalies`,
       ]);
 
       expect(result.passed).to.be(true);
@@ -347,13 +347,13 @@ describe('Elasticsearch function', () => {
 
     it(`reports whether ML job id ${TEST_JOB_ID} is running and the last time it ran`, async () => {
       const conversation = await chatClient.complete({
-        messages: `Is the Machine Learning (ML) job ${TEST_JOB_ID} running now? When was the last time it ran?`,
+        messages: `Is the machine learning job ${TEST_JOB_ID} running now? When was the last time it ran?`,
         scope: 'all',
       });
 
       const result = await chatClient.evaluate(conversation, [
         `Checks ml/anomaly_detectors/${TEST_JOB_ID}/_stats for state=open/closed`,
-        'Reads data_counts.latest_record_timestamp or timing stats for last run time',
+        'Returns the last time the job ran by reading data_counts.latest_record_timestamp or timing stats for last run time',
       ]);
 
       expect(result.passed).to.be(true);
@@ -375,7 +375,7 @@ describe('Elasticsearch function', () => {
 
     it('summarizes ML jobs alerts', async () => {
       const conversation = await chatClient.complete({
-        messages: 'Summarize Machine Learning (ML) jobs alerts in the last 24 hours',
+        messages: 'Summarize machine learning jobs alerts in the last 24 hours',
         scope: 'all',
       });
 
