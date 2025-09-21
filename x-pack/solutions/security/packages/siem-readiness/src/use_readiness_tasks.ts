@@ -8,12 +8,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { TaskSource } from '@kbn/security-solution-plugin/server/lib/siem_readiness/routes/get_latest_readiness_tasks';
+import type { TaskSource, SiemReadinessTask } from './types';
 import {
   GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
   POST_SIEM_READINESS_TASK_API_PATH,
 } from './constants';
-import type { SiemReadinessTask } from './types';
 import { validateTask } from './validate_task';
 
 const GET_LATEST_TASKS_QUERY_KEY = ['latest-readiness-tasks'];

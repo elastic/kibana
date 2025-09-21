@@ -14,8 +14,7 @@ import {
   POST_SIEM_READINESS_TASK_API_PATH,
   GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
 } from './constants';
-import type { SiemReadinessTask } from './types';
-import type { TaskSource } from '@kbn/security-solution-plugin/server/lib/siem_readiness/routes/get_latest_readiness_tasks';
+import type { SiemReadinessTask, TaskSource } from './types';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
