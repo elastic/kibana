@@ -71,9 +71,11 @@ describe('NoVulnerabilitiesStates', () => {
     expect(button).toHaveAttribute('href', expect.stringContaining(cnvmintegrationLink));
   });
 
-  it('Vulnerabilities - `Add Wiz integration`: should have link element to wiz integration installation page', async () => {
+  it('Vulnerabilities - `Add integration`: should have link element to integration page', async () => {
     await waitFor(() =>
-      expect(screen.getByText(/Already using a\s+cloud security product?/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Already using a vulnerability management solution\?/i)
+      ).toBeInTheDocument()
     );
 
     // Find the button

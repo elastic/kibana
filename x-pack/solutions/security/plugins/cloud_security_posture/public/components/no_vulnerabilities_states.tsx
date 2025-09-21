@@ -111,7 +111,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <FormattedMessage
                 id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.promptDescription"
                 defaultMessage="
-                Detect and remediate potential vulnerabilities {lineBreak} in your cloud assets, with our Cloud Native {lineBreak} Vulnerability Management(CNVM) integration. {lineBreak} {learnMore}"
+                Detect and remediate potential vulnerabilities {lineBreak} in your cloud assets, with our Cloud Native {lineBreak} Vulnerability Management (CNVM) integration. {lineBreak} {learnMore}"
                 values={{
                   lineBreak: <br />,
                   learnMore: (
@@ -165,7 +165,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <h2>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.promptTitle"
-                  defaultMessage="Already using a {lineBreak} cloud security product?"
+                  defaultMessage="Already using a vulnerability{lineBreak} management solution?"
                   values={{ lineBreak: <br /> }}
                 />
               </h2>
@@ -176,7 +176,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <p>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.promptDescription"
-                  defaultMessage="Ingest data from your existing vulnerability {lineBreak} solution for centralized analytics, hunting, {lineBreak} investigations, visualizations, and contextual {lineBreak} insights across your entire infrastructure."
+                  defaultMessage="Ingest vulnerability data to help you analyze,{lineBreak} hunt, and investigate threats by {lineBreak} providing contextual insights across your infrastructure."
                   values={{ lineBreak: <br /> }}
                 />
               </p>

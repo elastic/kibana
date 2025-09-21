@@ -291,7 +291,7 @@ const EmptySecurityFindingsPrompt = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptTitle"
-                  defaultMessage="Already using a {lineBreak} cloud security product?"
+                  defaultMessage="Already using a {lineBreak} cloud security solution?"
                   values={{ lineBreak: <br /> }}
                 />
               </h2>
@@ -302,7 +302,7 @@ const EmptySecurityFindingsPrompt = () => {
               <p>
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.promptDescription"
-                  defaultMessage="Ingest findings from your existing {lineBreak}  CSPM solution, while taking {lineBreak} advantage of Elastic’s security workflows and {lineBreak} dashboards."
+                  defaultMessage="Ingest misconfiguration data to help you  {lineBreak}  analyze, hunt, and investigate threats by {lineBreak} providing contextual insights across your infrastructure."
                   values={{ lineBreak: <br /> }}
                 />
               </p>
