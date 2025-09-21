@@ -31,9 +31,9 @@ export type {
   ObjectTypeOptions,
   ObjectRawProps,
   NullableProps,
-  TypeOf,
   ObjectResultType,
 } from './object_type';
+export type { TypeOf, TypeOfOutput, TypeOfInput } from './type_of';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

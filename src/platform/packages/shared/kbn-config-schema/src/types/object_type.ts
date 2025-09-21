@@ -16,6 +16,7 @@ import type {
   UnknownOptions,
   SomeType,
   DefaultValue,
+  TypeOrLazyType,
 } from './type';
 import { Type } from './type';
 import { ValidationError } from '../errors';
@@ -35,9 +36,7 @@ export type ObjectInputType<Props extends ObjectRawProps> = OptionalizeObject<{
 
 export type NullableProps = Record<string, Type<any, any, any> | undefined | null>;
 
-export type TypeOrLazyType = Type<any, any, any> | (() => Type<any, any, any>);
-
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any, any, any>
+type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any, any, any>
   ? ReturnType<RT>['type']
   : RT extends Type<any, any, any>
   ? RT['type']

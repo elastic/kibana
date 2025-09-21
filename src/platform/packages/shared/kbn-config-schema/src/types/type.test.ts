@@ -14,7 +14,7 @@ import { Type } from './type';
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
-  constructor(opts: TypeOptions<any> = {}) {
+  constructor(opts: TypeOptions<any, any, never> = {}) {
     super(internals.any(), opts);
   }
 }

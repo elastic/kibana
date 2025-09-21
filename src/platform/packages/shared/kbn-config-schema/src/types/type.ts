@@ -19,11 +19,14 @@ import {
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
+import type { IsAny } from '../helpers/types';
 
 /**
  * Generic schema type
  */
 export type SomeType = Type<any, any, any>;
+
+export type TypeOrLazyType = SomeType | (() => SomeType);
 
 /**
  * Resolve the default value based on the type of D.
