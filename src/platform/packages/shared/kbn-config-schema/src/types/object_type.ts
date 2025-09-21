@@ -43,11 +43,11 @@ export type ObjectInputType<Props extends ObjectRawProps> = OptionalizeObject<{
   [k in keyof Props]: Props[k]['_input'];
 }>;
 
-export type NullableProps = Record<string, Type<any, any, any> | undefined | null>;
+export type NullableProps = Record<string, SomeType | undefined | null>;
 
-type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any, any, any>
+type TypeOf<RT extends TypeOrLazyType> = RT extends () => SomeType
   ? ReturnType<RT>['type']
-  : RT extends Type<any, any, any>
+  : RT extends SomeType
   ? RT['type']
   : never;
 
@@ -82,15 +82,6 @@ type ExtendedProps<P extends ObjectRawProps, NP extends NullableProps> = Omit<P,
   [K in keyof DefinedProperties<NP>]: NP[K];
 };
 
-type ExtendedObjectType<P extends ObjectRawProps, NP extends NullableProps> = ObjectType<
-  ExtendedProps<P, NP>
->;
-
-type ExtendedObjectTypeOptions<
-  P extends ObjectRawProps,
-  NP extends NullableProps
-> = ObjectTypeOptions<ExtendedProps<P, NP>>;
-
 interface ObjectTypeOptionsMeta {
   /**
    * A string that uniquely identifies this schema. Used when generating OAS
@@ -113,7 +104,7 @@ export class ObjectType<
   D extends DefaultValue<Input> = never
 > extends Type<Output, Input, D> {
   #props: P;
-  #options: ObjectTypeOptions<P>;
+  #options: ObjectTypeOptions<Output, Input, D>;
   #propSchemas: Record<string, AnySchema>;
 
   constructor(props: P, options: ObjectTypeOptions<Output, Input, D> = {}) {
@@ -142,7 +133,7 @@ export class ObjectType<
     super(schema, typeOptions);
     this.#props = props;
     this.#propSchemas = schemaKeys;
-    this.#options = options as ObjectTypeOptions<P, P, never>;
+    this.#options = options;
   }
 
   /**
@@ -205,10 +196,23 @@ export class ObjectType<
    * // TypeOf<typeof extended> -> { foo: string; nested: { c: string } }
    * ```
    */
-  public extends<NP extends NullableProps>(
+  public extends<
+    T extends SomeObjectType,
+    NP extends T['props'], // must derive props from general type to infer precise types
+    ND extends DefaultValue<ObjectInputType<ExtendedProps<P, NP>>> = never
+  >(
     newProps: NP,
-    newOptions?: ExtendedObjectTypeOptions<P, NP>
-  ): ExtendedObjectType<P, NP> {
+    newOptions?: ObjectTypeOptions<
+      ObjectOutputType<ExtendedProps<P, NP>>,
+      ObjectInputType<ExtendedProps<P, NP>>,
+      ND
+    >
+  ): ObjectType<
+    ExtendedProps<P, NP>,
+    ObjectOutputType<ExtendedProps<P, NP>>,
+    ObjectInputType<ExtendedProps<P, NP>>,
+    ND
+  > {
     const extendedProps = Object.entries({
       ...this.#props,
       ...newProps,
@@ -222,7 +226,11 @@ export class ObjectType<
     const extendedOptions = {
       ...this.#options,
       ...newOptions,
-    } as ExtendedObjectTypeOptions<P, NP>;
+    } as ObjectTypeOptions<
+      ObjectOutputType<ExtendedProps<P, NP>>,
+      ObjectInputType<ExtendedProps<P, NP>>,
+      ND
+    >;
 
     return new ObjectType(extendedProps, extendedOptions);
   }
@@ -238,7 +246,7 @@ export class ObjectType<
       return memo;
     }, {} as P);
 
-    const extendedOptions: ObjectTypeOptions<P> = {
+    const extendedOptions: ObjectTypeOptions<Output, Input, D> = {
       ...this.#options,
       ...(options.unknowns ? { unknowns: options.unknowns } : {}),
     };
