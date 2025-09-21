@@ -154,7 +154,11 @@ function nullable<T extends SomeType>(type: T) {
   return union([type, literal(null)], { defaultValue: null });
 }
 
-function object<P extends ObjectRawProps, D extends DefaultValue<ObjectInputType<P>> = never>(
+function object<
+  T extends SomeObjectType,
+  P extends T['props'], // must derive props from general type to infer precise types
+  D extends DefaultValue<ObjectInputType<P>> = never
+>(
   props: P,
   options?: ObjectTypeOptions<ObjectOutputType<P>, ObjectInputType<P>, D>
 ): ObjectType<P, ObjectOutputType<P>, ObjectInputType<P>, D> {

@@ -24,6 +24,15 @@ import type { OptionalizeObject } from '../helpers/types';
 
 export type SomeObjectType = ObjectType<any, any, any, any>;
 
+/**
+ * Needed to constrain the object raw props to preserve the exact type for D
+ *
+ * Without this the defaults will be stripped away when defined directly in the object.
+ */
+export type PreciseObjectProps<P extends ObjectRawProps = ObjectRawProps> = {
+  [K in keyof P]: P[K] extends Type<infer O, infer I, infer D> ? D : never;
+};
+
 export type ObjectRawProps = Record<string, SomeType>;
 
 export type ObjectOutputType<Props extends ObjectRawProps> = OptionalizeObject<{
@@ -274,7 +283,7 @@ export class ObjectType<
   /**
    * @deprecated use `schema.props` instead
    */
-  public get propSchemas(): P {
+  public getPropSchemas(): P {
     return { ...this.#props };
   }
 
