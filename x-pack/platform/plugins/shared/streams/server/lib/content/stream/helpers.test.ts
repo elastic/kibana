@@ -40,6 +40,7 @@ describe('content pack stream helpers', () => {
 
     expect(scoped).toEqual({
       objects: {
+        mappings: true,
         queries: [],
         routing: [
           {
