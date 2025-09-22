@@ -79,9 +79,9 @@ export const getEsqlQueryHits = async (
 ): Promise<EsqlQueryHits> => {
   if (isGroupAgg) {
     const alertIdFields = getAlertIdFields(query, table.columns);
-    return toGroupedEsqlQueryHits(table, alertIdFields, isPreview);
+    return await toGroupedEsqlQueryHits(table, alertIdFields, isPreview);
   }
-  return toEsqlQueryHits(table, isPreview);
+  return await toEsqlQueryHits(table, isPreview);
 };
 
 export const toEsqlQueryHits = async (
@@ -91,34 +91,23 @@ export const toEsqlQueryHits = async (
 ): Promise<EsqlQueryHits> => {
   const hits: EsqlHit[] = [];
   const rows: EsqlDocument[] = [];
-  const numRows = table.values.length;
-  let currentRow = 0;
-
-  const processEsqlQueryHits = async () => {
-    const chunk = Math.min(currentRow + chunkSize, numRows);
-    for (; currentRow < chunk; currentRow++) {
-      const row = table.values[currentRow];
-      const document = rowToDocument(table.columns, row);
-      hits.push({
-        _id: ESQL_DOCUMENT_ID,
-        _index: '',
-        _source: document,
-      });
-      if (isPreview) {
-        rows.push(
-          rows.length > 0 ? document : Object.assign({ [ALERT_ID_COLUMN]: ActionGroupId }, document)
-        );
-      }
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
+    const document = rowToDocument(table.columns, row);
+    hits.push({
+      _id: ESQL_DOCUMENT_ID,
+      _index: '',
+      _source: document,
+    });
+    if (isPreview) {
+      rows.push(
+        rows.length > 0 ? document : Object.assign({ [ALERT_ID_COLUMN]: ActionGroupId }, document)
+      );
     }
-
-    if (currentRow < numRows) {
-      await new Promise((resolve) => {
-        setImmediate(() => resolve(processEsqlQueryHits()));
-      });
+    if (r % chunkSize === 0) {
+      await new Promise(setImmediate);
     }
-  };
-
-  await processEsqlQueryHits();
+  }
 
   return {
     results: {
@@ -150,47 +139,38 @@ export const toGroupedEsqlQueryHits = async (
   const rows: EsqlDocument[] = [];
   const mappedAlertIds: Record<string, Array<string | null>> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
-  const numRows = table.values.length;
-  let currentRow = 0;
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
+    const document = rowToDocument(table.columns, row);
+    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
+    if (mappedAlertId.length > 0) {
+      const alertId = mappedAlertId.join(',');
+      const hit = {
+        _id: ESQL_DOCUMENT_ID,
+        _index: '',
+        _source: document,
+      };
+      if (groupedHits[alertId]) {
+        duplicateAlertIds.add(alertId);
+        groupedHits[alertId].push(hit);
+      } else {
+        groupedHits[alertId] = [hit];
+        mappedAlertIds[alertId] = mappedAlertId;
+      }
 
-  const processGroupedEsqlQueryHits = async () => {
-    const chunk = Math.min(currentRow + chunkSize, numRows);
-    for (; currentRow < chunk; currentRow++) {
-      const row = table.values[currentRow];
-      const document = rowToDocument(table.columns, row);
-      const { mappedAlertId, alertId } = getAlertId(document, alertIdFields);
-      if (mappedAlertId.length > 0) {
-        const hit = {
-          _id: ESQL_DOCUMENT_ID,
-          _index: '',
-          _source: document,
-        };
-        if (groupedHits[alertId]) {
-          duplicateAlertIds.add(alertId);
-          groupedHits[alertId].push(hit);
-        } else {
-          groupedHits[alertId] = [hit];
-          mappedAlertIds[alertId] = mappedAlertId;
-        }
+      if (isPreview) {
+        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
 
-        if (isPreview) {
-          rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
-
-          if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
-            longAlertIds.add(alertId);
-          }
+        if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
+          longAlertIds.add(alertId);
         }
       }
-    }
 
-    if (currentRow < numRows) {
-      await new Promise((resolve) => {
-        setImmediate(() => resolve(processGroupedEsqlQueryHits()));
-      });
+      if (r % chunkSize === 0) {
+        await new Promise(setImmediate);
+      }
     }
-  };
-
-  await processGroupedEsqlQueryHits();
+  }
 
   const aggregations = {
     groupAgg: {
@@ -355,23 +335,4 @@ const getColumnsForPreview = (
 const intersection = (fields: string[], columns: string[]): string[] => {
   const columnSet = new Set(columns);
   return fields.filter((item) => columnSet.has(item));
-};
-
-const getAlertId = (document: EsqlDocument, alertIdFields: string[]) => {
-  let alertId = '';
-  let first = true;
-  const mappedAlertId: Array<string | null> = [];
-  for (const a of alertIdFields) {
-    const value = document[a];
-    if (!isNil(value)) {
-      if (first) {
-        alertId += value;
-        first = false;
-      } else {
-        alertId += ',' + value;
-      }
-      mappedAlertId.push(value);
-    }
-  }
-  return { mappedAlertId, alertId };
 };

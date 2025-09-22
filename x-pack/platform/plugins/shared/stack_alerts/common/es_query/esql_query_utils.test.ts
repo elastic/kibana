@@ -25,6 +25,10 @@ describe('ESQL query utils', () => {
   const value3 = ['2025-07-12T13:32:04.174Z', '1.2.0', '200'];
   const value4 = ['2025-07-12T13:32:04.174Z', '1.2.0', null];
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('rowToDocument', () => {
     it('correctly converts ESQL row to document', () => {
       expect(rowToDocument(columns, value1)).toEqual({
@@ -100,6 +104,20 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
+    });
+
+    it('correctly calls setImmediate', async () => {
+      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const values = [];
+      for (let i = 0; i < 1000; i++) {
+        values.push(value1);
+      }
+      await toEsqlQueryHits({
+        columns,
+        values,
+      });
+
+      expect(setImmediateSpy).toHaveBeenCalledTimes(10);
     });
   });
 
@@ -493,7 +511,6 @@ describe('ESQL query utils', () => {
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
     });
-
     it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', async () => {
       const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
@@ -604,6 +621,22 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'error.code' },
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
+    });
+    it('correctly calls setImmediate', async () => {
+      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const values = [];
+      for (let i = 0; i < 1000; i++) {
+        values.push(value1);
+      }
+      await toGroupedEsqlQueryHits(
+        {
+          columns,
+          values,
+        },
+        ['error.code', 'ecs.version']
+      );
+
+      expect(setImmediateSpy).toHaveBeenCalledTimes(10);
     });
   });
 
