@@ -12,10 +12,13 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constan
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { type DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
+const DEFAULT_CONNECTOR_NAME = 'synthetics-test-connector';
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const samlAuth = getService('samlAuth');
+  const alertingApi = getService('alertingApi');
 
   describe('Simultaneous Default Alert Requests', () => {
     let editorUser: RoleCredentials;
@@ -23,25 +26,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      alertingApi.createIndexConnector({
+        roleAuthc: editorUser,
+        name: DEFAULT_CONNECTOR_NAME,
+        indexName: 'synthetics-*',
+      });
     });
 
     beforeEach(async () => {
+      const supertestWithRoleScope = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       // ensure alerts are enabled before testing the feature
-      await supertest
+      supertestWithRoleScope
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(DYNAMIC_SETTINGS_DEFAULTS)
+        .send({ ...DYNAMIC_SETTINGS_DEFAULTS, defaultConnectors: [DEFAULT_CONNECTOR_NAME] })
         .expect(200);
     });
 
     afterEach(async () => await kibanaServer.savedObjects.cleanStandardList());
 
     it('should handle multiple simultaneous requests for default alerting', async () => {
+      const supertestWithRoleScope = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       // make many simultaneous requests to the default alerting API
       const REQUEST_COUNT = 20;
       const requests = Array.from({ length: REQUEST_COUNT }, () =>
-        supertest
+        supertestWithRoleScope
           .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -99,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // fetch all the rules, there should be two
-      const alertingResponse = await supertest
+      const alertingResponse = await supertestWithRoleScope
         .post(INTERNAL_ALERTING_API_FIND_RULES_PATH)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
