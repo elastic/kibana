@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { NoVulnerabilitiesStates } from './no_vulnerabilities_states';
 import * as useCspSetupStatusApi from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import * as useCspIntegrationLink from '../common/navigation/use_csp_integration_link';
-import * as useAddIntegrationPath from '../common/api/use_add_integrations_route';
+import * as useAddIntegrationRoute from '../common/api/use_add_integrations_route';
 import {
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_INTEGRATION_BUTTON,
@@ -36,7 +36,7 @@ describe('NoVulnerabilitiesStates', () => {
 
   beforeAll(() => {
     (useCspIntegrationLink.useCspIntegrationLink as jest.Mock).mockReturnValue(cnvmintegrationLink);
-    (useAddIntegrationPath.useAddIntegrationPath as jest.Mock).mockReturnValue(
+    (useAddIntegrationRoute.useAddIntegrationRoute as jest.Mock).mockReturnValue(
       integrationRouteLink
     );
   });

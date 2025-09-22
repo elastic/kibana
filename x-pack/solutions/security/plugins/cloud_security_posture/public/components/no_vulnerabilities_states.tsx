@@ -43,7 +43,7 @@ import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
 import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
-import { useAddIntegrationPath } from '../common/api/use_add_integrations_route';
+import { useAddIntegrationRoute } from '../common/api/use_add_integrations_route';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -78,7 +78,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
 }) => {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
-  const addIntegrationRouteLink = useAddIntegrationPath('vulnerability_workflow');
+  const addIntegrationRouteLink = useAddIntegrationRoute('vulnerability_workflow');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
   const isDarkMode = useKibanaIsDarkMode();
 

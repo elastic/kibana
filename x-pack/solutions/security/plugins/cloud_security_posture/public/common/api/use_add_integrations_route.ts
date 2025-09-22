@@ -8,7 +8,7 @@
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 
-export const useAddIntegrationPath = (
+export const useAddIntegrationRoute = (
   category: 'misconfiguration_workflow' | 'vulnerability_workflow'
 ) => {
   const { application } = useKibana().services;

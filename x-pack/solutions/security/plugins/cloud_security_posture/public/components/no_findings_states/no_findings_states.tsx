@@ -45,7 +45,7 @@ import misconfigurationsVendorDarkSVG from '../../assets/illustrations/misconfig
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
-import { useAddIntegrationPath } from '../../common/api/use_add_integrations_route';
+import { useAddIntegrationRoute } from '../../common/api/use_add_integrations_route';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -187,7 +187,7 @@ const EmptySecurityFindingsPrompt = () => {
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
   const isDarkMode = useKibanaIsDarkMode();
-  const addIntegrationRouteLink = useAddIntegrationPath('misconfiguration_workflow');
+  const addIntegrationRouteLink = useAddIntegrationRoute('misconfiguration_workflow');
 
   return (
     <EuiFlexGroup>
