@@ -38,6 +38,7 @@ export const transformRuleTypesResponse = (
       producer: ruleType.producer,
       recovery_action_group: ruleType.recoveryActionGroup,
       ...(ruleType.ruleTaskTimeout ? { rule_task_timeout: ruleType.ruleTaskTimeout } : {}),
+      is_internally_managed: Boolean(ruleType.internallyManaged),
     };
   });
 };

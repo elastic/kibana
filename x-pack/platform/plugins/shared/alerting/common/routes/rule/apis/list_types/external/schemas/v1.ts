@@ -183,6 +183,7 @@ export const typesRulesSchema = schema.object({
   }),
   recovery_action_group: actionGroupSchema,
   rule_task_timeout: schema.maybe(schema.string()),
+  is_internally_managed: schema.boolean(),
 });
 
 export const typesRulesResponseBodySchema = schema.arrayOf(typesRulesSchema);

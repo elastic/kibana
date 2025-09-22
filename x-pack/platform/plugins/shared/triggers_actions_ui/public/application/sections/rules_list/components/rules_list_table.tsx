@@ -169,6 +169,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+      isInternallyManaged: ruleTypeIndex.get(rule.ruleTypeId)!.isInternallyManaged,
     };
   });
 }

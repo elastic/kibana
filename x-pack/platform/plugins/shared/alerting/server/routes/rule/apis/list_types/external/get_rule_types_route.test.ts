@@ -131,6 +131,7 @@ describe('ruleTypesRoute', () => {
             "has_fields_for_a_a_d": true,
             "id": "1",
             "is_exportable": true,
+            "is_internally_managed": false,
             "minimum_license_required": "basic",
             "name": "name",
             "producer": "test",
