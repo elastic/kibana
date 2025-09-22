@@ -17,9 +17,6 @@ import { isResponseError } from '@kbn/es-errors';
 
 import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
-  OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS,
-  OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS,
-  OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
   OTEL_LOGS_COMPONENT_TEMPLATES,
   OTEL_METRICS_COMPONENT_TEMPLATES,
   OTEL_TRACES_COMPONENT_TEMPLATES,
@@ -141,7 +138,6 @@ export function getTemplate({
     ...(isEventIngestedEnabled(appContextService.getConfig())
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
-    ...(isOtelInputType ? getOtelCustomComponents(type) : []),
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
@@ -169,16 +165,6 @@ const getOtelBaseComponents = (type: string): string[] => {
     return OTEL_LOGS_COMPONENT_TEMPLATES;
   } else if (type === 'traces') {
     return OTEL_TRACES_COMPONENT_TEMPLATES;
-  }
-  return [];
-};
-const getOtelCustomComponents = (type: string) => {
-  if (type === 'metrics') {
-    return [OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS];
-  } else if (type === 'logs') {
-    return [OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS];
-  } else if (type === 'traces') {
-    return [OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS];
   }
   return [];
 };

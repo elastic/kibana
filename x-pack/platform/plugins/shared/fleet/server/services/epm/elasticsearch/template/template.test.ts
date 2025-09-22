@@ -324,7 +324,13 @@ describe('EPM template', () => {
     });
 
     it('adds composed_of correctly for otel input packages of type logs', () => {
-      const composedOfTemplates = ['component1', 'component2'];
+      const composedOfTemplates = [
+        'logs-check@package',
+        'logs@custom',
+        OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'logs-check@custom',
+      ];
 
       const template = getTemplate({
         templateIndexPattern: 'logs.otel-*',
@@ -334,6 +340,7 @@ describe('EPM template', () => {
         templatePriority: 200,
         isOtelInputType: true,
       });
+
       expect(template.composed_of).toStrictEqual([
         STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
         STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -345,12 +352,17 @@ describe('EPM template', () => {
         STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-        OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS,
       ]);
     });
 
     it('adds composed_of correctly for otel input packages of type metrics', () => {
-      const composedOfTemplates = ['component1', 'component2'];
+      const composedOfTemplates = [
+        'metrics-check@package',
+        'metrics@custom',
+        OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'metrics-check@custom',
+      ];
 
       const template = getTemplate({
         templateIndexPattern: 'metrics.otel-*',
@@ -367,15 +379,21 @@ describe('EPM template', () => {
         OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
         OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
         ...composedOfTemplates,
+
         STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-        OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS,
       ]);
     });
 
     it('adds composed_of correctly for otel input packages of type traces', () => {
-      const composedOfTemplates = ['component1', 'component2'];
+      const composedOfTemplates = [
+        'traces-check@package',
+        'traces@custom',
+        OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
+        'httpcheck@custom',
+        'traces-check@custom',
+      ];
 
       const template = getTemplate({
         templateIndexPattern: 'traces.otel-*',
@@ -386,17 +404,17 @@ describe('EPM template', () => {
         isOtelInputType: true,
       });
       expect(template.composed_of).toStrictEqual([
+        STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
+        STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS,
         OTEL_COMPONENT_TEMPLATE_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_SETTINGS,
         OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
         OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
-        STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
-        STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS,
         ...composedOfTemplates,
+
         STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
         FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-        OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS,
       ]);
     });
   });
