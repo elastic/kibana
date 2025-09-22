@@ -77,5 +77,6 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/doc-links",
   ]
 }
