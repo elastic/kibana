@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { RoleCredentials } from '../services';
 import { testHasEmbeddedConsole } from './embedded_console';
@@ -21,8 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const es = getService('es');
-  const browser = getService('browser');
-  const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const deleteAllTestIndices = async () => {
@@ -85,28 +82,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('does not render the "Add sample data" card', async () => {
           await testSubjects.missingOrFail('sampleDataSection');
-        });
-      });
-
-      describe('AI search capabilities', function () {
-        it('renders Semantic Search content', async () => {
-          await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
-          await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
-          await testSubjects.click('createSemanticOptimizedIndexButton');
-          expect(await browser.getCurrentUrl()).contain(
-            'app/elasticsearch/indices/create?workflow=semantic'
-          );
-        });
-
-        it('renders Keyword Search content', async () => {
-          await testSubjects.scrollIntoView('aiSearchCapabilities-item-keyword');
-          await testSubjects.existOrFail('aiSearchCapabilities-item-keyword');
-          await testSubjects.click('aiSearchCapabilities-item-keyword');
-          await testSubjects.existOrFail('createKeywordIndexButton');
-          await testSubjects.click('createKeywordIndexButton');
-          expect(await browser.getCurrentUrl()).contain(
-            'app/elasticsearch/indices/create?workflow=default'
-          );
         });
       });
 
@@ -256,23 +231,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('goes to the home page if there exists at least one index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
-      });
-
-      describe('AI search capabilities', function () {
-        it('renders Semantic Search content', async () => {
-          await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
-          await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
-          await testSubjects.click('createSemanticOptimizedIndexButton');
-          expect(await browser.getCurrentUrl()).contain(
-            'app/elasticsearch/indices/create?workflow=semantic'
-          );
-          await testSubjects.existOrFail('createIndexBtn');
-          expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
-          await testSubjects.click('createIndexBtn');
-          await retry.tryForTime(60 * 1000, async () => {
-            expect(await browser.getCurrentUrl()).contain('data?workflow=semantic');
-          });
-        });
       });
 
       describe('Elasticsearch endpoint and API Keys', function () {
