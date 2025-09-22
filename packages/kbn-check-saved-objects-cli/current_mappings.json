@@ -2556,6 +2556,9 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "action_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "delete_unenrolled_agents": {
         "properties": {
           "enabled": {

@@ -43164,6 +43164,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -43304,6 +43306,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
