@@ -131,7 +131,46 @@ export const createNavigationTree = async (
         type: 'navGroup',
         children: [
           defaultNavigationTree.launchpad({ hasAiValueAccess, sideNavVersion: 'v1' }),
-          defaultNavigationTree.launchpad({ hasAiValueAccess, sideNavVersion: 'v2' }),
+          {
+            id: 'launchpad',
+            title: i18nStrings.launchPad.title,
+            renderAs: 'panelOpener',
+            sideNavVersion: 'v2',
+            iconV2: 'launch',
+            children: [
+              {
+                children: [
+                  {
+                    id: 'launchpad_get_started',
+                    link: securityLink(SecurityPageName.landing),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    link: securityLink(SecurityPageName.siemReadiness),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    // value report
+                    link: securityLink(SecurityPageName.aiValue),
+                    sideNavVersion: 'v2',
+                  },
+                ],
+              },
+              {
+                title: i18nStrings.launchPad.migrations.title,
+                children: [
+                  {
+                    link: securityLink(SecurityPageName.siemMigrationsRules),
+                    sideNavVersion: 'v2',
+                  },
+                  {
+                    link: securityLink(SecurityPageName.siemMigrationsDashboards),
+                    sideNavVersion: 'v2',
+                  },
+                ],
+              },
+            ],
+          },
           {
             link: 'dev_tools',
             title: i18nStrings.devTools,
