@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const createEntitySourceResponse = await api.createEntitySource({
         body: {
-          type: 'index_sync',
+          type: 'index',
           name: 'User Monitored Indices',
           indexPattern: index1,
         },

@@ -11,7 +11,7 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
-import type { PrivMonUserSource } from '../types';
+import type { MonitoringEntitySourceType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
@@ -135,7 +135,9 @@ export class MonitoringEntitySourceDescriptorClient {
   /**
    * entity_analytics_integration or index type
    */
-  public async findSourcesByType(type: PrivMonUserSource): Promise<MonitoringEntitySource[]> {
+  public async findSourcesByType(
+    type: MonitoringEntitySourceType
+  ): Promise<MonitoringEntitySource[]> {
     const result = await this.find();
     return result.saved_objects
       .filter((so) => so.attributes.type === type)

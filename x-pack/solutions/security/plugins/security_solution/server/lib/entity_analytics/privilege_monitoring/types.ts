@@ -17,3 +17,5 @@ export interface PrivMonIntegrationsUser extends PrivMonBulkUser {
   id: string; // do you actually need this? I think you can use existingUserId instead
   isPrivileged: boolean;
 }
+
+export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';
