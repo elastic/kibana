@@ -62,7 +62,8 @@ export function SchemaChangesReviewModal({
 
   const changes = React.useMemo(() => {
     const addedFields = fields.filter(
-      (field) => !storedFields.some((stored) => stored.name === field.name)
+      (field) =>
+        field.status === 'mapped' && !storedFields.some((stored) => stored.name === field.name)
     );
 
     const changedFields = fields.filter((field) => {
