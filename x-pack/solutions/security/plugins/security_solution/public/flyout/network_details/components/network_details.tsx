@@ -22,14 +22,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { useNetworkDetails } from '../../../explore/network/containers/details';
 import { networkModel } from '../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 

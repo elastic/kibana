@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
@@ -53,7 +53,6 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';

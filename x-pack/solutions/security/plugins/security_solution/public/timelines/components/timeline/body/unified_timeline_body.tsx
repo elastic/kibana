@@ -10,12 +10,11 @@ import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
+import { SourcererScopeName, useGetScopedSourcererDataView } from '../../../../sourcerer';
 import { DataViewErrorComponent } from '../../../../common/components/data_view_error';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface UnifiedTimelineBodyProps
   extends Omit<ComponentProps<typeof UnifiedTimeline>, 'dataView'> {

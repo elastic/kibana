@@ -14,7 +14,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { SourcererScopeName } from '../../../sourcerer';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';

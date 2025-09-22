@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 
 import type { Filter } from '@kbn/es-query';
-import { TestProviders, createMockStore } from '../../../common/mock';
+import { createMockStore, TestProviders } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 import { Hosts } from './hosts';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
@@ -24,7 +24,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn().mockReturnValue({ tabName: 'allHosts' }),
 }));
-jest.mock('../../../sourcerer/containers');
+jest.mock('../../../sourcerer');
 jest.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

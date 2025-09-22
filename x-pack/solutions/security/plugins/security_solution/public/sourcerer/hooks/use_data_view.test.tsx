@@ -7,10 +7,10 @@
 
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
-import { mocksSource } from './mock';
-import { mockGlobalState, TestProviders } from '../../mock';
+import { mocksSource } from '../../common/containers/source/mock';
+import { mockGlobalState, TestProviders } from '../../common/mock';
 import { act, renderHook } from '@testing-library/react';
-import { useKibana } from '../../lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -21,8 +21,8 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../lib/kibana');
-jest.mock('../../lib/apm/use_track_http_request');
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/lib/apm/use_track_http_request');
 
 describe('useDataView', () => {
   const mockSearchResponse = {

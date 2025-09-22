@@ -10,9 +10,9 @@ import { act, fireEvent, render, renderHook, screen } from '@testing-library/rea
 import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSettingsView } from './use_settings_view';
+import { useSourcererDataView } from '../../../../sourcerer';
 import type { UseSettingsView } from './use_settings_view';
+import { useSettingsView } from './use_settings_view';
 import { TestProviders } from '../../../../common/mock';
 
 const mockFilterManager = createFilterManagerMock();
@@ -71,7 +71,7 @@ jest.mock('react-router', () => ({
 
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 
 jest.mock('../../../../common/hooks/use_space_id', () => {
   return {

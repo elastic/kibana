@@ -27,7 +27,7 @@ jest.mock('../../../../common/hooks/use_global_filter_query', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
+jest.mock('../../../../sourcerer/hooks/use_get_field_spec');
 
 type UseHostAlertsItemsReturn = ReturnType<UseHostAlertsItems>;
 const defaultUseHostAlertsItemsReturn: UseHostAlertsItemsReturn = {

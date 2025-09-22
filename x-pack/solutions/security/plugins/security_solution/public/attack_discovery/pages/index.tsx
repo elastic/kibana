@@ -42,7 +42,7 @@ import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
 import { SETTINGS_TAB_ID } from './settings_flyout/constants';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';

@@ -12,7 +12,7 @@ import {
   getScopePatternListSelection,
   validateSelectedPatterns,
 } from './helpers';
-import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { sortWithExcludesAtEnd } from '../utils/sourcerer';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 

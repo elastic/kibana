@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useSourcererDataView } from '../containers';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 import { useKibana } from '../../common/lib/kibana';
 import type { SourcererScopeName } from '../store/model';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
