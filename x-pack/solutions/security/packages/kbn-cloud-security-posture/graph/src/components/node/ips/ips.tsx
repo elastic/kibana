@@ -10,11 +10,12 @@ import { EuiFlexGroup, EuiText, EuiToolTip, useEuiFontSize } from '@elastic/eui'
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { ToolTipButton } from '../styles';
-
-export const TEST_SUBJ_TEXT = 'ips-text';
-export const TEST_SUBJ_PLUS_COUNT = 'ips-plus-count';
-export const TEST_SUBJ_TOOLTIP_CONTENT = 'ips-tooltip-content';
-export const TEST_SUBJ_TOOLTIP_IP = 'ips-tooltip-ip';
+import {
+  GRAPH_IPS_TEXT_ID,
+  GRAPH_IPS_PLUS_COUNT_ID,
+  GRAPH_IPS_TOOLTIP_CONTENT_ID,
+  GRAPH_IPS_TOOLTIP_IP_ID,
+} from '../../test_ids';
 
 export const VISIBLE_IPS_LIMIT = 1;
 export const MAX_IPS_IN_TOOLTIP = 10;
@@ -34,10 +35,10 @@ export const Ips = ({ ips }: IpsProps) => {
   if (ips.length === 0) return null;
 
   const toolTipContent = (
-    <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
+    <ul data-test-subj={GRAPH_IPS_TOOLTIP_CONTENT_ID}>
       {ips.slice(0, MAX_IPS_IN_TOOLTIP).map((ip, index) => (
         <li key={`${index}-${ip}`}>
-          <EuiText data-test-subj={TEST_SUBJ_TOOLTIP_IP} size="m">
+          <EuiText data-test-subj={GRAPH_IPS_TOOLTIP_IP_ID} size="m">
             {ip}
           </EuiText>
         </li>
@@ -47,7 +48,7 @@ export const Ips = ({ ips }: IpsProps) => {
 
   const visibleIps = (
     <EuiText
-      data-test-subj={TEST_SUBJ_TEXT}
+      data-test-subj={GRAPH_IPS_TEXT_ID}
       size="s"
       color="subdued"
       css={css`
@@ -65,7 +66,7 @@ export const Ips = ({ ips }: IpsProps) => {
       <EuiText
         size="xs"
         color="default"
-        data-test-subj={TEST_SUBJ_PLUS_COUNT}
+        data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
         css={css`
           font-weight: medium;
           ${xsFontSize};

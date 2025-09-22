@@ -8,10 +8,13 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { SelectableEntry } from '@kbn/unified-histogram';
-import { ToolbarSelector } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import { ClearAllSection } from './clear_all_section';
+
+const MAX_DIMENSIONS_SELECTIONS = 10;
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -20,12 +23,14 @@ interface DimensionsFilterProps {
   }>;
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
+  onClear: () => void;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
+  onClear,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -76,19 +81,28 @@ export const DimensionsSelector = ({
   }, [fields, selectedDimensions, allDimensions]);
 
   const options: SelectableEntry[] = useMemo(() => {
-    return allDimensions.map<SelectableEntry>((dimension) => ({
-      value: dimension.name,
-      label: dimension.name,
-      checked: selectedDimensions.includes(dimension.name) ? 'on' : undefined,
-      disabled: !intersectingDimensions.has(dimension.name),
-      toolTipContent: dimension.description,
-      key: dimension.name,
-    }));
+    const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    return allDimensions.map<SelectableEntry>((dimension) => {
+      const isSelected = selectedDimensions.includes(dimension.name);
+      const isIntersecting = intersectingDimensions.has(dimension.name);
+      const isDisabledByLimit = !isSelected && isAtMaxLimit;
+
+      return {
+        value: dimension.name,
+        label: dimension.name,
+        checked: isSelected ? 'on' : undefined,
+        disabled: !isIntersecting || isDisabledByLimit,
+        key: dimension.name,
+      };
+    });
   }, [allDimensions, selectedDimensions, intersectingDimensions]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry[]) => {
-      onChange(chosenOption?.map((p) => p.value) ?? []);
+      const newSelection = chosenOption?.map((p) => p.value) ?? [];
+      // Enforce the maximum limit
+      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
+      onChange(limitedSelection);
     },
     [onChange]
   );
@@ -97,7 +111,7 @@ export const DimensionsSelector = ({
     if (selectedDimensions.length === 0) {
       return (
         <FormattedMessage
-          id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabel"
+          id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
           defaultMessage="No dimensions selected"
         />
       );
@@ -106,7 +120,7 @@ export const DimensionsSelector = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabelWithSelection"
+            id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
             defaultMessage="Dimensions"
           />
         </EuiFlexItem>
@@ -116,6 +130,29 @@ export const DimensionsSelector = ({
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
+
+  const popoverContentBelowSearch = useMemo(() => {
+    const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    const statusMessage = isAtMaxLimit
+      ? i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
+          defaultMessage:
+            'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
+          values: { count: selectedDimensions.length, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
+        })
+      : i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
+          defaultMessage:
+            '{count, plural, one {# dimension selected} other {# dimensions selected}}',
+          values: { count: selectedDimensions.length },
+        });
+
+    return (
+      <ClearAllSection
+        selectedOptionsLength={selectedDimensions.length}
+        onClearAllAction={onClear}
+        selectedOptionsMessage={statusMessage}
+      />
+    );
+  }, [onClear, selectedDimensions.length]);
 
   return (
     <ToolbarSelector
@@ -131,6 +168,7 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={false}
       onChange={handleChange}
+      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };

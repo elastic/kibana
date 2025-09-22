@@ -15,10 +15,13 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
+  AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
+  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
+import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   AWS_CREDENTIALS_TYPE,
@@ -28,13 +31,12 @@ import {
   getAgentlessCredentialsType,
   getAwsAgentlessFormOptions,
   getAwsCloudConnectorsCredentialsFormOptions,
-  getAwsCloudConnectorsFormAgentlessOptions,
+  getAwsCredentialsCloudConnectorsFormAgentlessOptions,
   getAwsCredentialsFormAgentlessOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import {
   getTemplateUrlFromPackageInfo,
-  getCloudConnectorRemoteRoleTemplate,
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
   getAwsCredentialsType,
@@ -43,7 +45,6 @@ import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 
-import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { UpdatePolicy } from '../types';
@@ -57,8 +58,6 @@ interface AwsAgentlessFormProps {
   isEditPage?: boolean;
   setupTechnology: SetupTechnology;
   hasInvalidRequiredVars: boolean;
-  showCloudConnectors: boolean;
-  cloud?: CloudSetup;
 }
 
 // TODO: Extract cloud connector logic into separate component
@@ -70,14 +69,22 @@ export const AwsCredentialsFormAgentless = ({
   isEditPage,
   setupTechnology,
   hasInvalidRequiredVars,
-  showCloudConnectors,
-  cloud,
 }: AwsAgentlessFormProps) => {
-  const { awsOverviewPath, awsPolicyType, templateName, showCloudTemplates } = useCloudSetup();
+  const {
+    awsOverviewPath,
+    awsPolicyType,
+    awsInputFieldMapping,
+    templateName,
+    showCloudTemplates,
+    shortName,
+    awsCloudConnectorRemoteRoleTemplate,
+    isAwsCloudConnectorEnabled,
+  } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
-  const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
+  const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
+
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
@@ -102,15 +109,6 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const cloudConnectorRemoteRoleTemplate = cloud
-    ? getCloudConnectorRemoteRoleTemplate({
-        input,
-        cloud,
-        packageInfo,
-        templateName,
-      }) || undefined
-    : undefined;
-
   const cloudFormationSettings: Record<
     string,
     { accordianTitleLink: React.ReactNode; templateUrl?: string }
@@ -121,7 +119,7 @@ export const AwsCredentialsFormAgentless = ({
     },
     [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
       accordianTitleLink: <EuiLink>{'Steps to Generate Cloud Connection'}</EuiLink>,
-      templateUrl: cloudConnectorRemoteRoleTemplate,
+      templateUrl: awsCloudConnectorRemoteRoleTemplate,
     },
   };
 
@@ -130,32 +128,33 @@ export const AwsCredentialsFormAgentless = ({
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-  const agentlessOptions = showCloudConnectors
-    ? getAwsCloudConnectorsCredentialsFormOptions()
-    : getAwsAgentlessFormOptions();
+  const agentlessCredentialFormGroups = isAwsCloudConnectorEnabled
+    ? getAwsCloudConnectorsCredentialsFormOptions(awsInputFieldMapping)
+    : getAwsAgentlessFormOptions(awsInputFieldMapping);
 
-  const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
+  const group =
+    agentlessCredentialFormGroups[awsCredentialsType as keyof typeof agentlessCredentialFormGroups];
   const fields = getInputVarsFields(input, group.fields);
 
   const selectorOptions = () => {
     if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
-      return getAwsCredentialsFormAgentlessOptions();
+      return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
     }
-    if (showCloudConnectors) {
-      return getAwsCloudConnectorsFormAgentlessOptions();
+    if (isAwsCloudConnectorEnabled) {
+      return getAwsCredentialsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
     }
 
-    return getAwsCredentialsFormAgentlessOptions();
+    return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
   };
 
   const disabled =
     isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
-    showCloudConnectors;
+    isAwsCloudConnectorEnabled;
 
   const showCloudFormationAccordion = isCloudFormationSupported && showCloudTemplates;
 
-  const accordianTitleLink = showCloudFormationAccordion
+  const accordionTitleLink = showCloudFormationAccordion
     ? cloudFormationSettings[awsCredentialsType].accordianTitleLink
     : '';
   const templateUrl = showCloudFormationAccordion
@@ -166,15 +165,16 @@ export const AwsCredentialsFormAgentless = ({
     <>
       <AWSSetupInfoContent
         info={
-          showCloudConnectors ? (
+          isAwsCloudConnectorEnabled ? (
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
+              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
+                shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
-                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -183,13 +183,14 @@ export const AwsCredentialsFormAgentless = ({
             />
           ) : (
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentless"
-              defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContent.agentlessAccessKeys"
+              defaultMessage="Utilize AWS Access Keys to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
+                shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
-                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -202,7 +203,7 @@ export const AwsCredentialsFormAgentless = ({
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         label={i18n.translate(
-          'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabelAgentless',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.awsCredentialTypeSelectorLabelAgentless',
           {
             defaultMessage: 'Preferred method',
           }
@@ -218,7 +219,7 @@ export const AwsCredentialsFormAgentless = ({
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
-                showCloudConnectors,
+                showCloudConnectors: isAwsCloudConnectorEnabled,
                 provider: AWS_PROVIDER,
               })
             ),
@@ -230,7 +231,7 @@ export const AwsCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
               defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
             />
           </EuiCallOut>
@@ -242,8 +243,8 @@ export const AwsCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
           <EuiAccordion
             id="cloudFormationAccordianInstructions"
-            data-test-subj={AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ}
-            buttonContent={accordianTitleLink}
+            data-test-subj={AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ}
+            buttonContent={accordionTitleLink}
             paddingSize="l"
           >
             <CloudFormationCloudCredentialsGuide
@@ -253,14 +254,14 @@ export const AwsCredentialsFormAgentless = ({
           </EuiAccordion>
           <EuiSpacer size="l" />
           <EuiButton
-            data-test-subj="launchCloudFormationAgentlessButton"
+            data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
             target="_blank"
             iconSide="left"
             iconType="launch"
             href={templateUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForms.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>

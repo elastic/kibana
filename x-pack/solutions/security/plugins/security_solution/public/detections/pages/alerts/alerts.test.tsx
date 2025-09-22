@@ -15,13 +15,13 @@ import { TestProviders } from '../../../common/mock';
 import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
 import { NO_INTEGRATION_CALLOUT_TEST_ID } from '../../components/callouts/no_api_integration_key_callout';
-import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../components/callouts/need_admin_for_update_rules_callout';
-import { useMissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
+import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
+import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
 
 jest.mock('../../components/user_info');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../sourcerer/containers/use_signal_helpers');
-jest.mock('../../hooks/alerts/use_missing_privileges');
+jest.mock('../../../common/hooks/use_missing_privileges');
 jest.mock('../../components/alerts/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
 }));

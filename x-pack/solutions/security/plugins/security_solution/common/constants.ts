@@ -109,6 +109,7 @@ export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailNam
 export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
+export const SIEM_READINESS_PATH = '/siem_readiness' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
@@ -151,7 +152,9 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
 // AI SOC exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
@@ -186,6 +189,9 @@ export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReport
 
 /** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
 export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
+
+/** This Kibana Advanced Setting sets a default title for the AI value report page */
+export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -246,6 +252,9 @@ export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInven
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =

@@ -13,13 +13,10 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
   QueryDslQueryContainer,
-  SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { chunk } from 'lodash';
-import pMap from 'p-map';
 
 import { agentStatusesToSummary } from '../../../common/services';
-import { AGENTS_INDEX, MAX_CONCURRENT_DATASTREAMS_OPERATION } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../app_context';
@@ -35,7 +32,6 @@ interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase 
   key: AgentStatus;
 }
 
-const DATASTREAM_PATTERN_CHUNK_SIZE = 25;
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
@@ -195,99 +191,70 @@ export async function getIncomingDataByAgentsId({
   const logger = appContextService.getLogger();
 
   try {
-    const dataStreamPatternChunks = chunk(
-      dataStreamPattern.split(','),
-      DATASTREAM_PATTERN_CHUNK_SIZE
-    );
-
-    for (const datastreamChunck of dataStreamPatternChunks) {
-      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        index: [
-          {
-            names: [datastreamChunck.join(',')],
-            privileges: ['read'],
-          },
-        ],
-      });
-
-      if (!hasAllPrivileges) {
-        throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
-      }
-    }
-
-    async function _getIncomingDataByAgentsIdForChunk(index: string) {
-      const searchResult = await retryTransientEsErrors(
-        () =>
-          esClient.search({
-            index,
-            allow_partial_search_results: true,
-            _source: returnDataPreview,
-            timeout: '5s',
-            size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'agent.id': agentsIds,
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-5m',
-                        lte: 'now',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              agent_ids: {
-                terms: {
-                  field: 'agent.id',
-                  size: agentsIds.length,
-                },
-              },
-            },
-          }),
-        { logger }
-      );
-
-      if (!searchResult.aggregations?.agent_ids) {
-        return {
-          agentIdsWithData: [],
-          dataPreview: [],
-        };
-      }
-
-      const agentIdsWithData: string[] =
-        // @ts-expect-error aggregation type is not specified
-        searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ??
-        [];
-
-      const dataPreview = searchResult.hits?.hits || [];
-
-      return { agentIdsWithData, dataPreview };
-    }
-
-    const { agentIdsWithData, dataPreview } = await pMap(
-      dataStreamPatternChunks,
-      (dataStreamPatternChunk) =>
-        _getIncomingDataByAgentsIdForChunk(dataStreamPatternChunk.join(',')),
-      { concurrency: MAX_CONCURRENT_DATASTREAMS_OPERATION }
-    ).then((result) =>
-      result.reduce(
-        (acc, res) => {
-          acc.agentIdsWithData = [...acc.agentIdsWithData, ...res.agentIdsWithData];
-          acc.dataPreview = [...acc.dataPreview, ...res.dataPreview];
-
-          return acc;
+    const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+      index: [
+        {
+          names: dataStreamPattern.split(','),
+          privileges: ['read'],
         },
-        { agentIdsWithData: [] as string[], dataPreview: [] as SearchHit<unknown>[] }
-      )
+      ],
+    });
+
+    if (!hasAllPrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
+    }
+
+    const searchResult = await retryTransientEsErrors(
+      () =>
+        esClient.search({
+          index: dataStreamPattern,
+          allow_partial_search_results: true,
+          _source: returnDataPreview,
+          timeout: '5s',
+          size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': agentsIds,
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            agent_ids: {
+              terms: {
+                field: 'agent.id',
+                size: agentsIds.length,
+              },
+            },
+          },
+        }),
+      { logger }
     );
+
+    if (!searchResult.aggregations?.agent_ids) {
+      return {
+        items: agentsIds.map((id) => ({ [id]: { data: false } })),
+        dataPreview: [],
+      };
+    }
+
+    const dataPreview = searchResult.hits?.hits || [];
+
+    const agentIdsWithData: string[] =
+      // @ts-expect-error aggregation type is not specified
+      searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ?? [];
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }

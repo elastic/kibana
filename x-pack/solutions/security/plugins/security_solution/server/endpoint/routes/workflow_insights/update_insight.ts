@@ -74,7 +74,14 @@ const updateInsightsRouteHandler = (
   return async (context, request, response) => {
     const { insightId } = request.params;
     const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
-    const { endpointManagementSpaceAwarenessEnabled } = endpointContext.experimentalFeatures;
+    const { endpointManagementSpaceAwarenessEnabled, defendInsightsPolicyResponseFailure } =
+      endpointContext.experimentalFeatures;
+
+    if (request.body.type === 'policy_response_failure' && !defendInsightsPolicyResponseFailure) {
+      return response.badRequest({
+        body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+      });
+    }
 
     const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
 

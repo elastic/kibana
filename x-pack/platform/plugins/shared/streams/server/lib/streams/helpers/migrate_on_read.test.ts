@@ -39,6 +39,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [] },
+      settings: {},
       wired: {
         fields: {},
         routing: [],
@@ -173,6 +174,7 @@ describe('migrateOnRead', () => {
         description: 'Test stream',
         ingest: {
           lifecycle: { dsl: {} },
+          settings: {},
           processing: { steps: [] },
           classic: { someConfig: 'value' },
         },
@@ -204,6 +206,26 @@ describe('migrateOnRead', () => {
     });
   });
 
+  describe('wired ingest migration', () => {
+    it('should add settings to ingest if missing', () => {
+      const definition = {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          wired: {
+            fields: {},
+            routing: [createRoutingRule()],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+      expect((result as any).ingest.settings).toEqual({});
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
   describe('unwired migration', () => {
     it('should rename unwired to classic', () => {
       const definition = {
@@ -219,6 +241,42 @@ describe('migrateOnRead', () => {
       const result = migrateOnRead(definition);
       expect((result as any).ingest.classic).toEqual({ someConfig: 'value' });
       expect((result as any).ingest.unwired).toBeUndefined();
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
+  describe('group migration', () => {
+    it('should add metadata to group if missing', () => {
+      const definition = {
+        name: 'test-group-stream',
+        description: 'Test group stream',
+        group: {
+          members: ['stream1', 'stream2'],
+          tags: ['tag1', 'tag2'],
+          // No metadata field
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).group.metadata).toEqual({});
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add tags to group if missing', () => {
+      const definition = {
+        name: 'test-group-stream',
+        description: 'Test group stream',
+        group: {
+          members: ['stream1', 'stream2'],
+          metadata: { foo: 'bar' },
+          // No tags field
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).group.tags).toEqual([]);
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });

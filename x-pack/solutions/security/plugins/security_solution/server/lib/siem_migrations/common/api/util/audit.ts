@@ -15,7 +15,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
   SIEM_MIGRATION_DELETED = 'siem_migration_deleted',
   SIEM_MIGRATION_ADDED_RULES = 'siem_migration_added_rules',
-  SIEM_MIGRATION_RETRIEVED_RULES = 'siem_migration_retrieved_rules',
+  SIEM_MIGRATION_RETRIEVED_ITEMS = 'siem_migration_retrieved_items',
   SIEM_MIGRATION_UPLOADED_RESOURCES = 'siem_migration_uploaded_resources',
   SIEM_MIGRATION_RETRIEVED_RESOURCES = 'siem_migration_retrieved_resources',
   SIEM_MIGRATION_STARTED = 'siem_migration_started',
@@ -25,6 +25,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
   // Dashboards
   SIEM_MIGRATION_ADDED_DASHBOARDS = 'siem_migration_added_dashboards',
+  SIEM_MIGRATION_INSTALLED_DASHBOARDS = 'siem_migration_installed_dashboards',
 }
 
 export enum AUDIT_TYPE {
@@ -62,10 +63,11 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES]: AUDIT_TYPE.CREATION,
-  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_ITEMS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_DASHBOARDS]: AUDIT_TYPE.CREATION,
 };
 
 interface SiemMigrationAuditEvent {
@@ -161,11 +163,11 @@ export class SiemMigrationAuditLogger {
     });
   }
 
-  public async logGetMigrationRules(params: { migrationId: string; error?: Error }): Promise<void> {
+  public async logGetMigrationItems(params: { migrationId: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
-    const message = `User retrieved rules for SIEM migration with [id=${migrationId}]`;
+    const message = `User retrieved items for SIEM migration with [id=${migrationId}]`;
     return this.log({
-      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES,
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_ITEMS,
       message,
       error,
     });
@@ -263,6 +265,26 @@ export class SiemMigrationAuditLogger {
       });
     } else {
       const message = `User installed all installable translated rules through SIEM migration with [migration_id=${migrationId}]`;
+      events.push({ action, message, error });
+    }
+    return this.log(events);
+  }
+
+  public async logInstallDashboards(params: {
+    migrationId: string;
+    ids?: string[];
+    error?: Error;
+  }): Promise<void> {
+    const { ids, migrationId, error } = params;
+    const action = SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_DASHBOARDS;
+    const events: SiemMigrationAuditEvent[] = [];
+    if (ids) {
+      ids.forEach((id) => {
+        const message = `User installed a dashboard through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+        events.push({ action, message, error });
+      });
+    } else {
+      const message = `User installed all installable dashboards through SIEM migration with [migration_id=${migrationId}]`;
       events.push({ action, message, error });
     }
     return this.log(events);

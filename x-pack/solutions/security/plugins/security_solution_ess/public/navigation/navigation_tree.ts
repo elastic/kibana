@@ -7,8 +7,8 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -43,6 +43,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               link: securityLink(SecurityPageName.alerts),
             },
             {
+              link: 'workflows',
+              withBadge: true,
+              badgeTypeV2: 'techPreview' as const,
+              badgeOptions: {
+                icon: 'beaker',
+                tooltip: i18nStrings.workflows.badgeTooltip,
+              },
+            },
+            {
               id: SecurityPageName.attackDiscovery,
               link: securityLink(SecurityPageName.attackDiscovery),
             },
@@ -71,6 +80,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.assetInventory,
               link: securityLink(SecurityPageName.assetInventory),
+            },
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
             },
             defaultNavigationTree.assets(services),
           ],

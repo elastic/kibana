@@ -7,133 +7,81 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate } from '@kbn/unified-histogram';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import React, { useMemo } from 'react';
+import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { EuiFlexGridProps } from '@elastic/eui';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
-  setCurrentPage,
-  selectCurrentPage,
-  selectValueFilters,
-  setDimensions,
-  setValueFilters,
-  selectDimensions,
-} from '../store/slices';
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+  euiScrollBarStyles,
+  useEuiTheme,
+  type EuiFlexGridProps,
+} from '@elastic/eui';
+import { Subject } from 'rxjs';
+import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { DimensionsSelector } from './toolbar/dimensions_selector';
-import { ValuesSelector } from './toolbar/values_selector';
-import { useMetricFieldsQuery } from '../hooks';
+import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
+import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
   renderToggleActions,
   chartToolbarCss,
   histogramCss,
-  getTimeRange,
+  onBrushEnd,
+  onFilter,
+  searchSessionId,
+  requestParams,
+  services,
+  input$: originalInput$,
 }: ChartSectionProps) => {
-  // Get grid-specific state from Redux store
-  const dispatch = useAppDispatch();
-  const currentPage = useAppSelector(selectCurrentPage);
-  const dimensions = useAppSelector(selectDimensions);
-  const valueFilters = useAppSelector(selectValueFilters);
-  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
-  const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
+  const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
 
-  const { data: fields = [], isLoading: loading } = useMetricFieldsQuery({
-    index: indexPattern,
-    ...timeRange,
+  const { getTimeRange, updateTimeRange } = requestParams;
+
+  const input$ = useMemo(
+    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
+    [originalInput$]
+  );
+
+  const discoverFetch$ = useFetch({
+    input$,
+    beforeFetch: updateTimeRange,
   });
 
+  const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
+  const { data: fields = [], isLoading } = useMetricFieldsQuery({
+    index: indexPattern,
+    timeRange: getTimeRange(),
+  });
+
+  const { leftSideActions, rightSideActions } = useToolbarActions({
+    fields,
+    requestParams,
+    indexPattern,
+    renderToggleActions,
+  });
+
+  const {
+    allFields = [],
+    currentPageFields = [],
+    totalPages = 0,
+    dimensions: appliedDimensions = [],
+  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage }) ?? {};
+
   const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => (Array.isArray(fields) ? Math.min(fields.length, 4) : 1) as EuiFlexGridProps['columns'],
-    [fields]
-  );
-
-  const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
-      dispatch(setDimensions(nextDimensions));
-
-      // If no dimensions are selected, clear all values
-      if (nextDimensions.length === 0) {
-        dispatch(setDimensions([]));
-      } else {
-        // Filter existing values to keep only those whose dimension is still selected
-        const filteredValues = valueFilters.filter((selectedValue) => {
-          const [field] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
-          return nextDimensions.includes(field);
-        });
-
-        dispatch(setValueFilters(filteredValues));
-      }
-    },
-    [dispatch, valueFilters]
-  );
-
-  const onValuesChange = useCallback(
-    (values: string[]) => {
-      dispatch(setValueFilters(values));
-    },
-    [dispatch]
-  );
-
-  const pageSize = columns === 4 ? 20 : 15;
-  const actions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-    },
-  ];
-
-  const rightSideComponents = useMemo(
-    () => [
-      renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-      />,
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={timeRange}
-        />
-      ) : null,
-    ],
-    [
-      dimensions,
-      fields,
-      timeRange,
-      indexPattern,
-      onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      valueFilters,
-    ]
+    () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
+    [currentPageFields]
   );
 
   const filters = useMemo(() => {
@@ -152,66 +100,91 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  const filteredFields = useMemo(() => {
-    return fields.filter(
-      (field) =>
-        !field.noData &&
-        (dimensions.length === 0 ||
-          dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
-    );
-  }, [fields, dimensions]);
-
-  // Calculate pagination
-  const totalPages = useMemo(
-    () => Math.ceil(filteredFields.length / pageSize),
-    [filteredFields.length, pageSize]
-  );
-
-  const currentFields = useMemo(() => {
-    const startIndex = currentPage * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredFields.slice(startIndex, endIndex);
-  }, [filteredFields, currentPage, pageSize]);
-
-  // Pagination handler
-  const handlePageChange = (pageIndex: number) => {
-    dispatch(setCurrentPage(pageIndex));
-  };
+  if (fields.length === 0) {
+    return <EmptyState isLoading={isLoading} />;
+  }
 
   return (
     <ChartSectionTemplate
       id="unifiedMetricsExperienceGridPanel"
       toolbarCss={chartToolbarCss}
       toolbar={{
-        leftSide: rightSideComponents,
-        rightSide: actions,
+        leftSide: leftSideActions,
+        rightSide: rightSideActions,
       }}
     >
-      <section
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
         tabIndex={-1}
         data-test-subj="unifiedMetricsExperienceRendered"
         css={css`
           ${histogramCss || ''}
           height: 100%;
-          overflow: hidden;
+          overflow: auto;
+          padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+          margin-block: ${euiTheme.size.xs};
+          ${euiScrollBarStyles(euiThemeContext)}
         `}
       >
-        <MetricsGrid
-          fields={currentFields}
-          timeRange={timeRange}
-          loading={loading}
-          filters={filters}
-          dimensions={dimensions}
-          pivotOn="metric"
-          columns={columns}
-        />
-
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      </section>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {isLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                      defaultMessage: '{count} metrics',
+                      values: { count: allFields.length },
+                    })}
+                  </strong>
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('metricsExperience.grid.technicalPreview.label', {
+                  defaultMessage: 'Technical preview',
+                })}
+                tooltipContent={i18n.translate('metricsExperience.grid.technicalPreview.tooltip', {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                })}
+                tooltipPosition="left"
+                title={i18n.translate('metricsExperience.grid.technicalPreview.title', {
+                  defaultMessage: 'Technical preview',
+                })}
+                size="s"
+                data-test-subj="metricsExperienceTechnicalPreviewBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <MetricsGrid
+            pivotOn="metric"
+            columns={columns}
+            dimensions={appliedDimensions}
+            filters={filters}
+            services={services}
+            fields={currentPageFields}
+            searchSessionId={searchSessionId}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            discoverFetch$={discoverFetch$}
+            requestParams={requestParams}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ChartSectionTemplate>
   );
 };
