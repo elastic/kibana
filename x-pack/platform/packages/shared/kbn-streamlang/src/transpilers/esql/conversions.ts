@@ -40,7 +40,7 @@ function formatValueForESQLLiteral(value: any): string {
   return JSON.stringify(value); // Fallback for objects/arrays if they can be compared
 }
 
-function conditionToESQL(condition: Condition): string {
+export function conditionToESQL(condition: Condition): string {
   if (isFilterCondition(condition)) {
     const field = condition.field;
 

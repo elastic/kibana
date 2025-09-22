@@ -91,7 +91,12 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                       if (!validation.kql.isInvalid) {
                         setGeneratedQueries((prev) => [
                           ...prev,
-                          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                          {
+                            id: v4(),
+                            kql: { query: result.query.kql },
+                            title: result.query.title,
+                            system: result.query.system,
+                          },
                         ]);
                       }
                     },

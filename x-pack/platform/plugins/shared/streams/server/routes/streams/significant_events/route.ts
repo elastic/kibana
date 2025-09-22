@@ -15,6 +15,8 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { conditionSchema } from '@kbn/streamlang';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -33,6 +35,10 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
+        system: z.object({
+          name: NonEmptyString,
+          filter: conditionSchema,
+        }),
         kql: z.object({
           query: z.string(),
         }),

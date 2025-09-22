@@ -26,7 +26,7 @@ import type {
   SloLink,
 } from '../../../../common/assets';
 import { ASSET_TYPES } from '../../../../common/assets';
-import type { QUERY_KQL_BODY, QUERY_TITLE } from './fields';
+import { QUERY_KQL_BODY, QUERY_SYSTEM_FILTER, QUERY_SYSTEM_NAME, QUERY_TITLE } from './fields';
 import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
@@ -119,6 +119,8 @@ function ruleToAsset(ruleId: string, rule: SanitizedRule) {
 
 type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_TITLE]: string;
+  [QUERY_SYSTEM_NAME]: string;
+  [QUERY_SYSTEM_FILTER]: string;
   [QUERY_KQL_BODY]: string;
 };
 
@@ -138,10 +140,14 @@ function fromStorage(link: StoredAssetLink): AssetLink {
     return {
       ...link,
       query: {
-        id: link['asset.id'],
-        title: link['query.title'],
+        id: link[ASSET_ID],
+        title: link[QUERY_TITLE],
+        system: {
+          name: link[QUERY_SYSTEM_NAME],
+          filter: JSON.parse(link[QUERY_SYSTEM_FILTER]),
+        },
         kql: {
-          query: link['query.kql.query'],
+          query: link[QUERY_KQL_BODY],
         },
       },
     } satisfies QueryLink;
@@ -156,8 +162,10 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     return {
       ...rest,
       [STREAM_NAME]: name,
-      'query.title': query.title,
-      'query.kql.query': query.kql.query,
+      [QUERY_TITLE]: query.title,
+      [QUERY_SYSTEM_NAME]: query.system.name,
+      [QUERY_SYSTEM_FILTER]: JSON.stringify(query.system.filter),
+      [QUERY_KQL_BODY]: query.kql.query,
     };
   }
 

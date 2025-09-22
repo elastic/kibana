@@ -15,5 +15,11 @@ export function defaultQuery(): StreamQueryKql {
     kql: {
       query: '',
     },
+    system: {
+      name: '',
+      filter: {
+        always: {},
+      },
+    },
   };
 }

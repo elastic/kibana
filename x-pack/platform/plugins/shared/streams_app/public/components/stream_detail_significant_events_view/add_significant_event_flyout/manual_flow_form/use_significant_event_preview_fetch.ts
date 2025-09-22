@@ -7,22 +7,28 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import type { TimeState } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
+import type { Condition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 export function useSignificantEventPreviewFetch({
   name,
+  system,
   kqlQuery,
-  timeRange,
+  timeState,
   isQueryValid,
 }: {
   name: string;
+  system: {
+    name: string;
+    filter: Condition;
+  };
   kqlQuery: string;
-  timeRange: TimeRange;
+  timeState: TimeState;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
   const {
@@ -37,10 +43,10 @@ export function useSignificantEventPreviewFetch({
         return Promise.resolve(undefined);
       }
 
-      const { from, to } = getAbsoluteTimeRange(timeRange);
+      const { from, to } = getAbsoluteTimeRange(timeState.timeRange);
 
       const bucketSize = calculateAuto
-        .near(50, moment.duration(moment(to).diff(from)))
+        .near(10, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
 
       return streams.streamsRepositoryClient.fetch(
@@ -58,6 +64,10 @@ export function useSignificantEventPreviewFetch({
             },
             body: {
               query: {
+                system: {
+                  name: system.name,
+                  filter: system.filter,
+                },
                 kql: { query: kqlQuery },
               },
             },
@@ -65,7 +75,7 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [timeRange, name, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
+    [timeState, name, system, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
   );
 
   return previewFetch;

@@ -11,13 +11,25 @@ import { fromKueryExpression } from '@kbn/es-query';
 
 export function validateQuery(query: Partial<StreamQueryKql>): {
   title: { isInvalid: boolean; error?: string };
+  system: { isInvalid: boolean; error?: string };
   kql: { isInvalid: boolean; error?: string };
 } {
-  const { title = '', kql: { query: kqlQuery } = { query: '' } } = query;
+  const {
+    title = '',
+    system = { name: '', filter: '' },
+    kql: { query: kqlQuery } = { query: '' },
+  } = query;
 
   const isEmptyTitle = title.length === 0;
   const titleErrorMessage = isEmptyTitle
     ? i18n.translate('xpack.streams.significantEventFlyout.formFieldTitleRequiredError', {
+        defaultMessage: 'Required',
+      })
+    : undefined;
+
+  const isEmptySystem = system.name.length === 0;
+  const systemErrorMessage = isEmptySystem
+    ? i18n.translate('xpack.streams.significantEventFlyout.formFieldSystemRequiredError', {
         defaultMessage: 'Required',
       })
     : undefined;
@@ -44,6 +56,7 @@ export function validateQuery(query: Partial<StreamQueryKql>): {
 
   return {
     title: { isInvalid: Boolean(titleErrorMessage), error: titleErrorMessage },
+    system: { isInvalid: Boolean(systemErrorMessage), error: systemErrorMessage },
     kql: { isInvalid: Boolean(kqlErrorMessage), error: kqlErrorMessage },
   };
 }

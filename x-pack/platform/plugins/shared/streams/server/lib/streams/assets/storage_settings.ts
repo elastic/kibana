@@ -12,6 +12,8 @@ import {
   ASSET_TYPE,
   ASSET_UUID,
   QUERY_KQL_BODY,
+  QUERY_SYSTEM_FILTER,
+  QUERY_SYSTEM_NAME,
   QUERY_TITLE,
   STREAM_NAME,
 } from './fields';
@@ -26,6 +28,8 @@ export const assetStorageSettings = {
       [STREAM_NAME]: types.keyword(),
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
+      [QUERY_SYSTEM_NAME]: types.keyword(),
+      [QUERY_SYSTEM_FILTER]: types.text(),
     },
   },
 } satisfies IndexStorageSettings;
