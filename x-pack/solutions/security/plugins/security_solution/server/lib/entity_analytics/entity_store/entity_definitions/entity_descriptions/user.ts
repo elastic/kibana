@@ -33,6 +33,7 @@ export const userEntityEngineDescription: EntityDescription = {
       set: {
         field: 'entity.type',
         value: USER_ENTITY_TYPE,
+        override: false,
       },
     },
   ],

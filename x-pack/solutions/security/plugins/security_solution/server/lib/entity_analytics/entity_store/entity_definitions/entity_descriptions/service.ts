@@ -26,6 +26,7 @@ export const serviceEntityEngineDescription: EntityDescription = {
       set: {
         field: 'entity.type',
         value: SERVICE_ENTITY_TYPE,
+        override: false,
       },
     },
   ],

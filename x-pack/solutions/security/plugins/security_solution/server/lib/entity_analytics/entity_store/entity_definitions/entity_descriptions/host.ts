@@ -26,6 +26,7 @@ export const hostEntityEngineDescription: EntityDescription = {
       set: {
         field: 'entity.type',
         value: HOST_ENTITY_TYPE,
+        override: false,
       },
     },
   ],
