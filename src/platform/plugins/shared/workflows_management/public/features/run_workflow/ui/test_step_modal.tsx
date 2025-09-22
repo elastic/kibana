@@ -139,7 +139,7 @@ export function TestStepModal({
             <EuiFlexItem>
               <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
             </EuiFlexItem>
-            <EuiFlexItem css={componentStyles.description}>
+            <EuiFlexItem css={styles.description}>
               <FormattedMessage
                 id="workflows.testStepModal.description"
                 defaultMessage="Test run with current changes and provided payload. Will not be saved in history."

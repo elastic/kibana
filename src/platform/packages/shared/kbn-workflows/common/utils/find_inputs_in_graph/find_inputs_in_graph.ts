@@ -11,7 +11,7 @@ import type { WorkflowGraph } from '../../../graph';
 import { extractNunjucksVariables } from '../extract_nunjucks_variables/extract_nunjucks_variables';
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
 
-import type { AtomicGraphNode, EnterForeachNode, EnterIfNode } from '../../../types/execution';
+import type { AtomicGraphNode, EnterForeachNode, EnterIfNode } from '../../../graph';
 
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};

@@ -10,7 +10,7 @@
 import { WorkflowGraph } from '../../../graph';
 
 import type { ForEachStep, ConnectorStep, WorkflowYaml, IfStep } from '../../../spec/schema';
-import type { EnterForeachNode } from '../../../types/execution';
+import type { EnterForeachNode } from '../../../graph';
 
 import { findInputsInGraph } from './find_inputs_in_graph';
 
