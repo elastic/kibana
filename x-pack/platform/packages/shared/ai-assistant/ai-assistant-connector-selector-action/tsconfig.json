@@ -21,6 +21,5 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/ai-assistant-icon",
   ]
 }
