@@ -9,12 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EMPTY_LABEL = i18n.translate('fieldFormats.string.emptyLabel', {
+export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
   defaultMessage: '(blank)',
+  description: 'Represents the label used to replace an empty string value in tables and charts',
 });
 
-export const NULL_LABEL = i18n.translate('fieldFormats.string.missingLabel', {
+export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
   defaultMessage: '(null)',
+  description: 'Represents the label used to replace an null value in tables and charts',
 });
 
 export const NAN_LABEL = 'NaN';

@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
   field: DataViewField;
