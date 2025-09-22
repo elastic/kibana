@@ -6,9 +6,9 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import type { MapItem, MapAttributes } from '../../../../common/content_management';
 import type { MapsSavedObjectAttributes } from './types';
-import { extractReferences, injectReferences } from '@kbn/maps-plugin/common/migrations/references';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -18,6 +18,16 @@ interface PartialMapsItem {
   attributes: Partial<MapItem['attributes']>;
   references: SavedObjectReference[] | undefined;
 }
+
+export function savedObjectToItem(
+  savedObject: SavedObject<MapsSavedObjectAttributes>,
+  partial: false
+): MapItem;
+
+export function savedObjectToItem(
+  savedObject: PartialSavedObject<MapsSavedObjectAttributes>,
+  partial: true
+): PartialMapsItem;
 
 export function savedObjectToItem(
   savedObject:
@@ -34,7 +44,10 @@ export function savedObjectToItem(
 }
 
 function transformMapOut(storedMapState: MapAttributes, references: SavedObjectReference[]) {
-  const { attributes } = injectReferences({ attributes: storedMapState, references: references ?? [] });
+  const { attributes } = injectReferences({
+    attributes: storedMapState,
+    references: references ?? [],
+  });
   // TODO convert stringified JSON to objects
   return attributes;
 }
@@ -44,6 +57,6 @@ export function transformMapIn(mapState: MapAttributes) {
   // TODO convert API state to stringified JSON
   return {
     attributes,
-    references
-  }
+    references,
+  };
 }

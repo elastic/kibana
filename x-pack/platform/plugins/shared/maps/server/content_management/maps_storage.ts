@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
-import type { SavedObject, SavedObjectReference, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import type {
   CreateResult,
@@ -158,7 +162,8 @@ export class MapsStorage {
           ...soReferences,
           // tag refs still passed via API
           ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
-        ]}
+        ],
+      }
     );
 
     const item = savedObjectToItem(savedObject, false);
@@ -225,7 +230,7 @@ export class MapsStorage {
           ...soReferences,
           // tag refs still passed via API
           ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
-        ]
+        ],
       }
     );
 
