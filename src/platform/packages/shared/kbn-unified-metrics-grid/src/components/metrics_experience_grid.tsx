@@ -28,7 +28,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
-import { EmptyState } from './empty_state/empty_state';
+import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -166,7 +166,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {isDiscoverLoading && <EmptyState isLoading={isDiscoverLoading} />}
+          {isDiscoverLoading && <ChartLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}
