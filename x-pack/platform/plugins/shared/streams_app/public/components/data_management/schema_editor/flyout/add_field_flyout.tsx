@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isSchema, recursiveRecord, type Streams } from '@kbn/streams-schema';
+import { isSchema, recursiveRecord, Streams } from '@kbn/streams-schema';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UseFieldsMetadataReturnType } from '@kbn/fields-metadata-plugin/public/hooks/use_fields_metadata';
 import type { SubmitHandler } from 'react-hook-form';
@@ -91,9 +91,13 @@ export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutPr
     source: ['ecs', 'otel'],
   });
 
+  // Map the fields metadata to the OTel equivalent if the stream is a wired stream
   const fieldsMetadata = useMemo(
-    () => mapKeys(rawFieldsMetadata, (value, key) => value.otel_equivalent ?? prefixOTelField(key)),
-    [rawFieldsMetadata]
+    () =>
+      Streams.WiredStream.Definition.is(stream)
+        ? mapKeys(rawFieldsMetadata, (value, key) => value.otel_equivalent ?? prefixOTelField(key))
+        : rawFieldsMetadata,
+    [rawFieldsMetadata, stream]
   );
 
   const methods = useForm<SchemaField>({
