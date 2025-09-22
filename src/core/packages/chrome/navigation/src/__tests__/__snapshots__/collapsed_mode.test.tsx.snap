@@ -41,7 +41,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </span>
       <nav
-        aria-label="Main navigation"
+        aria-label="Main"
         class="css-1saqly-SideNavPrimaryMenu"
         id="primary-navigation"
       >
@@ -152,7 +152,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </nav>
       <footer
-        aria-label="Side navigation footer"
+        aria-label="Side navigation"
         class="css-5bzxab-SideNavFooter"
       >
         <div

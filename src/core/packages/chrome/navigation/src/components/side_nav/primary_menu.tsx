@@ -33,7 +33,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
       <nav
         id="primary-navigation"
         aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
-          defaultMessage: 'Main navigation',
+          defaultMessage: 'Main',
         })}
         ref={localRef}
         css={css`

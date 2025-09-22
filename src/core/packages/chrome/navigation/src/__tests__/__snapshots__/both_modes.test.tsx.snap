@@ -37,7 +37,7 @@ exports[`Both modes should render the side navigation 1`] = `
         </a>
       </div>
       <nav
-        aria-label="Main navigation"
+        aria-label="Main"
         class="css-8a235g-SideNavPrimaryMenu"
         id="primary-navigation"
       >
@@ -140,7 +140,7 @@ exports[`Both modes should render the side navigation 1`] = `
         </div>
       </nav>
       <footer
-        aria-label="Side navigation footer"
+        aria-label="Side navigation"
         class="css-4kpxr2-SideNavFooter"
       >
         <div
