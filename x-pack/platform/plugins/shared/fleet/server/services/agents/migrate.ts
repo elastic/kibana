@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverLt from 'semver/functions/lt';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { FleetUnauthorizedError } from '../../errors';
+import { MIGRATE_AGENT_VERSION } from '../../../common/constants';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 
 import type { AgentPolicy, Agent } from '../../types';
 
@@ -34,8 +36,16 @@ export async function migrateSingleAgent(
   }
 ) {
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
-  if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
+  if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
+  }
+  if (agent.components?.some((c) => c.type === 'fleet-server')) {
+    throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
+  }
+  if (agent.agent?.version && semverLt(agent.agent.version, MIGRATE_AGENT_VERSION)) {
+    throw new FleetError(
+      `Agent cannot be migrated. Migrate action is supported from version ${MIGRATE_AGENT_VERSION}.`
+    );
   }
   const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
