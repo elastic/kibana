@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils/tools/steps/execute_esql';
+import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/src/tools';

@@ -47,6 +47,7 @@ import type {
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type { DeleteDashboardMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
@@ -83,8 +84,13 @@ import type {
 import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import type { GetAllTranslationStatsDashboardMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetDashboardMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   GetDashboardMigrationResourcesRequestQueryInput,
   GetDashboardMigrationResourcesRequestParamsInput,
@@ -135,6 +141,10 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import type {
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -179,6 +189,10 @@ import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-
 import type { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type {
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   UpdateEntitySourceRequestParamsInput,
   UpdateEntitySourceRequestBodyInput,
@@ -578,6 +592,24 @@ For detailed information on Kibana actions and alerting, and additional API call
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    /**
+     * Deletes a SIEM dashboards migration using the migration id provided
+     */
+    deleteDashboardMigration(
+      props: DeleteDashboardMigrationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .delete(
+          getRouteUrlForSpace(
+            replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     deleteEntityEngine(props: DeleteEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
@@ -993,11 +1025,42 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Retrieves the dashboard migrations stats for all migrations stored in the system
+     */
+    getAllDashboardMigrationsStats(kibanaSpace: string = 'default') {
+      return supertest
+        .get(getRouteUrlForSpace('/internal/siem_migrations/dashboards/stats', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves the rule migrations stats for all migrations stored in the system
      */
     getAllStatsRuleMigration(kibanaSpace: string = 'default') {
       return supertest
         .get(getRouteUrlForSpace('/internal/siem_migrations/rules/stats', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+     */
+    getAllTranslationStatsDashboardMigration(
+      props: GetAllTranslationStatsDashboardMigrationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1037,6 +1100,28 @@ finalize it.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves the dashboards added to an existing dashboard migration
+     */
+    getDashboardMigrationDashboards(
+      props: GetDashboardMigrationDashboardsProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Retrieves resources for an existing SIEM dashboards migration
@@ -1520,6 +1605,28 @@ finalize it.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Installs migration dashboards
+     */
+    installMigrationDashboards(
+      props: InstallMigrationDashboardsProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/install',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Installs migration rules
@@ -2068,6 +2175,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Updates mutable fields of an existing dashboard migration
+     */
+    updateDashboardMigration(
+      props: UpdateDashboardMigrationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .patch(
+          getRouteUrlForSpace(
+            replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
@@ -2290,6 +2416,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
+}
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
@@ -2374,11 +2503,18 @@ export interface FindAssetCriticalityRecordsProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesProps {
   query: GetDashboardMigrationResourcesRequestQueryInput;
@@ -2470,6 +2606,10 @@ export interface InitEntityEngineProps {
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
 }
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
@@ -2565,6 +2705,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

@@ -17,6 +17,8 @@ export type {
   ExecutableTool,
   ExecutableToolHandlerParams,
   ExecutableToolHandlerFn,
+  LLmDescriptionHandlerParams,
+  LlmDescriptionHandler,
 } from './src/tools';
 export type { ModelProvider, ScopedModel } from './src/model_provider';
 export type {

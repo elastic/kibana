@@ -28,6 +28,7 @@ export interface BaseToolFormData {
   description: string;
   labels: string[];
 }
+
 export interface EsqlToolFormData extends BaseToolFormData {
   type: ToolType.esql;
   esql: string;
@@ -40,6 +41,7 @@ export interface BuiltinToolFormData extends BaseToolFormData {
 
 export interface IndexSearchToolFormData extends BaseToolFormData {
   type: ToolType.index_search;
+  pattern: string;
 }
 
 export type ToolFormData = EsqlToolFormData | BuiltinToolFormData | IndexSearchToolFormData;

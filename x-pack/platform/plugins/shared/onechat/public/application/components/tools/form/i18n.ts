@@ -87,7 +87,7 @@ export const i18nMessages = {
             'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.description',
             {
               defaultMessage:
-                'Shapes tool behavior and agent understanding. Start with a short human-friendly summary — the first ~50 characters appear in the tool list.',
+                'Help humans and agents understand how the tool works. Start with a short human-friendly summary, because the first ~50 characters appear in the tool list.',
             }
           ),
         },
@@ -147,7 +147,8 @@ export const i18nMessages = {
         defaultMessage: 'Configuration',
       }),
       description: i18n.translate('xpack.onechat.tools.newTool.configuration.description', {
-        defaultMessage: 'Set up how the tool works, including its logic and any needed parameters.',
+        defaultMessage:
+          'Set up how the tool works, by defining the index pattern or ES|QL query syntax and any required parameters.',
       }),
       documentationLink: i18n.translate(
         'xpack.onechat.tools.newTool.configuration.documentationLink',
@@ -155,9 +156,6 @@ export const i18nMessages = {
           defaultMessage: 'Configuring a tool',
         }
       ),
-      esqlOnlyCallout: i18n.translate('xpack.onechat.tools.newTool.configuration.esqlOnlyCallout', {
-        defaultMessage: 'Currently ES|QL only',
-      }),
     },
     form: {
       type: {
@@ -168,6 +166,20 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.type.esqlOption',
           {
             defaultMessage: 'ES|QL',
+          }
+        ),
+        indexSearchOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.indexSearchOption',
+          {
+            defaultMessage: 'Index search',
+          }
+        ),
+      },
+      indexSearch: {
+        patternLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.patternLabel',
+          {
+            defaultMessage: 'Target pattern',
           }
         ),
       },

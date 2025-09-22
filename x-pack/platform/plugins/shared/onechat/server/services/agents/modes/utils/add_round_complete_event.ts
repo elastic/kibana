@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
 import type {
@@ -108,6 +109,7 @@ const createRoundFromEvents = ({
   };
 
   const round: ConversationRound = {
+    id: uuidv4(),
     input,
     steps: stepEvents.map(eventToStep),
     trace_id: getCurrentTraceId(),

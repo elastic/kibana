@@ -128,6 +128,7 @@ export const InstallationInfoSchema = schema.object({
       error: schema.maybe(schema.string()),
     })
   ),
+  previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
 });
 
 const PackageIconSchema = schema.object({
@@ -393,6 +394,8 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
 
+export const BulkRollbackPackagesResponseSchema = schema.object({ taskId: schema.string() });
+
 export const GetOneBulkOperationPackagesResponseSchema = schema.object({
   status: schema.string(),
   error: schema.maybe(schema.object({ message: schema.string() })),
@@ -628,6 +631,17 @@ export const BulkUninstallPackagesRequestSchema = {
       { minSize: 1 }
     ),
     force: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkRollbackPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+      }),
+      { minSize: 1 }
+    ),
   }),
 };
 

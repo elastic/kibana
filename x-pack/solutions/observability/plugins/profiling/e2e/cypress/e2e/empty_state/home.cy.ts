@@ -11,7 +11,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows Set up page when Profiling has not been set up', () => {
-    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+    cy.intercept('GET', '/api/profiling/setup/es_resources', {
       body: {
         has_setup: false,
         has_data: false,
@@ -25,7 +25,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows Add data page after Profiling has been set up', () => {
-    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+    cy.intercept('GET', '/api/profiling/setup/es_resources', {
       body: {
         has_setup: true,
         has_data: false,
@@ -45,7 +45,7 @@ describe('Home page with empty state', () => {
 
   describe('Delete Data View', () => {
     it('shows Delete page when setup is false', () => {
-      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      cy.intercept('GET', '/api/profiling/setup/es_resources', {
         body: {
           has_setup: false,
           has_data: true,
@@ -58,7 +58,7 @@ describe('Home page with empty state', () => {
     });
 
     it('shows Delete page when data pre 8.9.1 is still available and data is found', () => {
-      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      cy.intercept('GET', '/api/profiling/setup/es_resources', {
         body: {
           has_setup: true,
           has_data: true,
@@ -71,7 +71,7 @@ describe('Home page with empty state', () => {
     });
 
     it('shows Delete page when data pre 8.9.1 is still available and data is not found', () => {
-      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      cy.intercept('GET', '/api/profiling/setup/es_resources', {
         body: {
           has_setup: true,
           has_data: false,
@@ -85,7 +85,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows disabled button for users without privileges', () => {
-    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+    cy.intercept('GET', '/api/profiling/setup/es_resources', {
       body: {
         has_setup: false,
         has_data: false,
@@ -99,7 +99,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows emabled button for users without privileges', () => {
-    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+    cy.intercept('GET', '/api/profiling/setup/es_resources', {
       body: {
         has_setup: false,
         has_data: false,

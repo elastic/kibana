@@ -12,6 +12,16 @@ import { configSchema } from './config';
 
 export type {
   //
+  // Layer types
+  //
+  Attribution,
+  StoredEMSVectorTileLayer,
+  StoredHeatmapLayer,
+  StoredLayerGroup,
+  StoredRasterLayer,
+  StoredVectorLayer,
+
+  //
   // Source types
   //
   CountAggDescriptor,

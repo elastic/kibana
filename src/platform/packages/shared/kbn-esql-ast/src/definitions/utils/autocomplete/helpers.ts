@@ -7,38 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type {
-  ESQLSingleAstItem,
-  ESQLFunction,
-  ESQLAstItem,
-  ESQLLiteral,
-  ESQLLocation,
-} from '../../../types';
+import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLocation } from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
-  ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import {
-  getDateLiterals,
-  getCompatibleLiterals,
-  buildConstantsDefinitions,
-  isLiteralDateItem,
-} from '../literals';
+import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import type { FunctionDefinition } from '../../types';
 import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
-import { getColumnForASTNode, getOverlapRange } from '../shared';
-import { getExpressionType } from '../expressions';
+import { getOverlapRange } from '../shared';
+import { argMatchesParamType, getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';
-import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
+import { getFunctionSuggestions } from '../functions';
 import { logicalOperators } from '../../all_operators';
 import {
   getOperatorSuggestion,
@@ -46,7 +34,7 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
+import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -169,14 +157,12 @@ export async function getFieldsOrFunctionsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
-    fields,
-    userDefinedColumns,
+    columns: fields,
     values = false,
     literals = false,
   }: {
     functions: boolean;
-    fields: boolean;
-    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
+    columns: boolean;
     literals?: boolean;
     values?: boolean;
   },
@@ -201,34 +187,6 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredColumnByType: string[] = [];
-  if (userDefinedColumns) {
-    for (const userDefinedColumn of userDefinedColumns.values()) {
-      if (
-        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
-        !ignoreColumns.includes(userDefinedColumn[0].name)
-      ) {
-        filteredColumnByType.push(userDefinedColumn[0].name);
-      }
-    }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
-    // avg( numberField ) => avg_numberField_
-    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-    if (
-      filteredColumnByType.length &&
-      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
-    ) {
-      for (const userDefinedColumn of filteredColumnByType) {
-        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
-        const index = filteredFieldsByType.findIndex(
-          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
-        );
-        if (index >= 0) {
-          filteredFieldsByType.splice(index);
-        }
-      }
-    }
-  }
   // could also be in stats (bucket) but our autocomplete is not great yet
   const displayDateSuggestions =
     types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
@@ -245,9 +203,6 @@ export async function getFieldsOrFunctionsSuggestions(
           hasMinimumLicenseRequired,
           activeProduct
         )
-      : [],
-    userDefinedColumns
-      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -380,11 +335,7 @@ export async function suggestForExpression({
     case 'after_literal':
     case 'after_column':
     case 'after_function':
-      const expressionType = getExpressionType(
-        expressionRoot,
-        context?.fields,
-        context?.userDefinedColumns
-      );
+      const expressionType = getExpressionType(expressionRoot, context?.columns);
 
       if (!isParameterType(expressionType)) {
         break;
@@ -472,8 +423,7 @@ export async function suggestForExpression({
           location,
           rootOperator: rightmostOperator,
           preferredExpressionType,
-          getExpressionType: (expression) =>
-            getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+          getExpressionType: (expression) => getExpressionType(expression, context?.columns),
           getColumnsByType,
           hasMinimumLicenseRequired,
           activeProduct,
@@ -585,43 +535,11 @@ export function getControlSuggestionIfSupported(
   return controlSuggestion;
 }
 
-/** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
-export function extractTypeFromASTArg(
-  arg: ESQLAstItem,
-  context: ICommandContext
-):
-  | ESQLLiteral['literalType']
-  | SupportedDataType
-  | FunctionReturnType
-  | string // @TODO remove this
-  | undefined {
-  if (Array.isArray(arg)) {
-    return extractTypeFromASTArg(arg[0], context);
-  }
-  if (isLiteral(arg)) {
-    return arg.literalType;
-  }
-  if (isColumn(arg) || isIdentifier(arg)) {
-    const hit = getColumnForASTNode(arg, context);
-    if (hit) {
-      return hit.type;
-    }
-  }
-  if (isFunctionExpression(arg)) {
-    const fnDef = getFunctionDefinition(arg.name);
-    if (fnDef) {
-      // @TODO: improve this to better filter down the correct return type based on existing arguments
-      // just mind that this can be highly recursive...
-      return fnDef.signatures[0].returnType;
-    }
-  }
-}
-
 function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      dataType: string;
+      dataType: SupportedDataType | 'unknown';
     }
   >,
   argIndex: number
@@ -632,9 +550,16 @@ function getValidFunctionSignaturesForPreviousArgs(
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
       s.params?.length >= argIndex &&
-      s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return dataType === enrichedArgs[idx].dataType;
-      })
+      s.params
+        .slice(0, argIndex)
+        .every(({ type: dataType }, idx) =>
+          argMatchesParamType(
+            enrichedArgs[idx].dataType,
+            dataType,
+            isLiteral(enrichedArgs[idx]),
+            true
+          )
+        )
   );
   return relevantFuncSignatures;
 }
@@ -651,7 +576,7 @@ function getCompatibleTypesToSuggestNext(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      dataType: string;
+      dataType: SupportedDataType | 'unknown';
     }
   >,
   argIndex: number
@@ -692,16 +617,15 @@ export function getValidSignaturesAndTypesToSuggestNext(
   fullText: string,
   offset: number
 ) {
-  const enrichedArgs = node.args.map((nodeArg) => {
-    let dataType = extractTypeFromASTArg(nodeArg, context);
-
-    // For named system time parameters ?start and ?end, make sure it's compatiable
-    if (isLiteralDateItem(nodeArg)) {
-      dataType = 'date';
+  const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
+  const enrichedArgs = node.args.map((arg, idx) => ({
+    ...arg,
+    dataType: argTypes[idx],
+  })) as Array<
+    ESQLAstItem & {
+      dataType: SupportedDataType | 'unknown';
     }
-
-    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
-  });
+  >;
 
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
@@ -741,5 +665,82 @@ export function getValidSignaturesAndTypesToSuggestNext(
     enrichedArgs,
     argIndex,
     currentArg,
+  };
+}
+
+export function getLookupIndexCreateSuggestion(
+  innerText: string,
+  indexName?: string
+): ISuggestionItem {
+  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
+  const rangeToReplace =
+    indexName && start !== -1
+      ? {
+          start,
+          end: start + indexName.length,
+        }
+      : undefined;
+  return {
+    label: indexName
+      ? i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+
+          {
+            defaultMessage: 'Create lookup index "{indexName}"',
+
+            values: { indexName },
+          }
+        )
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+          defaultMessage: 'Create lookup index',
+        }),
+
+    text: indexName,
+
+    kind: 'Issue',
+
+    filterText: indexName,
+
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+      {
+        defaultMessage: 'Click to create',
+      }
+    ),
+
+    sortText: '1A',
+
+    command: {
+      id: `esql.lookup_index.create`,
+
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+
+      arguments: [{ indexName }],
+    },
+
+    rangeToReplace,
+
+    incomplete: true,
+  } as ISuggestionItem;
+}
+
+export function createInferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): ISuggestionItem {
+  return {
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
+      defaultMessage: 'Inference endpoint used for the completion',
+    }),
+    kind: 'Reference',
+    label: inferenceEndpoint.inference_id,
+    sortText: '1',
+    text: inferenceEndpoint.inference_id,
   };
 }
