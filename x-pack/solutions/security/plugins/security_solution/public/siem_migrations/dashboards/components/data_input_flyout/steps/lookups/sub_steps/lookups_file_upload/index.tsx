@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps';
+import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
 import { LookupsFileUpload } from '../../../../../../../common/components/migration_steps';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';

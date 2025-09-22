@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   AddUploadedLookups,
   UploadedLookups,
-} from '../../../../../common/components/migration_steps';
+} from '../../../../../common/components/migration_steps/types';
 import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';

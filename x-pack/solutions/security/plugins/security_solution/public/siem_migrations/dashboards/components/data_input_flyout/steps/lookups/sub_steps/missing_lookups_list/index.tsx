@@ -10,7 +10,7 @@ import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import type {
   AddUploadedLookups,
   UploadedLookups,
-} from '../../../../../../../common/components/migration_steps';
+} from '../../../../../../../common/components/migration_steps/types';
 import { MissingLookupsList } from '../../../../../../../common/components/migration_steps';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
