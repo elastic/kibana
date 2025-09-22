@@ -8,6 +8,7 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { getAccessControlClient } from '../../services/access_control_service';
 import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
@@ -29,11 +30,12 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const [savedObjectResult, user] = await Promise.all([
+  const [savedObjectResult, user, isAccessControlEnabled] = await Promise.all([
     getDashboardContentManagementService().loadDashboardState({
       id: savedObjectId,
     }),
     getUserAccessControlData(),
+    getAccessControlClient().isAccessControlEnabled(),
   ]);
 
   // --------------------------------------------------------------------------------------
@@ -90,6 +92,7 @@ export async function loadDashboardApi({
     savedObjectResult,
     savedObjectId,
     user,
+    isAccessControlEnabled,
   });
 
   const performanceSubscription = startQueryPerformanceTracking(api, {

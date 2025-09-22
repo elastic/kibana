@@ -9,7 +9,6 @@
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
-import { getAccessControlClient } from '../../access_control_service';
 import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
@@ -84,19 +83,8 @@ export const loadDashboardState = async ({
     };
   }
 
-  const {
-    references,
-    attributes,
-    managed,
-    version,
-    accessControl: originalAccessControl,
-    createdBy,
-  } = rawDashboardContent;
-
-  const accessControlClient = getAccessControlClient();
-  const isAccessControlEnabled = await accessControlClient.isAccessControlEnabled();
-
-  const accessControl = isAccessControlEnabled ? originalAccessControl : undefined;
+  const { references, attributes, managed, version, accessControl, createdBy } =
+    rawDashboardContent;
 
   const {
     refreshInterval,

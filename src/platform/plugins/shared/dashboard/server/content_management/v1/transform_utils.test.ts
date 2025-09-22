@@ -279,7 +279,7 @@ describe('savedObjectToItem', () => {
         accessMode: 'read_only' as SavedObjectAccessControl['accessMode'],
       },
     };
-    const { item, error } = savedObjectToItem(input, false);
+    const { item, error } = savedObjectToItem(input, false, { isAccessControlEnabled: true });
     expect(error).toBeNull();
     expect(item).toEqual({
       ...commonSavedObject,

@@ -195,6 +195,7 @@ export class DashboardStorage {
     const { item, error: itemError } = savedObjectToItem(savedObject, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
+      isAccessControlEnabled: this.isAccessControlEnabled,
     });
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
@@ -453,6 +454,7 @@ export class DashboardStorage {
           allowedReferences: optionsToLatest?.includeReferences,
           getTagNamesFromReferences: (references: SavedObjectReference[]) =>
             this.getTagNamesFromReferences(references, allTags),
+          isAccessControlEnabled: this.isAccessControlEnabled,
         });
         return item;
       })

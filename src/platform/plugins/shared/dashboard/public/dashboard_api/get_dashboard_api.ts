@@ -50,6 +50,7 @@ export function getDashboardApi({
   savedObjectResult,
   savedObjectId,
   user,
+  isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
@@ -57,6 +58,7 @@ export function getDashboardApi({
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
   user?: DashboardUser;
+  isAccessControlEnabled?: boolean;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
@@ -231,6 +233,7 @@ export function getDashboardApi({
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
+    isAccessControlEnabled: Boolean(isAccessControlEnabled),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

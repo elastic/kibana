@@ -37,6 +37,7 @@ export function savedObjectToItem(
     allowedAttributes,
     allowedReferences,
     getTagNamesFromReferences,
+    isAccessControlEnabled,
   }: {
     /**
      * attributes to include in the output item
@@ -47,6 +48,7 @@ export function savedObjectToItem(
      */
     allowedReferences?: string[];
     getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
+    isAccessControlEnabled?: boolean;
   } = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
@@ -61,7 +63,7 @@ export function savedObjectToItem(
     namespaces,
     version,
     managed,
-    accessControl,
+    accessControl: originalAccessControl,
   } = savedObject;
   try {
     const dashboardState = transformDashboardOut(
@@ -87,7 +89,7 @@ export function savedObjectToItem(
           : references,
         version,
         managed,
-        accessControl,
+        accessControl: isAccessControlEnabled === true ? originalAccessControl : undefined,
       },
       error: null,
     };

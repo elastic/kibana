@@ -180,6 +180,13 @@ export const useDashboardMenuItems = ({
     return topNavStrings.edit.readOnlyTooltip;
   }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
 
+  const getShareTooltip = useCallback(() => {
+    if (!dashboardApi.isAccessControlEnabled) return undefined;
+    return isInEditAccessMode
+      ? topNavStrings.share.editModeTooltipContent
+      : topNavStrings.share.readOnlyModeTooltipContent;
+  }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
+
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
@@ -263,9 +270,7 @@ export const useDashboardMenuItems = ({
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
-        tooltip: isInEditAccessMode
-          ? topNavStrings.share.editModeTooltipContent
-          : topNavStrings.share.readOnlyModeTooltipContent,
+        tooltip: getShareTooltip(),
       } as TopNavMenuData,
 
       export: {
@@ -301,9 +306,9 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     isEditButtonDisabled,
-    isInEditAccessMode,
     isQuickSaveButtonDisabled,
     getEditTooltip,
+    getShareTooltip,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
