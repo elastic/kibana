@@ -27,10 +27,10 @@ export const usePopoverHover = (
     if (!persistent || !isOpenedByClick) {
       clearTimeout();
       if (!isSidePanelOpen) {
-        open();
+        setTimeout(open, POPOVER_HOVER_DELAY);
       }
     }
-  }, [persistent, isOpenedByClick, isSidePanelOpen, clearTimeout, open]);
+  }, [persistent, isOpenedByClick, isSidePanelOpen, clearTimeout, open, setTimeout]);
 
   const handleMouseLeave = useCallback(() => {
     if (!persistent || !isOpenedByClick) {
