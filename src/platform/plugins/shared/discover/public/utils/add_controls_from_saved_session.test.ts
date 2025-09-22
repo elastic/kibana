@@ -126,29 +126,18 @@ describe('addControlsFromSavedSession', () => {
       savedObject.attributes.controlGroupJson = JSON.stringify(controlsState);
     });
 
-    it('should add controls only for variables that exist in esqlVariables', () => {
+    it('should add controls only for variables that dont exist in esqlVariables', () => {
       addControlsFromSavedSession(mockContainer, savedObject);
 
-      expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledTimes(2);
+      expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledTimes(1);
 
       expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledWith({
         panelType: ESQL_CONTROL,
         serializedState: {
           rawState: {
-            variableName: 'var1',
+            variableName: 'nonExistentVar',
             type: 'control',
-            order: 0,
-          },
-        },
-      });
-
-      expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledWith({
-        panelType: ESQL_CONTROL,
-        serializedState: {
-          rawState: {
-            variableName: 'var2',
-            type: 'control',
-            order: 1,
+            order: 2,
           },
         },
       });
@@ -161,8 +150,8 @@ describe('addControlsFromSavedSession', () => {
         (call) => (call[0]?.serializedState?.rawState as { variableName?: string })?.variableName
       );
 
-      expect(addedPanels).not.toContain('nonExistentVar');
-      expect(addedPanels).toEqual(['var1', 'var2']);
+      expect(addedPanels).not.toContain(['var1', 'var2']);
+      expect(addedPanels).toEqual(['nonExistentVar']);
     });
   });
 });
