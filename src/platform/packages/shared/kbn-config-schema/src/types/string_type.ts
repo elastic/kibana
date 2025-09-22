@@ -14,14 +14,18 @@ import { Type, convertValidationFunction } from './type';
 
 import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 
-export type StringOptions<D extends DefaultValue<string>> = TypeOptions<string, string, D> & {
+export type StringOptions<D extends DefaultValue<string> = never> = TypeOptions<
+  string,
+  string,
+  D
+> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
   coerceFromNumber?: boolean;
 };
 
-export class StringType<D extends DefaultValue<string>> extends Type<string, string, D> {
+export class StringType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
   constructor(options: StringOptions<D> = {}) {
     // We want to allow empty strings, however calling `allow('')` causes
     // Joi to allow the value and skip any additional validation.

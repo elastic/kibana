@@ -23,13 +23,13 @@ import { Type } from './type';
 export type MapOfOptions<
   K,
   T extends SomeType,
-  D extends DefaultValue<Map<K, T['_input']>>
+  D extends DefaultValue<Map<K, T['_input']>> = never
 > = TypeOptions<Map<K, T['_output']>, Map<K, T['_input']>, D> & UnknownOptions;
 
 export class MapOfType<
   K,
   T extends SomeType,
-  D extends DefaultValue<Map<K, T['_input']>>
+  D extends DefaultValue<Map<K, T['_input']>> = never
 > extends Type<Map<K, T['_output']>, Map<K, T['_input']>, D> {
   private readonly keyType: Type<K>;
   private readonly valueType: T;

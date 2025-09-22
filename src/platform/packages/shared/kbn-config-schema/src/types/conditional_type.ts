@@ -19,9 +19,9 @@ export class ConditionalType<
   A extends ConditionalTypeValue,
   B,
   C,
-  BDV extends DefaultValue<B>,
-  CDV extends DefaultValue<C>,
-  DV extends DefaultValue<B | C>
+  BDV extends DefaultValue<B> = never,
+  CDV extends DefaultValue<C> = never,
+  DV extends DefaultValue<B | C> = never
 > extends Type<B | C, B | C, DV> {
   private readonly leftOperand: Reference<A>;
   private readonly rightOperand: Reference<A> | A | Type<unknown>;

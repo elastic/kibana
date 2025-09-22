@@ -12,7 +12,7 @@ import { internals } from '../internals';
 import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export class BufferType<D extends DefaultValue<Buffer>> extends Type<Buffer, Buffer, D> {
+export class BufferType<D extends DefaultValue<Buffer> = never> extends Type<Buffer, Buffer, D> {
   constructor(options?: TypeOptions<Buffer, Buffer, D>) {
     super(internals.binary(), options);
   }

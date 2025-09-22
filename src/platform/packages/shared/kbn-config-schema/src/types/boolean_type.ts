@@ -12,7 +12,11 @@ import { internals } from '../internals';
 import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export class BooleanType<D extends DefaultValue<boolean>> extends Type<boolean, boolean, D> {
+export class BooleanType<D extends DefaultValue<boolean> = never> extends Type<
+  boolean,
+  boolean,
+  D
+> {
   constructor(options?: TypeOptions<boolean, boolean, D>) {
     super(internals.boolean(), options);
   }

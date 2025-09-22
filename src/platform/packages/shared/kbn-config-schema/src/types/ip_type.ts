@@ -13,14 +13,14 @@ import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
 export type IpVersion = 'ipv4' | 'ipv6';
-export type IpOptions<D extends DefaultValue<string>> = TypeOptions<string, string, D> & {
+export type IpOptions<D extends DefaultValue<string> = never> = TypeOptions<string, string, D> & {
   /**
    * IP versions to accept, defaults to ['ipv4', 'ipv6'].
    */
   versions?: IpVersion[];
 };
 
-export class IpType<D extends DefaultValue<string>> extends Type<string, string, D> {
+export class IpType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
   constructor(options: IpOptions<D> = {}) {
     const versions = options.versions ?? ['ipv4', 'ipv6'];
     const schema = internals.string().ip({ version: versions, cidr: 'forbidden' });

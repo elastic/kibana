@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Duration } from 'moment';
 import type { Stream } from 'stream';
 
 import type { Reference } from './src/references';
@@ -119,9 +118,7 @@ function literal<T extends string | number | boolean | null>(value: T): LiteralT
   return new LiteralType(value);
 }
 
-function number<D extends DefaultValue<number> = never>(
-  options?: NumberOptions<D>
-): Type<number, number, D> {
+function number<D extends DefaultValue<number> = never>(options?: NumberOptions<D>): NumberType<D> {
   return new NumberType(options);
 }
 
@@ -133,7 +130,7 @@ function byteSize<D extends ByteSizeValueType = never>(
 
 function duration<D extends DurationDefaultValue = never>(
   options?: DurationOptions<D>
-): Type<Duration, Duration, [D] extends [never] ? never : Duration> {
+): DurationType<D> {
   return new DurationType(options);
 }
 
@@ -181,7 +178,7 @@ function arrayOf<T extends SomeType, D extends DefaultValue<T['_input'][]> = nev
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>>>(
+function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>> = never>(
   keyType: Type<K>,
   valueType: T,
   options?: MapOfOptions<K, T, D>
@@ -192,7 +189,7 @@ function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>
 function recordOf<
   K extends string,
   T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>>
+  D extends DefaultValue<Record<K, T['_input']>> = never
 >(
   keyType: Type<K>,
   valueType: T,
@@ -203,7 +200,7 @@ function recordOf<
 
 function union<
   T extends Readonly<[SomeType, ...SomeType[]]>,
-  D extends DefaultValue<T[number]['_input']>
+  D extends DefaultValue<T[number]['_input']> = never
 >(types: T, options?: UnionTypeOptions<T, D>): UnionType<T, D> {
   return new UnionType(types, options);
 }
@@ -224,7 +221,7 @@ function intersection<
   T2 extends SomeObjectType,
   T3 extends SomeObjectType,
   T4 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input'] & T4['_input']>
+  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input'] & T4['_input']> = never
 >(
   types: [T1, T2, T3, T4],
   options?: ObjectTypeOptions<
@@ -237,7 +234,7 @@ function intersection<
   T1 extends SomeObjectType,
   T2 extends SomeObjectType,
   T3 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input']>
+  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input']> = never
 >(
   types: [T1, T2, T3],
   options?: ObjectTypeOptions<
@@ -249,7 +246,7 @@ function intersection<
 function intersection<
   T1 extends SomeObjectType,
   T2 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input']>
+  D extends DefaultValue<T1['_input'] & T2['_input']> = never
 >(
   types: [T1, T2],
   options?: ObjectTypeOptions<T1['_output'] & T2['_output'], T1['_input'] & T2['_input'], D>

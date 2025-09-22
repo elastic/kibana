@@ -57,9 +57,9 @@ import type { DefaultValue } from '../types/type';
  */
 export function offeringBasedSchema<
   T,
-  SLD extends DefaultValue<T>,
-  TRD extends DefaultValue<T>,
-  DV extends DefaultValue<T>
+  SLD extends DefaultValue<T> = never,
+  TRD extends DefaultValue<T> = never,
+  DV extends DefaultValue<T> = never
 >(opts: {
   serverless?: Type<T, T, SLD>;
   traditional?: Type<T, T, TRD>;

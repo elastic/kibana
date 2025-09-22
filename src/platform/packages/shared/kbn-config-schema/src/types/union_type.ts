@@ -15,7 +15,7 @@ import { Type, type TypeOptions, type TypeMeta } from './type';
 
 export type UnionTypeOptions<
   T extends Readonly<[SomeType, ...SomeType[]]>,
-  D extends DefaultValue<T[number]['_input']>
+  D extends DefaultValue<T[number]['_input']> = never
 > = TypeOptions<T[number]['_output'], T[number]['_input'], D> & {
   meta?: Omit<TypeMeta, 'id'>;
 };

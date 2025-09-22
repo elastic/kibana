@@ -22,14 +22,14 @@ export type DurationDefaultValue =
   | (() => DurationValueType)
   | Reference<Duration>; // references must only be a Duration
 
-export interface DurationOptions<D extends DurationDefaultValue> {
+export interface DurationOptions<D extends DurationDefaultValue = never> {
   defaultValue?: D;
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
   max?: DurationValueType;
 }
 
-export class DurationType<D extends DurationDefaultValue> extends Type<
+export class DurationType<D extends DurationDefaultValue = never> extends Type<
   Duration,
   Duration,
   [D] extends [never] ? never : Duration

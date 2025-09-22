@@ -23,13 +23,13 @@ import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 export type RecordOfOptions<
   K extends string,
   T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>>
+  D extends DefaultValue<Record<K, T['_input']>> = never
 > = TypeOptions<Record<K, T['_output']>, Record<K, T['_input']>, D> & UnknownOptions;
 
 export class RecordOfType<
   K extends string,
   T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>>
+  D extends DefaultValue<Record<K, T['_input']>> = never
 > extends Type<Record<K, T['_output']>, Record<K, T['_input']>, D> {
   private readonly keyType: Type<K>;
   private readonly valueType: T;
