@@ -7,8 +7,56 @@
 
 import { getSupportedSchemas } from './supported_schemas';
 import type { ExperimentalFeatures } from '../../../../../../common';
+import * as securityModules from './security_modules';
+
+jest.mock('./security_modules', () => ({
+  CORE_SECURITY_MODULES: [
+    'crowdstrike',
+    'jamf_protect',
+    'sentinel_one',
+    'sentinel_one_cloud_funnel',
+  ],
+  MICROSOFT_DEFENDER_MODULES: [
+    'microsoft_defender_endpoint',
+    'm365_defender',
+  ],
+  getSecurityModuleDatasets: jest.fn(),
+  getAllSecurityModules: jest.fn(),
+}));
+
+const mockGetSecurityModuleDatasets = securityModules.getSecurityModuleDatasets as jest.MockedFunction<
+  typeof securityModules.getSecurityModuleDatasets
+>;
 
 describe('getSupportedSchemas', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Set up default mock implementation to return realistic data
+    mockGetSecurityModuleDatasets.mockImplementation((modules: readonly string[]) => {
+      const datasetMap: Record<string, string[]> = {
+        crowdstrike: ['crowdstrike.alert', 'crowdstrike.falcon', 'crowdstrike.fdr'],
+        jamf_protect: [
+          'jamf_protect.telemetry',
+          'jamf_protect.alerts',
+          'jamf_protect.web-threat-events',
+          'jamf_protect.web-traffic-events',
+        ],
+        sentinel_one: ['sentinel_one.alert'],
+        sentinel_one_cloud_funnel: ['sentinel_one_cloud_funnel.event'],
+        microsoft_defender_endpoint: ['microsoft_defender_endpoint.log'],
+        m365_defender: ['m365_defender.alert', 'm365_defender.incident'],
+      };
+
+      const datasets: string[] = [];
+      modules.forEach((module) => {
+        const moduleDatasets = datasetMap[module];
+        if (moduleDatasets) {
+          datasets.push(...moduleDatasets);
+        }
+      });
+      return datasets;
+    });
+  });
   describe('Microsoft Defender for Endpoint integration', () => {
     it('should include Microsoft Defender datasets when feature flag is enabled', () => {
       const experimentalFeatures: ExperimentalFeatures = {
@@ -244,6 +292,102 @@ describe('getSupportedSchemas', () => {
       expectedDatasets.forEach((dataset) => {
         expect(datasets).toContain(dataset);
       });
+    });
+  });
+
+  describe('centralized security module integration', () => {
+    it('should call getSecurityModuleDatasets with core modules when feature flag is disabled', () => {
+      const experimentalFeatures: ExperimentalFeatures = {
+        microsoftDefenderEndpointDataInAnalyzerEnabled: false,
+      } as ExperimentalFeatures;
+
+      getSupportedSchemas(experimentalFeatures);
+
+      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
+        'crowdstrike',
+        'jamf_protect',
+        'sentinel_one',
+        'sentinel_one_cloud_funnel',
+      ]);
+    });
+
+    it('should call getSecurityModuleDatasets with all modules when feature flag is enabled', () => {
+      const experimentalFeatures: ExperimentalFeatures = {
+        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
+      } as ExperimentalFeatures;
+
+      getSupportedSchemas(experimentalFeatures);
+
+      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
+        'crowdstrike',
+        'jamf_protect',
+        'sentinel_one',
+        'sentinel_one_cloud_funnel',
+        'microsoft_defender_endpoint',
+        'm365_defender',
+      ]);
+    });
+
+    it('should call getSecurityModuleDatasets with core modules when experimentalFeatures is undefined', () => {
+      getSupportedSchemas(undefined);
+
+      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
+        'crowdstrike',
+        'jamf_protect',
+        'sentinel_one',
+        'sentinel_one_cloud_funnel',
+      ]);
+    });
+
+    it('should use datasets returned by getSecurityModuleDatasets in filebeat schema constraint', () => {
+      const mockDatasets = ['custom.dataset1', 'custom.dataset2'];
+      mockGetSecurityModuleDatasets.mockReturnValue(mockDatasets);
+
+      const schemas = getSupportedSchemas(undefined);
+      const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
+
+      expect(filebeatSchema).toBeDefined();
+      const datasetConstraint = filebeatSchema!.constraints.find(
+        (constraint) => constraint.field === 'event.dataset'
+      );
+
+      expect(datasetConstraint).toBeDefined();
+      expect(datasetConstraint!.value).toEqual(mockDatasets);
+    });
+
+    it('should handle empty datasets from getSecurityModuleDatasets', () => {
+      mockGetSecurityModuleDatasets.mockReturnValue([]);
+
+      const schemas = getSupportedSchemas(undefined);
+      const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
+
+      expect(filebeatSchema).toBeDefined();
+      const datasetConstraint = filebeatSchema!.constraints.find(
+        (constraint) => constraint.field === 'event.dataset'
+      );
+
+      expect(datasetConstraint).toBeDefined();
+      expect(datasetConstraint!.value).toEqual([]);
+    });
+
+    it('should call getSecurityModuleDatasets exactly once per getSupportedSchemas call', () => {
+      getSupportedSchemas(undefined);
+
+      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(1);
+
+      getSupportedSchemas({ microsoftDefenderEndpointDataInAnalyzerEnabled: true } as ExperimentalFeatures);
+
+      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle getSecurityModuleDatasets throwing an error', () => {
+      mockGetSecurityModuleDatasets.mockImplementation(() => {
+        throw new Error('Security module datasets error');
+      });
+
+      expect(() => getSupportedSchemas(undefined)).toThrow('Security module datasets error');
     });
   });
 });

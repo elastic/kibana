@@ -6,6 +6,77 @@
  */
 
 /**
+ * # Security Module Extension Guide
+ *
+ * This file provides a centralized system for managing security modules and their datasets
+ * across the Resolver system. All security integrations should be defined here to ensure
+ * consistency between schema detection and event filtering.
+ *
+ * ## Adding a New Security Module
+ *
+ * To add a new security module integration to Resolver:
+ *
+ * ### 1. Core Module (Always Enabled)
+ *
+ * For modules that should always be available:
+ *
+ * ```typescript
+ * export const CORE_SECURITY_MODULES = [
+ *   'crowdstrike',
+ *   'jamf_protect',
+ *   'sentinel_one',
+ *   'sentinel_one_cloud_funnel',
+ *   'new_security_module', // Add your module here
+ * ] as const;
+ * ```
+ *
+ * ### 2. Feature-Flagged Module (Conditional)
+ *
+ * For modules that require experimental feature flags:
+ *
+ * ```typescript
+ * export const MICROSOFT_DEFENDER_MODULES = [
+ *   'microsoft_defender_endpoint',
+ *   'm365_defender',
+ *   'new_experimental_module', // Add experimental module here
+ * ] as const;
+ * ```
+ *
+ * ### 3. Dataset Mapping
+ *
+ * Add the module's dataset mappings:
+ *
+ * ```typescript
+ * export const SECURITY_MODULE_DATASETS = {
+ *   // ... existing mappings
+ *   new_security_module: [
+ *     'new_security_module.alerts',
+ *     'new_security_module.events',
+ *     'new_security_module.incidents'
+ *   ],
+ * } as const;
+ * ```
+ *
+
+
+ * ## Module Requirements
+ *
+ * For a security module to work with Resolver:
+ *
+ * - **Must set `event.kind`**: Either `"event"` or `"alert"`
+ * - **Must set `event.module`**: The module name (e.g., 'crowdstrike')
+ * - **Process events**: Should include process tree fields for correlation
+ * - **Index patterns**: Should be included in the appropriate Kibana index patterns
+ *
+ * ## Architecture Notes
+ *
+ * - **Single Source of Truth**: All modules defined in this file
+ * - **Automatic Integration**: Schema detection and event filtering use the same definitions
+ * - **Performance Optimized**: Event filtering only processes relevant security data
+ * - **Feature Flag Ready**: Conditional module support through experimental features
+ *
+
+ /**
  * Core security modules supported across all Resolver functionality.
  * This is the source of truth for security modules used by both schema detection
  * and event filtering to avoid duplication.
@@ -24,10 +95,7 @@ export const CORE_SECURITY_MODULES = [
  * Microsoft Defender modules that are conditionally enabled.
  * These modules are feature-flagged and may not always be available.
  */
-export const MICROSOFT_DEFENDER_MODULES = [
-  'microsoft_defender_endpoint',
-  'm365_defender',
-] as const;
+export const MICROSOFT_DEFENDER_MODULES = ['microsoft_defender_endpoint', 'm365_defender'] as const;
 
 /**
  * Security module dataset mappings for filebeat integrations.
@@ -39,7 +107,7 @@ export const SECURITY_MODULE_DATASETS = {
     'jamf_protect.telemetry',
     'jamf_protect.alerts',
     'jamf_protect.web-threat-events',
-    'jamf_protect.web-traffic-events'
+    'jamf_protect.web-traffic-events',
   ],
   sentinel_one: ['sentinel_one.alert'],
   sentinel_one_cloud_funnel: ['sentinel_one_cloud_funnel.event'],
@@ -67,7 +135,8 @@ export function getSecurityModuleDatasets(modules: readonly string[]): string[] 
   const datasets: string[] = [];
 
   modules.forEach((module) => {
-    const moduleDatasets = SECURITY_MODULE_DATASETS[module as keyof typeof SECURITY_MODULE_DATASETS];
+    const moduleDatasets =
+      SECURITY_MODULE_DATASETS[module as keyof typeof SECURITY_MODULE_DATASETS];
     if (moduleDatasets) {
       datasets.push(...moduleDatasets);
     }
