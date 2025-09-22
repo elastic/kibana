@@ -100,16 +100,6 @@ export default function searchSolutionNavigation({
               pageTestSubject: 'onechatPageConversations',
             },
             {
-              link: { deepLinkId: 'agent_builder:tools' },
-              breadcrumbs: ['Tools'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
-              link: { deepLinkId: 'agent_builder:agents' },
-              breadcrumbs: ['Agents'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
               link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
               pageTestSubject: 'noDataViewsPrompt',
