@@ -35,8 +35,6 @@ export const ConditionDisplay = ({
     return null;
   }
 
-  const isFilterCondition = isFilterConditionObject(condition);
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       {showKeyword && <OperatorText operator={keyword} />}
