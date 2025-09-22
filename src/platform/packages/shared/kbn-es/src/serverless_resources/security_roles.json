@@ -210,8 +210,8 @@
             ".entities.v1.latest.security_*",
             ".entities.v1.history.*.security_*",
             ".entities.v1.reset*",
-            ".entity_analytics.monitoring*",
-            ".entities.v1.updates.security_*"
+            ".entities.v1.updates.security_*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": [
             "read"
