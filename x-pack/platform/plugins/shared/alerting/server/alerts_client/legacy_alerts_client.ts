@@ -292,9 +292,6 @@ export class LegacyAlertsClient<
   public async setAlertStatusToUntracked() {
     return;
   }
-  public getTrackedExecutions() {
-    return new Set([]);
-  }
 
   private removeExpiredMaintenanceWindows({
     processedAlertsActive,
