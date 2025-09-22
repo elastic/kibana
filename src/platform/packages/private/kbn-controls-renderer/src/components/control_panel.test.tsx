@@ -7,50 +7,88 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useImperativeHandle } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { render as rtlRender, waitFor, screen, act } from '@testing-library/react';
+import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
+import {
+  registerReactEmbeddableFactory,
+  type EmbeddableFactory,
+} from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { render, waitFor } from '@testing-library/react';
 
-import type { ControlsLabelPosition, ControlWidth } from '@kbn/controls-schemas';
-import { uiActionsService } from '../../services/kibana_services';
+import type { ControlsRendererParentApi } from '../types';
 import { ControlPanel } from './control_panel';
-import { EuiThemeProvider } from '@elastic/eui';
 
-const render = (ui: React.ReactElement) => {
-  return rtlRender(ui, { wrapper: EuiThemeProvider });
+const mockServices = {
+  services: {
+    uiActions: {
+      getTriggerCompatibleActions: jest.fn().mockResolvedValue([
+        {
+          isCompatible: jest.fn().mockResolvedValue(true),
+          id: 'testAction',
+          MenuItem: () => <div>test1</div>,
+        },
+      ] as unknown as Action[]),
+      getFrequentlyChangingActionsForTrigger: jest.fn().mockResolvedValue([]),
+      getTrigger: jest.fn().mockResolvedValue({}),
+    },
+  },
+};
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn().mockImplementation(() => mockServices),
+}));
+
+const parentApi = {
+  getSerializedStateForChild: jest.fn().mockReturnValue({ type: 'optionsListControl' }),
+  viewMode$: new BehaviorSubject('view'),
+  layout$: new BehaviorSubject({
+    controls: {
+      control1: {
+        type: 'optionsListControl',
+      },
+    },
+  }),
+  registerChildApi: jest.fn(),
+} as unknown as ControlsRendererParentApi;
+
+const mockOptionsListFactory: EmbeddableFactory<{ type: 'optionsListControl' }> = {
+  type: 'optionsListControl',
+  buildEmbeddable: async ({ initialState, finalizeApi }) => {
+    const api = finalizeApi({
+      parentApi,
+      serializeState: () => ({
+        rawState: {
+          type: 'optionsListControl',
+        },
+      }),
+    });
+    return {
+      Component: () => <div data-test-subj="optionsListControl">Options list control</div>,
+      api,
+    };
+  },
 };
 
 describe('render', () => {
-  let mockApi = {};
-  const Component = React.forwardRef((_, ref) => {
-    // expose the api into the imperative handle
-    useImperativeHandle(ref, () => mockApi, []);
-
-    return <div />;
-  }) as any;
-
   beforeAll(() => {
-    setMockedPresentationUtilServices();
-    jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([
-      {
-        isCompatible: jest.fn().mockResolvedValue(true),
-        id: 'testAction',
-        MenuItem: () => <div>test1</div>,
-      },
-    ] as unknown as Action[]);
+    registerReactEmbeddableFactory(
+      'optionsListControl',
+      jest.fn().mockResolvedValue(mockOptionsListFactory)
+    );
   });
 
   beforeEach(() => {
-    mockApi = {};
     jest.clearAllMocks();
   });
 
   describe('control width', () => {
     test('defaults to medium and grow enabled', async () => {
-      const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
+      const controlPanel = render(
+        <ControlPanel uuid="control1" type="optionsListControl" parentApi={parentApi} />
+      );
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
@@ -58,43 +96,24 @@ describe('render', () => {
       });
     });
 
-    test('should use small class when using small width', async () => {
-      mockApi = {
-        uuid: 'control1',
-        width$: new BehaviorSubject<ControlWidth>('small'),
-      };
-      const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
+    test('should use small class + no flex grow', async () => {
+      parentApi.layout$.next({
+        controls: {
+          control1: {
+            type: 'optionsListControl',
+            width: 'small',
+            grow: false,
+          },
+        },
+      } as unknown as DashboardLayout);
+      const controlPanel = render(
+        <ControlPanel uuid="control1" type="optionsListControl" parentApi={parentApi} />
+      );
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
         expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
       });
-    });
-  });
-
-  describe('label position', () => {
-    test('should use one line layout class when using one line layout', async () => {
-      mockApi = {
-        uuid: 'control1',
-        parentApi: {
-          labelPosition: new BehaviorSubject<ControlsLabelPosition>('oneLine'),
-        },
-      };
-      await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
-      const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
-      expect(floatingActions).toHaveClass('controlFrameFloatingActions--oneLine');
-    });
-
-    test('should use two line layout class when using two line layout', async () => {
-      mockApi = {
-        uuid: 'control1',
-        parentApi: {
-          labelPosition: new BehaviorSubject<ControlsLabelPosition>('twoLine'),
-        },
-      };
-      await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
-      const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
-      expect(floatingActions).toHaveClass('controlFrameFloatingActions--twoLine');
     });
   });
 });

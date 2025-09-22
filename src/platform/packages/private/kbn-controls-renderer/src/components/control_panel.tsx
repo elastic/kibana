@@ -66,8 +66,12 @@ export const ControlPanel = ({
   const initialState = useMemo(() => {
     return parentApi.layout$.getValue().controls[uuid];
   }, [parentApi, uuid]);
-  const [grow, setGrow] = useState<ControlPanelState['grow']>(initialState.grow);
-  const [width, setWidth] = useState<ControlPanelState['width']>(initialState.width);
+  const [grow, setGrow] = useState<ControlPanelState['grow']>(
+    initialState.grow ?? DEFAULT_CONTROL_GROW
+  );
+  const [width, setWidth] = useState<ControlPanelState['width']>(
+    initialState.width ?? DEFAULT_CONTROL_WIDTH
+  );
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
@@ -76,8 +80,8 @@ export const ControlPanel = ({
         distinctUntilChanged(deepEqual)
       )
       .subscribe((newState) => {
-        setGrow(newState.grow);
-        setWidth(newState.width);
+        setGrow(newState.grow ?? DEFAULT_CONTROL_GROW);
+        setWidth(newState.width ?? DEFAULT_CONTROL_WIDTH);
       });
 
     return () => {
@@ -110,9 +114,6 @@ export const ControlPanel = ({
   }, [api]);
 
   const isEditable = viewMode === 'edit';
-  const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
-  const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
-  const controlLabel = undefined;
 
   const styles = useMemoCss(controlPanelStyles);
 
@@ -127,15 +128,15 @@ export const ControlPanel = ({
         transition,
         transform: CSS.Translate.toString(transform),
       }}
-      grow={controlGrow}
+      grow={grow}
       data-control-id={uuid}
       data-test-subj="control-frame"
       data-render-complete="true"
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={classNames({
-        'controlFrameWrapper--medium': controlWidth === 'medium',
-        'controlFrameWrapper--small': controlWidth === 'small',
-        'controlFrameWrapper--large': controlWidth === 'large',
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--large': width === 'large',
       })}
     >
       <FloatingActions
@@ -144,22 +145,12 @@ export const ControlPanel = ({
         uuid={uuid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
-        isEnabled={true}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          label={controlLabel}
           id={`control-title-${uuid}`}
-          aria-label={`Control for ${controlLabel}`}
-          // css={css({
-          //   '.euiFormControlLayout__childrenWrapper': {
-          //     '.euiPopover, .euiFilterGroup': {
-          //       // TODO: Remove options list styles
-          //       height: '100%',
-          //     },
-          //   },
-          // })}
+          aria-label={`Control for ${panelTitle}`}
         >
           <EuiFormControlLayout
             fullWidth

@@ -1,10 +1,10 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "@emotion/react/types/css-prop"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/presentation-panel-plugin"]
+  "kbn_references": ["@kbn/presentation-panel-plugin", "@kbn/kibana-react-plugin"]
 }

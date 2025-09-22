@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/controls/controls-renderer'],
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-controls-renderer'],
 };

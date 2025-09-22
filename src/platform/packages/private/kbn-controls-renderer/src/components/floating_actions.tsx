@@ -19,13 +19,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ControlRendererServices } from '../types';
+
+import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
 
-  className?: string;
-  isEnabled?: boolean;
   api?: unknown;
   uuid: string;
   viewMode?: ViewMode;
@@ -68,10 +67,8 @@ const getFloatingActionItem = (
 export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
-  isEnabled,
   api,
   uuid,
-  className = '',
   disabledActions,
 }) => {
   const {
@@ -152,14 +149,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   return (
     <div css={styles.wrapper}>
       {children}
-      {isEnabled && floatingActions.length > 0 && (
+      {floatingActions.length > 0 && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${uuid}`}
-          className={classNames(
-            'presentationUtil__floatingActions',
-            `controlFrameFloatingActions`,
-            className
-          )}
+          className={classNames('presentationUtil__floatingActions', `controlFrameFloatingActions`)}
           css={styles.floatingActions}
         >
           <>
