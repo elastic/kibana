@@ -11,7 +11,8 @@ import { action } from '@storybook/addon-actions';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
-import { ConnectorSelectable as Component, ConnectorSelectableProps } from '../connector_selectable';
+import type { ConnectorSelectableProps } from '../connector_selectable';
+import { ConnectorSelectable as Component } from '../connector_selectable';
 
 const preConfiguredConnectors: ConnectorSelectableProps['preConfiguredConnectors'] = [
   { label: 'Connector 1', value: '1' },
