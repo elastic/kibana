@@ -11,7 +11,7 @@ import { difference } from 'lodash';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
+import { fieldWildcardFilter } from '@kbn/data-search-source';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 
 export function getDataViewFieldList(

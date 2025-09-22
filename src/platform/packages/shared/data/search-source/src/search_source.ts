@@ -78,12 +78,12 @@ import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
-import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import { fieldWildcardFilter } from './field_wildcard';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';

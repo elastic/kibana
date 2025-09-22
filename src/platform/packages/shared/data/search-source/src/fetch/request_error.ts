@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchError } from './types';
 
@@ -16,11 +15,11 @@ import type { SearchError } from './types';
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
-export class RequestFailure extends KbnError {
+export class RequestFailure extends Error {
   public resp?: IKibanaSearchResponse;
   constructor(err: SearchError | null = null, resp?: IKibanaSearchResponse) {
     super(`Request to Elasticsearch failed: ${JSON.stringify(resp?.rawResponse || err?.message)}`);
-
+    Object.setPrototypeOf(this, new.target.prototype);
     this.resp = resp;
   }
 }

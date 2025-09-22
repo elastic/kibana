@@ -468,6 +468,7 @@
     "@kbn/data-quality": "link:x-pack/platform/packages/private/kbn-data-quality",
     "@kbn/data-quality-plugin": "link:x-pack/platform/plugins/shared/data_quality",
     "@kbn/data-search-plugin": "link:src/platform/test/plugin_functional/plugins/data_search",
+    "@kbn/data-search-source": "link:src/platform/packages/shared/data/search-source",
     "@kbn/data-service": "link:src/platform/packages/shared/kbn-data-service",
     "@kbn/data-service-server": "link:src/platform/packages/shared/kbn-data-service-server",
     "@kbn/data-stream-adapter": "link:x-pack/solutions/security/packages/data-stream-adapter",

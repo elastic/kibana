@@ -25,7 +25,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
+import { fieldWildcardMatcher } from '@kbn/data-search-source';
 import type {
   DataView,
   DataViewField,

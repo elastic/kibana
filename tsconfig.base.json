@@ -790,6 +790,8 @@
       "@kbn/data-quality-plugin/*": ["x-pack/platform/plugins/shared/data_quality/*"],
       "@kbn/data-search-plugin": ["src/platform/test/plugin_functional/plugins/data_search"],
       "@kbn/data-search-plugin/*": ["src/platform/test/plugin_functional/plugins/data_search/*"],
+      "@kbn/data-search-source": ["src/platform/packages/shared/data/search-source"],
+      "@kbn/data-search-source/*": ["src/platform/packages/shared/data/search-source/*"],
       "@kbn/data-service": ["src/platform/packages/shared/kbn-data-service"],
       "@kbn/data-service/*": ["src/platform/packages/shared/kbn-data-service/*"],
       "@kbn/data-service-server": ["src/platform/packages/shared/kbn-data-service-server"],

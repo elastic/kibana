@@ -8,8 +8,8 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { SearchSourceDependencies } from '.';
-import { SearchSourceService } from '.';
+import type { SearchSourceDependencies } from '..';
+import { SearchSourceService } from '..';
 
 describe('SearchSource service', () => {
   let dependencies: jest.Mocked<SearchSourceDependencies>;

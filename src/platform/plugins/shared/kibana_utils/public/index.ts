@@ -16,8 +16,6 @@ export {
   calculateObjectHash,
   defer,
   Defer,
-  fieldWildcardFilter,
-  fieldWildcardMatcher,
   of,
   url,
   createGetterSetter,

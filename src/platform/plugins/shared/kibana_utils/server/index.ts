@@ -12,8 +12,6 @@ export {
   AbortError,
   abortSignalToPromise,
   createGetterSetter,
-  fieldWildcardFilter,
-  fieldWildcardMatcher,
   url,
   mergeMigrationFunctionMaps,
 } from '../common';
