@@ -184,7 +184,7 @@ export function StreamsTreeTable({
                   color="warning"
                 />
               )}
-              {DOCUMENTS_COLUMN_HEADER}
+              {DATA_QUALITY_COLUMN_HEADER}
             </EuiFlexGroup>
           ),
           width: '150px',
