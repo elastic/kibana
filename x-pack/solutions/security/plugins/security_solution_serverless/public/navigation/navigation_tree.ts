@@ -113,7 +113,7 @@ export const createNavigationTree = async (
                 link: securityLink(SecurityPageName.assetInventory),
                 sideNavVersion: 'v1',
               },
-              defaultNavigationTree.assets(services),
+              defaultNavigationTree.assets(services, { sideNavVersion: 'v1' }),
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
