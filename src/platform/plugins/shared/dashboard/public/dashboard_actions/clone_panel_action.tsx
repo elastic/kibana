@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { apiCannotBeDuplicated } from '@kbn/presentation-containers/interfaces/panel_management';
+import { apiCanBeDuplicated } from '@kbn/presentation-containers';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
@@ -43,14 +43,7 @@ const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
       apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
       apiCanDuplicatePanels(api.parentApi) &&
-      /**
-       * TODO: Remove this once duplicating ES|QL controls has been implemented
-       * ES|QL controls can only output unique variable names, so in order to duplicate the control,
-       * we would need to add a number or other uniquifying character to the end of the variable name.
-       * The problem with this is that the user cannot edit variable names after the control is created.
-       * Once we come up with a good UX solution to this, we can remove this check
-       */
-      !apiCannotBeDuplicated(api)
+      apiCanBeDuplicated(api)
   );
 
 export class ClonePanelAction implements Action<EmbeddableApiContext> {

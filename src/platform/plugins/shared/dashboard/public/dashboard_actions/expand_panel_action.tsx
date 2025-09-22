@@ -8,7 +8,7 @@
  */
 
 import type { CanExpandPanels } from '@kbn/presentation-containers';
-import { apiCanExpandPanels, apiCannotBeExpanded } from '@kbn/presentation-containers';
+import { apiCanExpandPanels, apiCanBeExpanded } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext, HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
 import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -21,7 +21,7 @@ import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
 const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
-  !apiCannotBeExpanded(api) &&
+  apiCanBeExpanded(api) &&
   Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
 
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
