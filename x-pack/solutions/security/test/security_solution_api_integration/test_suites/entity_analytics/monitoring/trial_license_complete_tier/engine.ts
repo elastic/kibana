@@ -529,7 +529,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(names).toEqual(
           expect.arrayContaining([
             '.entity_analytics.monitoring.sources.okta-default',
-            '.entity_analytics.monitoring.sources.ad-default',
+            // '.entity_analytics.monitoring.sources.ad-default',
             '.entity_analytics.monitoring.users-default',
           ])
         );

@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
         await privMonUtils.initPrivMonEngine();
         const createEntitySourceResponse = await api.createEntitySource({
           body: {
-            type: 'index',
+            type: 'index_sync',
             name: 'User Monitored Indices',
             indexPattern: index1,
           },
