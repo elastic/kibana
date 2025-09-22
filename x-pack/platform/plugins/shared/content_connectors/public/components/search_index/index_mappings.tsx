@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-import './index_mappings.scss';
 import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
 import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
