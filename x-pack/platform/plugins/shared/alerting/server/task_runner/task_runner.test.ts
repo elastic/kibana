@@ -1659,7 +1659,6 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    alertsClient.getTrackedExecutions.mockResolvedValue([]);
 
     alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
@@ -3354,47 +3353,34 @@ describe('Task Runner', () => {
     );
   });
 
-  test('should remove the oldest execution id and return the tracked executions', async () => {
-    alertsClient.getTrackedExecutions.mockReturnValue(['1111', '2222', '3333', '4444', '5555']);
-    alertsClient.getProcessedAlerts.mockReturnValue({});
-    alertsClient.getSummarizedAlerts.mockResolvedValue({
-      new: {
-        count: 1,
-        data: [mockAAD],
-      },
-      ongoing: { count: 0, data: [] },
-      recovered: { count: 0, data: [] },
-    });
-
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    rulesSettingsService.getSettings.mockResolvedValue({
-      flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, lookBackWindow: 5 },
-      queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
-    });
-
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
+  test('should not run the rule and return DeleteRuleTaskRunResult when the task is outdated', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
-      taskInstance: mockedTaskInstance,
+      internalSavedObjectsRepository,
+      taskInstance: { ...mockedTaskInstance, id: 'old-task-id' },
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
-      internalSavedObjectsRepository,
     });
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.trackedExecutions).toEqual([
-      '2222',
-      '3333',
-      '4444',
-      '5555',
-      '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    ]);
+
+    const result = await taskRunner.run();
+
+    expect(logger.info).toBeCalledTimes(1);
+    const loggerCall = logger.info.mock.calls[0][0];
+    expect(loggerCall).toMatchInlineSnapshot(
+      `"Outdated task version: The task instance ID: old-task-id does not match the rule ID: 1."`
+    );
+
+    expect(ruleType.executor).not.toHaveBeenCalled();
+
+    expect(result).toEqual({
+      monitoring: undefined,
+      schedule: undefined,
+      shouldDeleteTask: true,
+      state: {},
+    });
   });
 
   test('should return shouldDisableTask when task is enabled but rule is not', async () => {
