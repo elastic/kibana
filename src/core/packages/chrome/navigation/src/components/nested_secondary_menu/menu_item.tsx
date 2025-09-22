@@ -30,7 +30,6 @@ export const Item: FC<ItemProps> = ({
   id,
   isHighlighted = false,
   isCurrent,
-  onClick,
   ...props
 }) => {
   const itemStyle = css`
