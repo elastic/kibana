@@ -20,11 +20,10 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
-import { Sourcerer } from '../../../../sourcerer/components';
+import { Sourcerer, SourcererScopeName } from '../../../../sourcerer';
 import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,

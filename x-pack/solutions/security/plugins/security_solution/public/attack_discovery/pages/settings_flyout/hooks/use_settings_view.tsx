@@ -25,7 +25,7 @@ import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { parseFilterQuery } from '../parse_filter_query';
 import type { SettingsOverrideOptions } from '../../results/history/types';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 

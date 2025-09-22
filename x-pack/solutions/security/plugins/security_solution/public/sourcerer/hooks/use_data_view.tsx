@@ -15,12 +15,12 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
 
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
-import { useKibana } from '../../lib/kibana';
-import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { getSourcererDataView } from '../../../sourcerer/containers/get_sourcerer_data_view';
-import * as i18n from './translations';
-import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useKibana } from '../../common/lib/kibana';
+import { sourcererActions } from '../store';
+import { SourcererScopeName } from '../store/model';
+import { getSourcererDataView } from '../containers/get_sourcerer_data_view';
+import * as i18n from '../../common/containers/source/translations';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;

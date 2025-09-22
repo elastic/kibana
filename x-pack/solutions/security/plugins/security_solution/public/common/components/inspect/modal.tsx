@@ -12,16 +12,16 @@ import {
   EuiIconTip,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
-import React, { useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
@@ -30,9 +30,7 @@ import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_select
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { getScopeFromPath, SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface ModalInspectProps {

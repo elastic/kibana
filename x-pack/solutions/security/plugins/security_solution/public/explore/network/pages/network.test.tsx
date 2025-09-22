@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { screen, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import type { Filter } from '@kbn/es-query';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { TestProviders, createMockStore } from '../../../common/mock';
+import { useSourcererDataView } from '../../../sourcerer';
+import { createMockStore, TestProviders } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
 import { Network } from './network';
@@ -23,7 +23,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../sourcerer/containers');
+jest.mock('../../../sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

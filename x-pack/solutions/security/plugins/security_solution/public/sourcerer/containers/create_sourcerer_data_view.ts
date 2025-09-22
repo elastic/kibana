@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DataViewListItem, DataView as DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView as DataViewType, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ensurePatternFormat } from '../../../common/utils/sourcerer';
+import { ensurePatternFormat } from '../utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 import {
-  DEFAULT_SECURITY_DATA_VIEW,
   DEFAULT_SECURITY_ALERT_DATA_VIEW,
+  DEFAULT_SECURITY_DATA_VIEW,
 } from '../../data_view_manager/components/data_view_picker/translations';
 
 export interface GetSourcererDataView {

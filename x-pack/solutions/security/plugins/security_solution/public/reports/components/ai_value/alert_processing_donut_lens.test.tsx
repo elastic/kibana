@@ -11,7 +11,7 @@ import { AlertProcessingDonut } from './alert_processing_donut_lens';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({

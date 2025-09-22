@@ -19,7 +19,7 @@ import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { SourcererScopeName } from '../../../sourcerer';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';

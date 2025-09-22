@@ -15,13 +15,13 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
 jest.mock('../logic/use_create_schedule');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({

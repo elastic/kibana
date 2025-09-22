@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -15,7 +15,7 @@ import type { UseMessagesStorage } from '../../common/containers/local_storage/u
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
@@ -48,7 +48,7 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../common/containers/source');
-jest.mock('../../sourcerer/containers');
+jest.mock('../../sourcerer');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -104,7 +104,7 @@ jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
-jest.mock('../../sourcerer/containers', () => ({
+jest.mock('../../sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',

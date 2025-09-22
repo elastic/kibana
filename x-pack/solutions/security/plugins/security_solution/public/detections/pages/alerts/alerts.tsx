@@ -16,7 +16,7 @@ import { NoIndexEmptyPage } from '../../components/alerts/empty_pages/no_index_e
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import * as i18n from './translations';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { useSignalHelpers } from '../../../sourcerer';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
 import { NoPrivileges } from '../../../common/components/no_privileges';

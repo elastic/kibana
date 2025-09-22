@@ -19,15 +19,15 @@ import { useHostDetails } from '../../../../explore/hosts/containers/hosts/detai
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
-  HOST_DETAILS_TEST_ID,
-  HOST_DETAILS_INFO_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
-  HOST_DETAILS_LINK_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
-  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
-  HOST_DETAILS_VULNERABILITIES_TEST_ID,
   HOST_DETAILS_ALERT_COUNT_TEST_ID,
+  HOST_DETAILS_INFO_TEST_ID,
+  HOST_DETAILS_LINK_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
+  HOST_DETAILS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -38,7 +38,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
@@ -85,7 +85,7 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../sourcerer/containers', () => ({
+jest.mock('../../../../sourcerer', () => ({
   useSourcererDataView: jest
     .fn()
     .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),

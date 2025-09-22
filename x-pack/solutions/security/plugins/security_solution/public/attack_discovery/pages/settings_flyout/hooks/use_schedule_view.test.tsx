@@ -11,7 +11,7 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { useScheduleView } from './use_schedule_view';
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -26,7 +26,7 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 jest.mock('../schedule/logic/use_find_schedules');
 
 const mockUseKibanaFeatureFlags = jest
