@@ -54,6 +54,10 @@ export function updateSavedSearch({
     savedSearch.visContext = initialInternalState.visContext;
   }
 
+  if (initialInternalState?.controlGroupJson) {
+    savedSearch.controlGroupJson = initialInternalState.controlGroupJson;
+  }
+
   if (useFilterAndQueryServices) {
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())

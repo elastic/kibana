@@ -47,7 +47,7 @@ export interface ParsedOriginalDashboard {
 /** Record of panel descriptions strings indexed by the parsed panel ID */
 export type PanelDescriptions = Record<string, string>;
 
-export type TranslatedPanels = Array<{
+export interface TranslatedPanel {
   /**
    * The index in the panels array, to keep the same order as in the original dashboard.
    * this is probably not necessary since we have already calculated the `position` of each panel, but maintained for consistency
@@ -58,16 +58,13 @@ export type TranslatedPanels = Array<{
   /* The visualization json */
   data: object;
   /* The individual panel translation result */
-  translation_result: MigrationTranslationResult;
+  translation_result?: MigrationTranslationResult;
   /* Any comments generated during the panel translation */
   comments: MigrationComments;
-}>;
-
-export type FailedPanelTranslations = Array<{
-  index: number;
-  error_message: string;
-  details: unknown;
-}>;
+  /* If an error happened during the panel translation, it is captured here */
+  error?: Error;
+}
+export type TranslatedPanels = Array<TranslatedPanel>;
 
 export interface TranslatePanelNodeParams {
   parsed_panel: ParsedPanel;

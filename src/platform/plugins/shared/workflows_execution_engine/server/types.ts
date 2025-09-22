@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -23,7 +24,8 @@ export interface WorkflowsExecutionEnginePluginSetup {}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    context: Record<string, any>
+    context: Record<string, any>,
+    request: KibanaRequest
   ): Promise<ExecuteWorkflowResponse>;
   cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
 }

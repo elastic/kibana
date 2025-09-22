@@ -13,6 +13,7 @@ import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { createRoute } from '../create_route';
 import { getDimensions } from './get_dimentions';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/dimensions',
@@ -43,8 +44,11 @@ export const getDimensionsRoute = createRoute({
     }),
   }),
   handler: async ({ context, params, logger }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
     const { dimensions, indices, from, to } = params.query;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = elasticsearch.client.asCurrentUser;
 
     const values = await getDimensions({
       esClient: createTracedEsClient({
