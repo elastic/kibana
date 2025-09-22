@@ -20,8 +20,6 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiToken,
-  EuiFlexItem,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';

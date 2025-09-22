@@ -44,6 +44,7 @@ export function SchemaEditor({
   const [controls, updateControls] = useControls();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
   const {
+    core: { notifications },
     dependencies: {
       start: { fieldsMetadata },
     },
@@ -73,7 +74,13 @@ export function SchemaEditor({
             status: type ? 'mapped' : 'unmapped',
           } as SchemaField);
         });
+        onFieldSelection(selection, false);
       } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('dataManagement.schemaEditor.fetchRecommendationsError', {
+            defaultMessage: 'Error fetching field type recommendations',
+          }),
+        });
       } finally {
         setIsLoadingRecommendations(false);
       }
@@ -154,6 +161,7 @@ export function SchemaEditor({
                           status: 'unmapped',
                         } as SchemaField);
                       });
+                      onFieldSelection(fieldSelection, false);
                     }
                   }}
                   idSelected=""
