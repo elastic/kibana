@@ -86,7 +86,6 @@ export function useWorkflowActions() {
       });
     },
     onSuccess: ({ workflowExecutionId }, {}) => {
-      // FIX: ensure workflow execution document is created at the end of the mutation
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
     },
   });

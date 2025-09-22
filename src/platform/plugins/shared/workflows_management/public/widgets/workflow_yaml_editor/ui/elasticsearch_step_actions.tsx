@@ -49,7 +49,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTrigger((prev) => prev + 1);
-    }, 500);
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);

@@ -57,7 +57,7 @@ export function TestStepModal({
   useEffect(() => {
     const overlayElement = document.createElement('div');
     overlayElement.id = 'step-mock-data-overlay-root';
-    overlayElement.style.zIndex = '6001'; // should me above modal's z-index (6000)
+    overlayElement.style.zIndex = '6001'; // should be above modal's z-index (6000)
     overlayElement.style.position = 'fixed';
     overlayElement.classList.add('monaco-editor');
     document.body.appendChild(overlayElement);
