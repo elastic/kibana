@@ -52,7 +52,7 @@ export function registerCAISchedulerTask({
 
   taskManager.registerTaskDefinitions({
     [ANALYTICS_SCHEDULER_TASK_TYPE]: {
-      title: 'Schedules cases analytics synchronizzer tasks.',
+      title: 'Schedules cases analytics synchronization tasks.',
       maxAttempts: 3,
       createTaskRunner: () => {
         return new AnalyticsIndexSchedulerTaskFactory({
