@@ -232,7 +232,9 @@ describe('ConnectorSelector', () => {
         return <ConnectorSelector {...props} value={value} onValueChange={handleValueChange} />;
       };
 
-      render(<ControlledWrapper {...defaultProps} value={undefined} />, { wrapper: EuiThemeProvider });
+      render(<ControlledWrapper {...defaultProps} value={undefined} />, {
+        wrapper: EuiThemeProvider,
+      });
 
       expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
       expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
