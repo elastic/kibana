@@ -393,6 +393,19 @@ export default ({ getService }: FtrProviderContext) => {
     describe('plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const entitySource = createIndexEntitySource(indexName, { name: 'StarWars' });
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
+          { useCreate: true }
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
+        );
+      });
+
       beforeEach(async () => {
         await kibanaServer.uiSettings.update({
           'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': false,
