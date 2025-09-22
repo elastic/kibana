@@ -20,7 +20,7 @@ const DEFAULT_NUM_DATA_POINTS = 25;
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp,
-  numDataPoints = DEFAULT_NUM_DATA_POINTS
+  numDataPoints = DEFAULT_NUM_DATA_POINTS,
 }: {
   groupTotalCountByTimestamp: boolean;
   numDataPoints?: number;
