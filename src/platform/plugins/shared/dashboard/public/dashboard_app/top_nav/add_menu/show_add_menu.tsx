@@ -19,8 +19,8 @@ import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@k
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
@@ -32,7 +32,6 @@ import {
   getAddTimeSliderControlButtonTitle,
   getCreateVisualizationButtonTitle,
 } from '../../_dashboard_app_strings';
-import { AddPanelFlyout } from '../add_panel_button/components/add_panel_flyout';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -72,13 +71,45 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
     };
   }, [controlGroupApi]);
 
+  useEffect(() => {
+    // ensure opened overlays are closed if a navigation event happens
+    return () => {
+      dashboardApi.clearOverlays();
+    };
+  }, [dashboardApi]);
+
   const onSave = () => {
     dashboardApi.scrollToTop();
   };
+
   const closePopover = useCallback(() => {
     cleanup();
     anchorElement.focus();
   }, [anchorElement]);
+
+  const openAddPanelFlyout = useCallback(() => {
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: dashboardApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        closePopover();
+
+        const { AddPanelFlyout } = await import('../add_panel_button/components/add_panel_flyout');
+
+        return (
+          <AddPanelFlyout
+            dashboardApi={dashboardApi}
+            closeFlyout={closeFlyout}
+            ariaLabelledBy={ariaLabelledBy}
+          />
+        );
+      },
+      flyoutProps: {
+        'data-test-subj': 'dashboardPanelSelectionFlyout',
+        triggerId: 'dashboardAddTopNavButton',
+      },
+    });
+  }, [closePopover, coreServices, dashboardApi]);
 
   const panels = [
     {
@@ -100,42 +131,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           }),
           icon: 'plusInCircle',
           'data-test-subj': 'dashboardOpenAddPanelFlyoutButton',
-          onClick: () => {
-            const overlayRef = coreServices.overlays.openFlyout(
-              toMountPoint(
-                React.createElement(function () {
-                  return (
-                    <AddPanelFlyout
-                      dashboardApi={dashboardApi}
-                      closeFlyout={() => {
-                        dashboardApi.clearOverlays();
-                        overlayRef.close();
-                        // Focus the anchor element after closing the flyout
-                        setTimeout(() => anchorElement.focus(), 0);
-                      }}
-                      ariaLabelledBy="addPanelsFlyout"
-                    />
-                  );
-                }),
-                coreServices
-              ),
-              {
-                size: 'm',
-                maxWidth: 500,
-                paddingSize: 'm',
-                'data-test-subj': 'dashboardPanelSelectionFlyout',
-                onClose: () => {
-                  dashboardApi.clearOverlays();
-                  overlayRef.close();
-                  // Focus the anchor element after closing the flyout
-                  setTimeout(() => anchorElement.focus(), 0);
-                },
-              }
-            );
-
-            dashboardApi.openOverlay(overlayRef);
-            closePopover();
-          },
+          onClick: openAddPanelFlyout,
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
