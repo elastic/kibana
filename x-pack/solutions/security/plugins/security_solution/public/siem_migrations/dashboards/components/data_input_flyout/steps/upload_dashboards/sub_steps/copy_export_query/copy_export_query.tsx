@@ -36,7 +36,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           <FormattedMessage
-            id="xpack.securitySolution.siemMigrations.rulesFileUpload.disclaimer"
+            id="xpack.securitySolution.siemMigrations.dashboardsFileUpload.disclaimer"
             defaultMessage="Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting rules in batches, for example by adding {operator} to the query above"
             values={{ operator: <EuiCode>{'| head'}</EuiCode> }}
           />
