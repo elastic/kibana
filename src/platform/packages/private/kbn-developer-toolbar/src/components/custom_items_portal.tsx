@@ -8,14 +8,14 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DeveloperToolbarContext } from '../context/developer_toolbar_context';
 
 /**
- * Safe wrapper that renders developer toolbar actions only when context is available.
+ * Safe wrapper that renders developer toolbar items only when context is available.
  * This allows the DeveloperToolbar to work with or without the provider.
  */
-export const SafeActionsPortal: React.FC = () => {
+export const CustomItemsPortal: React.FC = () => {
   // Directly use useContext to check if the context is available
   const context = useContext(DeveloperToolbarContext);
 
@@ -24,23 +24,17 @@ export const SafeActionsPortal: React.FC = () => {
     return null;
   }
 
-  const { enabledActions } = context;
+  const { enabledItems } = context;
 
-  if (enabledActions.length === 0) {
+  if (enabledItems.length === 0) {
     return null;
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {enabledActions.map((action) => (
-        <EuiFlexItem key={action.id} grow={false}>
-          {action.tooltip ? (
-            <EuiToolTip content={action.tooltip}>
-              <span>{action.children}</span>
-            </EuiToolTip>
-          ) : (
-            action.children
-          )}
+      {enabledItems.map((item) => (
+        <EuiFlexItem key={item.id} grow={false}>
+          {item.children}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

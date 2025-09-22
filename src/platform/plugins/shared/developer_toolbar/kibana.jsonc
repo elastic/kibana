@@ -5,7 +5,7 @@
   "description": "A plugin that provides a developer toolbar for Kibana.",
   "plugin": {
     "id": "developerToolbar",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": []
   }

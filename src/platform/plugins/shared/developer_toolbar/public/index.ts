@@ -14,4 +14,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DeveloperToolbarPlugin(initializerContext);
 }
 
-export type { DeveloperToolbarAction, DeveloperToolbarStart } from './plugin';
+export type {
+  DeveloperToolbarStart,
+  DeveloperToolbarSetup,
+  DeveloperToolbarActionRegistry,
+  UnregisterActionFn,
+} from './plugin';

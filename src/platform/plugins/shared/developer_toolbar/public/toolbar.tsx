@@ -13,15 +13,15 @@ import type { Observable } from 'rxjs';
 import type { DeveloperToolbarProps } from '@kbn/developer-toolbar';
 import {
   DeveloperToolbar,
-  DeveloperToolbarAction,
+  DeveloperToolbarItem,
   DeveloperToolbarProvider,
 } from '@kbn/developer-toolbar';
 import useObservable from 'react-use/lib/useObservable';
 
 export interface DeveloperToolbarAction {
-  id: string;
-  priority: number;
-  tooltip?: string;
+  id?: string;
+  name?: string;
+  priority?: number;
   children: React.ReactNode;
 }
 
@@ -33,7 +33,7 @@ export const Toolbar = ({
   envInfo: DeveloperToolbarProps['envInfo'];
 }) => {
   const updateLayout = useLayoutUpdate();
-  const registeredActions = useObservable(actions$, []);
+  const registeredActions = useObservable(actions$) || [];
 
   const onHeightChange = useCallback(
     (height: number) => {
@@ -44,22 +44,18 @@ export const Toolbar = ({
     [updateLayout]
   );
 
-  const sortedActions = registeredActions
-    .slice()
-    .sort((a: DeveloperToolbarAction, b: DeveloperToolbarAction) => b.priority - a.priority);
-
   return (
     <DeveloperToolbarProvider>
-      <DeveloperToolbar position="static" envInfo={envInfo} onHeightChange={onHeightChange} />
-      {sortedActions.map((action: DeveloperToolbarAction) => (
-        <DeveloperToolbarAction
+      <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
+      {registeredActions.map((action: DeveloperToolbarAction) => (
+        <DeveloperToolbarItem
           key={action.id}
           id={action.id}
           priority={action.priority}
-          tooltip={action.tooltip}
+          name={action.name}
         >
           {action.children}
-        </DeveloperToolbarAction>
+        </DeveloperToolbarItem>
       ))}
     </DeveloperToolbarProvider>
   );

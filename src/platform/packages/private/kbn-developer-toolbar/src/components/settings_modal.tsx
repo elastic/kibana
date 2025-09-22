@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -42,10 +41,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   }
 
   const {
-    actions,
+    items,
     settings,
     toggleSetting,
-    toggleActionEnabled,
+    toggleItemEnabled,
     updateCustomEnvironmentLabel,
     updateCustomBackgroundColor,
   } = context;
@@ -54,7 +53,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   }
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 400 }}>
+    <EuiModal onClose={onClose} style={{ width: 400 }} aria-label={'Developer Toolbar Settings'}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Developer Toolbar Settings</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -147,18 +146,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         />
         <EuiSpacer size="s" />
 
-        {actions.length > 0 && (
+        {items.length > 0 && (
           <>
-            {actions.map((action) => {
-              const isEnabled = !settings.disabledActionIds.includes(action.id);
-              const label = action.tooltip || action.id;
+            {items.map((item) => {
+              const isEnabled = !settings.disabledItemIds.includes(item.id);
+              const label = item.id;
 
               return (
-                <React.Fragment key={action.id}>
+                <React.Fragment key={item.id}>
                   <EuiSwitch
                     label={label}
                     checked={isEnabled}
-                    onChange={() => toggleActionEnabled(action.id)}
+                    onChange={() => toggleItemEnabled(item.id)}
                   />
                   <EuiSpacer size="s" />
                 </React.Fragment>

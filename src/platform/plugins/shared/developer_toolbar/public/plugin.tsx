@@ -14,59 +14,57 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarAction } from './toolbar';
 
-export interface DeveloperToolbarStart {
-  registerAction: (action: DeveloperToolbarAction) => () => void;
+export type UnregisterActionFn = () => void;
+export interface DeveloperToolbarActionRegistry {
+  registerAction: (action: DeveloperToolbarAction) => UnregisterActionFn;
 }
 
-export class DeveloperToolbarPlugin implements Plugin<void, DeveloperToolbarStart> {
+export type DeveloperToolbarSetup = DeveloperToolbarActionRegistry;
+export type DeveloperToolbarStart = DeveloperToolbarActionRegistry;
+
+export class DeveloperToolbarPlugin
+  implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
+{
   private actions$ = new BehaviorSubject<DeveloperToolbarAction[]>([]);
-  private initialFeatureFlags: Record<string, unknown> = {};
 
   constructor(private readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    this.initialFeatureFlags = core.featureFlags.getInitialFeatureFlags(true);
+    return {
+      registerAction: this.registerAction,
+    };
   }
 
   public start(core: CoreStart): DeveloperToolbarStart {
-    const registerAction = (action: DeveloperToolbarAction) => {
-      const currentActions = this.actions$.value;
-      const existingIndex = currentActions.findIndex((a) => a.id === action.id);
-
-      if (existingIndex >= 0) {
-        const updatedActions = [...currentActions];
-        updatedActions[existingIndex] = action;
-        this.actions$.next(updatedActions);
-      } else {
-        this.actions$.next([...currentActions, action]);
-      }
-
-      return () => {
-        const filteredActions = this.actions$.value.filter((a) => action.id !== a.id);
-        this.actions$.next(filteredActions);
-      };
-    };
-
     const LazyToolbar = React.lazy(() => import('./toolbar'));
-
     core.chrome.setGlobalFooter(
       <Suspense>
         <LazyToolbar actions$={this.actions$} envInfo={this.context.env} />
       </Suspense>
     );
 
-    import('./feature_flags_action').then(({ FeatureFlagsAction }) => {
-      registerAction({
-        id: 'developerToolbar.overrideFeatureFlags',
-        priority: 5,
-        tooltip: 'Override Feature Flags',
-        children: <FeatureFlagsAction core={core} initialFeatureFlags={this.initialFeatureFlags} />,
-      });
-    });
-
     return {
-      registerAction,
+      registerAction: this.registerAction,
     };
   }
+
   public stop() {}
+
+  private registerAction = (action: DeveloperToolbarAction) => {
+    const currentActions = this.actions$.value;
+    const existingIndex = currentActions.findIndex((a) => a.id === action.id);
+
+    if (existingIndex >= 0) {
+      const updatedActions = [...currentActions];
+      updatedActions[existingIndex] = action;
+      this.actions$.next(updatedActions);
+    } else {
+      this.actions$.next([...currentActions, action]);
+    }
+
+    return () => {
+      const filteredActions = this.actions$.value.filter((a) => action.id !== a.id);
+      this.actions$.next(filteredActions);
+    };
+  };
 }

@@ -11,55 +11,57 @@ import type React from 'react';
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useDeveloperToolbarContext } from '../context/developer_toolbar_context';
 
-export interface DeveloperToolbarActionProps {
+export interface DeveloperToolbarItemProps {
   /**
-   * Unique identifier for this action. If not provided, a random ID will be generated.
+   * Unique identifier for this item. If not provided, a random ID will be generated.
+   * Used as user-facing identifier settings and data-test-subj attributes.
    */
   id?: string;
+
+  /**
+   * Optional name for this item, used in settings UI. If not provided, the ID will be used.
+   */
+  name?: string;
   /**
    * The React component(s) to render in the toolbar
    */
   children: ReactNode;
   /**
-   * Priority for ordering actions. Higher numbers appear first. Defaults to 0.
+   * Priority for ordering items. Higher numbers appear first. Defaults to 0.
    */
   priority?: number;
-  /**
-   * Tooltip text to show on hover
-   */
-  tooltip?: string;
 }
 
 /**
- * Component that registers an action to be displayed in the developer toolbar.
+ * Component that registers an item to be displayed in the developer toolbar.
  * This component should be rendered anywhere in the app tree within a DeveloperToolbarProvider.
  * The children will be portaled to the developer toolbar automatically.
  */
-export const DeveloperToolbarAction: React.FC<DeveloperToolbarActionProps> = ({
+export const DeveloperToolbarItem: React.FC<DeveloperToolbarItemProps> = ({
   id: providedId,
+  name,
   children,
   priority = 0,
-  tooltip,
 }) => {
-  const { registerAction } = useDeveloperToolbarContext();
+  const { registerItem } = useDeveloperToolbarContext();
 
   // Generate stable ID if none provided
   const id = useMemo(
-    () => providedId ?? `action-${Math.random().toString(36).substring(2, 9)}`,
+    () => providedId ?? `item-${Math.random().toString(36).substring(2, 9)}`,
     [providedId]
   );
 
   useEffect(() => {
-    const unregister = registerAction({
+    const unregister = registerItem({
       id,
+      name,
       children,
       priority,
-      tooltip,
     });
 
     return unregister;
-  }, [id, children, priority, tooltip, registerAction]);
+  }, [id, children, priority, registerItem, name]);
 
-  // This component doesn't render anything - it just registers the action
+  // This component doesn't render anything - it just registers the item
   return null;
 };

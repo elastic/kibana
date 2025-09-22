@@ -20,7 +20,6 @@ import {
   shade,
   isColorDark,
   hexToRgb,
-  isValidHex,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConsoleErrorIndicator } from '../indicators/console_error/console_error_indicator';
@@ -29,12 +28,11 @@ import { FrameJankIndicator } from '../indicators/frame_jank/frame_jank_indicato
 import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
 import { EnvironmentIndicator } from '../indicators/environment/environment_indicator';
 import { useMinimized } from '../hooks/use_minimized';
-import { SafeActionsPortal } from './safe_actions_portal';
+import { CustomItemsPortal } from './custom_items_portal';
 import { SettingsModal } from './settings_modal';
 import { DeveloperToolbarContext } from '../context/developer_toolbar_context';
 
 export interface DeveloperToolbarProps {
-  position?: 'fixed' | 'static';
   envInfo?: EnvironmentInfo;
   onHeightChange?: (height: number) => void;
 }
@@ -46,7 +44,6 @@ const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
   bottom: 4px;
   right: 16px;
   z-index: 9999;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
 `;
 
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
@@ -55,22 +52,11 @@ const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
   background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
 `;
 
-const getToolbarContainerStyles = (
-  euiTheme: EuiThemeComputed,
-  position: DeveloperToolbarProps['position']
-) => [
+const getToolbarContainerStyles = (euiTheme: EuiThemeComputed) => [
   css`
     height: ${HEIGHT}px;
     font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
   `,
-  position === 'fixed' &&
-    css`
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      z-index: 9999;
-    `,
 ];
 
 export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
@@ -91,11 +77,7 @@ export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
   );
 };
 
-const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({
-  envInfo,
-  position = 'fixed',
-  onHeightChange,
-}) => {
+const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, onHeightChange }) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
   const context = useContext(DeveloperToolbarContext);
@@ -109,34 +91,30 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({
     if (onHeightChange) {
       onHeightChange(
         // Notify parent to reserve space for the toolbar
-        position === 'static' && !isMinimized ? HEIGHT : 0
+        isMinimized ? 0 : HEIGHT
       );
     }
-  }, [onHeightChange, isMinimized, position]);
+  }, [onHeightChange, isMinimized]);
 
   if (isMinimized) {
     return (
       <div css={getMinimizedToolbarStyles(euiTheme)}>
-        <EuiPanel paddingSize="xs" style={{ backgroundColor: customBackgroundColor }}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
-                <EuiButtonIcon
-                  iconType="devToolsApp"
-                  size="xs"
-                  onClick={toggleMinimized}
-                  aria-label={'Expand developer toolbar'}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+          <EuiButtonIcon
+            display={'fill'}
+            color={'accentSecondary'}
+            iconType="devToolsApp"
+            size="xs"
+            onClick={toggleMinimized}
+            aria-label={'Expand developer toolbar'}
+          />
+        </EuiToolTip>
       </div>
     );
   }
 
   return (
-    <div css={getToolbarContainerStyles(euiTheme, position)}>
+    <div css={getToolbarContainerStyles(euiTheme)}>
       {settings?.consoleErrorsEnabled && <ConsoleErrorIndicator />}
       <EuiPanel
         paddingSize="xs"
@@ -173,7 +151,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <SafeActionsPortal />
+                <CustomItemsPortal />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip content="Settings">

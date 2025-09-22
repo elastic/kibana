@@ -15,147 +15,19 @@ import React, {
   useEffect,
   type ReactNode,
 } from 'react';
-import type { DeveloperToolbarActionItem } from '../types/actions';
 
-const SETTINGS_STORAGE_KEY = 'kbn_developer_toolbar_settings';
-
-export interface ToolbarSettings {
-  environmentEnabled: boolean;
-  frameJankEnabled: boolean;
-  memoryUsageEnabled: boolean;
-  consoleErrorsEnabled: boolean;
-  disabledActionIds: string[];
-  customEnvironmentLabel: string;
-  customBackgroundColor: string;
-}
-
-const DEFAULT_SETTINGS: ToolbarSettings = {
-  environmentEnabled: true,
-  frameJankEnabled: true,
-  memoryUsageEnabled: true,
-  consoleErrorsEnabled: true,
-  disabledActionIds: [],
-  customEnvironmentLabel: '',
-  customBackgroundColor: '',
-};
+import type { DeveloperToolbarItem, ToolbarSettings } from './developer_toolbar_state';
+import { ToolbarStateManager } from './developer_toolbar_state';
 
 export interface DeveloperToolbarContextValue {
-  actions: DeveloperToolbarActionItem[];
-  enabledActions: DeveloperToolbarActionItem[];
+  items: DeveloperToolbarItem[];
+  enabledItems: DeveloperToolbarItem[];
   settings: ToolbarSettings;
-  registerAction: (action: DeveloperToolbarActionItem) => () => void;
+  registerItem: (item: DeveloperToolbarItem) => () => void;
   toggleSetting: (key: keyof ToolbarSettings) => void;
-  toggleActionEnabled: (actionId: string) => void;
+  toggleItemEnabled: (itemId: string) => void;
   updateCustomEnvironmentLabel: (label: string) => void;
   updateCustomBackgroundColor: (color: string | undefined) => void;
-}
-
-/**
- * Enhanced global state manager for actions and settings
- * @internal
- */
-class GlobalStateManager {
-  private actions: DeveloperToolbarActionItem[] = [];
-  private settings: ToolbarSettings;
-  private subscribers: Set<() => void> = new Set();
-
-  constructor() {
-    this.settings = this.loadSettings();
-  }
-
-  private loadSettings(): ToolbarSettings {
-    try {
-      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return { ...DEFAULT_SETTINGS, ...parsed };
-      }
-      return DEFAULT_SETTINGS;
-    } catch {
-      return DEFAULT_SETTINGS;
-    }
-  }
-
-  private saveSettings(): void {
-    try {
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(this.settings));
-    } catch {
-      // Silently fail if localStorage is unavailable
-    }
-  }
-
-  registerAction(action: DeveloperToolbarActionItem): () => void {
-    const exists = this.actions.some((a) => a.id === action.id);
-    if (exists) {
-      return () => {}; // Return no-op if already exists
-    }
-
-    this.actions = [...this.actions, action].sort((a, b) => b.priority - a.priority);
-    this.notifySubscribers();
-
-    return () => {
-      this.actions = this.actions.filter((a) => a.id !== action.id);
-      this.notifySubscribers();
-    };
-  }
-
-  getActions(): DeveloperToolbarActionItem[] {
-    return this.actions;
-  }
-
-  getEnabledActions(): DeveloperToolbarActionItem[] {
-    return this.actions.filter((action) => !this.settings.disabledActionIds.includes(action.id));
-  }
-
-  getSettings(): ToolbarSettings {
-    return this.settings;
-  }
-
-  updateSettings(newSettings: Partial<ToolbarSettings>): void {
-    this.settings = { ...this.settings, ...newSettings };
-    this.saveSettings();
-    this.notifySubscribers();
-  }
-
-  toggleSetting(key: keyof ToolbarSettings): void {
-    if (
-      key === 'disabledActionIds' ||
-      key === 'customEnvironmentLabel' ||
-      key === 'customBackgroundColor'
-    )
-      return; // Prevent direct manipulation
-    const currentValue = this.settings[key];
-    if (typeof currentValue === 'boolean') {
-      this.updateSettings({ [key]: !currentValue });
-    }
-  }
-
-  updateCustomEnvironmentLabel(label: string): void {
-    this.updateSettings({ customEnvironmentLabel: label });
-  }
-
-  updateCustomBackgroundColor(color: string | undefined): void {
-    this.updateSettings({ customBackgroundColor: color });
-  }
-
-  toggleActionEnabled(actionId: string): void {
-    const isCurrentlyDisabled = this.settings.disabledActionIds.includes(actionId);
-    const newDisabledIds = isCurrentlyDisabled
-      ? this.settings.disabledActionIds.filter((id) => id !== actionId)
-      : [...this.settings.disabledActionIds, actionId];
-    this.updateSettings({ disabledActionIds: newDisabledIds });
-  }
-
-  subscribe(callback: () => void): () => void {
-    this.subscribers.add(callback);
-    return () => {
-      this.subscribers.delete(callback);
-    };
-  }
-
-  private notifySubscribers(): void {
-    this.subscribers.forEach((callback) => callback());
-  }
 }
 
 /**
@@ -165,8 +37,7 @@ class GlobalStateManager {
 const REGISTRY_KEY = '__KIBANA_DEVELOPER_TOOLBAR_CTX__';
 
 interface DeveloperToolbarRegistry {
-  DeveloperToolbarContext?: React.Context<DeveloperToolbarContextValue | null>;
-  globalStateManager?: GlobalStateManager;
+  developerToolbarStateManager?: ToolbarStateManager;
 }
 
 const getGlobalRegistry = (): DeveloperToolbarRegistry => {
@@ -179,13 +50,11 @@ const getGlobalRegistry = (): DeveloperToolbarRegistry => {
 
 const registry = getGlobalRegistry();
 
-// Reuse if already created, otherwise create and store
-export const DeveloperToolbarContext = (registry.DeveloperToolbarContext ??=
-  createContext<DeveloperToolbarContextValue | null>(null));
+export const DeveloperToolbarContext = createContext<DeveloperToolbarContextValue | null>(null);
 
 // Reuse global state manager or create new one
-const getGlobalStateManager = (): GlobalStateManager => {
-  return (registry.globalStateManager ??= new GlobalStateManager());
+const getGlobalStateManager = (): ToolbarStateManager => {
+  return (registry.developerToolbarStateManager ??= new ToolbarStateManager());
 };
 
 export interface DeveloperToolbarProviderProps {
@@ -193,65 +62,63 @@ export interface DeveloperToolbarProviderProps {
 }
 
 export const DeveloperToolbarProvider: React.FC<DeveloperToolbarProviderProps> = ({ children }) => {
-  const globalStateManager = getGlobalStateManager();
+  const developerToolbarStateManager = getGlobalStateManager();
   const [state, setState] = useState(() => ({
-    actions: globalStateManager.getActions(),
-    enabledActions: globalStateManager.getEnabledActions(),
-    settings: globalStateManager.getSettings(),
+    items: developerToolbarStateManager.getItems(),
+    settings: developerToolbarStateManager.getSettings(),
   }));
 
   useEffect(() => {
-    return globalStateManager.subscribe(() => {
+    return developerToolbarStateManager.subscribe(() => {
       setState({
-        actions: globalStateManager.getActions(),
-        enabledActions: globalStateManager.getEnabledActions(),
-        settings: globalStateManager.getSettings(),
+        items: developerToolbarStateManager.getItems(),
+        settings: developerToolbarStateManager.getSettings(),
       });
     });
-  }, [globalStateManager]);
+  }, [developerToolbarStateManager]);
 
-  const registerAction = useCallback(
-    (action: DeveloperToolbarActionItem) => {
-      return globalStateManager.registerAction(action);
+  const registerItem = useCallback(
+    (item: DeveloperToolbarItem) => {
+      return developerToolbarStateManager.registerItem(item);
     },
-    [globalStateManager]
+    [developerToolbarStateManager]
   );
 
   const toggleSetting = useCallback(
     (key: keyof ToolbarSettings) => {
-      globalStateManager.toggleSetting(key);
+      developerToolbarStateManager.toggleSetting(key);
     },
-    [globalStateManager]
+    [developerToolbarStateManager]
   );
 
-  const toggleActionEnabled = useCallback(
-    (actionId: string) => {
-      globalStateManager.toggleActionEnabled(actionId);
+  const toggleItemEnabled = useCallback(
+    (itemId: string) => {
+      developerToolbarStateManager.toggleItemEnabled(itemId);
     },
-    [globalStateManager]
+    [developerToolbarStateManager]
   );
 
   const updateCustomEnvironmentLabel = useCallback(
     (label: string) => {
-      globalStateManager.updateCustomEnvironmentLabel(label);
+      developerToolbarStateManager.updateCustomEnvironmentLabel(label);
     },
-    [globalStateManager]
+    [developerToolbarStateManager]
   );
 
   const updateCustomBackgroundColor = useCallback(
     (color: string | undefined) => {
-      globalStateManager.updateCustomBackgroundColor(color);
+      developerToolbarStateManager.updateCustomBackgroundColor(color);
     },
-    [globalStateManager]
+    [developerToolbarStateManager]
   );
 
   const value: DeveloperToolbarContextValue = {
-    actions: state.actions,
-    enabledActions: state.enabledActions,
+    items: state.items,
+    enabledItems: developerToolbarStateManager.getEnabledItems(),
     settings: state.settings,
-    registerAction,
+    registerItem,
     toggleSetting,
-    toggleActionEnabled,
+    toggleItemEnabled,
     updateCustomEnvironmentLabel,
     updateCustomBackgroundColor,
   };

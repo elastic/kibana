@@ -21,7 +21,7 @@ import {
 
 import { DeveloperToolbar, type DeveloperToolbarProps } from '../components/developer_toolbar';
 import { DeveloperToolbarProvider } from '../context/developer_toolbar_context';
-import { DeveloperToolbarAction } from '../components/developer_toolbar_action';
+import { DeveloperToolbarItem } from '../components/developer_toolbar_item';
 import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
 
 const mockEnvInfo: EnvironmentInfo = {
@@ -125,7 +125,7 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
   };
 
   return (
-    <>
+    <DeveloperToolbarProvider>
       <EuiPanel paddingSize="l" style={{ height: '250px', marginBottom: '40px' }}>
         <EuiText>
           <h3>Developer Toolbar Demo</h3>
@@ -178,8 +178,10 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
         </EuiFlexGroup>
       </EuiPanel>
 
-      <DeveloperToolbar {...props} />
-    </>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}>
+        <DeveloperToolbar {...props} />
+      </div>
+    </DeveloperToolbarProvider>
   );
 };
 
@@ -226,11 +228,11 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
         <EuiText>
           <h3>Extensible Developer Toolbar Demo</h3>
           <p>
-            This demo shows how apps can add their own actions to the developer toolbar using
+            This demo shows how apps can add their own items to the developer toolbar using
             declarative components.
           </p>
           <p>
-            <strong>Check the toolbar:</strong> Custom actions appear automatically when rendered.
+            <strong>Check the toolbar:</strong> Custom items appear automatically when rendered.
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -253,30 +255,32 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
         </EuiFlexGroup>
       </EuiPanel>
 
-      {/* Actions that appear in the toolbar - render anywhere in the component tree! */}
-      <DeveloperToolbarAction priority={10} tooltip="Debug current state">
+      {/* Items that appear in the toolbar - render anywhere in the component tree! */}
+      <DeveloperToolbarItem priority={10} name="Debug current state">
         <EuiButtonIcon iconType="inspect" size="xs" color="text" onClick={onDebugClick} />
-      </DeveloperToolbarAction>
+      </DeveloperToolbarItem>
 
-      <DeveloperToolbarAction priority={5} tooltip="Refresh data">
+      <DeveloperToolbarItem priority={5} name="Refresh data">
         <EuiButtonIcon iconType="refresh" size="xs" color="text" onClick={onRefreshClick} />
-      </DeveloperToolbarAction>
+      </DeveloperToolbarItem>
 
-      {/* Conditional actions - only show when debug mode is enabled */}
+      {/* Conditional items - only show when debug mode is enabled */}
       {debugEnabled && (
-        <DeveloperToolbarAction priority={8} tooltip="Advanced debug options">
+        <DeveloperToolbarItem priority={8} name="Advanced debug options">
           <EuiButtonIcon iconType="bug" size="xs" color="accent" onClick={onDebugClick} />
-        </DeveloperToolbarAction>
+        </DeveloperToolbarItem>
       )}
 
-      {/* Dynamic actions - show notification count when there are notifications */}
+      {/* Dynamic items - show notification count when there are notifications */}
       {notifications > 0 && (
-        <DeveloperToolbarAction priority={3} tooltip={`${notifications} notifications`}>
+        <DeveloperToolbarItem priority={3} name={`${notifications} notifications`}>
           <EuiButtonIcon iconType="bell" size="xs" color="warning" onClick={clearNotifications} />
-        </DeveloperToolbarAction>
+        </DeveloperToolbarItem>
       )}
 
-      <DeveloperToolbar {...props} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}>
+        <DeveloperToolbar {...props} />
+      </div>
     </DeveloperToolbarProvider>
   );
 };
