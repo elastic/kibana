@@ -175,10 +175,17 @@ export const SECRET_OPTION = i18n.translate(
   }
 );
 
-export const SECRET_HEADER_MISSING_VALUE_ERROR = i18n.translate(
+export const HEADER_MISSING_VALUE_ERROR = i18n.translate(
   'xpack.stackConnectors.components.auth.secretHeaderMissingValueError',
   {
     defaultMessage: 'Value is required',
+  }
+);
+
+export const HEADER_MISSING_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderMissingValueError',
+  {
+    defaultMessage: 'Key is required',
   }
 );
 

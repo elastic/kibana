@@ -167,6 +167,9 @@ export const HeadersFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                                   label: i18n.KEY_LABEL,
                                   validations: [
                                     {
+                                      validator: emptyField(i18n.HEADER_MISSING_KEY_ERROR),
+                                    },
+                                    {
                                       validator: ({ value, form, path }) => {
                                         if (!value) return;
                                         const headers =
@@ -201,16 +204,11 @@ export const HeadersFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                                 path={`${item.path}.value`}
                                 config={{
                                   label: i18n.VALUE_LABEL,
-                                  validations:
-                                    headerTypeValue === 'secret'
-                                      ? [
-                                          {
-                                            validator: emptyField(
-                                              i18n.SECRET_HEADER_MISSING_VALUE_ERROR
-                                            ),
-                                          },
-                                        ]
-                                      : [],
+                                  validations: [
+                                    {
+                                      validator: emptyField(i18n.HEADER_MISSING_VALUE_ERROR),
+                                    },
+                                  ],
                                 }}
                                 component={headerTypeValue === 'secret' ? PasswordField : TextField}
                                 componentProps={{

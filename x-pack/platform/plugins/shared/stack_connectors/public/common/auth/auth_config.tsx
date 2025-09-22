@@ -23,12 +23,15 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { isEqual } from 'lodash';
+import { useSecretHeaders } from '../use_secret_headers';
 import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeadersFields } from './headers_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
+import type { InternalHeader } from '../../../common/auth/types';
 
 interface Props {
   readOnly: boolean;
@@ -45,8 +48,8 @@ export const AuthConfig: FunctionComponent<Props> = ({
   isPfxEnabled = true,
   isOAuth2Enabled = false,
 }) => {
-  const { setFieldValue, getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
+  const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
+  const [{ config, __internal__, id: connectorId }] = useFormData({
     watch: [
       'config.hasAuth',
       'config.authType',
@@ -64,6 +67,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+  const secretHeaders = useSecretHeaders(connectorId);
 
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
@@ -76,6 +80,37 @@ export const AuthConfig: FunctionComponent<Props> = ({
     getFieldDefaultValue('config.verificationMode') === 'none';
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
+
+  useEffect(() => {
+    if (!connectorId) return;
+
+    const formData = getFormData();
+
+    const currentHeaders: Array<InternalHeader> = formData.__internal__?.headers ?? [];
+
+    const configHeaders = currentHeaders.filter((header) => header.type === 'config');
+
+    let mergedHeaders: Array<InternalHeader>;
+    if (!hasHeaders) {
+      mergedHeaders = configHeaders;
+    } else {
+      mergedHeaders = configHeaders?.length ? configHeaders.concat(secretHeaders) : secretHeaders;
+    }
+
+    if (!isEqual(currentHeaders, mergedHeaders)) {
+      updateFieldValues(
+        {
+          __internal__: {
+            ...formData.__internal__,
+            hasHeaders: mergedHeaders.length > 0,
+            headers: mergedHeaders,
+          },
+        },
+        { runDeserializer: false }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [secretHeaders]);
 
   const options = [
     {

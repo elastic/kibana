@@ -13,6 +13,11 @@ import type {
   SecretConfigurationSchema,
 } from './schema';
 
+export interface InternalHeader {
+  key: string;
+  value: string;
+  type: 'config' | 'secret';
+}
 export type HasAuth = TypeOf<typeof hasAuthSchema>;
 export type AuthTypeName = TypeOf<typeof authTypeSchema>;
 export type SecretsConfigurationType = TypeOf<typeof SecretConfigurationSchema>;
