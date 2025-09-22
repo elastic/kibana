@@ -61,7 +61,7 @@ export const MetricsExperienceGrid = ({
   });
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching: isFieldsAPILoading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange: getTimeRange(),
   });
@@ -102,7 +102,7 @@ export const MetricsExperienceGrid = ({
   }, [valueFilters]);
 
   if (fields.length === 0) {
-    return <EmptyState isLoading={isFieldsAPILoading} />;
+    return <EmptyState isLoading={isFieldsLoading} />;
   }
 
   return (
@@ -131,7 +131,7 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {isFieldsAPILoading ? (
+              {isFieldsLoading ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
                 <EuiText size="s">
