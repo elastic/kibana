@@ -6,6 +6,7 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TITLE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
@@ -13,7 +14,6 @@ import {
   CompleteExternalResponseActionsTask,
 } from './complete_external_actions_task';
 import { createMockEndpointAppContext } from '../../mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 describe('CompleteExternalActionsTask class', () => {
   let endpointAppContextMock: ReturnType<typeof createMockEndpointAppContext>;
@@ -69,14 +69,14 @@ describe('CompleteExternalActionsTask class', () => {
 
   describe('#start()', () => {
     let taskManagerStartContractMock: ReturnType<typeof taskManagerMock.createStart>;
-    let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+    let esClientMock: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
     const doTaskInstanceSetup = () =>
       taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
 
     beforeEach(() => {
       taskManagerStartContractMock = taskManagerMock.createStart();
-      esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      esClientMock = elasticsearchClientMock.createElasticsearchClient();
     });
 
     it('should schedule task with task manager', async () => {
@@ -128,7 +128,7 @@ describe('CompleteExternalActionsTask class', () => {
       await taskInstance.setup({ taskManager: taskManagerMock.createSetup() });
       await taskInstance.start({
         taskManager: taskManagerStartContractMock,
-        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        esClient: elasticsearchClientMock.createElasticsearchClient(),
       });
       await taskInstance.stop();
 

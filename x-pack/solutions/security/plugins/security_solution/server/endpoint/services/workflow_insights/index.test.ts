@@ -19,7 +19,7 @@ import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/t
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -123,7 +123,7 @@ describe('SecurityWorkflowInsightsService', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     mockEndpointAppContextService = createMockEndpointAppContext()
       .service as jest.Mocked<EndpointAppContextService>;

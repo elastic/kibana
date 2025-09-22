@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger, AuthenticatedUser } from '@kbn/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,

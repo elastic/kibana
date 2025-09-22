@@ -11,12 +11,9 @@ import type {
   RouteMethod,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import type {

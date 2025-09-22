@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

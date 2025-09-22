@@ -6,12 +6,10 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  coreMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { produce } from 'immer';
 import type {
   KibanaRequest,

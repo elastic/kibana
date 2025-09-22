@@ -9,11 +9,9 @@ import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/a
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';

@@ -7,7 +7,8 @@
 
 import { uniq } from 'lodash';
 
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 import type { HasPrivilegesResponse } from '@kbn/security-plugin-types-server';
 

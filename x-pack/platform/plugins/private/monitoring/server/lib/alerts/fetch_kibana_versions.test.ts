@@ -6,7 +6,7 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

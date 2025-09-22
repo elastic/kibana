@@ -10,7 +10,9 @@
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';

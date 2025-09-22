@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { canRedirectRequest } from './can_redirect_request';
 import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';

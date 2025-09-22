@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { fromRemoteSummaryDocumentToSloDefinition } from './remote_summary_doc_to_slo';

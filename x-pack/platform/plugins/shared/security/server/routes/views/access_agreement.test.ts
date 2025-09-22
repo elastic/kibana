@@ -12,7 +12,8 @@ import type {
   RouteConfig,
 } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAccessAgreementRoutes } from './access_agreement';

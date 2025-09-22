@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  httpServerMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   KibanaResponseFactory,
   ElasticsearchClient,

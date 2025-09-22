@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import { Duration, DurationUnit } from '../domain/models';
@@ -33,7 +33,7 @@ describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     jest.useFakeTimers().setSystemTime(TEST_DATE);
   });
 

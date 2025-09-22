@@ -8,7 +8,8 @@
 import { cloneDeep } from 'lodash';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   FLEET_ENDPOINT_PACKAGE,

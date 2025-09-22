@@ -14,7 +14,7 @@ import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks
 import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 jest.mock(

@@ -31,7 +31,8 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
-import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {

@@ -6,7 +6,8 @@
  */
 
 import { mockLogger } from '../test_utils';
-import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { SCHEDULE_INTERVAL, taskRunner } from './mark_removed_tasks_as_unrecognized';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 

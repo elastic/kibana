@@ -15,12 +15,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';

@@ -6,14 +6,14 @@
  */
 
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getSampleDocs } from './get_sample_docs';
 
 describe('getSampleDocs', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   const createHit = ({

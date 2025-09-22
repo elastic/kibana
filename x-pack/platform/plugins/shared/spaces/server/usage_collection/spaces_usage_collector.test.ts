@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';

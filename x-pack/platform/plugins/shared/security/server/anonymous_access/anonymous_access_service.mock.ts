@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capabilitiesServiceMock } from '@kbn/core/server/mocks';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 
 import type { AnonymousAccessServiceStart } from './anonymous_access_service';
 

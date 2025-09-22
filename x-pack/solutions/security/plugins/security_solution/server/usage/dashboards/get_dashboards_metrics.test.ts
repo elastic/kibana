@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { getDashboardMetrics, initialDashboardMetrics } from './get_dashboards_metrics';
 import {

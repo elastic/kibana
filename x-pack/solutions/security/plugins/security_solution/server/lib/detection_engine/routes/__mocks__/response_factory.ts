@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,

@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsFindOptions, SavedObjectsFindResult } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';

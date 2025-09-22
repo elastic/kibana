@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
@@ -15,11 +16,11 @@ jest.mock('./update_migration_saved_object');
 jest.mock('@kbn/securitysolution-es-utils');
 
 describe('finalizeMigration', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
 
     // @ts-expect-error stubbing what we use of the task response

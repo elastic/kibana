@@ -12,12 +12,10 @@ import {
   createInitialisationSourcesService,
   type InitialisationSourcesService,
 } from './initialisation_sources_service';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 import { mockGlobalState } from '../../../../../public/common/mock';

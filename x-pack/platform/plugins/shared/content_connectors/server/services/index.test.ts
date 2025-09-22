@@ -10,7 +10,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ConnectorMetadata, PackagePolicyMetadata } from '.';
 import { AgentlessConnectorsInfraService, getConnectorsToDeploy, getPoliciesToDelete } from '.';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {

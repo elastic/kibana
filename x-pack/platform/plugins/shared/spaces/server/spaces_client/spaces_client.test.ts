@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';

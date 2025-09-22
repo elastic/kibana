@@ -7,7 +7,7 @@
 
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { requestEndpointPackagePoliciesStatsSearch } from '.';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';

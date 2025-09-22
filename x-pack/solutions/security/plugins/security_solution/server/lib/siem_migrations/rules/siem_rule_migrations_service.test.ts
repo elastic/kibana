@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {

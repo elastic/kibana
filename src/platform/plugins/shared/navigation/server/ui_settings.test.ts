@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';

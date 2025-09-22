@@ -6,11 +6,9 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../../../constants';

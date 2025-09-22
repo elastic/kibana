@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeepReadonly } from 'utility-types';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { Observable } from 'rxjs';

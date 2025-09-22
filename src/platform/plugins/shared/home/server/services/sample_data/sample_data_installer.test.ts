@@ -10,12 +10,10 @@
 import { Readable } from 'stream';
 import { insertDataIntoIndexMock, findSampleObjectsMock } from './sample_data_installer.test.mocks';
 import type { SavedObjectsImportFailure } from '@kbn/core/server';
-import {
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
 import { SampleDataInstallError } from './errors';

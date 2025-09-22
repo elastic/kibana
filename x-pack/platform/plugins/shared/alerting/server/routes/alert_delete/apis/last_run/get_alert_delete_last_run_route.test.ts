@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { alertDeleteLastRunRoute } from './get_alert_delete_last_run_route';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';

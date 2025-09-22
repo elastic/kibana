@@ -8,7 +8,8 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RuleSnooze } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { clearExpiredSnoozes } from './clear_expired_snoozes';

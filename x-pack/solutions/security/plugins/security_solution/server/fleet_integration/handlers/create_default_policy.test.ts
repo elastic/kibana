@@ -15,7 +15,7 @@ import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,

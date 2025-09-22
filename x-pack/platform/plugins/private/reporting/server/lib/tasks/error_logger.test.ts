@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errorLogger } from './error_logger';
 
 const logger = loggingSystemMock.createLogger();

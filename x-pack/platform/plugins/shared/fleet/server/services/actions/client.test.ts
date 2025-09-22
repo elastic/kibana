@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { FleetActionsClientError, FleetActionsError } from '../../../common/errors';
 import { createAppContextStartContractMock } from '../../mocks';

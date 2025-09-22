@@ -9,13 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageInfo, RegisterDeprecationsConfig } from '@kbn/core/server';
-import {
-  deprecationsServiceMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { registerKibanaUserRoleDeprecation } from './kibana_user_role';
 import { licenseMock } from '../../common/licensing/index.mock';

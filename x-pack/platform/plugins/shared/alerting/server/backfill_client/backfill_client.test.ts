@@ -8,7 +8,10 @@
 import { adHocRunStatus } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import type { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
 import type { RuleDomain } from '../application/rule/types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';

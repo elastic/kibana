@@ -6,7 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';

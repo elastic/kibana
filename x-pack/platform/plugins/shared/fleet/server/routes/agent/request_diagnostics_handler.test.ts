@@ -10,11 +10,9 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  httpServerMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';

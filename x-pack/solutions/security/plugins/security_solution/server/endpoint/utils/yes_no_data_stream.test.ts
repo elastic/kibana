@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
 describe('Accurately answers if index exists', () => {

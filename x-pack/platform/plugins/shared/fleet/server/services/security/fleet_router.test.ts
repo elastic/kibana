@@ -12,7 +12,7 @@ import type {
 } from '@kbn/security-plugin/server';
 import type { AuthenticatedUser, RequestHandler } from '@kbn/core/server';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { IRouter, RouteMethod, RequestHandler, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';

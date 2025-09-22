@@ -8,7 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import type { MockAuthenticationProviderOptions } from './base.mock';

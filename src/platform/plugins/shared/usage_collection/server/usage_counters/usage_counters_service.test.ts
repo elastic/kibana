@@ -10,7 +10,8 @@
 /* eslint-disable dot-notation */
 import * as rxOp from 'rxjs';
 import moment from 'moment';
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { UsageCountersService } from './usage_counters_service';
 
 jest.mock('./rollups', () => ({

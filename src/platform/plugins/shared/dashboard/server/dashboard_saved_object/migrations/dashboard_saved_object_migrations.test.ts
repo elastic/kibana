@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import type { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';

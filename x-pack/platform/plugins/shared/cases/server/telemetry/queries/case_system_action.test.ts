@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getCasesSystemActionData } from './case_system_action';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 

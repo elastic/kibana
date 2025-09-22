@@ -11,7 +11,7 @@ import { backfillClientMock } from '../../../backfill_client/backfill_client.moc
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';

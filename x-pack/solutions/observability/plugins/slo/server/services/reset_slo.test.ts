@@ -7,11 +7,9 @@
 
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import {
   getSLOSummaryTransformId,

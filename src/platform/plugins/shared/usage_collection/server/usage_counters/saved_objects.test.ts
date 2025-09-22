@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { serializeCounterKey, storeCounter } from './saved_objects';
 import type { UsageCounters } from '../../common';
 import type { SavedObjectsFindResult } from '@kbn/core/server';

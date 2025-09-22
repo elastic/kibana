@@ -9,7 +9,8 @@ import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
 import type { Logger, SavedObject } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';

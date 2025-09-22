@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';

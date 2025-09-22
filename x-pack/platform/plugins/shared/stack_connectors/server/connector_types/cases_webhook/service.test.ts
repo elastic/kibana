@@ -12,7 +12,7 @@ import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { CasesWebhookPublicConfigurationType, ExternalService } from './types';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

@@ -6,7 +6,7 @@
  */
 
 import { identity } from 'lodash';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import { loggerMock } from '@kbn/logging-mocks';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';

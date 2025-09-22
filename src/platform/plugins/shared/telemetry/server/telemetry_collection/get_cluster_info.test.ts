@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getClusterInfo } from './get_cluster_info';
 
 export function mockGetClusterInfo<ClusterInfo>(clusterInfo: ClusterInfo) {

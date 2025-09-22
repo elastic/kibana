@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createMigrationIndex } from './create_migration_index';
 import { createMigration } from './create_migration';
 
 jest.mock('./create_migration_index');
 
 describe('createMigration', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('passes reindex options to the reindex call', async () => {

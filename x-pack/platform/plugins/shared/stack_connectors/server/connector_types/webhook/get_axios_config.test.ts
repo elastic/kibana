@@ -18,7 +18,8 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { promiseResult } from '../lib/result_type';
 import sinon from 'sinon';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),

@@ -8,7 +8,8 @@
 import { getValueListsMetrics } from './get_metrics';
 import { getListsOverview } from './queries/get_lists_overview';
 import { getListItemsOverview } from './queries/get_list_items_overview';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { METRICS_ITEMS_DEFAULT_STATE, METRICS_LISTS_DEFAULT_STATE } from './utils';
 
 jest.mock('./queries/get_lists_overview', () => ({
@@ -20,11 +21,11 @@ jest.mock('./queries/get_list_items_overview', () => ({
 }));
 
 describe('getValueListsMetrics', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
     jest.resetAllMocks();

@@ -6,7 +6,8 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
 import type { Logger } from '@kbn/core/server';

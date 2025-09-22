@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,

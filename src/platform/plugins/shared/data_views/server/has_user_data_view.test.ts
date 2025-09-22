@@ -8,7 +8,8 @@
  */
 
 import { hasUserDataView } from './has_user_data_view';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 describe('hasUserDataView', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;

@@ -7,7 +7,8 @@
 
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { GetElasticsearchAndSOAvailabilityOpts } from './get_es_and_so_availability';

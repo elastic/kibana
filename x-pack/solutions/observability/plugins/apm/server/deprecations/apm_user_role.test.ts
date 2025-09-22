@@ -6,7 +6,8 @@
  */
 
 import type { GetDeprecationsContext, IScopedClusterClient, CoreSetup } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getDeprecationsInfo } from './apm_user_role';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 

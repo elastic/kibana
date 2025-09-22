@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { searchProcessWithIOEvents } from './io_events_route';
 
 const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';

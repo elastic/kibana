@@ -15,7 +15,7 @@ import {
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { elasticModelIds } from '@kbn/inference-common';

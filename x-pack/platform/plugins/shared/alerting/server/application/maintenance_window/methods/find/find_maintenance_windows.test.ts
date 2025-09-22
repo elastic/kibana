@@ -6,11 +6,9 @@
  */
 
 import { findMaintenanceWindows, getStatusFilter } from './find_maintenance_windows';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type {
   MaintenanceWindowClientContext,

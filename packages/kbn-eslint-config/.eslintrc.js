@@ -311,6 +311,117 @@ module.exports = {
           to: '@kbn/fleet-plugin/common/mocks',
           exportNames: ['createFleetAuthzMock'],
         },
+        // @kbn/core/server/mocks
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/config-mocks',
+          exportNames: ['configServiceMock', 'configDeprecationsMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-logging-server-mocks',
+          exportNames: ['loggingSystemMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-http-server-mocks',
+          exportNames: ['httpServerMock', 'sessionStorageMock', 'httpServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-elasticsearch-server-mocks',
+          exportNames: ['elasticsearchServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-http-resources-server-mocks',
+          exportNames: ['httpResourcesMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-saved-objects-server-mocks',
+          exportNames: ['savedObjectsServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-saved-objects-api-server-mocks',
+          exportNames: ['savedObjectsClientMock', 'savedObjectsRepositoryMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-ui-settings-server-mocks',
+          exportNames: ['uiSettingsServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-metrics-server-mocks',
+          exportNames: ['metricsServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-rendering-server-mocks',
+          exportNames: ['renderingServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-status-server-mocks',
+          exportNames: ['statusServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-http-context-server-mocks',
+          exportNames: ['contextServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-capabilities-server-mocks',
+          exportNames: ['capabilitiesServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-deprecations-server-mocks',
+          exportNames: ['deprecationsServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-usage-data-server-mocks',
+          exportNames: ['coreUsageDataServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-i18n-server-mocks',
+          exportNames: ['i18nServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-execution-context-server-mocks',
+          exportNames: ['executionContextServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-feature-flags-server-mocks',
+          exportNames: ['coreFeatureFlagsMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-doc-links-server-mocks',
+          exportNames: ['docLinksServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-analytics-server-mocks',
+          exportNames: ['analyticsServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-security-server-mocks',
+          exportNames: ['securityServiceMock'],
+        },
+        {
+          from: '@kbn/core/server/mocks',
+          to: '@kbn/core-user-profile-server-mocks',
+          exportNames: ['userProfileServiceMock'],
+        },
       ],
     ],
 

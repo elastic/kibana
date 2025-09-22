@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { ActionGroupId } from './rule_type';
 import { getRuleType } from './rule_type';

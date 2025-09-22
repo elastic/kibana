@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 export type ScopedClusterClientMock = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient

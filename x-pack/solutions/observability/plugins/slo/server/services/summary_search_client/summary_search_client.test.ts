@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from '../fixtures/slo';

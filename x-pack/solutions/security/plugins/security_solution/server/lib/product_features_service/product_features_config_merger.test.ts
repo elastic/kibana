@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 import type { Logger } from '@kbn/core/server';
 import type { ProductFeatureKibanaConfig } from '@kbn/security-solution-features';

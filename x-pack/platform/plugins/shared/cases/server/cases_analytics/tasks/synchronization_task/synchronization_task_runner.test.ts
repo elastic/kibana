@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
@@ -16,7 +17,7 @@ import { CAI_CASES_INDEX_NAME } from '../../cases_index/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
 
   const sourceIndex = '.source-index';
   const destIndex = CAI_CASES_INDEX_NAME;

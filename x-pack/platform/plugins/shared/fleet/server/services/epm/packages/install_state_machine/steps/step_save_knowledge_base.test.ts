@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/types/models/epm';
 

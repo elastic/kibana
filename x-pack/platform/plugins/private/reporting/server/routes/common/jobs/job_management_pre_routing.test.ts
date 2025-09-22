@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ReportingCore } from '../../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../../core';

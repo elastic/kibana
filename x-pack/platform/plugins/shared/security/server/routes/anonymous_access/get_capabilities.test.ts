@@ -6,7 +6,7 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineAnonymousAccessGetCapabilitiesRoutes } from './get_capabilities';
 import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';

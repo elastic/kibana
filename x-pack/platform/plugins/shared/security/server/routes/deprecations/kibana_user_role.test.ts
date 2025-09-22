@@ -10,7 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';

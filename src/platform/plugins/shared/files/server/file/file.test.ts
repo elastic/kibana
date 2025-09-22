@@ -10,11 +10,9 @@
 import { of } from 'rxjs';
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { createSandbox } from 'sinon';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { Readable, Transform } from 'stream';
 import { promisify } from 'util';
 

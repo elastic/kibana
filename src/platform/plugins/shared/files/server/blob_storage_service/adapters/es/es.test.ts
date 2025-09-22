@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 import { encode } from '@kbn/cbor';
 import { promisify } from 'util';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Semaphore } from '@kbn/std';
 import { errors } from '@elastic/elasticsearch';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -21,7 +21,7 @@ import { ElasticsearchBlobStorageClient } from './es';
 const setImmediate = promisify(global.setImmediate);
 
 describe('ElasticsearchBlobStorageClient', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let uploadSemaphore: Semaphore;
   let downloadSemaphore: Semaphore;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -52,7 +52,7 @@ describe('ElasticsearchBlobStorageClient', () => {
     uploadSemaphore = new Semaphore(1);
     downloadSemaphore = new Semaphore(1);
     logger = loggingSystemMock.createLogger();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     jest.clearAllMocks();
   });

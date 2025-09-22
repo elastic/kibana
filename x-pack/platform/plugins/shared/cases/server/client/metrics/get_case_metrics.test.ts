@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { getCaseMetrics } from './get_case_metrics';
 import { CaseMetricsFeature } from '../../../common/types/api';

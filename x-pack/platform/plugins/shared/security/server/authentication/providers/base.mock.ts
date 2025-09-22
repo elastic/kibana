@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions

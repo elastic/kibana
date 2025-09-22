@@ -6,7 +6,8 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/helpers';

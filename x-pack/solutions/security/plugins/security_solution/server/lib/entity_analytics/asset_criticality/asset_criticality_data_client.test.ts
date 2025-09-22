@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { Readable } from 'stream';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';

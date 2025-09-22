@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 

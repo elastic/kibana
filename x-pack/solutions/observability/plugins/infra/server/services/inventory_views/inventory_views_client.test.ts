@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InventoryViewAttributes } from '../../../common/inventory_views';
 
 import type { InfraSource } from '../../lib/sources';

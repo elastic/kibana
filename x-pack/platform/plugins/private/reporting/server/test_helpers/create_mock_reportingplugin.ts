@@ -10,14 +10,12 @@ jest.mock('../usage');
 
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  coreMock,
-  docLinksServiceMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  statusServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';

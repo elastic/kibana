@@ -9,7 +9,8 @@ import Boom from '@hapi/boom';
 
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineUpdateApiKeyRoutes } from './update';

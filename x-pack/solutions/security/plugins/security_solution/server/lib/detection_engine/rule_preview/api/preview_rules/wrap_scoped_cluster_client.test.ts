@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 
 const esQuery = {
@@ -28,8 +28,8 @@ describe('wrapScopedClusterClient', () => {
 
   test('searches with asInternalUser when specified', async () => {
     const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
@@ -49,8 +49,8 @@ describe('wrapScopedClusterClient', () => {
 
   test('searches with asCurrentUser when specified', async () => {
     const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asCurrentUser.child.mockReturnValue(childClient as unknown as Client);
     const asCurrentUserWrappedSearchFn = childClient.search;
@@ -70,8 +70,8 @@ describe('wrapScopedClusterClient', () => {
 
   test('uses search options when specified', async () => {
     const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
@@ -92,8 +92,8 @@ describe('wrapScopedClusterClient', () => {
 
   test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
@@ -111,8 +111,8 @@ describe('wrapScopedClusterClient', () => {
 
   test('handles empty search result object', async () => {
     const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     const asInternalUserWrappedSearchFn = childClient.search;
@@ -134,8 +134,8 @@ describe('wrapScopedClusterClient', () => {
   test('throws error when search throws abort error', async () => {
     const abortController = new AbortController();
     abortController.abort();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
+    const childClient = elasticsearchClientMock.createElasticsearchClient();
 
     scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
     childClient.search.mockRejectedValueOnce(new Error('Request has been aborted by the user'));

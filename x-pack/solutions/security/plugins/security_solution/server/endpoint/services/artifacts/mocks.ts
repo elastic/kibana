@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
 import {

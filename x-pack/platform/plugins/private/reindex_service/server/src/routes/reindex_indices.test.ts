@@ -6,11 +6,9 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { MockRouter } from '../__mocks__/routes.mock';

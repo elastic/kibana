@@ -7,11 +7,9 @@
 
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  deprecationsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
 export const savedObjectsClient = savedObjectsClientMock.create();
 export const routeHandlerContextMock = {

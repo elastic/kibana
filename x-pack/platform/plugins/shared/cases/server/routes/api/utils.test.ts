@@ -6,7 +6,7 @@
  */
 
 import { isBoom, boomify } from '@hapi/boom';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
 import type { HTTPError } from '../../common/error';
 import {

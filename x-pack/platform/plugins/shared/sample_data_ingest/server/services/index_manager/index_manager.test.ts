@@ -17,7 +17,8 @@ jest.mock('./utils', () => {
 });
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexManager } from './index_manager';
 import type { ZipArchive } from '../types';
@@ -64,7 +65,7 @@ describe('IndexManager', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
 
     indexManager = new IndexManager({
       elserInferenceId,

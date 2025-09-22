@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  httpServiceMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-} from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
 
 export function getMockedRouterDeps() {

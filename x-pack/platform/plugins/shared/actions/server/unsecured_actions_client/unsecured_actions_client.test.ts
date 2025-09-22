@@ -6,11 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { asNotificationExecutionSource } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';

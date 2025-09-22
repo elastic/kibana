@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
 
 describe('getSignalVersionsByIndex', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('properly transforms the elasticsearch aggregation', async () => {

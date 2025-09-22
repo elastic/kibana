@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { getAgentStatusForAgentPolicy } from '../../services/agents/status';
 

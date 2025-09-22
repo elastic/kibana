@@ -9,7 +9,7 @@ import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 describe('getConnectorById', () => {

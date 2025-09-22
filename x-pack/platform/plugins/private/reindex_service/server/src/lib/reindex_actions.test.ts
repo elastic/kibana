@@ -6,7 +6,8 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 

@@ -8,7 +8,8 @@
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/server';
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { Rule } from '../../../types';
 

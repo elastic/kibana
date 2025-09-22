@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { renderParameterTemplates } from './render';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import Mustache from 'mustache';

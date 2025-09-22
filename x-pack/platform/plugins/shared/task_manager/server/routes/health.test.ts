@@ -8,11 +8,13 @@
 import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from '@kbn/core/server';

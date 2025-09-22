@@ -7,7 +7,8 @@
 /* eslint-disable max-classes-per-file */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';

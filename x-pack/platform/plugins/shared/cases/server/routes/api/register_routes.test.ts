@@ -7,7 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 

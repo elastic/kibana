@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';

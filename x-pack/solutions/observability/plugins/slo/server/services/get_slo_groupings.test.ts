@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { SLORepository } from '.';
@@ -28,10 +28,10 @@ describe('Get SLO Instances', () => {
 
   beforeEach(() => {
     repositoryMock = createSLORepositoryMock();
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     definitionClient = new SloDefinitionClient(
       repositoryMock,
-      elasticsearchServiceMock.createElasticsearchClient(),
+      elasticsearchClientMock.createElasticsearchClient(),
       loggerMock.create()
     );
   });

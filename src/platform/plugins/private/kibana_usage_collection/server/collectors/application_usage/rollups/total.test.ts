@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from '../saved_objects_types';
 import { rollTotals } from './total';

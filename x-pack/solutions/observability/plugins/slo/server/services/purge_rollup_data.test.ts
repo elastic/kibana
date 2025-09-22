@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Duration, DurationUnit } from '@kbn/slo-schema';
 import { createSLO, createSLOWithCalendarTimeWindow } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
@@ -23,7 +23,7 @@ describe('purge rollup data', () => {
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient = elasticsearchClientMock.createElasticsearchClient();
     purgeRollupData = new BulkPurgeRollupData(mockEsClient, mockRepository);
   });
 

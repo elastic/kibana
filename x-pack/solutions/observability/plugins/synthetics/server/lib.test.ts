@@ -7,7 +7,8 @@
 
 import type { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsEsClient } from './lib';
-import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('SyntheticsEsClient', () => {

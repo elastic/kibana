@@ -12,12 +12,10 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';

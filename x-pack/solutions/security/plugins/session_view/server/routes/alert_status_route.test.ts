@@ -10,7 +10,7 @@ import {
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { searchAlertByUuid } from './alert_status_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';

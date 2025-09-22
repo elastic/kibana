@@ -16,7 +16,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AlertingConfig } from '../config';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 

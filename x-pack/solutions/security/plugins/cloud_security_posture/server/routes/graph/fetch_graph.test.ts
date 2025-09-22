@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';

@@ -7,12 +7,10 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { lastValueFrom, of, throwError } from 'rxjs';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';

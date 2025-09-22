@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEndpointMetrics, getUniqueEndpointCount } from './get_metrics';
 import { getUniqueEndpointCountMock } from './get_metrics.mocks';
 import type { EndpointMetrics } from './types';

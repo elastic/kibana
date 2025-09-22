@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertDeletionClient } from './alert_deletion_client';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server/spaces_service';
 
 const auditService = securityServiceMock.createStart().audit;

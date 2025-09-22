@@ -7,7 +7,8 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, type PackageInfo } from '@kbn/core/server';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 

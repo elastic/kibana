@@ -23,7 +23,8 @@ import type {
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
-import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { TaskCost } from './task';
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';

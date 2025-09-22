@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { runAgent } from './run_agent';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';

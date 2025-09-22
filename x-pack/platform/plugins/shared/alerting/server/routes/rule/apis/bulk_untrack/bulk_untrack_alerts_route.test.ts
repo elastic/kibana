@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { bulkUntrackAlertsRoute } from './bulk_untrack_alerts_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';

@@ -6,14 +6,12 @@
  */
 import { of } from 'rxjs';
 
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';

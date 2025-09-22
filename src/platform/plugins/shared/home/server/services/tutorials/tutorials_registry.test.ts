@@ -11,7 +11,7 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type {
   TutorialProvider,

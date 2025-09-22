@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { PackagePolicyClient } from '../../package_policy_service';
 import * as storage from '../archive/storage';

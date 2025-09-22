@@ -8,7 +8,7 @@
  */
 
 import { overrideTimeRange } from './override_time_range';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLogger = loggingSystemMock.createLogger();
 

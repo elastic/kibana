@@ -6,11 +6,9 @@
  */
 
 import { MonitoringEntitySourceDataClient } from './monitoring_entity_source_data_client';
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from '../saved_objects';

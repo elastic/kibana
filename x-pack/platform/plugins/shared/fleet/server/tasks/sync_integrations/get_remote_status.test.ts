@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import fetch, { FetchError } from 'node-fetch';
 
 import { loggerMock } from '@kbn/logging-mocks';

@@ -6,7 +6,7 @@
  */
 
 import type { IBasePath, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';

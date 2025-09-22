@@ -8,11 +8,9 @@
 // eslint-disable-next-line import/order
 import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 
 import { APIKeys } from './api_keys';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KueryNode } from '@kbn/es-query';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from '../wait_before_next_retry';
 import type { BulkEditSkipReason } from '../../../../common/bulk_action';

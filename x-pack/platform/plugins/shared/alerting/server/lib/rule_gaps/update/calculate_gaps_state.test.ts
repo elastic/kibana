@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { Gap } from '../gap';

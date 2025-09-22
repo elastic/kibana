@@ -9,7 +9,8 @@ import type {
   TransformGetTransformResponse,
   TransformGetTransformStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,

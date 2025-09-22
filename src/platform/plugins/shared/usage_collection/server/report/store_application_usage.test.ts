@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getDailyId } from '../../common/application_usage';
 import { storeApplicationUsage } from './store_application_usage';
 import type { ApplicationUsageReport } from './schema';

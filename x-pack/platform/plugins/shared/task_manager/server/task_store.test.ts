@@ -13,16 +13,14 @@ import { first } from 'rxjs';
 import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';

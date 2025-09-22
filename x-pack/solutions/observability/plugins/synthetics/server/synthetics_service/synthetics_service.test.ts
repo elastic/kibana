@@ -6,7 +6,8 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { merge } from 'lodash';
 
 import type { NewAgentAction, AgentActionType } from '../../../common/types';
@@ -48,7 +49,7 @@ describe('Agent actions', () => {
 
   describe('getAgentActions', () => {
     it('should call audit logger', async () => {
-      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const esClientMock = elasticsearchClientMock.createInternalClient();
 
       esClientMock.search.mockResolvedValue({
         hits: {
@@ -86,7 +87,7 @@ describe('Agent actions', () => {
     });
 
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -117,7 +118,7 @@ describe('Agent actions', () => {
     it.each(['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[])(
       'should sign %s action',
       async (actionType: AgentActionType) => {
-        const esClient = elasticsearchServiceMock.createInternalClient();
+        const esClient = elasticsearchClientMock.createInternalClient();
         esClient.search.mockResolvedValue({
           hits: {
             hits: [
@@ -163,7 +164,7 @@ describe('Agent actions', () => {
       'POLICY_CHANGE',
       'INPUT_ACTION',
     ] as AgentActionType[])('should not sign %s action', async (actionType: AgentActionType) => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -198,7 +199,7 @@ describe('Agent actions', () => {
 
   describe('bulkCreateAgentAction', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
 
       const newActions: NewAgentAction[] = [
         {
@@ -228,7 +229,7 @@ describe('Agent actions', () => {
     });
 
     it('should sign UNENROLL, UPGRADE and MIGRATE actions', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       const newActions: NewAgentAction[] = (
         ['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[]
       ).map((actionType, i) => {
@@ -258,7 +259,7 @@ describe('Agent actions', () => {
     });
 
     it('should not sign actions other than UNENROLL, UPGRADE and MIGRATE', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       const newActions: NewAgentAction[] = (
         [
           'SETTINGS',
@@ -299,7 +300,7 @@ describe('Agent actions', () => {
 
   describe('bulkCreateAgentActionResults', () => {
     it('should call audit logger', async () => {
-      const mockEsClient = elasticsearchServiceMock.createInternalClient();
+      const mockEsClient = elasticsearchClientMock.createInternalClient();
 
       await bulkCreateAgentActionResults(mockEsClient, [
         {
@@ -316,7 +317,7 @@ describe('Agent actions', () => {
 
   describe('cancelAgentAction', () => {
     it('should throw if the target action is not found', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [],
@@ -329,7 +330,7 @@ describe('Agent actions', () => {
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -377,7 +378,7 @@ describe('Agent actions', () => {
     });
 
     it('should cancel UPGRADE action', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
+      const esClient = elasticsearchClientMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -408,7 +409,7 @@ describe('Agent actions', () => {
   });
 
   describe('getAgentsByActionsIds', () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 
     it('should find agents by passing actions Ids', async () => {
       esClientMock.search.mockResolvedValue({

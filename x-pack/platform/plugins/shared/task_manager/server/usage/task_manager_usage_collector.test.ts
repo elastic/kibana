@@ -6,7 +6,7 @@
  */
 import { Subject } from 'rxjs';
 import { merge } from 'lodash';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   Collector,
   createCollectorFetchContextMock,

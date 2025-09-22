@@ -9,12 +9,9 @@
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   ACTION_STATUS_ROUTE,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,

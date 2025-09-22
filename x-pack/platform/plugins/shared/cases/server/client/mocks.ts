@@ -6,11 +6,9 @@
  */
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
 import {

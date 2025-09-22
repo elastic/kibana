@@ -7,13 +7,14 @@
 
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {
   it('returns false if no data is found', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
     esClient.indices.stats.mockResponse({
       _shards: { failed: 0, successful: 1, total: 1 },
       _all: {},
@@ -27,7 +28,7 @@ describe('checkClusterForUserData', () => {
   });
 
   it('returns false if data only exists in system indices', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
 
     esClient.indices.stats.mockResponse(
       mockIndicesStatsResponseFactory([
@@ -45,7 +46,7 @@ describe('checkClusterForUserData', () => {
   });
 
   it('returns true if data exists in non-system indices', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
 
     esClient.indices.stats.mockResponse(
       mockIndicesStatsResponseFactory([
@@ -61,7 +62,7 @@ describe('checkClusterForUserData', () => {
   });
 
   it('checks each time until the first true response is returned, then stops checking', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = elasticsearchClientMock.createElasticsearchClient();
 
     esClient.indices.stats
       .mockResponseOnce(mockIndicesStatsResponseFactory([]))

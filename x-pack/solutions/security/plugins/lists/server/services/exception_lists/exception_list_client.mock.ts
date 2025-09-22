@@ -7,7 +7,8 @@
 
 import { Readable } from 'stream';
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   EXCEPTION_LIST_NAMESPACE,

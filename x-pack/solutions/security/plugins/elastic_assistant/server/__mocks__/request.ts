@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { CAPABILITIES } from '../../common/constants';
 import type {
   CreateAttackDiscoverySchedulesRequestBody,

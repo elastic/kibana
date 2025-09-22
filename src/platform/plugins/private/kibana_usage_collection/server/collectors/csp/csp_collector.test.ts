@@ -10,7 +10,8 @@
 import type { ICspConfig } from '@kbn/core/server';
 import { CspConfig } from '@kbn/core/server';
 import { createCspCollector } from './csp_collector';
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   Collector,
   createCollectorFetchContextMock,

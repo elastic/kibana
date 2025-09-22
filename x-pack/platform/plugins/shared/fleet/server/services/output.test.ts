@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -256,7 +257,7 @@ function getMockedSoClient(
 }
 
 describe('Output Service', () => {
-  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 
   const mockedAgentPolicyWithFleetServerResolvedValue = {
     items: [

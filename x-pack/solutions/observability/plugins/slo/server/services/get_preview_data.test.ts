@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import type { GetPreviewDataParams } from '@kbn/slo-schema';
 import { GetPreviewData } from './get_preview_data';
@@ -17,7 +17,7 @@ describe('GetPreviewData', () => {
   let service: GetPreviewData;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     service = new GetPreviewData(esClientMock, 'default', dataViewsService);
   });
 

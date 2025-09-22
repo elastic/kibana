@@ -9,7 +9,7 @@
 
 import { getNodesUsage } from './get_nodes_usage';
 import { TIMEOUT } from './constants';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 const mockedNodesFetchResponse = {
   cluster_name: 'test cluster',

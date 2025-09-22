@@ -6,7 +6,8 @@
  */
 
 import { UptimeEsClient } from './lib';
-import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';

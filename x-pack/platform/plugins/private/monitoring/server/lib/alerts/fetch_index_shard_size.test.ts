@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 import type { estypes } from '@elastic/elasticsearch';
 

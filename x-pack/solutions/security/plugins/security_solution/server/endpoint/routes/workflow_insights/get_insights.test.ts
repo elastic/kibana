@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
 import { registerGetInsightsRoute } from './get_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../common/endpoint/constants';

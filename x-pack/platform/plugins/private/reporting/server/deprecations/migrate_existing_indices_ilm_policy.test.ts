@@ -6,11 +6,9 @@
  */
 
 import type { GetDeprecationsContext } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 

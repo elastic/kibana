@@ -7,11 +7,9 @@
 
 import type { DetectionMetrics } from './types';
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockMlJobSummaryResponse,

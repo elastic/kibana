@@ -8,7 +8,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,

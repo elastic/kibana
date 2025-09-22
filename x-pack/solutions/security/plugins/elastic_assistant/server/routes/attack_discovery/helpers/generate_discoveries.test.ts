@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
@@ -22,7 +23,7 @@ jest.mock('../post/helpers/invoke_attack_discovery_graph', () => ({
 }));
 
 const mockActionsClient = actionsClientMock.create();
-const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 const mockSavedObjectsClient = savedObjectsClientMock.create();
 

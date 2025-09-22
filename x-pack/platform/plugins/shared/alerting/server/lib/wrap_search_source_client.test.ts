@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, throwError } from 'rxjs';

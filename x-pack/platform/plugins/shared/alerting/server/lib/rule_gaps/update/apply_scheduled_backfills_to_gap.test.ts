@@ -8,7 +8,7 @@
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { adHocRunStatus } from '../../../../common/constants';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Gap } from '../gap';
 import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap';

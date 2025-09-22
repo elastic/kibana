@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { of, Subject } from 'rxjs';
 import { TaskCost } from '../task';
 import { mockTask } from './test_utils';

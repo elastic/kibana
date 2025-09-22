@@ -8,7 +8,7 @@
 import { Readable } from 'stream';
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -56,7 +56,7 @@ describe('FleetFromHostFilesClient', () => {
   };
 
   beforeEach(async () => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    esClientMock = elasticsearchClientMock.createElasticsearchClient();
     esFileClientMock = createFileClientMock<FileCustomMeta>({
       hash: {
         sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',

@@ -6,7 +6,7 @@
  */
 
 import { ActionScheduler } from './action_scheduler';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   actionsClientMock,
   actionsMock,

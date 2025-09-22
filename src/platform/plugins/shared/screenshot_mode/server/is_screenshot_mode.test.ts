@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
 import { isScreenshotMode } from './is_screenshot_mode';
 

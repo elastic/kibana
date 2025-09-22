@@ -6,7 +6,7 @@
  */
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SearchService } from './search_service';
 import { getIndicesForProductNames } from './utils';
 
@@ -17,12 +17,12 @@ const performSearchMock = performSearch as jest.MockedFn<typeof performSearch>;
 
 describe('SearchService', () => {
   let logger: MockedLogger;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let service: SearchService;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     service = new SearchService({ logger, esClient });
 
     performSearchMock.mockResolvedValue([]);

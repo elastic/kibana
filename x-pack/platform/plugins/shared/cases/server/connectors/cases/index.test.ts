@@ -10,7 +10,7 @@ import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_PROJECT_TYPE_ID, SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';

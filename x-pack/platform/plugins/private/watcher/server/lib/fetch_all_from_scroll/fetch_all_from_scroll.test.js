@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
 
 describe('fetch_all_from_scroll', () => {
   const mockScopedClusterClient = {};
 
   beforeEach(() => {
-    mockScopedClusterClient.asCurrentUser = elasticsearchServiceMock.createElasticsearchClient();
+    mockScopedClusterClient.asCurrentUser = elasticsearchClientMock.createElasticsearchClient();
   });
 
   describe('#fetchAllFromScroll', () => {

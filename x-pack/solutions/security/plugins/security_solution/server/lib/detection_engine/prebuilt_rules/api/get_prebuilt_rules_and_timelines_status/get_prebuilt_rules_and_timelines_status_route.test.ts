@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { securityServiceMock } from '@kbn/core/server/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status_route';
 
 import {

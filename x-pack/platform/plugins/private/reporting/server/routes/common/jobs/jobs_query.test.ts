@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';

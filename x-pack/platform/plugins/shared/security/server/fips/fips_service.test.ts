@@ -18,7 +18,7 @@ jest.mock('crypto', () => ({
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 

@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 
 import { getCreatedAttackDiscoveryAlerts } from '.';

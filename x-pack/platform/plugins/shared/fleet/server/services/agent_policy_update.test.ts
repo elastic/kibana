@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createAppContextStartContractMock } from '../mocks';
 
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -27,7 +26,7 @@ jest.mock('./secrets', () => ({
 describe('agentPolicyUpdateEventHandler', () => {
   describe('deleted', () => {
     it('should unenroll agentless agents', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       appContextService.start(createAppContextStartContractMock());
 
       jest

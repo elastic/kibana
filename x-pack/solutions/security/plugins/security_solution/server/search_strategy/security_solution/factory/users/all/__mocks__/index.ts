@@ -10,7 +10,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 import { UsersFields } from '../../../../../../../common/search_strategy/security_solution/users/common';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createMockEndpointAppContext } from '../../../../../../endpoint/mocks';
 import type { UsersRequestOptions } from '../../../../../../../common/api/search_strategy';

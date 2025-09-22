@@ -8,17 +8,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  analyticsServiceMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-  securityServiceMock,
-  coreMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type {
   IRouter,
   KibanaRequest,

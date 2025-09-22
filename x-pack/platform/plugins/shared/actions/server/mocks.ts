@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core/server/mocks';
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClientMock } from './actions_client/actions_client.mock';

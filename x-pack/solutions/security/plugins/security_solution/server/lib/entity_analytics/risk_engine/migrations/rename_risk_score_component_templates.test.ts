@@ -6,11 +6,9 @@
  */
 
 import { renameRiskScoreComponentTemplate } from './rename_risk_score_component_templates';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock as mockSavedObjectsClient,
-  elasticsearchServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock as mockSavedObjectsClient } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 const mockCreateComponentTemplate = jest.fn();

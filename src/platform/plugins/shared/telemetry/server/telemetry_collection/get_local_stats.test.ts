@@ -15,7 +15,7 @@ import {
   usageCollectionPluginMock,
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-plugin/server';
 
 function mockUsageCollection(kibanaUsage = {}) {

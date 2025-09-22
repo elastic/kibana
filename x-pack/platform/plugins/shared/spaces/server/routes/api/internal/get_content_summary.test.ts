@@ -10,13 +10,9 @@ import * as Rx from 'rxjs';
 
 import type { SavedObjectsNamespaceType, SavedObjectsType } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { SpaceContentTypeSummaryItem } from './get_content_summary';

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 

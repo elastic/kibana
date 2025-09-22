@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import { get } from 'lodash';
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 type RequestHandler = (...params: any[]) => any;
 

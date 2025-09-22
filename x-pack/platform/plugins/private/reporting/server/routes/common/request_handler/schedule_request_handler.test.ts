@@ -16,7 +16,9 @@ import type {
   KibanaResponseFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ReportingCore } from '../../..';

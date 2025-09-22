@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initSetSolutionSpaceApi } from './set_solution_space';

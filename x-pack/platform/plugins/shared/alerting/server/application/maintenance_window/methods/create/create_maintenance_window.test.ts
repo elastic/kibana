@@ -7,11 +7,9 @@
 
 import moment from 'moment-timezone';
 
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { FilterStateStore } from '@kbn/es-query';
 import { Frequency } from '@kbn/rrule';

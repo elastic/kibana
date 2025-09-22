@@ -6,7 +6,7 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { GetDataStreamMappingsRes } from './get_datastream_mappings';
 import { getDataStreamMappings } from './get_datastream_mappings';
 import { cleanupMapping } from './cleanup_mapping';
@@ -28,10 +28,10 @@ describe('mappings utilities', () => {
   };
 
   describe('getDatastreamMappings', () => {
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+    let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient = elasticsearchClientMock.createElasticsearchClient();
       cleanupMappingMock.mockImplementation((mappings) => mappings);
     });
 

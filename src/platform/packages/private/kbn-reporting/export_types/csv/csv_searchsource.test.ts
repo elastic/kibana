@@ -19,7 +19,9 @@ jest.mock('@kbn/generate-csv', () => ({
 }));
 
 import nodeCrypto from '@elastic/node-crypto';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';

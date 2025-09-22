@@ -6,7 +6,8 @@
  */
 
 import { setupCapabilities } from './capabilities';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities, CoreStart } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 

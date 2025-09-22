@@ -9,12 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import {
-  httpServerMock,
-  loggingSystemMock,
-  analyticsServiceMock,
-  securityServiceMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import type { ActionType as ConnectorType } from '../types';

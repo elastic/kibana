@@ -13,7 +13,7 @@ import {
   AsyncTelemetryEventsSender,
 } from './async_sender';
 import { TelemetryChannel, TelemetryCounter } from './types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   createMockTelemetryReceiver,
   createMockTelemetryPluginSetup,

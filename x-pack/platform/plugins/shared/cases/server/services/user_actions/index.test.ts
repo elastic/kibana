@@ -8,7 +8,7 @@
 import { omit, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,

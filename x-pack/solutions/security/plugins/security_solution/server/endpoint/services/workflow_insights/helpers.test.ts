@@ -11,7 +11,7 @@ import { merge } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
@@ -142,7 +142,7 @@ describe('helpers', () => {
     let esClient: ElasticsearchClient;
 
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient = elasticsearchClientMock.createElasticsearchClient();
     });
 
     it('should create an ingest pipeline with the correct configuration', async () => {

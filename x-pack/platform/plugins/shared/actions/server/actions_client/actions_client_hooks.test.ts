@@ -19,11 +19,9 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import {
-  httpServerMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionExecutorMock } from '../lib/action_executor.mock';

@@ -11,7 +11,7 @@ import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
 import type { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';

@@ -10,7 +10,7 @@ jest.mock('axios', () => ({
 }));
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { requestOAuthJWTToken } from './request_oauth_jwt_token';
 

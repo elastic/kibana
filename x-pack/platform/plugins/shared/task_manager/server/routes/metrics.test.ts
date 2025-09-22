@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { of, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { metricsRoute } from './metrics';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 

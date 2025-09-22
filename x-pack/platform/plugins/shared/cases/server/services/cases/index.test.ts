@@ -17,7 +17,7 @@ import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   SavedObject,
   SavedObjectReference,

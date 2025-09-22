@@ -22,7 +22,7 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 

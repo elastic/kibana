@@ -6,7 +6,7 @@
  */
 
 import type { LogMeta } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EcsLogAdapter } from './adapter';
 
 describe('EcsLogAdapter', () => {

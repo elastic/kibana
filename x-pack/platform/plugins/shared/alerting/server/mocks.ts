@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/server';

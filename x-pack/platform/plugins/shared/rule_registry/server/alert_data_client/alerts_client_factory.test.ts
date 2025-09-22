@@ -9,7 +9,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { AlertsClientFactoryProps } from './alerts_client_factory';
 import { AlertsClientFactory } from './alerts_client_factory';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';

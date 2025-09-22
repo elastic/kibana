@@ -8,11 +8,9 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/server';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 

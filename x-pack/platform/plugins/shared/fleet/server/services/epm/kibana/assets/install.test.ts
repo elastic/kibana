@@ -10,7 +10,7 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
 } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { type ArchiveAsset } from './install';
 

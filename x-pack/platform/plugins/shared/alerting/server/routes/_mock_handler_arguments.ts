@@ -12,7 +12,9 @@ import type {
 } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';

@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { riskScoreServiceMock } from './risk_score_service.mock';
 

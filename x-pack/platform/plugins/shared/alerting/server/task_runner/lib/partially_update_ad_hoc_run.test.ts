@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/c
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PartiallyUpdateableAdHocRunAttributes } from './partially_update_ad_hoc_run';
 import { partiallyUpdateAdHocRun } from './partially_update_ad_hoc_run';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { adHocRunStatus } from '../../../common/constants';
 

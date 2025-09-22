@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import { createDataStreamAdapterMock } from './data_stream_adapter.mock';

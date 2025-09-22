@@ -6,13 +6,10 @@
  */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { HttpApiTestSetupMock } from '../../mocks';

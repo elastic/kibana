@@ -7,7 +7,8 @@
 
 import * as Rx from 'rxjs';
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ISpacesClient } from './spaces_client';

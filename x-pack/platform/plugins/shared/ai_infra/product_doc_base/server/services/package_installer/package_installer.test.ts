@@ -23,7 +23,7 @@ import {
   getProductDocIndexName,
   DocumentationProduct,
 } from '@kbn/product-doc-common';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
@@ -43,14 +43,14 @@ const TEST_FORMAT_VERSION = '2.0.0';
 
 describe('PackageInstaller', () => {
   let logger: MockedLogger;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let productDocClient: ReturnType<typeof installClientMock.create>;
 
   let packageInstaller: PackageInstaller;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     productDocClient = installClientMock.create();
     packageInstaller = new PackageInstaller({
       artifactsFolder,

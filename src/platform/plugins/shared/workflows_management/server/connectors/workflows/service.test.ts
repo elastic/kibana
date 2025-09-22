@@ -9,7 +9,7 @@
 
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createExternalService, type WorkflowsServiceFunction } from './service';
 
 describe('Workflows Service', () => {

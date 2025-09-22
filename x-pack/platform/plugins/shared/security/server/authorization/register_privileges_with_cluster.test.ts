@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import type { RawKibanaPrivileges } from '../../common';

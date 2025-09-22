@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
 import { Actions } from '@kbn/security-authorization-core';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';

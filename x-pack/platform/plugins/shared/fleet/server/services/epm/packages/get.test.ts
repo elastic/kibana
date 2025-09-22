@@ -8,11 +8,9 @@
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  savedObjectsClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,

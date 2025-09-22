@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesNotificationParams } from '../legacy_types';
 // eslint-disable-next-line no-restricted-imports

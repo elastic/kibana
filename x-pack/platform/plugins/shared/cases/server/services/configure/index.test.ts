@@ -12,7 +12,7 @@ import type {
 } from '../../../common/types/domain';
 import { CustomFieldTypes, ConnectorTypes, CaseSeverity } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   SavedObject,
   SavedObjectReference,

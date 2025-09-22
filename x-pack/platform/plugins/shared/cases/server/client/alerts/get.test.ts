@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { AlertService } from '../../services';
 import type { CasesClientArgs } from '../types';
 import { getAlerts } from './get';
 
 describe('getAlerts', () => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
   const alertsClient = alertsClientMock.create();
   let alertsService: AlertService;

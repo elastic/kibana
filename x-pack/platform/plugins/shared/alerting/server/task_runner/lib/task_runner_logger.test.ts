@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { createTaskRunnerLogger } from './task_runner_logger';

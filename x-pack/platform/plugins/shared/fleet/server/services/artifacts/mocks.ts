@@ -9,7 +9,7 @@ import { URL } from 'url';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';

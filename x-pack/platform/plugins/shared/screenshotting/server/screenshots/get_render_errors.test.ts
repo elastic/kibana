@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';

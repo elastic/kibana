@@ -10,7 +10,7 @@ import path from 'path';
 
 import { load } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
@@ -1928,7 +1928,7 @@ describe('EPM template', () => {
 
   describe('updateCurrentWriteIndices', () => {
     it('update all the index matching, index template index pattern', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -1960,7 +1960,7 @@ describe('EPM template', () => {
       expect(putMappingsCall[0]).toBe('test.prefix1-default');
     });
     it('update non replicated datastream', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [
           { name: 'test-non-replicated' },
@@ -2008,7 +2008,7 @@ describe('EPM template', () => {
     });
 
     it('should fill constant keywords from previous mappings', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
 
       esClient.indices.getDataStream.mockResponse({
         data_streams: [
@@ -2079,7 +2079,7 @@ describe('EPM template', () => {
     });
 
     it('should not error when previous mappings are not found', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test-constant.keyword-default' }],
       } as any);
@@ -2121,7 +2121,7 @@ describe('EPM template', () => {
     });
 
     it('should rollover on expected error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2160,7 +2160,7 @@ describe('EPM template', () => {
     });
 
     it('should rollover on expected error when field subobjects in mappings changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2212,7 +2212,7 @@ describe('EPM template', () => {
       );
     });
     it('should rollover on mapper exception with subobjects in reason', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2264,7 +2264,7 @@ describe('EPM template', () => {
     });
 
     it('should rollover on mapper exception that change enabled object mappings', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2317,7 +2317,7 @@ describe('EPM template', () => {
     });
 
     it('should skip rollover on expected error when flag is on', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2355,7 +2355,7 @@ describe('EPM template', () => {
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
     it('should not rollover on unexpected error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2384,7 +2384,7 @@ describe('EPM template', () => {
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
     it('should not throw on unexpected error when flag is on', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2416,7 +2416,7 @@ describe('EPM template', () => {
     });
 
     it('should rollover on dynamic dimension mappings changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2461,7 +2461,7 @@ describe('EPM template', () => {
     });
 
     it('should not rollover on dynamic dimension mappings not changed', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
@@ -2512,7 +2512,7 @@ describe('EPM template', () => {
     });
 
     it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const esClient = elasticsearchClientMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'logs.prefix1-default' }],
       } as any);

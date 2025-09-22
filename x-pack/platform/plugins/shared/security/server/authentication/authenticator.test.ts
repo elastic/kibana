@@ -12,12 +12,9 @@ jest.mock('./providers/http');
 
 import { errors } from '@elastic/elasticsearch';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 

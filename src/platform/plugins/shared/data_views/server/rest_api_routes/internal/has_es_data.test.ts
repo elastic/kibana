@@ -9,7 +9,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { IKibanaResponse, Logger, RequestHandlerContext } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createHandler, crossClusterPatterns, patterns } from './has_es_data';
 import { loggerMock } from '@kbn/logging-mocks';
 

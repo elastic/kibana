@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { alertsClientMock } from '../../alert_data_client/alerts_client.mock';
 import type { RacRequestHandlerContext } from '../../types';
 

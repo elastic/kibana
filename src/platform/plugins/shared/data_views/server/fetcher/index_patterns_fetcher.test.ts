@@ -9,7 +9,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '.';
-import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DataViewMissingIndices, DataViewType } from '../../common';
 
@@ -28,7 +29,7 @@ const rollupResponse = {
 
 describe('Index Pattern Fetcher - server', () => {
   let indexPatterns: IndexPatternsFetcher;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   const uiSettingsClient = uiSettingsServiceMock
     .createStartContract()
     .asScopedToClient({} as SavedObjectsClientContract);
@@ -44,7 +45,7 @@ describe('Index Pattern Fetcher - server', () => {
   const patternList = ['a', 'b', 'c'];
   beforeEach(() => {
     jest.clearAllMocks();
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
     indexPatterns = new IndexPatternsFetcher(esClient, {
       uiSettingsClient,

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { type ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { createEsFileClient } from './create_es_file_client';
 import type { FileClient } from './types';
@@ -25,7 +23,7 @@ describe('When initializing file client via createESFileClient()', () => {
 
   beforeEach(() => {
     ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
   });
 

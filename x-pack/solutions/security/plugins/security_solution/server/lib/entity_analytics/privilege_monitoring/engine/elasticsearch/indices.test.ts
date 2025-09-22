@@ -6,12 +6,10 @@
  */
 
 import type { AuditLogger } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { PrivilegeMonitoringGlobalDependencies } from '../data_client';
 import { PrivilegeMonitoringDataClient } from '../data_client';

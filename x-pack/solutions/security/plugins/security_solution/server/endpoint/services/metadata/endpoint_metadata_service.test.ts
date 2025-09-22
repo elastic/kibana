@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,

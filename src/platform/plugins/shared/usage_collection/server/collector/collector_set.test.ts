@@ -13,12 +13,10 @@ import type { CollectorSetConfig } from './collector_set';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  executionContextServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
 
 describe('CollectorSet', () => {

@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineSecurityCheckupGetStateRoutes } from './get_state';
 import type { SecurityLicenseFeatures } from '../../../common';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertInstanceContext } from '../types';
 import { MaintenanceWindowStatus, RecoveredActionGroup } from '../types';

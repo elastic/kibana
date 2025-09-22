@@ -6,7 +6,8 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import type { Agent } from '../../types';

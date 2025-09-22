@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';

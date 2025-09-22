@@ -13,7 +13,8 @@ import tls from 'tls';
 
 import { pollEsNodesVersion } from '@kbn/core/server';
 import type { NodesVersionCompatibility } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { ConfigSchema } from './config';

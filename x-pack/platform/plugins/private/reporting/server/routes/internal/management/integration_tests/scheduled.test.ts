@@ -15,8 +15,10 @@ jest.mock('../../../../lib/content_stream', () => ({
 
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import type { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';

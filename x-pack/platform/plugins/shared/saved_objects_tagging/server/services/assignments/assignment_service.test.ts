@@ -6,11 +6,9 @@
  */
 
 import { getUpdatableSavedObjectTypesMock } from './assignment_service.test.mocks';
-import {
-  httpServerMock,
-  savedObjectsClientMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createSavedObject, createReference } from '../../../common/test_utils';
 import { taggableTypes } from '../../../common/constants';

@@ -18,7 +18,9 @@ import {
 import type { Client } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { privilegesFactory } from '@kbn/security-authorization-core';
 import { nextTick } from '@kbn/test-jest-helpers';

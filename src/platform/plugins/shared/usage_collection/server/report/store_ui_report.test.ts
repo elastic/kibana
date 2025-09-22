@@ -9,7 +9,7 @@
 
 import { storeApplicationUsageMock } from './store_ui_report.test.mocks';
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ReportSchemaType } from './schema';
 import { storeUiReport } from './store_ui_report';

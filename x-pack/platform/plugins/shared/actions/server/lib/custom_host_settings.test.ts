@@ -12,7 +12,7 @@ import moment from 'moment';
 
 import type { ActionsConfig } from '../config';
 import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 import {

@@ -7,7 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClientMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { createMockEndpointAppContext, createRouteHandlerContext } from '../../mocks';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { shouldCreateAlertsInAllSpaces } from './should_create_alerts_in_all_spaces';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const logger = loggingSystemMock.createLogger();
 

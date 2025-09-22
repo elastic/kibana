@@ -6,7 +6,7 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { AGENTS_INDEX } from '../../../common';
 

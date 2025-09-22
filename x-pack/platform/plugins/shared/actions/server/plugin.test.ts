@@ -10,7 +10,8 @@
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';

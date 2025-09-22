@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -109,7 +110,7 @@ export const buildManifestManagerContextMock = (
     experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
       .features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    esClient: elasticsearchClientMock.createElasticsearchClient(),
     licenseService: createLicenseServiceMock(),
   };
 };

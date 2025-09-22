@@ -17,7 +17,7 @@ import { buildManifestManagerMock } from '../../services/artifacts/manifest_mana
 import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('Endpoint artifact packager task', () => {
   const MOCK_TASK_INSTANCE = {

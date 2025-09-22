@@ -10,7 +10,9 @@ import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeGetCustomElementRoute } from './get';
 import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {

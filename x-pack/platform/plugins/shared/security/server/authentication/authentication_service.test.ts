@@ -28,14 +28,11 @@ import type {
   UnauthorizedErrorHandlerToolkit,
 } from '@kbn/core/server';
 import { CspConfig } from '@kbn/core/server';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';

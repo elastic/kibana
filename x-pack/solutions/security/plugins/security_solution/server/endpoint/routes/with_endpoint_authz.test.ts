@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import type { EndpointApiNeededAuthz } from './with_endpoint_authz';

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObjectsExportTransformContext } from '@kbn/core/server';
 import { handleExport } from './export';
 import { mockCases } from '../../mocks';

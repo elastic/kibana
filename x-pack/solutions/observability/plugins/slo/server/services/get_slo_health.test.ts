@@ -6,7 +6,7 @@
  */
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';

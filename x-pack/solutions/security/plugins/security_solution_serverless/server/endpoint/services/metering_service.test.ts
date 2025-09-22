@@ -10,7 +10,7 @@ import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsear
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ENDPOINT_HEARTBEAT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -31,7 +31,7 @@ describe('EndpointMeteringService', () => {
           projectId: 'test-project-id',
         },
       } as CloudSetup,
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      esClient: elasticsearchClientMock.createElasticsearchClient(),
       abortController: new AbortController(),
       lastSuccessfulReport: new Date(),
       config: {

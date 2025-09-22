@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { set } from '@kbn/safer-lodash-set';

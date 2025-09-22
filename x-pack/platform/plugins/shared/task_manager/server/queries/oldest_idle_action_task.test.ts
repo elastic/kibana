@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getOldestIdleActionTask } from './oldest_idle_action_task';
 
 describe('getOldestIdleActionTask', () => {

@@ -6,7 +6,9 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { KibanaRequest, RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import * as Boom from '@hapi/boom';
 

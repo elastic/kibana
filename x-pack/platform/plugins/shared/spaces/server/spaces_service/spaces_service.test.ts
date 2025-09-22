@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 
 import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 

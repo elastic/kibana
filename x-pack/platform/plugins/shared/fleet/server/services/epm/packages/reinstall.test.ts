@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import type { Installation } from '../../../../common';
 

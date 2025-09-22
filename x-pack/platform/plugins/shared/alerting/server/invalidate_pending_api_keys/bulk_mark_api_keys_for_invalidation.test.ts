@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { bulkMarkApiKeysForInvalidation } from './bulk_mark_api_keys_for_invalidation';
 

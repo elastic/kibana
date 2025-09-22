@@ -8,7 +8,7 @@
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import nodemailer from 'nodemailer';
 import type { ProxySettings } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

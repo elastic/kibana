@@ -10,7 +10,7 @@ import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

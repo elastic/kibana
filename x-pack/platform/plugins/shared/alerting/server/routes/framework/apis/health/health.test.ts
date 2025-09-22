@@ -6,7 +6,7 @@
  */
 
 import { healthRoute } from './health';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { HealthStatus } from '@kbn/alerting-types';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { verifyApiAccess } from '../../../../lib/license_api_access';

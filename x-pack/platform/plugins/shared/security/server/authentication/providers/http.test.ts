@@ -8,7 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 
 import type { ScopeableRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';

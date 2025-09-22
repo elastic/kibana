@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { updateIndex } from '.';
 import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';

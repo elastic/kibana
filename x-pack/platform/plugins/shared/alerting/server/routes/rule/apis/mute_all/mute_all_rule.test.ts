@@ -6,7 +6,7 @@
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { muteAllRuleRoute } from './mute_all_rule';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';

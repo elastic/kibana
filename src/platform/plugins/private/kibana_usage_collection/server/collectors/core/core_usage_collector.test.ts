@@ -13,7 +13,8 @@ import {
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerCoreUsageCollector } from './core_usage_collector';
-import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { CoreUsageData } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();

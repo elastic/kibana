@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import { loggingSystemMock, docLinksServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { TaskManagerConfig } from '../config';
 import { configSchema } from '../config';
 import { HealthStatus } from '../monitoring';

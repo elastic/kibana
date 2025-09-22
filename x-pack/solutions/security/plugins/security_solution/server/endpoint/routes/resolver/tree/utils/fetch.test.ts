@@ -18,7 +18,7 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type {
   FieldsObject,
   ResolverNode,

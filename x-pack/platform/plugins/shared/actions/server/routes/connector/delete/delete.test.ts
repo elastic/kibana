@@ -6,7 +6,7 @@
  */
 
 import { deleteConnectorRoute } from './delete';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../mocks';

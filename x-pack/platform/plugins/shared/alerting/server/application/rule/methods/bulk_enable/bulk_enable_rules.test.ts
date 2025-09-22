@@ -10,8 +10,8 @@ import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+} from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';

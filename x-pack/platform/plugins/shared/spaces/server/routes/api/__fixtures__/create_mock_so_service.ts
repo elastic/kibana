@@ -7,12 +7,9 @@
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  coreMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-  savedObjectsTypeRegistryMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const typeRegistry = savedObjectsTypeRegistryMock.create();

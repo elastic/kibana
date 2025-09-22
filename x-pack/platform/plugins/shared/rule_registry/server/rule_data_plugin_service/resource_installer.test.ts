@@ -22,7 +22,7 @@ import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
 const frameworkAlertsService = {
@@ -78,7 +78,7 @@ describe('resourceInstaller', () => {
 
       describe('if write is disabled', () => {
         it('should not install common resources', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -96,7 +96,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should not install index level resources', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
 
           const installer = new ResourceInstaller({
@@ -130,7 +130,7 @@ describe('resourceInstaller', () => {
 
       describe('if write is enabled', () => {
         it('should install common resources', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -161,7 +161,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should not install common resources if ES is not ready', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const test$ = new Subject<boolean>();
 
@@ -188,7 +188,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should install subset of common resources when framework alerts are enabled', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -218,7 +218,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should install index level resources', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -252,7 +252,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should not install index level component template when framework alerts are enabled', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -287,7 +287,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should install namespace level resources for the default space', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
             template: {
               aliases: {
@@ -368,7 +368,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should not install namespace level resources for the default space when framework alerts are available', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -407,7 +407,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should throw error if framework was unable to install namespace level resources', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -449,7 +449,7 @@ describe('resourceInstaller', () => {
         });
 
         it('should not install namespace level resources for non-default space when framework alerts are available', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
@@ -550,7 +550,7 @@ describe('resourceInstaller', () => {
         }
 
         it('succeeds on the happy path', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           mockClusterClient.indices.simulateIndexTemplate.mockImplementation(
             async () => SimulateTemplateResponse
           );
@@ -567,7 +567,7 @@ describe('resourceInstaller', () => {
         });
 
         it('gracefully fails on error simulating mappings', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           mockClusterClient.indices.simulateIndexTemplate.mockImplementation(async () => {
             throw new Error('expecting simulateIndexTemplate() to throw');
           });
@@ -615,7 +615,7 @@ describe('resourceInstaller', () => {
         });
 
         it('gracefully fails on empty mappings', async () => {
-          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const mockClusterClient = elasticsearchClientMock.createElasticsearchClient();
           // @ts-expect-error wrong response type
           mockClusterClient.indices.simulateIndexTemplate.mockImplementation(async () => ({}));
 

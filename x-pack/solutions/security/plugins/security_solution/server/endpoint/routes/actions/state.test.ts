@@ -6,7 +6,7 @@
  */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {

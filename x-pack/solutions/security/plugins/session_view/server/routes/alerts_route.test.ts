@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { searchAlerts } from './alerts_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';

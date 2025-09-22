@@ -8,11 +8,9 @@
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,

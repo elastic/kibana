@@ -12,11 +12,9 @@ import type {
   SecuritySuggestUserProfilesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';

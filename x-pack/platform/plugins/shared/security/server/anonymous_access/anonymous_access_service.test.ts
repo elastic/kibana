@@ -8,12 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 
 import type { Logger } from '@kbn/core/server';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { AnonymousAccessService } from './anonymous_access_service';

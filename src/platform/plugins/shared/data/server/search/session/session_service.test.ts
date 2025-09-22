@@ -9,7 +9,8 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
@@ -18,7 +19,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
 import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -64,7 +64,7 @@ describe('SearchSessionService', () => {
   describe('Feature disabled', () => {
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
-      asCurrentUserElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+      asCurrentUserElasticsearchClient = elasticsearchClientMock.createElasticsearchClient();
       const config: ConfigSchema = {
         search: {
           sessions: {

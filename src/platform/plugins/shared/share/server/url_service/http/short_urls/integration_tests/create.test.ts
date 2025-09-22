@@ -12,7 +12,7 @@ import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { registerCreateRoute } from '../register_create_route';
 import { MockUrlService } from '../../../../../common/mocks';
-import { httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 const url = new MockUrlService();
 const http = httpServiceMock.createSetupContract();

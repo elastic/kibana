@@ -7,8 +7,8 @@
 
 import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import { getESQueryPolicyResponseByAgentID, getPolicyResponseByAgentId } from './service';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { EndpointInternalFleetServicesInterfaceMocked } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { createEndpointFleetServicesFactoryMock } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
@@ -53,7 +53,7 @@ describe('Policy Response Services', () => {
     let fleetServicesMock: EndpointInternalFleetServicesInterfaceMocked;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      esClientMock = elasticsearchClientMock.createElasticsearchClient();
       fleetServicesMock = createEndpointFleetServicesFactoryMock().service.asInternalUser();
 
       applyEsClientSearchMock({

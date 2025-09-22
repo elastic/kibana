@@ -6,7 +6,8 @@
  */
 
 import { first, take, bufferCount } from 'rxjs';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type {
   TaskTypeAggregation,
   WorkloadAggregationResponse,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-types';
 import pRetry from 'p-retry';

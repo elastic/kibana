@@ -7,8 +7,8 @@
 
 import type { ConstructorOptions } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';

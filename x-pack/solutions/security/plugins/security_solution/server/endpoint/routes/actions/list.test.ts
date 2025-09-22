@@ -17,12 +17,9 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';

@@ -11,7 +11,8 @@ jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => 
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';

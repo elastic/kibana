@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fetchLicenses } from './fetch_licenses';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

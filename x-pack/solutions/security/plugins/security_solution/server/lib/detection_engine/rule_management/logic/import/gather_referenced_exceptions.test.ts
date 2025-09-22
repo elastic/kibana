@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { findExceptionList } from '@kbn/lists-plugin/server/services/exception_lists/find_exception_list';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';

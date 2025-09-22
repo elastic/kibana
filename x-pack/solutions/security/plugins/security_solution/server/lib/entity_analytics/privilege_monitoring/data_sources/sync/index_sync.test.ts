@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { PrivilegeMonitoringGlobalDependencies } from '../../engine/data_client';
 import { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { IndexSyncService } from './index_sync';

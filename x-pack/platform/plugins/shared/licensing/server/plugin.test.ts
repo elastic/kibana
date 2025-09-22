@@ -9,12 +9,10 @@ import moment from 'moment';
 import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  statusServiceMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import type { CoreStatus, IClusterClient, ServiceStatusLevel } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { LicenseType } from '@kbn/licensing-types';

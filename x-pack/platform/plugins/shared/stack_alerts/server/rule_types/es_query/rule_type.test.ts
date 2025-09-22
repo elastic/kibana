@@ -10,7 +10,7 @@ import type { Writable } from '@kbn/utility-types';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
 import type { EsQueryRuleState } from './rule_type_params';

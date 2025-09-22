@@ -7,7 +7,8 @@
 
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { UptimeEsClient } from '../lib';
 
@@ -33,7 +34,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
   criteria: Array<MultiPageCriteria<K, C>>,
   genBucketItem: (criteria: C) => I
 ): ElasticsearchClientMock => {
-  const esMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esMock = elasticsearchClientMock.createElasticsearchClient();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   criteria.forEach(({ after_key, bucketCriteria }) => {
@@ -65,7 +66,7 @@ interface UptimeEsMockClient {
 export const getUptimeESMockClient = (
   esClientMock?: ElasticsearchClientMock
 ): UptimeEsMockClient => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchClientMock.createElasticsearchClient();
 
   const savedObjectsClient = savedObjectsClientMock.create();
 

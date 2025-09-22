@@ -15,11 +15,9 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';

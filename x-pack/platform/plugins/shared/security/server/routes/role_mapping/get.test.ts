@@ -8,7 +8,8 @@
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { defineRoleMappingGetRoutes } from './get';
 import { routeDefinitionParamsMock } from '../index.mock';

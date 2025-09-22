@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ITaskMetricsService, TaskMetric } from './task_metrics.types';
 import { TaskMetricsService } from './task_metrics';
 import { createMockTelemetryEventsSender } from './__mocks__';

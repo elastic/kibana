@@ -9,15 +9,13 @@ import sinon from 'sinon';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  executionContextServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  savedObjectsServiceMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';

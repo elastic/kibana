@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { DocSearchResult } from '@kbn/product-doc-base-plugin/server/services/search';
 import { retrieveDocumentation } from './retrieve_documentation';

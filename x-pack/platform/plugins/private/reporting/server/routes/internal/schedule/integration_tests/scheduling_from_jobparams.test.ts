@@ -10,7 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
 import { setupServer, type SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';

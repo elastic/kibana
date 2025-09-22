@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { actionTypeRegistryMock } from './action_type_registry.mock';

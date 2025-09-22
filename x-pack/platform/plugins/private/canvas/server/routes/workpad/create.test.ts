@@ -6,7 +6,9 @@
  */
 
 import type { AwaitedProperties } from '@kbn/utility-types';
-import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { MockWorkpadRouteContext } from '../../mocks';
 import { workpadRouteContextMock } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';

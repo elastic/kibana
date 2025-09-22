@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { deleteMigration } from './delete_migration';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { deleteMigrationSavedObject } from './delete_migration_saved_object';

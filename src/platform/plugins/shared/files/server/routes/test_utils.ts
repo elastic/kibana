@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createFileServiceMock } from '../mocks';
 import type { FileKindsRequestHandlerContext } from './file_kind/types';
 

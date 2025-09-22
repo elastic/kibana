@@ -11,7 +11,7 @@ import { DEFAULT_OPENAI_MODEL } from '../../../common/openai/constants';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { OpenAIConnector } from './openai';
 import { OpenAiProviderType } from '../../../common/openai/constants';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { RunActionResponseSchema } from '../../../common/openai/schema';
 
