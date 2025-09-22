@@ -8,7 +8,7 @@
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana';
-import { asyncReducer, initialState } from '../../common/utils/api_request_reducer';
+import { initialState, reducer } from '../../common/service';
 
 export const DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.service.createRuleSuccess.title',
@@ -44,7 +44,7 @@ export type OnSuccess = () => void;
 
 export const useCreateDashboardMigration = (onSuccess: OnSuccess) => {
   const { notifications } = useKibana().services;
-  const [state, dispatch] = useReducer(asyncReducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateDashboardMigrationArgs>(
     (migrationName, rules) => {
