@@ -37,7 +37,7 @@ import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
-import { replaceColumnsWithVariableDriven } from '../../utils/replace_columns_with_variable_driven';
+import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
