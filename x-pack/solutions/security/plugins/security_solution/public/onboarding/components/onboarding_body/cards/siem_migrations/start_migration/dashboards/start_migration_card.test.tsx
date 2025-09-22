@@ -8,16 +8,62 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { TestProviders } from '../../../../../../../common/mock';
+import * as useLatestStatsModule from '../../../../../../../siem_migrations/dashboards/service/hooks/use_latest_stats';
 import StartDashboardMigrationCard from './start_migration_card';
 import * as useUpsellingComponentModule from '../../../../../../../common/hooks/use_upselling';
 import { OnboardingCardId } from '../../../../../../constants';
 import { render, screen } from '@testing-library/react';
+import * as useGetMigrationTranslationStatsModule from '../../../../../../../siem_migrations/dashboards/logic/use_get_migration_translation_stats';
+import * as useGetMissingResourcesModule from '../../../../../../../siem_migrations/common/hooks/use_get_missing_resources';
+
+const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
+
+const useGetMigrationTranslationStatsSpy = jest.spyOn(
+  useGetMigrationTranslationStatsModule,
+  'useGetMigrationTranslationStats'
+);
+
+const useGetMissingResourcesMock = jest.spyOn(
+  useGetMissingResourcesModule,
+  'useGetMissingResources'
+);
 
 const useUpsellingComponentSpy = jest.spyOn(useUpsellingComponentModule, 'useUpsellingComponent');
 
 const MockUpsellingComponent = () => {
   return <div data-test-subj="mockUpsellSection">{`Start Migrations Upselling Component`}</div>;
 };
+
+const mockedLatestStats = {
+  data: [],
+  isLoading: false,
+  refreshStats: jest.fn(),
+};
+
+const mockTranslationStats = {
+  isLoading: false,
+  data: {
+    id: '1',
+    dashboards: {
+      total: 1,
+      failed: 0,
+      success: {
+        result: {
+          full: 1,
+          partial: 0,
+          failed: 0,
+        },
+      },
+    },
+  },
+} as unknown as ReturnType<
+  typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats
+>;
+
+const mockMissingResources = {
+  getMissingResources: jest.fn(() => []),
+  isLoading: false,
+} as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>;
 
 type TestComponentProps = ComponentProps<typeof StartDashboardMigrationCard>;
 const defaultProps: TestComponentProps = {
@@ -48,7 +94,10 @@ const renderTestComponent = (props: Partial<TestComponentProps> = {}) => {
 
 describe('StartDashboardMigrationCard', () => {
   beforeEach(() => {
+    useLatestStatsSpy.mockReturnValue(mockedLatestStats);
     useUpsellingComponentSpy.mockReturnValue(null);
+    useGetMigrationTranslationStatsSpy.mockReturnValue(mockTranslationStats);
+    useGetMissingResourcesMock.mockReturnValue(mockMissingResources);
   });
   afterEach(() => {
     jest.clearAllMocks();
