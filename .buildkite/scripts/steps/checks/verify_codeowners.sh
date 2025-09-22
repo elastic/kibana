@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Verify CODEOWNERS
 
-if is_pr && ! is_auto_commit_disabled; then
+if is_pr && ! is_auto_commit_disabled && [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
   node scripts/generate codeowners
   check_for_changed_files "node scripts/generate codeowners" true
 fi
