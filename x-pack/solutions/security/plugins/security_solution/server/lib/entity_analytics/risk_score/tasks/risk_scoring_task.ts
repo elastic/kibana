@@ -331,6 +331,11 @@ export const runTask = async ({
         afterKeys = result.after_keys;
         scoresWritten += result.scores_written;
       }
+      await riskScoreService.resetToZero({
+        dataViewId,
+        entityType: identifierType,
+        refresh: 'wait_for',
+      });
     });
 
     updatedState.scoresWritten = scoresWritten;

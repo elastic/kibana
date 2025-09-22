@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
+  EntityType,
   RiskScoresCalculationResponse,
   RiskScoresPreviewResponse,
 } from '../../../../common/api/entity_analytics';
@@ -25,6 +26,8 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
+import type { ResetToZeroDependencies } from './reset_to_zero';
+import { resetToZero } from './reset_to_zero';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -33,13 +36,16 @@ export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<RiskScoresPreviewResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
-  ) => Promise<RiskScoresCalculationResponse>;
+  ) => Promise<RiskScoresCalculationResponse & { entities: Record<EntityType, string[]> }>;
   getConfigurationWithDefaults: (
     entityAnalyticsConfig: EntityAnalyticsConfig
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
+  resetToZero: (
+    deps: Pick<ResetToZeroDependencies, 'dataViewId' | 'refresh' | 'entityType'>
+  ) => Promise<void>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -100,6 +106,19 @@ export const riskScoreServiceFactory = ({
       alertSampleSizePerShard,
     };
   },
+  resetToZero: async (
+    deps: Pick<ResetToZeroDependencies, 'dataViewId' | 'refresh' | 'entityType'>
+  ) => {
+    await resetToZero({
+      ...deps,
+      esClient,
+      dataClient: riskScoreDataClient,
+      spaceId,
+      assetCriticalityService,
+      logger,
+    });
+  },
+
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
   scheduleLatestTransformNow: () =>
     scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),

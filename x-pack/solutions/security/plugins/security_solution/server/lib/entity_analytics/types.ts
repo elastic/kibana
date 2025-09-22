@@ -7,6 +7,7 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskScoresPreviewResponse } from '../../../common/api/entity_analytics';
 import type { EntityType } from '../../../common/search_strategy';
 import type {
   AfterKeys,
@@ -115,6 +116,10 @@ export interface CalculateAndPersistScoresParams {
   returnScores?: boolean;
   refresh?: 'wait_for';
 }
+
+export type CalculateResults = RiskScoresPreviewResponse & {
+  entities: Record<EntityType, string[]>;
+};
 
 export interface RiskScoreCompositeBuckets {
   user: {
