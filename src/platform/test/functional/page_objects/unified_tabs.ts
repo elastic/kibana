@@ -254,4 +254,17 @@ export class UnifiedTabsPageObject extends FtrService {
       return newNumberOfTabs === currentNumberOfTabs + 1;
     });
   }
+
+  public async clearRecentlyClosedTabs() {
+    await this.openTabsBarMenu();
+    const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
+    const clearButtonExists = await this.testSubjects.exists(buttonTestId);
+    if (clearButtonExists) {
+      await this.testSubjects.click(buttonTestId);
+      await this.retry.waitFor('recently closed tabs to be cleared', async () => {
+        return !(await this.testSubjects.exists(buttonTestId));
+      });
+    }
+    await this.closeTabsBarMenu();
+  }
 }

@@ -25,6 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const secondTabLabel = 'My second tab';
 
   describe('recently closed tabs', function () {
+    beforeEach(async () => {
+      await unifiedTabs.clearRecentlyClosedTabs();
+    });
+
     it('should start with no recently closed tabs', async () => {
       const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
       expect(recentlyClosedTabs.length).to.be(0);
@@ -42,15 +46,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.closeTab(1);
       await discover.waitUntilTabIsLoaded();
+
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
         // appeared in the recently closed tabs list
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
+
       // restore it
       await unifiedTabs.restoreRecentlyClosedTab(0);
       await discover.waitUntilTabIsLoaded();
+
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, secondTabLabel]);
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
@@ -61,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should restore a tab after after a page refresh', async () => {
+    it('should restore a tab after a page refresh', async () => {
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(1, secondTabLabel);
@@ -71,27 +78,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery(query);
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('1,813');
       await unifiedTabs.closeTab(1);
       await discover.waitUntilTabIsLoaded();
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-      // appeared in the recently closed tabs list
+
       await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        // appeared in the recently closed tabs list
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
+
       // refresh the page to reset the discover runtime state
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('14,004');
+
       // restore the tab
       await unifiedTabs.restoreRecentlyClosedTab(0);
       await discover.waitUntilTabIsLoaded();
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, secondTabLabel]);
-      expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
-      expect(await queryBar.getQueryString()).to.be(query);
-      // still on the recently closed tabs list
+
       await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, secondTabLabel]);
+        expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.be(query);
+        // still on the recently closed tabs list
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
+        expect(await discover.getHitCount()).to.be('1,813');
+      });
+
+      await filterBar.removeFilter('extension');
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('2,784');
+
+      // can restore it again
+      await unifiedTabs.restoreRecentlyClosedTab(0);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([
+          untitledTabLabel,
+          secondTabLabel,
+          secondTabLabel,
+        ]);
+        expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.be(query);
+        // still on the recently closed tabs list
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([secondTabLabel]);
+        expect(await discover.getHitCount()).to.be('1,813');
       });
     });
 
@@ -119,13 +155,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.loadSavedSearch('A Saved Search');
       await discover.waitUntilTabIsLoaded();
-      await retry.try(async () => {
-        expect(await dataViews.getSelectedName()).to.be('logstash-*');
-      });
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-      expect(await discover.getHitCount()).to.be('14,004');
 
       await retry.try(async () => {
+        expect(await dataViews.getSelectedName()).to.be('logstash-*');
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        expect(await discover.getHitCount()).to.be('14,004');
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([firstTabLabel, secondTabLabel]);
       });
@@ -133,20 +167,181 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.restoreRecentlyClosedTab(0);
       await discover.waitUntilTabIsLoaded();
 
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, firstTabLabel]);
-      expect(await monacoEditor.getCodeEditorValue()).to.be(firstTabQuery);
-      expect(await discover.getHitCount()).to.be('51');
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, firstTabLabel]);
+        expect(await monacoEditor.getCodeEditorValue()).to.be(firstTabQuery);
+        expect(await discover.getHitCount()).to.be('51');
+      });
 
       await unifiedTabs.restoreRecentlyClosedTab(1);
       await discover.waitUntilTabIsLoaded();
 
-      expect(await unifiedTabs.getTabLabels()).to.eql([
-        untitledTabLabel,
-        firstTabLabel,
-        secondTabLabel,
-      ]);
-      expect(await monacoEditor.getCodeEditorValue()).to.be(secondTabQuery);
-      expect(await discover.getHitCount()).to.be('52');
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([
+          untitledTabLabel,
+          firstTabLabel,
+          secondTabLabel,
+        ]);
+        expect(await monacoEditor.getCodeEditorValue()).to.be(secondTabQuery);
+        expect(await discover.getHitCount()).to.be('52');
+      });
+    });
+
+    it('should handle recently closed tabs correctly after saving a new discover session', async () => {
+      const testTabLabel = 'My test tab';
+
+      await unifiedTabs.editTabLabel(0, firstTabLabel);
+      await discover.waitUntilTabIsLoaded();
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, testTabLabel);
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.closeTab(1);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([testTabLabel]);
+      });
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, secondTabLabel);
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel, secondTabLabel]);
+      });
+
+      await discover.saveSearch('My Discover Session');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel, secondTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([testTabLabel]);
+      });
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([
+          firstTabLabel,
+          secondTabLabel,
+          untitledTabLabel,
+        ]);
+      });
+
+      await discover.saveSearch('My Discover Session 2', true);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([
+          firstTabLabel,
+          secondTabLabel,
+          untitledTabLabel,
+        ]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([
+          firstTabLabel,
+          secondTabLabel,
+          untitledTabLabel,
+          testTabLabel,
+        ]);
+      });
+    });
+
+    it('should update recently closed tabs after starting a new discover session', async () => {
+      const testTabLabel = 'My test tab';
+
+      await unifiedTabs.editTabLabel(0, firstTabLabel);
+      await discover.waitUntilTabIsLoaded();
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, testTabLabel);
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.closeTab(1);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel]);
+      });
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, secondTabLabel);
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([firstTabLabel, secondTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([testTabLabel]);
+      });
+
+      const tabWithFilterLabel = 'Tab with filter';
+      await discover.clickNewSearchButton();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(0, tabWithFilterLabel);
+      const query = 'machine.os: "ios"';
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('2,784');
+        expect(await unifiedTabs.getTabLabels()).to.eql([tabWithFilterLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([firstTabLabel, secondTabLabel, testTabLabel]);
+      });
+
+      await discover.loadSavedSearch('A Saved Search');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('14,004');
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([
+          tabWithFilterLabel,
+          firstTabLabel,
+          secondTabLabel,
+          testTabLabel,
+        ]);
+      });
+
+      await discover.clickNewSearchButton();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('14,004');
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([
+          untitledTabLabel,
+          tabWithFilterLabel,
+          firstTabLabel,
+          secondTabLabel,
+          testTabLabel,
+        ]);
+      });
+
+      await unifiedTabs.restoreRecentlyClosedTab(1);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('2,784');
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, tabWithFilterLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([
+          untitledTabLabel,
+          tabWithFilterLabel,
+          firstTabLabel,
+          secondTabLabel,
+          testTabLabel,
+        ]);
+      });
     });
   });
 }
