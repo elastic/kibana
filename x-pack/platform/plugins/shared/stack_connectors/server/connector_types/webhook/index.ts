@@ -10,19 +10,18 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
-import { map, getOrElse } from 'fp-ts/Option';
+import { getOrElse, map } from 'fp-ts/Option';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  ErrorCategorizationOverrides,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import {
@@ -30,15 +29,14 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 
-import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
-  WebhookConnectorType,
   ActionParamsType,
   ConnectorTypeConfigType,
-  WebhookConnectorTypeExecutorOptions,
   ConnectorTypeSecretsType,
+  WebhookConnectorType,
+  WebhookConnectorTypeExecutorOptions,
 } from './types';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
@@ -49,17 +47,7 @@ import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
-const errorCategorizationOverrides: ErrorCategorizationOverrides = {
-  '400': 'user',
-  '404': 'user',
-  '405': 'user',
-  '406': 'user',
-  '410': 'user',
-  '411': 'user',
-  '414': 'user',
-  '428': 'user',
-  '431': 'user',
-};
+const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
@@ -199,7 +187,6 @@ export async function executor(
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
-      errorCategorizationOverrides,
     })
   );
 
@@ -241,7 +228,14 @@ export async function executor(
           getOrElse(() => retryResult(actionId, message))
         );
       }
-      return errorResultInvalid(actionId, message, getErrorSource(error));
+
+      const errorResult = errorResultInvalid(actionId, message);
+
+      if (userErrorCodes.includes(status)) {
+        errorResult.errorSource = TaskErrorSource.USER;
+      }
+
+      return errorResult;
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
@@ -264,8 +258,7 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string,
-  errorSource?: TaskErrorSource
+  serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -275,7 +268,6 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
-    errorSource,
   };
 }
 

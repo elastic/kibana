@@ -289,5 +289,3 @@ export type AwsSesConfig = {
 } | null;
 
 export type ActionHttpErrorType = 'user' | 'framework';
-
-export type ErrorCategorizationOverrides = Record<string, ActionHttpErrorType>;

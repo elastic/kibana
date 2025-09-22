@@ -7,7 +7,6 @@
 
 import type { AxiosError } from 'axios';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type { ErrorCategorizationOverrides } from '../types';
 
 export const httpResponseUserErrorCodes = [
   401, 402, 403, 407, 409, 412, 413, 417, 422, 423, 429, 451,
@@ -17,13 +16,10 @@ export const httpResponseUserErrorCodes = [
  * Categorizes errored actions HTTP requests against external systems, creating user errors based
  * on the status code of the response and any overrides provided.
  */
-export const handleActionHttpUserErrors = <T = unknown, D = unknown>(
-  error: AxiosError<T, D>,
-  overrides?: ErrorCategorizationOverrides
-) => {
+export const handleActionHttpUserErrors = <T = unknown, D = unknown>(error: AxiosError<T, D>) => {
   const statusCode = error.response?.status;
   if (error.response && statusCode != null) {
-    if (overrides?.[statusCode] === 'user' || httpResponseUserErrorCodes.includes(statusCode)) {
+    if (httpResponseUserErrorCodes.includes(statusCode)) {
       throw createTaskRunError(error, TaskErrorSource.USER);
     }
   }
