@@ -29,8 +29,10 @@ export type SomeObjectType = ObjectType<any, any, any, any>;
  *
  * Without this the defaults will be stripped away when defined directly in the object.
  */
-export type PreciseObjectProps<P extends ObjectRawProps = ObjectRawProps> = {
-  [K in keyof P]: P[K] extends Type<infer O, infer I, infer D> ? D : never;
+export type PreciseObjectProps = {
+  [K in keyof ObjectRawProps]: ObjectRawProps[K] extends Type<infer O, infer I, infer D>
+    ? D
+    : never;
 };
 
 export type ObjectRawProps = Record<string, SomeType>;

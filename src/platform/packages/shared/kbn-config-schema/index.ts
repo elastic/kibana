@@ -21,7 +21,7 @@ import type {
   MapOfOptions,
   NumberOptions,
   ObjectTypeOptions,
-  ObjectRawProps,
+  PreciseObjectProps,
   NullableProps,
   RecordOfOptions,
   SchemaStructureEntry,
@@ -61,20 +61,29 @@ import type { ByteSizeValueType } from './src/types/byte_size_type';
 import type { DefaultValue, SomeType } from './src/types/type';
 import type { ObjectInputType, ObjectOutputType, SomeObjectType } from './src/types/object_type';
 import type { IntersectionInput, IntersectionOutput } from './src/types/intersection_type';
-export type {
-  AnyType,
-  ConditionalType,
-  TypeOf,
-  ObjectRawProps,
-  SchemaStructureEntry,
-  NullableProps,
-};
+export type { AnyType, ConditionalType, TypeOf, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
+
+/**
+ * Used to define props to pass to `schema.object`.
+ *
+ * @note should *only* be used with `satisfies` to ensure the correct type is inferred.
+ *
+ * @example
+ * ```ts
+ * const mySchemaProps = {
+ *   name: schema.string(),
+ *   age: schema.number(),
+ * } satisfies ObjectProps;
+ * const mySchema = schema.object(mySchemaProps);
+ * ```
+ */
+export type ObjectProps = PreciseObjectProps;
 
 function any<D extends DefaultValue<any> = never>(options?: TypeOptions<any, any, D>): AnyType<D> {
   return new AnyType(options);

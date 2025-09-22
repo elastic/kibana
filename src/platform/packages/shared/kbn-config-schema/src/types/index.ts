@@ -29,7 +29,7 @@ export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
 export type {
   ObjectTypeOptions,
-  ObjectRawProps,
+  PreciseObjectProps,
   NullableProps,
   ObjectResultType,
 } from './object_type';
