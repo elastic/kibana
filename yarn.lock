@@ -3560,6 +3560,11 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
+"@iarna/toml@^2.2.5":
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
+  integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
+
 "@inquirer/confirm@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@inquirer/confirm/-/confirm-5.0.0.tgz#9ecf8214452c48e8061aed0d513964f05c92d4a3"
@@ -3600,6 +3605,16 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@inquirer/type/-/type-3.0.0.tgz#1762ebe667ec1d838012b20bf0cf90b841ba68bc"
   integrity sha512-YYykfbw/lefC7yKj7nanzQXILM7r3suIvyFlCcMskc99axmsSewXWkAfXKwMbgxL76iAFVmRwmYdwNZNc8gjog==
+
+"@intellectronica/ruler@^0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@intellectronica/ruler/-/ruler-0.3.8.tgz#6baa5654cf1d47ae655f8f65b9fd99d4068120a2"
+  integrity sha512-AuCE3hNnYhzBxH/FEJa4vW7HmlboFsvoSaUPwrrwPVAxLQlKqvnACZceDLB+vkrCL2zLUH05+1elPHq1aYkNiA==
+  dependencies:
+    "@iarna/toml" "^2.2.5"
+    js-yaml "^4.1.0"
+    yargs "^17.7.2"
+    zod "^3.25.28"
 
 "@inversifyjs/common@1.5.2":
   version "1.5.2"
@@ -34215,7 +34230,7 @@ zod@^3.24.1:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.24.1.tgz#27445c912738c8ad1e9de1bea0359fa44d9d35ee"
   integrity sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==
 
-zod@^3.24.2:
+zod@^3.24.2, zod@^3.25.28:
   version "3.25.76"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
