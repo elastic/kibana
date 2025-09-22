@@ -13,6 +13,7 @@ import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigat
 
 import { type Services } from '../common/services';
 import { createStackManagementNavigationTree } from './stack_management_navigation';
+import { createV2footerItemsTree } from './v2_footer_items';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectType.title',
@@ -177,6 +178,7 @@ export const createNavigationTree = async (
             icon: 'editorCodeBlock',
           },
           createStackManagementNavigationTree({ sideNavVersion: 'v1' }),
+          createV2footerItemsTree(),
         ],
       },
     ],
