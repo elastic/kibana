@@ -22,5 +22,8 @@
     "@kbn/core",
     "@kbn/dev-cli-runner",
     "@kbn/repo-info",
+    "@kbn/streams-schema",
+    "@kbn/inference-common",
+    "@kbn/tooling-log",
   ]
 }
