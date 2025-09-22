@@ -8,6 +8,11 @@
 import _ from 'lodash';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
+import {
+  CORE_SECURITY_MODULES,
+  MICROSOFT_DEFENDER_MODULES,
+  getSecurityModuleDatasets,
+} from './security_modules';
 
 interface SupportedSchema {
   /**
@@ -37,20 +42,14 @@ export const getSupportedSchemas = (
   const microsoftDefenderEndpointDataInAnalyzerEnabled =
     experimentalFeatures?.microsoftDefenderEndpointDataInAnalyzerEnabled;
 
-  const supportedFileBeatDataSets = [
-    'sentinel_one_cloud_funnel.event',
-    'sentinel_one.alert',
-    'crowdstrike.alert',
-    'crowdstrike.falcon',
-    'crowdstrike.fdr',
-    'jamf_protect.telemetry',
-    'jamf_protect.alerts',
-    'jamf_protect.web-threat-events',
-    'jamf_protect.web-traffic-events',
-    ...(microsoftDefenderEndpointDataInAnalyzerEnabled
-      ? ['microsoft_defender_endpoint.log', 'm365_defender.alert', 'm365_defender.incident']
-      : []),
+  // Build the list of active security modules based on feature flags
+  const activeSecurityModules = [
+    ...CORE_SECURITY_MODULES,
+    ...(microsoftDefenderEndpointDataInAnalyzerEnabled ? MICROSOFT_DEFENDER_MODULES : []),
   ];
+
+  // Get all supported filebeat datasets for the active modules
+  const supportedFileBeatDataSets = getSecurityModuleDatasets(activeSecurityModules);
 
   return [
     {
