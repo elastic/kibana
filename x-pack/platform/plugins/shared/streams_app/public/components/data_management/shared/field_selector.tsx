@@ -28,6 +28,7 @@ export interface FieldSelectorProps {
   isInvalid?: boolean;
   error?: string;
   suggestions?: FieldSuggestion[];
+  autoFocus?: boolean;
 }
 
 /**
@@ -46,6 +47,7 @@ export const FieldSelector = ({
   isInvalid,
   error,
   suggestions = [],
+  autoFocus,
 }: FieldSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
@@ -117,6 +119,7 @@ export const FieldSelector = ({
             defaultMessage: 'Add {searchValue} as a custom field',
             values: { searchValue: '{searchValue}' },
           })}
+          autoFocus={autoFocus}
         />
       </EuiFormRow>
     </>
