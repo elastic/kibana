@@ -87,7 +87,7 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
         ],
       },
       {
-        title: 'AI',
+        title: i18nStrings.stackManagement.ai.title,
         children: [
           { link: 'management:genAiSettings' },
           { link: 'management:aiAssistantManagementSelection' },
