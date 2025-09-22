@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { reindexHandler } from './reindex_handler';
 export { type CredentialStore, credentialStoreFactory } from './credential_store';
 export { reindexServiceFactory } from './reindex_service';
 export { ReindexWorker } from './worker';
-export { generateNewIndexName } from './index_settings';

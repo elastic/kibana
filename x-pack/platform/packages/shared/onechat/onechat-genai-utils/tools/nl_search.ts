@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import type { EsqlResponse } from './steps/execute_esql';
-import { executeEsql } from './steps/execute_esql';
+import type { EsqlResponse } from './utils/esql';
+import { executeEsql } from './utils/esql';
 import { generateEsql } from './generate_esql';
 
 export interface NaturalLanguageSearchResponse {
@@ -25,20 +25,20 @@ export interface NaturalLanguageSearchResponse {
 export const naturalLanguageSearch = async ({
   nlQuery,
   context,
-  index,
+  target,
   model,
   esClient,
 }: {
   nlQuery: string;
   context?: string;
-  index?: string;
+  target: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
     context,
-    index,
+    index: target,
     model,
     esClient,
   });

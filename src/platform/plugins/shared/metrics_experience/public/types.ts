@@ -8,17 +8,16 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import type { MetricsExperienceRepositoryClient } from './api';
+import type { MetricsExperienceClient } from './api';
 
-export interface MetricsExperienceService {
-  callApi: MetricsExperienceRepositoryClient;
-}
+export type { MetricsExperienceClient };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExperiencePluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MetricsExperiencePluginStart {}
+export interface MetricsExperiencePluginStart {
+  metricsExperienceClient: MetricsExperienceClient | undefined;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExperiencePluginSetupDependencies {}

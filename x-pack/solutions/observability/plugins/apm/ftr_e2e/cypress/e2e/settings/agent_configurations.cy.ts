@@ -245,7 +245,7 @@ describe('Agent configuration', () => {
       });
 
       it('should display advanced configuration section', () => {
-        cy.contains('Advanced Configuration').should('be.visible');
+        cy.contains('Advanced Configuration').scrollIntoView().should('be.visible');
         cy.contains('Advanced configuration allows you to define custom settings').should(
           'be.visible'
         );
@@ -283,6 +283,11 @@ describe('Agent configuration', () => {
             .type('custom.key')
             .clear();
           cy.contains('Key cannot be empty').should('be.visible');
+        });
+
+        it('should show error when key is only whitespace', () => {
+          cy.getByTestSubj('apmSettingsAdvancedConfigurationKeyField').first().type(' ');
+          cy.contains('Key cannot be only whitespace characters').should('be.visible');
         });
 
         it('should show error when key conflicts with predefined settings', () => {

@@ -33,7 +33,7 @@ export const PanelsResizable = ({
 }: {
   className?: string;
   direction: ResizableLayoutDirection;
-  fixedPanelSize: number;
+  fixedPanelSize: number | 'max-content';
   minFixedPanelSize: number;
   minFlexPanelSize: number;
   fixedPanel: ReactNode;
@@ -91,9 +91,12 @@ export const PanelsResizable = ({
     let fixedPanelSizePct: number;
     let flexPanelSizePct: number;
 
+    const resolvedFixedPanelSize =
+      fixedPanelSize === 'max-content' ? containerSize - minFlexPanelSize : fixedPanelSize;
+
     // If the container size is less than the minimum main content size
     // plus the current fixed panel size, then we need to make some adjustments.
-    if (containerSize < minFlexPanelSize + fixedPanelSize) {
+    if (containerSize < minFlexPanelSize + resolvedFixedPanelSize) {
       const newFixedPanelSize = containerSize - minFlexPanelSize;
 
       // Try to make the fixed panel size fit within the container, but if it
@@ -106,7 +109,7 @@ export const PanelsResizable = ({
         flexPanelSizePct = 100 - fixedPanelSizePct;
       }
     } else {
-      fixedPanelSizePct = pixelsToPercent(containerSize, fixedPanelSize);
+      fixedPanelSizePct = pixelsToPercent(containerSize, resolvedFixedPanelSize);
       flexPanelSizePct = 100 - fixedPanelSizePct;
     }
 

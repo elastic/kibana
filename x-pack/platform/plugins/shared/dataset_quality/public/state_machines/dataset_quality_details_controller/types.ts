@@ -67,6 +67,8 @@ export interface WithDefaultControllerState {
   failedDocsErrors: FailedDocsErrorsTableConfig;
   timeRange: TimeRangeConfig;
   showCurrentQualityIssues: boolean;
+  selectedIssueTypes: string[];
+  selectedFields: string[];
   qualityIssuesChart: QualityIssueType;
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
@@ -78,6 +80,7 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
+  view: 'classic' | 'streams';
 }
 
 export interface WithDataStreamDetails {
@@ -141,7 +144,10 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'timeRange'
   | 'isIndexNotFoundError'
   | 'showCurrentQualityIssues'
+  | 'selectedIssueTypes'
+  | 'selectedFields'
   | 'qualityIssuesChart'
+  | 'view'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -283,6 +289,14 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'ROLLOVER_DATA_STREAM';
+    }
+  | {
+      type: 'UPDATE_SELECTED_ISSUE_TYPES';
+      selectedIssueTypes: string[];
+    }
+  | {
+      type: 'UPDATE_SELECTED_FIELDS';
+      selectedFields: string[];
     }
   | {
       type: 'UPDATE_FAILURE_STORE';

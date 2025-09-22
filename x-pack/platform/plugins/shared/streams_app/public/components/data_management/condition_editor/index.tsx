@@ -28,11 +28,11 @@ import {
   getFilterValue,
   isCondition,
   isFilterConditionObject,
+  operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
 import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
-import { useResizeChecker } from '@kbn/react-hooks';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
@@ -81,27 +81,12 @@ export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorP
   return <ConditionEditor status="enabled" {...props} />;
 }
 
-const operatorMap = {
-  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
-  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
-  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
-  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
-    defaultMessage: 'less than or equals',
-  }),
-  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
-  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
-    defaultMessage: 'greater than or equals',
-  }),
-  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
-  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
-  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
-  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
-};
-
-const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([value, text]) => ({
-  value,
-  text,
-}));
+const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
+  ([value, text]) => ({
+    value,
+    text,
+  })
+);
 
 interface ConditionEditorProps {
   condition: Condition;
@@ -119,8 +104,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
-
-  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -153,26 +136,23 @@ export function ConditionEditor(props: ConditionEditorProps) {
       }
     >
       {usingSyntaxEditor ? (
-        <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
-          <CodeEditor
-            dataTestSubj="streamsAppConditionEditorCodeEditor"
-            height={200}
-            languageId="json"
-            value={JSON.stringify(condition, null, 2)}
-            onChange={(value) => {
-              try {
-                handleConditionChange(JSON.parse(value));
-              } catch (error: unknown) {
-                // do nothing
-              }
-            }}
-            editorDidMount={setupResizeChecker}
-            editorWillUnmount={destroyResizeChecker}
-            options={{
-              readOnly: status === 'disabled',
-            }}
-          />
-        </div>
+        <CodeEditor
+          dataTestSubj="streamsAppConditionEditorCodeEditor"
+          height={200}
+          languageId="json"
+          value={JSON.stringify(condition, null, 2)}
+          onChange={(value) => {
+            try {
+              handleConditionChange(JSON.parse(value));
+            } catch (error: unknown) {
+              // do nothing
+            }
+          }}
+          options={{
+            readOnly: status === 'disabled',
+            automaticLayout: true,
+          }}
+        />
       ) : isFilterCondition ? (
         <FilterForm
           disabled={status === 'disabled'}

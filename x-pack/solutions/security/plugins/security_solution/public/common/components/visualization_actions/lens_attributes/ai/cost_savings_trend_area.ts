@@ -186,8 +186,5 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
   } as LensAttributes;
 };

@@ -12,17 +12,27 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type {
+  DashboardMigration,
+  DashboardMigrationDashboard,
+} from '../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface SiemMigrationsClientDependencies {
-  inferenceClient: InferenceClient;
+  inferenceService: InferenceServerStart;
   actionsClient: ActionsClient;
+  rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
 }
 
-export interface SiemMigrationsCommonCreateClientParams {
+export interface SiemMigrationsCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
@@ -30,3 +40,11 @@ export interface SiemMigrationsCommonCreateClientParams {
 }
 
 export type SiemMigrationsIndexNameProvider = () => Promise<string>;
+
+export type Stored<T extends object> = T & { id: string };
+
+export type MigrationDocument = RuleMigration | DashboardMigration;
+export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
+
+export type StoredSiemMigration = Stored<MigrationDocument>;
+export type StoredSiemMigrationItem = Stored<ItemDocument>;

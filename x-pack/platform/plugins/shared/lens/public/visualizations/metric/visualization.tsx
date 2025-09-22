@@ -46,6 +46,7 @@ import {
   isSecondaryTrendConfigInvalid,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
+import { convertToRunTimeState } from './runtime_state';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -55,9 +56,13 @@ export const showingBar = (
   Boolean(state.showBar && state.maxAccessor);
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
-  return showingBar(state) && isMetricNumeric
-    ? euiLightVars.euiColorPrimary
-    : euiThemeVars.euiColorEmptyShade;
+  if (showingBar(state) && isMetricNumeric) {
+    return euiLightVars.euiColorPrimary;
+  }
+  if (state.applyColorTo === 'value') {
+    return euiThemeVars.euiColorVisText0;
+  }
+  return euiThemeVars.euiColorEmptyShade;
 };
 
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
@@ -329,8 +334,9 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
-  delete state.secondaryPrefix;
+  delete state.secondaryLabel;
   delete state.secondaryTrend;
+  delete state.secondaryLabelPosition;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -395,14 +401,15 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state ?? {
-        layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+    if (state) return convertToRunTimeState(state);
+
+    return {
+      layerId: addNewLayer(),
+      layerType: layerTypes.DATA,
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
+
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
@@ -577,8 +584,9 @@ export const getMetricVisualization = ({
       return {
         state: {
           ...state,
-          secondaryPrefix: undefined,
+          secondaryLabel: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
+          secondaryLabelPosition: 'before',
         },
         references: [],
       };

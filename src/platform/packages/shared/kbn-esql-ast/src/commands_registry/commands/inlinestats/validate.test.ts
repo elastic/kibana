@@ -10,6 +10,7 @@ import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from '../stats/validate';
 import { Parser } from '../../../parser';
 import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const inlinestatsExpectErrors = (
   query: string,
@@ -25,21 +26,19 @@ describe('INLINESTATS Validation', () => {
   });
 
   describe('INLINESTATS <aggregates> [ BY <grouping> ]', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField * 3.281', [
-      {
-        name: 'doubleField * 3.281',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg_doubleField', [
-      {
-        name: 'avg_doubleField',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField * 3.281', {
+      name: 'doubleField * 3.281',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg_doubleField', {
+      name: 'avg_doubleField',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
 
     describe('... <aggregates> ...', () => {
       test('no errors on correct usage', () => {
@@ -72,23 +71,23 @@ describe('INLINESTATS Validation', () => {
 
       test('errors when input is not an aggregate function', () => {
         inlinestatsExpectErrors('from a_index | inlinestats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by col0 = wrongField + 1',
-          ['Unknown column [wrongField]']
+          ['Unknown column "wrongField"']
         );
         inlinestatsExpectErrors('from a_index | inlinestats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
+          'Unknown function FN',
         ]);
       });
 
@@ -122,12 +121,12 @@ describe('INLINESTATS Validation', () => {
 
       test('various errors', () => {
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by percentile(doubleField)',
-          ['INLINESTATS BY does not support function percentile']
+          'from a_index | inlinestats avg(doubleField) by percentile(doubleField, 90)',
+          ['Function PERCENTILE not allowed in BY']
         );
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField) by ipField',
-          ['INLINESTATS BY does not support function percentile']
+          'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 
@@ -145,25 +144,8 @@ describe('INLINESTATS Validation', () => {
 
         test('errors', () => {
           inlinestatsExpectErrors('from index | inlinestats by bucket(dateField, pi(), "", "")', [
-            'Argument of [bucket] must be [integer], found value [pi()] type [double]',
+            getNoValidCallSignatureError('bucket', ['date', 'double', 'keyword', 'keyword']),
           ]);
-
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, abs(doubleField), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(doubleField)]']
-          );
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, abs(length(doubleField)), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
-          );
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, doubleField, textField, textField)',
-            [
-              'Argument of [bucket] must be a constant, received [doubleField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-            ]
-          );
         });
       });
     });

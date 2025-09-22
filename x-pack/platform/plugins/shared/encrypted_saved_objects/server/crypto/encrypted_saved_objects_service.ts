@@ -154,6 +154,28 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Gets an array containing all registered type name
+   *
+   * @returns Array<string> - all SO type names registered with the ESO service
+   */
+  public getRegisteredTypes(): string[] {
+    return Array.from(this.typeDefinitions.keys());
+  }
+
+  /**
+   * Gets a hash map for all types registered with the ESO service
+   *
+   * @returns Record<string, string> - type names and unique hash
+   */
+  public getRegisteredTypeHashMap(): Record<string, string> {
+    const registeredTypes = {} as Record<string, string>;
+    for (const [key, value] of this.typeDefinitions) {
+      registeredTypes[key] = value.getDefinitionHash(key);
+    }
+    return registeredTypes;
+  }
+
+  /**
    * Checks whether the ESO type has explicitly opted out of enforcing random IDs.
    * @param type Saved object type.
    * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false

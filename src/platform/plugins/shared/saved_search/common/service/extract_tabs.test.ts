@@ -9,7 +9,8 @@
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from '../../server/saved_objects/schema';
-import { extractTabs, extractTabsBackfillFn, SavedSearchType, VIEW_MODE } from '..';
+import { extractTabs, extractTabsBackfillFn } from './extract_tabs';
+import { SavedSearchType, VIEW_MODE } from '..';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
@@ -89,6 +90,38 @@ describe('extractTabs', () => {
           "viewMode": "documents",
         }
       `);
+    });
+
+    it('should not extract `tabs` property in each tab', () => {
+      const attributes = {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"query":{"language":"kuery","query":"service.type: \\"elasticsearch\\""},"highlightAll":true,"fields":[{"field":"*","include_unmapped":true}],"sort":[{"@timestamp":{"order":"desc","format":"strict_date_optional_time"}},{"_doc":"desc"}],"filter":[{"meta":{"disabled":false,"negate":false,"alias":null,"key":"service.type","field":"service.type","params":{"query":"elasticsearch"},"type":"phrase","indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"},"query":{"match_phrase":{"service.type":"elasticsearch"}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+        },
+        title: 'my_title',
+        sort: [['@timestamp', 'desc']],
+        columns: ['message'],
+        description: 'my description',
+        grid: {},
+        hideChart: false,
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        isTextBasedQuery: false,
+        timeRestore: false,
+        tabs: [
+          {
+            id: 'existing-id',
+            label: 'Existing Tab',
+            attributes: {
+              columns: ['column1', 'column2'],
+            },
+          },
+        ],
+      };
+
+      const result = extractTabs(attributes);
+
+      expect(result.tabs).toBeInstanceOf(Array);
+      expect(result.tabs![0].attributes).not.toHaveProperty('tabs');
     });
   });
 

@@ -8,13 +8,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
+import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
+import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 
 const EXECUTIONS_LIST_REFETCH_INTERVAL = 5000;
 const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
+
+export interface ExecutionListFiltersQueryParams {
+  statuses: ExecutionStatus[];
+  executionTypes: ExecutionType[];
+}
+
+const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
+  statuses: [],
+  executionTypes: [],
+};
 
 interface WorkflowExecutionListProps {
   workflowId: string | null;
@@ -22,13 +32,17 @@ interface WorkflowExecutionListProps {
 
 export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
   const [refetchInterval, setRefetchInterval] = useState(EXECUTIONS_LIST_REFETCH_INTERVAL);
+  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const {
     data: workflowExecutions,
     isLoading: isLoadingWorkflowExecutions,
     error,
-  } = useWorkflowExecutions(workflowId, {
-    refetchInterval,
-  });
+  } = useWorkflowExecutions(
+    { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
+    {
+      refetchInterval,
+    }
+  );
 
   useEffect(() => {
     if (!workflowExecutions) {
@@ -63,6 +77,8 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       selectedId={selectedExecutionId ?? null}
       isLoading={isLoadingWorkflowExecutions}
       error={error as Error | null}
+      filters={filters}
+      onFiltersChange={setFilters}
     />
   );
 }

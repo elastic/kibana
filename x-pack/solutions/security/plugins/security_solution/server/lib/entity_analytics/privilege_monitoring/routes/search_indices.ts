@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  PRIVMON_INDICES_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
@@ -30,7 +31,7 @@ export const searchPrivilegeMonitoringIndicesRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/indices',
+      path: PRIVMON_INDICES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

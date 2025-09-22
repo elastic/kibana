@@ -12,6 +12,7 @@ import { collectValues as collect, newestValue } from './field_utils';
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
 export const SERVICE_IDENTITY_FIELD = 'service.name';
 
+const SERVICE_ENTITY_TYPE = 'Service';
 export const serviceEntityEngineDescription: EntityDescription = {
   entityType: 'service',
   version: SERVICE_DEFINITION_VERSION,
@@ -20,6 +21,14 @@ export const serviceEntityEngineDescription: EntityDescription = {
   settings: {
     timestampField: '@timestamp',
   },
+  pipeline: [
+    {
+      set: {
+        field: 'entity.type',
+        value: SERVICE_ENTITY_TYPE,
+      },
+    },
+  ],
   fields: [
     collect({ source: 'service.address' }),
     collect({ source: 'service.environment' }),

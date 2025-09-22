@@ -144,6 +144,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getAnalytics: () => core.analytics,
+
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
@@ -217,7 +219,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         currentUser: coreContext.security.authc.getCurrentUser(),
         spaceId: getSpaceId(),
         dependencies: {
-          inferenceClient: startPlugins.inference.getClient({ request }),
+          inferenceService: startPlugins.inference,
           rulesClient,
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
@@ -280,6 +282,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: coreStart.security.audit.asScoped(request),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         });
       }),
       getMonitoringEntitySourceDataClient: memoize(() => {

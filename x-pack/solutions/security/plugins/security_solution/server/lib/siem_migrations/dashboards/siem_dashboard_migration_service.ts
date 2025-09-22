@@ -10,13 +10,9 @@ import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_data_client';
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
-import type { SiemMigrationsCommonCreateClientParams } from '../common/types';
-import type { DashboardMigrationsClientDependencies } from './types';
-
-export interface DashboardMigrationsCreateClientParams
-  extends SiemMigrationsCommonCreateClientParams {
-  dependencies: DashboardMigrationsClientDependencies;
-}
+import type { DashboardMigrationsTaskClient } from './task/dashboard_migrations_task_client';
+import { DashboardMigrationsTaskService } from './task/dashboard_migrations_task_service';
+import type { SiemMigrationsCreateClientParams } from '../common/types';
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -26,16 +22,19 @@ export interface SiemDashboardsMigrationsSetupParams {
 
 export interface SiemDashboardMigrationsClient {
   data: DashboardMigrationsDataClient;
+  task: DashboardMigrationsTaskClient;
 }
 
 export class SiemDashboardMigrationsService {
   private dataService: DashboardMigrationsDataService;
   private esClusterClient?: IClusterClient;
+  private taskService: DashboardMigrationsTaskService;
   private logger: Logger;
 
   constructor(logger: LoggerFactory, kibanaVersion: string, elserInferenceId?: string) {
     this.logger = logger.get('siemDashboardMigrations');
     this.dataService = new DashboardMigrationsDataService(this.logger, kibanaVersion);
+    this.taskService = new DashboardMigrationsTaskService(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemDashboardsMigrationsSetupParams) {
@@ -52,7 +51,7 @@ export class SiemDashboardMigrationsService {
     currentUser,
     spaceId,
     dependencies,
-  }: DashboardMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  }: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
@@ -64,8 +63,17 @@ export class SiemDashboardMigrationsService {
       dependencies,
     });
 
-    return { data: dataClient };
+    const taskClient = this.taskService.createClient({
+      request,
+      currentUser,
+      dataClient,
+      dependencies,
+    });
+
+    return { data: dataClient, task: taskClient };
   }
 
-  stop() {}
+  stop() {
+    this.taskService.stopAll();
+  }
 }

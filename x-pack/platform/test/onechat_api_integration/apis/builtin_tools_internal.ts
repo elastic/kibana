@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const searchTool = platformCoreTools.search;
 
-  // Failing: See https://github.com/elastic/kibana/issues/233013
-  describe.skip('Builtin Tools internal API', () => {
-    describe('POST /internal/chat/tools/_bulk_delete', () => {
+  describe('Builtin Tools internal API', () => {
+    describe('POST /internal/agent_builder/tools/_bulk_delete', () => {
       it('should return error results when attempting to bulk delete builtin system tools', async () => {
-        const toolIds = Object.values(builtinToolIds).slice(0, 3) as string[];
+        const toolIds = Object.values(platformCoreTools).slice(0, 3) as string[];
 
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .send({ ids: toolIds })
           .expect(200);
@@ -52,15 +52,15 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(customTool)
           .expect(200);
 
-        const mixedToolIds = ['.nl_search', 'test-custom-tool'];
+        const mixedToolIds = [searchTool, 'test-custom-tool'];
 
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .send({ ids: mixedToolIds })
           .expect(200);
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.results).to.have.length(2);
 
         // Builtin tool should fail
-        const builtinResult = response.body.results.find((r: any) => r.toolId === '.nl_search');
+        const builtinResult = response.body.results.find((r: any) => r.toolId === searchTool);
         expect(builtinResult).to.have.property('success', false);
         expect(builtinResult.reason.error.message).to.contain("is read-only and can't be deleted");
 
