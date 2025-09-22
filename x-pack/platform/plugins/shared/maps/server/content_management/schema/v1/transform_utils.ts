@@ -6,8 +6,9 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { MapItem, MapAttributes } from '../../../../common/content_management';
+import { type MapItem, type MapAttributes, MapAttributes } from '../../../../common/content_management';
 import type { MapsCreateOptions, MapsSavedObjectAttributes } from './types';
+import { injectReferences } from '@kbn/maps-plugin/common/migrations/references';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -43,17 +44,11 @@ export function savedObjectToItem(
     | PartialSavedObject<MapsSavedObjectAttributes>,
   partial: boolean
 ): MapItem | PartialMapsItem {
-  const normalizedAttributes = {
-    ...savedObject.attributes,
-    description: savedObject.attributes?.description ?? undefined,
-    mapStateJSON: savedObject.attributes?.mapStateJSON ?? undefined,
-    layerListJSON: savedObject.attributes?.layerListJSON ?? undefined,
-    uiStateJSON: savedObject.attributes?.uiStateJSON ?? undefined,
-  };
-
+  const { references, attributes, ...rest } = savedObject;
   return {
-    ...savedObject,
-    attributes: normalizedAttributes,
+    ...rest,
+    ...injectReferences({ attributes: attributes as MapAttributes, references: references ?? [] }),
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
 }
 
