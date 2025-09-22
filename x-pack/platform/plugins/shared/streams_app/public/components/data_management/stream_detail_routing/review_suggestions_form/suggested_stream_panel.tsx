@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButton,
-  EuiPanel,
   EuiButtonEmpty,
   EuiSpacer,
   EuiText,
@@ -27,6 +26,8 @@ import { getPercentageFormatter } from '../../../../util/formatters';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useMatchRate } from './use_match_rate';
 import { ConditionPanel } from './condition_panel';
+import { useStreamSamplesSelector } from '../state_management/stream_routing_state_machine/use_stream_routing';
+import { SelectablePanel } from './selectable_panel';
 
 const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
@@ -40,12 +41,18 @@ export function SuggestedStreamPanel({
   definition: Streams.WiredStream.GetResponse;
   partition: ReviewSuggestionsInputs['suggestions'][number];
   onDismiss(): void;
-  onPreview(): void;
+  onPreview(toggle: boolean): void;
   onSuccess(): void;
 }) {
   const [isModalOpen, toggleModal] = useToggle(false);
   const { timeState } = useTimefilter();
   const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
+  const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
+  const isSelected = Boolean(
+    selectedPreview &&
+      selectedPreview.type === 'suggestion' &&
+      selectedPreview.name === partition.name
+  );
 
   return (
     <>
@@ -60,7 +67,7 @@ export function SuggestedStreamPanel({
           onClose={() => toggleModal(false)}
         />
       )}
-      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -89,7 +96,12 @@ export function SuggestedStreamPanel({
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="inspect" isSelected={false} size="s" onClick={onPreview}>
+            <EuiButtonEmpty
+              iconType={isSelected ? 'eyeClosed' : 'eye'}
+              isSelected={isSelected}
+              size="s"
+              onClick={() => onPreview(!isSelected)}
+            >
               {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
                 defaultMessage: 'Preview',
               })}
@@ -117,7 +129,7 @@ export function SuggestedStreamPanel({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </SelectablePanel>
     </>
   );
 }

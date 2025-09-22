@@ -141,8 +141,14 @@ export const streamRoutingMachine = setup({
           target: '#idle',
           actions: enqueueActions(({ enqueue, event }) => {
             enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: event.toggle
+                ? { type: 'suggestion', name: event.name, index: event.index }
+                : undefined,
+            });
+            enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.updateCondition',
-              condition: event.condition,
+              condition: event.toggle ? event.condition : undefined,
             });
             enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -185,9 +191,23 @@ export const streamRoutingMachine = setup({
         },
         creatingNewRule: {
           id: 'creatingNewRule',
-          entry: [{ type: 'addNewRoutingRule' }],
+          entry: [
+            { type: 'addNewRoutingRule' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'createStream' },
+            }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: { always: {} },
+            }),
+          ],
           exit: [
             { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: undefined,
+            }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.updateCondition',
               condition: undefined,
@@ -266,6 +286,12 @@ export const streamRoutingMachine = setup({
         editingRule: {
           id: 'editingRule',
           initial: 'changing',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           exit: [{ type: 'resetRoutingChanges' }],
           states: {
             changing: {
@@ -340,6 +366,12 @@ export const streamRoutingMachine = setup({
         reorderingRules: {
           id: 'reorderingRules',
           initial: 'reordering',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           states: {
             reordering: {
               on: {

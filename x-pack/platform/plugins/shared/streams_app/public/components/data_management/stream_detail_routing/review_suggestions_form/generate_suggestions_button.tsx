@@ -81,6 +81,7 @@ export const GenerateSuggestionButton = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
+            iconType="sparkles"
             data-test-subj="streamsAppGenerateSuggestionButton"
             onClick={() => onClick(aiFeatures.genAiConnectors.selectedConnector!)}
             isDisabled={!aiFeatures.genAiConnectors.selectedConnector || rest.isDisabled}

@@ -199,7 +199,16 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     defaultMessage: 'No suggestions available',
                   }
                 )}
-                onDismiss={resetForm}
+                onDismiss={() => {
+                  resetForm();
+                  streamsRoutingActorRef.send({
+                    type: 'suggestion.preview',
+                    condition: { always: {} },
+                    name: '',
+                    index: 0,
+                    toggle: false,
+                  });
+                }}
               >
                 <EuiText size="s">
                   {i18n.translate(
@@ -281,7 +290,25 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                       <SuggestedStreamPanel
                         definition={definition}
                         partition={partition}
-                        onDismiss={() => removeSuggestion(index)}
+                        onPreview={(toggle: boolean) =>
+                          streamsRoutingActorRef.send({
+                            type: 'suggestion.preview',
+                            condition: partition.condition,
+                            name: partition.name,
+                            index,
+                            toggle,
+                          })
+                        }
+                        onDismiss={() => {
+                          removeSuggestion(index);
+                          streamsRoutingActorRef.send({
+                            type: 'suggestion.preview',
+                            condition: partition.condition,
+                            name: partition.name,
+                            index,
+                            toggle: false,
+                          });
+                        }}
                         onSuccess={() => {
                           streamsRoutingActorRef.send({
                             type: 'suggestion.append',
@@ -295,12 +322,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                           });
                           removeSuggestion(index);
                         }}
-                        onPreview={() =>
-                          streamsRoutingActorRef.send({
-                            type: 'suggestion.preview',
-                            condition: partition.condition,
-                          })
-                        }
                       />
                       <EuiSpacer size="s" />
                     </NestedView>

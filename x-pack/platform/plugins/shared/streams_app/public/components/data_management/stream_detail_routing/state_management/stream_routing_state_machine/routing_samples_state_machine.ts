@@ -45,12 +45,20 @@ export interface RoutingSamplesContext {
   approximateMatchingPercentage?: string;
   approximateMatchingPercentageError?: Error;
   documentMatchFilter: DocumentMatchFilterOptions;
+  selectedPreview?:
+    | { type: 'suggestion'; name: string; index: number }
+    | { type: 'createStream' }
+    | { type: 'updateStream'; name: string };
 }
 
 export type RoutingSamplesEvent =
   | { type: 'routingSamples.refresh' }
   | { type: 'routingSamples.updateCondition'; condition?: Condition }
-  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions };
+  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
+  | {
+      type: 'routingSamples.setSelectedPreview';
+      preview: RoutingSamplesContext['selectedPreview'];
+    };
 
 export interface SearchParams extends RoutingSamplesInput {
   start: number;
@@ -97,6 +105,11 @@ export const routingSamplesMachine = setup({
     setDocumentMatchFilter: assign((_, params: { filter: DocumentMatchFilterOptions }) => ({
       documentMatchFilter: params.filter,
     })),
+    setSelectedPreview: assign(
+      (_, params: { preview: RoutingSamplesContext['selectedPreview'] }) => ({
+        selectedPreview: params.preview,
+      })
+    ),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -115,6 +128,7 @@ export const routingSamplesMachine = setup({
     documents: [],
     documentsError: undefined,
     approximateMatchingPercentageError: undefined,
+    selectedPreview: undefined,
     documentMatchFilter: 'matched',
   }),
   initial: 'fetching',
@@ -138,6 +152,16 @@ export const routingSamplesMachine = setup({
       actions: [
         {
           type: 'setDocumentMatchFilter',
+          params: ({ event }) => event,
+        },
+      ],
+    },
+    'routingSamples.setSelectedPreview': {
+      target: '.fetching',
+      reenter: true,
+      actions: [
+        {
+          type: 'setSelectedPreview',
           params: ({ event }) => event,
         },
       ],

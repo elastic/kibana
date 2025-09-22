@@ -15,6 +15,7 @@ import type { RoutingDefinition } from '@kbn/streams-schema';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
+import type { RoutingSamplesContext } from './routing_samples_state_machine';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
@@ -48,5 +49,12 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
   | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
-  | { type: 'suggestion.preview'; condition: Condition }
+  | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
+  | {
+      type: 'suggestion.preview';
+      condition: Condition;
+      name: string;
+      index: number;
+      toggle?: boolean;
+    }
   | { type: 'suggestion.append'; definitions: RoutingDefinition[] };

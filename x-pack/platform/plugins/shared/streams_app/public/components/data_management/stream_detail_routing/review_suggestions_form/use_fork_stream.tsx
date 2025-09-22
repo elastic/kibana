@@ -83,7 +83,11 @@ function createSuccessToast(
         <EuiText size="s">
           <p>
             {i18n.translate('xpack.streams.streamDetailRouting.createSuccessToast.message', {
-              defaultMessage: `You have successfully created a new stream called ${params.name}. To manage, open the stream.`,
+              defaultMessage:
+                'You have successfully created a new stream called {name}. To manage, open the stream.',
+              values: {
+                name: params.name,
+              },
             })}
           </p>
         </EuiText>
