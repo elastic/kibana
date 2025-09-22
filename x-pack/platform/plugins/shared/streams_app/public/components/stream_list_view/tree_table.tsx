@@ -39,6 +39,7 @@ import {
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
+  FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
 
@@ -151,7 +152,7 @@ export function StreamsTreeTable({
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {!canReadFailureStore && (
                 <EuiIconTip
-                  content="Does not include failed documents - user does not have access to failure store"
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
                 />
@@ -179,7 +180,7 @@ export function StreamsTreeTable({
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {!canReadFailureStore && (
                 <EuiIconTip
-                  content="Does not include failed documents - user does not have access to failure store"
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
                 />

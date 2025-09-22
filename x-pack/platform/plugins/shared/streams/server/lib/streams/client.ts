@@ -532,7 +532,7 @@ export class StreamsClient {
         cluster: REQUIRED_MANAGE_PRIVILEGES,
         index: [
           {
-            names: Array.isArray(names) ? names : [names],
+            names,
             privileges: REQUIRED_INDEX_PRIVILEGES,
           },
         ],
