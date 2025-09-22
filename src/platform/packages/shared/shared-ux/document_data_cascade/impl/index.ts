@@ -11,6 +11,7 @@ export { DataCascade, DataCascadeRow, DataCascadeRowCell } from './src/component
 export type {
   GroupNode,
   LeafNode,
+  DataCascadeProps,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
 } from './src/components';
