@@ -39,15 +39,6 @@ export interface SavedObjectsCounts {
   by_access_control_type: Array<{ key: string; doc_count: number }>;
 }
 
-type BucketWithAccessControl = estypes.AggregationsStringTermsBucketKeys & {
-  access_control_count: estypes.AggregationsFilterAggregate;
-};
-
-interface TypesAgg {
-  buckets: BucketWithAccessControl[];
-  sum_other_doc_count?: number;
-}
-
 /**
  * Returns the total number of Saved Objects indexed in Elasticsearch.
  * It also returns a break-down of the document count for all the built-in SOs in Kibana (or the types specified in `soTypes`).
@@ -65,39 +56,72 @@ export async function getSavedObjectsCounts(
   options?: {
     exclusive?: boolean;
     namespaces?: string[];
+    typesSupportingAccessControl?: string[];
   }
 ): Promise<SavedObjectsCounts> {
   const { exclusive = false, namespaces = ['*'] } = options || {};
 
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
+    types: {
+      terms: {
+        field: 'type',
+        // If `exclusive == true`, we only care about the strict length of the provided SO types.
+        // Otherwise, we want to account for the `missing` bucket (size and missing option).
+        ...(exclusive
+          ? { size: soTypes.length }
+          : { missing: MISSING_TYPE_KEY, size: soTypes.length + 1 }),
+      },
+    },
+  };
+
+  if (options?.typesSupportingAccessControl && options.typesSupportingAccessControl.length > 0) {
+    aggs.access_control_types = {
+      filter: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'accessControl',
+              },
+            },
+            {
+              terms: {
+                type: options.typesSupportingAccessControl,
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_type: {
+          terms: {
+            field: 'type',
+            size: options.typesSupportingAccessControl.length,
+          },
+        },
+      },
+    };
+  }
+
   const body = await soClient.find<
     void,
     {
-      types: TypesAgg;
+      types: estypes.AggregationsStringTermsAggregate;
+      access_control_types: estypes.AggregationsStringTermsAggregate;
     }
   >({
     type: soTypes,
     perPage: 0,
     namespaces,
-    aggs: {
-      types: {
-        terms: {
-          field: 'type',
-          // If `exclusive == true`, we only care about the strict length of the provided SO types.
-          // Otherwise, we want to account for the `missing` bucket (size and missing option).
-          ...(exclusive
-            ? { size: soTypes.length }
-            : { missing: MISSING_TYPE_KEY, size: soTypes.length + 1 }),
-        },
-        aggs: {
-          access_control_count: {
-            filter: { exists: { field: 'accessControl' } },
-          },
-        },
-      },
-    },
+    aggs,
   });
 
-  const buckets = body.aggregations?.types?.buckets || [];
+  const buckets =
+    (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
+
+  const accessControlBucket =
+    (body.aggregations?.access_control_types
+      ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const nonExpectedTypes: string[] = [];
 
@@ -112,9 +136,9 @@ export async function getSavedObjectsCounts(
   });
 
   const accessControlPerType =
-    buckets.map((b) => ({
+    accessControlBucket?.map((b) => ({
       key: b.key as string,
-      doc_count: b?.access_control_count?.doc_count ?? 0,
+      doc_count: b.doc_count ?? 0,
     })) ?? [];
 
   return {

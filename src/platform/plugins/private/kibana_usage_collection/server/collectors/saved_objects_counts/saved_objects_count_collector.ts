@@ -27,7 +27,8 @@ interface SavedObjectsCountUsage {
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
   getAllSavedObjectTypes: () => Promise<string[]>,
-  getSoClientWithHiddenIndices: () => Promise<SavedObjectsClientContract>
+  getSoClientWithHiddenIndices: () => Promise<SavedObjectsClientContract>,
+  getAllTypesWithAccessControl: () => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<SavedObjectsCountUsage>({
@@ -90,6 +91,7 @@ export function registerSavedObjectsCountUsageCollector(
       async fetch() {
         const soClient = await getSoClientWithHiddenIndices();
         const allRegisteredSOTypes = await getAllSavedObjectTypes();
+        const allTypesWithAccessControl = await getAllTypesWithAccessControl();
         const namespaces = ['*'];
         const {
           total,
@@ -100,6 +102,7 @@ export function registerSavedObjectsCountUsageCollector(
         } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, {
           namespaces,
           exclusive: false,
+          typesSupportingAccessControl: allTypesWithAccessControl,
         });
 
         return {

@@ -125,6 +125,12 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   public supportsAccessControl(type: string): boolean {
     return this.types.get(type)?.supportsAccessControl ?? false;
   }
+
+  public getAllTypesWithAccessControl() {
+    return this.getAllTypes()
+      .filter((type) => type.supportsAccessControl)
+      .map(({ name }) => name);
+  }
 }
 
 const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {

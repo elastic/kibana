@@ -98,4 +98,9 @@ export interface ISavedObjectTypeRegistry {
    * the property/type is not registered.
    */
   getNameAttribute(type: string): string;
+
+  /**
+   * Returns all {@link SavedObjectsType | types} currently registered that support access control.
+   */
+  getAllTypesWithAccessControl(): string[];
 }
