@@ -11,6 +11,7 @@ import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import { take } from 'rxjs';
 
 import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +43,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
   const expirationWarning = (
     <FormattedMessage
       id="xpack.security.sessionExpirationToast.body"
-      defaultMessage="You will be logged out {timeout}."
+      defaultMessage="You will be logged out {timeout}. Please save your work and log in again."
       values={{
         timeout: <FormattedRelativeTime value={timeoutSeconds} updateIntervalInSeconds={1} />,
       }}
@@ -77,6 +78,11 @@ export const createSessionExpirationToast = (
   onExtend: () => Promise<any>,
   onClose: () => void
 ): ToastInput => {
+  let currentState: SessionState | undefined;
+  sessionState$.pipe(take(1)).subscribe((state) => {
+    currentState = state;
+  });
+
   return {
     color: 'warning',
     iconType: 'clock',
@@ -88,6 +94,7 @@ export const createSessionExpirationToast = (
       services
     ),
     onClose,
+    autoFocus: currentState?.canBeExtended ?? false,
     toastLifeTimeMs: 0x7fffffff, // Toast is hidden based on observable so using maximum possible timeout
   };
 };
