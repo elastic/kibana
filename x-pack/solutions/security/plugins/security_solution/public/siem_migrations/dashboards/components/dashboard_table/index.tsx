@@ -45,6 +45,7 @@ import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
 import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -195,6 +196,22 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       }
     }, [addError, installMigrationDashboards]);
 
+    const installSingleDashboard = useCallback(
+      async (migrationDashboard: DashboardMigrationDashboard) => {
+        setTableLoading(true);
+        try {
+          await installMigrationDashboards({
+            ids: [migrationDashboard.id],
+          });
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_DASHBOARDS_FAILURE });
+        } finally {
+          setTableLoading(false);
+        }
+      },
+      [installMigrationDashboards, addError]
+    );
+
     const defaultSettingsForModal = useMemo(
       () => ({
         connectorId: migrationStats?.last_execution?.connector_id,
@@ -215,7 +232,30 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       close: closeReprocessFailedDashboardsModal,
     } = useIsOpenState(false);
 
-    const dashboardsColumns = useMigrationDashboardsTableColumns();
+    const getMigrationDashboardsData = useCallback(
+      (dashboardId: string) => {
+        if (!isDataLoading && migrationDashboards.length) {
+          return {
+            migrationDashboard: migrationDashboards.find(
+              (dashboard) => dashboard.id === dashboardId
+            ),
+          };
+        }
+      },
+      [isDataLoading, migrationDashboards]
+    );
+
+    const { migrationDashboardDetailsFlyout, openMigrationDashboardDetails } =
+      useMigrationDashboardDetailsFlyout({
+        isLoading: isDataLoading,
+        getMigrationDashboardData: getMigrationDashboardsData,
+      });
+
+    const dashboardsColumns = useMigrationDashboardsTableColumns({
+      shouldDisableActions: isDashboardsLoading || isTableLoading,
+      installDashboard: installSingleDashboard,
+      openDashboardDetailsFlyout: openMigrationDashboardDetails,
+    });
 
     return (
       <>
@@ -308,6 +348,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
             )
           }
         />
+        {migrationDashboardDetailsFlyout}
       </>
     );
   }
