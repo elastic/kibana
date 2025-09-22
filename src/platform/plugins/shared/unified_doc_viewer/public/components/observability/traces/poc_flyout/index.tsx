@@ -73,7 +73,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = (props) => {
               onClick={() => setIsWaterfallFlyoutVisible(true)}
               disabled={isWaterfallFlyoutVisible}
             >
-              Open waterfall (main flyout)
+              Open waterfall (main flyout - new session)
             </EuiButton>
             <Overview
               hit={hit}
