@@ -137,6 +137,7 @@ describe('AI Assistant Service', () => {
         getStatus: jest.fn(),
         install: jest.fn(),
         update: jest.fn(),
+        updateAll: jest.fn(),
         uninstall: jest.fn(),
       }),
     };

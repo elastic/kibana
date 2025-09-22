@@ -106,7 +106,7 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 107869
-  observabilityAIAssistant: 46941
+  observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
@@ -117,7 +117,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3058
+  productDocBase: 3074
   productIntercept: 9860
   profiling: 20716
   remoteClusters: 10170

@@ -43,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
-  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/235443
+  // Failing: See https://github.com/elastic/kibana/issues/235444
+  describe.skip('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
