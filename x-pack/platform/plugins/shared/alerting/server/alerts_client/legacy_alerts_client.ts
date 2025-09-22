@@ -6,6 +6,7 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys } from 'lodash';
+import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -33,14 +34,18 @@ import type { MaintenanceWindow } from '../application/maintenance_window/types'
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
+import type { TaskRunnerTimer } from '../task_runner/task_runner_timer';
+import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   request: KibanaRequest;
+  ruleRunMetricsStore: RuleRunMetricsStore;
   ruleType: UntypedNormalizedRuleType;
   spaceId: string;
+  timer: TaskRunnerTimer;
 }
 
 export class LegacyAlertsClient<
@@ -214,6 +219,13 @@ export class LegacyAlertsClient<
     return {};
   }
 
+  public async persistAlerts(): Promise<Array<{
+    alert: Alert & AlertData;
+    response: Partial<Record<BulkOperationType, BulkResponseItem>>;
+  }> | void> {
+    return;
+  }
+
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.options.logger,
@@ -225,7 +237,7 @@ export class LegacyAlertsClient<
   }
 
   public determineFlappingAlerts() {
-    if (this.flappingSettings.enabled) {
+    if (this.flappingSettings.enabled && this.options.ruleType.autoRecoverAlerts) {
       const alerts = determineFlappingAlerts({
         newAlerts: this.processedAlerts.new,
         activeAlerts: this.processedAlerts.active,
@@ -244,22 +256,24 @@ export class LegacyAlertsClient<
   }
 
   public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
-    const alerts = determineDelayedAlerts({
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
-      recoveredAlerts: this.processedAlerts.recovered,
-      trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
-      alertDelay: opts.alertDelay,
-      startedAt: this.startedAtString,
-      ruleRunMetricsStore: opts.ruleRunMetricsStore,
-    });
+    if (this.options.ruleType.autoRecoverAlerts) {
+      const alerts = determineDelayedAlerts({
+        newAlerts: this.processedAlerts.new,
+        activeAlerts: this.processedAlerts.active,
+        trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
+        recoveredAlerts: this.processedAlerts.recovered,
+        trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
+        alertDelay: opts.alertDelay,
+        startedAt: this.startedAtString,
+        ruleRunMetricsStore: opts.ruleRunMetricsStore,
+      });
 
-    this.processedAlerts.new = alerts.newAlerts;
-    this.processedAlerts.active = alerts.activeAlerts;
-    this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-    this.processedAlerts.recovered = alerts.recoveredAlerts;
-    this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+      this.processedAlerts.new = alerts.newAlerts;
+      this.processedAlerts.active = alerts.activeAlerts;
+      this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
+      this.processedAlerts.recovered = alerts.recoveredAlerts;
+      this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+    }
   }
 
   public hasReachedAlertLimit(): boolean {
@@ -280,10 +294,6 @@ export class LegacyAlertsClient<
 
   public client() {
     return null;
-  }
-
-  public async persistAlerts() {
-    return;
   }
 
   public async updatePersistedAlertsWithMaintenanceWindowIds() {

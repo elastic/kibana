@@ -23,6 +23,7 @@ import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import type { EnrichEventsWrapper } from './enrichments/types';
 import { enrichEvents } from './enrichments';
+import { alertWithSuppression } from '../factories/alert_with_suppression';
 
 export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
   success: boolean;
@@ -54,7 +55,8 @@ export const bulkCreateWithSuppression = async <
   maxAlerts?: number;
   ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
-  const { ruleExecutionLogger, alertTimestampOverride } = sharedParams;
+  const { executionId, ruleExecutionLogger, alertTimestampOverride } = sharedParams;
+  const { alertsClient } = services;
   if (wrappedDocs.length === 0) {
     return {
       errors: [],
@@ -101,14 +103,21 @@ export const bulkCreateWithSuppression = async <
   }));
 
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
-    await services.alertWithSuppression(
+    await alertWithSuppression({
+      alertsClient,
       alerts,
       suppressionWindow,
-      enrichAlertsWrapper,
-      alertTimestampOverride,
-      isSuppressionPerRuleExecution,
-      maxAlerts
-    );
+      enrichAlerts: enrichAlertsWrapper,
+      currentTimeOverride: alertTimestampOverride,
+      isRuleExecutionOnly: isSuppressionPerRuleExecution,
+      maxAlerts,
+      executionId,
+      logger: ruleExecutionLogger,
+      rule: sharedParams.completeRule.ruleConfig,
+      ruleParams: sharedParams.completeRule.ruleParams,
+      spaceId: sharedParams.spaceId,
+      uiSettingsClient: services.uiSettingsClient,
+    });
 
   const end = performance.now();
 

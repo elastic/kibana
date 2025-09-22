@@ -344,8 +344,10 @@ export class TaskRunner<
           params: rule.params,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
+        ruleRunMetricsStore,
         startedAt: this.taskInstance.startedAt,
         taskInstance: this.taskInstance,
+        timer: this.timer,
       })
     );
     const executorServices = getExecutorServices({

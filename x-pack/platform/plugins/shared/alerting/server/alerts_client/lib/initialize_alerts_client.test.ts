@@ -16,6 +16,7 @@ import {
 import * as LegacyAlertsClientModule from '../legacy_alerts_client';
 import { alertsServiceMock } from '../../alerts_service/alerts_service.mock';
 import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
+import { TaskRunnerTimer } from '../../task_runner/task_runner_timer';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -111,6 +112,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       startedAt,
       taskInstance: mockedTaskInstance,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -121,6 +124,8 @@ describe('initializeAlertsClient', () => {
       maintenanceWindowsService,
       namespace: 'default',
       spaceId: 'default',
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -172,6 +177,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -182,6 +189,8 @@ describe('initializeAlertsClient', () => {
       maintenanceWindowsService,
       namespace: 'default',
       spaceId: 'default',
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -234,6 +243,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -244,6 +255,8 @@ describe('initializeAlertsClient', () => {
       maintenanceWindowsService,
       namespace: 'default',
       spaceId: 'default',
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -265,6 +278,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       spaceId: 'default',
       maintenanceWindowsService,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
     expect(legacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
       activeAlertsFromState: {},
@@ -305,6 +320,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
       taskInstance: mockedTaskInstance,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -315,6 +332,8 @@ describe('initializeAlertsClient', () => {
       maintenanceWindowsService,
       namespace: 'default',
       spaceId: 'default',
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
       rule: {
         alertDelay: 0,
         consumer: 'bar',
@@ -336,6 +355,8 @@ describe('initializeAlertsClient', () => {
       ruleType: ruleTypeWithAlerts,
       spaceId: 'default',
       maintenanceWindowsService,
+      ruleRunMetricsStore,
+      timer: new TaskRunnerTimer({ logger }),
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error initializing AlertsClient for context test. Using legacy alerts client instead. - fail fail`

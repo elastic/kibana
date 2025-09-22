@@ -46,7 +46,6 @@ export type {
   SuppressedAlertService,
   SuppressedAlertServiceResult,
   PersistenceAlertServiceResult,
-  PersistenceServices,
   PersistenceAlertType,
   CreatePersistenceRuleTypeWrapper,
 } from './utils/persistence_types';

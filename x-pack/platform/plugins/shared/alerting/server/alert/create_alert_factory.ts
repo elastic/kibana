@@ -17,7 +17,7 @@ export interface AlertFactory<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
+  create: (id: string, uuid?: string) => PublicAlert<State, Context, ActionGroupIds>;
   get: (id: string) => PublicAlert<State, Context, ActionGroupIds> | null;
   alertLimit: {
     getValue: () => number;
@@ -86,7 +86,7 @@ export function createAlertFactory<
 
   let isDone = false;
   return {
-    create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
+    create: (id: string, uuid?: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
@@ -97,7 +97,7 @@ export function createAlertFactory<
       }
 
       if (!alerts[id]) {
-        alerts[id] = new Alert<State, Context>(id);
+        alerts[id] = new Alert<State, Context>(id, uuid ? { meta: { uuid } } : undefined);
       }
 
       return alerts[id];

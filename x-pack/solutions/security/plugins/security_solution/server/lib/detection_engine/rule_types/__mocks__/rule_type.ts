@@ -102,7 +102,6 @@ export const createRuleTypeMocks = (
       done: jest.fn().mockResolvedValue({}),
     },
     findAlerts: jest.fn(), // TODO: does this stay?
-    alertWithPersistence: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
     getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),

@@ -7,7 +7,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
 import { UnifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from './query';

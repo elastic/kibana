@@ -17,6 +17,7 @@ import type {
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
+import { alertWithPersistence } from './alert_with_persistence';
 
 export interface BulkCreateParams<T extends DetectionAlertLatest> {
   wrappedAlerts: Array<WrappedAlert<T>>;
@@ -42,8 +43,8 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
   sharedParams,
   maxAlerts,
 }: BulkCreateParams<T>): Promise<GenericBulkCreateResponse<T>> => {
-  const { ruleExecutionLogger, refreshOnIndexingAlerts: refreshForBulkCreate } = sharedParams;
-  const { alertWithPersistence } = services;
+  const { completeRule, ruleExecutionLogger, spaceId } = sharedParams;
+  const { alertsClient } = services;
   if (wrappedAlerts.length === 0) {
     return {
       errors: [],
@@ -78,16 +79,20 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
     }
   };
 
-  const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence(
-    wrappedAlerts.map((doc) => ({
+  const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence({
+    alertsClient,
+    alerts: wrappedAlerts.map((doc) => ({
       _id: doc._id,
       // `fields` should have already been merged into `doc._source`
       _source: doc._source,
     })),
-    refreshForBulkCreate,
+    logger: sharedParams.ruleExecutionLogger,
     maxAlerts,
-    enrichAlertsWrapper
-  );
+    rule: completeRule.ruleConfig,
+    ruleParams: completeRule.ruleParams,
+    spaceId,
+    enrichAlerts: enrichAlertsWrapper,
+  });
 
   const end = performance.now();
 
@@ -101,7 +106,9 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
+      createdItems: createdAlerts as unknown as Array<
+        AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }
+      >,
       alertsWereTruncated,
     };
   } else {
@@ -111,7 +118,9 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
       bulkCreateDuration: makeFloatString(end - start),
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
+      createdItems: createdAlerts as unknown as Array<
+        AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }
+      >,
       alertsWereTruncated,
     };
   }
