@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutPage } from '../../src/playwright';
+import type { ScoutPage } from '../../../src/playwright';
 
 const getEuiVersion = () => {
   const packageJsonPath = path.join(REPO_ROOT, 'package.json');
