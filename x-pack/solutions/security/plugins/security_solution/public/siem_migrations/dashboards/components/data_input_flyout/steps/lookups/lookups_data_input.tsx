@@ -15,11 +15,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../types';
-import { getStatus } from '../common/get_status';
 import * as i18n from './translations';
 import { DashboardUploadSteps } from '../constants';
 import { SubSteps } from '../common/sub_step';
@@ -43,7 +43,7 @@ interface LookupsDataInputProps
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
   ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DashboardUploadSteps.LookupsUpload, dataInputStep),
+      () => getEuiStepStatus(DashboardUploadSteps.LookupsUpload, dataInputStep),
       [dataInputStep]
     );
 
@@ -118,7 +118,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     }, [telemetry, migrationStats.id]);
 
     const copyStep = useMissingLookupsListStep({
-      status: getStatus(1, subStep),
+      status: getEuiStepStatus(1, subStep),
       migrationStats,
       missingLookups,
       uploadedLookups,
@@ -128,7 +128,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
 
     // Upload macros step
     const uploadStep = useLookupsFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingLookups,
       addUploadedLookups,
