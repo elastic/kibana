@@ -28,6 +28,11 @@ describe('classicNavigationFactory', function () {
       title: 'Web Crawlers',
       url: '/app/elasticsearch/content/crawlers',
     },
+    {
+      id: 'elasticsearchIndexManagement',
+      url: '/app/elasticsearch/index_management',
+      title: 'Index Management',
+    },
   ];
   const mockedCoreStart = {
     chrome: {
@@ -106,10 +111,11 @@ describe('classicNavigationFactory', function () {
         name: 'Content',
         items: [
           {
-            id: 'searchConnectors',
+            'data-test-subj': 'searchSideNav-Indices',
             deepLink: {
-              link: 'enterpriseSearchContent:connectors',
+              link: 'elasticsearchIndexManagement',
             },
+            id: 'search_indices',
           },
         ],
       },
@@ -121,10 +127,11 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/elasticsearch/content/connectors',
-            id: 'searchConnectors',
+            'data-test-subj': 'searchSideNav-Indices',
+            href: '/app/elasticsearch/index_management',
+            id: 'search_indices',
             isSelected: false,
-            name: 'Connectors',
+            name: 'Index Management',
             onClick: expect.any(Function),
           },
         ],
@@ -135,20 +142,20 @@ describe('classicNavigationFactory', function () {
   it('returns name if provided over the deeplink title', () => {
     const items: ClassicNavItem[] = [
       {
-        id: 'searchConnectors',
+        id: 'search_indices',
         deepLink: {
-          link: 'enterpriseSearchContent:connectors',
+          link: 'elasticsearchIndexManagement',
         },
-        name: 'Date connectors',
+        name: 'Indices',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/content/connectors',
-        id: 'searchConnectors',
+        href: '/app/elasticsearch/index_management',
+        id: 'search_indices',
         isSelected: false,
-        name: 'Date connectors',
+        name: 'Indices',
         onClick: expect.any(Function),
       },
     ]);

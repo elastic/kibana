@@ -46,7 +46,6 @@ export default function searchSolutionNavigation({
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },
-        { id: 'Connectors', label: 'Connectors' },
         { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
@@ -68,11 +67,6 @@ export default function searchSolutionNavigation({
           navItem: 'Indices',
           breadcrumbs: ['Build', 'Index Management'],
           pageTestSubject: 'indexManagementHeaderContent',
-        },
-        {
-          navItem: 'Connectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'searchCreateConnectorPage',
         },
         {
           navItem: 'Playground',
