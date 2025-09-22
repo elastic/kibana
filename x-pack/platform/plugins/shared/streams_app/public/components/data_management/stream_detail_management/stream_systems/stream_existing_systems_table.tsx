@@ -104,7 +104,7 @@ export function StreamExistingSystemsTable({
 }: {
   isLoading?: boolean;
   systems: System[];
-  definition: Streams.all.GetResponse;
+  definition: Streams.all.Definition;
   refreshSystems: () => void;
 }) {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();

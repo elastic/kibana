@@ -30,7 +30,7 @@ for (let i = 0; i < 5; i++) {
 
 export default stories;
 
-export const Spike: StoryFn<{}> = () => {
+export const StreamSystemFlyoutStory: StoryFn<{}> = () => {
   systems[0].description = `## Hello world!
 
 Basic "GitHub flavored" markdown will work as you'd expect.

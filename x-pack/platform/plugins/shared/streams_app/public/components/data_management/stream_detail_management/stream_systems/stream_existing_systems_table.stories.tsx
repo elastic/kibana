@@ -9,7 +9,6 @@ import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import type { System } from '@kbn/streams-schema';
 import { faker } from '@faker-js/faker';
-import { testStreamDefinition } from '../stream_configuration.stories';
 import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
 const stories: Meta<{}> = {
@@ -31,7 +30,7 @@ for (let i = 0; i < 5; i++) {
 
 export default stories;
 
-export const Spike: StoryFn<{}> = () => {
+export const StreamExistingSystemsTableStory: StoryFn<{}> = () => {
   systems[0].description = `## Hello world!
 
 Basic "GitHub flavored" markdown will work as you'd expect.
@@ -50,7 +49,16 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
       systems={systems}
       isLoading={false}
       refreshSystems={() => {}}
-      definition={testStreamDefinition}
+      definition={{
+        name: 'synthetics-http-default',
+        description: '',
+        ingest: {
+          settings: {},
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          classic: {},
+        },
+      }}
     />
   );
 };

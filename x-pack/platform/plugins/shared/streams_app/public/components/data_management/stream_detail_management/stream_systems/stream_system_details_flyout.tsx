@@ -33,7 +33,7 @@ export const StreamSystemDetailsFlyout = ({
 }: {
   system: System;
   closeFlyout: () => void;
-  definition: Streams.all.GetResponse;
+  definition: Streams.all.Definition;
 }) => {
   const [value, setValue] = React.useState(system.description);
   const { upsertQuery } = useStreamSystemsApi(definition);

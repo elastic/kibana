@@ -21,7 +21,7 @@ import { StreamSystemsFlyout } from './stream_systems/stream_systems_flyout';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
 
 interface StreamConfigurationProps {
-  definition: Streams.ClassicStream.GetResponse;
+  definition: Streams.all.Definition;
 }
 
 export function StreamSystemConfiguration({ definition }: StreamConfigurationProps) {

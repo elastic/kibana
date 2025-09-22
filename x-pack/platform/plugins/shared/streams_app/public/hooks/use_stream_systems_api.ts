@@ -16,7 +16,7 @@ interface StreamSystemsApi {
   ) => Promise<void>;
 }
 
-export function useStreamSystemsApi(definition: Streams.all.GetResponse): StreamSystemsApi {
+export function useStreamSystemsApi(definition: Streams.all.Definition): StreamSystemsApi {
   const {
     dependencies: {
       start: {
@@ -33,7 +33,7 @@ export function useStreamSystemsApi(definition: Streams.all.GetResponse): Stream
         signal,
         params: {
           path: {
-            name: definition.stream.name,
+            name: definition.name,
             systemName,
           },
           body: request,

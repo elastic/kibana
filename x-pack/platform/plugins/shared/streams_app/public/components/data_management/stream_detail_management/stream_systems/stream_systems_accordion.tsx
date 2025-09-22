@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useStreamSystems } from './hooks/use_stream_systems';
 import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 
-export const StreamSystemsAccordion = ({ definition }: { definition: Streams.all.GetResponse }) => {
+export const StreamSystemsAccordion = ({ definition }: { definition: Streams.all.Definition }) => {
   const { systems, refresh, loading } = useStreamSystems(definition);
 
   return (
