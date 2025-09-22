@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types-jest",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*"
