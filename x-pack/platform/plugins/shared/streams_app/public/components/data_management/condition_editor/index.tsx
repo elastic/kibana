@@ -28,6 +28,7 @@ import {
   getFilterValue,
   isCondition,
   isFilterConditionObject,
+  operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import { isPlainObject } from 'lodash';
 import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
@@ -80,27 +81,12 @@ export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorP
   return <ConditionEditor status="enabled" {...props} />;
 }
 
-const operatorMap = {
-  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
-  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
-  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
-  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
-    defaultMessage: 'less than or equals',
-  }),
-  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
-  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
-    defaultMessage: 'greater than or equals',
-  }),
-  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
-  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
-  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
-  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
-};
-
-const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([value, text]) => ({
-  value,
-  text,
-}));
+const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
+  ([value, text]) => ({
+    value,
+    text,
+  })
+);
 
 interface ConditionEditorProps {
   condition: Condition;

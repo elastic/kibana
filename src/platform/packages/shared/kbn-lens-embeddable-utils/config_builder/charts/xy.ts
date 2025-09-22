@@ -9,7 +9,6 @@
 
 import type {
   FormBasedPersistedState,
-  FormulaPublicApi,
   XYState,
   XYReferenceLineLayerConfig,
   XYDataLayerConfig,
@@ -204,15 +203,13 @@ function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
 function buildAllFormulasInLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): PersistedIndexPatternLayer {
   return layer.yAxis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
       `${ACCESSOR}${i}_${valueIndex}`,
       mapToFormula(curr),
       dataView,
-      formulaAPI,
       valueIndex > 0 ? acc : undefined
     );
     return { ...acc, ...formulaColumn };
@@ -222,11 +219,10 @@ function buildAllFormulasInLayer(
 function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
-    const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
 
     if (layer.xAxis) {
       const columnName = `x_${ACCESSOR}${i}`;
@@ -250,7 +246,7 @@ function buildFormulaLayer(
   } else if (layer.type === 'annotation') {
     // nothing ?
   } else if (layer.type === 'reference') {
-    return buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    return buildAllFormulasInLayer(layer, i, dataView);
   }
 
   return {
@@ -261,11 +257,11 @@ function buildFormulaLayer(
 
 export async function buildXY(
   config: LensXYConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: any, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
