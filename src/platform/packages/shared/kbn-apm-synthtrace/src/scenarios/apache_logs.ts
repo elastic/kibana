@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates realistic Apache access and security logs.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
@@ -82,9 +86,40 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             });
         });
 
+      // error logs
+      const errorLogs = range
+        .interval('1m')
+        .rate(10)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const logsData = constructApacheLogData();
+
+              return log
+                .create({ isLogsDb })
+                .message(
+                  `ERROR: ${logsData['client.ip']} encountered server error on path ${logsData['url.path']}`
+                )
+                .dataset('apache.error')
+                .logLevel('error')
+                .defaults({
+                  ...logsData,
+                  'event.category': 'application',
+                  'event.type': 'error',
+                  'event.outcome': 'failure',
+                })
+                .timestamp(timestamp);
+            });
+        });
+
       return withClient(
         logsEsClient,
-        logger.perf('generating_apache_logs', () => [normalAccessLogs, attackSimulationLogs])
+        logger.perf('generating_apache_logs', () => [
+          normalAccessLogs,
+          attackSimulationLogs,
+          errorLogs,
+        ])
       );
     },
   };

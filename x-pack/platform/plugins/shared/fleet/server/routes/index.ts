@@ -29,6 +29,7 @@ import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_toke
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
+import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -55,8 +56,9 @@ export function registerRoutes(
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
-  registerRemoteSyncedIntegrations(fleetAuthzRouter);
+  registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
+  registerCloudConnectorRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

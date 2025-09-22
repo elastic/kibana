@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
+    serverlessReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-serverless`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
@@ -905,6 +906,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       httpMonitoring: `${ELASTIC_DOCS}reference/fleet/agent-policy#change-policy-enable-agent-monitoring`,
       agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
       remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
+      agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
+      fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1015,6 +1018,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${ELASTIC_DOCS}solutions/search/rag/playground-query`,
       context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
+    },
+    agentBuilder: {
+      agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
+      getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
+      agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
+      tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,
+      programmaticAccess: `${ELASTIC_DOCS}solutions/search/agent-builder/programmatic-access`,
+      kibanaApi: `${ELASTIC_DOCS}solutions/search/agent-builder/kibana-api`,
+      mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
+      a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
+      limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless

@@ -133,7 +133,13 @@
             "description": [],
             "signature": [
               "<TEvaluationDataset extends ",
-              "EvaluationDataset",
+              {
+                "pluginId": "@kbn/evals",
+                "scope": "common",
+                "docId": "kibKbnEvalsPluginApi",
+                "section": "def-common.EvaluationDataset",
+                "text": "EvaluationDataset"
+              },
               ", TTaskOutput extends ",
               "TaskOutput",
               ">({ dataset, task, }: { dataset: TEvaluationDataset; task: ",
@@ -167,7 +173,13 @@
                     "label": "dataset",
                     "description": [],
                     "signature": [
-                      "EvaluationDataset"
+                      {
+                        "pluginId": "@kbn/evals",
+                        "scope": "common",
+                        "docId": "kibKbnEvalsPluginApi",
+                        "section": "def-common.EvaluationDataset",
+                        "text": "EvaluationDataset"
+                      }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                     "deprecated": false,
@@ -302,7 +314,7 @@
           "\nExports a Playwright configuration specifically for offline evals"
         ],
         "signature": [
-          "({\n  testDir,\n}: { testDir: string; }) => ",
+          "({\n  testDir,\n  repetitions,\n  timeout,\n}: { testDir: string; repetitions?: number | undefined; timeout?: number | undefined; }) => ",
           "PlaywrightTestConfig",
           "<{}, ",
           "EvaluationTestOptions",
@@ -317,7 +329,7 @@
             "id": "def-common.createPlaywrightEvalsConfig.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  testDir,\n}",
+            "label": "{\n  testDir,\n  repetitions,\n  timeout,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
             "deprecated": false,
@@ -333,10 +345,84 @@
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPlaywrightEvalsConfig.$1.repetitions",
+                "type": "number",
+                "tags": [],
+                "label": "repetitions",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPlaywrightEvalsConfig.$1.timeout",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/config/create_playwright_eval_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createQuantitativeCorrectnessEvaluators",
+        "type": "Function",
+        "tags": [],
+        "label": "createQuantitativeCorrectnessEvaluators",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Evaluator",
+          "<",
+          "Example",
+          ", ",
+          "TaskOutput",
+          ">[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createQuantitativeGroundednessEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createQuantitativeGroundednessEvaluator",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Evaluator",
+          "<",
+          "Example",
+          ", ",
+          "TaskOutput",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/groundedness/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -473,6 +559,8 @@
             "section": "def-common.AvailableConnectorWithId",
             "text": "AvailableConnectorWithId"
           },
+          "; repetitions: number; evaluationAnalysisService: ",
+          "EvaluationAnalysisService",
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluate.ts",
@@ -545,6 +633,115 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.DefaultEvaluators.correctnessAnalysis",
+            "type": "Function",
+            "tags": [],
+            "label": "correctnessAnalysis",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Evaluator",
+              "<",
+              "Example",
+              ", ",
+              "TaskOutput",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.DefaultEvaluators.groundednessAnalysis",
+            "type": "Function",
+            "tags": [],
+            "label": "groundednessAnalysis",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Evaluator",
+              "<",
+              "Example",
+              ", ",
+              "TaskOutput",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.EvaluationDataset",
+        "type": "Interface",
+        "tags": [],
+        "label": "EvaluationDataset",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationDataset.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationDataset.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationDataset.examples",
+            "type": "Array",
+            "tags": [],
+            "label": "examples",
+            "description": [],
+            "signature": [
+              "Example",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationDataset.id",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

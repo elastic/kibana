@@ -41,6 +41,7 @@ interface IdentifierControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  currentApp?: string;
 }
 
 export function IdentifierControlForm({
@@ -50,6 +51,7 @@ export function IdentifierControlForm({
   queryString,
   cursorPosition,
   esqlVariables,
+  currentApp,
   setControlState,
   search,
 }: IdentifierControlFormProps) {
@@ -60,7 +62,7 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -233,6 +235,9 @@ export function IdentifierControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
       />
     </>
   );

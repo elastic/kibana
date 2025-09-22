@@ -10,7 +10,7 @@ import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebui
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import type { RuleMigrationPrebuiltRule, RuleMigrationsClientDependencies } from '../types';
+import type { RuleMigrationPrebuiltRule } from '../types';
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
@@ -24,7 +24,7 @@ const RETURNED_RULES = 5 as const;
  */
 const BULK_MAX_SIZE = 500 as const;
 
-export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient<RuleMigrationsClientDependencies> {
+export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient {
   async getRuleVersionsMap(): Promise<PrebuildRuleVersionsMap> {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(this.dependencies.savedObjectsClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(this.dependencies.rulesClient);

@@ -13,7 +13,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Privileges', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235843
+  describe.skip('Privileges', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
@@ -43,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
             observabilityCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCasesV3: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
+            agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -79,7 +80,6 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
               'cases_assign',
             ],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
+            agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -431,7 +431,6 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: [

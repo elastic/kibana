@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
-import { assign, and, enqueueActions, setup } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
@@ -53,6 +53,7 @@ export const streamRoutingMachine = setup({
       const newRule = routingConverter.toUIDefinition({
         destination: `${context.definition.stream.name}.child`,
         where: ALWAYS_CONDITION,
+        status: 'enabled',
         isNew: true,
       });
 
@@ -131,6 +132,14 @@ export const streamRoutingMachine = setup({
           reenter: true,
         },
       },
+      invoke: {
+        id: 'routingSamplesMachine',
+        src: 'routingSamplesMachine',
+        input: ({ context }) => ({
+          definition: context.definition,
+          documentMatchFilter: 'matched',
+        }),
+      },
       states: {
         idle: {
           id: 'idle',
@@ -154,16 +163,18 @@ export const streamRoutingMachine = setup({
         creatingNewRule: {
           id: 'creatingNewRule',
           entry: [{ type: 'addNewRoutingRule' }],
-          exit: [{ type: 'resetRoutingChanges' }],
-          initial: 'changing',
-          invoke: {
-            id: 'routingSamplesMachine',
-            src: 'routingSamplesMachine',
-            input: ({ context }) => ({
-              definition: context.definition,
-              condition: selectCurrentRule(context).where,
+          exit: [
+            { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: undefined,
             }),
-          },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+          initial: 'changing',
           states: {
             changing: {
               on: {
@@ -193,6 +204,14 @@ export const streamRoutingMachine = setup({
                   guard: 'canForkStream',
                   target: 'forking',
                 },
+                'routingSamples.setDocumentMatchFilter': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: event.filter,
+                    });
+                  }),
+                },
               },
             },
             forking: {
@@ -206,6 +225,7 @@ export const streamRoutingMachine = setup({
                     definition: context.definition,
                     where: currentRoutingRule.where,
                     destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
                   };
                 },
                 onDone: {
@@ -345,10 +365,15 @@ export const createStreamRoutingMachineImplementations = ({
   data,
   timeState$,
   forkSuccessNofitier,
+  telemetryClient,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
-    forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
+    forkStream: createForkStreamActor({
+      streamsRepositoryClient,
+      forkSuccessNofitier,
+      telemetryClient,
+    }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     routingSamplesMachine: routingSamplesMachine.provide(
       createRoutingSamplesMachineImplementations({

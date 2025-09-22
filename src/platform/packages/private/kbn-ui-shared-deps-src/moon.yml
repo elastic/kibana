@@ -1,0 +1,80 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/ui-shared-deps-src'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/ui-shared-deps-src'
+  description: Moon project for @kbn/ui-shared-deps-src
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.js'
+    - '!src/entry.js'
+    - '!**/*.config.js'
+    - '!target/**/*'
+dependsOn:
+  - '@kbn/ui-shared-deps-npm'
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - build
+    deps:
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
+      - '/src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-i18n-react/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-monaco/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-datemath/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-analytics/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-crypto-browser/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-es-query/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-search-errors/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-std/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-safer-lodash-set/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/shared-ux/error_boundary/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-rison/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/shared-ux/code_editor/impl/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-esql-ast/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/kbn-ebt-tools/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/react/kibana_context/common/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/react/kibana_context/root/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/react/kibana_context/render/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/react/kibana_context/theme/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/shared-ux/router/impl/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/private/kbn-ui-shared-deps-npm/**/*.{js,ts,tsx}'
+      - '/src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}'
+      - '!/src/**/*.test.{js,ts,tsx}'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    deps:
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

@@ -19,6 +19,10 @@ export enum ToolType {
    * Tools based on ES|QL templates
    */
   esql = 'esql',
+  /**
+   * Index search tools
+   */
+  index_search = 'index_search',
 }
 
 /**
@@ -40,8 +44,11 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
    */
   description: string;
   /**
+   * Indicate whether this tool is editable by users or not.
+   */
+  readonly: boolean;
+  /**
    * Optional list of tags attached to this tool.
-   * For built-in tools, this is specified during registration.
    */
   tags: string[];
   /**

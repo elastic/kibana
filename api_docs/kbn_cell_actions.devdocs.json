@@ -121,7 +121,7 @@
         "label": "useDataGridColumnsCellActions",
         "description": [],
         "signature": [
-          "({ fields, getCellValue, triggerId, metadata, dataGridRef, disabledActionTypes, }: ",
+          "({ fields, getCellValue, triggerId, metadata, dataGridRef, disabledActionTypes, disableCellActions, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -142,7 +142,7 @@
             "id": "def-common.useDataGridColumnsCellActions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fields,\n  getCellValue,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n}",
+            "label": "{\n  fields,\n  getCellValue,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n  disableCellActions = false,\n}",
             "description": [],
             "signature": [
               {
@@ -544,7 +544,7 @@
               },
               " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
               "MappingTimeSeriesMetricType",
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; metadata_field?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -786,6 +786,22 @@
               "React.MutableRefObject<",
               "EuiDataGridRefProps",
               " | null> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.disableCellActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableCellActions",
+            "description": [
+              "\nIf true, disables all cell actions"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,

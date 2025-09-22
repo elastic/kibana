@@ -31,6 +31,9 @@ import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
 import jinaAIIcon from '../assets/images/jinaai.svg';
 import voyageAIIcon from '../assets/images/voyageai.svg';
 import deepSeekIcon from '../assets/images/deepseek.svg';
+import ai21Icon from '../assets/images/ai21_labs_default.svg';
+import llamaIcon from '../assets/images/llama_stack_default.svg';
+import defaultIcon from '../assets/images/default_connector_icon.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -93,7 +96,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   },
   [ServiceProviderKeys.elastic]: {
     icon: elasticIcon,
-    name: 'Elastic',
+    name: 'Elastic Inference Service',
     solutions: ['Observability', 'Security', 'Search'],
   },
   [ServiceProviderKeys.googleaistudio]: {
@@ -146,21 +149,32 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'DeepSeek',
     solutions: ['Search'],
   },
+  [ServiceProviderKeys.ai21]: {
+    icon: ai21Icon,
+    name: 'AI21 labs',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.llama]: {
+    icon: llamaIcon,
+    name: 'Llama Stack',
+    solutions: ['Search'],
+  },
 };
 
 export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {
   const provider = SERVICE_PROVIDERS[providerKey];
+  const iconType = provider ? provider.icon : defaultIcon;
 
-  return provider ? (
+  return (
     <EuiAvatar
       name={providerKey}
       data-test-subj={`icon-service-provider-${providerKey}`}
-      iconType={provider.icon}
+      iconType={iconType}
       color="#fff"
       size="s"
       type="space"
     />
-  ) : null;
+  );
 };
 
 export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
@@ -168,10 +182,7 @@ export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
   searchValue,
 }) => {
   const provider = SERVICE_PROVIDERS[providerKey];
+  const providerName = provider ? provider.name : providerKey;
 
-  return provider ? (
-    <EuiHighlight search={searchValue ?? ''}>{provider.name}</EuiHighlight>
-  ) : (
-    <span>{providerKey}</span>
-  );
+  return <EuiHighlight search={searchValue ?? ''}>{providerName}</EuiHighlight>;
 };

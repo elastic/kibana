@@ -7,6 +7,7 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -24,6 +25,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -47,6 +49,7 @@ export interface StreamsPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
   cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -57,4 +60,5 @@ export interface StreamsPluginStartDependencies {
   alerting: AlertingServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
+  fieldsMetadata: FieldsMetadataServerStart;
 }

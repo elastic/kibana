@@ -50,6 +50,8 @@ export const POLICIES = '[data-test-subj="solutionSideNavPanelLink-policy"]';
 
 export const TRUSTED_APPS = '[data-test-subj="solutionSideNavPanelLink-trusted_apps"]';
 
+export const TRUSTED_DEVICES = '[data-test-subj="solutionSideNavPanelLink-trusted_devices"]';
+
 export const EVENT_FILTERS = '[data-test-subj="solutionSideNavPanelLink-event_filters"]';
 
 export const BLOCKLIST = '[data-test-subj="solutionSideNavPanelLink-blocklist"]';
@@ -79,7 +81,10 @@ export const EXCEPTIONS = '[data-test-subj="solutionSideNavPanelLink-exceptions"
 // other
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
-export const KQL_INPUT = `${GLOBAL_KQL_WRAPPER} [data-test-subj="queryInput"]`;
+export const KQL_INPUT_TEXT_AREA = '[data-test-subj="queryInput"]';
+
+export const KQL_INPUT = (dataTestSubj: string = KQL_INPUT_TEXT_AREA) =>
+  `${GLOBAL_KQL_WRAPPER} ${dataTestSubj}`;
 
 export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
@@ -119,6 +124,7 @@ export const openNavigationPanelFor = (page: string) => {
     }
     case ENDPOINTS:
     case TRUSTED_APPS:
+    case TRUSTED_DEVICES:
     case EVENT_FILTERS:
     case POLICIES:
     case ENDPOINT_EXCEPTIONS:

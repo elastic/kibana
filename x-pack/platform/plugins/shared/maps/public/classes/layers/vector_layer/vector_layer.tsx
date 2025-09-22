@@ -51,6 +51,7 @@ import type {
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
   JoinSourceDescriptor,
+  StylePropertyField,
 } from '../../../../common/descriptor_types';
 import type { IVectorSource } from '../../sources/vector_source';
 import { isESVectorTileSource } from '../../sources/es_source';
@@ -151,7 +152,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type =
       layerDescriptor.type !== undefined ? layerDescriptor.type : LAYER_TYPE.GEOJSON_VECTOR;
 
@@ -229,14 +230,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
             Object.keys(clonedDescriptor.style.properties).forEach((key) => {
               const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
-              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+              if (styleProp && 'type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
                 const options = styleProp.options as DynamicStylePropertyOptions;
                 if (
                   options.field &&
                   options.field.origin === FIELD_ORIGIN.JOIN &&
                   options.field.name === originalJoinKey
                 ) {
-                  options.field.name = newJoinKey;
+                  (options.field as Writable<StylePropertyField>).name = newJoinKey;
                 }
               }
             });

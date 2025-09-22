@@ -23,5 +23,10 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/core",
+    "@kbn/inference-tracing",
+    "@kbn/es-errors",
+    "@kbn/i18n",
+    "@kbn/std",
   ]
 }

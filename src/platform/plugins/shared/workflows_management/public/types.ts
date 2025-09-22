@@ -9,6 +9,7 @@
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginSetup {
@@ -22,8 +23,12 @@ export interface WorkflowsPluginSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginStart {}
 
-export interface AppPluginStartDependencies {
+export interface WorkflowsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+}
+
+export interface WorkflowsPluginStartAdditionalServices {
+  storage: Storage;
 }
 
 export interface WorkflowsSearchParams {

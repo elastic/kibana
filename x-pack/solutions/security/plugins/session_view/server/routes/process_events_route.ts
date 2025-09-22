@@ -14,6 +14,7 @@ import type {
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import type { SearchHit } from '@kbn/es-types';
 import {
   ALERTS_PER_PROCESS_EVENTS_PAGE,
   PROCESS_EVENTS_ROUTE,
@@ -29,6 +30,7 @@ import {
 import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
+import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
@@ -146,6 +148,12 @@ export const fetchEventsAndScopedAlerts = async (
 
   let events = search.hits.hits;
 
+  // Normalize args fields to ensure consistent array structure
+  events = events.map((hit) => {
+    hit._source = normalizeEventProcessArgs(hit._source as ProcessEvent);
+    return hit;
+  });
+
   if (!forward) {
     events.reverse();
   }
@@ -179,7 +187,28 @@ export const fetchEventsAndScopedAlerts = async (
       range
     );
 
-    events = [...events, ...alertsBody.events, ...processesWithIOEvents];
+    // Ensure all added events conform to SearchHit<unknown>
+    const normalizeToSearchHit = (event: any): SearchHit<unknown> => {
+      // If already a SearchHit (has _index), return as is
+      if (event && typeof event._index === 'string') {
+        return event;
+      }
+      // Otherwise, add minimal required SearchHit fields
+      return {
+        _index: '', // Provide a default or meaningful value if available
+        _id: '',
+        _score: null,
+        _source: event._source,
+        fields: {},
+        sort: [],
+      };
+    };
+
+    events = [
+      ...events,
+      ...alertsBody.events.map(normalizeToSearchHit),
+      ...processesWithIOEvents.map(normalizeToSearchHit),
+    ];
   }
 
   return {

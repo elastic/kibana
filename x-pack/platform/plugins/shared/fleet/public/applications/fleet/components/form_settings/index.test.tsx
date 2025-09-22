@@ -73,6 +73,81 @@ describe('ConfiguredSettings', () => {
     );
   });
 
+  it('should render enum field', () => {
+    const result = render([
+      {
+        name: 'test',
+        title: 'TEST',
+        description: 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'test',
+        },
+        schema: z.enum(['test1', 'test2']).default('test2'),
+      },
+    ]);
+
+    const input = result.getByTestId('configuredSetting-test') as HTMLSelectElement;
+    const options = [...input.options].map((opt) => ({ label: opt.textContent, value: opt.value }));
+
+    expect(options).toEqual([
+      { label: 'test1', value: 'test1' },
+      { label: 'test2', value: 'test2' },
+    ]);
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'test1' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ test: 'test1' }),
+      })
+    );
+  });
+
+  it('should render enum field with custom options', () => {
+    const result = render([
+      {
+        name: 'test',
+        title: 'TEST',
+        description: 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'test',
+        },
+        schema: z.enum(['test1', 'test2']).default('test2'),
+        options: [
+          {
+            text: 'Test 1',
+            value: 'test1',
+          },
+          {
+            text: 'Test 2',
+            value: 'test2',
+          },
+        ],
+      },
+    ]);
+    const input = result.getByTestId('configuredSetting-test') as HTMLSelectElement;
+    const options = [...input.options].map((opt) => ({ label: opt.textContent, value: opt.value }));
+
+    expect(options).toEqual([
+      { label: 'Test 1', value: 'test1' },
+      { label: 'Test 2', value: 'test2' },
+    ]);
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'test1' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ test: 'test1' }),
+      })
+    );
+  });
+
   it('should render string field with time duration validation', () => {
     const result = render([
       {
@@ -96,9 +171,7 @@ describe('ConfiguredSettings', () => {
     });
 
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(
-      result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d')
-    ).not.toBeNull();
+    expect(result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h')).not.toBeNull();
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 
