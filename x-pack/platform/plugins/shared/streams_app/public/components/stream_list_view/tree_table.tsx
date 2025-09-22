@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   useEuiTheme,
   EuiHighlight,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -26,7 +27,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { useDocCountFetch } from '../../hooks/use_doc_count_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
@@ -44,8 +45,10 @@ import { DiscoverBadgeButton } from '../stream_badges';
 export function StreamsTreeTable({
   loading,
   streams = [],
+  canReadFailureStore = false,
 }: {
   streams?: ListStreamDetail[];
+  canReadFailureStore?: boolean;
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
@@ -84,7 +87,7 @@ export function StreamsTreeTable({
 
   const numDataPoints = 25;
 
-  const { getStreamDocCounts } = useStreamHistogramFetch(numDataPoints);
+  const { getStreamDocCounts } = useDocCountFetch({ numDataPoints, canReadFailureStore });
 
   const sorting = {
     sort: {
@@ -144,7 +147,18 @@ export function StreamsTreeTable({
         },
         {
           field: 'documentsCount',
-          name: DOCUMENTS_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content="Does not include failed documents - user does not have access to failure store"
+                  type="warning"
+                  color="warning"
+                />
+              )}
+              {DOCUMENTS_COLUMN_HEADER}
+            </EuiFlexGroup>
+          ),
           width: '180px',
           sortable: false,
           align: 'right',
@@ -161,7 +175,18 @@ export function StreamsTreeTable({
         },
         {
           field: 'dataQuality',
-          name: DATA_QUALITY_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content="Does not include failed documents - user does not have access to failure store"
+                  type="warning"
+                  color="warning"
+                />
+              )}
+              {DOCUMENTS_COLUMN_HEADER}
+            </EuiFlexGroup>
+          ),
           width: '150px',
           sortable: false,
           dataType: 'number',
