@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('search home page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(['test-*', 'search-*']);
-          await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
             `/s/${spaceCreated.id}`
           );
         });
