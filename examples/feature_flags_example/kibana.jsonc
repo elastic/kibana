@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-core",
   "description": "Plugin that shows how to make use of the feature flags core service.",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "featureFlagsExample",
     "server": true,

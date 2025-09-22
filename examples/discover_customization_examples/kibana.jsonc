@@ -3,7 +3,7 @@
   "id": "@kbn/discover-customization-examples-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "discoverCustomizationExamples",
     "server": false,

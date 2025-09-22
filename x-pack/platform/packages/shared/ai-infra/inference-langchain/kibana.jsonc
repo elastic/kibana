@@ -3,5 +3,5 @@
   "id": "@kbn/inference-langchain",
   "owner": "@elastic/appex-ai-infra",
   "group": "platform",
-  "visilitiby": "private"
+  "visibility": "private"
 }

@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-data-discovery",
   "description": "A plugin that demonstrates field formats usage",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "fieldFormatsExample",
     "server": true,

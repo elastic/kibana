@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "description": "A plugin which exemplifes the KibanaErrorBoundary",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "error_boundary_example",
     "server": false,

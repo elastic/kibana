@@ -3,7 +3,7 @@
   "id": "@kbn/response-stream-plugin",
   "owner": "@elastic/ml-ui",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "responseStream",
     "server": true,

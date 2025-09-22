@@ -3,6 +3,6 @@
   "id": "@kbn/synthetics-private-location",
   "owner": "@elastic/obs-ux-management-team",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

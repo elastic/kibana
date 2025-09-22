@@ -3,6 +3,6 @@
   "id": "@kbn/relocate",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

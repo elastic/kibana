@@ -3,7 +3,7 @@
   "id": "@kbn/application-usage-test-plugin",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "applicationUsageTest",
     "server": false,

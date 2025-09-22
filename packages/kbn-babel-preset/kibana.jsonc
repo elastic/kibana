@@ -3,6 +3,6 @@
   "id": "@kbn/babel-preset",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

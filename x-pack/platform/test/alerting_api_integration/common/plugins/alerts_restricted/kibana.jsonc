@@ -3,7 +3,7 @@
   "id": "@kbn/alerts-restricted-fixtures-plugin",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "alertsRestrictedFixtures",
     "server": true,

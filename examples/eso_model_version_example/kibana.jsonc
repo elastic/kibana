@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-security",
   "description": "ESO Model Version Example",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "esoModelVersionExample",
     "server": true,

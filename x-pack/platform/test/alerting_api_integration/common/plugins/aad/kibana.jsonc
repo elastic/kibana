@@ -3,7 +3,7 @@
   "id": "@kbn/aad-fixtures-plugin",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "aadFixtures",
     "server": true,

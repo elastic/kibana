@@ -3,7 +3,7 @@
   "id": "@kbn/task-manager-fixture-plugin",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "taskManagerFixture",
     "server": true,

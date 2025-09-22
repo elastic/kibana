@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-core",
   "description": "Testing the data streams core service",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "dataStreamsExample",
     "server": true,

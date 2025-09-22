@@ -4,7 +4,7 @@
   "owner": "@elastic/response-ops",
   "description": "Example plugin of how to use screenshotMode plugin services",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "screenshotModeExample",
     "server": true,

@@ -3,6 +3,6 @@
   "id": "@kbn/test-suites-xpack-performance",
   "owner": "@elastic/appex-qa",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

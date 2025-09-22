@@ -3,6 +3,6 @@
   "id": "@kbn/ci-stats-shipper-cli",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

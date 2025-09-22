@@ -3,7 +3,7 @@
   "id": "@kbn/observability-fixtures-plugin",
   "owner": "@elastic/kibana-cases",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "observabilityFixtures",
     "server": true,

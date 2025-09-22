@@ -3,7 +3,7 @@
   "id": "@kbn/stack-management-usage-test-plugin",
   "owner": "@elastic/kibana-management",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "stackManagementUsageTest",
     "server": false,

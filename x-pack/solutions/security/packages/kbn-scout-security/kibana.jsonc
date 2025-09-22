@@ -3,6 +3,6 @@
   "id": "@kbn/scout-security",
   "owner": "@elastic/appex-qa",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

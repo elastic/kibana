@@ -3,6 +3,6 @@
   "id": "@kbn/generate-console-definitions",
   "owner": "@elastic/kibana-management",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

@@ -3,7 +3,7 @@
   "id": "@kbn/global-search-test-plugin",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "globalSearchTest",
     "server": false,

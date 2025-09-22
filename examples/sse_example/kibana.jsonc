@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-core",
   "description": "Plugin that shows how to implement Server-Sent Events.",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "sseExample",
     "server": true,

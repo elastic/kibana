@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-data-discovery",
   "description": "Examples for using unified field list.",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "unifiedFieldListExamples",
     "server": false,

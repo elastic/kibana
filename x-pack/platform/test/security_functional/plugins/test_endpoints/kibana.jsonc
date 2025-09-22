@@ -3,7 +3,7 @@
   "id": "@kbn/security-test-endpoints-plugin",
   "owner": "@elastic/kibana-security",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "securityTestEndpoints",
     "server": true,

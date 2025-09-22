@@ -3,7 +3,7 @@
   "id": "@kbn/cloud-integration-saml-provider-plugin",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "cloudIntegrationSamlProviderPlugin",
     "server": true,

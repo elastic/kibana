@@ -3,6 +3,6 @@
   "id": "@kbn/performance-testing-dataset-extractor",
   "owner": "@elastic/kibana-performance-testing",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

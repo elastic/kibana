@@ -3,7 +3,7 @@
   "id": "@kbn/foo-plugin",
   "owner": "@elastic/kibana-security",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "fooPlugin",
     "server": true,

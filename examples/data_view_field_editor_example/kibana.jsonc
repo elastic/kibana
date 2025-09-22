@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-data-discovery",
   "description": "Data view field editor example app",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "dataViewFieldEditorExample",
     "server": false,

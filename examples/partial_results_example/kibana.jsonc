@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-data-discovery",
   "description": "A plugin demonstrating partial results in the expressions plugin",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "paertialResultsExample",
     "server": false,

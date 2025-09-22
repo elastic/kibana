@@ -3,7 +3,7 @@
   "id": "@kbn/fec-alerts-test-plugin",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "fecAlertsTestPlugin",
     "server": true,

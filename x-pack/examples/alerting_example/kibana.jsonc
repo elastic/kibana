@@ -3,7 +3,7 @@
   "id": "@kbn/alerting-example-plugin",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "alertingExample",
     "server": true,

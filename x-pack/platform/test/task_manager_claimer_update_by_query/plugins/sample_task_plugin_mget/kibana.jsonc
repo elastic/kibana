@@ -3,7 +3,7 @@
   "id": "@kbn/sample-task-plugin-update-by-query",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "sampleTaskPluginUpdateByQuery",
     "server": true,

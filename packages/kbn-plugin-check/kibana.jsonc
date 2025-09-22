@@ -3,6 +3,6 @@
   "id": "@kbn/plugin-check",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

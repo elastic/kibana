@@ -3,7 +3,7 @@
   "id": "@kbn/reporting-fixture",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "reportingFixturePlugin",
     "server": true,

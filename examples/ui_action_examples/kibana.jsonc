@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin of how to register custom uiActions",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "uiActionsExamples",
     "server": false,

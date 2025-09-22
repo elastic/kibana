@@ -3,6 +3,6 @@
   "id": "@kbn/capture-oas-snapshot-cli",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

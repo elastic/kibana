@@ -3,6 +3,6 @@
   "id": "@kbn/json-ast",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

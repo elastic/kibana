@@ -3,7 +3,7 @@
   "id": "@kbn/expressions-explorer-plugin",
   "owner": "@elastic/kibana-visualizations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "expressionsExplorer",
     "server": false,

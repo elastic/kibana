@@ -3,7 +3,7 @@
   "id": "@kbn/user-profiles-consumer-plugin",
   "owner": "@elastic/kibana-security",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "userProfilesConsumerPlugin",
     "server": true,

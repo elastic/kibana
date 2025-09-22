@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "description": "Example app that shows how to use custom URL locators",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "locatorExplorer",
     "server": false,

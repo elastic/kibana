@@ -3,7 +3,7 @@
   "id": "@kbn/iframe-embedded-plugin",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "iframeEmbedded",
     "server": true,

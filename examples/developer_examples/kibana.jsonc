@@ -3,7 +3,7 @@
   "id": "@kbn/developer-examples-plugin",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "developerExamples",
     "server": false,

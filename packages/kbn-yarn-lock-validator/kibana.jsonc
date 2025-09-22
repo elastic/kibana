@@ -3,6 +3,6 @@
   "id": "@kbn/yarn-lock-validator",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

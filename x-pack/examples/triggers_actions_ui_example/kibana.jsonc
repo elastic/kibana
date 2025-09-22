@@ -3,7 +3,7 @@
   "id": "@kbn/triggers-actions-ui-example-plugin",
   "owner": "@elastic/response-ops",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "triggersActionsUiExample",
     "server": true,

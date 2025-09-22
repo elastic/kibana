@@ -3,7 +3,7 @@
   "id": "@kbn/testing-embedded-lens-plugin",
   "owner": "@elastic/kibana-visualizations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "testingEmbeddedLens",
     "server": false,

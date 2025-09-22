@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin integrating with content management plugin",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "contentManagementExamples",
     "server": true,

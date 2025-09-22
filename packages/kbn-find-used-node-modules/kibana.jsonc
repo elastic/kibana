@@ -3,6 +3,6 @@
   "id": "@kbn/find-used-node-modules",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

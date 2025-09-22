@@ -3,6 +3,6 @@
   "id": "@kbn/scout-oblt",
   "owner": "@elastic/appex-qa",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

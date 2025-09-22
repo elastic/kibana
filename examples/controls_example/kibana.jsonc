@@ -3,7 +3,7 @@
   "id": "@kbn/controls-example-plugin",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "controlsExample",
     "server": false,

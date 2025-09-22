@@ -3,7 +3,7 @@
   "id": "@kbn/third-party-vis-lens-example-plugin",
   "owner": "@elastic/kibana-visualizations",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "thirdPartyVisLensExample",
     "server": true,

@@ -3,7 +3,7 @@
   "id": "@kbn/resizable-layout-examples-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "resizableLayoutExamples",
     "server": false,

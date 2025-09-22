@@ -3,5 +3,5 @@
   "id": "@kbn/data-view-validation",
   "owner": "@elastic/kibana-data-discovery",
   "group": "platform",
-  "visilitiby": "private"
+  "visibility": "private"
 }

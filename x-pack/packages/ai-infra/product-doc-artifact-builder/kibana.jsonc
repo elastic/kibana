@@ -3,6 +3,6 @@
   "id": "@kbn/product-doc-artifact-builder",
   "owner": "@elastic/appex-ai-infra",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "devOnly": true
 }

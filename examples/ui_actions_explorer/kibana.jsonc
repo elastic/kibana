@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin of how to use uiActions plugin services",
   "group": "platform",
-  "visilitiby": "private",
+  "visibility": "private",
   "plugin": {
     "id": "uiActionsExplorer",
     "server": false,
