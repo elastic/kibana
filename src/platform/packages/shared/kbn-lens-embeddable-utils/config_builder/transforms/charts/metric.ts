@@ -14,6 +14,8 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
 import {
@@ -22,6 +24,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
+  getAdhocDataviews,
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
@@ -117,13 +120,15 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer
+  layer: FormBasedLayer | TextBasedLayer,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[]
 ): MetricState {
   if (visualization.metricAccessor === undefined) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer);
+  const dataset = buildDatasetState(layer, adHocDataViews, references, 'layer_0');
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -342,7 +347,7 @@ function getValueColumns(layer: MetricStateESQL) {
 }
 
 export function fromAPItoLensState(config: MetricState): LensAttributes {
-  const dataviews: Record<string, { index: string; timeFieldName: string }> = {};
+  const dataviews: Record<string, { id: string; index: string; timeFieldName: string }> = {};
 
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
@@ -353,20 +358,26 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     _buildDataLayer,
     getValueColumns
   );
+
+  const visualization = buildVisualizationState(config);
+
+  const adHocDataViews = getAdhocDataviews(dataviews);
+  const references = buildReferences(
+    Object.fromEntries(Object.entries(adHocDataViews).map(([key, value]) => ['layer_0', value.id]))
+  );
+
   return {
     title: config.title ?? '',
     description: config.description ?? '',
     visualizationType: 'lnsMetric',
-    references: buildReferences(
-      Object.fromEntries(Object.entries(dataviews).map(([key, value]) => [key, value.index]))
-    ),
+    references,
     state: {
       datasourceStates,
       internalReferences: [],
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: buildVisualizationState(config),
-      adHocDataViews: {},
+      visualization,
+      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
 }
@@ -384,7 +395,12 @@ export function fromLensStateToAPI(
   const visualizationState = {
     title: config.title,
     description: config.description ?? '',
-    ...reverseBuildVisualizationState(visualization, layer),
+    ...reverseBuildVisualizationState(
+      visualization,
+      layer,
+      config.state.adHocDataViews ?? {},
+      config.references
+    ),
   };
 
   return visualizationState;

@@ -43,6 +43,7 @@ const createConversationsDataClientMock = () => {
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
     deleteAllConversations: jest.fn(),
+    conversationExists: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),

@@ -16,21 +16,27 @@ import {
   SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH,
   SIEM_DASHBOARD_MIGRATION_STATS_PATH,
+  SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH,
   SIEM_DASHBOARD_MIGRATIONS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
 import type {
-  CreateDashboardMigrationDashboardsRequestBody,
-  CreateDashboardMigrationRequestBody,
-  CreateDashboardMigrationResponse,
-  GetDashboardMigrationResourcesMissingResponse,
-  GetDashboardMigrationStatsResponse,
-  UpdateDashboardMigrationRequestBody,
   GetDashboardMigrationDashboardsRequestQuery,
-  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesRequestQuery,
   GetDashboardMigrationResourcesResponse,
   UpsertDashboardMigrationResourcesRequestBody,
   UpsertDashboardMigrationResourcesResponse,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import {
+  type CreateDashboardMigrationDashboardsRequestBody,
+  type CreateDashboardMigrationRequestBody,
+  type CreateDashboardMigrationResponse,
+  type GetDashboardMigrationResourcesMissingResponse,
+  type GetDashboardMigrationStatsResponse,
+  type UpdateDashboardMigrationRequestBody,
+  type GetDashboardMigrationDashboardsResponse,
+  type GetAllDashboardMigrationsStatsResponse,
+  type GetAllTranslationStatsDashboardMigrationResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type SuperTest from 'supertest';
 import { replaceParams } from '@kbn/openapi-common/shared';
@@ -83,6 +89,39 @@ export const dashboardMigrationRouteFactory = (supertest: SuperTest.Agent) => {
       expectStatusCode = 200,
     }: MigrationRequestParams): Promise<{ body: undefined }> => {
       const url = replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    allStats: async ({
+      expectStatusCode = 200,
+    }: RequestParams): Promise<{ body: GetAllDashboardMigrationsStatsResponse }> => {
+      const response = await supertest
+        .get(SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    translationStats: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{
+      body: GetAllTranslationStatsDashboardMigrationResponse;
+    }> => {
+      const url = replaceParams(SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH, {
         migration_id: migrationId,
       });
       const response = await supertest

@@ -8,3 +8,5 @@ tree-dump
 inversify
 @types/d3-color
 @intellectronica/ruler
+canvas-confetti
+@types/canvas-confetti

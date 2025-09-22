@@ -16,6 +16,8 @@ import { registerSiemDashboardMigrationsStartRoute } from './start';
 import { registerSiemDashboardMigrationsStopRoute } from './stop';
 import { registerSiemDashboardMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
+import { registerSiemDashboardMigrationsStatsAllRoute } from './stats_all';
+import { registerSiemDashboardMigrationsTranslationStatsRoute } from './translation_stats';
 import { registerSiemDashboardMigrationsResourceGetRoute } from './resources/get';
 import { registerSiemDashboardMigrationsResourceUpsertRoute } from './resources/upsert';
 import { registerSiemDashboardMigrationsInstallRoute } from './install';
@@ -47,6 +49,8 @@ export const registerSiemDashboardMigrationsRoutes = (
 
   // ===== Stats ========
   registerSiemDashboardMigrationsStatsRoute(router, logger);
+  registerSiemDashboardMigrationsStatsAllRoute(router, logger);
+  registerSiemDashboardMigrationsTranslationStatsRoute(router, logger);
 
   // ===== Task ========
   registerSiemDashboardMigrationsStartRoute(router, logger);
