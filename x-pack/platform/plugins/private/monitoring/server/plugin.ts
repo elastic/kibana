@@ -77,7 +77,12 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as IClusterClient | ICustomClusterClient;
+  /**
+   * Internal elasticsearch client used for monitoring purposes.
+   * It can be Kibana's internal client (`core.elasticsearch.client`), or a custom client, depending on the configuration.
+   * @private
+   */
+  private cluster: IClusterClient | ICustomClusterClient = {} as IClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
