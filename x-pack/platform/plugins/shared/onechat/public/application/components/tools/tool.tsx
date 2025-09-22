@@ -31,6 +31,7 @@ import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -323,9 +324,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 values={{
                   learnMoreLink: (
                     <EuiLink
-                      href="#"
+                      href={docLinks.tools}
                       target="_blank"
-                      external
                       aria-label={i18n.translate(
                         'xpack.onechat.tools.createToolDocumentationAriaLabel',
                         {
