@@ -26,7 +26,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
@@ -84,7 +84,10 @@ export function StreamsTreeTable({
 
   const numDataPoints = 25;
 
-  const { getStreamDocCounts } = useStreamHistogramFetch(numDataPoints);
+  const { getStreamDocCounts } = useStreamDocCountsFetch({
+    groupTotalCountByTimestamp: true,
+    numDataPoints,
+  });
 
   const sorting = {
     sort: {

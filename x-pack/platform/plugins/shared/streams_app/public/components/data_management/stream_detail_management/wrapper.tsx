@@ -18,6 +18,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import { calculateDataQuality } from '../../../util/calculate_data_quality';
+import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -77,6 +81,31 @@ export function Wrapper({
     })
   );
 
+  const { getStreamDocCounts } = useStreamDocCountsFetch({
+    groupTotalCountByTimestamp: false,
+  });
+  const docCountsFetch = getStreamDocCounts(streamId);
+
+  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
+  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
+
+  const docCount = countResult?.value ? Number(countResult.value?.values?.[0]?.[0]) : 0;
+  const degradedDocCount = degradedDocsResult?.value
+    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
+    : 0;
+  const failedDocCount = failedDocsResult?.value
+    ? Number(failedDocsResult.value?.values?.[0]?.[0])
+    : 0;
+
+  const quality = calculateDataQuality({
+    totalDocs: docCount,
+    degradedDocs: degradedDocCount,
+    failedDocs: failedDocCount,
+  });
+  const isQualityLoading =
+    countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
+
   const { euiTheme } = useEuiTheme();
   return (
     <>
@@ -114,6 +143,11 @@ export function Wrapper({
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <LifecycleBadge lifecycle={definition.effective_lifecycle} />
                   )}
+                  <DatasetQualityIndicator
+                    quality={quality}
+                    isLoading={isQualityLoading}
+                    verbose={true}
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
 

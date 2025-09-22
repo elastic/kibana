@@ -10,18 +10,26 @@ import { useEffect, useRef } from 'react';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 
-export interface StreamHistogramFetch {
+export interface StreamDocCountsFetch {
   docCount: Promise<UnparsedEsqlResponse>;
   failedDocCount: Promise<UnparsedEsqlResponse>;
   degradedDocCount: Promise<UnparsedEsqlResponse>;
 }
 
-export function useStreamHistogramFetch(numDataPoints: number): {
-  getStreamDocCounts(streamName: string): StreamHistogramFetch;
+const DEFAULT_NUM_DATA_POINTS = 25;
+
+export function useStreamDocCountsFetch({
+  groupTotalCountByTimestamp,
+  numDataPoints = DEFAULT_NUM_DATA_POINTS
+}: {
+  groupTotalCountByTimestamp: boolean;
+  numDataPoints?: number;
+}): {
+  getStreamDocCounts(streamName: string): StreamDocCountsFetch;
 } {
   const { timeState, timeState$ } = useTimefilter();
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-  const promiseCache = useRef<Partial<Record<string, StreamHistogramFetch>>>({});
+  const promiseCache = useRef<Partial<Record<string, StreamDocCountsFetch>>>({});
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
@@ -54,7 +62,7 @@ export function useStreamHistogramFetch(numDataPoints: number): {
   return {
     getStreamDocCounts(streamName: string) {
       if (promiseCache.current[streamName]) {
-        return promiseCache.current[streamName] as StreamHistogramFetch;
+        return promiseCache.current[streamName] as StreamDocCountsFetch;
       }
 
       const abortController = abortControllerRef.current;
@@ -69,7 +77,11 @@ export function useStreamHistogramFetch(numDataPoints: number): {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
-            query: `FROM ${streamName},${streamName}::failures | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+            query: `FROM ${streamName},${streamName}::failures | STATS doc_count = COUNT(*)${
+              groupTotalCountByTimestamp
+                ? ` BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`
+                : ''
+            }`,
             start: timeState.start,
             end: timeState.end,
           },

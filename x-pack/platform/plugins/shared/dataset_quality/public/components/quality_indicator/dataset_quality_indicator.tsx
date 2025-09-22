@@ -15,13 +15,15 @@ import { QualityIndicator } from '.';
 export const DatasetQualityIndicator = ({
   isLoading,
   quality,
+  verbose = false,
 }: {
   isLoading: boolean;
   quality: QualityIndicators;
+  verbose?: boolean;
 }) => {
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
-    defaultMessage: '{quality}',
-    values: { quality: capitalize(quality) },
+    defaultMessage: '{quality}{verbose, select, true { quality} other {}}',
+    values: { quality: capitalize(quality), verbose },
   });
 
   return (
