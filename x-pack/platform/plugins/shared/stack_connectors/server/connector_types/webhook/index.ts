@@ -28,7 +28,6 @@ import { SSLCertType } from '../../../common/auth/constants';
 import type {
   ActionParamsType,
   ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
   WebhookConnectorType,
   WebhookConnectorTypeExecutorOptions,
 } from './types';
