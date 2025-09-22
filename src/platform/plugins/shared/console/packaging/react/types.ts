@@ -26,7 +26,25 @@ export interface HttpSetup {
   ) => Promise<T>;
 }
 
+// Toast notification types
+export interface ToastInput {
+  title?: string;
+  text?: string;
+  iconType?: string;
+  color?: 'primary' | 'success' | 'warning' | 'danger';
+}
+
+export interface NotificationCallbacks {
+  addSuccess?: (toastOrTitle: ToastInput | string) => void;
+  addWarning?: (toastOrTitle: ToastInput | string) => void;
+  addDanger?: (toastOrTitle: ToastInput | string) => void;
+  addError?: (error: Error, options?: { title?: string }) => void;
+  add?: (toast: ToastInput) => { id: string };
+  remove?: (toastId: string) => void;
+}
+
 export interface OneConsoleProps {
   lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
   http?: Partial<HttpSetup>;
+  notifications: NotificationCallbacks;
 }

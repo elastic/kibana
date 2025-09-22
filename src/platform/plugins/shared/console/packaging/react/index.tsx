@@ -49,7 +49,6 @@ const createPackagingParsedRequestsProvider = () => {
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
-// import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
@@ -61,7 +60,6 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
-import { notificationServiceMock } from './notifications.mock';
 import { createStorage, createHistory, createSettings, setStorage } from '../../public/services';
 import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
 import { loadActiveApi } from '../../public/lib/kb';
@@ -77,6 +75,7 @@ import {
 import { createApi, createEsHostService } from '../../public/application/lib';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
+import type { NotificationsSetup } from '@kbn/core/public';
 
 const trackUiMetricMock = { count: () => {}, load: () => {} };
 const injectedMetadata = {
@@ -164,7 +163,7 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) => {
+export const OneConsole = ({ lang = 'en', http: customHttp, notifications: customNotifications }: OneConsoleProps) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
 
@@ -178,15 +177,6 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
   const docLinksService = new DocLinksService(coreContext as CoreContext);
   docLinksService.setup();
   const docLinks = docLinksService.start({ injectedMetadata });
-
-  // const notificationService = new NotificationsService();
-  // notificationsService.setup({ uiSettings, analytics });
-  // const notifications = notificationService.start({
-  // analytics,
-  // overlays,
-  // targetDomElement: notificationsTargetDomElement,
-  // rendering,
-  // });
 
   const i18nService = new I18nService();
 
@@ -206,6 +196,18 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
     theme,
     i18n: i18nService.getContext(),
   });
+
+  // Use the custom notifications provided by the consumer
+  const notifications = {
+    toasts: {
+      addSuccess: customNotifications.addSuccess || (() => {}),
+      addWarning: customNotifications.addWarning || (() => {}),
+      addDanger: customNotifications.addDanger || (() => {}),
+      addError: customNotifications.addError || (() => {}),
+      add: customNotifications.add || (() => ({ id: '' })),
+      remove: customNotifications.remove || (() => {}),
+    }
+  };
 
   const executionContextService = new ExecutionContextService();
   const executionContext = executionContextService.setup({ analytics });
@@ -267,7 +269,7 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
             storage,
             history: storageHistory,
             settings,
-            notifications: notificationServiceMock.createStartContract(),
+            notifications: notifications as NotificationsSetup,
             trackUiMetric: trackUiMetricMock,
             objectStorageClient,
             http,
