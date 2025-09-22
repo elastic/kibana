@@ -39,6 +39,8 @@ import { useForm } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { UserAPIClient } from '../user_api_client';
 
+const MIN_PASSWORD_LENGTH = 6;
+
 export interface ChangePasswordFormValues {
   current_password?: string;
   password: string;
@@ -72,10 +74,10 @@ export const validateChangePasswordForm = (
       'xpack.security.management.users.changePasswordForm.passwordRequiredError',
       { defaultMessage: 'Enter a new password.' }
     );
-  } else if (values.password.length < 6) {
+  } else if (values.password.length < MIN_PASSWORD_LENGTH) {
     errors.password = i18n.translate(
       'xpack.security.management.users.changePasswordForm.passwordInvalidError',
-      { defaultMessage: 'Enter at least 6 characters.' }
+      { defaultMessage: `Enter at least ${MIN_PASSWORD_LENGTH} characters.` }
     );
   } else if (values.password !== values.confirm_password) {
     errors.confirm_password = i18n.translate(
@@ -249,7 +251,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
               )}
               helpText={i18n.translate(
                 'xpack.security.management.users.changePasswordForm.passwordHelpText',
-                { defaultMessage: 'Password must be at least 6 characters.' }
+                { defaultMessage: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` }
               )}
               error={form.errors.password}
               isInvalid={form.touched.password && !!form.errors.password}
@@ -301,7 +303,12 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
           form={modalFormId}
           data-test-subj="changePasswordFormSubmitButton"
           isLoading={form.isSubmitting}
-          isDisabled={isLoading || (form.isSubmitted && form.isInvalid)}
+          isDisabled={
+            isLoading ||
+            !form.values.password ||
+            form.values.password.length === 0 ||
+            (form.isSubmitted && form.isInvalid)
+          }
           color={isSystemUser ? 'danger' : undefined}
           fill
         >

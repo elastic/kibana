@@ -68,6 +68,18 @@ const defaultDefaultValues: UserFormValues = {
   roles: [],
 };
 
+// I toyed with using this to compare against the original form values, but it behaves identically to ===
+// const haveUserValuesChanged = (original: UserFormValues, current: UserFormValues): boolean => {
+//   return (
+//     original.username !== current.username ||
+//     original.full_name !== current.full_name ||
+//     original.email !== current.email ||
+//     original.roles.length !== current.roles.length ||
+//     original.roles.some((role) => !current.roles.includes(role)) ||
+//     original.password !== current.password
+//   );
+// };
+
 export const UserForm: FunctionComponent<UserFormProps> = ({
   isNewUser = false,
   isReservedUser = false,
@@ -449,7 +461,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               <EuiButton
                 type="submit"
                 isLoading={form.isSubmitting}
-                isDisabled={form.isSubmitted && form.isInvalid}
+                isDisabled={defaultValues === form.values || (form.isSubmitted && form.isInvalid)}
                 fill
               >
                 {isNewUser ? (
