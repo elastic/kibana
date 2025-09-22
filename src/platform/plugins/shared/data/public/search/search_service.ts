@@ -74,10 +74,7 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import type { ISessionsClient, ISessionService } from './session';
 import { SessionsClient, SessionService } from './session';
-import {
-  registerSearchSessionsMgmt,
-  updateSearchSessionMgmtSectionTitle,
-} from './session/sessions_mgmt';
+import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
@@ -216,7 +213,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
       );
-      //updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
+      // updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
     }
 
     return {
