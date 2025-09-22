@@ -24,5 +24,8 @@ export const queryKeys = {
     indexSearch: {
       resolveTargets: (pattern: string) => ['tools', 'indexSearch', 'resolveTargets', pattern],
     },
+    workflows: {
+      list: () => ['tools', 'workflows', 'list'] as const,
+    },
   },
 };
