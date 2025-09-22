@@ -7672,11 +7672,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/upselling":
+"@kbn/security-solution-test-api-clients@link:x-pack/solutions/security/packages/test-api-clients":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-test-api-clients@link:x-pack/solutions/security/packages/test-api-clients":
+"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/upselling":
   version "0.0.0"
   uid ""
 
