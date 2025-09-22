@@ -22,9 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CascadeRowActionProps } from '../../types';
 
+const MAX_ACTIONS_VISIBLE = 2;
+
 export const CascadeRowActions = function RowActions({
   headerRowActions,
-  hideOver = 2,
+  hideOver = MAX_ACTIONS_VISIBLE,
 }: CascadeRowActionProps) {
   const id = useGeneratedHtmlId({
     prefix: 'dataCascadeRowActions',
@@ -85,7 +87,17 @@ export const CascadeRowActions = function RowActions({
   );
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      css={({ euiTheme }) => ({
+        '& > *:not(:first-child)': {
+          borderLeft: `${euiTheme.border.width.thin} solid`,
+          borderColor: euiTheme.border.color,
+          paddingLeft: euiTheme.size.s,
+        },
+      })}
+    >
       <React.Fragment>{visibleActions}</React.Fragment>
       {headerRowActions.length > hideOver && (
         <EuiFlexItem>
@@ -93,7 +105,7 @@ export const CascadeRowActions = function RowActions({
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             button={hiddenActionsButton}
-            panelPaddingSize="s"
+            panelPaddingSize="none"
           >
             <EuiContextMenuPanel size="m" items={hiddenActions} />
           </EuiPopover>

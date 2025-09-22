@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
-import type { Row, CellContext } from '@tanstack/react-table';
+import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps } from '../../lib/core/virtualizer';
@@ -161,17 +161,18 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 };
 
 export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
-  tableRows: Array<Row<G>>;
+  tableInstance: Table<G>;
   onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
   customTableHeader?: (props: {
-    currentSelectedColumns: string[];
     availableColumns: string[];
-    onSelectionChange: (groupByColumn: string[]) => void;
+    currentSelectedColumns: string[];
+    onGroupSelection: (groupByColumn: string[]) => void;
+    selectedRows: string[];
   }) => React.ReactNode;
   /**
    * Slot for the table title.
    */
-  tableTitleSlot: React.FC<{ rows: Array<G> }>;
+  tableTitleSlot: React.FC;
 }
 
 /**
