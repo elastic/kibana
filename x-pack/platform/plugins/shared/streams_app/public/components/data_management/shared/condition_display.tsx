@@ -40,11 +40,7 @@ export const ConditionDisplay = ({
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       {showKeyword && <OperatorText operator={keyword} />}
-      {isFilterCondition ? (
-        <FilterBadges condition={condition as FilterCondition} />
-      ) : (
-        <ComplexBadges condition={condition} />
-      )}
+      <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
   );
 };
@@ -67,10 +63,6 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
       </EuiFlexItem>
     </>
   );
-};
-
-const ComplexBadges = ({ condition }: { condition: Condition }) => {
-  return <RecursiveConditionDisplay condition={condition} />;
 };
 
 const RecursiveConditionDisplay = ({ condition }: { condition: Condition }) => {
