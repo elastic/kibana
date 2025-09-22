@@ -56,7 +56,7 @@ export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
     <EuiComboBox
       data-test-subj="streamsAppSchemaEditorFieldFormFormat"
       placeholder={i18n.translate(
-        'xpack.streams.schemaEditor.addFieldFlyout.fieldNamePlaceholder',
+        'xpack.streams.schemaEditor.fieldFormatSelector.placeholderText',
         { defaultMessage: 'Select or type the field format...' }
       )}
       options={POPULAR_FORMATS_SUGGESTIONS}
@@ -66,10 +66,13 @@ export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
       singleSelection={{ asPlainText: true }}
       isClearable
       fullWidth
-      customOptionText={i18n.translate('xpack.streams.fieldSelector.customOptionText', {
-        defaultMessage: 'Add {searchValue} as a custom format',
-        values: { searchValue: '{searchValue}' },
-      })}
+      customOptionText={i18n.translate(
+        'xpack.streams.schemaEditor.fieldFormatSelector.customOptionText',
+        {
+          defaultMessage: 'Add {searchValue} as a custom format',
+          values: { searchValue: '{searchValue}' },
+        }
+      )}
     />
   );
 };
