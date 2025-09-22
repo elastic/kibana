@@ -14,6 +14,7 @@ export * from './empty_migration';
 export * from './filters';
 export * from './header_buttons';
 export * from './migration_data_input_flyout_context';
+export * from './migration_name_step';
 export * from './migration_panels';
 export * from './migration_steps';
 export * from './missing_privileges';
