@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { EuiIconProps, EuiTextProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 
 interface Props {
   label: string;
