@@ -28,7 +28,7 @@ export const MigrationDataInputContextProvider: React.FC<
     </MigrationDataInputContext.Provider>
   );
 });
-MigrationDataInputContextProvider.displayName = 'RuleMigrationDataInputContextProvider';
+MigrationDataInputContextProvider.displayName = 'MigrationDataInputContextProvider';
 
 export const useMigrationDataInputContext = (): MigrationDataInputContextValue => {
   const context = useContext(MigrationDataInputContext);

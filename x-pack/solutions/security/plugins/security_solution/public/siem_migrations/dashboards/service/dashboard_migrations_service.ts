@@ -205,7 +205,6 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     const stats = await api.getDashboardMigrationStats({ migrationId });
     return stats;
   }
-
   protected async fetchMigrationsStatsAll(
     params: GetMigrationsStatsAllParams = {}
   ): Promise<DashboardMigrationStats[]> {
