@@ -56,6 +56,11 @@ export const casePropsWithAlerts: CaseViewTabsProps = {
   caseData: { ...caseData, totalAlerts: 3 },
 };
 
+export const casePropsWithEvents: CaseViewTabsProps = {
+  ...caseProps,
+  caseData: { ...caseData, totalEvents: 4 },
+};
+
 describe('CaseViewTabs', () => {
   const data = { total: 3 };
   const basicLicense = licensingMock.createLicense({
@@ -301,6 +306,33 @@ describe('CaseViewTabs', () => {
     expect(
       await screen.findByTestId('case-view-alerts-table-experimental-badge')
     ).toBeInTheDocument();
+  });
+
+  it('should display the events tab with correct count when the feature is enabled', async () => {
+    renderWithTestingProviders(
+      <CaseViewTabs {...casePropsWithEvents} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
+
+    const badge = await screen.findByTestId('case-view-events-stats-badge');
+
+    expect(badge).toHaveTextContent('4');
+  });
+
+  it('should not display the events tab when the feature is disabled', async () => {
+    renderWithTestingProviders(
+      <CaseViewTabs {...casePropsWithEvents} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: false } } },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-events')).not.toBeInTheDocument();
   });
 
   it('should not show observable tabs in non-platinum tiers', async () => {
