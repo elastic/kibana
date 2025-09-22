@@ -30,17 +30,14 @@ import type {
   ICommandCallbacks,
   ICommandContext,
   ISuggestionItem,
-  ItemKind,
 } from '../../../commands_registry/types';
 import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
-import { comparisonFunctions } from '../../all_operators';
 import { timeUnitsToSuggest } from '../../constants';
 import type { FunctionParameter, FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../ast';
-import { getColumnExists } from '../columns';
 import { getExpressionType } from '../expressions';
 import {
   filterFunctionSignatures,
@@ -156,6 +153,9 @@ export async function getFunctionArgsSuggestions(
     hasMoreMandatoryArgs,
     currentArg,
     fnToIgnore,
+    fnDefinition,
+    finalCommandArgIndex,
+    command,
   } = analysis;
 
   // 4. Parameter Types to Suggest
@@ -308,8 +308,9 @@ const analyzeParameterLocation = (
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ) => {
   // --- Context Gathering Section ---
-  // 1. AST Node Context
+  // AST Node Context
   // Find the AST node and command at the cursor position
+  // TODO: do we need findAstPosition here?
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
   if (!node) {
@@ -325,7 +326,7 @@ const analyzeParameterLocation = (
     command = forkCommand || astContext.command;
   }
 
-  // 2. Function Definition
+  // Function Definition
   // The function’s metadata and signatures (fnDefinition)
   const functionNode = node as ESQLFunction;
   const fnDefinition = getFunctionDefinition(functionNode.name);
@@ -339,7 +340,7 @@ const analyzeParameterLocation = (
     signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
   };
 
-  // 3. Argument State
+  // Argument State
   // Available columns and their types (columnMap)
   const columnMap: Map<string, ESQLColumnData> = context?.columns || new Map();
   const references = {
@@ -356,7 +357,7 @@ const analyzeParameterLocation = (
   // The specific argument at the cursor
   const currentArg = enrichedArgs[argIndex];
 
-  // 6. Special Function Handling
+  // Special Function Handling
   // Whether to add a comma after the suggestion
   const isCursorFollowedByComma = fullText
     ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
@@ -372,7 +373,7 @@ const analyzeParameterLocation = (
   // Whether to advance the cursor or open suggestions
   const shouldAdvanceCursor = hasMoreMandatoryArgs && !isCursorFollowedByComma;
 
-  // 7. Ignored Functions
+  // Ignored Functions
   // Functions to ignore based on context (e.g., grouping, aggregation, already-used functions)
   const commandArgIndex = command.args.findIndex(
     (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
@@ -414,6 +415,9 @@ const analyzeParameterLocation = (
     hasMoreMandatoryArgs,
     currentArg,
     fnToIgnore,
+    fnDefinition,
+    command,
+    finalCommandArgIndex,
   };
 };
 
