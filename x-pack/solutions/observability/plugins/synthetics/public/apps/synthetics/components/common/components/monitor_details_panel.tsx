@@ -74,7 +74,7 @@ export const MonitorDetailsPanel = ({
       hasBorder={hasBorder}
     >
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" columnWidths={[2, 3]} compressed align="left">
+      <EuiDescriptionList type="responsiveColumn" columnWidths={[2, 3]} compressed align="left">
         {!hideEnabled && (
           <>
             <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
