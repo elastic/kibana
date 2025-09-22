@@ -34,6 +34,7 @@ export type {
   ObjectResultType,
 } from './object_type';
 export type { TypeOf, TypeOfOutput, TypeOfInput } from './type_of';
+export type { SchemaOf } from './schema_of';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

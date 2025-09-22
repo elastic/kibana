@@ -16,7 +16,7 @@ describe('SchemaOf', () => {
   it('should create basic schema type from output', () => {
     interface MySchemaOutput {
       name: string;
-      age?: number;
+      age?: number | undefined;
     }
 
     type Expected = SchemaOf<MySchemaOutput>;
@@ -32,7 +32,8 @@ describe('SchemaOf', () => {
   it('should error on missing property definitions', () => {
     interface MySchemaOutput {
       name: string;
-      age?: number;
+      age: number;
+      maybe?: number;
     }
 
     type Expected = SchemaOf<MySchemaOutput>;
@@ -41,6 +42,17 @@ describe('SchemaOf', () => {
       // @ts-expect-error
       schema.object({
         name: schema.string(),
+        age: schema.string(),
+        maybe: schema.maybe(schema.number()),
+      })
+    );
+
+    // unable to enforce presence of optional types
+    expectType<Expected>(
+      schema.object({
+        name: schema.string(),
+        age: schema.number(),
+        // maybe: schema.maybe(schema.number()),
       })
     );
   });
@@ -57,6 +69,51 @@ describe('SchemaOf', () => {
       schema.object({
         name: schema.string({ defaultValue: 'John' }),
         age: schema.number({ defaultValue: 1 }),
+      })
+    );
+  });
+
+  it('should create schema with array of objects', () => {
+    interface ArrayItem {
+      name: string;
+      age: number | string;
+    }
+    interface MySchemaOutput {
+      arr: ArrayItem[];
+    }
+
+    type Expected = SchemaOf<MySchemaOutput>;
+
+    expectType<Expected>(
+      schema.object({
+        arr: schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            age: schema.string(),
+          })
+        ),
+      })
+    );
+  });
+
+  it('should create nested schema type', () => {
+    interface MySchemaOutput {
+      name: string;
+      age: number;
+      obj: {
+        bool: boolean;
+      };
+    }
+
+    type Expected = SchemaOf<MySchemaOutput>;
+
+    expectType<Expected>(
+      schema.object({
+        name: schema.string(),
+        age: schema.number(),
+        obj: schema.object({
+          bool: schema.boolean(),
+        }),
       })
     );
   });

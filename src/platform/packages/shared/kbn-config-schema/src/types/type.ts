@@ -118,7 +118,7 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<Output = any, Input = Output, D extends DefaultValue<Input> = never> {
+export abstract class Type<Output, Input = Output, D extends DefaultValue<Input> = never> {
   public readonly type!: Output;
   public readonly _output!: Output;
   public readonly _input!: [D] extends [never] ? Input : Input | undefined;

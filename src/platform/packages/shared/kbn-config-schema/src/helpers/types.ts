@@ -26,7 +26,7 @@ export type RequiredKeys<T extends object> = {
  *   a: string;
  *   b: number | undefined;
  * }>;
- * // { a: string; b?: number | undefined }
+ * // A -> { a: string; b?: number | undefined }
  * ```
  */
 export type OptionalizeObject<T extends object> = Simplify<

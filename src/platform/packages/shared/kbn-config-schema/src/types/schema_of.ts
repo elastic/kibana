@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType, ObjectInputType, ObjectOutputType } from './object_type';
 import type { Type } from './type';
 
+/*
+ * This `SchemaOf` is meant to allow driving schemas based on TS types.
+ * The difficulty is that it's hard to build up the shape of the schema perfectly,
+ * in order to match the expected schema.
+ *
+ * This is a loose type to derive a schema that mostly matches the expected type.
+ */
+
 /**
- * Schema type derived from *output* type.
+ * Schema type derived from *output* type. Should be used with `satisfies` to infer the correct schema type.
  *
  * Limitations:
  * - Does **not** support input types (i.e. input === output).
@@ -21,25 +28,13 @@ import type { Type } from './type';
  * ```ts
  * interface MySchemaOutput {
  *    name: string;
- *    age?: number;
+ *    age: number;
  *  }
  *
- *  const mySchema: SchemaOf<MySchemaOutput> = schema.object({
+ *  const mySchema = schema.object({
  *    name: schema.string(),
- *    age: schema.maybe(schema.number()),
- *  });
+ *    age: schema.number(),
+ *  }) satisfies SchemaOf<MySchemaOutput>;
  * ```
  */
-export type SchemaOf<T> = [T] extends [object]
-  ? ObjectType<
-      {
-        [k in keyof Required<T>]: SchemaOf<T[k]>;
-      },
-      ObjectOutputType<{
-        [k in keyof Required<T>]: SchemaOf<T[k]>;
-      }>,
-      ObjectInputType<{
-        [k in keyof Required<T>]: SchemaOf<T[k]>;
-      }>
-    >
-  : Type<T, T, T>;
+export type SchemaOf<T> = Omit<Type<T, T, any>, '_input' | 'extendsDeep'>;

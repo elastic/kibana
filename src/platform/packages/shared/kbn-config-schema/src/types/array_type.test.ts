@@ -194,7 +194,7 @@ describe('#maxSize', () => {
 
 describe('#validate', () => {
   test('should validate with correct type', () => {
-    const type = schema.arrayOf(
+    schema.arrayOf(
       schema.object({
         foo: schema.string(),
       }),
