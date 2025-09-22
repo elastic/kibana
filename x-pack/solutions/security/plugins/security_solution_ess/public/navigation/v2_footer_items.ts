@@ -25,7 +25,8 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           // TODO: Add fleet back when it is possible to not jump to  fleet sub menu under assets
           // { link: 'fleet' },
           { link: 'management:ingest_pipelines' },
-          { link: 'management:pipelines' }, // logstash pipeline
+          // logstash pipeline
+          { link: 'management:pipelines' },
           { link: 'management:content_connectors' },
         ],
       },
@@ -38,7 +39,7 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'management:snapshot_restore' },
           { link: 'management:transform' },
           { link: 'management:rollup_jobs' },
-          { link: 'management:data_quality' }, // data set quality
+          { link: 'management:data_quality' },
         ],
       },
     ],
@@ -116,7 +117,7 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'management:filesManagement' },
           { link: 'management:objects' },
           { link: 'management:tags' },
-          { link: 'management:search_sessions' }, // not in the sheet // doesn't show up?
+          { link: 'management:search_sessions' },
           { link: 'management:spaces' },
           { link: 'maps' },
           { link: 'visualize' },

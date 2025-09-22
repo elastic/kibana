@@ -159,6 +159,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           title: i18nStrings.devTools,
           icon: 'editorCodeBlock',
         },
+        // version 2 sidenav footer items
         ...v2FooterItems,
         {
           title: i18nStrings.management.title,
