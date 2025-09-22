@@ -31,6 +31,10 @@ const customConnectorLabel = i18n.translate('xpack.aiAssistant.callToAction.titl
   defaultMessage: 'Custom',
 });
 
+const defaultConnectorLabel = i18n.translate('xpack.aiAssistant.callToAction.titleLabel', {
+  defaultMessage: 'Default',
+});
+
 /**
  * Translations for the `ConnectorSelector` component.
  */
@@ -41,4 +45,5 @@ export const translations = {
   manageConnectorAriaLabel,
   preConfiguredConnectorLabel,
   customConnectorLabel,
+  defaultConnectorLabel,
 };

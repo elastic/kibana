@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 
 import type { ConnectorSelectorProps } from './connector_selector';
 import { ConnectorSelector } from './connector_selector';
@@ -110,6 +110,40 @@ describe('ConnectorSelector', () => {
       });
 
       expect(screen.queryByTestId('aiAssistantManageConnectorsButton')).not.toBeInTheDocument();
+    });
+
+    it('renders default connector badge when connector is pre-configured', async () => {
+      renderComponent({
+        ...defaultProps,
+        defaultConnectorId: '1',
+      });
+
+      const connector1 = screen.queryByTestId('connector1');
+      const defaultConnectorBadge = within(connector1!).getByTestId('defaultConnectorBadge');
+      expect(defaultConnectorBadge).toBeInTheDocument();
+      expect(defaultConnectorBadge).toHaveTextContent(translations.defaultConnectorLabel);
+    });
+
+    it('renders default connector badge when connector is custom', async () => {
+      renderComponent({
+        ...defaultProps,
+        defaultConnectorId: '6',
+      });
+
+      const connector6 = screen.queryByTestId('customConnector3');
+      const defaultConnectorBadge = within(connector6!).getByTestId('defaultConnectorBadge');
+      expect(defaultConnectorBadge).toBeInTheDocument();
+      expect(defaultConnectorBadge).toHaveTextContent(translations.defaultConnectorLabel);
+    });
+
+    it('does not renders default connector badge when connector does not match default connector id', async () => {
+      renderComponent({
+        ...defaultProps,
+        defaultConnectorId: '7',
+      });
+
+      const defaultConnectorBadge = screen.queryByTestId('defaultConnectorBadge');
+      expect(defaultConnectorBadge).not.toBeInTheDocument();
     });
 
     it('renders panel without add connectors button', async () => {

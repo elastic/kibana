@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -26,6 +27,8 @@ export interface ConnectorSelectorProps<T extends { value: string } = { value: s
   preConfiguredConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];
   /** Custom connectors to display in the selector */
   customConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];
+  /** Default connector id if a default connector has been configured. */
+  defaultConnectorId?: string;
   /** Optional test subject for the component. */
   ['data-test-subj']?: string;
   /** Controlled selected connector value. */
@@ -67,14 +70,23 @@ export const ConnectorSelector = <T extends { value: string } = { value: string 
 
   const selectedValue = isControlled ? controlledValue : uncontrolledValue;
 
+  const defaultConnectorBadge = useMemo(() => {
+    return (
+      <EuiBadge color="hollow" data-test-subj="defaultConnectorBadge">
+        {i8n.defaultConnectorLabel}
+      </EuiBadge>
+    );
+  }, []);
+
   const preConfiguredConnectors = useMemo(
     () =>
       props.preConfiguredConnectors.map((connector) => ({
         ...connector,
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
+        append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
       })),
-    [props.preConfiguredConnectors, selectedValue]
+    [props.preConfiguredConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
 
   const customConnectors = useMemo(
@@ -83,8 +95,9 @@ export const ConnectorSelector = <T extends { value: string } = { value: string 
         ...connector,
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
+        append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
       })),
-    [props.customConnectors, selectedValue]
+    [props.customConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
 
   const options = useMemo<EuiSelectableOption<T>[]>(

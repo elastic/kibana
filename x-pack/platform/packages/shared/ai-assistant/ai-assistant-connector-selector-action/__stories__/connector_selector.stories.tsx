@@ -77,6 +77,7 @@ export const UncontrolledContextMenu: StoryFn<typeof Component> = (args) => <Com
 
 UncontrolledContextMenu.args = {
   defaultValue: '2',
+  defaultConnectorId: '3',
 } as Partial<ConnectorSelectorProps>;
 
 export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
@@ -98,4 +99,5 @@ export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
 
 ControlledContextMenu.args = {
   value: '3',
+  defaultConnectorId: '4',
 } as Partial<ConnectorSelectorProps>;
