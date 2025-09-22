@@ -315,7 +315,8 @@ export function createCustomCallbackMocks(
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      if (queryString.includes('logs*')) {
+      // from * is called in the empty state
+      if (queryString.includes('logs*') || queryString === 'from *') {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,
