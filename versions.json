@@ -7,22 +7,22 @@
       "branchType": "development"
     },
     {
-      "version": "9.1.4",
+      "version": "9.1.5",
       "branch": "9.1",
       "branchType": "release"
     },
     {
-      "version": "9.0.7",
+      "version": "9.0.8",
       "branch": "9.0",
       "branchType": "release"
     },
     {
-      "version": "8.19.4",
+      "version": "8.19.5",
       "branch": "8.19",
       "branchType": "release"
     },
     {
-      "version": "8.18.7",
+      "version": "8.18.8",
       "branch": "8.18",
       "branchType": "release"
     },
