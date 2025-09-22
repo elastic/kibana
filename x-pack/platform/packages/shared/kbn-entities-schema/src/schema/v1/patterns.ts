@@ -14,7 +14,11 @@ export const ENTITY_RESET = 'reset' as const;
 export const ENTITY_SCHEMA_VERSION_V1 = 'v1';
 
 type SchemaVersion = `v${number}`;
-type Dataset = typeof ENTITY_LATEST | typeof ENTITY_HISTORY | typeof ENTITY_RESET | typeof ENTITY_UPDATES;
+type Dataset =
+  | typeof ENTITY_LATEST
+  | typeof ENTITY_HISTORY
+  | typeof ENTITY_RESET
+  | typeof ENTITY_UPDATES;
 
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;
