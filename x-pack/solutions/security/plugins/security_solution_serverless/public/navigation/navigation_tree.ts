@@ -58,6 +58,8 @@ export const createNavigationTree = async (
             link: 'discover',
           },
           defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
+          // version 2 sidenav
+          ...defaultNavigationTree.v2(services),
           {
             breadcrumbStatus: 'hidden',
             children: [
@@ -128,13 +130,14 @@ export const createNavigationTree = async (
         id: 'security_solution_nav_footer',
         type: 'navGroup',
         children: [
-          defaultNavigationTree.launchpad({ hasAiValueAccess }),
+          defaultNavigationTree.launchpad({ hasAiValueAccess, sideNavVersion: 'v1' }),
+          defaultNavigationTree.launchpad({ hasAiValueAccess, sideNavVersion: 'v2' }),
           {
             link: 'dev_tools',
             title: i18nStrings.devTools,
             icon: 'editorCodeBlock',
           },
-          createStackManagementNavigationTree(),
+          createStackManagementNavigationTree({ sideNavVersion: 'v1' }),
         ],
       },
     ],
