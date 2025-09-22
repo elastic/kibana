@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { mockGlobalState, TestProviders, createMockStore } from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+import { SourcererScopeName } from '../../sourcerer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

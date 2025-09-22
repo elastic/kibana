@@ -11,12 +11,12 @@ import { act, render, screen } from '@testing-library/react';
 import { ScheduleDefinition } from '.';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../../sourcerer';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
-jest.mock('../../../../../../sourcerer/containers');
+jest.mock('../../../../../../sourcerer');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;

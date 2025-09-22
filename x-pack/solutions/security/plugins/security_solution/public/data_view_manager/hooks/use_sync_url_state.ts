@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SourcererScopeName, type SourcererUrlState } from '../../sourcerer/store/model';
+import { SourcererScopeName, type SourcererUrlState } from '../../sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import type { State } from '../../common/store/types';

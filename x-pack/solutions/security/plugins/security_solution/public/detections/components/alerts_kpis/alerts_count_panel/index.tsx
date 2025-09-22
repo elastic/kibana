@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';

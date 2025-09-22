@@ -12,8 +12,8 @@ import { UnifiedTimeline } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
+import { useSourcererDataView } from '../../../../sourcerer';
+import { mockSourcererScope } from '../../../../sourcerer/__mocks__';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,
@@ -46,8 +46,8 @@ jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
+jest.mock('../../../../sourcerer/hooks/use_sourcerer_data_view');
+jest.mock('../../../../sourcerer/hooks/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
-import { render, act, waitFor, renderHook } from '@testing-library/react';
+import { act, render, renderHook, waitFor } from '@testing-library/react';
 import type { Store } from 'redux';
-import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
+import type { FieldEditorActionsRef, UseFieldBrowserOptions, UseFieldBrowserOptionsProps } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -17,7 +17,7 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';

@@ -9,7 +9,7 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { useParams } from 'react-router-dom';
 
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -59,7 +59,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',

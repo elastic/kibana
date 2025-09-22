@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -23,7 +23,7 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../sourcerer';
 import { HeaderPage } from '../../../common/components/header_page';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';

@@ -18,8 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { HeaderPage } from '../../../common/components/header_page';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AlertsPageContent } from './content';

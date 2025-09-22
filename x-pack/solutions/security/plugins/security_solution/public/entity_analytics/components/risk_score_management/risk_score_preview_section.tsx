@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiCallOut,
   EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,8 +29,7 @@ import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/ri
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../../common';
 import { EntityIconByType } from '../entity_store/helpers';
@@ -38,6 +37,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
 import type { AlertFilter } from './common';
+
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;

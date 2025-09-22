@@ -9,9 +9,8 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
-import { initDataView } from '../../sourcerer/store/model';
-import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
+import type { KibanaDataView, SourcererModel } from '../../sourcerer';
+import { createSourcererDataView, initDataView } from '../../sourcerer';
 import {
   DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_ATTACK_DATA_VIEW_ID,

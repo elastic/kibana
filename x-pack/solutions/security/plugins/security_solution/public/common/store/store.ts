@@ -8,12 +8,12 @@
 import thunk from 'redux-thunk';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
+  Store,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
@@ -34,7 +34,7 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type { SourcererDataView } from '../../sourcerer/store/model';
+import type { SourcererDataView } from '../../sourcerer';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { AnalyzerState } from '../../resolver/types';

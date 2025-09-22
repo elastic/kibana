@@ -19,7 +19,7 @@ mockGetUrlForApp.mockImplementation(
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
 );
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
+jest.mock('../../../../sourcerer/hooks/use_get_field_spec');
 
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 

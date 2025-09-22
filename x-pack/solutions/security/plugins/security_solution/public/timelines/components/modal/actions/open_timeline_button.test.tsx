@@ -12,11 +12,11 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useParams } from 'react-router-dom';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 jest.mock('../../open_timeline/use_timeline_status');
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');

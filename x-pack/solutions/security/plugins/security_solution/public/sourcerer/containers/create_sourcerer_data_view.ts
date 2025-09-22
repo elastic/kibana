@@ -8,7 +8,7 @@
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ensurePatternFormat } from '../../../common/utils/sourcerer';
+import { ensurePatternFormat } from '../utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 import {

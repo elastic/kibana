@@ -8,7 +8,8 @@
 import { renderHook } from '@testing-library/react';
 import { useUpdateDataView } from './use_update_data_view';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import * as i18n from './translations';
+import * as i18n from '../translations';
+
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockPatterns = ['packetbeat-*', 'winlogbeat-*'];

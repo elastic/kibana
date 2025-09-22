@@ -8,11 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiShowFor,
   EuiScreenReaderOnly,
+  EuiShowFor,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -32,7 +32,7 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';

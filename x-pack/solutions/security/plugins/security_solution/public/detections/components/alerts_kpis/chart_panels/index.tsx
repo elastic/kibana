@@ -16,7 +16,7 @@ import { ChartSelect } from './chart_select';
 import { ChartCollapse } from './chart_collapse';
 import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../alerts_treemap_panel';
-import type { RunTimeMappings } from '../../../../sourcerer/store/model';
+import type { RunTimeMappings } from '../../../../sourcerer';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../alerts_histogram_panel';

@@ -17,7 +17,7 @@ import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import type { FlowTarget } from '../../../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../../sourcerer';
 
 interface PointToolTipContentProps {
   contextId: string;

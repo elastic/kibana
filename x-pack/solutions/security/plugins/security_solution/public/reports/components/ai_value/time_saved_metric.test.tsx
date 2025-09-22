@@ -10,9 +10,10 @@ import { render } from '@testing-library/react';
 import { TimeSavedMetric } from './time_saved_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
+
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));

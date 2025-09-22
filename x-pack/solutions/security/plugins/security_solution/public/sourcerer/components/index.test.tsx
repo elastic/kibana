@@ -14,18 +14,18 @@ import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { fireEvent, waitFor, render } from '@testing-library/react';
-import { useSourcererDataView } from '../containers';
-import { useSignalHelpers } from '../containers/use_signal_helpers';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { useSignalHelpers } from '../hooks/use_signal_helpers';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
-import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { sortWithExcludesAtEnd } from '../utils/sourcerer';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../containers');
-jest.mock('../containers/use_signal_helpers');
+jest.mock('../hooks/use_sourcerer_data_view');
+jest.mock('../hooks/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
-jest.mock('./use_update_data_view', () => ({
+jest.mock('../hooks/use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,
 }));
 jest.mock('react-redux', () => {

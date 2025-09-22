@@ -15,7 +15,7 @@ import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {

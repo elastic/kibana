@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import type {
   CellActionsProps,
   UseDataGridColumnsCellActions,
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
+import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
-import { useDataViewId } from '../../hooks/use_data_view_id';
+import { SourcererScopeName, useDataViewId, useGetFieldSpec } from '../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 

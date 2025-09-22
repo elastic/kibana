@@ -31,8 +31,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { useUserData } from '../../../detections/components/user_info';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { RiskInformationButtonEmpty } from '../risk_information';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 

@@ -18,8 +18,8 @@ import type { SortColumnTimeline as Sort } from '../../../../../../common/types/
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer';
+import { mockSourcererScope } from '../../../../../sourcerer/__mocks__';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
@@ -39,7 +39,7 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

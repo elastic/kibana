@@ -30,12 +30,12 @@ jest.mock('@kbn/cell-actions', () => ({
 const mockFieldSpec = { someFieldSpec: 'theFieldSpec' };
 const mockGetFieldSpec = jest.fn((_: string) => mockFieldSpec);
 const mockUseGetFieldSpec = jest.fn((_: unknown) => mockGetFieldSpec);
-jest.mock('../../hooks/use_get_field_spec', () => ({
+jest.mock('../../../sourcerer/hooks/use_get_field_spec', () => ({
   useGetFieldSpec: (param: unknown) => mockUseGetFieldSpec(param),
 }));
 const mockDataViewId = 'security-default-dataview-id';
 const mockUseDataViewId = jest.fn((_: unknown) => mockDataViewId);
-jest.mock('../../hooks/use_data_view_id', () => ({
+jest.mock('../../../sourcerer/hooks/use_data_view_id', () => ({
   useDataViewId: (param: unknown) => mockUseDataViewId(param),
 }));
 

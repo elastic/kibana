@@ -9,7 +9,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { TimelinesPage } from './timelines_page';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { withMatchedIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
@@ -25,7 +25,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
-jest.mock('../../sourcerer/containers');
+jest.mock('../../sourcerer');
 jest.mock('../../common/components/user_privileges');
 jest.mock('../../common/hooks/use_experimental_features');
 

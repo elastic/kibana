@@ -42,7 +42,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
+jest.mock('../../../../sourcerer', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };

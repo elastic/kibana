@@ -25,7 +25,7 @@ import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../../sourcerer';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
 import { timelineSelectors } from '../../../../store';
@@ -34,7 +34,6 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { timelineDefaults } from '../../../../store/defaults';
 import { savedSearchComparator } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {

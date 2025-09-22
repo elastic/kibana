@@ -16,7 +16,7 @@ import styled from '@emotion/styled';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 
 import {
   convertKueryToElasticSearchQuery,
@@ -31,7 +31,6 @@ import { buildGlobalQuery, getNonDropAreaFilters, TIMELINE_FILTER_DROP_AREA } fr
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];

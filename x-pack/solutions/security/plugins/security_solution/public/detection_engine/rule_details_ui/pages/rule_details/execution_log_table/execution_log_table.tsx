@@ -10,23 +10,23 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
 import type {
-  OnTimeChangeProps,
-  OnRefreshProps,
-  OnRefreshChangeProps,
-  EuiSwitchEvent,
   CriteriaWithPagination,
+  EuiSwitchEvent,
+  OnRefreshChangeProps,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiSpacer,
-  EuiSwitch,
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -57,7 +57,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../../../sourcerer';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -72,7 +72,6 @@ import type {
   RelativeTimeRange,
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
@@ -80,9 +79,9 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
-  getMessageColumn,
-  getExecutionLogMetricsColumns,
   expanderColumn,
+  getExecutionLogMetricsColumns,
+  getMessageColumn,
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';

@@ -6,13 +6,13 @@
  */
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AlertSelection } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from './translations';
 
 jest.mock('react-router', () => ({
@@ -23,7 +23,7 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));

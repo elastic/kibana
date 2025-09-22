@@ -9,13 +9,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
-import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
+import type { RunTimeMappings, SelectedDataView, SourcererDataView } from '../store/model';
 import { SourcererScopeName } from '../store/model';
 import { checkIfIndicesExist } from '../store/helpers';
-import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
+import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
-import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { sortWithExcludesAtEnd } from '../utils/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSourcererDataView = (

@@ -6,9 +6,9 @@
  */
 
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { ensurePatternFormat } from '../../../common/utils/sourcerer';
+import { ensurePatternFormat } from '../utils/sourcerer';
 import type { SourcererDataView } from '../store/model';
-import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
+import { getDataViewStateFromIndexFields } from '../hooks/use_data_view';
 
 export const getSourcererDataView = async (
   dataViewId: string,

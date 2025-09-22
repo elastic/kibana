@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
-import { useSourcererDataView } from '../../sourcerer/containers';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../sourcerer';
+
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { SignalHit } from '../../common/utils/alerts';

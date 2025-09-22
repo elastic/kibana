@@ -24,7 +24,7 @@ import type { AutonomousSystem } from '../../../../../common/search_strategy';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');
@@ -33,7 +33,7 @@ mockGetUrlForApp.mockImplementation(
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
 );
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
+jest.mock('../../../sourcerer/hooks/use_get_field_spec');
 
 const mockHost: HostEcs = mockData.complete.host as HostEcs;
 

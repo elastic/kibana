@@ -11,7 +11,7 @@ import { EuiBadge, EuiButtonEmpty, EuiFormRow, EuiIcon, useEuiTheme } from '@ela
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import type { sourcererModel } from '../store';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 export const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};

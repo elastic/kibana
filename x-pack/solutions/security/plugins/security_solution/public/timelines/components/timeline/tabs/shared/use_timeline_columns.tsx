@@ -8,8 +8,7 @@
 import { useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../../../sourcerer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';

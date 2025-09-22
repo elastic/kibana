@@ -14,7 +14,7 @@ import { kpiTotalUsersMetricLensAttributes } from './kpi_total_users_metric';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../../sourcerer/containers', () => ({
+jest.mock('../../../../../sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',

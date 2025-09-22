@@ -36,7 +36,7 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { SourcererScopeName } from '../../../sourcerer';
 
 const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 

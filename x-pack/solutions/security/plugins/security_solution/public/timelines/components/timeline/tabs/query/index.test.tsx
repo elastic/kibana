@@ -11,8 +11,8 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer';
+import { mockSourcererScope } from '../../../../../sourcerer/__mocks__';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -67,8 +67,8 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
+jest.mock('../../../../../sourcerer/hooks/use_sourcerer_data_view');
+jest.mock('../../../../../sourcerer/hooks/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 

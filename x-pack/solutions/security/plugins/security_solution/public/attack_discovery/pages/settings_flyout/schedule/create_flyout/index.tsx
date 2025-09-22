@@ -23,7 +23,7 @@ import { DataViewManagerScopeName } from '../../../../../data_view_manager/const
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';

@@ -26,7 +26,7 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';

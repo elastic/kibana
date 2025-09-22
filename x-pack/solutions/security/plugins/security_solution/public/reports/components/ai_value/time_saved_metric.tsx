@@ -14,7 +14,7 @@ import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
 } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';

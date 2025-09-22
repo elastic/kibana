@@ -7,9 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { SourcererScopeName } from '../../sourcerer/store/model';
-import { sourcererSelectors } from '../../sourcerer/store';
-import type { State } from '../store';
+import type { State } from '../../common/store';
+import { sourcererSelectors } from '../store';
+import type { SourcererScopeName } from '../store/model';
 
 export const useGetFieldSpec = (scopeId: SourcererScopeName) => {
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
@@ -20,6 +20,7 @@ export const useGetFieldSpec = (scopeId: SourcererScopeName) => {
     () => kibanaDataViews.find((dv) => dv.id === selectedDataViewId),
     [kibanaDataViews, selectedDataViewId]
   );
+
   return useCallback(
     (fieldName: string) => {
       const fields = dataView?.fields;

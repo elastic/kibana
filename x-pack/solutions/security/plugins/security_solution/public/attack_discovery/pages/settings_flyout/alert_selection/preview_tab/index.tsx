@@ -7,9 +7,9 @@
 
 import {
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -26,7 +26,7 @@ import { useSignalIndex } from '../../../../../detections/containers/detection_e
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { sourcererActions } from '../../../../../sourcerer/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../../sourcerer';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
@@ -158,7 +158,7 @@ const PreviewTabComponent = ({
     if (signalIndexName != null) {
       // Limit the fields in the StackByComboBox to the fields in the signal index.
       // NOTE: The page containing this component must also be a member of
-      // `detectionsPaths` in `sourcerer/containers/sourcerer_paths.ts` for this
+      // `detectionsPaths` in `sourcerer/constants/sourcerer_paths.ts` for this
       // action to have any effect.
       dispatch(
         sourcererActions.setSelectedDataView({

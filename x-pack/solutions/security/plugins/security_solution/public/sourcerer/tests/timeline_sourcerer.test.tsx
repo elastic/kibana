@@ -7,20 +7,20 @@
 
 import React from 'react';
 
-import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { SourcererScopeName } from '../store/model';
-import { Sourcerer } from '.';
+import { Sourcerer } from '../components';
 import { sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import { useSourcererDataView } from '../containers';
-import { useSignalHelpers } from '../containers/use_signal_helpers';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { useSignalHelpers } from '../hooks/use_signal_helpers';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../containers');
-jest.mock('../containers/use_signal_helpers');
+jest.mock('../hooks/use_sourcerer_data_view');
+jest.mock('../hooks/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
-jest.mock('./use_update_data_view', () => ({
+jest.mock('../hooks/use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,
 }));
 jest.mock('react-redux', () => {

@@ -12,7 +12,7 @@ import { AIValue } from './ai_value';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useHasSecurityCapability } from '../../helper_hooks';
@@ -28,7 +28,7 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-jest.mock('../../sourcerer/containers', () => ({
+jest.mock('../../sourcerer', () => ({
   useSourcererDataView: jest.fn(),
 }));
 

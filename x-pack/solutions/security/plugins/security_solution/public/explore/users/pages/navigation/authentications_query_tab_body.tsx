@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
+
 export const ID = 'usersAuthenticationsQuery';
 
 const HISTOGRAM_QUERY_ID = 'usersAuthenticationsHistogramQuery';
