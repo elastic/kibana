@@ -11,11 +11,7 @@ import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { DeveloperToolbarProps } from '@kbn/developer-toolbar';
-import {
-  DeveloperToolbar,
-  DeveloperToolbarItem,
-  DeveloperToolbarProvider,
-} from '@kbn/developer-toolbar';
+import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
 import useObservable from 'react-use/lib/useObservable';
 
 export interface DeveloperToolbarAction {
@@ -45,7 +41,7 @@ export const Toolbar = ({
   );
 
   return (
-    <DeveloperToolbarProvider>
+    <>
       <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
       {registeredActions.map((action: DeveloperToolbarAction) => (
         <DeveloperToolbarItem
@@ -57,7 +53,7 @@ export const Toolbar = ({
           {action.children}
         </DeveloperToolbarItem>
       ))}
-    </DeveloperToolbarProvider>
+    </>
   );
 };
 

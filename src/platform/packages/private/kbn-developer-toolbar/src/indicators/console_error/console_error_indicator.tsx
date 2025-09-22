@@ -52,7 +52,7 @@ const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 
   bottom: 0;
   left: 0;
   width: auto;
-  max-width: min(600px, 100%);
+  max-width: min(720px, 100%);
   padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
   height: 100%;
   z-index: 100;

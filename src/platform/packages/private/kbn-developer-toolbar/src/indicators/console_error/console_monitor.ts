@@ -17,10 +17,6 @@ export class ConsoleMonitor {
   private IGNORE_ERRORS = [
     // We're ignoring this error until we migrate to React 18's createRoot API.
     'Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead.',
-    // This error is usually noop and chrome doesn't even log it in the console.
-    'ResizeObserver loop completed with undelivered notifications.',
-    // for demo, issue with color picker
-    'There was a problem inserting the following rule',
   ];
 
   private errorSubject: Subject<{ message: string; type: 'error' | 'warn' } | null> = new Subject<{

@@ -8,4 +8,4 @@
  */
 
 export { useMinimized } from './use_minimized';
-export { useToolbarState } from './use_toolbar_state';
+export { useToolbarState, type DeveloperToolbarState } from './use_toolbar_state';

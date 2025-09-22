@@ -12,7 +12,4 @@ export {
   DeveloperToolbarItem,
   type DeveloperToolbarItemProps,
 } from './src/components/developer_toolbar_item';
-export {
-  DeveloperToolbarProvider,
-  type DeveloperToolbarProviderProps,
-} from './src/context/developer_toolbar_context';
+export { useToolbarState, type DeveloperToolbarState } from './src/hooks';

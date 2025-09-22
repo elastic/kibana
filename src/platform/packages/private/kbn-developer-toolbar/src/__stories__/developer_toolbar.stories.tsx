@@ -202,6 +202,9 @@ export const Default: StoryObj<DeveloperToolbarProps> = {
 const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
   const [debugEnabled, setDebugEnabled] = useState(false);
   const [notifications, setNotifications] = useState(0);
+  const [testItems, setTestItems] = useState<
+    Array<{ id: string; name: string; icon: string; priority: number }>
+  >([]);
 
   const addNotification = () => {
     setNotifications((prev) => prev + 1);
@@ -209,6 +212,32 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
 
   const clearNotifications = () => {
     setNotifications(0);
+  };
+
+  const addMultipleTestItems = () => {
+    const icons = [
+      'beaker',
+      'clock',
+      'database',
+      'package',
+      'users',
+      'wrench',
+      'eye',
+      'heart',
+      'star',
+      'bolt',
+    ];
+    const newItems = Array.from({ length: 30 }, (_, index) => ({
+      id: `test-item-${index + 1}`,
+      name: `Test Item ${index + 1}`,
+      icon: icons[index % icons.length],
+      priority: 100 + index,
+    }));
+    setTestItems(newItems);
+  };
+
+  const clearTestItems = () => {
+    setTestItems([]);
   };
 
   const onDebugClick = () => {
@@ -251,31 +280,81 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
               Clear Notifications
             </EuiButton>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" color="warning" onClick={addMultipleTestItems}>
+              Add 30 Test Items
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={clearTestItems}>
+              Clear Test Items ({testItems.length})
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
       {/* Items that appear in the toolbar - render anywhere in the component tree! */}
       <DeveloperToolbarItem priority={10} name="Debug current state">
-        <EuiButtonIcon iconType="inspect" size="xs" color="text" onClick={onDebugClick} />
+        <EuiButtonIcon
+          iconType="inspect"
+          size="xs"
+          color="text"
+          onClick={onDebugClick}
+          aria-label="Debug current state"
+        />
       </DeveloperToolbarItem>
 
       <DeveloperToolbarItem priority={5} name="Refresh data">
-        <EuiButtonIcon iconType="refresh" size="xs" color="text" onClick={onRefreshClick} />
+        <EuiButtonIcon
+          iconType="refresh"
+          size="xs"
+          color="text"
+          onClick={onRefreshClick}
+          aria-label="Refresh data"
+        />
       </DeveloperToolbarItem>
 
       {/* Conditional items - only show when debug mode is enabled */}
       {debugEnabled && (
         <DeveloperToolbarItem priority={8} name="Advanced debug options">
-          <EuiButtonIcon iconType="bug" size="xs" color="accent" onClick={onDebugClick} />
+          <EuiButtonIcon
+            iconType="bug"
+            size="xs"
+            color="accent"
+            onClick={onDebugClick}
+            aria-label="Advanced debug options"
+          />
         </DeveloperToolbarItem>
       )}
 
       {/* Dynamic items - show notification count when there are notifications */}
       {notifications > 0 && (
         <DeveloperToolbarItem priority={3} name={`${notifications} notifications`}>
-          <EuiButtonIcon iconType="bell" size="xs" color="warning" onClick={clearNotifications} />
+          <EuiButtonIcon
+            iconType="bell"
+            size="xs"
+            color="warning"
+            onClick={clearNotifications}
+            aria-label="Clear notifications"
+          />
         </DeveloperToolbarItem>
       )}
+
+      {/* Render test items */}
+      {testItems.map((item) => (
+        <DeveloperToolbarItem key={item.id} priority={item.priority} name={item.name}>
+          <EuiButtonIcon
+            iconType={item.icon}
+            size="xs"
+            color="primary"
+            onClick={() => {
+              // eslint-disable-next-line no-console
+              console.log(`Clicked ${item.name}`);
+            }}
+            aria-label={`Test item: ${item.name}`}
+          />
+        </DeveloperToolbarItem>
+      ))}
 
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}>
         <DeveloperToolbar {...props} />
