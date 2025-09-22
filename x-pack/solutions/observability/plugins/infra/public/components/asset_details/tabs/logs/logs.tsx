@@ -18,7 +18,6 @@ import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
@@ -29,7 +28,6 @@ export const Logs = () => {
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { logs } = useDataViewsContext();
 
   const {
     services: {
