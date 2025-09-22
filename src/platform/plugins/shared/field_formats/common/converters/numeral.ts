@@ -12,10 +12,10 @@ import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
 import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '../constants/replacement_labels';
 import { asPrettyString } from '../utils';
 
 const numeralInst = numeral();

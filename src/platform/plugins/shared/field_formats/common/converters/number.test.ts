@@ -9,7 +9,7 @@
 
 import { NumberFormat } from './number';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import { NULL_LABEL } from '../constants/replacement_labels';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('NumberFormat', () => {
   const config: { [key: string]: string } = {

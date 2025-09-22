@@ -6084,6 +6084,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-formats-example-plugin@link:examples/field_formats_example":
   version "0.0.0"
   uid ""

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import type { IpPrefixKey } from '../buckets/lib/ip_prefix';
@@ -158,7 +159,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         if (val === '__other__' && params.otherBucketLabel) {
           return `${params.otherBucketLabel}`;
         }
-        if (val === '__missing__' && params.missingBucketLabel) {
+        if (val === MISSING_TOKEN && params.missingBucketLabel) {
           return `${params.missingBucketLabel}`;
         }
 

@@ -22,7 +22,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { NULL_LABEL } from '@kbn/field-formats-plugin/common/constants/replacement_labels';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
 import type { Context } from '../../../public/components/field_editor_context';
 import { FieldEditorProvider } from '../../../public/components/field_editor_context';

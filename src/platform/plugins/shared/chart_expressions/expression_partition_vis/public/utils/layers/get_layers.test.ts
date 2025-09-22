@@ -20,10 +20,7 @@ import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks'
 import { type CoreSetup } from '@kbn/core/public';
 import { getAggsFormats } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import {
-  EMPTY_LABEL,
-  NULL_LABEL,
-} from '@kbn/field-formats-plugin/common/constants/replacement_labels';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('getLayers', () => {
   // use the current fieldFormatRegistry
@@ -168,7 +165,7 @@ describe('getLayers', () => {
       rows: [
         { category: '', value: 10 },
         { category: null, value: 10 },
-        { category: '__missing__', value: 10 },
+        { category: MISSING_TOKEN, value: 10 },
         { category: '__other__', value: 10 },
       ],
     };

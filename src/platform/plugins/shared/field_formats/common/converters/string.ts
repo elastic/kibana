@@ -10,11 +10,11 @@
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '../constants/replacement_labels';
 
 const TRANSFORM_OPTIONS = [
   {

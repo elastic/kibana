@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '../constants/replacement_labels';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { asPrettyString } from './as_pretty_string';
 
 describe('asPrettyString', () => {

@@ -78,7 +78,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { NULL_LABEL } from '@kbn/field-formats-plugin/common/constants/replacement_labels';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();

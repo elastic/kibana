@@ -1058,6 +1058,8 @@
       "@kbn/features-provider-plugin/*": ["x-pack/platform/test/security_api_integration/plugins/features_provider/*"],
       "@kbn/fec-alerts-test-plugin": ["x-pack/platform/test/functional_execution_context/plugins/alerts"],
       "@kbn/fec-alerts-test-plugin/*": ["x-pack/platform/test/functional_execution_context/plugins/alerts/*"],
+      "@kbn/field-formats-common": ["src/platform/packages/shared/kbn-field-formats-common"],
+      "@kbn/field-formats-common/*": ["src/platform/packages/shared/kbn-field-formats-common/*"],
       "@kbn/field-formats-example-plugin": ["examples/field_formats_example"],
       "@kbn/field-formats-example-plugin/*": ["examples/field_formats_example/*"],
       "@kbn/field-formats-plugin": ["src/platform/plugins/shared/field_formats"],

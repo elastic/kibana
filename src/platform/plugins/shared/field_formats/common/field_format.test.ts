@@ -11,7 +11,7 @@ import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import type { FieldFormatParams, TextContextTypeOptions } from './types';
-import { NULL_LABEL } from './constants/replacement_labels';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 const getTestFormat = (
   _params?: FieldFormatParams,

@@ -24,8 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { EMPTY_LABEL } from '@kbn/field-formats-plugin/common/constants/replacement_labels';
-import type { AddFieldFilterHandler } from '../../types';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export interface FieldTopValuesBucketParams {
   field: DataViewField;

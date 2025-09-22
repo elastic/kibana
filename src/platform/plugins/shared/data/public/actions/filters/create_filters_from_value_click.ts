@@ -22,6 +22,7 @@ import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -68,7 +69,7 @@ const getOtherBucketFilterTerms = (
     ...new Set(
       terms.filter((term) => {
         const notOther = String(term) !== '__other__';
-        const notMissing = String(term) !== '__missing__';
+        const notMissing = String(term) !== MISSING_TOKEN;
         return notOther && notMissing;
       })
     ),

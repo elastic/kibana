@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMPTY_LABEL } from '../constants/replacement_labels';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
 
 /**

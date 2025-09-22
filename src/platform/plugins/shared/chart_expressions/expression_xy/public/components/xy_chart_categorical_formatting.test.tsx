@@ -27,16 +27,12 @@ import { type CoreSetup } from '@kbn/core/public';
 import type { ExtendedDataLayerConfig } from '../../common/types';
 import { getAggsFormats } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  EMPTY_LABEL,
-  NULL_LABEL,
-} from '@kbn/field-formats-plugin/common/constants/replacement_labels';
+import { EMPTY_LABEL, NULL_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
 
 // these are used within the DSL terms aggs custom format
 const OTHER_BUCKET_LABEL = '[OTHER LABEL]';
 const MISSING_BUCKET_LABEL = '[MISSING LABEL]';
 
-const MISSING_TOKEN = '__missing__';
 const OTHER_TOKEN = '__other__';
 
 const categoricalTable: Datatable = {
