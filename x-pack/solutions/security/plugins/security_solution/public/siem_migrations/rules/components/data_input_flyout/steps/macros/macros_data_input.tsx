@@ -8,7 +8,7 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { SubSteps, useCheckResourcesStep } from '../../../../../common/components/migration_steps';
+import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
@@ -17,6 +17,7 @@ import * as i18n from './translations';
 import { DataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
+import { useCheckResourcesStep } from './sub_steps/check_resources';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -106,7 +107,6 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
     );
     const resourcesStep = useCheckResourcesStep({
       status: getEuiStepStatus(3, subStep),
-      migrationType: 'rule',
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });

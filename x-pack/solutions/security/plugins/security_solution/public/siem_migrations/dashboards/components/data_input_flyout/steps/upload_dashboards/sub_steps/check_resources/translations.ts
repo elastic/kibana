@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DATA_INPUT_CHECK_RESOURCES_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.dashboards.checkResources.title',
+export const RULES_DATA_INPUT_CHECK_RESOURCES_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.dashboards.checkResources.title',
   { defaultMessage: 'Check for macros and lookups' }
 );
 
-export const DATA_INPUT_CHECK_RESOURCES_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.dashboards.checkResources.description',
+export const RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.dashboards.checkResources.description',
   {
     defaultMessage: `For best translation results, we will review the data for macros and lookups. If found, we will ask you to upload them next.`,
   }

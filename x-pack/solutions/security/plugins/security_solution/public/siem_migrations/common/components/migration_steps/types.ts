@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SiemMigrationResourceBase,
-  SiemMigrationResourceData,
-} from '../../../../../common/siem_migrations/model/common.gen';
-
-export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;
+import type { SiemMigrationResourceData } from '../../../../../common/siem_migrations/model/common.gen';
 
 export type UploadedLookups = Record<string, string>;
 export type AddUploadedLookups = (lookups: SiemMigrationResourceData[]) => void;

@@ -8,10 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import {
-  useCheckResourcesStep,
-  useMigrationNameStep,
-} from '../../../../../../common/components/migration_steps';
+import { useMigrationNameStep } from '../../../../../../common/components/migration_steps';
 import { MigrationDataInputSubSteps } from '../../../../../../common/components/migration_data_input_sub_steps';
 import { useCopyExportQueryStep } from './copy_export_query';
 import type {
@@ -20,7 +17,7 @@ import type {
   OnMissingResourcesFetched,
 } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
-
+import { useCheckResourcesStep } from './check_resources';
 interface DashboardsUploadSubStepsProps {
   migrationStats?: DashboardMigrationTaskStats;
   onMissingResourcesFetched: OnMissingResourcesFetched;
@@ -116,7 +113,6 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
 
   const resourcesStep = useCheckResourcesStep({
     status: getEuiStepStatus(4, currentSubStep),
-    migrationType: 'dashboard',
     migrationStats,
     onMissingResourcesFetched,
   });
