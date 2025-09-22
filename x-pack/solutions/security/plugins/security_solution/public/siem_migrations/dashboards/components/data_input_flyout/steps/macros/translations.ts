@@ -8,6 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const MACROS_DATA_INPUT_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.title',
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.macros.title',
   { defaultMessage: 'Upload macros' }
 );
