@@ -12,6 +12,16 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { ProcessorFieldSelector } from './processor_field_selector';
 import { FieldSelector } from '../../../../shared/field_selector';
 
+// Mock the field suggestions hook
+jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
+  useEnrichmentFieldSuggestions: jest.fn(() => [
+    { name: '@timestamp', type: 'date' },
+    { name: 'log.level', type: 'keyword' },
+    { name: 'service.name', type: 'keyword' },
+    { name: 'error.message', type: 'text' },
+  ]),
+}));
+
 // Mock the FieldSelector component to focus on ProcessorFieldSelector-specific logic
 jest.mock('../../../../shared/field_selector', () => ({
   FieldSelector: jest.fn(
@@ -27,6 +37,7 @@ jest.mock('../../../../shared/field_selector', () => ({
       disabled,
       compressed,
       fullWidth,
+      suggestions,
       ...restProps
     }) => (
       <div>
@@ -141,16 +152,20 @@ describe('ProcessorFieldSelector', () => {
   describe('FieldSelector Integration', () => {
     it('passes correct props to FieldSelector', () => {
       renderComponent({
-        processorType: 'grok',
         placeholder: 'Custom placeholder',
       });
 
       expect(FieldSelector).toHaveBeenCalledWith(
         expect.objectContaining({
-          processorType: 'grok',
           placeholder: 'Custom placeholder',
           fullWidth: true,
           dataTestSubj: 'streamsAppProcessorFieldSelectorComboFieldText',
+          suggestions: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'log.level', type: 'keyword' },
+            { name: 'service.name', type: 'keyword' },
+            { name: 'error.message', type: 'text' },
+          ],
         }),
         expect.anything()
       );
