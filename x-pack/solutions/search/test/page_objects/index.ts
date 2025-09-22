@@ -7,8 +7,10 @@
 
 import { SearchHomePageProvider } from './search_homepage';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
+import { SearchPlaygroundPageProvider } from './search_playground_page';
 
 export const searchSharedPageObjects = {
   searchHomePage: SearchHomePageProvider,
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
+  searchPlayground: SearchPlaygroundPageProvider,
 };

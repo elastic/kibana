@@ -12,7 +12,6 @@ import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
 import { SearchNavigationProvider } from './search_navigation';
 import { SearchOverviewProvider } from './search_overview_page';
-import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 
 export const pageObjects = {
@@ -23,6 +22,5 @@ export const pageObjects = {
   searchStart: SearchStartProvider,
   searchNavigation: SearchNavigationProvider,
   searchOverview: SearchOverviewProvider,
-  searchPlayground: SearchPlaygroundPageProvider,
   searchQueryRules: SearchQueryRulesPageProvider,
 };
