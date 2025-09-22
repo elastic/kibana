@@ -24,7 +24,6 @@ import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { RouteMethod } from '@kbn/core/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
@@ -280,7 +279,6 @@ export class MonitoringPlugin
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,

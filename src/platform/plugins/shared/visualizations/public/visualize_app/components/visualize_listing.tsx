@@ -414,7 +414,7 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="info" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
