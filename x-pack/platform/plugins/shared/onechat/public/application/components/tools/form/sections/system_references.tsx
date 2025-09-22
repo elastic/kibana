@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiMarkdownEditorRef } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -16,10 +17,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useRef } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { i18nMessages } from '../i18n';
 import { ToolFormSection } from '../components/tool_form_section';
+import { i18nMessages } from '../i18n';
 import { ToolFormMode } from '../tool_form';
 import type { ToolFormData } from '../types/tool_form_types';
 export interface SystemReferencesProps {
@@ -31,6 +32,8 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
     control,
     formState: { errors },
   } = useFormContext<ToolFormData>();
+
+  const descriptionRef = useRef<EuiMarkdownEditorRef>(null);
 
   const isReadOnly = mode === ToolFormMode.View;
   const isToolIdDisabled = mode === ToolFormMode.Edit || isReadOnly;
@@ -106,13 +109,17 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         <Controller
           control={control}
           name="description"
-          render={({ field }) => (
-            <EuiMarkdownEditor
-              aria-label={i18nMessages.systemReferences.form.description.label}
-              readOnly={isReadOnly}
-              {...field}
-            />
-          )}
+          render={({ field: { ref, ...field } }) => {
+            ref(descriptionRef.current?.textarea);
+            return (
+              <EuiMarkdownEditor
+                aria-label={i18nMessages.systemReferences.form.description.label}
+                readOnly={isReadOnly}
+                ref={descriptionRef}
+                {...field}
+              />
+            );
+          }}
         />
       </EuiFormRow>
     </ToolFormSection>
