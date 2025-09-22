@@ -163,14 +163,6 @@ const putIndexMapping = () => {
             },
           },
         },
-        data_stream: {
-          type: 'object',
-          properties: {
-            dataset: {
-              type: 'keyword',
-            },
-          },
-        },
       },
     },
   });

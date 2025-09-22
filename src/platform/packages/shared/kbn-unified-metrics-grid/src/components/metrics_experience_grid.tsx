@@ -9,10 +9,11 @@
 
 import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
+import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -26,7 +27,7 @@ import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
-import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
@@ -44,8 +45,7 @@ export const MetricsExperienceGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
-
+  const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
   const { getTimeRange, updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -64,19 +64,18 @@ export const MetricsExperienceGrid = ({
     timeRange: getTimeRange(),
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
-    requestParams,
-    indexPattern,
-    renderToggleActions,
-  });
-
   const {
-    allFields = [],
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
-  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage }) ?? {};
+    filteredFieldsBySearch = [],
+  } = usePaginatedFields({
+    fields,
+    dimensions,
+    pageSize: 20,
+    currentPage,
+    searchTerm,
+  }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
     () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
@@ -104,19 +103,18 @@ export const MetricsExperienceGrid = ({
   }
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-      }}
+    <MetricsGridWrapper
+      indexPattern={indexPattern}
+      renderToggleActions={renderToggleActions}
+      chartToolbarCss={chartToolbarCss}
+      requestParams={requestParams}
+      fields={fields}
     >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
         tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
+        data-test-subj="metricsExperienceRendered"
         css={css`
           ${histogramCss || ''}
           height: 100%;
@@ -127,18 +125,45 @@ export const MetricsExperienceGrid = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          {isLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                  defaultMessage: '{count} metrics',
-                  values: { count: allFields.length },
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            direction="row"
+          >
+            <EuiFlexItem grow={false}>
+              {isLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                      values: { count: filteredFieldsBySearch.length },
+                    })}
+                  </strong>
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('metricsExperience.grid.technicalPreview.label', {
+                  defaultMessage: 'Technical preview',
                 })}
-              </strong>
-            </EuiText>
-          )}
+                tooltipContent={i18n.translate('metricsExperience.grid.technicalPreview.tooltip', {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                })}
+                tooltipPosition="left"
+                title={i18n.translate('metricsExperience.grid.technicalPreview.title', {
+                  defaultMessage: 'Technical preview',
+                })}
+                size="s"
+                data-test-subj="metricsExperienceTechnicalPreviewBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
           <MetricsGrid
@@ -163,6 +188,6 @@ export const MetricsExperienceGrid = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ChartSectionTemplate>
+    </MetricsGridWrapper>
   );
 };

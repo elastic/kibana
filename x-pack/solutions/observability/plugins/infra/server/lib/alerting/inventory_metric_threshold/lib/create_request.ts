@@ -20,15 +20,27 @@ import type { InventoryMetricConditions } from '../../../../../common/alerting/m
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
+/**
+ * This function escapes Regex special characters with a (\) so they will behave like normal text.
+ * @param str input text
+ * @returns input text with regex operators escaped
+ * @example
+ *   escapeRegex("foo.bar") -> "foo\.bar"
+ *   escapeRegex("a+b?")    -> "a\+b\?"
+ */
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function wildcardToRegex(str: string) {
+  return escapeRegex(str).replace(/\\\*/g, '.*');
+}
+
 const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+export const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
-  '^' +
-    ADDITIONAL_CONTEXT_BLOCKED_LIST.map((p) => p.replace(/\./g, '\\.').replace(/\*/g, '.*')).join(
-      '|'
-    ) +
-    '$'
+  `^(${ADDITIONAL_CONTEXT_BLOCKED_LIST.map(wildcardToRegex).join('|')})$`
 );
 
 export const createRequest = async (
