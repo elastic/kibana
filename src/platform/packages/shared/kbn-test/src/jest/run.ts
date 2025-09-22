@@ -95,12 +95,14 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     process.env.JEST_CONFIG_PATH = resolvedConfigPath;
   }
 
+  log.debug('Setting up Jest with shared cache directory...');
+
   // Prepare Jest execution context
   const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig);
 
   log.info('yarn jest', originalArgv.join(' '));
 
-  log.debug('Setting up Jest with caching:', jestArgv.join(' '));
+  log.debug('Setting up Jest with shared cache directory:', jestArgv.join(' '));
 
   // Run Jest and report timing
   return run(jestArgv).then(() => {
@@ -296,8 +298,6 @@ async function prepareJestExecution(
 
   // Create temporary config file for Jest
   await fs.mkdir(cacheDirectory, { recursive: true });
-  const tmpConfigPath = join(cacheDirectory, `${process.pid}.jest.config.json`);
-  await fs.writeFile(tmpConfigPath, JSON.stringify(inlineConfig, null, 2), 'utf8');
 
   // Remove existing --config flags and provide the inline JSON config
   const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
