@@ -23,5 +23,6 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/logging-mocks",
     "@kbn/inference-common",
+    "@kbn/core-http-server-mocks",
   ]
 }

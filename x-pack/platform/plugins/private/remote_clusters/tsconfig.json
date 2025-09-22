@@ -36,6 +36,8 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": [
     "target/**/*",

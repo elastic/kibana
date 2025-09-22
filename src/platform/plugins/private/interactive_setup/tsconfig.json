@@ -26,6 +26,8 @@
     "@kbn/security-hardening",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

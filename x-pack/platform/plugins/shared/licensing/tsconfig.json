@@ -15,6 +15,10 @@
     "@kbn/logging-mocks",
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-status-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

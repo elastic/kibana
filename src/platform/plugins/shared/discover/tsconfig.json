@@ -119,6 +119,7 @@
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

@@ -18,6 +18,10 @@
     "@kbn/utility-types",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/licensing-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-capabilities-server-mocks",
   ],
   "exclude": [
     "target/**/*",

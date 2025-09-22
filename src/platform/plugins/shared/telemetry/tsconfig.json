@@ -41,6 +41,9 @@
     "@kbn/logging",
     "@kbn/core-security-server",
     "@kbn/telemetry-config",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": [
     "target/**/*",

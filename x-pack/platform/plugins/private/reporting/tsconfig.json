@@ -67,7 +67,13 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-capabilities-common",
     "@kbn/core-ui-settings-common",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-status-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

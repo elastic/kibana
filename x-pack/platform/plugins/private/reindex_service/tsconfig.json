@@ -28,6 +28,9 @@
     "@kbn/i18n",
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/std",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-deprecations-server-mocks",
   ],
   "exclude": [
     "target/**/*",

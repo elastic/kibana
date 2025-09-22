@@ -19,7 +19,9 @@
     "@kbn/ebt-tools",
     "@kbn/core-notifications-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": [
     "target/**/*",

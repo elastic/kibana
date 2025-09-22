@@ -57,6 +57,10 @@
     "@kbn/spaces-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/home-plugin",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }

@@ -16,6 +16,8 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/licensing-types",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

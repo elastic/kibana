@@ -61,6 +61,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

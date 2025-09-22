@@ -42,7 +42,11 @@
     "@kbn/upgrade-assistant-pkg-public",
     "@kbn/upgrade-assistant-pkg-server",
     "@kbn/upgrade-assistant-pkg-common",
-    "@kbn/reindex-service-plugin"
+    "@kbn/reindex-service-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-deprecations-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": [
     "target/**/*",

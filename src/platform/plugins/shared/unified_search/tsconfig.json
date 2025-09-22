@@ -48,7 +48,8 @@
     "@kbn/aiops-utils",
     "@kbn/esql-ast",
     "@kbn/background-search",
-    "@kbn/split-button"
+    "@kbn/split-button",
+    "@kbn/config-mocks"
   ],
   "exclude": ["target/**/*"]
 }

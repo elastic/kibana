@@ -15,6 +15,7 @@
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": [
     "target/**/*",

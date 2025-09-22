@@ -15,6 +15,7 @@
     "@kbn/i18n",
     "@kbn/metrics",
     "@kbn/metrics-config",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

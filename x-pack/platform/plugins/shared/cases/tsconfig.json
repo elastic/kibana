@@ -98,7 +98,9 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
-    "@kbn/cases-ai"
+    "@kbn/cases-ai",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-saved-objects-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

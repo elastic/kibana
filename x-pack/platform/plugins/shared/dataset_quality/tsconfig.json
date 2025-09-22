@@ -18,7 +18,6 @@
     "@kbn/charts-plugin",
     "@kbn/charts-theme",
     "@kbn/core-analytics-browser",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",
@@ -70,7 +69,8 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
-    "@kbn/failure-store-modal"
+    "@kbn/failure-store-modal",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": [
     "target/**/*"
