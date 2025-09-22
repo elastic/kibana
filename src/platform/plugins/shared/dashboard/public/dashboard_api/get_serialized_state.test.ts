@@ -105,7 +105,7 @@ describe('getSerializedState', () => {
     expect(result.attributes.panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
+          "grid": Object {
             "i": "54321",
           },
           "panelIndex": "54321",

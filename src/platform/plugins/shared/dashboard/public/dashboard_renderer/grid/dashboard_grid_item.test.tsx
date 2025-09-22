@@ -38,13 +38,13 @@ const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const panels = [
     {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       type: TEST_EMBEDDABLE,
       config: {},
       panelIndex: '1',
     },
     {
-      gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+      grid: { x: 6, y: 6, w: 6, h: 6, i: '2' },
       type: TEST_EMBEDDABLE,
       config: {},
       panelIndex: '2',

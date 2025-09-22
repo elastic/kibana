@@ -31,7 +31,7 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 // recognize this, so we need to manually extend the type here.
 export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'config'> & {
   config: TypeOf<typeof schema.panelSchema>['config'] & { [key: string]: any };
-  gridData: GridData;
+  grid: GridData;
 };
 export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type

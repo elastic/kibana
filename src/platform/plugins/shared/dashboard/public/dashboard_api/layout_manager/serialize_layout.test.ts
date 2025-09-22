@@ -14,7 +14,7 @@ describe('serializeLayout', () => {
     const layout = {
       panels: {
         '1': {
-          gridData: {
+          grid: {
             h: 6,
             i: '1',
             w: 6,
@@ -24,7 +24,7 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
         '3': {
-          gridData: {
+          grid: {
             h: 6,
             i: '3',
             sectionId: 'section1',
@@ -38,7 +38,7 @@ describe('serializeLayout', () => {
       sections: {
         section1: {
           collapsed: true,
-          gridData: {
+          grid: {
             i: 'section1',
             y: 6,
           },
@@ -74,7 +74,7 @@ describe('serializeLayout', () => {
           "config": Object {
             "title": "panel One",
           },
-          "gridData": Object {
+          "grid": Object {
             "h": 6,
             "i": "1",
             "w": 6,
@@ -86,7 +86,7 @@ describe('serializeLayout', () => {
         },
         Object {
           "collapsed": true,
-          "gridData": Object {
+          "grid": Object {
             "i": "section1",
             "y": 6,
           },
@@ -95,7 +95,7 @@ describe('serializeLayout', () => {
               "config": Object {
                 "title": "panel Three",
               },
-              "gridData": Object {
+              "grid": Object {
                 "h": 6,
                 "i": "3",
                 "w": 6,

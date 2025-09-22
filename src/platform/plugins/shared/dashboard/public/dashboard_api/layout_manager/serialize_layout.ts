@@ -22,14 +22,14 @@ export function serializeLayout(
 
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
-  Object.entries(layout.panels).forEach(([panelId, { gridData, type }]) => {
+  Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
     const config = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
 
-    const { sectionId, ...restOfGridData } = gridData; // drop section ID
+    const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
       type,
-      gridData: restOfGridData,
+      grid: restOfGridData,
       panelIndex: panelId,
       config,
     };

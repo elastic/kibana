@@ -1,7 +1,7 @@
 [
   {
     "type": "visualization",
-    "gridData": {
+    "grid": {
       "x": 0,
       "y": 0,
       "w": 28,
@@ -37,7 +37,7 @@
   },
   {
     "type": "lens",
-    "gridData": {
+    "grid": {
       "x": 30,
       "y": 0,
       "w": 20,
@@ -144,7 +144,7 @@
   },
   {
     "type": "lens",
-    "gridData": {
+    "grid": {
       "x": 0,
       "y": 9,
       "w": 28,

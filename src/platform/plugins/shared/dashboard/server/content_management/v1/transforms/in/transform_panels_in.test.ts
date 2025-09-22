@@ -20,12 +20,12 @@ describe('transformPanelsIn', () => {
       {
         type: 'foo',
         panelIndex: '1',
-        gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
+        grid: { x: 0, y: 0, w: 12, h: 12, i: '1' },
         config: { foo: 'bar' },
       },
       {
         type: 'bar',
-        gridData: { x: 0, y: 0, w: 12, h: 12 },
+        grid: { x: 0, y: 0, w: 12, h: 12 },
         config: { bizz: 'buzz' },
       },
     ];

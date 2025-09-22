@@ -12,7 +12,27 @@ import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
   describe('< 9.3 panels state', () => {
-    test('should convert panelConfig to config', () => {
+    test('should move gridData to grid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            gridData: { x: 0, y: 0, w: 24, h: 15, i: 'fizz' },
+            type: 'lens',
+            panelIndex: 'fizz',
+            config: {},
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          config: {},
+          grid: { x: 0, y: 0, w: 24, h: 15, i: 'fizz' },
+          type: 'lens',
+          panelIndex: 'fizz',
+        },
+      ]);
+    });
+    test('should move panelConfig to config', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
@@ -22,7 +42,7 @@ describe('extractPanelsState', () => {
                 to: 'now',
               },
             },
-            gridData: {},
+            grid: {},
             id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             type: 'map',
           },
@@ -37,7 +57,7 @@ describe('extractPanelsState', () => {
               to: 'now',
             },
           },
-          gridData: {},
+          grid: {},
           type: 'map',
         },
       ]);
@@ -51,7 +71,7 @@ describe('extractPanelsState', () => {
             embeddableConfig: {
               savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             },
-            gridData: {},
+            grid: {},
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             type: 'links',
           },
@@ -78,7 +98,7 @@ describe('extractPanelsState', () => {
                 to: 'now',
               },
             },
-            gridData: {},
+            grid: {},
             id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             title: 'Custom title',
@@ -97,7 +117,7 @@ describe('extractPanelsState', () => {
             title: 'Custom title',
           },
           panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-          gridData: {},
+          grid: {},
           type: 'map',
         },
       ]);
@@ -115,7 +135,7 @@ describe('extractPanelsState', () => {
                 to: 'now',
               },
             },
-            gridData: {},
+            grid: {},
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             type: 'map',
           },
@@ -130,7 +150,7 @@ describe('extractPanelsState', () => {
             },
           },
           panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-          gridData: {},
+          grid: {},
           type: 'map',
         },
       ]);

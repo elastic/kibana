@@ -142,15 +142,15 @@ export function initializeLayoutManager(
   const placeNewPanel = async (
     uuid: string,
     panelPackage: PanelPackage,
-    gridData?: DashboardPanel['gridData']
+    grid?: DashboardPanel['grid']
   ): Promise<DashboardLayout> => {
     const { panelType: type, serializedState } = panelPackage;
-    if (gridData) {
+    if (grid) {
       return {
         ...layout$.value,
         panels: {
           ...layout$.value.panels,
-          [uuid]: { gridData: { ...gridData, i: uuid }, type },
+          [uuid]: { grid: { ...grid, i: uuid }, type },
         },
       };
     }
@@ -173,7 +173,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type },
+        [uuid]: { grid: { ...newPanelPlacement, i: uuid }, type },
       },
     };
   };
@@ -187,7 +187,7 @@ export function initializeLayoutManager(
     const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
     const sameType = existingPanel?.type === type;
 
-    const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
+    const grid = existingPanel ? existingPanel.grid : placeIncomingPanel(uuid, size);
     currentChildState[uuid] = {
       rawState: {
         ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
@@ -200,7 +200,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...layout$.value.panels,
-        [uuid]: { gridData, type },
+        [uuid]: { grid, type },
       },
     });
     trackPanel.setScrollToPanelId(uuid);
@@ -213,7 +213,7 @@ export function initializeLayoutManager(
     if (!childApi || !childLayout) throw new PanelNotFoundError();
     return {
       type: childLayout.type,
-      gridData: childLayout.gridData,
+      grid: childLayout.grid,
       serializedState: apiHasSerializableState(childApi)
         ? childApi.serializeState()
         : { rawState: {} },
@@ -236,7 +236,7 @@ export function initializeLayoutManager(
   const addNewPanel = async <ApiType>(
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean,
-    gridData?: DashboardPanel['gridData']
+    grid?: DashboardPanel['grid']
   ) => {
     const { panelType: type, serializedState, maybePanelId } = panelPackage;
     const uuid = maybePanelId ?? v4();
@@ -244,7 +244,7 @@ export function initializeLayoutManager(
 
     if (serializedState) currentChildState[uuid] = serializedState;
 
-    layout$.next(await placeNewPanel(uuid, panelPackage, gridData));
+    layout$.next(await placeNewPanel(uuid, panelPackage, grid));
 
     if (displaySuccessMessage) {
       const title = (serializedState?.rawState as SerializedTitles)?.title;
@@ -275,7 +275,7 @@ export function initializeLayoutManager(
   };
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
-    const existingGridData = layout$.value.panels[idToRemove]?.gridData;
+    const existingGridData = layout$.value.panels[idToRemove]?.grid;
     if (!existingGridData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
@@ -301,9 +301,9 @@ export function initializeLayoutManager(
     currentChildState[uuidOfDuplicate] = serializedState;
 
     const { newPanelPlacement, otherPanels } = placeClonePanel({
-      width: layoutItemToDuplicate.gridData.w,
-      height: layoutItemToDuplicate.gridData.h,
-      sectionId: layoutItemToDuplicate.gridData.sectionId,
+      width: layoutItemToDuplicate.grid.w,
+      height: layoutItemToDuplicate.grid.h,
+      sectionId: layoutItemToDuplicate.grid.sectionId,
       currentPanels: layout$.value.panels,
       placeBesideId: uuidToDuplicate,
     });
@@ -312,10 +312,10 @@ export function initializeLayoutManager(
       panels: {
         ...otherPanels,
         [uuidOfDuplicate]: {
-          gridData: {
+          grid: {
             ...newPanelPlacement,
             i: uuidOfDuplicate,
-            sectionId: layoutItemToDuplicate.gridData.sectionId,
+            sectionId: layoutItemToDuplicate.grid.sectionId,
           },
           type: layoutItemToDuplicate.type,
         },
@@ -336,7 +336,7 @@ export function initializeLayoutManager(
     if (children$.value[uuid]) return children$.value[uuid];
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
-    if (isSectionCollapsed(panelLayout.gridData.sectionId)) {
+    if (isSectionCollapsed(panelLayout.grid.sectionId)) {
       return undefined;
     }
 
@@ -423,7 +423,7 @@ export function initializeLayoutManager(
         let maxY = 0;
         [...Object.values(currentLayout.panels), ...Object.values(currentLayout.sections)].forEach(
           (widget) => {
-            const { y, h } = { h: 1, ...widget.gridData };
+            const { y, h } = { h: 1, ...widget.grid };
             maxY = Math.max(maxY, y + h);
           }
         );
@@ -432,7 +432,7 @@ export function initializeLayoutManager(
         const sections = { ...currentLayout.sections };
         const newId = v4();
         sections[newId] = {
-          gridData: { i: newId, y: maxY },
+          grid: { i: newId, y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
           }),
@@ -484,25 +484,25 @@ const transformDashboardLayoutToGridLayout = (
     newLayout[sectionId] = {
       id: sectionId,
       type: 'section',
-      row: section.gridData.y,
+      row: section.grid.y,
       isCollapsed: Boolean(section.collapsed),
       title: section.title,
       panels: {},
     };
   });
   Object.keys(layout.panels).forEach((panelId) => {
-    const gridData = layout.panels[panelId].gridData;
+    const grid = layout.panels[panelId].grid;
     const type = layout.panels[panelId].type;
     const basePanel = {
       id: panelId,
-      row: gridData.y,
-      column: gridData.x,
-      width: gridData.w,
-      height: gridData.h,
+      row: grid.y,
+      column: grid.x,
+      width: grid.w,
+      height: grid.h,
       resizeOptions: resizeSettings[type],
     } as GridPanelData;
-    if (gridData.sectionId) {
-      (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
+    if (grid.sectionId) {
+      (newLayout[grid.sectionId] as GridSectionData).panels[panelId] = basePanel;
     } else {
       newLayout[panelId] = {
         ...basePanel,

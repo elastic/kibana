@@ -28,7 +28,7 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
     const panelAsObject = panel as { [key: string]: unknown };
 
     if (
-      !panelAsObject.gridData ||
+      !(panelAsObject.gridData || panelAsObject.grid) ||
       !(panelAsObject.config || panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
       (panelAsObject.version && semverSatisfies(panelAsObject.version as string, '<7.3'))
     )
@@ -66,6 +66,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     if (panel?.panelConfig) {
       panel.config = panel.panelConfig;
       delete panel.panelConfig;
+    }
+
+    // < 9.3 grid stored as gridData
+    if (panel?.gridData) {
+      panel.grid = panel.gridData;
+      delete panel.gridData;
     }
 
     // <8.19 'id' (saved object id) stored as siblings to config

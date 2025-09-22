@@ -81,7 +81,7 @@ describe('savedObjectToItem', () => {
               savedObjectId: '1',
               title: 'title1',
             },
-            gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+            grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
             panelIndex: '1',
             type: 'type1',
             version: '2',

@@ -35,7 +35,7 @@ describe('transformPanels', () => {
     const panels = await transformPanels(
       [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
           config: {},
           panelIndex: '1',
           type: 'testPanelType',
@@ -43,13 +43,13 @@ describe('transformPanels', () => {
         {
           title: 'Section One',
           collapsed: true,
-          gridData: {
+          grid: {
             y: 6,
             i: 'section1',
           },
           panels: [
             {
-              gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+              grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
               config: {},
               panelIndex: '3',
               type: 'testPanelType',
@@ -81,7 +81,7 @@ describe('transformPanels', () => {
   test('should handle transformOut throw', async () => {
     const panels = await transformPanels([
       {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+        grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
         config: { title: 'panel One' },
         panelIndex: '1',
         type: 'testPanelType',

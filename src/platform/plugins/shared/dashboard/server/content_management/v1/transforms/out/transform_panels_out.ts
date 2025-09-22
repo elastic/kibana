@@ -90,7 +90,7 @@ function transformPanelProperties(
   }
 
   return {
-    gridData: rest,
+    grid: rest,
     config: transformedPanelConfig ? transformedPanelConfig : config,
     panelIndex,
     type: panelType,

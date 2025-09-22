@@ -237,11 +237,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 return {
                   ...panel,
                   gridData: {
-                    ...panel.gridData,
+                    ...panel.grid,
                     w:
-                      panel.gridData.w === DEFAULT_PANEL_WIDTH
-                        ? DEFAULT_PANEL_WIDTH * 2
-                        : panel.gridData.w,
+                      panel.grid.w === DEFAULT_PANEL_WIDTH ? DEFAULT_PANEL_WIDTH * 2 : panel.grid.w,
                   },
                 };
               }),

@@ -27,8 +27,8 @@ export function deserializeLayout(
     const panelId = panel.panelIndex ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
-      gridData: {
-        ...panel.gridData,
+      grid: {
+        ...panel.grid,
         ...(sectionId && { sectionId }),
         i: panelId,
       },
@@ -43,13 +43,13 @@ export function deserializeLayout(
 
   panels.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const sectionId = widget.gridData.i ?? v4();
+      const sectionId = widget.grid.i ?? v4();
       const { panels: sectionPanels, ...restOfSection } = widget;
       layout.sections[sectionId] = {
         collapsed: false,
         ...restOfSection,
-        gridData: {
-          ...widget.gridData,
+        grid: {
+          ...widget.grid,
           i: sectionId,
         },
       };
