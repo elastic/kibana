@@ -14,7 +14,6 @@ import {
   EuiPortal,
   EuiProgress,
   EuiText,
-  euiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
