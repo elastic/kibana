@@ -19,6 +19,12 @@ export function buildRequestFromConnector(
 ): { method: string; path: string; body?: any; params?: any } {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
+  // Special case: elasticsearch.request type uses raw API format at top level
+  if (stepType === 'elasticsearch.request') {
+    const { method = 'GET', path, body } = params;
+    return { method, path, body };
+  }
+
   // Lazy load the generated connectors to avoid main bundle bloat
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');

@@ -78,6 +78,8 @@ export {
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
+export { streamObjectNameSchema } from './src/shared/stream_object_name';
+
 export {
   type IngestStreamLifecycle,
   type ClassicIngestStreamEffectiveLifecycle,
@@ -112,3 +114,5 @@ export type {
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
+
+export { type System, systemSchema } from './src/system';
