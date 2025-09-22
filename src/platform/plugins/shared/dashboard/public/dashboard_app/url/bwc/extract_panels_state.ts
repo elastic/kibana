@@ -29,7 +29,7 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
 
     if (
       !panelAsObject.gridData ||
-      !(panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
+      !(panelAsObject.config || panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
       (panelAsObject.version && semverSatisfies(panelAsObject.version as string, '<7.3'))
     )
       return true;
@@ -58,36 +58,37 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
     if (panel?.embeddableConfig) {
-      panel.panelConfig = panel.embeddableConfig;
+      panel.config = panel.embeddableConfig;
       delete panel.embeddableConfig;
     }
 
-    // <8.19 'id' (saved object id) stored as siblings to panelConfig
-    if (panel.id && panel.panelConfig && typeof panel.panelConfig === 'object') {
-      panel.panelConfig.savedObjectId = panel.id;
+    // < 9.3 panels state stored config as panelConfig
+    if (panel?.panelConfig) {
+      panel.config = panel.panelConfig;
+      delete panel.panelConfig;
+    }
+
+    // <8.19 'id' (saved object id) stored as siblings to config
+    if (panel.id && panel.config && typeof panel.config === 'object') {
+      panel.config.savedObjectId = panel.id;
       delete panel.id;
     }
 
-    // <8.19 'title' stored as siblings to panelConfig
-    if (panel.title && panel.panelConfig && typeof panel.panelConfig === 'object') {
-      panel.panelConfig.title = panel.title;
+    // <8.19 'title' stored as siblings to config
+    if (panel.title && panel.config && typeof panel.config === 'object') {
+      panel.config.title = panel.title;
       delete panel.title;
     }
 
     // < 9.2 dashboard managed saved object refs for panels
     // Add saved object ref for panels that contain savedObjectId
     // TODO remove once all panels inject references in dashboard server api
-    const { panelConfig, panelIndex, type } = panel;
-    if (
-      panelIndex &&
-      type &&
-      panelConfig?.savedObjectId &&
-      typeof panelConfig?.savedObjectId === 'string'
-    ) {
+    const { config, panelIndex, type } = panel;
+    if (panelIndex && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
       savedObjectReferences.push(
         ...prefixReferencesFromPanel(panelIndex, [
           {
-            id: panelConfig.savedObjectId,
+            id: config.savedObjectId,
             name: SAVED_OBJECT_REF_NAME,
             type,
           },

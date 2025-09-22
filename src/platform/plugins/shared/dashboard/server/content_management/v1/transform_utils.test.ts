@@ -76,7 +76,7 @@ describe('savedObjectToItem', () => {
         timeRestore: true,
         panels: [
           {
-            panelConfig: {
+            config: {
               enhancements: {},
               savedObjectId: '1',
               title: 'title1',

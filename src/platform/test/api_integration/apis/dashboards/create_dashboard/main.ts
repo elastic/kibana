@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
                 w: 24,
                 h: 15,
               },
-              panelConfig: {},
+              config: {},
             },
           ],
         });
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
                 h: 15,
                 i: 'bizz',
               },
-              panelConfig: {},
+              config: {},
               panelIndex: 'bizz',
             },
           ],

@@ -35,7 +35,7 @@ export function deserializeLayout(
     };
     childState[panelId] = {
       rawState: {
-        ...panel.panelConfig,
+        ...panel.config,
       },
       references: getReferences(panelId),
     };

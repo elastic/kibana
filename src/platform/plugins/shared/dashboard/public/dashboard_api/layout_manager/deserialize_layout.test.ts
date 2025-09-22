@@ -15,7 +15,7 @@ describe('deserializeLayout', () => {
       [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: { title: 'panel One' },
+          config: { title: 'panel One' },
           panelIndex: '1',
           type: 'testPanelType',
         },
@@ -29,7 +29,7 @@ describe('deserializeLayout', () => {
           panels: [
             {
               gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: { title: 'panel Three' },
+              config: { title: 'panel Three' },
               panelIndex: '3',
               type: 'testPanelType',
             },

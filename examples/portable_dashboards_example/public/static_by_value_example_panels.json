@@ -9,7 +9,7 @@
       "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
     },
     "panelIndex": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
-    "panelConfig": {
+    "config": {
       "savedVis": {
         "id": "",
         "title": "",
@@ -45,7 +45,7 @@
       "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
     },
     "panelIndex": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
-    "panelConfig": {
+    "config": {
       "title": "Destinations",
       "attributes": {
         "title": "",

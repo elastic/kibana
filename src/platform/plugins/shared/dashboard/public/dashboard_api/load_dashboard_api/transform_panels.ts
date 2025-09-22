@@ -44,10 +44,10 @@ async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
   if (!transforms?.transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut(panel.panelConfig, references);
+    const transformedPanelConfig = transforms.transformOut(panel.config, references);
     return {
       ...panel,
-      panelConfig: transformedPanelConfig,
+      config: transformedPanelConfig,
     };
   } catch (transformOutError) {
     // eslint-disable-next-line no-console

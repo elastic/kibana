@@ -36,7 +36,7 @@ describe('transformPanels', () => {
       [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: {},
+          config: {},
           panelIndex: '1',
           type: 'testPanelType',
         },
@@ -50,7 +50,7 @@ describe('transformPanels', () => {
           panels: [
             {
               gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: {},
+              config: {},
               panelIndex: '3',
               type: 'testPanelType',
             },
@@ -70,10 +70,10 @@ describe('transformPanels', () => {
         },
       ]
     );
-    expect((panels[0] as DashboardPanel).panelConfig).toEqual({
+    expect((panels[0] as DashboardPanel).config).toEqual({
       savedObjectId: '1234',
     });
-    expect((panels[1] as DashboardSection).panels[0].panelConfig).toEqual({
+    expect((panels[1] as DashboardSection).panels[0].config).toEqual({
       savedObjectId: '5678',
     });
   });
@@ -82,12 +82,12 @@ describe('transformPanels', () => {
     const panels = await transformPanels([
       {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-        panelConfig: { title: 'panel One' },
+        config: { title: 'panel One' },
         panelIndex: '1',
         type: 'testPanelType',
       },
     ]);
-    expect((panels[0] as DashboardPanel).panelConfig).toEqual({
+    expect((panels[0] as DashboardPanel).config).toEqual({
       title: 'panel One',
     });
   });

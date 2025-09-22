@@ -11,6 +11,38 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
+  describe('< 9.3 panels state', () => {
+    test('should convert panelConfig to config', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            panelConfig: {
+              timeRange: {
+                from: 'now-7d/d',
+                to: 'now',
+              },
+            },
+            gridData: {},
+            id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            type: 'map',
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          config: {
+            savedObjectId: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            timeRange: {
+              from: 'now-7d/d',
+              to: 'now',
+            },
+          },
+          gridData: {},
+          type: 'map',
+        },
+      ]);
+    });
+  });
   describe('< 9.2 panels state', () => {
     test('should create saved object reference', () => {
       const { savedObjectReferences } = extractPanelsState({
@@ -36,7 +68,7 @@ describe('extractPanelsState', () => {
   });
 
   describe('< 8.19 panels state', () => {
-    test('should move id and title to panelConfig', () => {
+    test('should move id and title to config', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
@@ -56,7 +88,7 @@ describe('extractPanelsState', () => {
       });
       expect(panels).toEqual([
         {
-          panelConfig: {
+          config: {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
@@ -73,7 +105,7 @@ describe('extractPanelsState', () => {
   });
 
   describe('< 8.17 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
+    test('should convert embeddableConfig to config', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
@@ -91,7 +123,7 @@ describe('extractPanelsState', () => {
       });
       expect(panels).toEqual([
         {
-          panelConfig: {
+          config: {
             timeRange: {
               from: 'now-7d/d',
               to: 'now',

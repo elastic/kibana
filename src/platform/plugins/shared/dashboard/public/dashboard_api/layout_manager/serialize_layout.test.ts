@@ -71,15 +71,15 @@ describe('serializeLayout', () => {
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
+          "config": Object {
+            "title": "panel One",
+          },
           "gridData": Object {
             "h": 6,
             "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
-          },
-          "panelConfig": Object {
-            "title": "panel One",
           },
           "panelIndex": "1",
           "type": "testPanelType",
@@ -92,15 +92,15 @@ describe('serializeLayout', () => {
           },
           "panels": Array [
             Object {
+              "config": Object {
+                "title": "panel Three",
+              },
               "gridData": Object {
                 "h": 6,
                 "i": "3",
                 "w": 6,
                 "x": 0,
                 "y": 0,
-              },
-              "panelConfig": Object {
-                "title": "panel Three",
               },
               "panelIndex": "3",
               "type": "testPanelType",

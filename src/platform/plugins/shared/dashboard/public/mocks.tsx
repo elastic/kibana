@@ -134,13 +134,13 @@ export function getMockPanels() {
   return [
     {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-      panelConfig: { title: 'panel One' },
+      config: { title: 'panel One' },
       panelIndex: '1',
       type: 'testPanelType',
     },
     {
       gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
-      panelConfig: { title: 'panel Two' },
+      config: { title: 'panel Two' },
       panelIndex: '2',
       type: 'testPanelType',
     },
@@ -160,7 +160,7 @@ export function getMockPanelsWithSections() {
       panels: [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-          panelConfig: { title: 'panel Three' },
+          config: { title: 'panel Three' },
           panelIndex: '3',
           type: 'testPanelType',
         },
@@ -176,7 +176,7 @@ export function getMockPanelsWithSections() {
       panels: [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '4' },
-          panelConfig: { title: 'panel Four' },
+          config: { title: 'panel Four' },
           panelIndex: '4',
           type: 'testPanelType',
         },

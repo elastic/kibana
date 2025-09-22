@@ -80,7 +80,7 @@ describe('transformDashboardOut', () => {
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',
@@ -166,7 +166,7 @@ describe('transformDashboardOut', () => {
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',

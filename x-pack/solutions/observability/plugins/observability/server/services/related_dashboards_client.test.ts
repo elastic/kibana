@@ -125,7 +125,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [
                           { name: 'indexpattern', id: 'index1' },
@@ -152,7 +152,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [
                           { name: 'indexpattern', id: 'index1' },
@@ -214,7 +214,7 @@ describe('RelatedDashboardsClient', () => {
               panels: [
                 {
                   type: 'lens',
-                  panelConfig: {
+                  config: {
                     attributes: {
                       references: [
                         { name: 'indexpattern', id: 'index1' },
@@ -265,7 +265,7 @@ describe('RelatedDashboardsClient', () => {
                   {
                     type: 'lens',
                     panelIndex: '123',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
                         state: {
@@ -348,7 +348,7 @@ describe('RelatedDashboardsClient', () => {
               id: 'dashboard1',
               attributes: {
                 title: 'Dashboard 1',
-                panels: [{ panelConfig: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE }],
+                panels: [{ config: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE }],
               },
               references: [{ name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID }],
             },
@@ -388,8 +388,8 @@ describe('RelatedDashboardsClient', () => {
               attributes: {
                 title: 'Dashboard 1',
                 panels: [
-                  { panelConfig: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE },
-                  { panelConfig: {}, panelIndex: OTHER_PANEL_INDEX, type: PANEL_TYPE },
+                  { config: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE },
+                  { config: {}, panelIndex: OTHER_PANEL_INDEX, type: PANEL_TYPE },
                 ],
               },
               references: [
@@ -427,7 +427,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: {
                   type: 'lens',
                   references: [
@@ -462,7 +462,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: null, // Lens attributes are not available
               },
             },
@@ -475,7 +475,7 @@ describe('RelatedDashboardsClient', () => {
       expect(result.dashboards).toEqual([]);
     });
 
-    it('should get attributes from referencedPanelManager when panelConfig.attributes is missing', () => {
+    it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
       const PANEL_INDEX = '123';
       const INDEX_ID = 'index1';
 
@@ -488,7 +488,7 @@ describe('RelatedDashboardsClient', () => {
             {
               type: 'lens',
               panelIndex: PANEL_INDEX,
-              panelConfig: {},
+              config: {},
             },
           ],
         },
@@ -519,7 +519,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: null, // Lens attributes are not available
               },
             },
@@ -532,7 +532,7 @@ describe('RelatedDashboardsClient', () => {
       expect(result.dashboards).toEqual([]);
     });
 
-    it('should get attributes from referencedPanelManager when panelConfig.attributes is missing', () => {
+    it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
       const PANEL_INDEX = '456';
       const FIELD_NAME = 'field1';
 
@@ -544,7 +544,7 @@ describe('RelatedDashboardsClient', () => {
             {
               type: 'lens',
               panelIndex: PANEL_INDEX,
-              panelConfig: {},
+              config: {},
             },
           ],
         },
@@ -793,7 +793,7 @@ describe('RelatedDashboardsClient', () => {
                   {
                     type: 'lens',
                     panelIndex: '123',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
                         state: {
@@ -816,7 +816,7 @@ describe('RelatedDashboardsClient', () => {
                   {
                     type: 'lens',
                     panelIndex: '123',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }],
                         state: {

@@ -22,7 +22,7 @@ describe('generateNewPanelIds', () => {
       [
         {
           gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: { title: 'panel One' },
+          config: { title: 'panel One' },
           panelIndex: '1',
           type: 'testPanelType',
         },
@@ -39,7 +39,7 @@ describe('generateNewPanelIds', () => {
     expect(newPanels).toEqual([
       {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '100' },
-        panelConfig: { title: 'panel One' },
+        config: { title: 'panel One' },
         panelIndex: '100',
         type: 'testPanelType',
       },
@@ -67,7 +67,7 @@ describe('generateNewPanelIds', () => {
           panels: [
             {
               gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-              panelConfig: { title: 'panel One' },
+              config: { title: 'panel One' },
               panelIndex: '1',
               type: 'testPanelType',
             },
@@ -94,7 +94,7 @@ describe('generateNewPanelIds', () => {
         panels: [
           {
             gridData: { x: 0, y: 0, w: 6, h: 6, i: '102' },
-            panelConfig: { title: 'panel One' },
+            config: { title: 'panel One' },
             panelIndex: '102',
             type: 'testPanelType',
           },

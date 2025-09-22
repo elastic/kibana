@@ -37,11 +37,11 @@ describe('layout manager', () => {
   const panel1 = {
     gridData: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
     type: 'testPanelType',
-    panelConfig: { title: 'Panel One' },
+    config: { title: 'Panel One' },
     panelIndex: PANEL_ONE_ID,
   };
 
-  const titleManager = initializeTitleManager(panel1.panelConfig);
+  const titleManager = initializeTitleManager(panel1.config);
   const panel1Api: DefaultEmbeddableApi = {
     type: 'testPanelType',
     uuid: PANEL_ONE_ID,

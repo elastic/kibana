@@ -40,13 +40,13 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
     {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       type: TEST_EMBEDDABLE,
-      panelConfig: {},
+      config: {},
       panelIndex: '1',
     },
     {
       gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
       type: TEST_EMBEDDABLE,
-      panelConfig: {},
+      config: {},
       panelIndex: '2',
     },
   ];

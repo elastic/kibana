@@ -57,7 +57,7 @@ export const panelGridDataSchema = schema.object({
 });
 
 export const panelSchema = schema.object({
-  panelConfig: schema.object(
+  config: schema.object(
     {},
     {
       unknowns: 'allow',
@@ -74,7 +74,7 @@ export const panelSchema = schema.object({
     schema.string({
       meta: {
         description:
-          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
         deprecated: true,
       },
     })

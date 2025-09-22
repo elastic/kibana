@@ -69,8 +69,8 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.references
+      let references = this.isLensVizAttributes(panel.config.attributes)
+        ? panel.config.attributes.references
         : undefined;
       if (!references && panel.panelIndex) {
         references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
@@ -88,8 +88,8 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.state
+      let state: unknown = this.isLensVizAttributes(panel.config.attributes)
+        ? panel.config.attributes.state
         : undefined;
       if (!state && panel.panelIndex) {
         state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
@@ -181,7 +181,7 @@ export class RelatedDashboardsClient {
         if (
           isDashboardPanel(panel) &&
           isSuggestedDashboardsValidPanelType(panel.type) &&
-          (isEmpty(panel.panelConfig) || !panel.panelConfig.attributes)
+          (isEmpty(panel.config) || !panel.config.attributes)
         ) {
           this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
