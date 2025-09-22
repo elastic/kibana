@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -67,7 +67,7 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
     return () => clearInterval(intervalId);
   }, [workflowExecution, refetch]);
 
-  const renderSelectedStepExecutionFlyout = useCallback(() => {
+  const selectedStepExecutionFlyout = useMemo(() => {
     if (!workflowExecution?.stepExecutions?.length) {
       return null;
     }
@@ -127,7 +127,7 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
 
   return (
     <>
-      {renderSelectedStepExecutionFlyout()}
+      {selectedStepExecutionFlyout}
       <WorkflowStepExecutionList
         execution={workflowExecution ?? null}
         isLoading={isLoading}

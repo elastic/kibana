@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -70,43 +70,47 @@ export function TestStepModal({
 
   // Hook Monaco on mount to register the schema for validation + suggestions
   const mountedOnce = useRef(false);
-  const handleMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    if (mountedOnce.current) return;
-    mountedOnce.current = true;
+  const handleMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (mountedOnce.current) return;
+      mountedOnce.current = true;
 
-    try {
-      // First, configure the JSON language service with schema validation
-      monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
-        validate: true,
-        allowComments: false,
-        enableSchemaRequest: false,
-        schemas: [
-          {
-            uri: schemaUri, // schema URI
-            fileMatch: [modelUri], // bind to this specific model URI
-            schema: jsonSchema as any,
-          },
-        ],
-      });
+      try {
+        // First, configure the JSON language service with schema validation
+        monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
+          validate: true,
+          allowComments: false,
+          enableSchemaRequest: false,
+          schemas: [
+            {
+              uri: schemaUri, // schema URI
+              fileMatch: [modelUri], // bind to this specific model URI
+              schema: jsonSchema as any,
+            },
+          ],
+        });
 
-      // Get current editor content
-      const text = editor.getValue() || JSON.stringify(initialStepContextMock.stepContext, null, 2);
+        // Get current editor content
+        const text =
+          editor.getValue() || JSON.stringify(initialStepContextMock.stepContext, null, 2);
 
-      // Create model with the specific URI that matches our schema fileMatch
-      const uri = monaco.Uri.parse(modelUri);
-      const model = monaco.editor.createModel(text, 'json', uri);
+        // Create model with the specific URI that matches our schema fileMatch
+        const uri = monaco.Uri.parse(modelUri);
+        const model = monaco.editor.createModel(text, 'json', uri);
 
-      // Set the model to the editor
-      editor.setModel(model);
-    } catch (error) {
-      // Monaco setup failed - fall back to basic JSON editing
-    }
+        // Set the model to the editor
+        editor.setModel(model);
+      } catch (error) {
+        // Monaco setup failed - fall back to basic JSON editing
+      }
 
-    // Optional: seed example if editor is empty
-    if (!editor.getValue()?.trim()) {
-      editor.setValue(JSON.stringify(initialStepContextMock.stepContext, null, 2));
-    }
-  };
+      // Optional: seed example if editor is empty
+      if (!editor.getValue()?.trim()) {
+        editor.setValue(JSON.stringify(initialStepContextMock.stepContext, null, 2));
+      }
+    },
+    [initialStepContextMock.stepContext, jsonSchema, modelUri, schemaUri]
+  );
 
   useEffect(() => {
     try {
