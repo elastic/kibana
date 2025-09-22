@@ -73,7 +73,7 @@ export function FieldsTable({
         stream.name
       ),
     ];
-  }, [withTableActions, filteredFields, selectedFields, onFieldSelection]);
+  }, [withTableActions, filteredFields, selectedFields, onFieldSelection, stream.name]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -253,6 +253,11 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   return filteredByGroupsFields;
 };
 
-const isSelectableField = (streamName: string, field: SchemaField) => {
-  return field.parent === streamName && !field.alias_for && field.type !== 'system';
+export const isSelectableField = (streamName: string, field: SchemaField) => {
+  return (
+    field.status !== 'inherited' &&
+    field.parent === streamName &&
+    !field.alias_for &&
+    field.type !== 'system'
+  );
 };

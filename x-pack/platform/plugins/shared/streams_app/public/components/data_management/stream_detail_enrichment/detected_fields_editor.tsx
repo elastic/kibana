@@ -18,6 +18,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { isSelectableField } from '../schema_editor/schema_editor_table';
 
 interface DetectedFieldsEditorProps {
   detectedFields: SchemaField[];
@@ -31,7 +32,9 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const [selectedFields, setSelectedFields] = React.useState<string[]>(
-    detectedFields.map(({ name }) => name)
+    detectedFields
+      .filter((field) => isSelectableField(definition.stream.name, field))
+      .map(({ name }) => name)
   );
 
   const hasFields = detectedFields.length > 0;

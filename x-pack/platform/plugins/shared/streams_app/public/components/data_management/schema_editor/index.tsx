@@ -76,7 +76,7 @@ export function SchemaEditor({
         onFieldSelection(selection, false);
       } catch (err) {
         notifications.toasts.addError(err, {
-          title: i18n.translate('dataManagement.schemaEditor.fetchRecommendationsError', {
+          title: i18n.translate('xpack.streams.schemaEditor.fetchRecommendationsError', {
             defaultMessage: 'Error fetching field type recommendations',
           }),
         });
@@ -84,7 +84,7 @@ export function SchemaEditor({
         setIsLoadingRecommendations(false);
       }
     },
-    [fieldSelection]
+    [fieldSelection, fields, fieldsMetadata, notifications.toasts, onFieldSelection, onFieldUpdate]
   );
 
   return (
@@ -158,6 +158,7 @@ export function SchemaEditor({
                           name: field.name,
                           parent: field.parent,
                           status: 'unmapped',
+                          type: undefined,
                         } as SchemaField);
                       });
                       onFieldSelection(fieldSelection, false);

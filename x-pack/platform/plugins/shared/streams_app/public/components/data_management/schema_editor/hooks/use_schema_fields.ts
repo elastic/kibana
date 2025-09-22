@@ -167,7 +167,7 @@ export const useSchemaFields = ({
         return [...before, field, ...after];
       });
     },
-    [fields]
+    [setFields]
   );
 
   const pendingChangesCount = useMemo(() => {
