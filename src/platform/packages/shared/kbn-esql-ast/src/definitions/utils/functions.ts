@@ -31,7 +31,7 @@ import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers'
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
-import { argMatchesParamType } from './expressions';
+import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
@@ -335,14 +335,16 @@ export function checkFunctionInvocationComplete(
   }
 
   // If the function is complete, check that the types of the arguments match the function definition
-  const hasCorrectTypes = fnDefinition.signatures.some(({ params }) => {
-    return func.args.every((a, index) => {
-      const expectedType = params[index].type;
-      const actualType = getExpressionType(a);
+  const givenTypes = func.args.map((arg) => getExpressionType(arg));
+  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
 
-      return argMatchesParamType(actualType, expectedType, isLiteral(a), false);
-    });
-  });
+  const hasCorrectTypes = !!getMatchingSignatures(
+    fnDefinition.signatures,
+    givenTypes,
+    literalMask,
+    true
+  ).length;
+
   if (!hasCorrectTypes) {
     return { complete: false, reason: 'wrongTypes' };
   }
