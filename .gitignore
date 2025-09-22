@@ -181,3 +181,11 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 .dependency-graph-log.json
 
 .moon/cache
+
+# Local Agentic Development
+CLAUDE.md
+.claude/
+.serena
+logs-dev-*.md
+PR.md
+*219704.md
