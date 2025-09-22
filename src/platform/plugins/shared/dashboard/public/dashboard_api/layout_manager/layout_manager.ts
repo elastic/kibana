@@ -65,7 +65,6 @@ export function initializeLayoutManager(
   initialPanels: DashboardState['panels'],
   initialControls: DashboardState['controlGroupInput'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
-  references$: BehaviorSubject<Reference[] | undefined>,
   getReferences: (id: string) => Reference[]
 ) {
   // --------------------------------------------------------------------------------------
@@ -75,7 +74,6 @@ export function initializeLayoutManager(
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     initialControls,
-    references$.value ?? [],
     getReferences
   );
 
@@ -398,9 +396,7 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      getSerializedStateForPanel: (panelId: string) => {
-        return currentChildState[panelId];
-      },
+      getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
       childrenLoading$,
@@ -414,12 +410,7 @@ export function initializeLayoutManager(
           combineLatestWith(
             lastSavedState$.pipe(
               map((lastSaved) =>
-                deserializeLayout(
-                  lastSaved.panels,
-                  lastSaved.controlGroupInput,
-                  references$.value ?? [],
-                  getReferences
-                )
+                deserializeLayout(lastSaved.panels, lastSaved.controlGroupInput, getReferences)
               ),
               tap(({ layout, childState }) => {
                 lastSavedChildState = childState;
@@ -430,8 +421,7 @@ export function initializeLayoutManager(
           map(([currentLayout]) => {
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              const serialized = serializeLayout(currentLayout, currentChildState);
-              return { panels: serialized.panels, controlGroupInput: serialized.controlGroupInput };
+              return serializeLayout(currentLayout, currentChildState);
             }
             return {};
           })
@@ -450,7 +440,6 @@ export function initializeLayoutManager(
           ...children$.value,
           [api.uuid]: api,
         });
-        currentChildState[api.uuid] = api.serializeState();
       },
 
       /** Panels */

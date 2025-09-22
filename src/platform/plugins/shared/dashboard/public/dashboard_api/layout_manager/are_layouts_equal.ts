@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { pick, xor } from 'lodash';
+import { xor } from 'lodash';
 import type { DashboardLayout } from './types';
 
 /**
@@ -45,7 +45,8 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
       return false;
     }
   }
-  // then compare control state that layout manages (order, width, and grow; other state is managed by the control embeddable itself)
+
+  // then compare control state that layout manages (i.e. order, grow, width, etc.)
   for (const controlId of Object.keys(newLayout?.controls ?? {})) {
     if (!deepEqual(originalLayout?.controls[controlId], newLayout?.controls[controlId])) {
       return false;

@@ -67,7 +67,6 @@ export function getDashboardApi({
     initialState.panels,
     initialState.controlGroupInput,
     trackPanel,
-    references$,
     getReferences
   );
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
