@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SubSteps } from '../../../../../common/components/migration_steps/sub_step';
+import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';

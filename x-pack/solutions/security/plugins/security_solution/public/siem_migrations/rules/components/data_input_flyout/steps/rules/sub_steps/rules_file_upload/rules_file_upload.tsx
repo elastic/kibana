@@ -12,6 +12,7 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import {
   useParseFileInput,
@@ -21,7 +22,6 @@ import type { CreateMigration } from '../../../../../../service/hooks/use_create
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
-import { UploadFileButton } from '../../../common/upload_file_button';
 import * as i18n from './translations';
 
 type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;

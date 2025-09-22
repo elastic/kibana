@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { useMigrationNameStep } from '../../../../../../common/components/migration_steps/migration_name';
+import { useMigrationNameStep } from '../../../../../../common/components/migration_steps';
 import { MigrationDataInputSubSteps } from '../../../../../../common/components/migration_data_input_sub_steps';
 import { useCopyExportQueryStep } from './copy_export_query';
 import type {

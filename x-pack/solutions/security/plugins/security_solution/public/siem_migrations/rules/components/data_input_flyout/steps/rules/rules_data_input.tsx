@@ -8,9 +8,8 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { SubSteps } from '../../../../../common/components/migration_steps/sub_step';
+import { SubSteps, useMigrationNameStep } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import { useMigrationNameStep } from '../../../../../common/components/migration_steps/migration_name';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
