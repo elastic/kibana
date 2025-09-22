@@ -9,7 +9,6 @@ import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-pl
 import { searchSharedPageObjects } from '../../../page_objects';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
-import { SvlSearchIndexDetailPageProvider } from './svl_search_index_detail_page';
 import { SvlSearchElasticsearchStartPageProvider } from './svl_search_elasticsearch_start_page';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
@@ -24,7 +23,6 @@ export const pageObjects = {
   // Search Solution serverless FTR page objects
   svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
-  svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider,
   svlSearchElasticsearchStartPage: SvlSearchElasticsearchStartPageProvider,
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,

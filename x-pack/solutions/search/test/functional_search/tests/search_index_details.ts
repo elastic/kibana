@@ -63,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           solution: 'es',
         }));
 
+        await esDeleteAllIndices([indexDoesNotExistName]);
         await createIndices();
       });
 
