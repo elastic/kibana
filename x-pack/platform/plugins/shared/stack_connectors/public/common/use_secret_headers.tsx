@@ -8,6 +8,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 
 interface SecretHeader {
   key: string;
@@ -40,7 +41,9 @@ export function useSecretHeaders(connectorId?: string) {
       refetchOnMount: 'always',
       onError: (error: ServerError) => {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
-          title: 'error fetching secret headers',
+          title: i18n.translate('xpack.stackConnectors.public.common.errorFetchingSecretHeaders', {
+            defaultMessage: 'Error fetching secret headers',
+          }),
         });
       },
     }

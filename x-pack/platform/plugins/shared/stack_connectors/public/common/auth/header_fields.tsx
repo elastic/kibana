@@ -68,7 +68,7 @@ const headerTypeOptions = [
   },
 ];
 
-export const HeadersFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
+export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
   const { euiTheme } = useEuiTheme();
 
   return (

@@ -28,7 +28,7 @@ import { useSecretHeaders } from '../use_secret_headers';
 import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
-import { HeadersFields } from './headers_fields';
+import { HeaderFields } from './header_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 import type { InternalHeader } from '../../../common/auth/types';
@@ -87,7 +87,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
     const formData = getFormData();
 
     const currentHeaders: Array<InternalHeader> = formData.__internal__?.headers ?? [];
-
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
 
     const mergedHeaders = [...configHeaders, ...secretHeaders];
@@ -104,8 +103,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         { runDeserializer: false }
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [secretHeaders]);
+  }, [connectorId, getFormData, secretHeaders, updateFieldValues]);
 
   const options = [
     {
@@ -177,8 +175,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         }}
       />
 
-      {hasHeaders && <HeadersFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}
-
+      {hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}
       <EuiSpacer size="m" />
       <UseField
         path="__internal__.hasCA"
