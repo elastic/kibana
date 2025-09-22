@@ -8,6 +8,8 @@
  */
 
 import type { TriggerType } from '@kbn/workflows';
+import type { ToStringOptions } from 'yaml';
+import { stringify } from 'yaml';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
@@ -26,26 +28,53 @@ export function generateTriggerSnippet(
   triggerType: TriggerType,
   { full, monacoSuggestionFormat }: GenerateTriggerSnippetOptions = {}
 ): string {
-  let prepend = '';
-
-  if (full) {
-    prepend = '- type: ';
-  }
+  const stringifyOptions: ToStringOptions = { indent: 2 };
+  let parameters: Record<string, any>;
 
   switch (triggerType) {
     case 'alert':
-      return `${prepend}${triggerType}`;
+      parameters = {};
+      break;
 
     case 'scheduled':
       if (!monacoSuggestionFormat) {
-        return `${prepend}${triggerType}\n  with:\n    every: "5"\n    unit: minute`;
+        parameters = {
+          with: { every: '5', unit: 'minute' },
+        };
+      } else {
+        parameters = {
+          with: { every: '${1:5}', unit: '${2|second,minute,hour,day,week,month,year|}' },
+        };
       }
-      return `${prepend}${triggerType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
+      break;
 
     case 'manual':
-      return `${prepend}${triggerType}`;
+      parameters = {};
+      break;
 
     default:
-      return `${prepend}${triggerType}`;
+      parameters = {};
+      break;
   }
+
+  if (full) {
+    // if the full snippet is requested, return the whole trigger node as a sequence item
+    // - type: ${triggerType}
+    //   ...parameters
+    return stringify(
+      [
+        {
+          type: triggerType,
+          ...parameters,
+        },
+      ],
+      stringifyOptions
+    ).slice(0, -1); // remove the last newline
+  }
+
+  // otherwise, the "type:" is already present, so we just return the type value and parameters
+  // (type:)${triggerType}
+  // ...parameters
+  // stringify always adds a newline, so we need to remove it
+  return `${triggerType}\n${stringify(parameters, stringifyOptions).slice(0, -1)}`;
 }

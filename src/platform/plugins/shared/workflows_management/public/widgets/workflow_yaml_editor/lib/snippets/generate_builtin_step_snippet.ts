@@ -8,6 +8,8 @@
  */
 
 import type { BuiltInStepType } from '@kbn/workflows';
+import type { ToStringOptions } from 'yaml';
+import { stringify } from 'yaml';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
@@ -24,42 +26,77 @@ export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
   { full }: GenerateBuiltInStepSnippetOptions = {}
 ): string {
-  let prepend = '';
-  if (full) {
-    prepend = `- name: ${stepType}_step\n  type: `;
-  }
+  const stringifyOptions: ToStringOptions = { indent: 2 };
+  let parameters: Record<string, any>;
 
-  let parameters = '';
   switch (stepType) {
     case 'foreach':
-      parameters = `\nforeach: "{{ context.items }}"\nsteps:\n  - name: "process-item"\n    type: # Add step type here`;
+      parameters = {
+        foreach: '{{context.items}}',
+        steps: [
+          {
+            name: 'process-item',
+            type: '# Add step type here',
+          },
+        ],
+      };
       break;
     case 'if':
-      parameters = `\ncondition: "{{ context.condition }}"\nsteps:\n  - name: "then-step"\n    type: # Add step type here\nelse:\n  - name: "else-step"\n    type: # Add step type here`;
+      parameters = {
+        condition: '{{ context.condition }}',
+        steps: [{ name: 'then-step', type: '# Add step type here' }],
+      };
       break;
     case 'parallel':
-      parameters = `\nbranches:\n  - name: "branch-1"\n    steps:\n      - name: "step-1"\n        type: # Add step type here\n  - name: "branch-2"\n    steps:\n      - name: "step-2"\n        type: # Add step type here`;
+      parameters = {
+        branches: [
+          { name: 'branch-1', steps: [{ name: 'step-1', type: '# Add step type here' }] },
+          { name: 'branch-2', steps: [{ name: 'step-2', type: '# Add step type here' }] },
+        ],
+      };
       break;
     case 'merge':
-      parameters = `\nsources:\n  - "branch-1"\n  - "branch-2"\nsteps:\n  - name: "merge-step"\n    type: # Add step type here`;
+      parameters = {
+        sources: ['branch-1', 'branch-2'],
+        steps: [{ name: 'merge-step', type: '# Add step type here' }],
+      };
       break;
     case 'http':
-      parameters = `\nwith:\n  url: "https://api.example.com"\n  method: "GET"`;
+      parameters = {
+        with: { url: 'https://api.example.com', method: 'GET' },
+      };
       break;
     case 'wait':
-      parameters = `\nwith:\n  duration: "5s"`;
+      parameters = {
+        with: { duration: '5s' },
+      };
       break;
     default:
-      parameters = `\nwith:\n  # Add parameters here`;
+      parameters = {
+        with: { '# Add parameters here': '' },
+      };
   }
 
-  return `${prepend}${stepType}${
-    full
-      ? // if full, indent the parameters
-        parameters
-          .split('\n')
-          .map((line) => `  ${line}`)
-          .join('\n')
-      : parameters
-  }`;
+  if (full) {
+    // if the full snippet is requested, return the whole step node as a sequence item
+    // - name: ${stepType}_step
+    //   type: ${stepType}
+    //   ...parameters
+    return stringify(
+      [
+        {
+          name: `${stepType.replaceAll('.', '_')}_step`,
+          type: stepType,
+          ...parameters,
+        },
+      ],
+      stringifyOptions
+    ).slice(0, -1); // remove the last newline
+  }
+
+  // otherwise, the "type:" is already present, so we just return the type value and parameters
+  // (type:)${stepType}
+  // ...parameters
+  // stringify always adds a newline, so we need to remove it
+  return `${stepType}\n${stringify(parameters, stringifyOptions).slice(0, -1)}`;
 }

@@ -15,11 +15,11 @@ import { createMockModel } from '../../../../../common/mocks/monaco_model';
 
 describe('insertTriggerSnippet', () => {
   it('should insert a trigger snippet after the last trigger', () => {
-    const inputYaml = `triggers:\n  - type: alert`;
+    const inputYaml = `triggers:\n  - type: alert\n`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const snippetText = generateTriggerSnippet('manual', {
-      full: false,
+      full: true,
       monacoSuggestionFormat: false,
     });
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
@@ -47,7 +47,7 @@ describe('insertTriggerSnippet', () => {
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const snippetText = generateTriggerSnippet('manual', {
-      full: false,
+      full: true,
       monacoSuggestionFormat: false,
     });
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');

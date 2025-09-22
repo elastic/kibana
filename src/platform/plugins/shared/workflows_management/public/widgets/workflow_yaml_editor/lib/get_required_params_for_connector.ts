@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
+import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
 
 /**
  * Get required parameters for a connector type from generated schemas
@@ -20,12 +21,12 @@ export function getRequiredParamsForConnector(
   const allConnectors = getCachedAllConnectors();
 
   // Find the connector by type
-  const connector = allConnectors.find((c: any) => c.type === connectorType);
+  const connector = allConnectors.find((c) => c.type === connectorType);
 
   if (connector && connector.paramsSchema) {
     try {
       // Check if this connector has enhanced examples
-      const hasEnhancedExamples = (connector as any).examples?.params;
+      const hasEnhancedExamples = (connector as EnhancedConnectorDefinition).examples?.params;
 
       // Processing enhanced examples for connector
 

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorContract } from '@kbn/workflows';
 import { getAllConnectors } from '../../../../common/schema';
 
 // Global cache for connectors (they don't change during runtime)
-let allConnectorsCache: any[] | null = null;
+let allConnectorsCache: ConnectorContract[] | null = null;
 
-export function getCachedAllConnectors(): any[] {
+export function getCachedAllConnectors() {
   if (allConnectorsCache === null) {
     allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
   }
