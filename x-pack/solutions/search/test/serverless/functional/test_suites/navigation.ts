@@ -69,16 +69,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               pageTestSubject: 'onechatPageConversations',
             },
             {
-              link: { deepLinkId: 'agent_builder:tools' },
-              breadcrumbs: ['Tools'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
-              link: { deepLinkId: 'agent_builder:agents' },
-              breadcrumbs: ['Agents'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
               link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
               pageTestSubject: 'queryInput',
@@ -97,16 +87,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
-            },
-            {
-              link: { deepLinkId: 'searchSynonyms' },
-              breadcrumbs: ['Relevance', 'Synonyms'],
-              pageTestSubject: 'searchSynonymsOverviewPage',
-            },
-            {
-              link: { deepLinkId: 'searchQueryRules' },
-              breadcrumbs: ['Relevance', 'Query rules'],
-              pageTestSubject: 'queryRulesBasePage',
             },
             {
               link: { deepLinkId: 'dev_tools:console' },
@@ -273,17 +253,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
 
       if (isV1) {
         // All these items have been moved to sub menus in the footer
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
         // v2 ignores sections
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
@@ -325,7 +304,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'management:trained_models',
           'management',
           'cloudLinkDeployment',
-          'cloudLinkBilling',
         ]);
       } else {
         // in v2 we don't have "sections" and order is different because items under "more" are in the end
@@ -338,8 +316,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             'discover',
             'dashboards',
             'searchPlayground',
-            'searchSynonyms',
-            'searchQueryRules',
             'machine_learning',
             'maps',
             'visualize',

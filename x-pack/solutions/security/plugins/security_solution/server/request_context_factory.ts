@@ -144,6 +144,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getAnalytics: () => core.analytics,
+
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
@@ -311,7 +313,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const soClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
         });
-
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           clusterClient,
@@ -329,6 +330,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           security: startPlugins.security,
           request,
           uiSettingsClient: coreContext.uiSettings.client,
+          isServerless: options.buildFlavor === 'serverless',
         });
       }),
       getAssetInventoryClient: memoize(

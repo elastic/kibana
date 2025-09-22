@@ -13,21 +13,19 @@ import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const updatedDashboard = {
-  attributes: {
-    title: 'Refresh Requests (Updated)',
-    options: { useMargins: false },
-    panels: [
-      {
-        type: 'visualization',
-        gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
-        panelIndex: '1',
-        version: '7.3.0',
-      },
-    ],
-    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-    timeRestore: true,
-    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-  },
+  title: 'Refresh Requests (Updated)',
+  options: { useMargins: false },
+  panels: [
+    {
+      type: 'visualization',
+      gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
+      panelIndex: '1',
+      version: '7.3.0',
+    },
+  ],
+  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+  timeRestore: true,
+  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
   references: [
     {
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -45,13 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send(updatedDashboard);
 
       expect(response.status).to.be(200);
 
-      expect(response.body.item.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
-      expect(response.body.item.type).to.be('dashboard');
-      expect(response.body.item.attributes.title).to.be('Refresh Requests (Updated)');
+      expect(response.body.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
+      expect(response.body.type).to.be('dashboard');
+      expect(response.body.data.title).to.be('Refresh Requests (Updated)');
     });
 
     it('should return 404 when updating a non-existent dashboard', async () => {
@@ -59,10 +58,9 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`${PUBLIC_API_PATH}/not-an-id`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title: 'Some other dashboard (updated)',
-          },
+          title: 'Some other dashboard (updated)',
         });
 
       expect(response.status).to.be(404);
@@ -79,23 +77,21 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .set('kbn-xsrf', 'true')
           .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .set('elastic-api-version', '1')
           .send({
             ...updatedDashboard,
-            attributes: {
-              ...updatedDashboard.attributes,
-              tags: ['bar'],
-            },
+            tags: ['bar'],
           });
 
         expect(response.status).to.be(200);
-        expect(response.body.item.attributes.tags).to.contain('bar');
-        expect(response.body.item.attributes.tags).to.have.length(1);
-        const referenceIds = response.body.item.references.map(
+        expect(response.body.data.tags).to.contain('bar');
+        expect(response.body.data.tags).to.have.length(1);
+        const referenceIds = response.body.data.references.map(
           (ref: SavedObjectReference) => ref.id
         );
         expect(referenceIds).to.contain('tag-2');
         expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.item.references).to.have.length(2);
+        expect(response.body.data.references).to.have.length(2);
       });
 
       it('replaces the tags on the dashboard', async () => {
@@ -103,23 +99,21 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .set('kbn-xsrf', 'true')
           .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .set('elastic-api-version', '1')
           .send({
             ...updatedDashboard,
-            attributes: {
-              ...updatedDashboard.attributes,
-              tags: ['foo'],
-            },
+            tags: ['foo'],
           });
 
         expect(response.status).to.be(200);
-        expect(response.body.item.attributes.tags).to.contain('foo');
-        expect(response.body.item.attributes.tags).to.have.length(1);
-        const referenceIds = response.body.item.references.map(
+        expect(response.body.data.tags).to.contain('foo');
+        expect(response.body.data.tags).to.have.length(1);
+        const referenceIds = response.body.data.references.map(
           (ref: SavedObjectReference) => ref.id
         );
         expect(referenceIds).to.contain('tag-1');
         expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.item.references).to.have.length(2);
+        expect(response.body.data.references).to.have.length(2);
       });
 
       it('empty tags array removes all tags', async () => {
@@ -127,21 +121,19 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .set('kbn-xsrf', 'true')
           .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .set('elastic-api-version', '1')
           .send({
             ...updatedDashboard,
-            attributes: {
-              ...updatedDashboard.attributes,
-              tags: [],
-            },
+            tags: [],
           });
 
         expect(response.status).to.be(200);
-        expect(response.body.item.attributes).not.to.have.property('tags');
-        const referenceIds = response.body.item.references.map(
+        expect(response.body.data).not.to.have.property('tags');
+        const referenceIds = response.body.data.references.map(
           (ref: SavedObjectReference) => ref.id
         );
         expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.item.references).to.have.length(1);
+        expect(response.body.data.references).to.have.length(1);
       });
 
       it('creates tag if a saved object matching a tag name is not found', async () => {
@@ -150,28 +142,26 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .set('kbn-xsrf', 'true')
           .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .set('elastic-api-version', '1')
           .send({
             ...updatedDashboard,
-            attributes: {
-              ...updatedDashboard.attributes,
-              tags: ['foo', 'bar', 'buzz', randomTagName],
-            },
+            tags: ['foo', 'bar', 'buzz', randomTagName],
           });
 
         expect(response.status).to.be(200);
-        expect(response.body.item.attributes.tags).to.contain('foo');
-        expect(response.body.item.attributes.tags).to.contain('bar');
-        expect(response.body.item.attributes.tags).to.contain('buzz');
-        expect(response.body.item.attributes.tags).to.contain(randomTagName);
-        expect(response.body.item.attributes.tags).to.have.length(4);
-        const referenceIds = response.body.item.references.map(
+        expect(response.body.data.tags).to.contain('foo');
+        expect(response.body.data.tags).to.contain('bar');
+        expect(response.body.data.tags).to.contain('buzz');
+        expect(response.body.data.tags).to.contain(randomTagName);
+        expect(response.body.data.tags).to.have.length(4);
+        const referenceIds = response.body.data.references.map(
           (ref: SavedObjectReference) => ref.id
         );
         expect(referenceIds).to.contain('tag-1');
         expect(referenceIds).to.contain('tag-2');
         expect(referenceIds).to.contain('tag-3');
         expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.item.references).to.have.length(5);
+        expect(response.body.data.references).to.have.length(5);
       });
     });
   });

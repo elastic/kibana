@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
@@ -21,12 +22,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool, isIndexSearchTool } from '@kbn/onechat-common/tools';
-import { ToolType } from '@kbn/onechat-common/tools/definition';
+import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -34,21 +37,17 @@ import type {
   UpdateToolResponse,
 } from '../../../../common/http_api/tools';
 import { useToolForm } from '../../hooks/tools/use_tool_form';
+import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useQueryState } from '../../hooks/use_query_state';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
-import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
 import {
-  transformEsqlFormDataForCreate,
-  transformEsqlFormDataForUpdate,
-  transformEsqlToolToFormData,
-} from '../../utils/transform_esql_form_data';
-import {
-  transformIndexSearchFormDataForCreate,
-  transformIndexSearchFormDataForUpdate,
-  transformIndexSearchToolToFormData,
-} from '../../utils/transform_index_search_form_data';
+  getToolTypeConfig,
+  getCreatePayloadFromData,
+  getUpdatePayloadFromData,
+  getToolTypeDefaultValues,
+} from './form/registry/tools_form_registry';
 import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
 import { ToolTestFlyout } from './execute/test_tools';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
@@ -89,27 +88,39 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
   const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
     OPEN_TEST_FLYOUT_QUERY_PARAM,
     { defaultValue: false }
   );
-  const [urlToolType] = useQueryState<ToolType | undefined>(TOOL_TYPE_QUERY_PARAM);
+  const [urlToolType, setUrlToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
 
   const initialToolType = useMemo(() => {
-    switch (urlToolType) {
-      case ToolType.esql:
-      case ToolType.index_search:
-        return urlToolType;
-      default:
-        return undefined;
+    if (urlToolType && getToolTypeConfig(urlToolType)) {
+      return urlToolType;
     }
+    return undefined;
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit } = form;
-  const { errors, isDirty } = formState;
+  const { reset, formState, watch, handleSubmit, getValues } = form;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { services } = useKibana();
+  const {
+    application: { navigateToUrl },
+    overlays: { openConfirm },
+    http,
+    appParams: { history },
+  } = services;
 
   const currentToolId = watch('toolId');
 
@@ -122,8 +133,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam]);
 
   const handleCancel = useCallback(() => {
-    navigateToOnechatUrl(appPaths.tools.list);
-  }, [navigateToOnechatUrl]);
+    setIsCancelling(true);
+    deferNavigateToOnechatUrl(appPaths.tools.list);
+  }, [deferNavigateToOnechatUrl]);
 
   const handleSave = useCallback(
     async (
@@ -137,36 +149,20 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       setSubmittingButtonId(buttonId);
       try {
         if (mode === ToolFormMode.Edit) {
-          switch (data.type) {
-            case ToolType.esql:
-              await saveTool(transformEsqlFormDataForUpdate(data));
-              break;
-            case ToolType.index_search:
-              await saveTool(transformIndexSearchFormDataForUpdate(data));
-              break;
-            default:
-              break;
-          }
+          const updatePayload = getUpdatePayloadFromData(data);
+          await saveTool(updatePayload);
         } else {
-          switch (data.type) {
-            case ToolType.esql:
-              await saveTool(transformEsqlFormDataForCreate(data));
-              break;
-            case ToolType.index_search:
-              await saveTool(transformIndexSearchFormDataForCreate(data));
-              break;
-            default:
-              break;
-          }
+          const createPayload = getCreatePayloadFromData(data);
+          await saveTool(createPayload);
         }
       } finally {
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        navigateToOnechatUrl(appPaths.tools.list);
+        deferNavigateToOnechatUrl(appPaths.tools.list);
       }
     },
-    [mode, saveTool, navigateToOnechatUrl]
+    [mode, saveTool, deferNavigateToOnechatUrl]
   );
 
   const handleTestTool = useCallback(() => {
@@ -183,15 +179,30 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   useEffect(() => {
     if (tool) {
-      if (isEsqlTool(tool)) {
-        reset(transformEsqlToolToFormData(tool));
-      } else if (isIndexSearchTool(tool)) {
-        reset(transformIndexSearchToolToFormData(tool));
-      } else if (tool.type === ToolType.builtin) {
-        reset(transformBuiltInToolToFormData(tool));
+      const toolTypeConfig = getToolTypeConfig(tool.type);
+      if (toolTypeConfig) {
+        const { toolToFormData } = toolTypeConfig;
+        reset(toolToFormData(tool));
       }
     }
   }, [tool, reset]);
+
+  // Switching tool types clears tool-specific fields
+  useEffect(() => {
+    if (!urlToolType) return;
+    if (mode !== ToolFormMode.Create) return;
+    const currentValues = getValues();
+    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
+
+    const mergedValues: ToolFormData = {
+      ...newDefaultValues,
+      toolId: currentValues.toolId,
+      description: currentValues.description,
+      labels: currentValues.labels,
+    };
+
+    reset(mergedValues);
+  }, [urlToolType, initialToolType, mode, getValues, reset]);
 
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
@@ -265,6 +276,15 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     ]
   );
 
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: !isViewMode && isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+    shouldPromptOnReplace: false,
+  });
+
   return (
     <FormProvider {...form}>
       <KibanaPageTemplate>
@@ -284,6 +304,32 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
+          }
+          description={
+            mode === ToolFormMode.Create ? (
+              <FormattedMessage
+                id="xpack.onechat.tools.createToolDescription"
+                defaultMessage="Give your new tool a unique ID and a clear description, so both humans and LLMs can understand its purpose. Add labels for organization, and write the index pattern or ES|QL query that powers its functionality. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={docLinks.tools}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'xpack.onechat.tools.createToolDocumentationAriaLabel',
+                        {
+                          defaultMessage: 'Learn more about creating tools in the documentation',
+                        }
+                      )}
+                    >
+                      {i18n.translate('xpack.onechat.tools.createToolDocumentation', {
+                        defaultMessage: 'Learn more',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : undefined
           }
           rightSideItems={[
             ...(mode !== ToolFormMode.View ? [renderSaveButton({ size: 'm' })] : []),
@@ -306,7 +352,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               {isViewMode ? (
                 <ToolForm mode={ToolFormMode.View} formId={toolFormId} />
               ) : (
-                <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
+                <ToolForm
+                  mode={mode}
+                  formId={toolFormId}
+                  saveTool={handleSave}
+                  toolType={urlToolType!}
+                  setToolType={setUrlToolType}
+                />
               )}
               {showTestFlyout && currentToolId && (
                 <ToolTestFlyout
@@ -341,7 +393,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             {mode !== ToolFormMode.View && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
+                <EuiButtonEmpty
+                  aria-label={labels.tools.cancelButtonLabel}
+                  size="s"
+                  iconType="cross"
+                  color="text"
+                  onClick={handleCancel}
+                >
                   {labels.tools.cancelButtonLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>

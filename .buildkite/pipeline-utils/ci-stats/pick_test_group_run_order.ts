@@ -573,6 +573,15 @@ export async function pickTestGroupRunOrder() {
   );
 }
 
+// copied from src/platform/packages/shared/kbn-scout/src/config/discovery/search_configs.ts
+interface ScoutTestDiscoveryConfig {
+  group: string;
+  path: string;
+  usesParallelWorkers: boolean;
+  configs: string[];
+  type: 'plugin' | 'package';
+}
+
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
@@ -581,19 +590,22 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
 
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
-  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
+    string,
+    ScoutTestDiscoveryConfig
+  >;
+  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
 
-  if (pluginsWithScoutConfigs.length === 0) {
+  if (pluginsOrPackagesWithScoutTests.length === 0) {
     // no scout configs found, nothing to need to upload steps
     return;
   }
 
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
-    title: plugin,
-    key: plugin,
-    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
-    group: rawScoutConfigs[plugin].group,
+  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
+    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
+    key: name,
+    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+    group: rawScoutConfigs[name].group,
   }));
 
   // upload the step definitions to Buildkite
@@ -601,13 +613,14 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [
       {
         group: 'Scout Configs',
-        depends_on: ['build'],
-        steps: scoutGroups.map(
-          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
-            label: `Scout: [ ${group} / ${title} ] plugin`,
+        key: 'scout-configs',
+        depends_on: ['build_scout_tests'],
+        steps: scoutCiRunGroups.map(
+          ({ label, key, group, agents }): BuildkiteStep => ({
+            label,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
-            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+            agents,
             env: {
               SCOUT_CONFIG_GROUP_KEY: key,
               SCOUT_CONFIG_GROUP_TYPE: group,
