@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps';
 import { LookupsFileUpload } from '../../../../../../../common/components/migration_steps';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { AddUploadedLookups } from '../../lookups_data_input';
 import * as i18n from './translations';
 
 export interface DashboardsFileUploadStepProps {

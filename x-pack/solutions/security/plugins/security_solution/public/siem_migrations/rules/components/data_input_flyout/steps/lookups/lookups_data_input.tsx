@@ -15,9 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
+  AddUploadedLookups,
+  UploadedLookups,
+} from '../../../../../common/components/migration_steps';
 import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
-import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
@@ -25,9 +28,6 @@ import * as i18n from './translations';
 import { DataInputStep } from '../constants';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
-
-export type UploadedLookups = Record<string, string>;
-export type AddUploadedLookups = (lookups: SiemMigrationResourceData[]) => void;
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
