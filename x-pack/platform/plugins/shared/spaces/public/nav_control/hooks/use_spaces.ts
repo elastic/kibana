@@ -22,6 +22,6 @@ export const useSpaces = (
     queryFn: () => spacesManager.getSpaces(),
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 3,
+    networkMode: 'always',
   });
 };
