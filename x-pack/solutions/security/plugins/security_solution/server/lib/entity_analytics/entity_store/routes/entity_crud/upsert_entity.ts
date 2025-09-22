@@ -23,6 +23,11 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
     .put({
       access: 'public',
       path: '/api/entity_store/entities/{entityType}',
+      options: {
+        availability: {
+          stability: 'beta',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

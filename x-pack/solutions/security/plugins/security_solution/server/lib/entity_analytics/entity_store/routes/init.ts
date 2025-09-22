@@ -64,8 +64,7 @@ export const initEntityEngineRoute = (
             getSpaceId(),
             EntityType[request.params.entityType],
             getAppClient(),
-            getDataViewsService(),
-            request.params.entityType
+            getDataViewsService()
           );
 
           const privileges = await entityStoreClient.getEntityStoreInitPrivileges(
