@@ -21,10 +21,12 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
       {
         title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
         children: [
-          {
-            id: `external-integrations`,
-            link: securityLink(SecurityPageName.configurationsIntegrations),
-          },
+          // TODO: same as Congigurations/Integrations on the main nav list
+          // sets to active when on integrations page
+          // {
+          //   id: `external-integrations`,
+          //   link: securityLink(SecurityPageName.configurationsIntegrations),
+          // },
           { link: 'management:ingest_pipelines' },
           { link: 'management:pipelines' },
           { link: 'management:content_connectors' },
@@ -112,7 +114,6 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
         breadcrumbStatus: 'hidden',
         children: [
           {
-            breadcrumbStatus: 'hidden',
             link: 'management:settings',
           },
         ],
