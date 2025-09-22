@@ -5,7 +5,7 @@
   "description": "Dashboard markdown",
   "plugin": {
     "id": "dashboardMarkdown",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
       "contentManagement",

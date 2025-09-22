@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MarkdownEmbeddableState } from '@kbn/dashboard-markdown-schemas';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { MarkdownEmbeddableState } from '../server';
 import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
 import type { MarkdownEditorApi } from './types';
 

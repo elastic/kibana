@@ -8,7 +8,6 @@
  */
 
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
-import type { MarkdownEditorState, MarkdownEmbeddableState } from '@kbn/dashboard-markdown-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
@@ -27,6 +26,7 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { MarkdownEditorState, MarkdownEmbeddableState } from '../server';
 import { MARKDOWN_ID } from './constants';
 import type { MarkdownEditorApi } from './types';
 import { MarkdownEditor } from './components/markdown_editor';

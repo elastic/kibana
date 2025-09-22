@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-dashboard-markdown-schemas'],
+export type { MarkdownEditorState, MarkdownEmbeddableState } from './schemas';
+
+export const plugin = async () => {
+  const { MarkdownPlugin } = await import('./plugin');
+  return new MarkdownPlugin();
 };

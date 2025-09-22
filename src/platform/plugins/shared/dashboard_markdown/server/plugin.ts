@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+import type { SetupDeps, StartDeps } from './types';
+
+export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {}
+
+  start(core: CoreStart, plugins: StartDeps) {}
+}

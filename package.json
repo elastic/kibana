@@ -459,7 +459,6 @@
     "@kbn/custom-integrations-plugin": "link:src/platform/plugins/shared/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/platform/plugins/shared/dashboard_enhanced",
     "@kbn/dashboard-markdown": "link:src/platform/plugins/shared/dashboard_markdown",
-    "@kbn/dashboard-markdown-schemas": "link:src/platform/packages/private/kbn-dashboard-markdown-schemas",
     "@kbn/dashboard-plugin": "link:src/platform/plugins/shared/dashboard",
     "@kbn/dashboards-selector": "link:src/platform/packages/shared/dashboards/dashboards-selector",
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",

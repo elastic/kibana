@@ -770,8 +770,6 @@
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/platform/plugins/shared/dashboard_enhanced/*"],
       "@kbn/dashboard-markdown": ["src/platform/plugins/shared/dashboard_markdown"],
       "@kbn/dashboard-markdown/*": ["src/platform/plugins/shared/dashboard_markdown/*"],
-      "@kbn/dashboard-markdown-schemas": ["src/platform/packages/private/kbn-dashboard-markdown-schemas"],
-      "@kbn/dashboard-markdown-schemas/*": ["src/platform/packages/private/kbn-dashboard-markdown-schemas/*"],
       "@kbn/dashboard-plugin": ["src/platform/plugins/shared/dashboard"],
       "@kbn/dashboard-plugin/*": ["src/platform/plugins/shared/dashboard/*"],
       "@kbn/dashboards-selector": ["src/platform/packages/shared/dashboards/dashboards-selector"],
