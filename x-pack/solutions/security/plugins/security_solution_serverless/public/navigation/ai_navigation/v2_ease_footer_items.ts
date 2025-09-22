@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+import { i18nStrings } from '@kbn/security-solution-navigation/links';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
   {
