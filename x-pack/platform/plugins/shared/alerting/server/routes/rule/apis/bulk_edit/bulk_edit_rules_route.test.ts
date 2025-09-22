@@ -21,9 +21,6 @@ const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
-beforeEach(() => {
-  jest.resetAllMocks();
-});
 
 describe('bulkEditRulesRoute', () => {
   const mockedAlert: SanitizedRule<{}> = {
@@ -75,7 +72,13 @@ describe('bulkEditRulesRoute', () => {
       },
     ],
   };
+
   const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1, skipped: [] };
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    rulesClient.getRuleTypesByQuery.mockResolvedValue({ ruleTypes: [] });
+  });
 
   it('bulk edits rules with tags action', async () => {
     const licenseState = licenseStateMock.create();
@@ -182,10 +185,11 @@ describe('bulkEditRulesRoute', () => {
 
     rulesClient.bulkEdit.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
-      'ok',
-      'forbidden',
-    ]);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: {}, body: { operations: [] } },
+      ['ok', 'forbidden']
+    );
 
     await handler(context, req, res);
 
@@ -360,6 +364,146 @@ describe('bulkEditRulesRoute', () => {
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Group is not defined in action 2"`
+      );
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    it('throws 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValue({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: bulkEditRequest,
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
+
+    it('does not throw 400 if the rule type is internally managed and the operation is apiKey', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValueOnce({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...bulkEditRequest, operations: [{ field: 'apiKey', operation: 'set' }] },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).resolves.not.toThrow();
+    });
+
+    it('throws 400 if the rule type is internally managed and multiple non supported operations', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValueOnce({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: {
+            ...bulkEditRequest,
+            operations: [...bulkEditRequest.operations, { field: 'apiKey', operation: 'set' }],
+          },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
+
+    it('throws 400 if the rule type is not registered', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.getRuleTypesByQuery.mockResolvedValue({
+        ruleTypes: ['test.internal-rule-type'],
+      });
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, handler] = router.post.mock.calls[0];
+
+      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          listTypes: new Map([]),
+        },
+        {
+          body: bulkEditRequest,
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"unknown\\" because it is internally managed."`
       );
     });
   });

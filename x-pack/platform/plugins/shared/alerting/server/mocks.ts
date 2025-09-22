@@ -179,6 +179,7 @@ const createRuleExecutorServicesMock = <
     shouldStopExecution: () => true,
     shouldWriteAlerts: () => true,
     uiSettingsClient: uiSettingsServiceMock.createClient(),
+    getAsyncSearchClient: jest.fn().mockReturnValue(createAbortableSearchClientMock()),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
