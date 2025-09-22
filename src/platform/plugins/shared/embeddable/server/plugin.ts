@@ -36,7 +36,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * allowing embeddables to have one shape for REST APIs and another for storage.
    * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
    * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
-   * On write, transformIn is used extract references and convert EmbeddableState into StoredEmbeddableState.
+   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
