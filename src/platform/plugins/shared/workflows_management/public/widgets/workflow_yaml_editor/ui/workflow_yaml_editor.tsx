@@ -20,7 +20,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import YAML, { isPair, isScalar } from 'yaml';
+import YAML, { type Pair, type Scalar, isPair, isScalar } from 'yaml';
 import {
   getStepNodesWithType,
   getTriggerNodes,
@@ -44,8 +44,8 @@ import { useYamlValidation } from '../lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { ElasticsearchStepActions } from './elasticsearch_step_actions';
-import { ActionsMenuPopover } from '../../actions_menu_popover';
-import type { ActionOptionData } from '../../actions_menu_popover/types';
+import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
+import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
@@ -846,10 +846,19 @@ export const WorkflowYAMLEditor = ({
       const triggerNodes = getTriggerNodesWithType(yamlDocument);
 
       for (const triggerNode of triggerNodes) {
-        const typePair = triggerNode.items.find((item: any) => item.key?.value === 'type');
-        if (!typePair?.value?.value) continue;
+        const typePair = triggerNode.items.find(
+          (item): item is Pair<Scalar, Scalar> =>
+            isPair(item) && isScalar(item.key) && isScalar(item.value) && item.key.value === 'type'
+        );
+        if (!typePair?.value?.value) {
+          continue;
+        }
 
         const triggerType = typePair.value.value;
+
+        if (typeof triggerType !== 'string') {
+          continue;
+        }
 
         // Skip decoration for very short trigger types to avoid false matches
         if (triggerType.length < 3) {
@@ -858,7 +867,9 @@ export const WorkflowYAMLEditor = ({
 
         const typeRange = typePair.value.range;
 
-        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
+        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
+          continue;
+        }
 
         // Get icon and class based on trigger type
         const { className } = getTriggerIcon(triggerType);
