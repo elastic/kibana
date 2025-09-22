@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
@@ -17,6 +17,7 @@ import {
   getSortArray,
 } from '@kbn/discover-utils';
 import type { FetchContext } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -36,6 +37,7 @@ import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
+import { replaceColumnsWithVariableDriven } from '../../utils/replace_columns_with_variable_driven';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -58,6 +60,9 @@ export function SearchEmbeddableGridComponent({
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
+  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
+    ? api.parentApi.esqlVariables$
+    : undefined;
   const [
     loading,
     savedSearch,
@@ -74,6 +79,7 @@ export function SearchEmbeddableGridComponent({
     panelDescription,
     savedSearchTitle,
     savedSearchDescription,
+    esqlVariables,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -89,7 +95,8 @@ export function SearchEmbeddableGridComponent({
     api.title$,
     api.description$,
     api.defaultTitle$,
-    api.defaultDescription$
+    api.defaultDescription$,
+    esqlVariables$ ?? new BehaviorSubject(undefined)
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -104,7 +111,14 @@ export function SearchEmbeddableGridComponent({
     [dataView, isEsql, savedSearch.sort]
   );
 
-  const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
+  const originalColumns = useMemo(() => {
+    return replaceColumnsWithVariableDriven(
+      savedSearch.columns,
+      columnsMeta,
+      esqlVariables,
+      isEsql
+    );
+  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,

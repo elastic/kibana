@@ -62,6 +62,7 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { addControlsFromSavedSession } from './utils/add_controls_from_saved_session';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -399,6 +400,7 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        addControlsFromSavedSession(container, savedObject);
         const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {

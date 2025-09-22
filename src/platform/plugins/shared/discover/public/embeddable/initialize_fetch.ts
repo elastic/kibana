@@ -16,6 +16,7 @@ import {
   SEARCH_EMBEDDABLE_TYPE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -127,7 +128,18 @@ export function initializeFetch({
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
+  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
+    ? api.parentApi.esqlVariables$
+    : undefined;
+
+  const observables = [
+    fetch$(api),
+    api.savedSearch$,
+    api.dataViews$,
+    ...(esqlVariables$ ? [esqlVariables$] : []),
+  ] as const;
+
+  const fetchSubscription = combineLatest(observables)
     .pipe(
       tap(() => {
         // abort any in-progress requests
@@ -136,7 +148,7 @@ export function initializeFetch({
           abortController = undefined;
         }
       }),
-      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
+      switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
@@ -193,6 +205,7 @@ export function initializeFetch({
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
+              esqlVariables,
             });
             return {
               columnsMeta: result.esqlQueryColumns
