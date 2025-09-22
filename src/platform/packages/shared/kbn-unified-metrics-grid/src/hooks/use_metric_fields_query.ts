@@ -15,8 +15,8 @@ import { useMetricsExperience } from './use_metrics_experience';
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
-  from: string;
-  to: string;
+  from?: string;
+  to?: string;
 }) => {
   const { client } = useMetricsExperience();
 

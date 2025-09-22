@@ -12,7 +12,6 @@ import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { store } from '../store';
 import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
@@ -29,11 +28,7 @@ const queryClient = new QueryClient({
 });
 
 export const UnifiedMetricsExperienceGrid = (
-  props: ChartSectionProps & {
-    client?: MetricsExperienceClient;
-    isChartLoading: boolean;
-    timeRange: TimeRange;
-  }
+  props: ChartSectionProps & { client?: MetricsExperienceClient }
 ) => {
   if (!props.client) {
     return null;

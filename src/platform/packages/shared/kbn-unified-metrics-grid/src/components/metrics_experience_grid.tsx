@@ -23,7 +23,6 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
@@ -44,7 +43,7 @@ export const MetricsExperienceGrid = ({
   input$: originalInput$,
   isChartLoading,
   timeRange,
-}: ChartSectionProps & { isChartLoading: boolean; timeRange: TimeRange }) => {
+}: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -65,8 +64,8 @@ export const MetricsExperienceGrid = ({
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching } = useMetricFieldsQuery({
     index: indexPattern,
-    from: timeRange.from,
-    to: timeRange.to,
+    from: timeRange?.from,
+    to: timeRange?.to,
   });
 
   const { leftSideActions, rightSideActions } = useToolbarActions({
