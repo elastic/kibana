@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -37,11 +38,15 @@ const getOpenedTabsList = (
 };
 
 const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
-  return tabItems.map((tab) => ({
-    label: tab.label,
-    key: tab.id,
-    'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
-  }));
+  return tabItems.map((tab) => {
+    const closedAt = 'closedAt' in tab && tab.closedAt ? moment(tab.closedAt) : undefined;
+    return {
+      label: tab.label,
+      title: `${tab.label}${closedAt?.isValid() ? ` (${closedAt.format('LL LT')})` : ''}`,
+      key: tab.id,
+      'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
+    };
+  });
 };
 
 export interface TabsBarMenuProps {
