@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromAPItoLensState, fromLensStateToAPI } from './metric';
+import {
+  fromAPItoLensState,
+  fromLensStateToAPI,
+  LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+} from './metric';
 import type { MetricState } from '../../schema';
+import { merge } from 'lodash';
+
+// ts-expect-error
+function mergeDefaultsToNewCopy(originalObject, filledDefaults) {
+  return merge(structuredClone(originalObject), filledDefaults);
+}
 
 describe('metric chart transformations', () => {
   describe('roundtrip conversion', () => {
-    it('basic metric chart', async () => {
+    it('basic metric chart with ad hoc dataView', () => {
       const basicMetricConfig: MetricState = {
         type: 'metric',
         title: 'Test Metric',
@@ -36,20 +46,40 @@ describe('metric chart transformations', () => {
         ignore_global_filters: false,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(basicMetricConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(basicMetricConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(basicMetricConfig));
+      const filledDefaults = { metric: { fit: false } };
+      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(basicMetricConfig, filledDefaults));
     });
 
-    it('chart with secondary metric', async () => {
+    it('basic metric chart with dataView', () => {
+      const basicMetricConfig: MetricState = {
+        type: 'metric',
+        title: 'Test Metric',
+        description: 'A test metric chart',
+        dataset: {
+          type: 'dataView',
+          id: 'test-id',
+        },
+        metric: {
+          operation: 'count',
+          label: 'Count of documents',
+          alignments: {
+            labels: 'left',
+            value: 'left',
+          },
+          fit: false,
+          empty_as_null: false,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      };
+
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(basicMetricConfig));
+      const filledDefaults = { metric: { fit: false } };
+      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(basicMetricConfig, filledDefaults));
+    });
+
+    it('chart with secondary metric', () => {
       const metricWithSecondaryConfig: MetricState = {
         type: 'metric',
         title: 'Test Metric with Secondary',
@@ -97,7 +127,7 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('title');
     });
 
-    it('metric chart with breakdown', async () => {
+    it('metric chart with breakdown', () => {
       const metricWithBreakdownConfig: MetricState = {
         type: 'metric',
         title: 'Test Metric with Breakdown',
@@ -132,21 +162,28 @@ describe('metric chart transformations', () => {
         ignore_global_filters: false,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(metricWithBreakdownConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(metricWithBreakdownConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('breakdown_by');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(metricWithBreakdownConfig));
+      const filledDefaults = {
+        breakdown_by: {
+          excludes: {
+            as_regex: false,
+            values: [],
+          },
+          includes: {
+            as_regex: false,
+            values: [],
+          },
+          increase_accuracy: false,
+          other_bucket: { include_documents_without_field: false },
+          rank_by: { direction: 'asc', type: 'alphabetical' },
+        },
+      };
+      expect(finalAPIState).toEqual(
+        mergeDefaultsToNewCopy(metricWithBreakdownConfig, filledDefaults)
+      );
     });
 
-    it('metric chart with background chart (bar)', async () => {
+    it('metric chart with background chart (bar)', () => {
       const metricWithBarConfig: MetricState = {
         type: 'metric',
         title: 'Test Metric with Bar Background',
@@ -177,21 +214,12 @@ describe('metric chart transformations', () => {
         ignore_global_filters: false,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(metricWithBarConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(metricWithBarConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig.metric).toHaveProperty('background_chart');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(metricWithBarConfig));
+      const filledDefaults = {};
+      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(metricWithBarConfig, filledDefaults));
     });
 
-    it('ESQL-based metric chart', async () => {
+    it('ESQL-based metric chart', () => {
       const esqlMetricConfig: MetricState = {
         type: 'metric',
         title: 'Test ESQL Metric',
@@ -213,97 +241,12 @@ describe('metric chart transformations', () => {
         ignore_global_filters: true,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(esqlMetricConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(esqlMetricConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
-      expect(lensState).toHaveProperty('references');
-      expect(lensState.references).toHaveLength(0);
-
-      expect(lensState).toMatchInlineSnapshot(`
-        Object {
-          "description": "A test metric chart using ESQL",
-          "references": Array [],
-          "state": Object {
-            "adHocDataViews": Object {},
-            "datasourceStates": Object {
-              "textBased": Object {
-                "layers": Object {
-                  "layer_0": Object {
-                    "columns": Array [
-                      Object {
-                        "columnId": "metric_formula_accessor",
-                        "fieldName": "count",
-                        "meta": Object {
-                          "type": "number",
-                        },
-                      },
-                    ],
-                    "index": "test-index",
-                    "query": Object {
-                      "esql": "FROM test-index | STATS count = COUNT(*)",
-                    },
-                    "timeField": "@timestamp",
-                  },
-                },
-              },
-            },
-            "filters": Array [],
-            "internalReferences": Array [],
-            "query": Object {
-              "language": "kuery",
-              "query": "",
-            },
-            "visualization": Object {
-              "layerId": "layer_0",
-              "layerType": "data",
-              "metricAccessor": "metric_formula_accessor",
-              "showBar": false,
-              "subtitle": "",
-              "titlesTextAlign": "left",
-              "valueFontMode": "fit",
-              "valuesTextAlign": "left",
-            },
-          },
-          "title": "Test ESQL Metric",
-          "visualizationType": "lnsMetric",
-        }
-      `);
-
-      expect(convertedConfig).toMatchInlineSnapshot(`
-        Object {
-          "dataset": Object {
-            "query": "FROM test-index | STATS count = COUNT(*)",
-            "type": "esql",
-          },
-          "description": "A test metric chart using ESQL",
-          "ignore_global_filters": true,
-          "metric": Object {
-            "alignments": Object {
-              "labels": "left",
-              "value": "left",
-            },
-            "column": "count",
-            "fit": true,
-            "operation": "value",
-          },
-          "sampling": 1,
-          "title": "Test ESQL Metric",
-          "type": "metric",
-        }
-      `);
-
-      expect(convertedConfig).toEqual(esqlMetricConfig);
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(esqlMetricConfig));
+      const filledDefaults = {};
+      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(esqlMetricConfig, filledDefaults));
     });
 
-    it('comprehensive metric chart with ad hoc data view', async () => {
+    it('comprehensive metric chart with ad hoc data view', () => {
       const comprehensiveMetricConfig: MetricState = {
         type: 'metric',
         title: 'Comprehensive Test Metric',
@@ -339,16 +282,11 @@ describe('metric chart transformations', () => {
           operation: 'count',
           label: 'Request Count',
           prefix: 'Requests: ',
-          color: {
-            type: 'static',
-            color: '#0000FF',
-          },
           empty_as_null: false,
           compare: {
             to: 'primary',
             icon: false,
-            value: false,
-            palette: 'compare_to',
+            value: true,
           },
         },
         breakdown_by: {
@@ -361,100 +299,33 @@ describe('metric chart transformations', () => {
         ignore_global_filters: true,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(comprehensiveMetricConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(comprehensiveMetricConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('secondary_metric');
-      expect(convertedConfig).toHaveProperty('breakdown_by');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
-
-      expect(lensState).toHaveProperty('references');
-      expect(lensState.references).toHaveLength(0);
-
-      // there are 2 ad hoc dataViews instead of 1 as there's the hidden trend layer defined
-      expect(Object.keys(lensState.state.adHocDataViews ?? {})).toHaveLength(2);
-
-      expect(convertedConfig).toMatchInlineSnapshot(`
-        Object {
-          "breakdown_by": Object {
-            "excludes": Object {
-              "as_regex": false,
-              "values": Array [],
-            },
-            "fields": Array [
-              "service_name",
-            ],
-            "includes": Object {
-              "as_regex": false,
-              "values": Array [],
-            },
-            "increase_accuracy": false,
-            "label": undefined,
-            "operation": "terms",
-            "other_bucket": Object {
-              "include_documents_without_field": false,
-            },
-            "rank_by": Object {
-              "direction": "asc",
-              "type": "alphabetical",
-            },
-            "size": 10,
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(comprehensiveMetricConfig));
+      const filledDefaults = {
+        secondary_metric: {
+          compare: {
+            palette: LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
           },
-          "dataset": Object {
-            "id": undefined,
-            "type": "dataView",
+        },
+        breakdown_by: {
+          excludes: {
+            as_regex: false,
+            values: [],
           },
-          "description": "A comprehensive metric chart with all features",
-          "ignore_global_filters": true,
-          "metric": Object {
-            "alignments": Object {
-              "labels": "center",
-              "value": "right",
-            },
-            "background_chart": Object {
-              "type": "trend",
-            },
-            "color": Object {
-              "color": "#00FF00",
-              "type": "static",
-            },
-            "field": "response_time",
-            "fit": true,
-            "icon": Object {
-              "align": "right",
-              "name": "clock",
-            },
-            "label": "Avg Response Time",
-            "operation": "average",
-            "sub_label": "milliseconds",
+          includes: {
+            as_regex: false,
+            values: [],
           },
-          "sampling": 0.8,
-          "secondary_metric": Object {
-            "compare": Object {
-              "icon": false,
-              "palette": "compare_to",
-              "to": "primary",
-              "value": true,
-            },
-            "empty_as_null": false,
-            "label": "Request Count",
-            "operation": "count",
-            "prefix": "Requests: ",
-          },
-          "title": "Comprehensive Test Metric",
-          "type": "metric",
-        }
-      `);
+          increase_accuracy: false,
+          other_bucket: { include_documents_without_field: false },
+          rank_by: { direction: 'asc', type: 'alphabetical' },
+        },
+      };
+      expect(finalAPIState).toEqual(
+        mergeDefaultsToNewCopy(comprehensiveMetricConfig, filledDefaults)
+      );
     });
 
-    it('comprehensive metric chart with data view', async () => {
+    it('comprehensive metric chart with data view', () => {
       const comprehensiveMetricConfig: MetricState = {
         type: 'metric',
         title: 'Comprehensive Test Metric',
@@ -504,89 +375,64 @@ describe('metric chart transformations', () => {
         sampling: 0.8,
         ignore_global_filters: true,
       };
-
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(comprehensiveMetricConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(comprehensiveMetricConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('secondary_metric');
-      expect(convertedConfig).toHaveProperty('breakdown_by');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
-
-      expect(lensState).toHaveProperty('references');
-      expect(lensState.references).toHaveLength(1);
-
-      expect(convertedConfig).toMatchInlineSnapshot(`
-        Object {
-          "breakdown_by": Object {
-            "excludes": Object {
-              "as_regex": false,
-              "values": Array [],
-            },
-            "fields": Array [
-              "service_name",
-            ],
-            "includes": Object {
-              "as_regex": false,
-              "values": Array [],
-            },
-            "increase_accuracy": false,
-            "label": undefined,
-            "operation": "terms",
-            "other_bucket": Object {
-              "include_documents_without_field": false,
-            },
-            "rank_by": Object {
-              "direction": "asc",
-              "type": "alphabetical",
-            },
-            "size": 10,
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(comprehensiveMetricConfig));
+      const filledDefaults = {
+        breakdown_by: {
+          excludes: {
+            as_regex: false,
+            values: [],
           },
-          "dataset": Object {
-            "id": "my-custom-data-view-id",
-            "type": "dataView",
+          includes: {
+            as_regex: false,
+            values: [],
           },
-          "description": "A comprehensive metric chart with all features",
-          "ignore_global_filters": true,
-          "metric": Object {
-            "alignments": Object {
-              "labels": "center",
-              "value": "right",
-            },
-            "background_chart": Object {
-              "type": "trend",
-            },
-            "color": Object {
-              "color": "#00FF00",
-              "type": "static",
-            },
-            "field": "response_time",
-            "fit": true,
-            "icon": Object {
-              "align": "right",
-              "name": "clock",
-            },
-            "label": "Avg Response Time",
-            "operation": "average",
-            "sub_label": "milliseconds",
+          increase_accuracy: false,
+          other_bucket: { include_documents_without_field: false },
+          rank_by: { direction: 'asc', type: 'alphabetical' },
+        },
+      };
+      expect(finalAPIState).toEqual(
+        mergeDefaultsToNewCopy(comprehensiveMetricConfig, filledDefaults)
+      );
+    });
+
+    it('comprehensive ESQL-based metric chart with comapre to feature', () => {
+      const esqlMetricConfig: MetricState = {
+        type: 'metric',
+        title: 'Test ESQL Metric',
+        description: 'A test metric chart using ESQL',
+        dataset: {
+          type: 'esql',
+          query:
+            'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
+        },
+        metric: {
+          operation: 'value',
+          column: 'countA',
+          alignments: {
+            labels: 'left',
+            value: 'left',
           },
-          "sampling": 0.8,
-          "secondary_metric": Object {
-            "empty_as_null": false,
-            "label": "Request Count",
-            "operation": "count",
-            "prefix": "Requests: ",
+          fit: true,
+        },
+        secondary_metric: {
+          operation: 'value',
+          column: 'countB',
+          compare: {
+            to: 'primary',
+            icon: true,
+            value: false,
           },
-          "title": "Comprehensive Test Metric",
-          "type": "metric",
-        }
-      `);
+        },
+        sampling: 1,
+        ignore_global_filters: true,
+      };
+
+      // Convert API config to Lens state and back
+      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(esqlMetricConfig));
+
+      const filledDefaults = { secondary_metric: { compare: { palette: 'compare_to' } } };
+      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(esqlMetricConfig, filledDefaults));
     });
   });
 });

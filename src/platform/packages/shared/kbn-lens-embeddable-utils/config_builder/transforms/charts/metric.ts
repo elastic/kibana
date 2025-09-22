@@ -46,14 +46,14 @@ type MetricApiCompareType = Extract<
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
-const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
+export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
 
-function convertToCompareToLensState(compareToConfig: MetricApiCompareType): {
+function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
   secondaryTrend: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>;
 } {
   return {
@@ -108,7 +108,10 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           // secondaryLabelPosition: layer.metric.alignments.labels,
           // secondaryLabel: '',
           ...(layer.secondary_metric.compare
-            ? convertToCompareToLensState(layer.secondary_metric.compare)
+            ? fromCompareAPIToLensState(layer.secondary_metric.compare)
+            : {}),
+          ...(layer.secondary_metric.color?.type === 'static'
+            ? { secondaryTrend: { type: 'static', color: layer.secondary_metric.color.color } }
             : {}),
         }
       : {}),
@@ -118,7 +121,10 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-
+    collapseFn:
+      layer.breakdown_by && layer.breakdown_by.collapse_by
+        ? layer.breakdown_by.collapse_by
+        : undefined,
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -149,7 +155,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   };
 }
 
-function getCompareToApi(
+function fromCompareLensStateToAPI(
   compare: Extract<MetricVisualizationState['secondaryTrend'], { type: 'dynamic' }>
 ): MetricApiCompareType {
   const sharedProps = {
@@ -175,13 +181,18 @@ function reverseBuildVisualizationState(
   layer: FormBasedLayer | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
-  references: SavedObjectReference[]
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
 ): MetricState {
   if (visualization.metricAccessor === undefined) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, layerId);
+  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+
+  if (!dataset || dataset.type == null) {
+    throw new Error('Unsupported dataset type');
+  }
 
   let props: DeepPartial<DeepMutable<MetricState>> = generateApiLayer(layer);
 
@@ -234,17 +245,14 @@ function reverseBuildVisualizationState(
       : undefined;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const breakdown_by = visualization.breakdownByAccessor
-      ? (operationFromColumn(
-          visualization.breakdownByAccessor,
-          formLayer
-        ) as LensApiBucketOperations)
+      ? operationFromColumn(visualization.breakdownByAccessor, formLayer)
       : undefined;
 
     props = {
       ...props,
       metric: {
         ...metric,
-        ...(max_value || props.metric?.background_chart
+        ...(max_value ?? props.metric?.background_chart
           ? {
               background_chart: {
                 ...(max_value
@@ -261,21 +269,54 @@ function reverseBuildVisualizationState(
       ...(secondary_metric ? { secondary_metric: { ...secondary_metric } } : {}),
       ...(breakdown_by ? { breakdown_by } : {}),
     } as MetricState;
-  } else {
-    throw new Error('Unsupported dataset type');
   }
 
-  if (visualization.subtitle) {
-    props.metric!.sub_label = visualization.subtitle;
-  }
+  if (props.metric) {
+    if (visualization.subtitle) {
+      props.metric.sub_label = visualization.subtitle;
+    }
 
-  if (visualization.trendlineLayerType) {
-    props.metric!.background_chart = { ...props.metric!.background_chart, type: 'trend' };
+    if (visualization.trendlineLayerType) {
+      props.metric.background_chart = { ...props.metric.background_chart, type: 'trend' };
+    }
+
+    if (visualization.color) {
+      props.metric.color = {
+        type: 'static',
+        color: visualization.color,
+      };
+    }
+
+    if (visualization.palette) {
+      props.metric.color = {
+        type: 'gradient',
+        palette: visualization.palette.name,
+      };
+    }
+
+    // todo: what to do with this ?
+    // if (visualization.applyColorTo) {}
+
+    if (visualization.icon) {
+      props.metric.icon = {
+        name: visualization.icon,
+        align: visualization.iconAlign,
+      };
+    }
+
+    if (visualization.valuesTextAlign || visualization.titlesTextAlign) {
+      props.metric.alignments = {
+        ...(visualization.valuesTextAlign ? { value: visualization.valuesTextAlign } : {}),
+        ...(visualization.titlesTextAlign ? { labels: visualization.titlesTextAlign } : {}),
+      };
+    }
+
+    props.metric.fit = visualization.valueFontMode === 'fit';
   }
 
   if (props.secondary_metric) {
     if (visualization.secondaryTrend?.type === 'dynamic') {
-      props.secondary_metric.compare = getCompareToApi(visualization.secondaryTrend);
+      props.secondary_metric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
     if (visualization.secondaryPrefix) {
@@ -290,44 +331,15 @@ function reverseBuildVisualizationState(
     }
   }
 
-  if (visualization.color) {
-    props.metric!.color = {
-      type: 'static',
-      color: visualization.color,
-    };
-  }
-
-  if (visualization.palette) {
-    props.metric!.color = {
-      type: 'gradient',
-      palette: visualization.palette.name,
-    };
-  }
-
-  // todo: what to do with this ?
-  // if (visualization.applyColorTo) {}
-
-  if (visualization.icon) {
-    props.metric!.icon = {
-      name: visualization.icon,
-      align: visualization.iconAlign,
-    };
-  }
-
-  if (visualization.valuesTextAlign || visualization.titlesTextAlign) {
-    props.metric!.alignments = {
-      ...(visualization.valuesTextAlign ? { value: visualization.valuesTextAlign } : {}),
-      ...(visualization.titlesTextAlign ? { labels: visualization.titlesTextAlign } : {}),
-    };
-  }
-
-  if (visualization.valueFontMode === 'fit') {
-    props.metric!.fit = true;
+  if (props.breakdown_by) {
+    if (visualization.maxCols) {
+      props.breakdown_by.columns = visualization.maxCols;
+    }
   }
 
   return {
     type: 'metric',
-    dataset,
+    dataset: dataset satisfies MetricState['dataset'],
     ...props,
   } as MetricState;
 }
@@ -377,7 +389,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   if (layer.metric?.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const newColumn = fromMetricAPItoLensState({ operation: 'max', field: 'max' });
+    const newColumn = fromMetricAPItoLensState(layer.metric.background_chart.goal_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
@@ -417,9 +429,9 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
 
   const visualization = buildVisualizationState(config);
 
-  const adHocDataViews = getAdhocDataviews(usedDataviews);
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
   const regularDataViews = Object.values(usedDataviews).filter((v) => v.type === 'dataView');
-  const references = buildReferences({ layer_0: regularDataViews[0]?.id ?? adHocDataViews[0]?.id });
+  const references = buildReferences({ layer_0: regularDataViews[0]?.id });
 
   return {
     visualizationType: 'lnsMetric',
@@ -427,7 +439,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     references,
     state: {
       datasourceStates: layers,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization,
@@ -453,7 +465,8 @@ export function fromLensStateToAPI(
       layer,
       layerId ?? 'layer_0',
       config.state.adHocDataViews ?? {},
-      config.references
+      config.references,
+      config.state.internalReferences
     ),
   };
 

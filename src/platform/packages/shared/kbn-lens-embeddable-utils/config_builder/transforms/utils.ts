@@ -27,23 +27,26 @@ import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
+import { LENS_LAYER_SUFFIX, LENS_DEFAULT_TIME_FIELD, INDEX_PATTERN_ID } from './constants';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
   | PersistedIndexPatternLayer
   | TextBasedPersistedState['layers'][0];
 
+export function createDataViewReference(index: string, layerId: string): SavedObjectReference {
+  return {
+    type: INDEX_PATTERN_ID,
+    id: index,
+    name: `${LENS_LAYER_SUFFIX}${layerId}`,
+  };
+}
+
 export const getDefaultReferences = (
   index: string,
   dataLayerId: string
 ): SavedObjectReference[] => {
-  return [
-    {
-      type: 'index-pattern',
-      id: index,
-      name: `indexpattern-datasource-layer-${dataLayerId}`,
-    },
-  ];
+  return [createDataViewReference(index, dataLayerId)];
 };
 
 // Need to dance a bit to satisfy TypeScript
@@ -83,27 +86,24 @@ function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-const getAdhocDataView = (dataView: {
+function getAdHocDataViewSpec(dataView: {
   type: 'adHocDataView';
   index: string;
   timeFieldName: string;
-}) => {
-  const id = uuidv4();
+}) {
   return {
-    [id]: {
-      id,
-      title: dataView.index,
-      name: dataView.index,
-      timeFieldName: dataView.timeFieldName,
-      sourceFilters: [],
-      fieldFormats: {},
-      runtimeFieldMap: {},
-      fieldAttrs: {},
-      allowNoIndex: false,
-      allowHidden: false,
-    },
+    id: uuidv4({}),
+    title: dataView.index,
+    name: dataView.index,
+    timeFieldName: dataView.timeFieldName,
+    sourceFilters: [],
+    fieldFormats: {},
+    runtimeFieldMap: {},
+    fieldAttrs: {},
+    allowNoIndex: false,
+    allowHidden: false,
   };
-};
+}
 
 export const getAdhocDataviews = (
   dataviews: Record<
@@ -112,24 +112,35 @@ export const getAdhocDataviews = (
     | { type: 'adHocDataView'; index: string; timeFieldName: string }
   >
 ) => {
-  let adHocDataViews: Record<string, { id: string; timeFieldName: string }> = {};
-  [
-    ...new Set(
-      Object.values(dataviews).filter(
-        (
-          dataViewEntry
-        ): dataViewEntry is { type: 'adHocDataView'; index: string; timeFieldName: string } =>
-          dataViewEntry.type === 'adHocDataView'
-      )
-    ),
-  ].forEach((d) => {
-    adHocDataViews = {
-      ...adHocDataViews,
-      ...getAdhocDataView(d),
-    };
-  });
+  // filter out ad hoc dataViews only
+  const adHocDataViewsFiltered = Object.entries(dataviews).filter(
+    ([_layerId, dataViewEntry]) => dataViewEntry.type === 'adHocDataView'
+  ) as [string, { type: 'adHocDataView'; index: string; timeFieldName: string }][];
 
-  return adHocDataViews;
+  const internalReferencesMap = new Map<
+    { type: 'adHocDataView'; index: string; timeFieldName: string },
+    { layerIds: string[]; id: string }
+  >();
+
+  // dedupe and map multiple layer references to the same ad hoc dataview
+  for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
+    if (!internalReferencesMap.has(dataViewEntry)) {
+      internalReferencesMap.set(dataViewEntry, { layerIds: [], id: uuidv4({}) });
+    }
+    const internalRef = internalReferencesMap.get(dataViewEntry)!;
+    internalRef.layerIds.push(layerId);
+  }
+
+  const adHocDataViews: Record<string, DataViewSpec> = {};
+  const internalReferences: SavedObjectReference[] = [];
+  for (const [baseSpec, { layerIds, id }] of internalReferencesMap.entries()) {
+    adHocDataViews[id] = getAdHocDataViewSpec(baseSpec);
+    for (const layerId of layerIds) {
+      internalReferences.push(createDataViewReference(id, layerId));
+    }
+  }
+
+  return { adHocDataViews, internalReferences };
 };
 
 /**
@@ -142,8 +153,9 @@ export const buildDatasetState = (
   layer: FormBasedLayer | TextBasedLayer,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[] = [],
   layerId: string
-) => {
+): LensApiState['dataset'] => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
@@ -151,17 +163,19 @@ export const buildDatasetState = (
     };
   }
 
-  const reference = (references ?? []).find(
-    (ref) => ref.name === `indexpattern-datasource-layer-${layerId}`
+  const adhocReference = (adhocReferences ?? []).find(
+    (ref) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`
   );
+  if (adhocReference && adHocDataViews?.[adhocReference.id]) {
+    return {
+      type: 'index',
+      index: adHocDataViews[adhocReference.id].title!,
+      time_field: adHocDataViews[adhocReference.id].timeFieldName ?? LENS_DEFAULT_TIME_FIELD,
+    };
+  }
+
+  const reference = (references ?? []).find((ref) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`);
   if (reference) {
-    if (adHocDataViews?.[reference.id]) {
-      return {
-        type: 'index',
-        index: adHocDataViews[reference.id].title!,
-        time_field: adHocDataViews[reference.id].timeFieldName,
-      };
-    }
     return {
       type: 'dataView',
       id: reference.id,
@@ -199,7 +213,7 @@ export function isSingleLayer(
  * @returns
  */
 export function getDatasetIndex(dataset: LensApiState['dataset']) {
-  const timeFieldName: string = '@timestamp';
+  const timeFieldName: string = LENS_DEFAULT_TIME_FIELD;
   switch (dataset.type) {
     case 'index':
       return {
@@ -267,14 +281,15 @@ function buildDatasourceStatesLayer(
     return {
       index: index.index,
       query: { esql: ds.query },
-      timeField: '@timestamp',
+      timeField: LENS_DEFAULT_TIME_FIELD,
       columns,
     };
   }
 
   if (dataset.type === 'esql') {
     return ['textBased', buildESQLLayer(layer, dataset)];
-  } else if (dataset.type === 'table') {
+  }
+  if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer, dataset)];
   }
   return ['formBased', buildDataLayers(layer, i, index)];

@@ -265,7 +265,19 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(textBasedLayer, {}, [], 'layer_0');
+    const result = buildDatasetState(
+      textBasedLayer,
+      {},
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-index',
+          name: 'indexpattern-datasource-layer-layer_0',
+        },
+      ],
+      'layer_0'
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "query": "from my-index | limit 10",
@@ -274,18 +286,53 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds dataView dataset state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, {}, [], 'layer_0');
+    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
         "id": "my-dataview-id",
         "type": "dataView",
+      }
+    `);
+  });
+
+  test('builds index dataset state', () => {
+    const formBasedLayer = {
+      indexPatternId: 'my-adhoc-dataview-id',
+      columns: {},
+      columnOrder: [],
+    } as FormBasedLayer;
+
+    const result = buildDatasetState(
+      formBasedLayer,
+      {
+        'my-adhoc-dataview-id': {
+          id: 'test-id',
+          title: 'my-adhoc-dataview-id',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ],
+      'layer_1'
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "index": "my-adhoc-dataview-id",
+        "time_field": "@timestamp",
+        "type": "index",
       }
     `);
   });
