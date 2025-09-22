@@ -373,7 +373,7 @@
               "ReqOptions",
               ") => Promise<",
               "AxiosResponse",
-              "<T, any>>"
+              "<T, any, {}>>"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
@@ -1076,7 +1076,15 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
-          "; }>"
+          "; } & { samlAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
+          "; preCreateSecurityIndexes: void; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "deprecated": false,

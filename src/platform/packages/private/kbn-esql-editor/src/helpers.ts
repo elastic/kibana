@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-types';
-import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { ILicense } from '@kbn/licensing-types';
+import { monaco } from '@kbn/monaco';
 import type { MapCache } from 'lodash';
+import { useRef } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
-  EDITOR_MIN_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  EDITOR_MIN_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
 } from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
-
-export type MonacoMessage = monaco.editor.IMarkerData;
 
 interface IntegrationsResponse {
   items: Array<{
@@ -120,6 +119,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
           endColumn: startColumn + errorLength - 1,
           endLineNumber: startLineNumber,
           severity: monaco.MarkerSeverity.Warning,
+          code: 'warningFromES',
         };
       });
     }
@@ -133,6 +133,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       endColumn: 10,
       endLineNumber: 1,
       severity: monaco.MarkerSeverity.Warning,
+      code: 'unknown',
     },
   ];
 };
@@ -159,6 +160,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
+        code: 'errorFromES',
       };
     } else if (error.message.includes('expression was aborted')) {
       return {
@@ -170,6 +172,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: 10,
         endLineNumber: 1,
         severity: monaco.MarkerSeverity.Warning,
+        code: 'abortedRequest',
       };
     } else {
       // unknown error message
@@ -180,6 +183,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: 10,
         endLineNumber: 1,
         severity: monaco.MarkerSeverity.Error,
+        code: 'unknownError',
       };
     }
   });
@@ -378,9 +382,8 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   `;
 };
 
-export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    const code = typeof error.code === 'object' ? error.code.value : error.code;
-    return code !== 'unknownIndex' && code !== 'unknownColumn';
+    return !['unknownIndex', 'unknownColumn'].includes(error.code);
   });
 };
