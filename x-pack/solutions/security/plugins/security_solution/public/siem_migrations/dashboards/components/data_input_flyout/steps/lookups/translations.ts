@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOOKUPS_DATA_INPUT_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.title',
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.lookups.title',
   { defaultMessage: 'Upload lookups' }
 );
 export const LOOKUPS_DATA_INPUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.description',
+  'xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.lookups.description',
   {
-    defaultMessage: `We've also found lookups within your rules. To fully translate those rules containing these lookups, follow the step-by-step guide to export and upload them all.`,
+    defaultMessage: `We've also found lookups within your dashboards. To fully translate those dashboards containing these lookups, follow the step-by-step guide to export and upload them all.`,
   }
 );
