@@ -12,8 +12,6 @@ import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlSearchElasticsearchStartPageProvider } from './svl_search_elasticsearch_start_page';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
-import { SearchQueryRulesPageProvider } from '../../../functional_search/page_objects/search_query_rules_page';
-import { SearchSynonymsPageProvider } from '../../../functional_search/page_objects/search_synonyms_page';
 
 export const pageObjects = {
   ...svlPlatformPageObjects,
@@ -25,6 +23,4 @@ export const pageObjects = {
   svlSearchElasticsearchStartPage: SvlSearchElasticsearchStartPageProvider,
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
-  searchQueryRules: SearchQueryRulesPageProvider,
-  searchSynonyms: SearchSynonymsPageProvider,
 };
