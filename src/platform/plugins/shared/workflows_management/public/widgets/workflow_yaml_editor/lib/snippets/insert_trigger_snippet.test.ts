@@ -18,7 +18,10 @@ describe('insertTriggerSnippet', () => {
     const inputYaml = `triggers:\n  - type: alert`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateTriggerSnippet('manual', false, true);
+    const snippetText = generateTriggerSnippet('manual', {
+      full: false,
+      monacoSuggestionFormat: false,
+    });
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
@@ -43,7 +46,10 @@ describe('insertTriggerSnippet', () => {
     const inputYaml = `steps:\n  - type: http`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateTriggerSnippet('manual', false, true);
+    const snippetText = generateTriggerSnippet('manual', {
+      full: false,
+      monacoSuggestionFormat: false,
+    });
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
