@@ -15,7 +15,7 @@ import type { OnResourcesCreated } from '../../../../types';
 import { MacrosFileUpload } from './macros_file_upload';
 import * as i18n from './translations';
 
-export interface RulesFileUploadStepProps {
+export interface DashboardsFileUploadStepProps {
   status: EuiStepStatus;
   migrationStats: DashboardMigrationTaskStats;
   missingMacros: string[];
@@ -26,7 +26,7 @@ export const useMacrosFileUploadStep = ({
   migrationStats,
   missingMacros,
   onMacrosCreated,
-}: RulesFileUploadStepProps): EuiStepProps => {
+}: DashboardsFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
 
   const upsertMigrationResources = useCallback(
