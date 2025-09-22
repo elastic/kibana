@@ -28,7 +28,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
-import { EmptyState } from './empty_state/empty_state';
+import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -41,7 +41,7 @@ export const MetricsExperienceGrid = ({
   requestParams,
   services,
   input$: originalInput$,
-  isChartLoading,
+  isChartLoading: isDiscoverLoading,
   timeRange,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
@@ -62,7 +62,7 @@ export const MetricsExperienceGrid = ({
   });
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFieldsAPILoading } = useMetricFieldsQuery({
     index: indexPattern,
     from: timeRange?.from,
     to: timeRange?.to,
@@ -103,8 +103,8 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  if (isChartLoading) {
-    return <EmptyState isLoading={isChartLoading} />;
+  if (fields.length === 0) {
+    return <EmptyState isLoading={isFieldsAPILoading} />;
   }
 
   return (
@@ -133,7 +133,7 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {isFetching ? (
+              {isFieldsAPILoading ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
                 <EuiText size="s">
@@ -166,6 +166,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
+          {isDiscoverLoading && <ChartLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}
