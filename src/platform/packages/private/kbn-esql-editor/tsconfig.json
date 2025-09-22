@@ -32,7 +32,6 @@
     "@kbn/content-management-favorites-common",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/shared-ux-table-persist",
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/i18n-react",

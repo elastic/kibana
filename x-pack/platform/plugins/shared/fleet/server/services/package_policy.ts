@@ -58,7 +58,6 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -74,9 +73,10 @@ import type {
   RegistryDataStream,
   Installation,
   DeletePackagePoliciesResponse,
-  PolicySecretReference,
+  SecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
   CloudProvider,
   CloudConnectorResponse,
   CloudConnectorVars,
@@ -365,7 +365,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType,
     });
 
-    let secretReferences: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
 
@@ -515,8 +515,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       enrichedPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: packagePolicyId }
+      assetsMap
     );
 
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -728,13 +727,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
         inputs = pkgInfo
-          ? await _compilePackagePolicyInputs(
-              pkgInfo,
-              packagePolicy.vars || {},
-              inputs,
-              assetsMap,
-              { otelcolSuffixId: id }
-            )
+          ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
           : inputs;
 
         const elasticsearch = pkgInfo?.elasticsearch;
@@ -863,9 +856,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectsClient: soClient,
     });
     inputs = pkgInfo
-      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
-          otelcolSuffixId: id,
-        })
+      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
       : inputs;
 
     const elasticsearch = pkgInfo?.elasticsearch;
@@ -1189,7 +1180,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1210,8 +1206,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
-    let secretReferences: PolicySecretReference[] | undefined;
-    let secretsToDelete: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
+    let secretsToDelete: SecretReference[] | undefined;
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
@@ -1309,8 +1305,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       restOfPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: id }
+      assetsMap
     );
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1469,10 +1464,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           isEndpointPolicy &&
           ((assignedInOldPolicy && !assignedInNewPolicy) ||
             (!assignedInOldPolicy && assignedInNewPolicy));
-        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        });
+        if (options?.bumpRevision !== false) {
+          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          });
+        }
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
@@ -1565,7 +1562,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       new Map<string, PackageInfo>()
     );
 
-    const allSecretsToDelete: PolicySecretReference[] = [];
+    const allSecretsToDelete: SecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
       logger,
@@ -1667,7 +1664,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        let secretReferences: PolicySecretReference[] | undefined;
+        let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
         // id and version are not part of the saved object attributes
@@ -1711,8 +1708,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgInfo,
           restOfPackagePolicy.vars || {},
           inputs,
-          assetsMap,
-          { otelcolSuffixId: id }
+          assetsMap
         );
         const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -3124,23 +3120,15 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap,
-  opts?: { otelcolSuffixId?: string }
+  assetsMap: PackagePolicyAssetsMap
 ): PackagePolicyInput[] {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   return inputs.map((input) => {
-    if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      return {
-        ...input,
-        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
-        compiled_input: [],
-      };
-    }
+    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
+    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
     return {
       ...input,
-      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
-      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
+      compiled_input: compiledInput,
+      streams: compiledStreams,
     };
   });
 }
@@ -3198,11 +3186,10 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  assetsMap: PackagePolicyAssetsMap
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
   );
 }
 
@@ -3268,8 +3255,7 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  assetsMap: PackagePolicyAssetsMap
 ) {
   let stream = streamIn;
 
@@ -3327,9 +3313,7 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString(),
-    input.type,
-    otelcolSuffixId
+    pkgStreamTemplate.buffer.toString()
   );
 
   stream.compiled_stream = yaml;
@@ -3627,7 +3611,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 

@@ -31,6 +31,7 @@ import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -292,6 +293,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     http,
     navigateToUrl,
     openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   return (
@@ -322,9 +324,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 values={{
                   learnMoreLink: (
                     <EuiLink
-                      href="#"
+                      href={docLinks.tools}
                       target="_blank"
-                      external
                       aria-label={i18n.translate(
                         'xpack.onechat.tools.createToolDocumentationAriaLabel',
                         {
@@ -397,7 +398,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             {mode !== ToolFormMode.View && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
+                <EuiButtonEmpty
+                  aria-label={labels.tools.cancelButtonLabel}
+                  size="s"
+                  iconType="cross"
+                  color="text"
+                  onClick={handleCancel}
+                >
                   {labels.tools.cancelButtonLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
