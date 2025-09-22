@@ -9,7 +9,6 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
 import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
@@ -67,31 +66,6 @@ export class ServerlessSearchPlugin
 
     const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
       defaultMessage: 'Home',
-    });
-
-    core.application.register({
-      id: 'serverlessElasticsearch',
-      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
-        defaultMessage: 'Elasticsearch',
-      }),
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch/getting_started',
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/elasticsearch');
-        const [coreStart, services] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
-        coreStart.chrome.docTitle.change(homeTitle);
-        let user: AuthenticatedUser | undefined;
-        try {
-          const response = await coreStart.security.authc.getCurrentUser();
-          user = response;
-        } catch {
-          user = undefined;
-        }
-
-        return await renderApp(element, coreStart, { history, user, ...services }, queryClient);
-      },
     });
 
     core.application.register({
