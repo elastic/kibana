@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -110,6 +111,8 @@ export function VisualizeESQL({
 
   return (
     <div style={{ height: VISUALIZATION_HEIGHT }}>
+      <SaveVisualization lens={lens} lensInput={lensInput} />
+
       {isLoading ? (
         <EuiLoadingSpinner />
       ) : (
@@ -121,5 +124,42 @@ export function VisualizeESQL({
         />
       )}
     </div>
+  );
+}
+
+function SaveVisualization({
+  lens,
+  lensInput,
+}: {
+  lens: LensPublicStart;
+  lensInput: TypedLensByValueInput | undefined;
+}) {
+  const saveVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.save', {
+    defaultMessage: 'Save visualization',
+  });
+
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  return (
+    <>
+      <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          size="xs"
+          iconType="save"
+          onClick={() => setIsSaveModalOpen(true)}
+          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+          aria-label={saveVisualizationLabel}
+        />
+      </EuiToolTip>
+
+      {isSaveModalOpen ? (
+        <lens.SaveModalComponent
+          initialInput={lensInput}
+          onClose={() => {
+            setIsSaveModalOpen(() => false);
+          }}
+          isSaveable={false} // prevent saving ESQL visualizations to the library
+        />
+      ) : null}
+    </>
   );
 }
