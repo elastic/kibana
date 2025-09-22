@@ -52,7 +52,7 @@ export const DashboardMigrationsPanels = React.memo<DashboardMigrationsPanelsPro
       []
     );
     return (
-      <EuiFlexGroup data-test-subj="ruleMigrationPanelGroup" direction="column" gutterSize="m">
+      <EuiFlexGroup data-test-subj="dashboardMigrationPanelGroup" direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           {!isConnectorsCardComplete && (
             <>
