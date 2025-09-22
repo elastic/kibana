@@ -71,7 +71,7 @@ export function SuggestedStreamPanel({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h4>{`${definition.stream.name}.${partition.name}`}</h4>
+              <h4>{partition.name}</h4>
             </EuiTitle>
           </EuiFlexItem>
           {matchRate.loading ? (

@@ -31,7 +31,6 @@ import { RoutingStreamEntry } from './routing_stream_entry';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
-  useStreamsRoutingActorRef,
 } from './state_management/stream_routing_state_machine';
 import {
   useReviewSuggestionsForm,
@@ -60,7 +59,6 @@ function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestin
 
 export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
-  const streamsRoutingActorRef = useStreamsRoutingActorRef();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const aiFeatures = useAIFeatures();
   const { timeState } = useTimefilter();
@@ -77,9 +75,11 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     isEmpty: isEmptySuggestions,
     resetForm,
     suggestions,
-    removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,
+    previewSuggestion,
+    acceptSuggestion,
+    rejectSuggestion,
   } = useReviewSuggestionsForm();
 
   // Reset suggestions when navigating to a different stream
@@ -193,22 +193,14 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           <>
             {isEmptySuggestions ? (
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsTitle',
                   {
                     defaultMessage: 'No suggestions available',
                   }
                 )}
-                onDismiss={() => {
-                  resetForm();
-                  streamsRoutingActorRef.send({
-                    type: 'suggestion.preview',
-                    condition: { always: {} },
-                    name: '',
-                    index: 0,
-                    toggle: false,
-                  });
-                }}
+                onDismiss={resetForm}
               >
                 <EuiText size="s">
                   {i18n.translate(
@@ -269,6 +261,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             ) : (
               <FormProvider {...reviewSuggestionsForm}>
                 <EuiCallOut
+                  announceOnMount
                   title="Review partitioning suggestions"
                   onDismiss={resetForm}
                   className={css`
@@ -290,38 +283,9 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                       <SuggestedStreamPanel
                         definition={definition}
                         partition={partition}
-                        onPreview={(toggle: boolean) =>
-                          streamsRoutingActorRef.send({
-                            type: 'suggestion.preview',
-                            condition: partition.condition,
-                            name: partition.name,
-                            index,
-                            toggle,
-                          })
-                        }
-                        onDismiss={() => {
-                          removeSuggestion(index);
-                          streamsRoutingActorRef.send({
-                            type: 'suggestion.preview',
-                            condition: partition.condition,
-                            name: partition.name,
-                            index,
-                            toggle: false,
-                          });
-                        }}
-                        onSuccess={() => {
-                          streamsRoutingActorRef.send({
-                            type: 'suggestion.append',
-                            definitions: [
-                              {
-                                destination: `${definition.stream.name}.${partition.name}`,
-                                where: partition.condition,
-                                status: 'enabled',
-                              },
-                            ],
-                          });
-                          removeSuggestion(index);
-                        }}
+                        onPreview={(toggle) => previewSuggestion(index, toggle)}
+                        onDismiss={() => rejectSuggestion(index)}
+                        onSuccess={() => acceptSuggestion(index)}
                       />
                       <EuiSpacer size="s" />
                     </NestedView>

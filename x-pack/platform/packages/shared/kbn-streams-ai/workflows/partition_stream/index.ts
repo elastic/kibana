@@ -94,7 +94,7 @@ export async function partitionStream({
       ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
       .map(({ name, condition }) => {
         return {
-          name,
+          name: `${definition.name}.${name}`,
           condition: condition as Condition,
         };
       }) ?? [];

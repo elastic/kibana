@@ -40,8 +40,6 @@ export function CreateStreamConfirmationModal({
   const [forkStreamState, forkStream] = useForkStream(onSuccess);
   const modalTitleId = useGeneratedHtmlId();
 
-  const name = `${definition.stream.name}.${partition.name}`;
-
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
@@ -60,7 +58,7 @@ export function CreateStreamConfirmationModal({
             }
           )}
         >
-          <EuiFieldText value={name} readOnly />
+          <EuiFieldText value={partition.name} readOnly />
         </EuiFormRow>
         <EuiSpacer />
         <EuiTitle size="xxxs">
@@ -84,7 +82,7 @@ export function CreateStreamConfirmationModal({
           onClick={() =>
             forkStream({
               parentName: definition.stream.name,
-              name,
+              name: partition.name,
               condition: partition.condition,
             })
           }

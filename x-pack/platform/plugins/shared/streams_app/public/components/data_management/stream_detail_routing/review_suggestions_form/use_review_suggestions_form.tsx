@@ -9,6 +9,7 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { Condition } from '@kbn/streamlang';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useFetchSuggestedPartitions } from './use_fetch_suggested_partitions';
+import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
 
 export { FormProvider } from 'react-hook-form';
 
@@ -21,6 +22,7 @@ export interface ReviewSuggestionsInputs {
 }
 
 export function useReviewSuggestionsForm() {
+  const streamsRoutingActorRef = useStreamsRoutingActorRef();
   const [suggestedPartitionsState, fetchSuggestions] = useFetchSuggestedPartitions();
   const reviewSuggestionsForm = useForm<ReviewSuggestionsInputs>({
     defaultValues: { suggestions: [] },
@@ -30,7 +32,16 @@ export function useReviewSuggestionsForm() {
     name: 'suggestions',
   });
 
-  const resetForm = () => fetchSuggestions(null);
+  const resetForm = () => {
+    fetchSuggestions(null);
+    streamsRoutingActorRef.send({
+      type: 'suggestion.preview',
+      condition: { always: {} },
+      name: '',
+      index: 0,
+      toggle: false,
+    });
+  };
   const isEmpty = suggestedPartitionsState.value && suggestions.length === 0;
 
   // Update form values when suggestions are fetched or reset
@@ -57,5 +68,40 @@ export function useReviewSuggestionsForm() {
     isLoadingSuggestions: suggestedPartitionsState.loading,
     fetchSuggestions,
     resetForm,
+    previewSuggestion: (index: number, toggle?: boolean) => {
+      const partition = suggestions[index];
+      streamsRoutingActorRef.send({
+        type: 'suggestion.preview',
+        condition: partition.condition,
+        name: partition.name,
+        index,
+        toggle,
+      });
+    },
+    acceptSuggestion: (index: number) => {
+      const partition = suggestions[index];
+      streamsRoutingActorRef.send({
+        type: 'suggestion.append',
+        definitions: [
+          {
+            destination: partition.name,
+            where: partition.condition,
+            status: 'enabled',
+          },
+        ],
+      });
+      removeSuggestion(index);
+    },
+    rejectSuggestion: (index: number) => {
+      const partition = suggestions[index];
+      streamsRoutingActorRef.send({
+        type: 'suggestion.preview',
+        condition: partition.condition,
+        name: partition.name,
+        index,
+        toggle: false,
+      });
+      removeSuggestion(index);
+    },
   };
 }
