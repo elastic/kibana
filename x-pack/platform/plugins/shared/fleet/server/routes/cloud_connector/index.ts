@@ -53,7 +53,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
-          since: '1.0.0',
+          since: '9.2.0',
           stability: 'experimental',
         },
       },
@@ -98,7 +98,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
-          since: '1.0.0',
+          since: '9.2.0',
           stability: 'experimental',
         },
       },
@@ -143,7 +143,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
-          since: '1.0.0',
+          since: '9.2.0',
           stability: 'experimental',
         },
       },
@@ -188,7 +188,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
-          since: '1.0.0',
+          since: '9.2.0',
           stability: 'experimental',
         },
       },
@@ -233,7 +233,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
-          since: '1.0.0',
+          since: '9.2.0',
           stability: 'experimental',
         },
       },

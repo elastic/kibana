@@ -67,6 +67,7 @@ const AwsCredentialsFormAgentlessWrapper = ({
       newPolicy={newPackagePolicy}
     >
       <AwsCredentialsFormAgentless
+        cloud={cloud}
         updatePolicy={updatePolicy}
         setupTechnology={setupTechnology}
         hasInvalidRequiredVars={hasInvalidRequiredVars}
