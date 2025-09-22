@@ -280,7 +280,12 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
-                  <EuiCallOut typeof="info" size="m">
+                  <EuiCallOut
+                    announceOnMount
+                    typeof="info"
+                    size="m"
+                    data-test-subj="defaultRetentionCallout"
+                  >
                     <FormattedMessage
                       id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
                       defaultMessage="This will pull the default value set at the cluster level."
@@ -305,6 +310,9 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButtonEmpty
           data-test-subj="failureStoreModalCancelButton"
           onClick={() => onCloseModal()}
+          aria-label={i18n.translate('xpack.failureStoreModal.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
         >
           <FormattedMessage
             id="xpack.failureStoreModal.cancelButtonLabel"

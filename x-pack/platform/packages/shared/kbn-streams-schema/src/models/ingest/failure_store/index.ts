@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 export interface FailureStore {
   enabled: boolean;
   retentionPeriod: {
-    default: string;
+    default?: string;
     custom?: string;
   };
 }
@@ -35,3 +36,15 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
   count: z.number().min(0).optional(),
   creationDate: z.number().min(0).optional(),
 });
+
+export type DataStreamWithFailureStore = IndicesDataStream & {
+  failure_store: {
+    enabled?: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string;
+      effective_retention?: string;
+      retention_determined_by?: 'default_failures_retention' | 'data_stream_configuration';
+    };
+  };
+};
