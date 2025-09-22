@@ -56,7 +56,7 @@ export class StatsQuery extends BaseResolverQuery {
               ? [{ term: { 'agent.id': this.agentId } }]
               : []),
             {
-              terms: { 'event.kind': ['event', 'alert', 'signal'] },
+              term: { 'event.kind': 'event' },
             },
             {
               bool: {

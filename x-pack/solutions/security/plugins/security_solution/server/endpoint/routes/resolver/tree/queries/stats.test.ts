@@ -29,42 +29,6 @@ describe('StatsQuery', () => {
   });
 
   describe('query generation', () => {
-    it('should include signal in event.kind filter', async () => {
-      const query = new StatsQuery({
-        schema: baseSchema,
-        indexPatterns,
-        timeRange,
-        isInternalRequest: false,
-      });
-
-      // Mock the Elasticsearch response
-      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        aggregations: {
-          ids: {
-            buckets: [],
-          },
-        },
-      });
-
-      await query.search(client, ['test-node-id'], undefined, false);
-
-      // Verify that the search was called with the correct query including signal
-      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  terms: { 'event.kind': ['event', 'alert', 'signal'] },
-                },
-              ]),
-            },
-          },
-        }),
-        index: indexPatterns,
-      });
-    });
-
     it('should include agent.id filter when agentId is provided', async () => {
       const query = new StatsQuery({
         schema: baseSchema,

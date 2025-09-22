@@ -29,41 +29,6 @@ describe('LifecycleQuery', () => {
   });
 
   describe('query generation', () => {
-    it('should include signal in event.kind filter', async () => {
-      const query = new LifecycleQuery({
-        schema: baseSchema,
-        indexPatterns,
-        timeRange,
-        isInternalRequest: false,
-        shouldExcludeColdAndFrozenTiers: false,
-      });
-
-      // Mock the Elasticsearch response
-      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      });
-
-      await query.search(client, ['test-node-id']);
-
-      // Verify that the search was called with the correct query including signal
-      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  terms: { 'event.kind': ['event', 'alert', 'signal'] },
-                },
-              ]),
-            },
-          },
-        }),
-        index: indexPatterns,
-      });
-    });
-
     it('should include agent.id filter when agentId is provided', async () => {
       const query = new LifecycleQuery({
         schema: baseSchema,
@@ -125,7 +90,6 @@ describe('LifecycleQuery', () => {
       expect(filters).toEqual(
         expect.arrayContaining([
           { terms: { 'event.category': ['process'] } },
-          { terms: { 'event.kind': ['event', 'alert', 'signal'] } },
         ])
       );
     });

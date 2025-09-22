@@ -21,11 +21,6 @@ describe('DescendantsQuery', () => {
     agentId: 'agent.id',
   };
 
-  const schemaWithAncestry: ResolverSchema = {
-    ...baseSchema,
-    ancestry: 'process.Ext.ancestry',
-  };
-
   const schemaWithName: ResolverSchema = {
     ...baseSchema,
     name: 'process.name',
@@ -39,76 +34,6 @@ describe('DescendantsQuery', () => {
   });
 
   describe('query generation', () => {
-    it('should include signal in event.kind filter when not using ancestry', async () => {
-      const query = new DescendantsQuery({
-        schema: baseSchema,
-        indexPatterns,
-        timeRange,
-        isInternalRequest: false,
-        shouldExcludeColdAndFrozenTiers: false,
-      });
-
-      // Mock the Elasticsearch response
-      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      });
-
-      await query.search(client, ['test-node-id'], 100);
-
-      // Verify that the search was called with the correct query
-      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  terms: { 'event.kind': ['event', 'alert', 'signal'] },
-                },
-              ]),
-            },
-          },
-        }),
-        index: indexPatterns,
-      });
-    });
-
-    it('should include signal in event.kind filter when using ancestry', async () => {
-      const query = new DescendantsQuery({
-        schema: schemaWithAncestry,
-        indexPatterns,
-        timeRange,
-        isInternalRequest: false,
-        shouldExcludeColdAndFrozenTiers: false,
-      });
-
-      // Mock the Elasticsearch response
-      (client.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      });
-
-      await query.search(client, ['test-node-id'], 100);
-
-      // Verify that the search was called with the correct query including signal
-      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              filter: expect.arrayContaining([
-                {
-                  terms: { 'event.kind': ['event', 'alert', 'signal'] },
-                },
-              ]),
-            },
-          },
-        }),
-        index: indexPatterns,
-      });
-    });
-
     it('should include process.name field when name is in schema', async () => {
       const query = new DescendantsQuery({
         schema: schemaWithName,
@@ -197,7 +122,6 @@ describe('DescendantsQuery', () => {
       expect(filters).toEqual(
         expect.arrayContaining([
           { terms: { 'event.category': ['process'] } },
-          { terms: { 'event.kind': ['event', 'alert', 'signal'] } },
           { exists: { field: 'process.entity_id' } },
           { exists: { field: 'process.parent.entity_id' } },
           { bool: { must_not: { term: { 'process.entity_id': '' } } } },
