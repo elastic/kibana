@@ -6,6 +6,7 @@
  */
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 // Cloud Connector field labels
 const AWS_CLOUD_CONNECTOR_FIELD_LABELS = {
@@ -29,10 +30,10 @@ export interface AwsCloudConnectorOptions {
 
 // Define field sequence order
 const FIELD_SEQUENCE = [
-  'role_arn',
-  'aws.role_arn',
-  'aws.credentials.external_id',
-  'external_id',
+  CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN,
+  CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN,
+  CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID,
+  CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID,
 ] as const;
 
 export const getAwsCloudConnectorsCredentialsFormOptions = (
@@ -57,39 +58,39 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
   const availableFields = new Map<string, AwsCloudConnectorOptions>();
 
   if (inputVars.role_arn) {
-    availableFields.set('role_arn', {
-      id: 'role_arn',
+    availableFields.set(CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN, {
+      id: CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN,
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.role_arn,
       type: 'text' as const,
-      dataTestSubj: 'awsCloudConnectorRoleArnInput',
+      dataTestSubj: 'awsRoleArnInput',
       value: inputVars.role_arn.value,
     });
   }
 
-  if (inputVars['aws.role_arn']) {
-    availableFields.set('aws.role_arn', {
-      id: 'aws.role_arn',
+  if (inputVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+    availableFields.set(CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN, {
+      id: CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN,
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.role_arn,
       type: 'text' as const,
-      dataTestSubj: 'awsCloudConnectorRoleArnInput',
-      value: inputVars['aws.role_arn'].value,
+      dataTestSubj: 'awsRoleArnInput',
+      value: inputVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value,
     });
   }
 
   if (inputVars['aws.credentials.external_id']) {
     availableFields.set('aws.credentials.external_id', {
-      id: 'aws.credentials.external_id',
+      id: CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID,
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.external_id,
       type: 'password' as const,
       dataTestSubj: 'awsCloudConnectorExternalId',
       isSecret: true,
-      value: inputVars['aws.credentials.external_id'].value,
+      value: inputVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value,
     });
   }
 
   if (inputVars.external_id) {
-    availableFields.set('external_id', {
-      id: 'external_id',
+    availableFields.set(CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID, {
+      id: CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID,
       label: AWS_CLOUD_CONNECTOR_FIELD_LABELS.external_id,
       type: 'password' as const,
       dataTestSubj: 'awsCloudConnectorExternalId',

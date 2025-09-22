@@ -490,7 +490,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'test-get-by-id-connector');
+        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/get-by-id-role');
         expect(body).to.have.property('cloudProvider', 'aws');
         expect(body).to.have.property('namespace', '*');
         expect(body).to.have.property('packagePolicyCount', 1);
