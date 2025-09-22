@@ -65,8 +65,6 @@ describe('HeadersField', () => {
     expect(await screen.findAllByTestId('webhookHeadersKeyInput')).toHaveLength(1);
   });
 
-  // it renders config/secret as options when clicking on the type selector btn
-
   it('renders config/secret options when clicking on the select type button', async () => {
     render(
       <AuthFormTestProvider onSubmit={onSubmit}>

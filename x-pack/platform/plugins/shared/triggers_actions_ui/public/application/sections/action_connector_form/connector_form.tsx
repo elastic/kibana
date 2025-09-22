@@ -176,7 +176,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   const isFormModified = useFormIsModified({
     form,
-    discard: ['__internal__'],
+    discard: ['__internal__', '__internal__.headers__array__'],
   });
 
   useEffect(() => {

@@ -90,12 +90,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
 
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
 
-    let mergedHeaders: Array<InternalHeader>;
-    if (!hasHeaders) {
-      mergedHeaders = configHeaders;
-    } else {
-      mergedHeaders = configHeaders?.length ? configHeaders.concat(secretHeaders) : secretHeaders;
-    }
+    const mergedHeaders = [...configHeaders, ...secretHeaders];
 
     if (!isEqual(currentHeaders, mergedHeaders)) {
       updateFieldValues(
