@@ -14,7 +14,8 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+// import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+import { PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { dashboardAPIGetResultSchema } from '../content_management/v1';
 import {
@@ -25,6 +26,8 @@ import {
   dashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
 
+const INTERNAL_API_VERSION = '2023-10-31';
+
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
   contentManagement: ContentManagementServerSetup;
@@ -34,7 +37,7 @@ interface RegisterAPIRoutesArgs {
 
 const commonRouteConfig = {
   // This route is in development and not yet intended for public use.
-  access: 'internal',
+  access: 'public',
   /**
    * `enableQueryVersion` is a temporary solution for testing internal endpoints.
    * Requests to these internal endpoints from Kibana Dev Tools or external clients
