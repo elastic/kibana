@@ -20,6 +20,10 @@ export class StreamsApp {
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
+  async gotoStreamMainPage() {
+    await this.page.gotoApp(`streams`);
+  }
+
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
   }
@@ -46,6 +50,55 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  // Streams table utility methods
+  async expectStreamsTableVisible() {
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should not be present in the table`
+      ).not.toBeVisible();
+    }
+  }
+
+  async expandAllStreams() {
+    const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
+    await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();
+    await expandAllButton.click();
+  }
+
+  async collapseAllStreams() {
+    const collapseAllButton = this.page.getByTestId('streamsCollapseAllButton');
+    await expect(collapseAllButton, 'Collapse all button should be visible').toBeVisible();
+    await collapseAllButton.click();
+  }
+
+  async collapseExpandStream(streamName: string, collapse: boolean) {
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
   }
 
   // Routing-specific utility methods
@@ -222,7 +275,10 @@ export class StreamsApp {
    * Utility for data processing
    */
   async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+      .click();
   }
 
   async clickSaveProcessor() {
@@ -254,7 +310,14 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    return targetProcessor.getByRole('button', { name: 'Edit' });
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorContextMenuButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Step context menu' });
   }
 
   async confirmDiscardInModal() {
@@ -268,7 +331,9 @@ export class StreamsApp {
   }
 
   async fillFieldInput(value: string) {
-    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+    const comboBoxInput = this.page.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
+    await comboBoxInput.click();
+    await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
   async fillGrokPatternInput(value: string) {
@@ -294,7 +359,7 @@ export class StreamsApp {
 
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
-    await this.page.getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
   async saveProcessorsListChanges() {
@@ -303,14 +368,14 @@ export class StreamsApp {
 
   async getProcessorsListItems() {
     try {
-      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
         timeout: 15_000,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+    return this.page.getByTestId('streamsAppProcessorBlock').all();
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
