@@ -26,7 +26,7 @@ export const captureScreenshotFromUrl = async (
   Object.assign(iframe.style, {
     position: 'absolute',
     width: '1200px',
-    height: '600px',
+    height: '800px',
     pointerEvents: 'none',
     visibility: 'hidden',
   });
