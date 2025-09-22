@@ -250,6 +250,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
       closePopover={closePopover}
       button={anchorElement}
       panelPaddingSize="none"
+      repositionOnScroll
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>
