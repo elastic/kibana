@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { browserFieldsManager } from './security_browser_fields_manager';
+import { buildBrowserFields } from './build_browser_fields';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
@@ -35,8 +35,8 @@ const createDataView = (fields: Array<Partial<FieldSpec>>, id = 'test-id'): Data
 describe('browserFieldsManager', () => {
   it('returns empty browserFields for empty array', () => {
     const dataView = createDataView([]);
-    const result = browserFieldsManager.getBrowserFields(dataView);
-    expect(result.browserFields).toEqual({});
+    const result = buildBrowserFields(dataView.fields);
+    expect(result).toEqual({});
   });
 
   it('groups fields by category', () => {
@@ -48,17 +48,17 @@ describe('browserFieldsManager', () => {
       { name: 'event.action' },
       { name: 'basefield' },
     ]);
-    const result = browserFieldsManager.getBrowserFields(dataView);
-    expect(result.browserFields).toHaveProperty('host');
-    expect(result.browserFields).toHaveProperty('user');
-    expect(result.browserFields).toHaveProperty('event');
-    expect(result.browserFields).toHaveProperty('base');
-    expect(result.browserFields.host.fields).toHaveProperty(['host.name']);
-    expect(result.browserFields.host.fields).toHaveProperty(['host.ip']);
-    expect(result.browserFields.user.fields).toHaveProperty(['user.name']);
-    expect(result.browserFields.event.fields).toHaveProperty(['event.category']);
-    expect(result.browserFields.event.fields).toHaveProperty(['event.action']);
-    expect(result.browserFields.base.fields).toHaveProperty(['basefield']);
+    const result = buildBrowserFields(dataView.fields);
+    expect(result).toHaveProperty('host');
+    expect(result).toHaveProperty('user');
+    expect(result).toHaveProperty('event');
+    expect(result).toHaveProperty('base');
+    expect(result.host.fields).toHaveProperty(['host.name']);
+    expect(result.host.fields).toHaveProperty(['host.ip']);
+    expect(result.user.fields).toHaveProperty(['user.name']);
+    expect(result.event.fields).toHaveProperty(['event.category']);
+    expect(result.event.fields).toHaveProperty(['event.action']);
+    expect(result.base.fields).toHaveProperty(['basefield']);
   });
 
   it('handles fields with missing type gracefully', () => {
@@ -66,8 +66,8 @@ describe('browserFieldsManager', () => {
     // Remove type from the DataViewField
     // @ts-expect-error
     dataView.getFieldByName('host.name').spec.type = undefined;
-    const result = browserFieldsManager.getBrowserFields(dataView);
-    expect(result.browserFields.host.fields).toHaveProperty(['host.name']);
-    expect(result.browserFields.host.fields['host.name'].type).toBeUndefined();
+    const result = buildBrowserFields(dataView.fields);
+    expect(result.host.fields).toHaveProperty(['host.name']);
+    expect(result.host.fields['host.name'].type).toBeUndefined();
   });
 });

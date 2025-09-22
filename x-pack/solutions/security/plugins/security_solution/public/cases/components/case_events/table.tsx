@@ -29,7 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { RowAction } from '../../../common/components/control_columns/row_action';
-import { buildBrowserFields } from '../../../data_view_manager/utils/security_browser_fields_manager';
+import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
@@ -60,7 +60,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
   const dispatch = useDispatch();
 
   const browserFields = useMemo(() => {
-    return buildBrowserFields(dataView.fields).browserFields;
+    return buildBrowserFields(dataView.fields);
   }, [dataView.fields]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
