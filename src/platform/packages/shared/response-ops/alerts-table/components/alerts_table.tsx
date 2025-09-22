@@ -219,6 +219,8 @@ const AlertsTableContent = typedForwardRef(
       notifications,
     });
 
+    // Keeping a stable reference to the default columns to support the reset functionality and
+    // to apply default properties to the configured columns
     const [defaultColumns] = useState(columnsProp ?? defaultAlertsTableColumns);
     const [columns, setColumns] = useControllableState({
       prop: columnsProp,
@@ -475,7 +477,8 @@ const AlertsTableContent = typedForwardRef(
             isLoadingAlerts ||
             casesQuery.isFetching ||
             maintenanceWindowsQuery.isFetching ||
-            mutedAlertsQuery.isFetching,
+            mutedAlertsQuery.isFetching ||
+            fieldsQuery.isFetching,
           isLoadingAlerts,
           alerts,
           alertsCount,
@@ -517,6 +520,7 @@ const AlertsTableContent = typedForwardRef(
         maintenanceWindowsQuery.data,
         mutedAlertsQuery.isFetching,
         mutedAlertsQuery.data,
+        fieldsQuery.isFetching,
         alerts,
         alertsCount,
         ecsAlertsData,
