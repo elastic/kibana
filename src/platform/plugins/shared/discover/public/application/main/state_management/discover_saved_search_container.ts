@@ -10,6 +10,8 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
@@ -111,6 +113,11 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
+  /**
+   * Updates the current value of controlState in saved search
+   * @param params
+   */
+  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -183,6 +190,7 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
+      initialInternalState: undefined,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
       services,
@@ -228,6 +236,22 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
+  const updateControlState = ({
+    nextControlState,
+  }: {
+    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
+  }) => {
+    const previousSavedSearch = getState();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      controlGroupJson: JSON.stringify(nextControlState),
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateControlState done', nextSavedSearch);
+  };
+
   return {
     initUrlTracking,
     getCurrent$,
@@ -241,6 +265,7 @@ export function getSavedSearchContainer({
     update,
     updateTimeRange,
     updateVisContext,
+    updateControlState,
   };
 }
 

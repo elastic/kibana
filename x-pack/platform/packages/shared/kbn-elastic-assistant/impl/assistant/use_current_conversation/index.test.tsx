@@ -316,7 +316,7 @@ describe('useCurrentConversation', () => {
       }),
     });
 
-    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(mockData.welcome_id.id, true);
+    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(mockData.welcome_id.id, false);
 
     await act(async () => {
       await result.current.handleOnConversationSelected({
