@@ -91,23 +91,7 @@ type UseCasesAddToExistingCaseModal = (
   }: {
     getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
-};
-
-type UseRemoveAlertFromCaseModal = ({
-  alertId,
-  caseId,
-  onClose,
-  onSuccess,
-}: {
-  alertId: string[];
-  caseId: string;
-  onClose: () => void;
-  onSuccess: () => void;
-}) => {
-  open: () => void;
   close: () => void;
-  onSuccess: () => void;
-  onClose: () => void;
 };
 
 export interface Ecs {
@@ -133,7 +117,6 @@ export interface CasesService {
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
-    useRemoveAlertFromCaseModal: UseRemoveAlertFromCaseModal;
   };
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
