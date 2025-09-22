@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ExecuteToolParams } from '@kbn/onechat-browser';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -58,11 +59,12 @@ export class ToolsService {
     });
   }
 
-  async execute(toolId: string, toolParams: Record<string, unknown>) {
+  async execute({ toolId, toolParams, connectorId }: ExecuteToolParams) {
     return await this.http.post<ExecuteToolResponse>(`${publicApiPath}/tools/_execute`, {
       body: JSON.stringify({
         tool_id: toolId,
         tool_params: toolParams,
+        connector_id: connectorId,
       }),
     });
   }
