@@ -589,6 +589,13 @@ export const reindexServiceFactory = (
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
 
+      const newIndexExists = await esClient.indices.exists({ index: newIndexName });
+      if (newIndexExists) {
+        throw error.indexAlreadyExists(
+          `The new index ${newIndexName} already exists. Please try again.`
+        );
+      }
+
       const existingReindexOps = await actions.findReindexOperations(indexName);
       if (existingReindexOps.total !== 0) {
         const existingOp = existingReindexOps.saved_objects[0];
