@@ -19,9 +19,10 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/std",
-    "@kbn/safer-lodash-set",
     "@kbn/serverless",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/task-manager-plugin",
+    "@kbn/event-log-types",
   ],
   "exclude": [
     "target/**/*",

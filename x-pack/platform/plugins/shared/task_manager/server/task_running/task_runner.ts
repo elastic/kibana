@@ -27,6 +27,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { IEventLoggerBase, IEvent } from '@kbn/event-log-types';
+
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -69,6 +71,7 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -127,6 +130,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  eventLogger: IEventLoggerBase;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -181,6 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private eventLogger: IEventLoggerBase;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -207,6 +212,7 @@ export class TaskManagerRunner implements TaskRunner {
     config,
     allowReadingInvalidState,
     strategy,
+    eventLogger,
     getPollInterval,
   }: Opts) {
     this.basePathService = basePathService;
@@ -229,6 +235,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.eventLogger = eventLogger;
   }
 
   /**
@@ -388,6 +395,27 @@ export class TaskManagerRunner implements TaskRunner {
       )
     );
 
+    const kibanaProperties = {
+      task: {
+        id: this.instance.task.id,
+      },
+    };
+    const startEvent: IEvent = {
+      event: {
+        action: EVENT_LOG_ACTIONS.executeStart,
+      },
+      kibana: kibanaProperties,
+      tags: [this.instance.task.id, this.instance.task.taskType],
+    };
+    const doneEvent: IEvent = {
+      event: {
+        action: EVENT_LOG_ACTIONS.execute,
+        outcome: 'unknown',
+      },
+      kibana: kibanaProperties,
+      tags: [this.instance.task.id, this.instance.task.taskType],
+    };
+
     try {
       const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
       const fakeRequest = this.getFakeKibanaRequest(
@@ -416,9 +444,18 @@ export class TaskManagerRunner implements TaskRunner {
         description: 'run task',
       };
 
+      this.eventLogger.logEvent(startEvent);
+      this.eventLogger.startTiming(doneEvent);
+
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'success',
+      };
+      this.eventLogger.logEvent(doneEvent);
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -427,6 +464,17 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'failure',
+      };
+      doneEvent.error = {
+        ...doneEvent.error,
+        message: `${err.message}`,
+      };
+      this.eventLogger.logEvent(doneEvent);
+
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
       this.logger.error(`Task ${this} failed: ${err}`, {
         tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],

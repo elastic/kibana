@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 import type {
   IEventLogConfig,
@@ -39,6 +40,7 @@ const ACTIONS = {
 
 interface PluginSetupDeps {
   serverless?: ServerlessPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStartDeps {
@@ -91,6 +93,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
+    plugins.taskManager.setEventLogService(this.eventLogService);
     return this.eventLogService;
   }
 

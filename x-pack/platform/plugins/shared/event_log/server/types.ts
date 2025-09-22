@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { IEvent, IEventLogServiceBase, IEventLoggerBase } from '@kbn/event-log-types';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 
-export type { IEvent, IValidatedEvent } from '../generated/schemas';
+export type { IEvent, IValidatedEvent } from '@kbn/event-log-types';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IEvent } from '../generated/schemas';
 import type {
   AggregateOptionsType,
   FindOptionsType,
@@ -44,16 +45,9 @@ export const ConfigSchema = schema.object({
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 
 // the object exposed by plugin.setup()
-export interface IEventLogService {
-  isLoggingEntries(): boolean;
-  isIndexingEntries(): boolean;
-  registerProviderActions(provider: string, actions: string[]): void;
-  isProviderActionRegistered(provider: string, action: string): boolean;
-  getProviderActions(): Map<string, Set<string>>;
-  registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
+export interface IEventLogService extends IEventLogServiceBase {
   getLogger(properties: IEvent): IEventLogger;
-  getIndexPattern(): string;
-  isEsContextReady(): Promise<boolean>;
+  registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
 }
 
 export interface IEventLogClientService {
@@ -100,10 +94,7 @@ export interface IEventLogClient {
   refreshIndex(): Promise<void>;
 }
 
-export interface IEventLogger {
-  logEvent(properties: IEvent, id?: string): void;
-  startTiming(event: IEvent, startTime?: Date): void;
-  stopTiming(event: IEvent): void;
+export interface IEventLogger extends IEventLoggerBase {
   updateEvents(
     events: Array<{ internalFields: InternalFields; event: IEvent }>
   ): Promise<BulkResponse>;

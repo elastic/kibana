@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/event-log-types",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

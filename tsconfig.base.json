@@ -1012,6 +1012,8 @@
       "@kbn/event-log-fixture-plugin/*": ["x-pack/platform/test/plugin_api_integration/plugins/event_log/*"],
       "@kbn/event-log-plugin": ["x-pack/platform/plugins/shared/event_log"],
       "@kbn/event-log-plugin/*": ["x-pack/platform/plugins/shared/event_log/*"],
+      "@kbn/event-log-types": ["x-pack/platform/packages/shared/kbn-event-log-types"],
+      "@kbn/event-log-types/*": ["x-pack/platform/packages/shared/kbn-event-log-types/*"],
       "@kbn/event-stacktrace": ["x-pack/platform/packages/shared/kbn-event-stacktrace"],
       "@kbn/event-stacktrace/*": ["x-pack/platform/packages/shared/kbn-event-stacktrace/*"],
       "@kbn/expandable-flyout": ["x-pack/solutions/security/packages/expandable-flyout"],
