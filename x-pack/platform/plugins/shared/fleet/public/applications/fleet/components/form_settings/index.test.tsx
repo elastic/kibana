@@ -171,9 +171,7 @@ describe('ConfiguredSettings', () => {
     });
 
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(
-      result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d')
-    ).not.toBeNull();
+    expect(result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h')).not.toBeNull();
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 

@@ -78,6 +78,7 @@ export {
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,
@@ -100,6 +101,8 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,

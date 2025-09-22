@@ -7,13 +7,14 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
@@ -28,6 +29,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
   const { share, uiSettings } = useKibana().services;
   const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
+  const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
   const onInstallButtonClick = useCallback(() => {
     usageTracker.click(clickEvent);
@@ -63,13 +65,21 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     }
   }, [share, indexName]);
 
+  const navigateToAgentBuilder = useCallback(async () => {
+    if (isAgentBuilderAvailable) {
+      const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
+      await agentBuilderLocator?.navigate({});
+    }
+  }, [share, isAgentBuilderAvailable]);
+
   if (isStatusLoading) {
     return null;
   }
 
   if (isInstalled && indexName) {
     const button = (
-      <EuiButtonEmpty
+      <EuiButton
+        color="text"
         data-test-subj="viewDataBtn"
         size="s"
         iconType="arrowDown"
@@ -77,7 +87,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
         onClick={onViewButtonClick}
       >
         <FormattedMessage id="xpack.searchHomepage.sampleData.view" defaultMessage="View Data" />
-      </EuiButtonEmpty>
+      </EuiButton>
     );
 
     return (
@@ -92,6 +102,21 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
           <EuiContextMenuPanel
             css={{ minWidth: 250 }}
             items={[
+              ...(isAgentBuilderAvailable
+                ? [
+                    <EuiContextMenuItem
+                      key="agentBuilder"
+                      onClick={navigateToAgentBuilder}
+                      icon="comment"
+                      data-test-subj="agentBuilderMenuItem"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchHomepage.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                        defaultMessage="Agents"
+                      />
+                    </EuiContextMenuItem>,
+                  ]
+                : []),
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToDiscover"
@@ -132,8 +157,8 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
   }
 
   return (
-    <EuiButtonEmpty
-      color="primary"
+    <EuiButton
+      color="text"
       iconSide="left"
       iconType="download"
       size="s"
@@ -143,8 +168,8 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     >
       <FormattedMessage
         id="xpack.searchHomepage.sampleData.btn"
-        defaultMessage="Install a sample dataset"
+        defaultMessage="Sample knowledge base"
       />
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };

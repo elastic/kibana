@@ -143,10 +143,10 @@ describe('buildDatasourceStates', () => {
           query: 'from test | limit 10',
         },
         metric: {
+          operation: 'value',
           label: 'test',
           column: 'test',
           fit: false,
-          show_array_values: false,
           alignments: { labels: 'left', value: 'left' },
         },
         sampling: 1,
@@ -161,12 +161,6 @@ describe('buildDatasourceStates', () => {
         "textBased": Object {
           "layers": Object {
             "layer_0": Object {
-              "allColumns": Array [
-                Object {
-                  "columnId": "test",
-                  "fieldName": "test",
-                },
-              ],
               "columns": Array [
                 Object {
                   "columnId": "test",
@@ -263,13 +257,10 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(textBasedLayer);
+    const result = buildDatasetState(textBasedLayer, {}, [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-index",
-        "query": Object {
-          "esql": "from my-index | limit 10",
-        },
+        "query": "from my-index | limit 10",
         "type": "esql",
       }
     `);
@@ -282,12 +273,11 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer);
+    const result = buildDatasetState(formBasedLayer, {}, [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-dataview-id",
-        "time_field": "@timestamp",
-        "type": "index",
+        "name": "my-dataview-id",
+        "type": "dataView",
       }
     `);
   });

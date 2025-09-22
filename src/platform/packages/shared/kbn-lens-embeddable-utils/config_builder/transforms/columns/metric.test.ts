@@ -106,7 +106,7 @@ describe('Metric Transforms', () => {
 
         const [result] = fromMetricAPItoLensState(input);
         expect(result.operationType).toBe('unique_count');
-        expect(result.sourceField).toBe('user_id');
+        expect(result).toHaveProperty('sourceField', 'user_id');
       });
 
       it('should transform basic metric operations', () => {
@@ -121,7 +121,7 @@ describe('Metric Transforms', () => {
           const result = fromMetricAPItoLensState(input);
           expect(result).toHaveLength(1);
           expect(result[0].operationType).toBe(op);
-          expect(result[0].sourceField).toBe('value');
+          expect(result[0]).toHaveProperty('sourceField', 'value');
         });
       });
     });

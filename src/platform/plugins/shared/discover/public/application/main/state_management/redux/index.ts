@@ -21,6 +21,7 @@ import {
   updateTabs,
   disconnectTab,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
@@ -56,6 +57,7 @@ export const internalStateActions = {
   initializeSingleTab,
   syncLocallyPersistedTabState,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
@@ -94,7 +96,13 @@ export {
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
 
 export {
   fromSavedObjectTabToTabState,
