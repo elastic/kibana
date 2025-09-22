@@ -59,8 +59,8 @@ export const ConnectorSelector = <T extends { value: string } = { value: string 
   } = props;
 
   // Determine controlled vs uncontrolled
-  const controlledValue = props.value;
-  const isControlled = controlledValue !== undefined;
+  const isControlled = Object.prototype.hasOwnProperty.call(props, 'value');
+  const controlledValue = props.value ?? undefined;
 
   // Internal value only used when uncontrolled
   const [uncontrolledValue, setUncontrolledValue] = useState<string | undefined>(() => {

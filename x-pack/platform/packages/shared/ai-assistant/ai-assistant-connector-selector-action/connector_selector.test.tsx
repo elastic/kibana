@@ -221,6 +221,41 @@ describe('ConnectorSelector', () => {
         expect.objectContaining({ label: 'Connector 1', value: '1' })
       );
     });
+
+    it('renders panel with correct selection change when value is undefined initially', async () => {
+      const ControlledWrapper = (props: ConnectorSelectorProps) => {
+        const [value, setValue] = React.useState<string>(String(props.value));
+        const handleValueChange = (val: string, option: EuiSelectableOption) => {
+          setValue(String(val));
+          onValueChange(val, option);
+        };
+        return <ConnectorSelector {...props} value={value} onValueChange={handleValueChange} />;
+      };
+
+      render(<ControlledWrapper {...defaultProps} value={undefined} />, { wrapper: EuiThemeProvider });
+
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+
+      act(() => screen.queryByTestId('connector1')?.click());
+
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+
+      expect(onValueChange).toHaveBeenCalledTimes(1);
+      expect(onValueChange).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({ label: 'Connector 1', value: '1' })
+      );
+    });
   });
 
   describe('Uncontrolled', () => {
