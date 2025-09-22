@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -24,8 +25,6 @@ import type { AccessControlSelectorOption } from './components/access_control_in
 import { AccessControlIndexSelector } from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
-
-import './index_mappings.scss';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
@@ -57,7 +56,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {shouldShowAccessControlSwitch && (
-              <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 100%;
+                `}
+              >
                 <AccessControlIndexSelector
                   fullWidth
                   onChange={setSelectedIndexType}
