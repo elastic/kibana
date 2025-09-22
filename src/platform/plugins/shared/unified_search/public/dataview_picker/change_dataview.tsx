@@ -45,6 +45,7 @@ const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => 
 
 const shrinkableContainerCss = css`
   min-width: 0;
+  flex-direction: row;
 `;
 
 export function ChangeDataView({
@@ -131,6 +132,7 @@ export function ChangeDataView({
         title={trigger.label}
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
+        size="s"
         {...rest}
       >
         <>
@@ -142,6 +144,7 @@ export function ChangeDataView({
               css={css`
                 margin-right: ${euiTheme.size.s};
               `}
+              size="s"
             />
           )}
           {trigger.label}
@@ -327,16 +330,20 @@ export function ChangeDataView({
             <EuiFlexItem
               grow={false}
               css={css`
-                padding: 11px;
+                padding: 0 ${euiTheme.size.s};
+                height: 100%;
                 border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
                 background-color: ${euiTheme.colors.lightestShade};
                 border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
                 border-right: 0;
+                justify-content: center;
               `}
             >
-              {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                defaultMessage: 'Data view',
-              })}
+              <EuiText size="s">
+                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                  defaultMessage: 'Data view',
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true} css={shrinkableContainerCss}>
               <EuiPopover
@@ -351,6 +358,7 @@ export function ChangeDataView({
                 initialFocus={`[id="${searchListInputId}"]`}
                 display="block"
                 buffer={8}
+                css={{ inlineSize: '100%' }}
               >
                 <div css={styles.popoverContent}>
                   <EuiContextMenuPanel size="s" items={items} />
