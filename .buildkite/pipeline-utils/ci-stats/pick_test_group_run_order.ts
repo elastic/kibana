@@ -130,10 +130,13 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     if (
-      (mappedSolutions && !mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`))) ||
-      // When applying the solution filter, still allow platform tests
-      manifestRelPath.includes('ftr_platform_') ||
-      manifestRelPath.includes('ftr_base_')
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
     ) {
       continue;
     }
