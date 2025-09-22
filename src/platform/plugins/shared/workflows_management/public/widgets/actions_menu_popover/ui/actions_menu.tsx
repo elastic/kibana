@@ -227,14 +227,15 @@ function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[]
   return [triggersGroup, elasticSearchGroup, kibanaGroup, externalGroup, flowControlGroup];
 }
 
+function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {
+  return options.map((option) => [option, ...flattenOptions(option.options || [])]).flat();
+}
+
 export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
-  const flatOptions = useMemo(
-    () => defaultOptions.map((option) => [option, ...(option.options || [])]).flat(),
-    [defaultOptions]
-  );
+  const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
@@ -385,6 +386,7 @@ const componentStyles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   }),
   groupIconOuter: ({ euiTheme }: UseEuiTheme) =>
     css({
