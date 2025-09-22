@@ -30,16 +30,10 @@ import { useDataCascadeState, useDataCascadeActions } from '../../../../store_pr
 const MAX_SELECTABLE_COLUMNS = 3;
 
 export interface SelectionDropdownProps {
-  availableColumns: string[];
-  currentSelectedColumns: string[];
   onSelectionChange: (groupByColumn: string[]) => void;
 }
 
-export function SelectionDropdown({
-  onSelectionChange,
-  availableColumns,
-  currentSelectedColumns,
-}: SelectionDropdownProps) {
+export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps) {
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
   const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
@@ -74,7 +68,12 @@ export function SelectionDropdown({
   );
 
   const button = (
-    <EuiButtonEmpty iconType="inspect" onClick={onButtonClick} flush="right">
+    <EuiButtonEmpty
+      aria-label="Group by columns"
+      iconType="inspect"
+      onClick={onButtonClick}
+      flush="right"
+    >
       {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.selection_message', {
         defaultMessage:
           'Group By: {groupedColumnsCount, plural, one {# group selected} other {# groups selected}}',
@@ -161,6 +160,10 @@ export function SelectionDropdown({
                             closePopover={() => setAvailableColumnsIsOpen(false)}
                             button={
                               <EuiButtonEmpty
+                                aria-label={i18n.translate(
+                                  'sharedUXPackages.data_cascade.selection_dropdown.open_popover',
+                                  { defaultMessage: 'Open available columns popover' }
+                                )}
                                 size="xs"
                                 flush="left"
                                 iconType="arrowDown"
@@ -192,6 +195,10 @@ export function SelectionDropdown({
                         {Boolean(currentGroupByColumns.length) && (
                           <EuiFlexItem grow={false}>
                             <EuiButtonEmpty
+                              aria-label={i18n.translate(
+                                'sharedUXPackages.data_cascade.selection_dropdown.clear_selection_btn_text',
+                                { defaultMessage: 'Clear selection' }
+                              )}
                               onClick={clearSelectedGroupByColumn}
                               size="xs"
                               flush="right"

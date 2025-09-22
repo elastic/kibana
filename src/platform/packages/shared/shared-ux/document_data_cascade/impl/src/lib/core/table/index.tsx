@@ -80,6 +80,12 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
+    onRowSelectionChange: (updater) => {
+      const proposedSelectedState =
+        typeof updater === 'function' ? updater(state.table.rowSelection) : updater;
+
+      actions.setSelectedRows(proposedSelectedState);
+    },
     onExpandedChange: (updater) => {
       const proposedExpandedState =
         typeof updater === 'function' ? updater(state.table.expanded) : updater;
@@ -148,6 +154,16 @@ interface TableRowAdapterArgs<G extends GroupNode> {
   rowInstance: Row<G>;
 }
 
+function getAdaptedTable<G extends GroupNode>({ tableInstance }: { tableInstance: Table<G> }) {
+  return {
+    selectedRows: tableInstance.getSelectedRowModel,
+  };
+}
+
+export function useAdaptedTable<G extends GroupNode>(tableInstance: Table<G>) {
+  return useMemo(() => getAdaptedTable<G>({ tableInstance }), [tableInstance]);
+}
+
 export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
   rowInstance,
 }: TableRowAdapterArgs<G>) {
@@ -175,15 +191,11 @@ export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
     get rowVisibleCells() {
       return rowInstance.getVisibleCells() as Cell<G, L>[];
     },
-    get rowIsSelected() {
-      return rowInstance.getIsSelected();
-    },
-    get rowHasSelectedChildren() {
-      return rowInstance.getIsSomeSelected();
-    },
+    isRowSelected: rowInstance.getIsSelected,
+    rowHasSelectedChildren: rowInstance.getIsSomeSelected,
     get rowCanSelect() {
       // maybe we also want to check if the row has children?
-      return rowInstance.getCanSelect();
+      return rowInstance.getCanSelect;
     },
     rowSelectionFn: (...args: Parameters<typeof toggleSelectedHandler>) => {
       toggleSelectedHandler(...args);

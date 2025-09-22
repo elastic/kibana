@@ -80,13 +80,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const cascadeHeaderElement = useCallback(
     ({ table }: { table: Table<G> }) => {
-      const { rows: tableRows } = table.getGroupedRowModel();
-
       return (
-        <CascadeHeaderPrimitive<G>
+        <CascadeHeaderPrimitive<G, L>
+          tableInstance={table}
           customTableHeader={customTableHeader}
           tableTitleSlot={TableTitleSlot!}
-          tableRows={tableRows}
           onCascadeGroupingChange={onCascadeGroupingChange}
         />
       );
