@@ -58,6 +58,7 @@ export function useFetchLog({ errorDocId }: Props) {
   const { data, core } = getUnifiedDocViewerServices();
   const [loading, setLoading] = useState(true);
   const [logDoc, setLogDoc] = useState<Record<PropertyKey, any> | null>(null);
+  const [index, setIndex] = useState<string | null>(null);
 
   const indexPattern = indexes.logs;
   useEffect(() => {
@@ -70,6 +71,7 @@ export function useFetchLog({ errorDocId }: Props) {
         const result = indexPattern
           ? await fetchLogDocument({ docId: errorDocId, indexPattern, data, signal })
           : undefined;
+        setIndex(result?.rawResponse.hits.hits[0]?._index ?? null);
         setLogDoc(result?.rawResponse.hits.hits[0]?.fields ?? null);
       } catch (err) {
         if (!signal.aborted) {
@@ -94,5 +96,5 @@ export function useFetchLog({ errorDocId }: Props) {
     };
   }, [core.notifications.toasts, data, errorDocId, indexPattern]);
 
-  return { loading, logDoc };
+  return { loading, logDoc, index };
 }

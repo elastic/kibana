@@ -20,6 +20,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IToasts } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedDocViewerStart } from './plugin';
 export interface UnifiedDocViewerServices {
   analytics: AnalyticsServiceStart;
@@ -33,4 +34,5 @@ export interface UnifiedDocViewerServices {
   share: SharePluginStart;
   core: CoreStart;
   discoverShared: DiscoverSharedPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
