@@ -14,15 +14,14 @@ import {
   from,
   map,
   switchMap,
-  debounceTime,
 } from 'rxjs';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import {
   internalStateActions,
+  selectAllTabs,
   selectHasUnsavedChanges,
   selectTabRuntimeState,
   type InternalStateStore,
@@ -40,13 +39,13 @@ export const useUnsavedChanges = ({
   onAppLeave?: AppMountParameters['onAppLeave'];
 }) => {
   const services = useDiscoverServices();
-  const [savedSearches$] = useState(() =>
+  const [onChange$] = useState(() =>
     from(internalState).pipe(
-      map((state) => state.tabs.allIds),
-      distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-      switchMap((allTabIds) => {
-        const stateContainerObservables = allTabIds.map(
-          (tabId) => selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$
+      map(selectAllTabs),
+      distinctUntilChanged(),
+      switchMap((allTabs) => {
+        const stateContainerObservables = allTabs.map(
+          (tab) => selectTabRuntimeState(runtimeStateManager, tab.id).stateContainer$
         );
 
         return combineLatest(stateContainerObservables);
@@ -63,13 +62,12 @@ export const useUnsavedChanges = ({
         }
 
         return combineLatest(savedSearchObservables);
-      }),
-      debounceTime(50)
+      })
     )
   );
 
   useEffect(() => {
-    const subscription = savedSearches$.subscribe(() => {
+    const subscription = onChange$.subscribe(() => {
       internalState.dispatch(
         internalStateActions.setUnsavedChanges(
           selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
@@ -80,7 +78,7 @@ export const useUnsavedChanges = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [internalState, runtimeStateManager, savedSearches$, services]);
+  }, [internalState, onChange$, runtimeStateManager, services]);
 
   useEffect(() => {
     onAppLeave?.((actions) => {
