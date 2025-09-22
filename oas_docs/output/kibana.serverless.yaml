@@ -56714,13 +56714,13 @@ paths:
           schema:
             type: string
         - in: query
-          name: shortLookback
-          required: false
+          name: from
+          required: true
           schema:
             type: string
         - in: query
-          name: longLookback
-          required: false
+          name: to
+          required: true
           schema:
             type: string
       requestBody:
