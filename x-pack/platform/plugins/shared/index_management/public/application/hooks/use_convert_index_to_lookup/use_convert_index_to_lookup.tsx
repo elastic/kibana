@@ -67,7 +67,7 @@ export const useConvertIndexToLookup = ({
           i18n.translate(
             'xpack.idxMgmt.convertToLookupIndexAction.reindexFailedOrCancelledErrorMessage',
             {
-              defaultMessage: 'Reindex did not complete successfully.',
+              defaultMessage: 'Reindex did not complete successfully due to unknown error.',
             }
           )
       );
