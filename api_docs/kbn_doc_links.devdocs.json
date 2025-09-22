@@ -1105,6 +1105,20 @@
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.agentBuilder",
+            "type": "Object",
+            "tags": [],
+            "label": "agentBuilder",
+            "description": [],
+            "signature": [
+              "{ readonly agentBuilder: string; readonly getStarted: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
