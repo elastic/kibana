@@ -137,20 +137,17 @@ components:
         ]
       description: 'The reason for closing the alerts'
 
-    SignalIds:
-      type: array
-      description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
-      items:
-        type: string
-        format: nonempty
-        minLength: 1
-      minItems: 1
-
     SetAlertsStatusByIdsBase:
       type: object
       properties:
         signal_ids:
-          $ref: '#/components/schemas/SignalIds'
+          type: array
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            type: string
+            format: nonempty
+            minLength: 1
+          minItems: 1
         status:
           $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatusExceptClosed'
       required: [signal_ids, status]
@@ -159,7 +156,13 @@ components:
       type: object
       properties:
         signal_ids:
-          $ref: '#/components/schemas/SignalIds'
+          type: array
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            type: string
+            format: nonempty
+            minLength: 1
+          minItems: 1
         status:
           type: string
           enum: [closed]

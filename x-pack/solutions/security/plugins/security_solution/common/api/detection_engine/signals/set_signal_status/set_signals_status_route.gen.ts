@@ -34,21 +34,21 @@ export const ReasonEnum = z.enum([
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
 export const ReasonEnumEnum = ReasonEnum.enum;
 
-/**
- * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
- */
-export type SignalIds = z.infer<typeof SignalIds>;
-export const SignalIds = z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1);
-
 export type SetAlertsStatusByIdsBase = z.infer<typeof SetAlertsStatusByIdsBase>;
 export const SetAlertsStatusByIdsBase = z.object({
-  signal_ids: SignalIds,
+  /**
+   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: AlertStatusExceptClosed,
 });
 
 export type CloseAlertsByIds = z.infer<typeof CloseAlertsByIds>;
 export const CloseAlertsByIds = z.object({
-  signal_ids: SignalIds,
+  /**
+   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: z.literal('closed'),
   reason: ReasonEnum.optional(),
 });
