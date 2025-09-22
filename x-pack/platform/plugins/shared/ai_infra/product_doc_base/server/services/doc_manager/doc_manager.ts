@@ -141,18 +141,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
   }
-  async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
-    const { inferenceIds } = options ?? {};
-    const idsToUpdate: string[] =
-      inferenceIds ?? (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
-    this.logger.info(
-      `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
-    );
-    await Promise.all(idsToUpdate.map((inferenceId) => this.update({ inferenceId })));
-    return {
-      inferenceIds: idsToUpdate,
-    };
-  }
 
   async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
     const { forceUpdate, inferenceIds } = options ?? {};
