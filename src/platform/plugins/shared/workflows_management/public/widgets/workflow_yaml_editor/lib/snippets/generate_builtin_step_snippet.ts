@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BuiltInStepType } from '@kbn/workflows';
+
+interface GenerateBuiltInStepSnippetOptions {
+  full?: boolean;
+}
+
 /**
- * Generate a snippet template for built-in step types
+ * Generates a YAML snippet for a built-in workflow step based on the specified type.
+ * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', etc.)
+ * @param options - Configuration options for snippet generation
+ * @param options.full - Whether to include the full YAML structure with step name and type prefix
+ * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
 export function generateBuiltInStepSnippet(
-  stepType: string,
-  shouldBeQuoted: boolean,
-  full: boolean = false,
-  indentLevel: number = 0
+  stepType: BuiltInStepType,
+  { full }: GenerateBuiltInStepSnippetOptions = {}
 ): string {
-  const quotedType = shouldBeQuoted ? `"${stepType}"` : stepType;
   let prepend = '';
   if (full) {
     prepend = `- name: ${stepType}_step\n  type: `;
   }
 
-  // Generate appropriate snippets based on step type
   let parameters = '';
   switch (stepType) {
     case 'foreach':
@@ -47,7 +53,7 @@ export function generateBuiltInStepSnippet(
       parameters = `\nwith:\n  # Add parameters here`;
   }
 
-  return `${prepend}${quotedType}${
+  return `${prepend}${stepType}${
     full
       ? // if full, indent the parameters
         parameters

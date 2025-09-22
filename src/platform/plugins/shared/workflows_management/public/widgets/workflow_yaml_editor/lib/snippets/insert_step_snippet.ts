@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import type { Document } from 'yaml';
-import { BuiltInStepTypes } from '@kbn/workflows/spec/schema';
+import { isBuiltInStepType } from '@kbn/workflows';
 import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
 import { getMonacoRangeFromYamlNode } from '../utils';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
@@ -30,10 +30,10 @@ export function insertStepSnippet(
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   let snippetText = '';
-  if (BuiltInStepTypes.includes(stepType)) {
-    snippetText = generateBuiltInStepSnippet(stepType, false, true);
+  if (isBuiltInStepType(stepType)) {
+    snippetText = generateBuiltInStepSnippet(stepType, { full: true });
   } else {
-    snippetText = generateConnectorSnippet(stepType, false, true);
+    snippetText = generateConnectorSnippet(stepType, { full: true });
   }
   // we need it to be 1-indexed
   const lastLineNumber = model.getLineCount();

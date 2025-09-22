@@ -7,39 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TriggerType } from '@kbn/workflows';
+
+interface GenerateTriggerSnippetOptions {
+  full?: boolean;
+  monacoSuggestionFormat?: boolean;
+}
+
 /**
- * Generate a snippet template for trigger types with appropriate parameters
+ * Generates a YAML snippet for a workflow trigger based on the specified type.
+ * @param triggerType - The type of trigger ('alert', 'scheduled', 'manual', etc.)
+ * @param options - Configuration options for snippet generation
+ * @param options.full - Whether to include the full YAML structure with '- type: ' prefix
+ * @param options.monacoSuggestionFormat - Whether to format the snippet for Monaco editor suggestions with placeholders
+ * @returns The formatted YAML trigger snippet as a string
  */
-// TODO: better interface for this function
 export function generateTriggerSnippet(
-  triggerType: string,
-  shouldBeQuoted: boolean, // FIX: why we might need quoted type?
-  full: boolean = false,
-  indentLevel: number = 0,
-  monacoSuggestionFormat: boolean = true
+  triggerType: TriggerType,
+  { full, monacoSuggestionFormat }: GenerateTriggerSnippetOptions = {}
 ): string {
-  const quotedType = shouldBeQuoted ? `"${triggerType}"` : triggerType;
   let prepend = '';
 
   if (full) {
     prepend = '- type: ';
   }
 
-  // Generate appropriate snippets based on trigger type
   switch (triggerType) {
     case 'alert':
-      return `${prepend}${quotedType}`;
+      return `${prepend}${triggerType}`;
 
     case 'scheduled':
       if (!monacoSuggestionFormat) {
-        return `${prepend}${quotedType}\n  with:\n    every: "5"\n    unit: minute`;
+        return `${prepend}${triggerType}\n  with:\n    every: "5"\n    unit: minute`;
       }
-      return `${prepend}${quotedType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
+      return `${prepend}${triggerType}\n  with:\n    every: "\${1:5}"\n    unit: "\${2|second,minute,hour,day,week,month,year|}"`;
 
     case 'manual':
-      return `${prepend}${quotedType}`;
+      return `${prepend}${triggerType}`;
 
     default:
-      return `${prepend}${quotedType}`;
+      return `${prepend}${triggerType}`;
   }
 }

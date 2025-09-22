@@ -9,6 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import { type Document } from 'yaml';
+import type { TriggerType } from '@kbn/workflows';
 import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
 import { getMonacoRangeFromYamlNode } from '../utils';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
@@ -22,10 +23,13 @@ import { generateTriggerSnippet } from './generate_trigger_snippet';
 export function insertTriggerSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document,
-  triggerType: string,
+  triggerType: TriggerType,
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
-  const triggerSnippet = generateTriggerSnippet(triggerType, false, true, 0, false);
+  const triggerSnippet = generateTriggerSnippet(triggerType, {
+    full: true,
+    monacoSuggestionFormat: false,
+  });
   // find triggers: line number and column number
   const triggerNodes = getTriggerNodes(yamlDocument);
   const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);

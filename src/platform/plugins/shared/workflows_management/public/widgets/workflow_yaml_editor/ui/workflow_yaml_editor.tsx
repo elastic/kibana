@@ -15,7 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import { TriggerTypes, getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import { getJsonSchemaFromYamlSchema, isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -332,7 +332,7 @@ export const WorkflowYAMLEditor = ({
     if (!model || !yamlDocumentCurrent || !editor) {
       return;
     }
-    if (TriggerTypes.includes(action.id)) {
+    if (isTriggerType(action.id)) {
       insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
     } else {
       insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);

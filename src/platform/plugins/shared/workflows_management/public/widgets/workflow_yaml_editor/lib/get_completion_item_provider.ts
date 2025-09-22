@@ -11,6 +11,7 @@ import type { Scalar } from 'yaml';
 import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
+import type { BuiltInStepType } from '@kbn/workflows';
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -592,13 +593,10 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
  */
 function getConnectorTypeSuggestions(
   typePrefix: string,
-  range: monaco.IRange,
-  context: monaco.languages.CompletionContext,
-  scalarType: Scalar.Type | null,
-  shouldBeQuoted: boolean
+  range: monaco.IRange
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
-  const cacheKey = `${typePrefix}|${shouldBeQuoted}|${JSON.stringify(range)}`;
+  const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
 
   // Check cache first
   if (connectorTypeSuggestionsCache.has(cacheKey)) {
@@ -615,7 +613,7 @@ function getConnectorTypeSuggestions(
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
-    const snippetText = generateConnectorSnippet(connectorType, shouldBeQuoted);
+    const snippetText = generateConnectorSnippet(connectorType);
 
     // For YAML, we insert the actual text without snippet placeholders
     const simpleText = snippetText;
@@ -667,7 +665,7 @@ function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type, shouldBeQuoted);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -725,10 +723,7 @@ function getConnectorTypeSuggestions(
  */
 function getTriggerTypeSuggestions(
   typePrefix: string,
-  range: monaco.IRange,
-  context: monaco.languages.CompletionContext,
-  scalarType: Scalar.Type | null,
-  shouldBeQuoted: boolean
+  range: monaco.IRange
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -741,7 +736,7 @@ function getTriggerTypeSuggestions(
   );
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type, shouldBeQuoted);
+    const snippetText = generateTriggerSnippet(triggerType.type);
 
     // Extended range for multi-line insertion
     const extendedRange = {
@@ -969,22 +964,10 @@ export function getCompletionItemProvider(
 
           if (inTriggersContext) {
             // We're in triggers context - suggest trigger types
-            typeSuggestions = getTriggerTypeSuggestions(
-              typePrefix,
-              adjustedRange,
-              completionContext,
-              scalarType,
-              shouldBeQuoted
-            );
+            typeSuggestions = getTriggerTypeSuggestions(typePrefix, adjustedRange);
           } else {
             // We're in steps context - suggest connector/step types
-            typeSuggestions = getConnectorTypeSuggestions(
-              typePrefix,
-              adjustedRange,
-              completionContext,
-              scalarType,
-              shouldBeQuoted
-            );
+            typeSuggestions = getConnectorTypeSuggestions(typePrefix, adjustedRange);
           }
 
           return {
@@ -1252,22 +1235,10 @@ export function getCompletionItemProvider(
 
               if (inTriggersContext) {
                 // We're in triggers context - suggest trigger types
-                typeSuggestions = getTriggerTypeSuggestions(
-                  typePrefix,
-                  adjustedRange,
-                  completionContext,
-                  scalarType,
-                  shouldBeQuoted
-                );
+                typeSuggestions = getTriggerTypeSuggestions(typePrefix, adjustedRange);
               } else {
                 // We're in steps context - suggest connector/step types
-                typeSuggestions = getConnectorTypeSuggestions(
-                  typePrefix,
-                  adjustedRange,
-                  completionContext,
-                  scalarType,
-                  shouldBeQuoted
-                );
+                typeSuggestions = getConnectorTypeSuggestions(typePrefix, adjustedRange);
               }
 
               // Return immediately to prevent schema-based literal completions

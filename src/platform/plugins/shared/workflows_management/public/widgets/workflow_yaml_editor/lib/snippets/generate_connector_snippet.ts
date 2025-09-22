@@ -10,16 +10,21 @@
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 
+interface GenerateConnectorSnippetOptions {
+  full?: boolean;
+}
+
 /**
- * Generate a snippet template for a connector type with required parameters
+ * Generates a YAML snippet for a workflow connector step based on the specified type.
+ * @param connectorType - The type of connector to generate a snippet for
+ * @param options - Configuration options for snippet generation
+ * @param options.full - Whether to include the full YAML structure with step name and type prefix
+ * @returns The formatted YAML connector snippet with required parameters as placeholders
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  shouldBeQuoted: boolean,
-  full: boolean = false,
-  indentLevel: number = 0
+  { full }: GenerateConnectorSnippetOptions = {}
 ): string {
-  const quotedType = shouldBeQuoted ? `"${connectorType}"` : connectorType;
   let prepend = '';
   if (full) {
     prepend = `- name: ${connectorType}_step\n  type: `;
@@ -31,14 +36,14 @@ export function generateConnectorSnippet(
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
-    const snippet = `${prepend}${quotedType}\n${
+    const snippet = `${prepend}${connectorType}\n${
       full ? '  ' : ''
     }with:\n  # Add parameters here. Press ${shortcut} to see all available options\n  `;
     return snippet;
   }
 
   // Create with block with required parameters as placeholders
-  let withBlock = `${prepend}${quotedType}\n${full ? '  ' : ''}with:`;
+  let withBlock = `${prepend}${connectorType}\n${full ? '  ' : ''}with:`;
   requiredParams.forEach((param) => {
     const placeholder = param.example || param.defaultValue || '';
 

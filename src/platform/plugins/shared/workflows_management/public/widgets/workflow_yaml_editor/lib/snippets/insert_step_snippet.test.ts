@@ -19,7 +19,7 @@ describe('insertStepSnippet', () => {
     const inputYaml = `name: one_step_workflow`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', false, true);
+    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
@@ -41,7 +41,7 @@ steps:
       url: https://google.com`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', false, true);
+    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
@@ -67,7 +67,7 @@ steps:
           url: https://google.com # cursor is here`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', false, true);
+    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
@@ -99,7 +99,7 @@ steps:
 `;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', false, true);
+    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
