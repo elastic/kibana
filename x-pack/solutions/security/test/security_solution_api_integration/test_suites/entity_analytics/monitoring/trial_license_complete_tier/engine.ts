@@ -17,7 +17,7 @@ import {
   createIntegrationEntitySource,
 } from './utils';
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const spaces = getService('spaces');

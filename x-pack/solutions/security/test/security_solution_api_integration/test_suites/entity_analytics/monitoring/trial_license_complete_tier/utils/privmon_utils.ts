@@ -27,7 +27,7 @@ export const PrivMonUtils = (
   namespace: string = 'default'
 ) => {
   const TASK_ID = 'entity_analytics:monitoring:privileges:engine:default:1.0.0';
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -197,7 +197,7 @@ export const PrivMonUtils = (
     let lastSeenLength = -1;
 
     return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      const res = await api.listPrivMonUsers({ query: {} });
+      const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
       const currentLength = res.body.length;
 
       if (currentLength !== lastSeenLength) {
@@ -217,8 +217,8 @@ export const PrivMonUtils = (
     await scheduleMonitoringEngineNow({ ignoreConflict: true });
     await waitForSyncTaskRun();
     await _waitForPrivMonUsersToBeSynced(expectedCount);
+    const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
 
-    const res = await api.listPrivMonUsers({ query: {} });
     return res.body;
   };
 

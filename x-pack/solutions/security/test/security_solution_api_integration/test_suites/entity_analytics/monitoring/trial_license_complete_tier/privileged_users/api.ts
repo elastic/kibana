@@ -12,7 +12,7 @@ import { PrivMonUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
 
@@ -23,14 +23,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await enablePrivmonSetting(kibanaServer);
-      await api.deleteMonitoringEngine({ query: { data: true } });
+      await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
       await privmonUtils.initPrivMonEngine();
     });
 
     describe('CRUD API', () => {
       it('should create a user', async () => {
         log.info(`creating a user`);
-        const { status, body: user } = await api.createPrivMonUser({
+        const { status, body: user } = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user1' } },
         });
 
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not create a user if the advanced setting is disabled', async () => {
         await disablePrivmonSetting(kibanaServer);
         log.info(`creating a user with advanced setting disabled`);
-        const res = await api.createPrivMonUser({
+        const res = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user2' } },
         });
 
@@ -65,12 +65,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not create a user if the maximum user limit is reached', async () => {
         log.info(`creating a user when the maximum limit is reached`);
         const userCreationPromises = Array.from({ length: 100 }, (_, i) =>
-          api.createPrivMonUser({
+          entityAnalyticsApi.createPrivMonUser({
             body: { user: { name: `privmon_testuser_${i + 1}` } },
           })
         );
         await Promise.all(userCreationPromises);
-        const res = await api.createPrivMonUser({
+        const res = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'privmon_testuser_maxPlusOne' } },
         });
 
@@ -84,11 +84,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
       it('should update a user', async () => {
         log.info(`updating a user`);
-        const { body: userBefore } = await api.createPrivMonUser({
+        const { body: userBefore } = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user3' } },
         });
         log.info(`User before: ${JSON.stringify(userBefore)}`);
-        const res = await api.updatePrivMonUser({
+        const res = await entityAnalyticsApi.updatePrivMonUser({
           body: { user: { name: 'updated' } },
           params: { id: userBefore.id },
         });
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const {
           body: [userAfter],
-        } = await api.listPrivMonUsers({ query: { kql: 'user.name: test_user3' } });
+        } = await entityAnalyticsApi.listPrivMonUsers({ query: { kql: 'user.name: test_user3' } });
 
         log.info(`User after: ${JSON.stringify(userAfter)}`);
 
@@ -113,14 +113,16 @@ export default ({ getService }: FtrProviderContext) => {
       it('should list users', async () => {
         log.info(`listing users`);
 
-        const { body } = await api.createPrivMonUser({
+        const { body } = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user4' } },
         });
 
         // Ensure the data is indexed and available for searching, in case we ever remove `refresh: wait_for` when indexing
         await es.indices.refresh({ index: body._index });
 
-        const res = await api.listPrivMonUsers({ query: { kql: `user.name: test*` } });
+        const res = await entityAnalyticsApi.listPrivMonUsers({
+          query: { kql: `user.name: test*` },
+        });
 
         if (res.status !== 200) {
           log.error(`Listing privmon users failed`);
@@ -132,10 +134,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
       it('should delete a user', async () => {
         log.info(`deleting a user`);
-        const { body } = await api.createPrivMonUser({
+        const { body } = await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user5' } },
         });
-        const res = await api.deletePrivMonUser({ params: { id: body.id } });
+        const res = await entityAnalyticsApi.deletePrivMonUser({ params: { id: body.id } });
 
         if (res.status !== 200) {
           log.error(`Deleting privmon user failed`);
@@ -176,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         log.info('Verifying uploaded users');
 
-        const listRes = await api.listPrivMonUsers({
+        const listRes = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: csv_user_*` },
         });
         if (listRes.status !== 200) {
@@ -195,13 +197,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should add "csv" source even if the user already has other sources', async () => {
         log.info(`Creating a user via CRUD API`);
-        await api.createPrivMonUser({
+        await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'api_user_1' } },
         });
 
         const {
           body: [apiUserBefore],
-        } = await api.listPrivMonUsers({
+        } = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: api_user_1` },
         });
 
@@ -216,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         log.info('Verifying uploaded users');
-        const listRes = await api.listPrivMonUsers({
+        const listRes = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: api_user_* or user.name: csv_user_*` },
         });
         if (listRes.status !== 200) {
@@ -245,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const {
           body: [user3Before],
-        } = await api.listPrivMonUsers({
+        } = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: csv_user_3` },
         });
         log.info(`User 3 before soft delete: ${JSON.stringify(user3Before)}`);
@@ -259,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         log.info('Verifying soft deleted users');
-        const listRes = await api.listPrivMonUsers({
+        const listRes = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: csv_user_*` },
         });
 
@@ -285,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not soft delete users which have other sources', async () => {
         log.info(`Creating a user via CRUD API`);
-        await api.createPrivMonUser({
+        await entityAnalyticsApi.createPrivMonUser({
           body: { user: { name: 'test_user_3' } },
         });
 
@@ -306,7 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         log.info('Verifying soft deleted users');
-        const listRes = await api.listPrivMonUsers({
+        const listRes = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: test_user_*` },
         });
 
@@ -338,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(res.status).eql(200);
 
-        const listRes = await api.listPrivMonUsers({
+        const listRes = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: non_unique_user` },
         });
         if (listRes.status !== 200) {
@@ -364,7 +366,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const {
           body: [userBefore],
-        } = await api.listPrivMonUsers({
+        } = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: csv_user_1` },
         });
         log.info(`User before second upload: ${JSON.stringify(userBefore)}`);
@@ -381,7 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const {
           body: [userAfter],
-        } = await api.listPrivMonUsers({
+        } = await entityAnalyticsApi.listPrivMonUsers({
           query: { kql: `user.name: csv_user_1` },
         });
         log.info(`User after second upload: ${JSON.stringify(userAfter)}`);
@@ -395,7 +397,7 @@ export default ({ getService }: FtrProviderContext) => {
           const csv = ['csv_user_1,label1'].join('\n');
           await privmonUtils.bulkUploadUsersCsv(csv);
 
-          const listRes = await api.listPrivMonUsers({
+          const listRes = await entityAnalyticsApi.listPrivMonUsers({
             query: {},
           });
 
@@ -410,7 +412,7 @@ export default ({ getService }: FtrProviderContext) => {
           const updateCsv = ['csv_user_1,label3'].join('\n');
           await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
-          const listRes = await api.listPrivMonUsers({
+          const listRes = await entityAnalyticsApi.listPrivMonUsers({
             query: {},
           });
 
@@ -425,7 +427,7 @@ export default ({ getService }: FtrProviderContext) => {
           const updateCsv = ['csv_user_1'].join('\n');
           await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
-          const listRes = await api.listPrivMonUsers({
+          const listRes = await entityAnalyticsApi.listPrivMonUsers({
             query: {},
           });
 
@@ -441,7 +443,7 @@ export default ({ getService }: FtrProviderContext) => {
           const updateCsv = ['csv_user_2,label2'].join('\n');
           await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
-          const listRes = await api.listPrivMonUsers({
+          const listRes = await entityAnalyticsApi.listPrivMonUsers({
             query: { kql: `user.name: csv_user_1` },
           });
 

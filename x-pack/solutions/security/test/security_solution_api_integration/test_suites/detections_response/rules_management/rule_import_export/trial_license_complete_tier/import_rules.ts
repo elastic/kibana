@@ -39,7 +39,7 @@ const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const securitySolutionExceptionsApi = getService('securitySolutionExceptionsApi');
   const log = getService('log');
   const spacesServices = getService('spaces');
@@ -187,7 +187,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule1 } = await securitySolutionApi.readRule(
+          const { body: importedRule1 } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importedRule1).toMatchObject(IMPORT_PAYLOAD[0]);
 
-          const { body: importedRule2 } = await securitySolutionApi.readRule(
+          const { body: importedRule2 } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID_2 },
             },
@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -488,7 +488,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -564,7 +564,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -674,7 +674,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -831,7 +831,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 0,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -1527,7 +1527,7 @@ export default ({ getService }: FtrProviderContext): void => {
             overwrite: false,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule({
+          const { body: importedRule } = await detectionsApi.readRule({
             query: { rule_id: RULE_TO_IMPORT_RULE_ID },
           });
 
@@ -1564,7 +1564,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
