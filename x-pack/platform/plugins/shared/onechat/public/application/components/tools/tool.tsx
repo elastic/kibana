@@ -217,7 +217,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const hasErrors = Object.keys(errors).length > 0;
 
   const renderSaveButton = useCallback(
-    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+    ({ size = 's', testSubj }: { size?: EuiButtonProps['size']; testSubj?: string } = {}) => {
       const saveButton = (
         <EuiButton
           size={size}
@@ -228,6 +228,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           disabled={hasErrors || isSubmitting || (mode === ToolFormMode.Edit && !isDirty)}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE}
           minWidth="112px"
+          data-test-subj={testSubj}
         >
           {labels.tools.saveButtonLabel}
         </EuiButton>
@@ -290,7 +291,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   return (
     <>
       <FormProvider {...form}>
-        <KibanaPageTemplate>
+        <KibanaPageTemplate data-test-subj="agentBuilderToolFormPage">
           <KibanaPageTemplate.Header
             pageTitle={
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -301,7 +302,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 </EuiFlexItem>
                 {tool?.readonly && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" iconType="lock">
+                    <EuiBadge
+                      color="hollow"
+                      iconType="lock"
+                      data-test-subj="agentBuilderToolReadOnlyBadge"
+                    >
                       {labels.tools.readOnly}
                     </EuiBadge>
                   </EuiFlexItem>

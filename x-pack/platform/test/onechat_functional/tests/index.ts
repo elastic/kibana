@@ -13,5 +13,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
       loadTestFile(require.resolve('./converse/conversation_history.ts'));
     });
+    describe('tools', function () {
+      loadTestFile(require.resolve('./tools/create_tool.ts'));
+      loadTestFile(require.resolve('./tools/landing_page.ts'));
+      loadTestFile(require.resolve('./tools/manage_tool.ts'));
+    });
   });
 }

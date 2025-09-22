@@ -32,6 +32,7 @@ export const OnechatToolsTable = memo(() => {
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderToolsTable"
       css={css`
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
         table {
