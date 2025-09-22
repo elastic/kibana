@@ -46,6 +46,5 @@ export function resolverFields(schema: ResolverSchema): Array<{ field: string }>
   if (schema.agentId) {
     filter.push({ field: schema.agentId });
   }
-
   return filter;
 }
