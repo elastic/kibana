@@ -18,11 +18,12 @@ import {
   EuiComboBox,
   EuiForm,
   EuiLink,
+  useGeneratedHtmlId,
+  EuiFlyout,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isSchema, recursiveRecord, Streams } from '@kbn/streams-schema';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UseFieldsMetadataReturnType } from '@kbn/fields-metadata-plugin/public/hooks/use_fields_metadata';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form';
@@ -31,10 +32,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
 import { mapKeys } from 'lodash';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
-import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
-import { SchemaEditorContextProvider, useSchemaEditorContext } from '../schema_editor_context';
+import { useSchemaEditorContext } from '../schema_editor_context';
 import { FieldTypeSelector as FieldTypeSelectorComponent } from './field_form_type';
 import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { deserializeJson, serializeXJson } from '../../stream_detail_enrichment/helpers';
@@ -42,49 +43,34 @@ import { deserializeJson, serializeXJson } from '../../stream_detail_enrichment/
 export interface AddFieldFlyoutProps {
   onClose: () => void;
   onAddField: (field: SchemaField) => void;
-  stream: Streams.ingest.all.Definition;
 }
 
 export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddField'>) => {
-  const context = useKibana();
-  const schemaEditorContext = useSchemaEditorContext();
-
-  const { core } = context;
-
-  const openFlyout = () => {
-    const overlay = core.overlays.openFlyout(
-      toMountPoint(
-        <StreamsAppContextProvider context={context}>
-          <SchemaEditorContextProvider {...schemaEditorContext}>
-            <AddFieldFlyout
-              onClose={() => overlay.close()}
-              onAddField={onAddField}
-              stream={schemaEditorContext.stream}
-            />
-          </SchemaEditorContextProvider>
-        </StreamsAppContextProvider>,
-        core
-      ),
-      { maxWidth: 500 }
-    );
-  };
+  const [isFlyoutVisible, { on: openFlyout, off: closeFlyout }] = useBoolean(false);
 
   return (
-    <EuiButton
-      data-test-subj="streamsAppContentAddFieldButton"
-      iconType="plus"
-      onClick={openFlyout}
-      fill
-    >
-      {i18n.translate('xpack.streams.schemaEditor.addFieldButtonLabel', {
-        defaultMessage: 'Add field',
-      })}
-    </EuiButton>
+    <>
+      <EuiButton
+        data-test-subj="streamsAppContentAddFieldButton"
+        iconType="plus"
+        onClick={openFlyout}
+        fill
+      >
+        {i18n.translate('xpack.streams.schemaEditor.addFieldButtonLabel', {
+          defaultMessage: 'Add field',
+        })}
+      </EuiButton>
+      {isFlyoutVisible && <AddFieldFlyout onClose={closeFlyout} onAddField={onAddField} />}
+    </>
   );
 };
 
-export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutProps) => {
+export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
+
+  const { stream } = useSchemaEditorContext();
+
+  const flyoutId = useGeneratedHtmlId({ prefix: 'streams-add-field' });
 
   const { fieldsMetadata: rawFieldsMetadata } = useFieldsMetadata({
     attributes: ['ignore_above', 'type', 'otel_equivalent'],
@@ -119,7 +105,7 @@ export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutPr
   };
 
   return (
-    <>
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutId} maxWidth={500}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -163,7 +149,7 @@ export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutPr
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </>
+    </EuiFlyout>
   );
 };
 
@@ -220,6 +206,8 @@ export const FieldNameSelector = ({ fieldsMetadata }: FieldSelectorProps) => {
     }
     if (fieldMetadata?.ignore_above) {
       setValue('additionalParameters', { ignore_above: fieldMetadata.ignore_above });
+    } else {
+      setValue('additionalParameters', {});
     }
   };
 

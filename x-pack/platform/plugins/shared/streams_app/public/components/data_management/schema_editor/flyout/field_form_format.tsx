@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
-import useToggle from 'react-use/lib/useToggle';
 import type { SchemaField } from '../types';
 
 interface FieldFormFormatProps {
@@ -18,17 +17,12 @@ interface FieldFormFormatProps {
   onChange: (format: SchemaField['format']) => void;
 }
 
-const DEFAULT_FORMAT = 'strict_date_optional_time||epoch_millis';
-
-const POPULAR_FORMATS = [
-  DEFAULT_FORMAT,
-  'strict_date_optional_time',
-  'date_optional_time',
-  'epoch_millis',
-  'basic_date_time',
-] as const;
-
-type PopularFormatOption = (typeof POPULAR_FORMATS)[number];
+const POPULAR_FORMATS_SUGGESTIONS = [
+  { label: 'strict_date_optional_time' },
+  { label: 'date_optional_time' },
+  { label: 'epoch_millis' },
+  { label: 'basic_date_time' },
+];
 
 export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
   if (!type) return false;
@@ -36,70 +30,46 @@ export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
 };
 
 export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
-  const [isFreeform, toggleIsFreeform] = useToggle(value !== undefined && !isPopularFormat(value));
+  const selectedOptions = useMemo(() => {
+    if (!value) return [];
 
-  const onToggle = useCallback(
-    (e: EuiSwitchEvent) => {
-      if (!e.target.checked && !isPopularFormat(value)) {
-        onChange(undefined);
-      }
-      toggleIsFreeform();
-    },
-    [onChange, value, toggleIsFreeform]
-  );
+    const matchingSuggestion = POPULAR_FORMATS_SUGGESTIONS.find(
+      (suggestion) => suggestion.label === value
+    );
+    return matchingSuggestion ? [matchingSuggestion] : [{ label: value }];
+  }, [value]);
+
+  const handleSelectionChange = (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const selectedOption = newSelectedOptions[0];
+    const newFieldValue = selectedOption?.label ?? '';
+    onChange(newFieldValue);
+  };
+
+  const handleCreateOption = (searchValue: string) => {
+    const normalizedValue = searchValue.trim();
+    if (normalizedValue) {
+      handleSelectionChange([{ label: normalizedValue }]);
+    }
+  };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        {isFreeform ? (
-          <FreeformFormatInput value={value} onChange={onChange} />
-        ) : (
-          <PopularFormatsSelector value={value} onChange={onChange} />
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSwitch
-          label={i18n.translate('xpack.streams.fieldFormFormatSelection.freeformToggleLabel', {
-            defaultMessage: 'Use freeform mode',
-          })}
-          checked={isFreeform}
-          onChange={onToggle}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const PopularFormatsSelector = ({ onChange, value }: FieldFormFormatProps) => {
-  return (
-    <EuiSelect
-      hasNoInitialSelection={value === undefined || !isPopularFormat(value)}
-      data-test-subj="streamsAppSchemaEditorFieldFormatPopularFormats"
-      onChange={(event) => {
-        onChange(event.target.value as PopularFormatOption);
-      }}
-      value={value}
-      options={POPULAR_FORMATS.map((format) => ({
-        text: format,
-        value: format,
-      }))}
+    <EuiComboBox
+      data-test-subj="streamsAppSchemaEditorFieldFormFormat"
+      placeholder={i18n.translate(
+        'xpack.streams.schemaEditor.addFieldFlyout.fieldNamePlaceholder',
+        { defaultMessage: 'Select or type the field format...' }
+      )}
+      options={POPULAR_FORMATS_SUGGESTIONS}
+      selectedOptions={selectedOptions}
+      onChange={handleSelectionChange}
+      onCreateOption={handleCreateOption}
+      singleSelection={{ asPlainText: true }}
+      isClearable
       fullWidth
+      customOptionText={i18n.translate('xpack.streams.fieldSelector.customOptionText', {
+        defaultMessage: 'Add {searchValue} as a custom format',
+        values: { searchValue: '{searchValue}' },
+      })}
     />
   );
-};
-
-const FreeformFormatInput = ({ value, onChange }: FieldFormFormatProps) => {
-  return (
-    <EuiFieldText
-      data-test-subj="streamsAppFieldFormFormatField"
-      placeholder="yyyy/MM/dd"
-      value={value ?? ''}
-      onChange={(e) => onChange(e.target.value)}
-      fullWidth
-    />
-  );
-};
-
-const isPopularFormat = (value?: string): value is PopularFormatOption => {
-  return POPULAR_FORMATS.includes(value as PopularFormatOption);
 };
