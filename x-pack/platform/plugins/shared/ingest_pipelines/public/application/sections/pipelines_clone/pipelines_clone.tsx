@@ -11,8 +11,9 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
+import { SectionLoading, useKibana } from '../../../shared_imports';
 
+import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
 import { PipelinesCreate } from '../pipelines_create';
 import { getErrorText } from '../utils';
 
@@ -28,7 +29,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 
-  const decodedSourceName = attemptToURIDecode(sourceName)!;
+  const decodedSourceName = normalizePipelineNameFromParams(sourceName) ?? '';
   const {
     error,
     data: pipeline,

@@ -16,6 +16,7 @@ import { listKibanaPackagesTool } from '../tools/list_packages';
 import { generateKibanaPackageTool } from '../tools/generate_package';
 import { listKibanaTeamsTool } from '../tools/list_teams';
 import { runUnitTestsTool } from '../tools/run_unit_tests';
+import { runCiChecksTool } from '../tools/run_ci_checks';
 import { codeSearchTool } from '../tools/code_search';
 import { getDistinctValuesTool } from '../tools/get_distinct_values';
 import { findUsagesTool } from '../tools/find_usages';
@@ -27,6 +28,7 @@ run(async () => {
   addTool(server, generateKibanaPackageTool);
   addTool(server, listKibanaTeamsTool);
   addTool(server, runUnitTestsTool);
+  addTool(server, runCiChecksTool);
   addTool(server, codeSearchTool);
   addTool(server, getDistinctValuesTool);
   addTool(server, findUsagesTool);

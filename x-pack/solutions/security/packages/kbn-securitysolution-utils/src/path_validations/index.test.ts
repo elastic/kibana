@@ -10,10 +10,12 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
+  TrustedDeviceConditionEntryField,
   validateWildcardInput,
   validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
   validateFilePathInput,
+  isTrustedDeviceFieldAvailableForOs,
   WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
@@ -754,5 +756,89 @@ describe('hasSimpleExecutableName', () => {
         value: 'c:\\**\\pa*h.exe',
       })
     ).toEqual(false);
+  });
+});
+
+describe('isTrustedDeviceFieldAvailableForOs', () => {
+  describe('USERNAME field availability', () => {
+    it('should return true for USERNAME field when Windows OS is selected exclusively', () => {
+      expect(
+        isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, [
+          OperatingSystem.WINDOWS,
+        ])
+      ).toBe(true);
+    });
+
+    it('should return false for USERNAME field when Mac OS is selected exclusively', () => {
+      expect(
+        isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, [
+          OperatingSystem.MAC,
+        ])
+      ).toBe(false);
+    });
+
+    it('should return false for USERNAME field when both Windows and Mac OS are selected', () => {
+      expect(
+        isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, [
+          OperatingSystem.WINDOWS,
+          OperatingSystem.MAC,
+        ])
+      ).toBe(false);
+    });
+
+    it('should return false for USERNAME field when Mac and Windows OS are selected (different order)', () => {
+      expect(
+        isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, [
+          OperatingSystem.MAC,
+          OperatingSystem.WINDOWS,
+        ])
+      ).toBe(false);
+    });
+
+    it('should return false for USERNAME field when empty OS array is provided', () => {
+      expect(
+        isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, [])
+      ).toBe(false);
+    });
+  });
+
+  describe('Other fields availability', () => {
+    const commonFields = [
+      TrustedDeviceConditionEntryField.HOST,
+      TrustedDeviceConditionEntryField.DEVICE_ID,
+      TrustedDeviceConditionEntryField.MANUFACTURER,
+      TrustedDeviceConditionEntryField.PRODUCT_ID,
+      TrustedDeviceConditionEntryField.PRODUCT_NAME,
+    ];
+
+    it.each(commonFields)(
+      'should return true for %s field when Windows OS is selected exclusively',
+      (field) => {
+        expect(isTrustedDeviceFieldAvailableForOs(field, [OperatingSystem.WINDOWS])).toBe(true);
+      }
+    );
+
+    it.each(commonFields)(
+      'should return true for %s field when Mac OS is selected exclusively',
+      (field) => {
+        expect(isTrustedDeviceFieldAvailableForOs(field, [OperatingSystem.MAC])).toBe(true);
+      }
+    );
+
+    it.each(commonFields)(
+      'should return true for %s field when both Windows and Mac OS are selected',
+      (field) => {
+        expect(
+          isTrustedDeviceFieldAvailableForOs(field, [OperatingSystem.WINDOWS, OperatingSystem.MAC])
+        ).toBe(true);
+      }
+    );
+
+    it.each(commonFields)(
+      'should return true for %s field when empty OS array is provided',
+      (field) => {
+        expect(isTrustedDeviceFieldAvailableForOs(field, [])).toBe(true);
+      }
+    );
   });
 });

@@ -16,7 +16,7 @@ import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrat
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
 import { OnboardingCardId } from '../../../../../constants';
 import * as useGetMigrationTranslationStatsModule from '../../../../../../siem_migrations/rules/logic/use_get_migration_translation_stats';
-import * as useGetMissingResourcesModule from '../../../../../../siem_migrations/rules/service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../../../../../siem_migrations/common/hooks/use_get_missing_resources';
 
 const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
 
@@ -161,7 +161,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.RUNNING,
-          rules: {
+          items: {
             total: 1,
             pending: 1,
             processing: 1,
@@ -187,7 +187,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.RUNNING,
-          rules: {
+          items: {
             total: 1,
             pending: 1,
             processing: 1,
@@ -204,7 +204,7 @@ describe('StartMigrationsBody', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('migrationProgressPanel')).toBeVisible();
+      expect(screen.getByTestId('ruleMigrationProgressPanel')).toBeVisible();
     });
   });
 
@@ -216,7 +216,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.FINISHED,
-          rules: {
+          items: {
             total: 1,
             pending: 0,
             processing: 0,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -15,19 +15,23 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-interface Action {
+interface BaseAction {
   icon: IconType;
-  onClick: () => void;
   ariaLabel: string;
-  dataTestSubj: string;
+  dataTestSubj?: string;
   label?: string;
 }
+
+type Action =
+  | (BaseAction & { onClick: () => void; href?: never })
+  | (BaseAction & { href: string; onClick?: never });
 
 export interface ContentFrameworkSectionProps {
   id: string;
@@ -35,20 +39,26 @@ export interface ContentFrameworkSectionProps {
   description?: string;
   actions?: Action[];
   children: React.ReactNode;
+  'data-test-subj'?: string;
+  initialIsOpen?: boolean;
 }
 
-export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
+export function ContentFrameworkSection({
   id,
   title,
   description,
   actions,
   children,
-}) => {
+  'data-test-subj': accordionDataTestSubj,
+  initialIsOpen = true,
+}: ContentFrameworkSectionProps) {
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(initialIsOpen);
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
-        const { icon, onClick, ariaLabel, label, dataTestSubj } = action;
+        const { icon, onClick, ariaLabel, label, dataTestSubj, href } = action;
         const size = 'xs';
+        const buttonProps = onClick ? { onClick } : { href };
         return (
           <EuiFlexItem grow={false} key={idx}>
             {label ? (
@@ -56,8 +66,8 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 size={size}
                 iconType={icon}
                 aria-label={ariaLabel}
-                onClick={onClick}
                 data-test-subj={dataTestSubj}
+                {...buttonProps}
               >
                 {label}
               </EuiButtonEmpty>
@@ -65,9 +75,9 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
               <EuiButtonIcon
                 size={size}
                 iconType={icon}
-                onClick={onClick}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...buttonProps}
               />
             )}
           </EuiFlexItem>
@@ -77,37 +87,47 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
   );
 
   return (
-    <EuiAccordion
-      id={`sectionAccordion-${id}`}
-      initialIsOpen
-      buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          {description && (
+    <>
+      <EuiAccordion
+        data-test-subj={accordionDataTestSubj}
+        id={`sectionAccordion-${id}`}
+        initialIsOpen={isAccordionExpanded}
+        onToggle={setIsAccordionExpanded}
+        buttonContent={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      }
-      extraAction={
-        actions?.length && (
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
+            {description && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={description}
+                  size="s"
+                  color="subdued"
+                  aria-label={description}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        )
-      }
-    >
-      <>
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
-          {children}
-        </EuiPanel>
-      </>
-    </EuiAccordion>
+        }
+        extraAction={
+          actions?.length ? (
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null
+        }
+      >
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+            {children}
+          </EuiPanel>
+        </>
+      </EuiAccordion>
+      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
+    </>
   );
-};
+}

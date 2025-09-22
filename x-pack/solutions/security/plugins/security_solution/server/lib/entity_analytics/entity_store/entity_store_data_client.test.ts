@@ -16,7 +16,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { EntityStoreCapability, type EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
 import type {
@@ -76,6 +76,7 @@ const defaultIndexPatterns = [
   stubSecurityDataView.getIndexPattern(),
   '.asset-criticality.asset-criticality-default',
   'risk-score.risk-score-latest-default',
+  '.entities.v1.reset.security_user_default',
 ];
 
 const dataviewService = {
@@ -144,6 +145,7 @@ describe('EntityStoreDataClient', () => {
     } as unknown as SecurityPluginStart,
     request: {} as KibanaRequest,
     uiSettingsClient: uiSettingsClientMock,
+    isServerless: false,
   });
 
   const defaultSearchParams = {
@@ -587,6 +589,80 @@ describe('EntityStoreDataClient', () => {
 
       expect(response.errors.length).toBeGreaterThan(0);
       expect(response.errors[0].message).toBe(testErrorMessages);
+    });
+  });
+
+  describe('isCapabilityEnabled', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns false when engine not enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({ definitions: [] });
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when capability is undefined', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [{}],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when no capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when other capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [EntityStoreCapability.HISTORICAL_VIEWS],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns true when capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [EntityStoreCapability.HISTORICAL_VIEWS, EntityStoreCapability.CRUD_API],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeTruthy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
     });
   });
 });

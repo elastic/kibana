@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../..';
 
-import { compileTemplate, replaceKeyByParent } from './agent';
+import { compileTemplate } from './agent';
 
 jest.mock('../../app_context');
 
@@ -20,10 +20,6 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
-
-mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-  enableOtelIntegrations: false,
-} as any);
 
 let mockedLogger: jest.Mocked<Logger>;
 
@@ -252,7 +248,7 @@ text_var: {{escape_string text_var}}
         text_var: {
           type: 'text',
           value: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
         },
       };
 
@@ -260,7 +256,7 @@ New lines and \\n escaped values.`,
       expect(output).toEqual({
         input: 'log',
         text_var: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
       });
     });
   });
@@ -550,88 +546,6 @@ describe('encode', () => {
       hosts: [
         'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
       ],
-    });
-  });
-});
-
-describe('replaceKeyByParent', () => {
-  it('appends package policy id to a key in the yaml', () => {
-    const config = {
-      receivers: {
-        httpcheck: {
-          collection_interval: `30s`,
-          targets: [
-            {
-              method: 'GET',
-              endpoints: ['https://elastic.co'],
-            },
-          ],
-        },
-      },
-    };
-
-    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
-
-    expect(replaceKeyByParent(config, ['receivers'], packagePolicyId)).toEqual({
-      receivers: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
-          collection_interval: '30s',
-          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
-        },
-      },
-    });
-  });
-  it('appends package policy ids to multiple keys', () => {
-    const config = {
-      receivers: {
-        httpcheck: {
-          collection_interval: `30s`,
-          targets: [
-            {
-              method: 'GET',
-              endpoints: ['https://elastic.co'],
-            },
-          ],
-        },
-      },
-      service: {
-        pipelines: {
-          logs: {
-            receivers: ['httpcheck'],
-          },
-        },
-      },
-      processors: {
-        httpcheck: {},
-      },
-      extensions: {
-        httpcheck: {},
-      },
-    };
-
-    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
-    const parentKeys = ['receivers', 'processors', 'extensions'];
-
-    expect(replaceKeyByParent(config, parentKeys, packagePolicyId)).toEqual({
-      receivers: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
-          collection_interval: '30s',
-          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
-        },
-      },
-      service: {
-        pipelines: {
-          logs: {
-            receivers: ['httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76'],
-          },
-        },
-      },
-      processors: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
-      },
-      extensions: {
-        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
-      },
     });
   });
 });

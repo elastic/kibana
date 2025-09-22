@@ -21,6 +21,7 @@ export const transformESToConversation = (
   const conversation: ConversationResponse = {
     timestamp: conversationSchema['@timestamp'],
     createdAt: conversationSchema.created_at,
+    createdBy: conversationSchema.created_by,
     users:
       conversationSchema.users?.map((user) => ({
         id: user.id,
@@ -28,15 +29,6 @@ export const transformESToConversation = (
       })) ?? [],
     title: conversationSchema.title,
     category: conversationSchema.category,
-    ...(conversationSchema.summary
-      ? {
-          summary: {
-            timestamp: conversationSchema.summary['@timestamp'],
-            semanticContent: conversationSchema.summary.semantic_content,
-            summarizedMessageIds: conversationSchema.summary.summarized_message_ids,
-          },
-        }
-      : {}),
     ...(conversationSchema.api_config
       ? {
           apiConfig: {
@@ -53,6 +45,7 @@ export const transformESToConversation = (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conversationSchema.messages?.map((message: Record<string, any>) => ({
         timestamp: message['@timestamp'],
+        ...(message.id ? { id: message.id } : {}),
         // always return anonymized data from the client
         content: replaceOriginalValuesWithUuidValues({
           messageContent: message.content,
@@ -60,6 +53,7 @@ export const transformESToConversation = (
         }),
         ...(message.is_error ? { isError: message.is_error } : {}),
         ...(message.reader ? { reader: message.reader } : {}),
+        ...(message.user ? { user: message.user } : {}),
         role: message.role,
         ...(message.metadata
           ? {
@@ -117,6 +111,8 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
         return '@timestamp';
       case 'apiConfig':
         return 'api_config';
+      case 'createdBy':
+        return 'created_by';
       case 'apiConfig.actionTypeId':
         return 'api_config.action_type_id';
       case 'apiConfig.connectorId':
@@ -127,12 +123,6 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
         return 'api_config.model';
       case 'apiConfig.provider':
         return 'api_config.provider';
-      case 'summary.timestamp':
-        return 'summary.@timestamp';
-      case 'summary.semanticContent':
-        return 'summary.semantic_content';
-      case 'summary.summarizedMessageIds':
-        return 'summary.summarized_message_ids';
       default:
         return _.snakeCase(f);
     }

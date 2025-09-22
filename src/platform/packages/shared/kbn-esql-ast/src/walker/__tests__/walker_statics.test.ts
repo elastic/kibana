@@ -11,7 +11,14 @@ import { Builder } from '../../builder';
 import { parse } from '../../parser';
 import { BasicPrettyPrinter } from '../../pretty_print';
 import { EsqlQuery } from '../../query';
-import type { ESQLAstRerankCommand } from '../../types';
+import type {
+  ESQLAstItem,
+  ESQLAstRerankCommand,
+  ESQLCommandOption,
+  ESQLIntegerLiteral,
+  ESQLMap,
+  ESQLStringLiteral,
+} from '../../types';
 import { Walker } from '../walker';
 
 describe('Walker static methods', () => {
@@ -190,31 +197,30 @@ describe('Walker static methods', () => {
       });
     });
 
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    test.skip('can find RERANK command by inference ID', () => {
-      const query =
-        'FROM b | RERANK "query" ON field WITH abc | RERANK "query" ON field WITH my_id | LIMIT 10';
-      const command = Walker.find(parse(query).root, (node) => {
-        if (node.type === 'command' && node.name === 'rerank') {
-          const cmd = node as ESQLAstRerankCommand;
-          if (cmd.inferenceId.name === 'my_id') {
-            return true;
-          }
-        }
-        return false;
-      });
+    test('can find RERANK by inference_id in WITH map', () => {
+      const isWithOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+        !!arg && !Array.isArray(arg) && arg.type === 'option' && arg.name === 'with';
 
-      expect(command).toMatchObject({
-        type: 'command',
-        name: 'rerank',
-        inferenceId: {
-          type: 'identifier',
-          name: 'my_id',
-        },
-      });
+      const getWithString = (cmd: ESQLAstRerankCommand, key: string): string | undefined => {
+        const map = cmd.args.find(isWithOption)!.args[0] as ESQLMap;
+        const entry = map.entries.find((e) => e.key.valueUnquoted === key);
+        const { valueUnquoted } = entry?.value as ESQLStringLiteral;
+
+        return valueUnquoted;
+      };
+
+      const query =
+        'FROM b | RERANK "query" ON field WITH { "inference_id": "abc" } | RERANK "query" ON field WITH { "inference_id": "my_id" } | LIMIT 10';
+
+      const command = Walker.find(
+        parse(query).root,
+        (node) =>
+          node.type === 'command' &&
+          node.name === 'rerank' &&
+          getWithString(node as ESQLAstRerankCommand, 'inference_id') === 'my_id'
+      );
+
+      expect(getWithString(command as ESQLAstRerankCommand, 'inference_id')).toBe('my_id');
     });
 
     test('finds the first "fn" function', () => {
@@ -550,6 +556,16 @@ describe('Walker static methods', () => {
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456');
     });
 
+    test('can replace using a callback', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123');
+      Walker.replace(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246');
+    });
+
     test('can find node by predicate function', () => {
       const { ast } = EsqlQuery.fromSrc('FROM index | EVAL a = "x" | WHERE a == 123 | LIMIT 10');
       const newNode = Builder.expression.literal.integer(456);
@@ -593,6 +609,16 @@ describe('Walker static methods', () => {
       Walker.replaceAll(ast, { type: 'literal', value: 123 }, newNode);
 
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 456');
+    });
+
+    test('can replace using a callback all matches', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      Walker.replaceAll(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246 AND b > 246');
     });
 
     test('returns list of updated nodes', () => {
