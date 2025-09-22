@@ -7,14 +7,14 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
+import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
-import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnMissingResourcesFetched } from '../../../../types';
 import * as i18n from './translations';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
-  migrationStats: RuleMigrationTaskStats | undefined;
+  migrationStats: DashboardMigrationTaskStats | undefined;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 export const useCheckResourcesStep = ({
@@ -44,8 +44,8 @@ export const useCheckResourcesStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
+    title: i18n.DASHBOARDS_DATA_INPUT_CHECK_RESOURCES_TITLE,
     status: uploadStepStatus,
-    children: <EuiText size="s">{i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>,
+    children: <EuiText size="s">{i18n.DASHBOARDS_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>,
   };
 };
