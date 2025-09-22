@@ -23,6 +23,7 @@ import { createNewConversation, newConversationId } from '../utils/new_conversat
 import { queryKeys } from '../query_keys';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
+import { usePrefetchAgentById } from './agents/use_agent_by_id';
 
 const pendingRoundId = '__pending__';
 
@@ -43,9 +44,6 @@ export const useConversationActions = () => {
       })
     );
   };
-  const removeNewConversationQuery = () => {
-    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-  };
   const { navigateToOnechatUrl } = useNavigation();
   const shouldAllowConversationRedirectRef = useRef(true);
   useEffect(() => {
@@ -60,13 +58,16 @@ export const useConversationActions = () => {
       navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
     }
   };
+  const prefetchAgentById = usePrefetchAgentById();
 
   return {
+    removeNewConversationQuery: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
+    },
     invalidateConversation: () => {
-      removeNewConversationQuery();
       queryClient.invalidateQueries({ queryKey });
     },
-    addConversationRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
           const nextRound: ConversationRound = {
@@ -86,6 +87,13 @@ export const useConversationActions = () => {
         })
       );
     },
+    removeOptimisticRound: () => {
+      setConversation(
+        produce((draft) => {
+          draft?.rounds?.pop();
+        })
+      );
+    },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
@@ -102,6 +110,7 @@ export const useConversationActions = () => {
           draft.agent_id = agentId;
         })
       );
+      prefetchAgentById(agentId);
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {

@@ -14,7 +14,7 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import { useConversationId } from '../../hooks/use_conversation_id';
-import { useSendMessage } from '../../context/send_message_context';
+import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { ConversationContent } from './conversation_grid';

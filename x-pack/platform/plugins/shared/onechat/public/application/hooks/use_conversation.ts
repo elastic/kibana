@@ -7,7 +7,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useSendMessage } from '../context/send_message_context';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { useSendMessage } from '../context/send_message/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
@@ -22,6 +23,7 @@ export const useConversation = () => {
   const {
     data: conversation,
     isLoading,
+    isFetching,
     isFetched,
   } = useQuery({
     queryKey,
@@ -36,17 +38,21 @@ export const useConversation = () => {
     },
   });
 
-  return { conversation, isLoading, isFetched };
+  return { conversation, isLoading, isFetching, isFetched };
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetched } = useConversation();
-  return { isLoading, isFetched };
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
 };
 
 export const useAgentId = () => {
-  const { conversation } = useConversation();
-  return conversation?.agent_id;
+  const { conversation, isFetching } = useConversation();
+  const agentId = conversation?.agent_id;
+  if (!agentId && !isFetching) {
+    return oneChatDefaultAgentId;
+  }
+  return agentId;
 };
 
 export const useConversationTitle = () => {
