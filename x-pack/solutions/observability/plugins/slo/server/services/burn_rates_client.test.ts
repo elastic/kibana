@@ -153,8 +153,9 @@ describe('SummaryClient', () => {
           },
         });
         // Assertion for the time difference
-        const longRange = searchSpy.mock.lastCall[0].aggs.long_window.date_range.ranges[0];
-        const shortRange = searchSpy.mock.lastCall[0].aggs.short_window.date_range.ranges[0];
+        const longRange = (searchSpy.mock.lastCall as any)[0].aggs.long_window.date_range.ranges[0];
+        const shortRange = (searchSpy.mock.lastCall as any)[0].aggs.short_window.date_range
+          .ranges[0];
         expectTimeDifferences(longRange, shortRange, 60, 5, 'minutes');
 
         expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
@@ -289,8 +290,9 @@ describe('SummaryClient', () => {
           },
         });
         // Assertion for the time difference
-        const longRange = searchSpy.mock.lastCall[0].aggs.long_window.date_range.ranges[0];
-        const shortRange = searchSpy.mock.lastCall[0].aggs.short_window.date_range.ranges[0];
+        const longRange = (searchSpy.mock.lastCall as any)[0].aggs.long_window.date_range.ranges[0];
+        const shortRange = (searchSpy.mock.lastCall as any)[0].aggs.short_window.date_range
+          .ranges[0];
         expectTimeDifferences(longRange, shortRange, 60, 5, 'minutes');
 
         expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
