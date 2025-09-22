@@ -8,6 +8,7 @@
 /* Assertions are performed by re-using the streams_app fixtures and page objects. */
 /* eslint-disable playwright/expect-expect */
 
+import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe(
@@ -61,9 +62,11 @@ test.describe(
       await pageObjects.streams.expectRoutingOrder(['logs.first', 'logs.second', 'logs.third']);
     });
 
-    test('should handle multiple reorder operations', async ({ pageObjects }) => {
+    test('should handle multiple reorder operations', async ({ pageObjects, page }) => {
       // Perform drag operations
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
+      await expect(page.getByTestId('streamsAppManagementBottomBarButton')).toBeVisible();
+
       // Perform another reorder while in reordering state
       await pageObjects.streams.dragRoutingRule('logs.third', -1);
 
