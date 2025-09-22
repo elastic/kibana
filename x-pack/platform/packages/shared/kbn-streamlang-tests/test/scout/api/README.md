@@ -14,10 +14,10 @@ Then you can run the tests multiple times in another terminal with:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/platform/packages/shared/kbn-streamlang-tests/scout/api/playwright.config.ts --project local --grep @ess
+npx playwright test --config x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/playwright.config.ts --project local --grep @ess
 
 // Serverless
-npx playwright test --config x-pack/platform/packages/shared/kbn-streamlang-tests/scout/api/playwright.config.ts --project local --grep @svl
+npx playwright test --config x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/playwright.config.ts --project local --grep @svl
 ```
 
 Test results are available in `x-pack/platform/packages/shared/kbn-streamlang-tests/scout/api/output`
