@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './lookups';
 export * from './migration_name';
 export * from './sub_step';
 export * from './upload_file_button';
