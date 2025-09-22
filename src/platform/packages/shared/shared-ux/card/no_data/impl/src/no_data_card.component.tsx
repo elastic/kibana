@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
@@ -47,21 +47,14 @@ export const NoDataCard = ({
   canAccessFleet = true,
   href,
   buttonText,
+  disabledButtonTooltipText,
   docsLink: link,
   onClick,
   icon,
-  hideActionButton = false,
   'data-test-subj': dataTestSubj = 'noDataCard',
 }: Props) => {
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
   const docsLink = link || 'https://www.elastic.co/kibana';
-
-  const renderDescription = (content: React.ReactNode, fallback: string) => {
-    if (typeof content === 'string') {
-      return <p>{content}</p>;
-    }
-    return content || <p>{fallback}</p>;
-  };
 
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -77,15 +70,9 @@ export const NoDataCard = ({
         </EuiTitle>
       }
       icon={cardIcon}
-      body={
-        canAccessFleet ? (
-          renderDescription(description, defaultDescription)
-        ) : (
-          <p>{noPermissionDescription}</p>
-        )
-      }
+      body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
       actions={
-        !hideActionButton && canAccessFleet && href ? (
+        canAccessFleet && href && !disabledButtonTooltipText ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiButton
             color="primary"
@@ -96,6 +83,12 @@ export const NoDataCard = ({
           >
             {buttonText || defaultButtonText}
           </EuiButton>
+        ) : disabledButtonTooltipText ? (
+          <EuiToolTip position="right" content={disabledButtonTooltipText}>
+            <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+              {buttonText || defaultButtonText}
+            </EuiButton>
+          </EuiToolTip>
         ) : undefined
       }
       footer={

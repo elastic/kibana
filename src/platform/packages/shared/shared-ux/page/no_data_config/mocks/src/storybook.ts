@@ -8,34 +8,23 @@
  */
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 
 import type {
-  NoDataConfig,
   NoDataConfigPageProps,
   NoDataConfigPageServices,
 } from '@kbn/shared-ux-page-no-data-config-types';
 import { NoDataPageStorybookMock } from '@kbn/shared-ux-page-no-data-mocks';
 import type { NoDataPageStorybookParams } from '@kbn/shared-ux-page-no-data-mocks';
 
-type PropArguments = Pick<NoDataConfig, 'pageTitle'>;
-
-export type Params = ArgumentParams<PropArguments, {}> & NoDataPageStorybookParams;
+export type Params = NoDataPageStorybookParams;
 
 const dataPageMock = new NoDataPageStorybookMock();
 
 export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
   NoDataConfigPageProps,
-  NoDataConfigPageServices,
-  PropArguments
+  NoDataConfigPageServices
 > {
-  propArguments = {
-    pageTitle: {
-      control: { control: 'text' },
-      defaultValue: '',
-    },
-  };
-
+  propArguments = {};
   serviceArguments = {};
 
   dependencies = [dataPageMock];
@@ -48,12 +37,11 @@ export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        pageTitle: this.getArgumentValue('pageTitle', params),
       },
     };
   }
 
-  getServices(params: Params): NoDataConfigPageServices {
+  getServices(params: NoDataPageStorybookParams): NoDataConfigPageServices {
     return { ...dataPageMock.getServices(params) };
   }
 }

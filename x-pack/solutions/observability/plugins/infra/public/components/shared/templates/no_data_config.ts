@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { NoDataCardComponentProps } from '@kbn/shared-ux-card-no-data-types';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
@@ -38,8 +37,8 @@ const createCardConfig = (
   switch (onboardingFlow) {
     case OnboardingFlow.Hosts: {
       return {
-        title: i18n.translate('xpack.infra.hostsViewPage.noData.card.cta', {
-          defaultMessage: 'Add data',
+        title: i18n.translate('xpack.infra.hostsViewPage.noData.page.title', {
+          defaultMessage: 'Detect and resolve problems with your hosts',
         }),
         description: i18n.translate('xpack.infra.hostsViewPage.noData.card.description', {
           defaultMessage:
@@ -66,34 +65,12 @@ const createCardConfig = (
   }
 };
 
-const createPageConfig = (
-  onboardingFlow: OnboardingFlow
-): Pick<NoDataPageProps, 'pageTitle' | 'pageDescription'> | undefined => {
-  switch (onboardingFlow) {
-    case OnboardingFlow.Hosts: {
-      return {
-        pageTitle: i18n.translate('xpack.infra.hostsViewPage.noData.page.title', {
-          defaultMessage: 'Detect and resolve problems with your hosts',
-        }),
-        pageDescription: i18n.translate('xpack.infra.hostsViewPage.noData.page.description', {
-          defaultMessage:
-            'Understand how your hosts are performing so you can take action before it becomes a problem.',
-        }),
-      };
-    }
-    default: {
-      return {};
-    }
-  }
-};
-
 const getNoDataConfigDetails = ({
   onboardingFlow,
   locators,
   docsLink,
 }: NoDataConfigDetails): NoDataConfig => {
   return {
-    ...createPageConfig(onboardingFlow),
     action: {
       beats: {
         ...createCardConfig(onboardingFlow, locators, docsLink),

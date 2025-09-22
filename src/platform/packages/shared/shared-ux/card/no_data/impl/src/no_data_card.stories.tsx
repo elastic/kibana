@@ -8,8 +8,6 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiText, EuiCallOut, EuiLink, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
@@ -65,7 +63,7 @@ export const NoPermission = {
   },
 };
 
-export const WithComplexDescription = {
+export const DisabledButtonWithTooltip = {
   render: (params: NoDataCardStorybookParams) => {
     return (
       <NoDataCardProvider {...mock.getServices(params)}>
@@ -76,46 +74,10 @@ export const WithComplexDescription = {
 
   argTypes,
   args: {
-    title: 'Universal Profiling',
-    description: (
-      <EuiFlexGrid gutterSize="s">
-        <EuiText>
-          Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero
-          instrumentation. Understand what lines of code are consuming compute resources, at all
-          times, and across your entire infrastructure.
-        </EuiText>
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title="To setup Universal Profiling, you must be logged in as a superuser."
-        />
-        <EuiText size="xs">
-          <ul>
-            <li>
-              {i18n.translate('sharedUXPackages.noDataCard.examples.dataRetention.prefix', {
-                defaultMessage:
-                  'Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about',
-              })}{' '}
-              <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/set-up-lifecycle-policy.html"
-                target="_blank"
-              >
-                {i18n.translate('sharedUXPackages.noDataCard.examples.dataRetentionLink', {
-                  defaultMessage: 'controlling data retention',
-                })}
-              </EuiLink>
-              .
-            </li>
-          </ul>
-        </EuiText>
-        <EuiFlexItem>
-          <EuiButton color="primary" fill onClick={() => {}}>
-            Set up Universal Profiling
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-    ),
+    canAccessFleet: false,
+    buttonText: 'Browse integrations',
+    disabledButtonTooltipText:
+      'This feature is currently unavailable. Please contact your administrator for access.',
     href: '/app/integrations/browse',
-    hideActionButton: true,
   },
 };

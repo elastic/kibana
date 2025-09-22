@@ -20,7 +20,7 @@ type PropArguments = Pick<
   | 'href'
   | 'docsLink'
   | 'canAccessFleet'
-  | 'hideActionButton'
+  | 'disabledButtonTooltipText'
   | 'data-test-subj'
 >;
 type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
@@ -79,11 +79,11 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: true,
     },
-    hideActionButton: {
+    disabledButtonTooltipText: {
       control: {
-        control: 'boolean',
+        control: 'text',
       },
-      defaultValue: false,
+      defaultValue: '',
     },
   };
 
@@ -104,7 +104,7 @@ export class StorybookMock extends AbstractStorybookMock<
       canAccessFleet: this.getArgumentValue('canAccessFleet', params),
       href: this.getArgumentValue('href', params),
       docsLink: this.getArgumentValue('docsLink', params),
-      hideActionButton: this.getArgumentValue('hideActionButton', params),
+      disabledButtonTooltipText: this.getArgumentValue('disabledButtonTooltipText', params),
     };
   }
 

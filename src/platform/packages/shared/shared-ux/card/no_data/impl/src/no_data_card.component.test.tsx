@@ -45,18 +45,40 @@ describe('NoDataCardComponent', () => {
       expect(button).toHaveAttribute('href', '/some-path');
     });
 
-    test('renders custom title and description', () => {
-      render(<NoDataCard title="Custom Title" description="Custom description" />);
+    test('renders disabled button with tooltip when disabledButtonTooltipText is provided', () => {
+      const tooltipText = 'This feature is currently unavailable';
+      render(
+        <NoDataCard
+          buttonText="Browse integrations"
+          disabledButtonTooltipText={tooltipText}
+          href="/app/integrations/browse"
+        />
+      );
 
-      expect(screen.getByText('Custom Title')).toBeInTheDocument();
-      expect(screen.getByText('Custom description')).toBeInTheDocument();
+      // Button should be present and disabled, not hidden
+      const button = screen.getByRole('button', { name: 'Browse integrations' });
+      expect(button).toBeInTheDocument();
+      expect(button).toBeDisabled();
+
+      // Button should not be a link when disabled
+      expect(screen.queryByRole('link', { name: 'Browse integrations' })).not.toBeInTheDocument();
     });
 
-    test('does not render button if hideButton is passed and/or without href', () => {
-      render(<NoDataCard hideActionButton={true} />);
+    test('does not render button when canAccessFleet is false and disabledButtonTooltipText is not provided', () => {
+      render(<NoDataCard buttonText="Setup Button" href="/setup" canAccessFleet={false} />);
 
-      expect(screen.queryByTestId('noDataDefaultActionButton')).not.toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: /Should not show/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Setup Button' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Setup Button' })).not.toBeInTheDocument();
+      const mockOnClick = jest.fn();
+    });
+
+    test('uses custom data-test-subj when provided', () => {
+      const customTestSubj = 'customNoDataCard';
+
+      render(<NoDataCard data-test-subj={customTestSubj} />);
+
+      expect(screen.getByTestId(customTestSubj)).toBeInTheDocument();
+      expect(screen.queryByTestId('noDataCard')).not.toBeInTheDocument();
     });
   });
 });

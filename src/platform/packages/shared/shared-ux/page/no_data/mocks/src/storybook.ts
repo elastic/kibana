@@ -8,45 +8,32 @@
  */
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import type { NoDataPageProps, NoDataPageServices } from '@kbn/shared-ux-page-no-data-types';
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
-
-type PropArguments = Pick<NoDataPageProps, 'pageTitle'>;
-
-export type Params = ArgumentParams<PropArguments, {}> & NoDataCardStorybookParams;
 
 const dataCardMock = new NoDataCardStorybookMock();
 
 export class NoDataPageStorybookMock extends AbstractStorybookMock<
   NoDataPageProps,
-  NoDataPageServices,
-  PropArguments
+  NoDataPageServices
 > {
-  propArguments = {
-    pageTitle: {
-      control: { control: 'text' },
-      defaultValue: '',
-    },
-  };
-
+  propArguments = {};
   serviceArguments = {};
 
   dependencies = [dataCardMock];
 
-  getProps(params?: Params): NoDataPageProps {
+  getProps(params?: NoDataCardStorybookParams): NoDataPageProps {
     return {
       action: {
         elasticAgent: {
           title: 'Add Integrations',
         },
       },
-      pageTitle: this.getArgumentValue('pageTitle', params),
     };
   }
 
-  getServices(params: Params): NoDataPageServices {
+  getServices(params: NoDataCardStorybookParams): NoDataPageServices {
     return { ...dataCardMock.getServices(params) };
   }
 }

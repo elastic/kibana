@@ -125,9 +125,7 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts):
 
-1. `pageTitle?: string`: Optionally add page title (h1)
-2. `pageDescription?: string`: Optionally provide a custom description for the page
-3. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
+1. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
 
 ### `NoDataPageActions`
 
@@ -145,7 +143,7 @@ Each action configuration is of type [`NoDataCardProps`](https://github.com/elas
 - `href?: string`: Custom URL for the button (defaults to integrations browse page)
 - `onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void`: Custom click handler
 - `canAccessFleet?: boolean`: Whether user has Fleet access - affects button visibility and content
-- `hideActionButton?: boolean`: Hide the action button completely
+- `disabledButtonTooltipText?: string`: Optional custom tooltip text for the disabled action button
 - `docsLink?: string`: Custom documentation link
 - `icon?: EuiEmptyPromptProps['icon']`: Custom icon for the card
 - `data-test-subj?: string`: Custom test subject for testing

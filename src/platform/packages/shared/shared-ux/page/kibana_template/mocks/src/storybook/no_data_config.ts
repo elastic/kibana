@@ -8,41 +8,24 @@
  */
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 
 import { NoDataConfigPageStorybookMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 import type { NoDataConfigPageStorybookParams } from '@kbn/shared-ux-page-no-data-config-mocks';
 
 import type {
-  NoDataConfig,
   KibanaPageTemplateProps,
   KibanaPageTemplateServices,
 } from '@kbn/shared-ux-page-kibana-template-types';
 
-export type NoDataConfigArguments = Pick<NoDataConfig, 'pageTitle'>;
-
-type PropArguments = NoDataConfigArguments;
-
-export type Params = ArgumentParams<PropArguments, {}> & NoDataConfigPageStorybookParams;
+export type Params = NoDataConfigPageStorybookParams;
 
 const noDataConfigMock = new NoDataConfigPageStorybookMock();
 
-export const noDataConfigArguments: ArgumentParams<NoDataConfigArguments> = {
-  pageTitle: {
-    control: { control: 'text' },
-    defaultValue: '',
-  },
-};
-
 export class StorybookMock extends AbstractStorybookMock<
   KibanaPageTemplateProps,
-  KibanaPageTemplateServices,
-  PropArguments
+  KibanaPageTemplateServices
 > {
-  propArguments = {
-    ...noDataConfigArguments,
-  };
-
+  propArguments = {};
   serviceArguments = {};
 
   dependencies = [noDataConfigMock];
@@ -55,7 +38,6 @@ export class StorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        pageTitle: this.getArgumentValue('pageTitle', params),
       },
     };
 

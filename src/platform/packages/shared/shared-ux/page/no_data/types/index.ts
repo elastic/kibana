@@ -25,16 +25,7 @@ export interface ActionCardProps {
    */
   action: Record<string, NoDataPageActions>;
 }
-export interface NoDataPageProps extends CommonProps, ActionCardProps {
-  /**
-   * An optional custom title for the page. This title is only rendered if provided; by default, no title is shown.
-   */
-  pageTitle?: string;
-  /**
-   * An optional custom description for the page. This description is only rendered if provided; by default, no description is shown.
-   */
-  pageDescription?: string;
-}
+export interface NoDataPageProps extends CommonProps, ActionCardProps {}
 
 /**
  * A list of services that are consumed by this component.

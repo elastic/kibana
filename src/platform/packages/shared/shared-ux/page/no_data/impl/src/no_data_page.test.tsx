@@ -32,23 +32,4 @@ describe('NoDataPage', () => {
     // Should render the NoDataCard component (inherited from ActionCard)
     expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
   });
-
-  test('renders with pageTitle and pageDescription', () => {
-    render(
-      <NoDataPageProvider {...getNoDataPageServicesMock()}>
-        <NoDataPage
-          pageTitle="Test Page Title"
-          pageDescription="Test page description"
-          action={{
-            elasticAgent: {},
-          }}
-        />
-      </NoDataPageProvider>
-    );
-
-    // Should render the page title and description
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Page Title');
-    expect(screen.getByText('Test page description')).toBeInTheDocument();
-    expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
-  });
 });
