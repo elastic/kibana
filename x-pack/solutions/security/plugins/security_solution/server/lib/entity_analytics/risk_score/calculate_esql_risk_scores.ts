@@ -228,14 +228,15 @@ export const getESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
   const query = /* SQL */ `
-  FROM .alerts-security.alerts-default
+  FROM .alerts-security.alerts-default METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
+             event.kind as category,
              @timestamp as time
-    | EVAL input = CONCAT(""" {"risk_score": """", score::keyword, """", "time": """", time::keyword, """", "rule_name": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(""" {"risk_score": """", score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
