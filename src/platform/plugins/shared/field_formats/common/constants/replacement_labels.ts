@@ -10,11 +10,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_LABEL = i18n.translate('fieldFormats.string.emptyLabel', {
-  defaultMessage: '(empty)',
+  defaultMessage: '(blank)',
 });
 
 export const NULL_LABEL = i18n.translate('fieldFormats.string.missingLabel', {
-  defaultMessage: '(missing value)',
+  defaultMessage: '(null)',
 });
 
 export const NAN_LABEL = 'NaN';
