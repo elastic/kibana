@@ -20408,7 +20408,7 @@
         "tags": [
           "Fleet cloud connectors"
         ],
-        "x-state": "Technical Preview; added in 1.0.0"
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "post": {
         "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
@@ -20598,7 +20598,7 @@
         "tags": [
           "Fleet cloud connectors"
         ],
-        "x-state": "Technical Preview; added in 1.0.0"
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/fleet/cloud_connectors/{cloudConnectorId}": {
@@ -20689,7 +20689,7 @@
         "tags": [
           "Fleet cloud connectors"
         ],
-        "x-state": "Technical Preview; added in 1.0.0"
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "get": {
         "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.",
@@ -20788,7 +20788,7 @@
         "tags": [
           "Fleet cloud connectors"
         ],
-        "x-state": "Technical Preview; added in 1.0.0"
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "put": {
         "description": "[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.",
@@ -20973,7 +20973,7 @@
         "tags": [
           "Fleet cloud connectors"
         ],
-        "x-state": "Technical Preview; added in 1.0.0"
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/fleet/data_streams": {
