@@ -27633,7 +27633,7 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview; added in 1.0.0
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -27768,7 +27768,7 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview; added in 1.0.0
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -27838,7 +27838,7 @@ paths:
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview; added in 1.0.0
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -27916,7 +27916,7 @@ paths:
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview; added in 1.0.0
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -28046,7 +28046,7 @@ paths:
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview; added in 1.0.0
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
