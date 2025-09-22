@@ -88,7 +88,7 @@ export function DataViewsList({
   const sortingService = useMemo(
     () =>
       new SortingService<DataViewListItemEnhanced>({
-        alphabetically: (item) => item.name ?? item.title,
+        alphabetically: (item) => item.name || item.title,
       }),
     []
   );

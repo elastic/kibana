@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { dsl as genericDsl } from '../../common/data/dsl_queries';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../../../../../common/siem_migrations/constants';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
 
 export const dsl = {
   isInstalled(): QueryDslQueryContainer {
@@ -25,17 +25,15 @@ export const dsl = {
   matchTitle(title: string): QueryDslQueryContainer {
     return { match: { 'elastic_rule.title': title } };
   },
-  isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullyTranslated(), dsl.isNotInstalled()];
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };
   },
-  isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullyTranslated(), dsl.isInstalled()] } };
   },
   isMissingIndex(): QueryDslQueryContainer {
     return {
-      query_string: {
-        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
-      },
+      query_string: { query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"` },
     };
   },
 };

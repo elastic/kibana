@@ -21,6 +21,7 @@ import {
   updateTabs,
   disconnectTab,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
@@ -56,6 +57,7 @@ export const internalStateActions = {
   initializeSingleTab,
   syncLocallyPersistedTabState,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
@@ -83,17 +85,24 @@ export {
   type RuntimeStateManager,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
 
 export {
   fromSavedObjectTabToTabState,

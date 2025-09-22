@@ -32,7 +32,7 @@ import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useTool } from '../../../hooks/tools/use_tools';
 
-interface OnechatTestToolFlyout {
+interface ToolTestFlyoutProps {
   isOpen: boolean;
   isLoading?: boolean;
   toolId: string;
@@ -168,7 +168,7 @@ const renderFormField = (
   }
 };
 
-export const OnechatTestFlyout: React.FC<OnechatTestToolFlyout> = ({ toolId, onClose }) => {
+export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose }) => {
   const [response, setResponse] = useState<string>('{}');
 
   const form = useForm<Record<string, any>>({

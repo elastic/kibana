@@ -397,7 +397,10 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
+  DeleteDashboardMigrationRequestParamsInput,
   GetAllDashboardMigrationsStatsResponse,
+  GetAllTranslationStatsDashboardMigrationRequestParamsInput,
+  GetAllTranslationStatsDashboardMigrationResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
   GetDashboardMigrationDashboardsRequestQueryInput,
@@ -410,11 +413,16 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+  InstallMigrationDashboardsResponse,
   StartDashboardsMigrationRequestParamsInput,
   StartDashboardsMigrationRequestBodyInput,
   StartDashboardsMigrationResponse,
   StopDashboardsMigrationRequestParamsInput,
   StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
   UpsertDashboardMigrationResourcesRequestParamsInput,
   UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
@@ -910,6 +918,21 @@ For detailed information on Kibana actions and alerting, and additional API call
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Deletes a SIEM dashboards migration using the migration id provided
+   */
+  async deleteDashboardMigration(props: DeleteDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1469,6 +1492,28 @@ finalize it.
     return this.kbnClient
       .request<GetAllStatsRuleMigrationResponse>({
         path: '/internal/siem_migrations/rules/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+   */
+  async getAllTranslationStatsDashboardMigration(
+    props: GetAllTranslationStatsDashboardMigrationProps
+  ) {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetAllTranslationStatsDashboardMigration`
+    );
+    return this.kbnClient
+      .request<GetAllTranslationStatsDashboardMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2100,6 +2145,25 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs migration dashboards
+   */
+  async installMigrationDashboards(props: InstallMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationDashboards`);
+    return this.kbnClient
+      .request<InstallMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/install',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2835,6 +2899,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates mutable fields of an existing dashboard migration
+   */
+  async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -3058,6 +3138,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
+}
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
@@ -3144,6 +3227,9 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
@@ -3247,6 +3333,10 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
+}
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
@@ -3347,6 +3437,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
 }
 export interface UpdateEntitySourceProps {
   params: UpdateEntitySourceRequestParamsInput;

@@ -66,7 +66,9 @@ export enum SecurityPageName {
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
   siemReadiness = 'siem_readiness',
+  siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
+  siemMigrationsDashboards = 'siem_migrations-dashboards',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts

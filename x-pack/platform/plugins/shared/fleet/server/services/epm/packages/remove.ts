@@ -155,7 +155,9 @@ export async function deleteKibanaAssets({
   spaceId?: string;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository([KibanaSavedObjectType.alert])
+    appContextService
+      .getSavedObjects()
+      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);

@@ -27,6 +27,8 @@ const userProfileMock = userProfileServiceMock.createStart();
 
 const MODAL_CONTENT = 'Modal content 1';
 const MODAL_CONTENT_TWO = 'Modal content 2';
+const MODAL_SCREEN_READER_TEXT =
+  'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.';
 const SOME_CONFIRM = 'Some confirm';
 
 beforeEach(() => {
@@ -62,7 +64,9 @@ describe('ModalService', () => {
       });
       expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.find('div.euiModal').text()).toEqual(MODAL_CONTENT);
+      expect(modalContent.find('div.euiModal').text()).toEqual(
+        `${MODAL_CONTENT}${MODAL_SCREEN_READER_TEXT}`
+      );
     });
 
     describe('with a currently active modal', () => {

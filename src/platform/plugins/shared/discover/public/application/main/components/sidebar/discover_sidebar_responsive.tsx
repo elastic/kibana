@@ -26,6 +26,7 @@ import {
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -300,6 +301,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
+  const additionalFieldGroups = useMemo(() => {
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))();
+  }, [getRecommendedFieldsAccessor]);
+
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -386,6 +392,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
+            additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
             dataView={selectedDataView}
