@@ -50,6 +50,7 @@ describe('content pack stream helpers', () => {
           {
             destination: 'logs.foo.baz',
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
