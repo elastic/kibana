@@ -104,7 +104,8 @@ export const toEsqlQueryHits = async (
         rows.length > 0 ? document : Object.assign({ [ALERT_ID_COLUMN]: ActionGroupId }, document)
       );
     }
-    if (r % chunkSize === 0) {
+
+    if (r !== 0 && r % chunkSize === 0) {
       await new Promise(setImmediate);
     }
   }
