@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { FAILURE_STORE_SELECTOR } from '../../../../util/constants';
 
 export const getFailureStoreIndexName = (definition: Streams.ingest.all.GetResponse) => {
-  const isClassic = Streams.ClassicStream.GetResponse.is(definition);
-  return isClassic
-    ? definition.stream.name
-    : `${definition.stream.name}${FAILURE_STORE_SELECTOR},${definition.stream.name}.*${FAILURE_STORE_SELECTOR}`;
+  return getIndexPatternsForStream(definition.stream)
+    ?.map((index) => index + FAILURE_STORE_SELECTOR)
+    .join(',');
 };

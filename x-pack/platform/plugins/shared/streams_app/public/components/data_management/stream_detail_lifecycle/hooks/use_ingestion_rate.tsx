@@ -15,7 +15,6 @@ import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { DataStreamStats } from './use_data_stream_stats';
 import type { FailureStoreStats } from './use_failure_store_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
-import { FAILURE_STORE_SELECTOR } from '../../../../util/constants';
 import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 
 const TIMESTAMP_FIELD = '@timestamp';
@@ -79,7 +78,7 @@ export const useIngestionRate = ({
         return { start, end, interval, buckets: {} };
       }
       const indexName = isFailureStore
-        ? `${getFailureStoreIndexName(definition)}${FAILURE_STORE_SELECTOR}`
+        ? getFailureStoreIndexName(definition)
         : definition.stream.name;
 
       const {
@@ -200,7 +199,7 @@ export const useIngestionRatePerTier = ({
         return { start, end, interval, buckets: {} };
       }
       const indexName = isFailureStore
-        ? `${getFailureStoreIndexName(definition)}${FAILURE_STORE_SELECTOR}`
+        ? getFailureStoreIndexName(definition)
         : definition.stream.name;
 
       const {

@@ -7,9 +7,9 @@
 
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
-import { FAILURE_STORE_SELECTOR } from '../../../../util/constants';
+import { type Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 
 export const useFailureStoreRedirectLink = ({
   definition,
@@ -22,13 +22,8 @@ export const useFailureStoreRedirectLink = ({
     },
   } = useKibana();
 
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const failureIndexPatterns = indexPatterns?.map((pattern, index) => {
-    return indexPatterns.length === 1 || index > 0
-      ? `${pattern}${FAILURE_STORE_SELECTOR}`
-      : pattern;
-  });
-  const esqlQuery = failureIndexPatterns ? `FROM ${failureIndexPatterns.join(', ')}` : undefined;
+  const failureIndexPatterns = getFailureStoreIndexName(definition);
+  const esqlQuery = failureIndexPatterns ? `FROM ${failureIndexPatterns}` : undefined;
 
   const useUrl = share.url.locators.useUrl;
 
