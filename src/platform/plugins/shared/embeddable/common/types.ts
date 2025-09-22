@@ -14,7 +14,7 @@ export type EmbeddableTransforms<
   EmbeddableState extends object = object
 > = {
   /**
-   * Converts StoredEmbeddableState and inject references into EmbeddableState
+   * Converts StoredEmbeddableState and injects references into EmbeddableState
    */
   transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
   /**
