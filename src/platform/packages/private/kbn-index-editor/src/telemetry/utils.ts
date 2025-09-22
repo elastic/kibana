@@ -25,18 +25,14 @@ export const getBucket = (value: number, config: BucketConfig): string => {
     }
   }
 
-  // For values greater than the last bucket's `to`.
+  // For values greater than the last bucket's `to`, create an overflow label
   const lastBucket = config[config.length - 1];
-  const lastBucketLowerBound = config.length > 1 ? config[config.length - 2].to + 1 : 1;
 
-  // Create a label like "20+" from a label like "5-20"
-  const lastPart = lastBucket.label.split('-').pop();
-  if (lastPart && lastPart.endsWith('+')) {
-    return lastPart;
-  }
-  if (lastPart) {
-    return `${lastBucket.to}+`;
+  // If the label already ends with '+', use it as-is
+  if (lastBucket.label.endsWith('+')) {
+    return lastBucket.label;
   }
 
-  return `${lastBucketLowerBound}+`;
+  // Otherwise, create a "X+" label from the last bucket's upper bound
+  return `${lastBucket.to}+`;
 };
