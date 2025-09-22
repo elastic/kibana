@@ -16,17 +16,15 @@ jest.mock('./security_modules', () => ({
     'sentinel_one',
     'sentinel_one_cloud_funnel',
   ],
-  MICROSOFT_DEFENDER_MODULES: [
-    'microsoft_defender_endpoint',
-    'm365_defender',
-  ],
+  MICROSOFT_DEFENDER_MODULES: ['microsoft_defender_endpoint', 'm365_defender'],
   getSecurityModuleDatasets: jest.fn(),
   getAllSecurityModules: jest.fn(),
 }));
 
-const mockGetSecurityModuleDatasets = securityModules.getSecurityModuleDatasets as jest.MockedFunction<
-  typeof securityModules.getSecurityModuleDatasets
->;
+const mockGetSecurityModuleDatasets =
+  securityModules.getSecurityModuleDatasets as jest.MockedFunction<
+    typeof securityModules.getSecurityModuleDatasets
+  >;
 
 describe('getSupportedSchemas', () => {
   beforeEach(() => {
@@ -375,7 +373,9 @@ describe('getSupportedSchemas', () => {
 
       expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(1);
 
-      getSupportedSchemas({ microsoftDefenderEndpointDataInAnalyzerEnabled: true } as ExperimentalFeatures);
+      getSupportedSchemas({
+        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
+      } as ExperimentalFeatures);
 
       expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(2);
     });

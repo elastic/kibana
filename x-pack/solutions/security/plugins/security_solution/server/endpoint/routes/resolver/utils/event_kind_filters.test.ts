@@ -64,10 +64,7 @@ describe('event_kind_filters', () => {
 
       expect(result.bool.should).toContainEqual({
         bool: {
-          must: [
-            { term: { 'event.kind': 'alert' } },
-            { terms: { 'event.module': mockModules } },
-          ],
+          must: [{ term: { 'event.kind': 'alert' } }, { terms: { 'event.module': mockModules } }],
         },
       });
     });
@@ -102,10 +99,7 @@ describe('event_kind_filters', () => {
             },
             {
               bool: {
-                must: [
-                  { term: { 'event.kind': 'alert' } },
-                  { terms: { 'event.module': [] } },
-                ],
+                must: [{ term: { 'event.kind': 'alert' } }, { terms: { 'event.module': [] } }],
               },
             },
           ],
@@ -144,10 +138,7 @@ describe('event_kind_filters', () => {
 
       expect(result.bool.should[1]).toEqual({
         bool: {
-          must: [
-            { term: { 'event.kind': 'alert' } },
-            { terms: { 'event.module': mockModules } },
-          ],
+          must: [{ term: { 'event.kind': 'alert' } }, { terms: { 'event.module': mockModules } }],
         },
       });
     });
@@ -179,10 +170,7 @@ describe('event_kind_filters', () => {
 
         expect(result.bool.should[1]).toEqual({
           bool: {
-            must: [
-              { term: { 'event.kind': 'alert' } },
-              { terms: { 'event.module': mockModules } },
-            ],
+            must: [{ term: { 'event.kind': 'alert' } }, { terms: { 'event.module': mockModules } }],
           },
         });
       });
@@ -203,7 +191,10 @@ describe('event_kind_filters', () => {
         const result1 = createEventKindFilter();
 
         // Second call returns different modules (simulating feature flag changes)
-        mockGetAllSecurityModules.mockReturnValueOnce(['crowdstrike', 'microsoft_defender_endpoint']);
+        mockGetAllSecurityModules.mockReturnValueOnce([
+          'crowdstrike',
+          'microsoft_defender_endpoint',
+        ]);
         const result2 = createEventKindFilter();
 
         expect(result1.bool.should[1].bool.must[1]).toEqual({
