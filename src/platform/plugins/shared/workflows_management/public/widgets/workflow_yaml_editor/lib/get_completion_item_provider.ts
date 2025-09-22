@@ -11,7 +11,7 @@ import type { Scalar } from 'yaml';
 import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import type { BuiltInStepType } from '@kbn/workflows';
+import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -736,7 +736,7 @@ function getTriggerTypeSuggestions(
   );
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type);
+    const snippetText = generateTriggerSnippet(triggerType.type as TriggerType);
 
     // Extended range for multi-line insertion
     const extendedRange = {
