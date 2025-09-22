@@ -11,7 +11,7 @@ import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_mig
 import type { DashboardMigrationStats } from '../../../../../../../siem_migrations/dashboards/types';
 import { UploadDashboardsPanel } from '../../../../../../../siem_migrations/dashboards/components/status_panels/upload_panel';
 import { MigrationReadyPanel } from '../../../../../../../siem_migrations/dashboards/components/migration_status_panels/migration_ready_panel';
-import { MigrationProgressPanel } from '../../../../../../../siem_migrations/common/components/migration_panels/migration_progress_panel';
+import { MigrationProgressPanel } from '../../../../../../../siem_migrations/common/components';
 import { DashboardMigrationResultPanel } from '../../../../../../../siem_migrations/dashboards/components/migration_status_panels/migration_result_panel';
 import { MissingAIConnectorCallout } from '../common/missing_ai_connector_callout';
 

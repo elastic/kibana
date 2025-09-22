@@ -14,8 +14,10 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { MigrationsReadMore } from '../../../../../../../siem_migrations/common/components';
-import { useMigrationDataInputContext } from '../../../../../../../siem_migrations/common/components/migration_data_input_flyout_context';
+import {
+  MigrationsReadMore,
+  useMigrationDataInputContext,
+} from '../../../../../../../siem_migrations/common/components';
 import { useUploadPanelStyles } from '../../../../../../../siem_migrations/common/styles/upload_panel.styles';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../../../../../siem_migrations/common/styles';
 import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
