@@ -193,6 +193,19 @@ export default function (providerContext: FtrProviderContext) {
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
+        id: 'agent3_91',
+        document: {
+          policy_id: policy3.id,
+          enrolled_at: new Date().toISOString(),
+          agent: {
+            version: '9.1.0',
+          },
+        },
+      });
+
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
         id: 'agent4',
         document: {
           policy_id: policy1.id,
@@ -272,6 +285,17 @@ export default function (providerContext: FtrProviderContext) {
             uri: 'https://example.com',
           })
           .expect(403);
+      });
+
+      it('should return a 400 if the agent is an unsupported version', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/agent3_91/migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            enrollment_token: '1234',
+            uri: 'https://example.com',
+          })
+          .expect(400);
       });
 
       it('should return a 404 when agent does not exist', async () => {
