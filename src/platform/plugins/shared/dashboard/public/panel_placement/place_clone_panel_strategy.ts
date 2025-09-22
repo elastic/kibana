@@ -95,22 +95,22 @@ export function placeClonePanel({
    * 3. reposition the panels after the cloned panel in the grid
    */
   const otherPanels = { ...currentPanels };
-  const grid = otherPanelGridData.sort(comparePanels);
+  const sortedGrid = otherPanelGridData.sort(comparePanels);
 
   let position = 0;
-  for (position; position < grid.length; position++) {
-    if (beside.i === grid[position].i) {
+  for (position; position < sortedGrid.length; position++) {
+    if (beside.i === sortedGrid[position].i) {
       break;
     }
   }
   const bottomPlacement = possiblePlacementDirections[2];
   // place to the bottom and move all other panels
-  let originalPositionInTheGrid = grid[position + 1].i;
+  let originalPositionInTheGrid = sortedGrid[position + 1].i;
   const diff =
     bottomPlacement.grid.y + bottomPlacement.grid.h - otherPanels[originalPositionInTheGrid].grid.y;
 
-  for (let j = position + 1; j < grid.length; j++) {
-    originalPositionInTheGrid = grid[j].i;
+  for (let j = position + 1; j < sortedGrid.length; j++) {
+    originalPositionInTheGrid = sortedGrid[j].i;
     const { grid, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
     if (grid.sectionId === sectionId) {
       // only move panels in the cloned panel's section
