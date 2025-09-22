@@ -63,7 +63,6 @@ export function ClassicStreamBadge() {
       }}
     >
       <EuiBadge color="hollow" iconType={iconStreamClassic} iconSide="left" tabIndex={0}>
-
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
