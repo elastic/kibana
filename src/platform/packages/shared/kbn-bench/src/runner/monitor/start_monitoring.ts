@@ -20,7 +20,7 @@ export async function startMonitoring({
   dir: string;
   procStatsRefreshInterval?: number;
   log: ToolingLog;
-}): Promise<(includeOwnMetrics: boolean) => Promise<ProcStats[]>> {
+}): Promise<() => Promise<ProcStats[]>> {
   // Create a temporary directory where all monitored Node processes will write their stats
   const monitorDir = path.resolve(dir, 'monitor', Math.random().toString().substring(-6));
 
@@ -39,20 +39,8 @@ export async function startMonitoring({
 
   log.debug(`kbn-bench monitor enabled: dir=${monitorDir}`);
 
-  // make sure it's a fresh require, as it's an IIFE
-  delete require.cache[agentPath];
-
-  // Start monitoring for the current (parent) process immediately
-  require(agentPath);
-
-  return async function stopMonitoring(includeOwnMetrics) {
+  return async function stopMonitoring() {
     await fs.promises.writeFile(path.join(monitorDir, 'stop'), '1', 'utf8');
-
-    (
-      globalThis as unknown as {
-        __KBN_BENCH_MONITOR?: { stop?: () => void };
-      }
-    ).__KBN_BENCH_MONITOR?.stop?.();
 
     if (prevNodeOptions) {
       const current = process.env.NODE_OPTIONS ?? '';
@@ -97,7 +85,7 @@ export async function startMonitoring({
       if (samples.length) {
         const stat = aggregateProcStatSamples(samples);
 
-        if (includeOwnMetrics || stat.pid !== process.pid || files.length === 1) {
+        if (stat.pid !== process.pid) {
           results.push(stat);
         }
       }

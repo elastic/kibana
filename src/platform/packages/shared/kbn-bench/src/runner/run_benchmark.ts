@@ -77,8 +77,6 @@ async function runAll({
 }) {
   const results: BenchmarkRunResult[] = [];
 
-  const includeOwnMetrics = benchmark.kind === 'module';
-
   // don't collect system metrics for high volume of runs, too much overhead
   const shouldMonitor = benchmark.kind !== 'module' || config.runs <= 100;
 
@@ -99,13 +97,13 @@ async function runAll({
         metrics,
         status: 'completed',
         time: performance.now() - start,
-        stats: await stopMonitoring(includeOwnMetrics),
+        stats: await stopMonitoring(),
       });
     } catch (error: any) {
       results.push({
         error,
         status: 'failed',
-        stats: await stopMonitoring(includeOwnMetrics),
+        stats: await stopMonitoring(),
       });
     } finally {
       await hooks.after?.();
