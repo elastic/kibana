@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -246,11 +246,6 @@ export interface ChartSectionProps {
    * Observable for fetching the histogram data
    */
   input$: UnifiedHistogramInput$;
-
-  /**
-   * The current time range
-   */
-  timeRange?: TimeRange;
 
   /**
    * Flag indicating that the chart is currently loading

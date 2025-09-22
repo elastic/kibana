@@ -42,14 +42,13 @@ export const MetricsExperienceGrid = ({
   services,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
-  timeRange,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
   const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
 
-  const { updateTimeRange } = requestParams;
+  const { getTimeRange, updateTimeRange } = requestParams;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -64,8 +63,7 @@ export const MetricsExperienceGrid = ({
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsAPILoading } = useMetricFieldsQuery({
     index: indexPattern,
-    from: timeRange?.from,
-    to: timeRange?.to,
+    timeRange: getTimeRange(),
   });
 
   const { leftSideActions, rightSideActions } = useToolbarActions({
