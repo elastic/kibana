@@ -428,7 +428,7 @@ export function buildComponentTemplates(params: {
       isTimeSeriesEnabledByDefault);
 
   const isPkgConfiguringDynamicSettings =
-    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings.dynamic === false;
+    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.dynamic !== undefined;
 
   templatesMap[packageTemplateName] = {
     template: {
