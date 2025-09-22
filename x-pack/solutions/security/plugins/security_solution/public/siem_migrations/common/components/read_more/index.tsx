@@ -11,13 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 
-export const RuleMigrationsReadMore = React.memo(() => {
+export const MigrationsReadMore = React.memo(() => {
   const docLink = useKibana().services.docLinks.links.securitySolution.siemMigrations;
   return (
     <PanelText size="xs" subdued>
       <p>
         <FormattedMessage
-          id="xpack.securitySolution.siemMigrations.rules.panel.help.readMore"
+          id="xpack.securitySolution.siemMigrations.common.panel.help.readMore"
           defaultMessage="Read more about our AI powered translations and other features. {readMore}"
           values={{
             readMore: (
@@ -34,4 +34,4 @@ export const RuleMigrationsReadMore = React.memo(() => {
     </PanelText>
   );
 });
-RuleMigrationsReadMore.displayName = 'RuleMigrationsReadMore';
+MigrationsReadMore.displayName = 'MigrationsReadMore';

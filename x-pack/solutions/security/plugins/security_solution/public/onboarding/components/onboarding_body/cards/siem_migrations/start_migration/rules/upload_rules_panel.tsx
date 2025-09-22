@@ -14,11 +14,11 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
+import { MigrationsReadMore } from '../../../../../../../siem_migrations/common/components';
 import { useMigrationDataInputContext } from '../../../../../../../siem_migrations/common/components/migration_data_input_flyout_context';
 import { useUploadPanelStyles } from '../../../../../../../siem_migrations/common/styles/upload_panel.styles';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../../../../../siem_migrations/common/styles';
 import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
-import { RuleMigrationsReadMore } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
 import { SiemMigrationsIcon } from '../../../../../../../siem_migrations/common/icon';
 import * as i18n from './translations';
 
@@ -64,7 +64,7 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <RuleMigrationsReadMore />
+                  <MigrationsReadMore />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

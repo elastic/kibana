@@ -9,6 +9,7 @@ export * from './column_header';
 export * from './empty_migration';
 export * from './filters';
 export * from './header_buttons';
+export * from './read_more';
 export * from './search_field';
 export * from './start_migration_modal';
 export * from './unknown_migration';

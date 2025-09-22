@@ -14,13 +14,13 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { RuleMigrationsReadMore } from '../../../rules/components/migration_status_panels/read_more';
 import { SiemMigrationsIcon } from '../../../common/icon';
 import * as i18n from './translations';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../common/styles';
 import { useUploadPanelStyles } from '../../../common/styles/upload_panel.styles';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import type { DashboardMigrationStats } from '../../types';
+import { MigrationsReadMore } from '../../../common/components';
 
 export interface UploadDashboardsPanelProps {
   isUploadMore?: boolean;
@@ -69,7 +69,7 @@ export const UploadDashboardsSectionPanel = React.memo<UploadDashboardsSectionPa
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <RuleMigrationsReadMore />
+                  <MigrationsReadMore />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
