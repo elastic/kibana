@@ -28,6 +28,7 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/router-utils",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

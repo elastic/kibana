@@ -21,6 +21,7 @@
     "@kbn/utility-types-jest",
     "@kbn/shared-ux-file-mocks",
     "@kbn/test-jest-helpers",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

@@ -11,5 +11,6 @@
     "@kbn/charts-theme",
     "@kbn/apm-types-shared",
     "@kbn/custom-icons",
+    "@kbn/lazy-require",
   ]
 }

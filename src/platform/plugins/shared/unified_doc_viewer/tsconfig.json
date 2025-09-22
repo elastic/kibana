@@ -56,7 +56,8 @@
     "@kbn/css-utils",
     "@kbn/storybook",
     "@kbn/esql-composer",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/lazy-require"
   ],
   "exclude": ["target/**/*"]
 }

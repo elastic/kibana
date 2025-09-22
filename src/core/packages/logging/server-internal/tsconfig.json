@@ -22,6 +22,7 @@
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
     "@kbn/security-hardening",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

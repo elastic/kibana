@@ -89,6 +89,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
+    "@kbn/lazy-require",
   ],
   "exclude": ["target/**/*"]
 }

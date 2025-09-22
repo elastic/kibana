@@ -18,6 +18,7 @@
     "@kbn/datemath",
     "@kbn/file-upload-common",
     "@kbn/test-jest-helpers",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

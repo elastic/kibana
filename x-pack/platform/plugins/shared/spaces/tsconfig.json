@@ -57,7 +57,8 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-utils",
     "@kbn/css-utils",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/lazy-require"
   ],
   "exclude": ["target/**/*"]
 }

@@ -60,7 +60,8 @@
     "@kbn/inference-tracing",
     "@kbn/licensing-types",
     "@kbn/llm-tasks-plugin",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/lazy-require"
   ],
   "exclude": ["target/**/*"]
 }

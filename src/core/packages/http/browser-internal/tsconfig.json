@@ -24,6 +24,7 @@
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/core-fatal-errors-browser-mocks",
     "@kbn/utility-types",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

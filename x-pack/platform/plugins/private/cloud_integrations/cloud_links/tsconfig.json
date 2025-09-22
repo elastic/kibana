@@ -26,6 +26,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/core-plugins-browser",
     "@kbn/config",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

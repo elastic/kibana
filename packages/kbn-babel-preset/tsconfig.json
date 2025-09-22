@@ -8,5 +8,8 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/lazy-require",
   ]
 }

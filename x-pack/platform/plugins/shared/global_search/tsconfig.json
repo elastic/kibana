@@ -18,6 +18,7 @@
     "@kbn/utility-types",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/licensing-types",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

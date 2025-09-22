@@ -168,6 +168,7 @@ module.exports = function lazyRequirePlugin(babel, initialOptions) {
           debug(() => 'Processing');
 
           debug(() => {
+            // eslint-disable-next-line import/no-extraneous-dependencies
             const generate = require('@babel/generator').default;
             const { code } = generate(programPath.hub.file.ast, {
               compact: false,

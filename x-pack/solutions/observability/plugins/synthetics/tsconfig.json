@@ -119,7 +119,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/lazy-require"
   ],
   "exclude": ["target/**/*"]
 }

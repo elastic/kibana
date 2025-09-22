@@ -27,6 +27,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/screenshotting-server",
     "@kbn/handlebars",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

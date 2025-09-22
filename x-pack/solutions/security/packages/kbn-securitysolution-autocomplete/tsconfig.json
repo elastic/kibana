@@ -17,6 +17,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/doc-links",
     "@kbn/securitysolution-utils",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

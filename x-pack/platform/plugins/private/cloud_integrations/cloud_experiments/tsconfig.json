@@ -23,6 +23,7 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-feature-flags-server",
     "@kbn/config",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

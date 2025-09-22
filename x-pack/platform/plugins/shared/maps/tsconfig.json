@@ -97,6 +97,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

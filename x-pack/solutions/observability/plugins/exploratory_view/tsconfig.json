@@ -46,6 +46,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/config-schema",
+    "@kbn/lazy-require",
   ],
   "exclude": ["target/**/*"]
 }

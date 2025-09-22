@@ -23,6 +23,7 @@
     "@kbn/utility-types",
     "@kbn/repo-info",
     "@kbn/repo-packages",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

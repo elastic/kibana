@@ -21,6 +21,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/lazy-require"
   ]
 }

@@ -22,5 +22,6 @@
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/lazy-require",
   ]
 }

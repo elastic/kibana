@@ -25,6 +25,7 @@
     "@kbn/core-theme-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

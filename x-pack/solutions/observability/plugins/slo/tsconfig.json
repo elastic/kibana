@@ -111,5 +111,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
+    "@kbn/lazy-require",
   ]
 }

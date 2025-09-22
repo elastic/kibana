@@ -8,6 +8,7 @@
  */
 
 const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const resolve = require('resolve');
 
 /**

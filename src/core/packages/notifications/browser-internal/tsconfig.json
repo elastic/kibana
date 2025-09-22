@@ -27,7 +27,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-rendering-browser-mocks",
-    "@kbn/core-rendering-browser"
+    "@kbn/core-rendering-browser",
+    "@kbn/lazy-require"
   ],
   "exclude": [
     "target/**/*"

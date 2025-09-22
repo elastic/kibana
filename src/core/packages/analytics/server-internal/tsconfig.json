@@ -16,7 +16,8 @@
     "@kbn/core-analytics-server",
     "@kbn/config-mocks",
     "@kbn/core-base-server-mocks",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/lazy-require"
   ],
   "exclude": [
     "target/**/*",

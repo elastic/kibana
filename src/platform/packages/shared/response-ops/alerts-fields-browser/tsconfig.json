@@ -20,5 +20,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
+    "@kbn/lazy-require",
   ]
 }

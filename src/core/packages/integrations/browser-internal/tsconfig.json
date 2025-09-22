@@ -16,6 +16,7 @@
     "@kbn/core-base-browser-internal",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

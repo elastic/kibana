@@ -61,6 +61,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
+    "@kbn/lazy-require",
   ],
   "exclude": ["target/**/*"]
 }

@@ -260,5 +260,6 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/core-analytics-server-mocks",
+    "@kbn/lazy-require",
   ]
 }

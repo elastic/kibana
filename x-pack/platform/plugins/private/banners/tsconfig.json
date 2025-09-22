@@ -13,6 +13,7 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

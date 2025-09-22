@@ -37,6 +37,7 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

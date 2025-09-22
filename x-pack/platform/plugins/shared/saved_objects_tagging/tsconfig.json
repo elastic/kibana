@@ -19,7 +19,8 @@
     "@kbn/ebt-tools",
     "@kbn/core-notifications-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/lazy-require"
   ],
   "exclude": [
     "target/**/*",

@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/logging",
     "@kbn/core-logging-common-internal",
-    "@kbn/security-hardening"
+    "@kbn/security-hardening",
+    "@kbn/lazy-require"
   ],
   "exclude": [
     "target/**/*",

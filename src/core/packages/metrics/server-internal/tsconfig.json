@@ -28,6 +28,7 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server",
     "@kbn/safer-lodash-set",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

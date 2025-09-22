@@ -16,6 +16,7 @@
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

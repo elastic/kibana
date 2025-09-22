@@ -126,6 +126,7 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/lazy-require",
   ],
   "exclude": ["target/**/*"]
 }

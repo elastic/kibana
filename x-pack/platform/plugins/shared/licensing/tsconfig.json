@@ -16,6 +16,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
+    "@kbn/lazy-require",
   ],
   "exclude": ["target/**/*"]
 }

@@ -15,7 +15,8 @@
     "@kbn/core-base-common",
     "@kbn/core-base-common-internal",
     "@kbn/core-base-server-internal",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/lazy-require"
   ],
   "exclude": [
     "target/**/*",
