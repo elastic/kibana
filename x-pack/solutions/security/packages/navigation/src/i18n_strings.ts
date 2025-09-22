@@ -280,6 +280,11 @@ export const i18nStrings = {
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
       { defaultMessage: 'Admin and Settings' }
     ),
+    organization: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.organization', {
+        defaultMessage: 'Organization',
+      }),
+    },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
         defaultMessage: 'Alerts and Insights',

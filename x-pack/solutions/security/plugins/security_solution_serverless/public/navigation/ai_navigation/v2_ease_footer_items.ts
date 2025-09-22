@@ -50,13 +50,16 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
     sideNavVersion: 'v2',
     children: [
       {
-        cloudLink: 'billingAndSub',
+        title: i18nStrings.stackManagementV2.access.title,
+        children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
       },
       {
-        title: i18nStrings.stackManagementV2.access.title,
+        title: i18nStrings.stackManagementV2.organization.title,
+        breadcrumbStatus: 'hidden',
         children: [
-          { link: 'management:api_keys' },
-          { link: 'management:roles' },
+          {
+            cloudLink: 'billingAndSub',
+          },
           {
             cloudLink: 'userAndRoles',
             title: i18nStrings.stackManagement.access.usersAndRoles,
