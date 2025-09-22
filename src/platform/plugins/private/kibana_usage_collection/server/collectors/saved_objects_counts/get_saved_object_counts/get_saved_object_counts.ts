@@ -107,7 +107,9 @@ export async function getSavedObjectsCounts(
     void,
     {
       types: estypes.AggregationsStringTermsAggregate;
-      access_control_types: estypes.AggregationsStringTermsAggregate;
+      access_control_types: estypes.AggregationsFilterAggregate & {
+        by_type: estypes.AggregationsStringTermsAggregate;
+      };
     }
   >({
     type: soTypes,
@@ -120,7 +122,7 @@ export async function getSavedObjectsCounts(
     (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const accessControlBucket =
-    (body.aggregations?.access_control_types
+    (body.aggregations?.access_control_types?.by_type
       ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const nonExpectedTypes: string[] = [];
