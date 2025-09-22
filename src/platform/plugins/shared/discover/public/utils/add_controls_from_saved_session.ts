@@ -44,8 +44,7 @@ export const addControlsFromSavedSession = (
   Object.values(controlsState).forEach((panel) => {
     const variableName = panel.variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
-    // Only add the control if its variable name exists in current esqlVariables
-    if (variableExists) {
+    if (!variableExists) {
       controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
