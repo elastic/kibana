@@ -19,7 +19,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SEARCH_SESSIONS_MANAGEMENT_ID, BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
@@ -70,7 +70,7 @@ export function registerSearchSessionsMgmt(
 ) {
   return deps.management.sections.section.kibana.registerApp({
     id: APP.id,
-    title: APP.getI18nName(false),
+    title: APP.getI18nName(true),
     order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
@@ -85,5 +85,4 @@ export async function updateSearchSessionMgmtSectionTitle(
   app: ManagementApp | undefined
 ) {
   if (!app) return;
-
 }
