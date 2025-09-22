@@ -95,6 +95,13 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/core-capabilities-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-deprecations-server-mocks",
+    "@kbn/core-http-resources-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
   ],
   "exclude": [
     "target/**/*",

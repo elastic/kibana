@@ -54,6 +54,7 @@
     "@kbn/object-utils",
     "@kbn/expressions-plugin",
     "@kbn/esql-ast",
+    "@kbn/config-mocks",
   ],
   "exclude": ["target/**/*"]
 }

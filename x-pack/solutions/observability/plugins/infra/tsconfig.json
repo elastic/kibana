@@ -121,6 +121,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/apm-types",
+    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

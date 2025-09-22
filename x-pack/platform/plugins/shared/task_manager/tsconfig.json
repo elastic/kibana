@@ -39,6 +39,12 @@
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
+    "@kbn/config-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

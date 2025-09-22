@@ -111,5 +111,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }

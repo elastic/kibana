@@ -64,6 +64,9 @@
     "@kbn/global-search-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/otel-semantic-conventions",
-    "@kbn/streams-ai"
+    "@kbn/streams-ai",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }
