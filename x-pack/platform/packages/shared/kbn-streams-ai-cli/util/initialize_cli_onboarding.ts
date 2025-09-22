@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { BoundInferenceClient, truncateList } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { truncateList } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import type { PatternMatchFailure } from '@kbn/streams-ai';
 import {
-  PatternMatchFailure,
   findDissectMatchFailure,
   findGrokMatchFailure,
   formatMatchFailure,
   initializeOnboarding,
 } from '@kbn/streams-ai';
-import { FlattenRecord, Streams, getProcessorConfig } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams, getProcessorConfig } from '@kbn/streams-schema';
 import { castArray, get, omit, pick, uniqBy } from 'lodash';
-import { SampleError } from '@kbn/streams-ai/shared/processing/types';
-import {
+import type { SampleError } from '@kbn/streams-ai/shared/processing/types';
+import type {
   OnboardingTaskContext,
   OnboardingTaskState,
 } from '@kbn/streams-ai/workflows/onboarding/types';

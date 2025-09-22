@@ -6,7 +6,7 @@
  */
 
 import { castArray } from 'lodash';
-import { Flags } from '@kbn/dev-cli-runner';
+import type { Flags } from '@kbn/dev-cli-runner';
 
 export function getStreamNames(flags: Flags) {
   return castArray(flags.stream ?? []).flatMap((val) => String(val).split(','));

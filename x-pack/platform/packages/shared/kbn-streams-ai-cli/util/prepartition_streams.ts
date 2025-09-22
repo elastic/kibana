@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaClient } from '@kbn/kibana-api-cli';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { createStreamsRepositoryCliClient } from './create_repository_client';
 

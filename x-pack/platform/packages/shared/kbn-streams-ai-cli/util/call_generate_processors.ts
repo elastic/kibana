@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Flags } from '@kbn/dev-cli-runner';
-import { BoundInferenceClient } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
-import { ValidateProcessorsCallback } from '@kbn/streams-ai';
-import { SampleSet } from '@kbn/streams-ai/shared/processing/types';
-import { ProcessorValidation } from '@kbn/streams-ai/workflows/generate_content_pack/generate_processors/validate_processor_callback';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { ProcessorDefinitionWithId, Streams, getProcessorConfig } from '@kbn/streams-schema';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Flags } from '@kbn/dev-cli-runner';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import type { ValidateProcessorsCallback } from '@kbn/streams-ai';
+import type { SampleSet } from '@kbn/streams-ai/shared/processing/types';
+import type { ProcessorValidation } from '@kbn/streams-ai/workflows/generate_content_pack/generate_processors/validate_processor_callback';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { ProcessorDefinitionWithId, Streams } from '@kbn/streams-schema';
+import { getProcessorConfig } from '@kbn/streams-schema';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { omit, uniqBy } from 'lodash';
 import { inspect } from 'util';
 

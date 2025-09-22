@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { runRecipe } from '@kbn/inference-cli';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '@kbn/streams-ai/workflows/partition_stream';
 import moment from 'moment';
 import { format } from 'util';
