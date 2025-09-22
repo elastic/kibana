@@ -8989,6 +8989,35 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.makeRegEx",
+        "type": "Function",
+        "tags": [],
+        "label": "makeRegEx",
+        "description": [],
+        "signature": [
+          "((glob: string) => RegExp) & _.MemoizedFunction"
+        ],
+        "path": "src/platform/plugins/shared/kibana_utils/common/field_wildcard.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.makeRegEx.$1",
+            "type": "string",
+            "tags": [],
+            "label": "glob",
+            "description": [],
+            "path": "src/platform/plugins/shared/kibana_utils/common/field_wildcard.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.mergeMigrationFunctionMaps",
         "type": "Function",
         "tags": [],

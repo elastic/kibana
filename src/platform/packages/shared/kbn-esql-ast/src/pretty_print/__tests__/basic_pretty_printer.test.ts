@@ -439,6 +439,18 @@ describe('single line query', () => {
 
           expect(text).toBe('ROW F(*)');
         });
+
+        test('parameter function name is printed as specified', () => {
+          const { text } = reprint('ROW ??functionName(*)');
+
+          expect(text).toBe('ROW ??functionName(*)');
+        });
+
+        test('parameter function name is printed as specified (single ?)', () => {
+          const { text } = reprint('ROW ?functionName(42)');
+
+          expect(text).toBe('ROW ?functionName(42)');
+        });
       });
 
       describe('unary expression', () => {

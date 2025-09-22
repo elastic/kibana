@@ -16,7 +16,7 @@ export const fromEs = <TConfig extends object = {}>(
     throw new Error('No source found on get conversation response');
   }
   return {
-    id: document._id,
+    id: document._source.id,
     type: document._source.type,
     description: document._source.description,
     tags: document._source.tags,
