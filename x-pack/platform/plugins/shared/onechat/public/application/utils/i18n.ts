@@ -10,6 +10,15 @@ import { i18n } from '@kbn/i18n';
 export const labels = {
   conversations: {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
+    manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
+      defaultMessage: 'Manage agents',
+    }),
+    createAnAgent: i18n.translate('xpack.onechat.agents.createAnAgent', {
+      defaultMessage: 'Create an agent',
+    }),
+    selectAgentAriaLabel: i18n.translate('xpack.onechat.agents.selectAgentAriaLabel', {
+      defaultMessage: 'Select an agent',
+    }),
   },
   tools: {
     // Landing page
@@ -227,6 +236,9 @@ export const labels = {
     settings: {
       optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
         defaultMessage: 'Optional',
+      }),
+      cancelButtonLabel: i18n.translate('xpack.onechat.agents.form.settings.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
       }),
     },
   },
