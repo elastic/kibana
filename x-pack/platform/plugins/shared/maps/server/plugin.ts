@@ -18,7 +18,7 @@ import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 
-import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
@@ -191,7 +191,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
           defaultMessage: 'Maps',
         }),
         category: DEFAULT_APP_CATEGORIES.kibana,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [APP_ID, 'kibana'],
         catalogue: [APP_ID],
         privileges: {

@@ -29,7 +29,6 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { observabilityFeatureId } from '../common';
 import {
@@ -130,7 +129,6 @@ export class ObservabilityPlugin
         }),
         order: 1000,
         category: DEFAULT_APP_CATEGORIES.observability,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
         alerting: alertingFeatures,
