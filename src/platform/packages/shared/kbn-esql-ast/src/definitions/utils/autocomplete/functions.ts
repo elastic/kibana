@@ -10,26 +10,20 @@ import type { LicenseType } from '@kbn/licensing-types';
 
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { uniq } from 'lodash';
-import {
-  isAssignment,
-  isColumn,
-  isFunctionExpression,
-  isList,
-  isLiteral,
-  isOptionNode,
-} from '../../../ast/is';
+import { isAssignment, isColumn, isFunctionExpression, isList, isLiteral } from '../../../ast/is';
 import {
   allStarConstant,
   commaCompleteItem,
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
 import { getLocationInfo } from '../../../commands_registry/location';
-import type {
-  ESQLColumnData,
-  GetColumnsByTypeFn,
-  ICommandCallbacks,
-  ICommandContext,
-  ISuggestionItem,
+import {
+  Location,
+  type ESQLColumnData,
+  type GetColumnsByTypeFn,
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
 } from '../../../commands_registry/types';
 import { parse } from '../../../parser';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
@@ -41,7 +35,6 @@ import { correctQuerySyntax, findAstPosition } from '../ast';
 import { getExpressionType } from '../expressions';
 import {
   filterFunctionSignatures,
-  getAllFunctions,
   getFunctionDefinition,
   getFunctionSuggestions,
 } from '../functions';
@@ -126,21 +119,13 @@ const getCommandAndOptionWithinFORK = (
 };
 
 export async function getFunctionArgsSuggestions(
-  innerText: string,
-  commands: ESQLCommand[],
-  getFieldsByType: GetColumnsByTypeFn,
-  fullText: string,
-  offset: number,
+  fn: ESQLFunction,
+  // commands: ESQLCommand[],
+  getColumnsByType: GetColumnsByTypeFn,
   context?: ICommandContext,
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
-  const analysis = analyzeParameterLocation(
-    fullText,
-    offset,
-    commands,
-    context,
-    hasMinimumLicenseRequired
-  );
+  const analysis = analyzeParameterLocation(fn, context, hasMinimumLicenseRequired);
 
   if (!analysis) {
     return [];
@@ -154,8 +139,6 @@ export async function getFunctionArgsSuggestions(
     currentArg,
     fnToIgnore,
     fnDefinition,
-    finalCommandArgIndex,
-    command,
   } = analysis;
 
   // 4. Parameter Types to Suggest
@@ -230,7 +213,7 @@ export async function getFunctionArgsSuggestions(
 
     suggestions.push(
       ...pushItUpInTheList(
-        await getFieldsByType(
+        await getColumnsByType(
           getTypesFromParamDefs(
             compatibleParamDefs.filter((d) => !d.constantOnly)
           ) as FunctionParameterType[],
@@ -246,12 +229,15 @@ export async function getFunctionArgsSuggestions(
     );
 
     if (compatibleParamDefs.every((d) => !d.fieldsOnly)) {
-      const location = getLocationInfo(
-        offset,
-        command,
-        commands,
-        isAggFunctionUsedAlready(command, finalCommandArgIndex)
-      ).id;
+      // const location = getLocationInfo(
+      //   offset,
+      //   command,
+      //   commands,
+      //   // TODO - re-enable
+      //   // isAggFunctionUsedAlready(command, finalCommandArgIndex)
+      //   false
+      // ).id;
+      const location = Location.EVAL;
       suggestions.push(
         ...getFunctionSuggestions(
           {
@@ -301,30 +287,19 @@ export async function getFunctionArgsSuggestions(
 }
 
 const analyzeParameterLocation = (
-  fullText: string,
-  offset: number,
-  commands: ESQLCommand[],
+  node: ESQLFunction,
   context?: ICommandContext,
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ) => {
-  // --- Context Gathering Section ---
-  // AST Node Context
-  // Find the AST node and command at the cursor position
-  // TODO: do we need findAstPosition here?
-  const astContext = findAstPosition(commands, offset);
-  const node = astContext.node;
-  if (!node) {
-    return;
-  }
-  let command = astContext.command;
-  // Special handling if the command is a `fork`
-  if (astContext.command?.name === 'fork') {
-    const { command: forkCommand } =
-      astContext.command?.name === 'fork'
-        ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
-        : { command: undefined };
-    command = forkCommand || astContext.command;
-  }
+  // let command = astContext.command;
+  // // Special handling if the command is a `fork`
+  // if (astContext.command?.name === 'fork') {
+  //   const { command: forkCommand } =
+  //     astContext.command?.name === 'fork'
+  //       ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+  //       : { command: undefined };
+  //   command = forkCommand || astContext.command;
+  // }
 
   // Function Definition
   // The function’s metadata and signatures (fnDefinition)
@@ -359,9 +334,11 @@ const analyzeParameterLocation = (
 
   // Special Function Handling
   // Whether to add a comma after the suggestion
-  const isCursorFollowedByComma = fullText
-    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
-    : false;
+  // TODO - re-enable
+  // const isCursorFollowedByComma = fullText
+  //   ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+  //   : false;
+  const isCursorFollowedByComma = false;
   // Whether the function is a boolean condition (e.g., `case`)
   const canBeBooleanCondition =
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
@@ -373,40 +350,40 @@ const analyzeParameterLocation = (
   // Whether to advance the cursor or open suggestions
   const shouldAdvanceCursor = hasMoreMandatoryArgs && !isCursorFollowedByComma;
 
-  // Ignored Functions
-  // Functions to ignore based on context (e.g., grouping, aggregation, already-used functions)
-  const commandArgIndex = command.args.findIndex(
-    (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
-  );
-  const finalCommandArgIndex =
-    command.name !== 'stats' && command.name !== 'inlinestats'
-      ? -1
-      : commandArgIndex < 0
-      ? Math.max(command.args.length - 1, 0)
-      : commandArgIndex;
-  const finalCommandArg = command.args[finalCommandArgIndex];
-  const fnToIgnore = [];
-  fnToIgnore.push(
-    ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-  );
-  if (
-    (command.name !== 'stats' && command.name !== 'inlinestats') ||
-    (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
-  ) {
-    // ignore the current function
-    fnToIgnore.push(node.name);
-  } else {
-    fnToIgnore.push(
-      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-      // TODO — can this be captured in just the location ID computation?
-      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
-        : []),
-      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
-        : [])
-    );
-  }
+  // // Ignored Functions
+  // // Functions to ignore based on context (e.g., grouping, aggregation, already-used functions)
+  // const commandArgIndex = command.args.findIndex(
+  //   (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
+  // );
+  // const finalCommandArgIndex =
+  //   command.name !== 'stats' && command.name !== 'inlinestats'
+  //     ? -1
+  //     : commandArgIndex < 0
+  //     ? Math.max(command.args.length - 1, 0)
+  //     : commandArgIndex;
+  // const finalCommandArg = command.args[finalCommandArgIndex];
+  // const fnToIgnore = [];
+  // fnToIgnore.push(
+  //   ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+  // );
+  // if (
+  //   (command.name !== 'stats' && command.name !== 'inlinestats') ||
+  //   (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
+  // ) {
+  //   // ignore the current function
+  //   fnToIgnore.push(node.name);
+  // } else {
+  //   fnToIgnore.push(
+  //     ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+  //     // TODO — can this be captured in just the location ID computation?
+  //     ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
+  //       ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+  //       : []),
+  //     ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+  //       ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
+  //       : [])
+  //   );
+  // }
 
   return {
     compatibleParamDefs,
@@ -414,10 +391,8 @@ const analyzeParameterLocation = (
     shouldAdvanceCursor,
     hasMoreMandatoryArgs,
     currentArg,
-    fnToIgnore,
+    fnToIgnore: [node.name], // TODO - re-enable fnToIgnore,
     fnDefinition,
-    command,
-    finalCommandArgIndex,
   };
 };
 
@@ -536,18 +511,18 @@ export const getInsideFunctionsSuggestions = async (
         context?.activeProduct
       );
     }
-    if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
-      // command ... fn( <here> )
-      return await getFunctionArgsSuggestions(
-        innerText,
-        ast,
-        callbacks?.getByType ?? (() => Promise.resolve([])),
-        query,
-        cursorPosition ?? 0,
-        context,
-        callbacks?.hasMinimumLicenseRequired
-      );
-    }
+    // if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
+    //   // command ... fn( <here> )
+    //   return await getFunctionArgsSuggestions(
+    //     innerText,
+    //     ast,
+    //     callbacks?.getByType ?? (() => Promise.resolve([])),
+    //     query,
+    //     cursorPosition ?? 0,
+    //     context,
+    //     callbacks?.hasMinimumLicenseRequired
+    //   );
+    // }
   }
 
   return undefined;

@@ -6,22 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { isAssignment, isColumn } from '../../../ast/is';
+import { isMarkerNode } from '../../../definitions/utils/ast';
+import {
+  getExpressionPosition,
+  suggestForExpression,
+} from '../../../definitions/utils/autocomplete/helpers';
+import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import {
-  pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
+  pipeCompleteItem,
 } from '../../complete_items';
-import {
-  suggestForExpression,
-  getExpressionPosition,
-} from '../../../definitions/utils/autocomplete/helpers';
-import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import type { ICommandCallbacks } from '../../types';
-import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
-import { isColumn, isAssignment } from '../../../ast/is';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isMarkerNode } from '../../../definitions/utils/ast';
+import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 
 export async function autocomplete(
   query: string,
@@ -64,16 +63,6 @@ export async function autocomplete(
     suggestions.push(
       getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
     );
-  }
-
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
   }
 
   if (

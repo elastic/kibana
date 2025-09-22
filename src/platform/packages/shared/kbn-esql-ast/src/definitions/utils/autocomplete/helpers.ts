@@ -13,13 +13,14 @@ import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import type {
   GetColumnsByTypeFn,
   ICommandContext,
   ISuggestionItem,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import type { ESQLAstItem, ESQLFunction, ESQLLocation, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import { Walker } from '../../../walker';
 import { logicalOperators } from '../../all_operators';
 import { EDITOR_MARKER } from '../../constants';
@@ -35,9 +36,6 @@ import {
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
 import { getColumnByName, getOverlapRange, isParamExpressionType } from '../shared';
-
-export const within = (position: number, location: ESQLLocation | undefined) =>
-  Boolean(location && location.min <= position && location.max >= position);
 
 export const shouldBeQuotedText = (
   text: string,
@@ -222,6 +220,7 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 type ExpressionPosition =
   | 'after_column'
   | 'after_function'
+  | 'in_function'
   | 'after_not'
   | 'after_operator'
   | 'after_literal'
@@ -273,7 +272,7 @@ export const getExpressionPosition = (
     }
 
     if (isFunctionExpression(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
-      return 'after_function';
+      return within(innerText.length, expressionRoot) ? 'in_function' : 'after_function';
     }
 
     if (isFunctionExpression(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
@@ -328,6 +327,22 @@ export async function suggestForExpression({
 
   const position = getExpressionPosition(innerText, expressionRoot);
   switch (position) {
+    case 'in_function': {
+      const lastArg = (expressionRoot as ESQLFunction).args.slice(-1)[0] as ESQLAstItem;
+
+      return suggestForExpression({
+        expressionRoot: (Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem,
+        innerText,
+        getColumnsByType,
+        location,
+        preferredExpressionType,
+        context,
+        advanceCursorAfterInitialColumn,
+        hasMinimumLicenseRequired,
+        activeProduct,
+        ignoredColumnsForEmptyExpression,
+      });
+    }
     /**
      * After a literal, column, or complete (non-operator) function call
      */
@@ -466,7 +481,7 @@ export async function suggestForExpression({
       return;
     } else if (hasNonWhitespacePrefix) {
       // get index of first char of final word
-      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+      const lastNonWhitespaceIndex = innerText.search(/\b\w(?=\w*$)/);
       s.rangeToReplace = {
         start: lastNonWhitespaceIndex,
         end: innerText.length,
