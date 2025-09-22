@@ -5,13 +5,13 @@
     "functions": [
       {
         "parentPluginId": "workflowsManagement",
-        "id": "def-public.WorkflowExecutionLazy",
+        "id": "def-public.WorkflowExecution",
         "type": "Function",
         "tags": [],
-        "label": "WorkflowExecutionLazy",
+        "label": "WorkflowExecution",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<React.FC<",
+          "React.LazyExoticComponent<React.LazyExoticComponent<React.FC<",
           {
             "pluginId": "workflowsManagement",
             "scope": "public",
@@ -19,16 +19,16 @@
             "section": "def-public.WorkflowExecutionProps",
             "text": "WorkflowExecutionProps"
           },
-          ">>"
+          ">>>"
         ],
-        "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution.lazy.tsx",
+        "path": "src/platform/plugins/shared/workflows_management/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecutionLazy.$1",
+            "id": "def-public.WorkflowExecution.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -233,7 +233,7 @@
         "label": "WORKFLOWS_EXECUTION_LOGS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-execution-logs\""
+          "\".workflows-execution-logs\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,
@@ -248,7 +248,7 @@
         "label": "WORKFLOWS_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-executions\""
+          "\".workflows-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,
@@ -263,7 +263,7 @@
         "label": "WORKFLOWS_STEP_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".kibana-workflow-step-executions\""
+          "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,

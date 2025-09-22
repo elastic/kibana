@@ -60,6 +60,24 @@ describe('DataView list component', () => {
     };
   });
 
+  it('sorts alphabetically the items', () => {
+    const listWithEmptyName: DataViewListItemEnhanced[] = [
+      { id: 'dataview-1', title: 'beta', name: '' },
+      { id: 'dataview-2', title: 'alpha' },
+      { id: 'dataview-3', title: 'gamma', name: 'gamma' },
+    ];
+
+    const component = shallow(
+      <DataViewsList {...props} dataViewsList={listWithEmptyName} currentDataViewId="dv-1" />
+    );
+
+    expect(getDataViewPickerOptions(component)!.map((o: any) => o.label)).toEqual([
+      'alpha',
+      'beta',
+      'gamma',
+    ]);
+  });
+
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {
     const component = shallow(<DataViewsList {...props} />);
     await act(async () => {

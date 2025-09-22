@@ -24,15 +24,13 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
-  DashboardCreateOut,
   DashboardCreateOptions,
-  DashboardGetOut,
-  DashboardSearchOut,
   DashboardUpdateOptions,
-  DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardItem,
+  DashboardGetOut,
 } from './latest';
+import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
 const searchArgsToSOFindOptions = (
   query: SearchQuery,
@@ -170,11 +168,11 @@ export class DashboardStorage {
     );
 
     const { item, error: itemError } = savedObjectToItem(savedObject, false);
+
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
-    const validationError = transforms.create.out.result.validate({ item });
+    const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);

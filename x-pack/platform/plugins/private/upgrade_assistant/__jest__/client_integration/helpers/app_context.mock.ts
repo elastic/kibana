@@ -87,6 +87,8 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
     currentMajor: kibanaVersion.major,
     prevMajor: kibanaVersion.major - 1,
     nextMajor: kibanaVersion.major + 1,
+    currentMinor: kibanaVersion.minor,
+    currentPatch: kibanaVersion.patch,
   },
   services: {
     ...servicesMock,

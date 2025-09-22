@@ -12,21 +12,19 @@ import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const updatedDashboard = {
-  attributes: {
-    title: 'Refresh Requests (Updated)',
-    options: { useMargins: false },
-    panels: [
-      {
-        type: 'visualization',
-        gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
-        panelIndex: '1',
-        version: '7.3.0',
-      },
-    ],
-    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-    timeRestore: true,
-    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-  },
+  title: 'Refresh Requests (Updated)',
+  options: { useMargins: false },
+  panels: [
+    {
+      type: 'visualization',
+      gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
+      panelIndex: '1',
+      version: '7.3.0',
+    },
+  ],
+  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+  timeRestore: true,
+  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
   references: [
     {
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -44,13 +42,14 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send(updatedDashboard);
 
       expect(response.status).to.be(200);
 
-      expect(response.body.item.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
-      expect(response.body.item.type).to.be('dashboard');
-      expect(response.body.item.attributes.title).to.be('Refresh Requests (Updated)');
+      expect(response.body.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
+      expect(response.body.type).to.be('dashboard');
+      expect(response.body.data.title).to.be('Refresh Requests (Updated)');
     });
 
     it('should return 404 when updating a non-existent dashboard', async () => {
@@ -58,10 +57,9 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`${PUBLIC_API_PATH}/not-an-id`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title: 'Some other dashboard (updated)',
-          },
+          title: 'Some other dashboard (updated)',
         });
 
       expect(response.status).to.be(404);

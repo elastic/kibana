@@ -6,3 +6,5 @@
  */
 
 export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;

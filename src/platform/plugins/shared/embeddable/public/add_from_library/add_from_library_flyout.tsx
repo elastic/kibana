@@ -42,13 +42,12 @@ const runAddTelemetry = (
   usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
-export const AddFromLibraryFlyout = ({
-  container,
-  modalTitleId,
-}: {
+export interface AddFromLibraryFormProps {
   container: CanAddNewPanel;
   modalTitleId?: string;
-}) => {
+}
+
+export const AddFromLibraryFlyout = ({ container, modalTitleId }: AddFromLibraryFormProps) => {
   const libraryTypes = useAddFromLibraryTypes();
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(

@@ -6,18 +6,23 @@
  */
 
 import { ToolType } from './definition';
+import { internalNamespaces } from './namespaces';
+
+const platformCoreTool = (toolName: string) => {
+  return `${internalNamespaces.platformCore}.${toolName}`;
+};
 
 /**
  * Ids of built-in onechat tools
  */
-export const builtinToolIds = {
-  indexExplorer: '.index_explorer',
-  search: '.search',
-  listIndices: '.list_indices',
-  getIndexMapping: '.get_index_mapping',
-  getDocumentById: '.get_document_by_id',
-  generateEsql: '.generate_esql',
-  executeEsql: '.execute_esql',
+export const platformCoreTools = {
+  indexExplorer: platformCoreTool('index_explorer'),
+  search: platformCoreTool('search'),
+  listIndices: platformCoreTool('list_indices'),
+  getIndexMapping: platformCoreTool('get_index_mapping'),
+  getDocumentById: platformCoreTool('get_document_by_id'),
+  generateEsql: platformCoreTool('generate_esql'),
+  executeEsql: platformCoreTool('execute_esql'),
 } as const;
 
 /**
@@ -26,24 +31,11 @@ export const builtinToolIds = {
 export const editableToolTypes: ToolType[] = [ToolType.esql, ToolType.index_search];
 
 export const defaultAgentToolIds = [
-  builtinToolIds.search,
-  builtinToolIds.listIndices,
-  builtinToolIds.getIndexMapping,
-  builtinToolIds.getDocumentById,
+  platformCoreTools.search,
+  platformCoreTools.listIndices,
+  platformCoreTools.getIndexMapping,
+  platformCoreTools.getDocumentById,
 ];
-
-export const builtInToolIdPrefix = '.';
-export const reservedKeywords = ['new'];
-
-/**
- * Common set of tags used for platform tools.
- */
-export const builtinTags = {
-  /**
-   * Tag associated to tools related to data retrieval
-   */
-  retrieval: 'retrieval',
-} as const;
 
 /**
  * The number of active tools that will trigger a warning in the UI.

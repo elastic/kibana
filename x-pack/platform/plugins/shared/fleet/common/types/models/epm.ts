@@ -62,7 +62,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -82,7 +82,7 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -97,6 +97,7 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   transform = 'transform',
   mlModel = 'ml_model',
+  knowledgeBase = 'knowledge_base',
 }
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
@@ -246,6 +247,7 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -256,6 +258,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -485,6 +488,7 @@ export type RegistryVarType =
   | 'yaml'
   | 'string'
   | 'textarea'
+  | 'duration'
   | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
@@ -500,6 +504,8 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  min_duration = 'min_duration',
+  max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
 }
 
@@ -524,6 +530,8 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.min_duration]?: string;
+  [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
@@ -649,6 +657,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
@@ -806,6 +815,22 @@ export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
+}
+
+export interface KnowledgeBaseItem {
+  fileName: string;
+  content: string;
+  path?: string;
+  installed_at?: string;
+  version?: string;
+}
+
+export interface PackageKnowledgeBase {
+  package: {
+    name: string;
+  };
+
+  items: KnowledgeBaseItem[];
 }
 
 // Experimental support for Otel integrations

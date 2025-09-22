@@ -57,7 +57,7 @@ export const loadDashboardState = async ({
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+          throw new SavedObjectNotFound({ type: DASHBOARD_CONTENT_ID, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
@@ -83,7 +83,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed } = rawDashboardContent;
+  const { references, attributes, managed, version } = rawDashboardContent;
 
   const {
     refreshInterval,
@@ -110,7 +110,7 @@ export const loadDashboardState = async ({
   return {
     managed,
     references,
-    resolveMeta,
+    resolveMeta: { ...resolveMeta, version },
     dashboardInput: {
       ...options,
       refreshInterval,

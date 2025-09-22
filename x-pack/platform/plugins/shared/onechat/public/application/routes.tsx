@@ -12,7 +12,7 @@ import { OnechatAgentsEdit } from './pages/agent_edit';
 import { OnechatAgentsPage } from './pages/agents';
 import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatToolCreatePage } from './pages/tool_create';
-import { OnechatToolEditPage } from './pages/tool_edit';
+import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
 
 export const OnechatRoutes: React.FC<{}> = () => {
@@ -39,7 +39,7 @@ export const OnechatRoutes: React.FC<{}> = () => {
       </Route>
 
       <Route path="/tools/:toolId">
-        <OnechatToolEditPage />
+        <OnechatToolDetailsPage />
       </Route>
 
       <Route path="/tools">

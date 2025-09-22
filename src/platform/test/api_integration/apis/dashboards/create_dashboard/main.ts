@@ -22,17 +22,16 @@ export default function ({ getService }: FtrProviderContext) {
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-          },
+          title,
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.attributes.kibanaSavedObjectMeta.searchSource).to.eql({});
-      expect(response.body.item.attributes.panels).to.eql([]);
-      expect(response.body.item.attributes.timeRestore).to.be(false);
-      expect(response.body.item.attributes.options).to.eql({
+      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
+      expect(response.body.data.panels).to.eql([]);
+      expect(response.body.data.timeRestore).to.be(false);
+      expect(response.body.data.options).to.eql({
         hidePanelTitles: false,
         useMargins: true,
         syncColors: true,
@@ -48,30 +47,29 @@ export default function ({ getService }: FtrProviderContext) {
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-            panels: [
-              {
-                type: 'visualization',
-                gridData: {
-                  x: 0,
-                  y: 0,
-                  w: 24,
-                  h: 15,
-                },
-                panelConfig: {},
+          title,
+          panels: [
+            {
+              type: 'visualization',
+              gridData: {
+                x: 0,
+                y: 0,
+                w: 24,
+                h: 15,
               },
-            ],
-          },
+              panelConfig: {},
+            },
+          ],
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.attributes.panels).to.be.an('array');
+      expect(response.body.data.panels).to.be.an('array');
       // panel index is a random uuid when not provided
-      expect(response.body.item.attributes.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
-      expect(response.body.item.attributes.panels[0].panelIndex).to.eql(
-        response.body.item.attributes.panels[0].gridData.i
+      expect(response.body.data.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
+      expect(response.body.data.panels[0].panelIndex).to.eql(
+        response.body.data.panels[0].gridData.i
       );
     });
 
@@ -82,36 +80,35 @@ export default function ({ getService }: FtrProviderContext) {
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-            controlGroupInput: {
-              controls: [
-                {
-                  type: 'optionsListControl',
-                  order: 0,
-                  width: 'medium',
-                  grow: true,
-                  controlConfig: {
-                    title: 'Origin City',
-                    fieldName: 'OriginCityName',
-                    dataViewId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-                    selectedOptions: [],
-                    enhancements: {},
-                  },
+          title,
+          controlGroupInput: {
+            controls: [
+              {
+                type: 'optionsListControl',
+                order: 0,
+                width: 'medium',
+                grow: true,
+                controlConfig: {
+                  title: 'Origin City',
+                  fieldName: 'OriginCityName',
+                  dataViewId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+                  selectedOptions: [],
+                  enhancements: {},
                 },
-              ],
-            },
+              },
+            ],
           },
         });
 
       expect(response.status).to.be(200);
       // generates a random saved object id
-      expect(response.body.item.id).match(/^[0-9a-f-]{36}$/);
+      expect(response.body.id).match(/^[0-9a-f-]{36}$/);
       // saved object stores controls panels as an object, but the API should return as an array
-      expect(response.body.item.attributes.controlGroupInput.controls).to.be.an('array');
+      expect(response.body.data.controlGroupInput.controls).to.be.an('array');
 
-      expect(response.body.item.attributes.controlGroupInput.ignoreParentSettings).to.eql(
+      expect(response.body.data.controlGroupInput.ignoreParentSettings).to.eql(
         DEFAULT_IGNORE_PARENT_SETTINGS
       );
     });
@@ -124,12 +121,13 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`${PUBLIC_API_PATH}/${id}`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: { title },
+          title,
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.id).to.be(id);
+      expect(response.body.id).to.be(id);
     });
 
     it('creates a dashboard with references', async () => {
@@ -139,24 +137,23 @@ export default function ({ getService }: FtrProviderContext) {
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-            panels: [
-              {
-                type: 'visualization',
-                gridData: {
-                  x: 0,
-                  y: 0,
-                  w: 24,
-                  h: 15,
-                  i: 'bizz',
-                },
-                panelConfig: {},
-                panelIndex: 'bizz',
+          title,
+          panels: [
+            {
+              type: 'visualization',
+              gridData: {
+                x: 0,
+                y: 0,
+                w: 24,
+                h: 15,
+                i: 'bizz',
               },
-            ],
-          },
+              panelConfig: {},
+              panelIndex: 'bizz',
+            },
+          ],
           references: [
             {
               name: 'bizz:panel_bizz',
@@ -167,10 +164,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.attributes.panels).to.be.an('array');
+      expect(response.body.data.panels).to.be.an('array');
     });
 
-    // TODO Maybe move this test to x-pack/test/api_integration/dashboards
+    // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
     it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 
@@ -180,15 +177,14 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${spaceId}${PUBLIC_API_PATH}`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-          },
+          title,
           spaces: [spaceId],
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.item.namespaces).to.eql([spaceId]);
+      expect(response.body.data.namespaces).to.eql([spaceId]);
     });
 
     it('return error if provided id already exists', async () => {
@@ -200,10 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`${PUBLIC_API_PATH}/${id}`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
-            title,
-          },
+          title,
         });
 
       expect(response.status).to.be(409);

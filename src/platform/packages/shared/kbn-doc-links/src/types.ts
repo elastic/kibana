@@ -554,6 +554,8 @@ export interface DocLinks {
     httpMonitoring: string;
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
+    agentReleaseProcess: string;
+    fipsIngest: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -675,6 +677,18 @@ export interface DocLinks {
   };
   readonly datasetQuality: {
     readonly failureStore: string;
+  };
+  readonly agentBuilder: {
+    readonly agentBuilder: string;
+    readonly getStarted: string;
+    readonly chat: string;
+    readonly agentBuilderAgents: string;
+    readonly tools: string;
+    readonly programmaticAccess: string;
+    readonly kibanaApi: string;
+    readonly mcpServer: string;
+    readonly a2aServer: string;
+    readonly limitationsKnownIssues: string;
   };
 }
 

@@ -6,15 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { ToolResultType, builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 const tools = {
-  indexExplorer: sanitizeToolId(builtinToolIds.indexExplorer),
-  listIndices: sanitizeToolId(builtinToolIds.listIndices),
-  search: sanitizeToolId(builtinToolIds.search),
+  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
+  listIndices: sanitizeToolId(platformCoreTools.listIndices),
+  search: sanitizeToolId(platformCoreTools.search),
 };
 
 export const getActPrompt = ({
@@ -46,8 +46,9 @@ export const getActPrompt = ({
         3) Scope discipline: Answer ONLY what was asked. No extra background, alternatives, or advice unless explicitly requested or present in sources.
         4) No speculation or capability disclaimers. Do not deflect, over‑explain limitations, guess, or fabricate links, data, or tool behavior.
         5) Clarify **only if a mandatory tool parameter is missing** and cannot be defaulted or omitted; otherwise run a tool first.
-        6) Use only currently available tools. Never invent tool names or capabilities.
-        7) Bias to action: When uncertain, default to calling tools to gather information.
+        6) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+        7) Use only currently available tools. Never invent tool names or capabilities.
+        8) Bias to action: When uncertain, default to calling tools to gather information.
 
         DECISION GATEWAY (when you MAY skip tools)
         - Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
@@ -82,7 +83,7 @@ export const getActPrompt = ({
           - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
           - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
           - Never expose internal tool selection reasoning unless the user asks.
-        
+
         OPERATING PROTOCOL
         Step 1 — Analyze & plan
           - Examine the user's query and conversation history.
@@ -103,6 +104,14 @@ export const getActPrompt = ({
               2) Ask the user to enable/authorize a needed tool.
           - Do NOT provide ungrounded general knowledge answers.
 
+        TOOL USAGE PROTOCOL
+
+        1.  **Exclusive Tool Call Output:** When you decide to call a tool, your entire response **must** be the tool call. Do not include any text, greetings, or explanations before or after this block.
+
+        2.  **Mandatory Internal Reasoning:** All reasoning, thinking, or justification for making a tool call **must** be placed inside the \`_reasoning\` parameter of that tool call. Do not provide reasoning as plain text outside the tool call.
+
+        This protocol is critical for the automated parsing of your responses.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.
@@ -110,12 +119,12 @@ export const getActPrompt = ({
         - [ ] The answer stays within the user's requested scope.
         - [ ] I addressed every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
         - [ ] No internal tool process or names revealed (unless user asked).
-       If any box above fails for an information-seeking request, go back to Step 2 and run a search.
+        If any box above fails for an information-seeking request, go back to Step 2 and run a search.
 
         OUTPUT STYLE
         - Clear, direct, and scoped. No extraneous commentary.
         - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
-        - Do not mention internal reasoning or tool names unless user explicitly asks.
+        - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
@@ -125,7 +134,8 @@ export const getActPrompt = ({
         ${customInstructionsBlock(customInstructions)}
 
         ADDITIONAL INFO
-        - Current date: ${formatDate()}`,
+        - Current date: ${formatDate()}
+`,
     ],
     ...messages,
   ];
