@@ -88,8 +88,9 @@ export class MapsStorage {
       outcome,
     } = await soClient.resolve<MapsSavedObjectAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
+    const item = savedObjectToItem(savedObject, false);
     const response = {
-      item: savedObject,
+      item,
       meta: { aliasPurpose, aliasTargetId, outcome },
     };
 
