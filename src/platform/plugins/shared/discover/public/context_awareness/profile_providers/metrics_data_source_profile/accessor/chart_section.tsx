@@ -13,7 +13,7 @@ import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { once } from 'lodash';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const createChartSection = (
   metricsExperienceClient?: MetricsExperienceClient
