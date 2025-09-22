@@ -11,11 +11,14 @@ import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_mig
 import type { StartMigrationCardMetadata } from '../common/types';
 
 const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
-  i18n.translate('xpack.securitySolution.onboarding.siemMigrations.startMigration.completeBadge', {
-    defaultMessage:
-      '{migrationsCount} {migrationsCount, plural, one {migration} other {migrations}}',
-    values: { migrationsCount },
-  });
+  i18n.translate(
+    'xpack.securitySolution.onboarding.siemMigrations.rules.startMigration.completeBadge',
+    {
+      defaultMessage:
+        '{migrationsCount} {migrationsCount, plural, one {migration} other {migrations}}',
+      values: { migrationsCount },
+    }
+  );
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
