@@ -325,7 +325,7 @@ export const AdvancedFieldMappingEditor = () => {
    */
   const serializedValue = useMemo(() => serializeXJson(field.value), [field.value]);
   const [value, setValue] = React.useState(serializedValue);
-  // Sync internal state for edito with the form value controlled by the form
+  // Sync internal state for editor with the form value controlled by the form
   if (value !== serializedValue) {
     setValue(serializedValue);
   }
