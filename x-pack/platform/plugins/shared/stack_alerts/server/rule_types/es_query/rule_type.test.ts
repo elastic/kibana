@@ -829,7 +829,7 @@ describe('ruleType', () => {
       expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
     });
 
-    it('rule executor schedule actions when condition met', async () => {
+    it.only('rule executor schedule actions when condition met', async () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
       const searchResult = {

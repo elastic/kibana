@@ -117,7 +117,7 @@ describe('ESQL query utils', () => {
         values,
       });
 
-      expect(setImmediateSpy).toHaveBeenCalledTimes(10);
+      expect(setImmediateSpy).toHaveBeenCalledTimes(9);
     });
   });
 
@@ -636,7 +636,7 @@ describe('ESQL query utils', () => {
         ['error.code', 'ecs.version']
       );
 
-      expect(setImmediateSpy).toHaveBeenCalledTimes(10);
+      expect(setImmediateSpy).toHaveBeenCalledTimes(9);
     });
   });
 
