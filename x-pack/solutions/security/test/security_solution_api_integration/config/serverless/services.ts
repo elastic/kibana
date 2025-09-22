@@ -9,7 +9,7 @@ import { services as serverlessServices } from '@kbn/test-suites-xpack-platform/
 import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/api/detections_api.gen';
 import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/api/entity_analytics_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/api/security_solution_exceptions_api.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/api/exceptions_api.gen';
 import { SearchSecureService } from '../services/search_secure';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';

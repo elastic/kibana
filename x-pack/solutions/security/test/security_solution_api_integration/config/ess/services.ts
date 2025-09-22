@@ -13,7 +13,7 @@ import { UsageAPIProvider } from '@kbn/test-suites-xpack-platform/api_integratio
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/api/detections_api.gen';
 import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/api/entity_analytics_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/api/security_solution_exceptions_api.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/api/exceptions_api.gen';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 
