@@ -109,10 +109,6 @@ export const OptionsListStrings = {
           }),
       },
     },
-    getAdditionalSettingsTitle: () =>
-      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
-        defaultMessage: `Additional settings`,
-      }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
         defaultMessage: 'Ignore timeout for results',
@@ -121,10 +117,6 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
-      }),
-    getUseGlobalFiltersTitle: () =>
-      i18n.translate('controls.optionsList.editor.useGlobalFilters', {
-        defaultMessage: 'Use global filters',
       }),
   },
   popover: {
