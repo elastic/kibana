@@ -101,6 +101,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 : i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
                     defaultMessage: 'Set up Universal Profiling',
                   }),
+              buttonIsDisabled: postSetupLoading && true,
               disabledButtonTooltipText:
                 data?.has_required_role === false
                   ? i18n.translate('xpack.profiling.noDataConfig.action.permissionsTooltip', {

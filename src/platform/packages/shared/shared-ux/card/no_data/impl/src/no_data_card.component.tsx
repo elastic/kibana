@@ -47,6 +47,7 @@ export const NoDataCard = ({
   canAccessFleet = true,
   href,
   buttonText,
+  buttonIsDisabled = false,
   disabledButtonTooltipText,
   docsLink: link,
   onClick,
@@ -80,6 +81,7 @@ export const NoDataCard = ({
             href={href}
             data-test-subj="noDataDefaultActionButton"
             onClick={onClick}
+            disabled={buttonIsDisabled}
           >
             {buttonText || defaultButtonText}
           </EuiButton>

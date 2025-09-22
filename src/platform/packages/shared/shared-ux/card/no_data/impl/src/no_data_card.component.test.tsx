@@ -69,7 +69,6 @@ describe('NoDataCardComponent', () => {
 
       expect(screen.queryByRole('button', { name: 'Setup Button' })).not.toBeInTheDocument();
       expect(screen.queryByRole('link', { name: 'Setup Button' })).not.toBeInTheDocument();
-      const mockOnClick = jest.fn();
     });
 
     test('uses custom data-test-subj when provided', () => {

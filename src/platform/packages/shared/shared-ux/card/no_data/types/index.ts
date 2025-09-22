@@ -74,8 +74,13 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
    */
   buttonText?: string;
   /**
+   * Provide a boolean to disable the button;
+   * The button will be disabled if `buttonIsDisabled` or `disabledButtonTooltipText`is provided otherwise the button will be hidden completely
+   */
+  buttonIsDisabled?: boolean;
+  /**
    * Provide a tooltip text for the disabled button;
-   * The button will be disabled if `disabledButtonTooltipText` is provided otherwise the button will be hidden completely
+   * The button will be disabled if `buttonIsDisabled` or `disabledButtonTooltipText` is provided otherwise the button will be hidden completely
    */
   disabledButtonTooltipText?: string;
   /**
