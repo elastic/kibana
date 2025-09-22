@@ -6,13 +6,13 @@
  */
 
 import { MigrationNameInput } from './migration_name_input';
-import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
+import { useGetCurrentUserProfile } from '../../../../../common/components/user_profiles/use_get_current_user_profile';
 import type { UserProfile } from '@kbn/security-plugin-types-common';
 import { renderHook } from '@testing-library/react';
 import type { MigrationNameStepProps } from '.';
 import { useMigrationNameStep } from '.';
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
+jest.mock('../../../../../common/components/user_profiles/use_get_current_user_profile');
 const mockUseGetCurrentUserProfile = useGetCurrentUserProfile as jest.MockedFunction<
   typeof useGetCurrentUserProfile
 >;

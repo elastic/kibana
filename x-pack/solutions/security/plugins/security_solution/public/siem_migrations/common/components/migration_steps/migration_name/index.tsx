@@ -10,7 +10,7 @@ import moment from 'moment';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import { MigrationNameInput } from './migration_name_input';
 import * as i18n from './translations';
-import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
+import { useGetCurrentUserProfile } from '../../../../../common/components/user_profiles/use_get_current_user_profile';
 
 export interface MigrationNameStepProps {
   status: EuiStepStatus;
