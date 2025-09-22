@@ -21,7 +21,7 @@ export interface DashboardsFileUploadStepProps {
   migrationStats: DashboardMigrationTaskStats | undefined;
   migrationName: string | undefined;
   onDashboardsFileChanged?: (files: FileList | null) => void;
-  onFileUpload: (dashboards: SplunkDashboardsResult[]) => void;
+  onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
   onMigrationCreated: OnMigrationCreated;
 }
 export const useDashboardsFileUploadStep = ({

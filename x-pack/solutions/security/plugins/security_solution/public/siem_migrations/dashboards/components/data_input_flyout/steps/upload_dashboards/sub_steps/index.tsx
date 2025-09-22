@@ -6,16 +6,12 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
+import type { EuiStepProps } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { useMigrationNameStep } from '../../../../../../common/components/migration_steps';
-import { MigrationDataInputSubSteps } from '../../../../../../common/components/migration_data_input_sub_steps';
+import { SubSteps, useMigrationNameStep } from '../../../../../../common/components';
 import { useCopyExportQueryStep } from './copy_export_query';
-import type {
-  SplunkDashboardsResult,
-  OnMigrationCreated,
-  OnMissingResourcesFetched,
-} from '../../../types';
+import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
 import { useCheckResourcesStep } from './check_resources';
 interface DashboardsUploadSubStepsProps {
@@ -38,88 +34,73 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   onMissingResourcesFetched,
   onMigrationCreated,
 }: DashboardsUploadSubStepsProps) {
-  const [currentSubStep, setCurrentSubStep] = useState<SubStep>(1);
+  const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 4 : 1);
+
   const [migrationName, setMigrationName] = useState<string | undefined>(migrationStats?.name);
-  const [_, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
+  const [isDashboardsFileReady, setIsDashboardFileReady] = useState<boolean>(false);
 
-  const onUploadedDashboards = useCallback(
-    (dashboards: SplunkDashboardsResult[]) => {
-      if (dashboards.length > 0) {
-        setUploadedDashboards(dashboards);
-        if (currentSubStep === 3) {
-          // If we are on step 3 and dashboards are uploaded, move to step 4
-          setCurrentSubStep(4);
-        }
-      } else {
-        setCurrentSubStep(3);
-      }
-    },
-    [setCurrentSubStep, currentSubStep]
-  );
-
-  const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
-    (stats) => {
-      onMigrationCreated(stats);
-      setCurrentSubStep(4);
-    },
-    [onMigrationCreated]
-  );
-
-  const onDashboardsFileChanged = useCallback((files: FileList | null) => {
-    if (!files?.length) {
-      setUploadedDashboards([]);
-    }
-  }, []);
-
+  // Migration name step
   const setName = useCallback(
     (name: string) => {
       setMigrationName(name);
       if (name) {
-        if (currentSubStep === 1) {
-          // If the name is set and we are on step 1, move to step 2
-          setCurrentSubStep(2);
-        }
+        setSubStep(isDashboardsFileReady ? 3 : 2);
       } else {
-        setCurrentSubStep(1);
+        setSubStep(1);
       }
     },
-    [currentSubStep]
+    [isDashboardsFileReady]
   );
-
-  const onQueryCopied = useCallback(() => {
-    // Move to the next step only if step 1 was completed
-    setCurrentSubStep((prev) => (prev !== 1 ? 3 : prev));
-  }, []);
-
   const nameStep = useMigrationNameStep({
-    status: getEuiStepStatus(1, currentSubStep),
+    status: getEuiStepStatus(1, subStep),
     setMigrationName: setName,
     migrationName,
   });
 
-  const copyQueryStep = useCopyExportQueryStep({
-    status: getEuiStepStatus(2, currentSubStep),
-    onCopied: onQueryCopied,
-  });
+  // Copy query step
+  const onCopied = useCallback(() => {
+    setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
+  }, []);
+  const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(2, subStep), onCopied });
 
-  const dashboardsFileUploadStep = useDashboardsFileUploadStep({
-    status: getEuiStepStatus(3, currentSubStep),
-    migrationName,
+  // Upload rules step
+  const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
+    (stats) => {
+      onMigrationCreated(stats);
+      setSubStep(4);
+    },
+    [onMigrationCreated]
+  );
+  const onDashboardsFileChanged = useCallback((files: FileList | null) => {
+    setIsDashboardFileReady(!!files?.length);
+    setSubStep(3);
+  }, []);
+  const uploadStep = useDashboardsFileUploadStep({
+    status: getEuiStepStatus(3, subStep),
     migrationStats,
-    onFileUpload: onUploadedDashboards,
     onDashboardsFileChanged,
     onMigrationCreated: onMigrationCreatedStep,
+    migrationName,
   });
 
+  // Check missing resources step
+  const onMissingResourcesFetchedStep = useCallback<OnMissingResourcesFetched>(
+    (missingResources) => {
+      onMissingResourcesFetched(missingResources);
+      setSubStep(END);
+    },
+    [onMissingResourcesFetched]
+  );
   const resourcesStep = useCheckResourcesStep({
-    status: getEuiStepStatus(4, currentSubStep),
+    status: getEuiStepStatus(4, subStep),
     migrationStats,
-    onMissingResourcesFetched,
+    onMissingResourcesFetched: onMissingResourcesFetchedStep,
   });
 
-  const steps = useMemo(() => {
-    return [nameStep, copyQueryStep, dashboardsFileUploadStep, resourcesStep];
-  }, [nameStep, copyQueryStep, dashboardsFileUploadStep, resourcesStep]);
+  const steps = useMemo<EuiStepProps[]>(
+    () => [nameStep, copyStep, uploadStep, resourcesStep],
+    [nameStep, copyStep, uploadStep, resourcesStep]
+  );
 
-  return <MigrationDataInputSubSteps steps={steps} />;
+  return <SubSteps steps={steps} />;
 });

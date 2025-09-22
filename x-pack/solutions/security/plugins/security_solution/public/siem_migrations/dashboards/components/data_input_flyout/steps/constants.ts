@@ -9,5 +9,5 @@ export enum DashboardUploadSteps {
   DashboardsUpload = 1,
   MacrosUpload = 2,
   LookupsUpload = 3,
-  End = 4,
+  End = 10,
 }
