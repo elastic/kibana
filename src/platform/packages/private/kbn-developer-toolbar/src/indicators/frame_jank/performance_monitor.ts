@@ -73,7 +73,10 @@ export class PerformanceMonitor {
       frameCount++;
 
       if (currentTime - lastTime >= 1000) {
-        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        const fps = Math.min(
+          Math.round((frameCount * 1000) / (currentTime - lastTime)),
+          this.targetFps
+        );
         this.frameHistory.push(fps);
 
         if (this.frameHistory.length > this.maxHistorySize) {

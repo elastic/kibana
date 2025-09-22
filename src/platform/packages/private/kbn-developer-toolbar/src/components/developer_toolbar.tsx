@@ -41,7 +41,7 @@ const HEIGHT = 32;
 const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
   position: fixed;
   bottom: 4px;
-  right: 16px;
+  right: 4px;
   z-index: 9999;
 `;
 
