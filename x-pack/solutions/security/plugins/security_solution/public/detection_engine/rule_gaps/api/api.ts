@@ -16,6 +16,7 @@ import {
   INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH,
   gapStatus,
 } from '@kbn/alerting-plugin/common';
+import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
@@ -113,6 +114,38 @@ export const deleteBackfill = async ({ backfillId }: { backfillId: string }) => 
     }
   );
 };
+
+export const getGapAutoFillSchedulerLogs = async ({
+  id,
+  page,
+  perPage,
+  start,
+  end,
+  filter,
+  signal,
+}: {
+  id: string;
+  page: number;
+  perPage: number;
+  start?: string;
+  end?: string;
+  filter?: string;
+  signal?: AbortSignal;
+}): Promise<GapAutoFillSchedulerLogsResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerLogsResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH}/${encodeURIComponent(id)}/logs`,
+    {
+      method: 'GET',
+      query: {
+        page,
+        per_page: perPage,
+        ...(start ? { start: dateMath.parse(start)?.utc().toISOString() } : {}),
+        ...(end ? { end: dateMath.parse(end, { roundUp: true })?.utc().toISOString() } : {}),
+        ...(filter ? { filter } : {}),
+      },
+      signal,
+    }
+  );
 
 export const getGapAutoFillScheduler = async ({
   id,

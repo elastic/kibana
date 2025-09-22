@@ -13,7 +13,7 @@ export type GetGapFillAutoSchedulerLogsParams = TypeOf<typeof getGapFillAutoSche
 
 export interface GapFillAutoSchedulerLogEntry {
   timestamp: string;
-  status: 'success' | 'error' | 'warning' | 'unknown';
+  status: 'success' | 'error' | 'warning' | 'skipped' | 'unknown';
   message: string;
   durationMs: number;
   summary: {

@@ -28,6 +28,7 @@ export const gapFillSchedulerLogEntrySchema = schema.object({
     schema.literal('success'),
     schema.literal('error'),
     schema.literal('warning'),
+    schema.literal('skipped'),
     schema.literal('unknown'),
   ]),
   message: schema.string(),

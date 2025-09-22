@@ -11,12 +11,14 @@ import type {
   GapAutoFillSchedulerResponseBodyV1,
   UpdateGapAutoFillSchedulerRequestBodyV1,
 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import {
   createGapAutoFillScheduler,
   getGapAutoFillScheduler,
   updateGapAutoFillScheduler,
+  getGapAutoFillSchedulerLogs,
 } from '../api';
 
 const getSchedulerId = (spaceId?: string) =>
@@ -64,6 +66,45 @@ export const useCreateGapAutoFillScheduler = () => {
       },
     }
   );
+};
+
+export const useGetGapAutoFillSchedulerLogs = ({
+  page,
+  perPage,
+  start,
+  end,
+  sort,
+  filter,
+}: {
+  page: number;
+  perPage: number;
+  start?: string;
+  end?: string;
+  sort?: { field: string; direction: 'asc' | 'desc' };
+  filter?: string;
+}) => {
+  const spaceId = useSpaceId();
+  const schedulerId = getSchedulerId(spaceId);
+  const queryKey = useMemo(
+    () => ['GET', 'gap_auto_fill_scheduler_logs', schedulerId, page, perPage, start, end, sort, filter],
+    [schedulerId, page, perPage, start, end, sort, filter]
+  );
+
+  return useQuery<GapAutoFillSchedulerLogsResponseBodyV1, Error>({
+    queryKey,
+    queryFn: ({ signal }) =>
+      getGapAutoFillSchedulerLogs({
+        id: schedulerId,
+        page,
+        perPage,
+        start,
+        end,
+        sort,
+        filter,
+        signal,
+      }),
+    keepPreviousData: true,
+  });
 };
 
 export const useUpdateGapAutoFillScheduler = () => {

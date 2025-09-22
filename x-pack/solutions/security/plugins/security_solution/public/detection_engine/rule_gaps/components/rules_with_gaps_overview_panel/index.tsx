@@ -28,6 +28,7 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { defaultRangeValue, GapRangeValue } from '../../constants';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { AutoFillSchedulerFlyoutTrigger } from './auto_fill_scheduler_flyout_trigger';
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -170,6 +171,9 @@ export const RulesWithGapsOverviewPanel = () => {
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL}
             </EuiFilterButton>
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AutoFillSchedulerFlyoutTrigger />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

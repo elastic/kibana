@@ -233,13 +233,13 @@ async function earlySuccess({
     failedRules: 0,
     totalGapsProcessed: 0,
   };
-  await logExecution({ logEvent, status: 'success', summary, message });
+  await logExecution({ logEvent, status: 'skipped', summary, message });
   await updateSchedulerSO({
     soClient,
     schedulerSo,
     payload: {
       lastRun: {
-        status: 'success',
+        status: 'skipped',
         message,
         metrics: summary,
       },
@@ -546,12 +546,14 @@ export function registerGapFillAutoSchedulerTask({
                 now
               );
 
+              // logger.debug(`Fetched ${ruleIds.length} ruleIds with gaps`);
+
               if (!ruleIds.length) {
                 await earlySuccess({
                   logEvent,
                   soClient,
                   schedulerSo,
-                  message: 'Gap fill execution completed - no rules with gaps found',
+                  message: 'Gap fill execution skipped - no rules with gaps found',
                 });
                 return { state: {} };
               }

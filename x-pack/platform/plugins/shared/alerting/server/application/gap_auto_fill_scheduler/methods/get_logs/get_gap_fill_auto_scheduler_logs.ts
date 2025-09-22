@@ -171,7 +171,7 @@ export async function getGapFillAutoSchedulerLogs(
 
         return {
           timestamp: entry['@timestamp'],
-          status: (execution?.status as 'success' | 'error' | 'warning') || 'unknown',
+          status: (execution?.status as 'success' | 'error' | 'warning' | 'skipped') || 'unknown',
           message: entry.message || 'Gap fill execution',
           durationMs: execution?.duration_ms || 0,
           summary: {
