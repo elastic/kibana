@@ -139,25 +139,13 @@ export const getNavigationTreeDefinition = ({
                   withBadge: true,
                 },
                 {
-                  children: [
-                    { link: 'agent_builder:conversations' },
-                    { link: 'agent_builder:tools' },
-                    { link: 'agent_builder:agents' },
-                  ],
-                  id: 'agent_builder',
-                  title: AGENTS_TITLE,
-                  renderAs: 'accordion',
+                  link: 'agent_builder',
                   sideNavVersion: 'v1',
+                  title: AGENTS_TITLE,
                 },
                 {
-                  children: [
-                    { link: 'agent_builder:conversations' },
-                    { link: 'agent_builder:tools' },
-                    { link: 'agent_builder:agents' },
-                  ],
                   iconV2: 'comment',
-                  id: 'agent_builder',
-                  renderAs: 'panelOpener',
+                  link: 'agent_builder',
                   sideNavVersion: 'v2',
                   title: AGENTS_TITLE,
                 },
