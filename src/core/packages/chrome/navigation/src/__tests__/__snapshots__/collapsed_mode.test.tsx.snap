@@ -46,7 +46,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         id="primary-navigation"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -82,7 +82,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -118,7 +118,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -156,7 +156,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         class="css-5bzxab-SideNavFooter"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -185,7 +185,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -214,7 +214,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -244,7 +244,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -273,7 +273,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"

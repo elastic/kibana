@@ -11,6 +11,7 @@ import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode, ReactElement } from 'react';
 import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
 import { blurPopover } from './blur_popover';
@@ -51,6 +52,8 @@ export const SideNavPopover = ({
   persistent = false,
   trigger,
 }: SideNavPopoverProps): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+
   const popoverRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement>(null);
 
@@ -123,11 +126,24 @@ export const SideNavPopover = ({
     [trigger, hasContent, isOpen, handleKeyDown, handleTriggerClick]
   );
 
+  const wrapperStyles = css`
+    width: 100%;
+  `;
+
+  const popoverContentStyles = css`
+    max-height: 37.5rem;
+    ${useEuiOverflowScroll('y')}
+  `;
+
+  const maskStyles = css`
+    position: fixed;
+    inset: 0;
+    z-index: calc(${euiTheme.levels.menu} - 1);
+  `;
+
   return (
     <div
-      css={css`
-        width: 100%;
-      `}
+      css={wrapperStyles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
@@ -148,16 +164,14 @@ export const SideNavPopover = ({
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <div
-          ref={popoverRef}
-          css={css`
-            max-height: 600px;
-            ${useEuiOverflowScroll('y')}
-          `}
-        >
+        <div ref={popoverRef} css={popoverContentStyles}>
           {typeof children === 'function' ? children(handleClose) : children}
         </div>
       </EuiPopover>
+      {persistent && isPersistent && isOpen && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div onClick={handleClose} css={maskStyles} />
+      )}
     </div>
   );
 };
