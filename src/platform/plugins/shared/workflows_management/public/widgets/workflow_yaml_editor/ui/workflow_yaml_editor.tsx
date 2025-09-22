@@ -72,6 +72,10 @@ const useWorkflowJsonSchema = () => {
   }, []);
 };
 
+const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
+  .toLowerCase()
+  .includes('mac');
+
 /**
  * Since we implemented custom error formatting at the validation level,
  * we no longer need to modify the schema. The full validation works with
@@ -341,7 +345,10 @@ export const WorkflowYAMLEditor = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'k' && event.metaKey) {
+      const modifierKey = isMac ? event.metaKey : event.ctrlKey;
+      if (event.key === 'k' && modifierKey) {
+        event.preventDefault();
+        event.stopPropagation();
         openActionsPopover();
       }
     };
@@ -721,7 +728,7 @@ export const WorkflowYAMLEditor = ({
 
       for (const stepNode of stepNodes) {
         // Find the main step type (not nested inside 'with' or other blocks)
-        const typePair = stepNode.items.find((item: any) => {
+        const typePair = stepNode.items.find((item): item is Pair<Scalar, Scalar> => {
           // Must be a direct child of the step node (not nested)
           return isPair(item) && isScalar(item.key) && item.key.value === 'type';
         });
@@ -730,7 +737,12 @@ export const WorkflowYAMLEditor = ({
           continue;
         }
 
-        const connectorType = typePair.value.value as string;
+        const connectorType = typePair.value.value;
+
+        if (typeof connectorType !== 'string') {
+          continue;
+        }
+
         // console.log('🎨 Processing connector type:', connectorType);
 
         // Skip decoration for very short connector types to avoid false matches
