@@ -79,6 +79,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     );
   };
 
+  const isRootStream = isRootStreamDefinition(definition.stream);
+  const handleAddField = !isRootStream && definition.privileges.manage ? addField : undefined;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
       <EuiFlexItem grow={1} css={{ minHeight: 0 }}>
@@ -91,14 +94,12 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
               : classicDefaultColumns
           }
           stream={definition.stream}
-          onAddField={addField}
+          onAddField={handleAddField}
           onFieldUpdate={updateField}
           onRefreshData={refreshFields}
           withControls
           withFieldSimulation
-          withTableActions={
-            !isRootStreamDefinition(definition.stream) && definition.privileges.manage
-          }
+          withTableActions={!isRootStream && definition.privileges.manage}
         />
       </EuiFlexItem>
       {pendingChangesCount > 0 && (

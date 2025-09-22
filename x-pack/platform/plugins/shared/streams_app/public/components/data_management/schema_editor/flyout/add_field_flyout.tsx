@@ -29,6 +29,8 @@ import { FormProvider, useController, useForm, useFormContext, useWatch } from '
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
+import { mapKeys } from 'lodash';
+import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
@@ -84,10 +86,15 @@ export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddF
 export const AddFieldFlyout = ({ onAddField, onClose, stream }: AddFieldFlyoutProps) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
-  const { fieldsMetadata } = useFieldsMetadata({
-    attributes: ['ignore_above', 'type'],
+  const { fieldsMetadata: rawFieldsMetadata } = useFieldsMetadata({
+    attributes: ['ignore_above', 'type', 'otel_equivalent'],
     source: ['ecs', 'otel'],
   });
+
+  const fieldsMetadata = useMemo(
+    () => mapKeys(rawFieldsMetadata, (value, key) => value.otel_equivalent ?? prefixOTelField(key)),
+    [rawFieldsMetadata]
+  );
 
   const methods = useForm<SchemaField>({
     defaultValues: {
