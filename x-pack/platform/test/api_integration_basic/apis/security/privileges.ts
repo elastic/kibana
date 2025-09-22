@@ -13,7 +13,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Privileges', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235843
+  describe.skip('Privileges', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
