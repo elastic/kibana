@@ -9,10 +9,14 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { SetupDeps, StartDeps } from './types';
+import { markdownEmbeddableSchema } from './schemas';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {}
+  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+    plugins.embeddable.registerEmbeddableSchema(MARKDOWN_EMBEDDABLE_TYPE, markdownEmbeddableSchema);
+  }
 
   start(core: CoreStart, plugins: StartDeps) {}
 }

@@ -27,7 +27,7 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { MarkdownEditorState, MarkdownEmbeddableState } from '../server';
-import { MARKDOWN_ID } from './constants';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
@@ -43,7 +43,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
-  type: MARKDOWN_ID,
+  type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState.rawState);
     const markdownStateManager = initializeStateManager(

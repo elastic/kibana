@@ -13,6 +13,7 @@ import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   ...createEmbeddablePersistableStateServiceMock(),
   registerEmbeddableFactory: jest.fn(),
+  registerEmbeddableSchema: jest.fn(),
   registerTransforms: jest.fn(),
   getAllMigrations: jest.fn().mockReturnValue({}),
   registerEnhancement: jest.fn(),
@@ -22,5 +23,6 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
+  getEmbeddableSchemas: jest.fn(),
   getTransforms: jest.fn(),
 });

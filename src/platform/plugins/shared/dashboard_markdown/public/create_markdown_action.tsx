@@ -14,8 +14,9 @@ import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { MarkdownEmbeddableState } from '../server';
-import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
+import { ADD_MARKDOWN_ACTION_ID } from './constants';
 import type { MarkdownEditorApi } from './types';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_MARKDOWN_ACTION_ID,
@@ -30,7 +31,7 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
       MarkdownEditorApi
     >(
       {
-        panelType: MARKDOWN_ID,
+        panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
           rawState: {
             content: '',

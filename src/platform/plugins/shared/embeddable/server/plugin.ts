@@ -15,7 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectType } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -36,7 +36,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use this registry to include embeddable state schemas in their OpenAPI Specification (OAS) documenation.
    */
-  registerEmbeddableSchema: (type: string, schema: ObjectType) => void;
+  registerEmbeddableSchema: (type: string, schema: Type<object>) => void;
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
@@ -48,14 +48,14 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerEmbeddableSchema.
    */
-  getEmbeddableSchemas: () => ObjectType[];
+  getEmbeddableSchemas: () => Type<object>[];
 
   getTransforms: (type: string) => EmbeddableTransforms | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly embeddableSchemas: { [key: string]: ObjectType } = {};
+  private readonly embeddableSchemas: { [key: string]: Type<object> } = {};
   private enhancementsRegistry = new EnhancementsRegistry();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
@@ -67,7 +67,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerEmbeddableSchema: (type: string, schema: ObjectType) => {
+      registerEmbeddableSchema: (type: string, schema: Type<Object>) => {
         if (this.embeddableSchemas[type]) {
           throw new Error(`Embeddable schema already registered for type: ${type}.`);
         }
