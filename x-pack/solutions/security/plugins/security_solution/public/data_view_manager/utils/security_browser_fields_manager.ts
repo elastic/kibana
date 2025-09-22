@@ -16,6 +16,27 @@ interface BrowserFieldsResult {
 // NOTE:for referential comparison optimization
 const emptyBrowserFields = {};
 
+export const buildBrowserFields = (fields: DataView['fields']): BrowserFieldsResult => {
+  if (fields == null || !fields.length) return { browserFields: emptyBrowserFields };
+
+  const browserFields: BrowserFields = {};
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i].spec;
+    const name = field.name;
+    if (name != null) {
+      const category = getCategory(name);
+      if (browserFields[category] == null) {
+        browserFields[category] = { fields: {} };
+      }
+      const categoryFields = browserFields[category].fields;
+      if (categoryFields) {
+        categoryFields[name] = field;
+      }
+    }
+  }
+  return { browserFields };
+};
+
 /**
  * SecurityBrowserFieldsManager is a singleton class that manages the browser fields
  * for the Security Solution. It previously used a cache to store browser fields for
