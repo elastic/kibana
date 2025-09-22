@@ -210,6 +210,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                   // Truncation width must be equal to max tab width minus padding
                   width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
                   truncation="middle"
+                  title=""
                 />
               </EuiText>
             </div>

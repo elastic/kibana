@@ -13,7 +13,6 @@ import type {
   ConversationRoundStep,
 } from '@kbn/onechat-common';
 import React from 'react';
-import { useTimer } from '../../../hooks/use_timer';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
 
@@ -30,8 +29,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   steps,
   isLoading,
 }) => {
-  const timer = useTimer({ isLoading });
-  const showThinking = timer.showTimer || steps.length > 0;
+  const showThinking = steps.length > 0;
   return (
     <EuiFlexGroup
       direction="column"
@@ -42,7 +40,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={steps} isLoading={isLoading} timer={timer} rawRound={rawRound} />
+          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
         </EuiFlexItem>
       )}
 
