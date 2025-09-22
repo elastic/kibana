@@ -19,167 +19,241 @@
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
 import { resolve, relative, sep as osSep, join } from 'path';
-import Fs from 'fs';
-import Path from 'path';
+import { promises as fs, existsSync } from 'fs';
 import { run } from 'jest';
+import { readInitialOptions } from 'jest-config';
+import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { map } from 'lodash';
-import getopts from 'getopts';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
-import { readInitialOptions } from 'jest-config';
 import type { Config } from '@jest/types';
+
 import jestFlags from './jest_flags.json';
 
-// yarn test:jest src/core/server/saved_objects
-// yarn test:jest src/core/public/core_system.test.ts
-// :kibana/src/core/server/saved_objects yarn test:jest
+const JEST_CACHE_DIR = 'data/jest-cache';
 
-export async function runJest(configName = 'jest.config.js') {
-  const unknownFlag: string[] = [];
-  const argv = getopts(process.argv.slice(2), {
-    ...jestFlags,
-    unknown(v) {
-      unknownFlag.push(v);
-      return false;
-    },
-  });
+// Skip 'node' and script name
+const NODE_ARGV_SLICE_INDEX = 2;
 
-  if (argv.help) {
-    run();
-    process.exit(0);
-  }
+/**
+ * Runs Jest tests with automatic config discovery and argument forwarding.
+ *
+ * Searches for jest.config.js files starting from the working directory
+ * and walking up the directory tree until reaching the repo root.
+ *
+ * @param configName - Name of the Jest config file to search for
+ */
+export async function runJest(configName = 'jest.config.js'): Promise<void> {
+  // Parse and validate command line arguments
+  const { parsedArguments } = parseJestArguments();
 
-  if (unknownFlag.length) {
-    const flags = unknownFlag.join(', ');
-
-    throw createFailError(
-      `unexpected flag: ${flags}
-
-  If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
-
-  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
-  flags jest supports
-
-`
-    );
-  }
-
-  const devConfigName = 'jest.config.dev.js';
-
+  // Set up logging
   const log = new ToolingLog({
-    level: argv.verbose ? 'verbose' : 'info',
+    level: parsedArguments.verbose ? 'verbose' : 'info',
     writeTo: process.stdout,
   });
 
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/jest');
 
-  let testFiles: string[];
-
+  // Set default NODE_ENV
   if (!process.env.NODE_ENV) {
     process.env.NODE_ENV = 'test';
   }
 
-  const cwd: string = process.env.INIT_CWD || process.cwd();
-
-  // We'll resolve a config path (either provided or discovered),
-  // then read/augment the initial options and pass them to Jest as inline JSON.
+  const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
+  let testFiles: string[] = [];
   let resolvedConfigPath: string | undefined;
 
-  if (!argv.config) {
-    testFiles = argv._.map((p) => resolve(cwd, p.toString()));
+  // Handle config discovery if no config was explicitly provided
+  if (!parsedArguments.config) {
+    testFiles = parsedArguments._.map((p: any) => resolve(currentWorkingDirectory, p.toString()));
 
-    if (argv.testPathPattern) {
-      testFiles.push(argv.testPathPattern);
+    if (parsedArguments.testPathPattern) {
+      testFiles.push(parsedArguments.testPathPattern);
     }
 
-    const commonTestFiles = commonBasePath(testFiles);
+    resolvedConfigPath = discoverJestConfig(testFiles, currentWorkingDirectory, configName, log);
+    process.argv.push('--config', resolvedConfigPath);
+
     const testFilesProvided = testFiles.length > 0;
-
-    log.verbose('cwd:', cwd);
-    log.verbose('testFiles:', testFiles.join(', '));
-    log.verbose('commonTestFiles:', commonTestFiles);
-
-    let configPath;
-
-    // sets the working directory to the cwd or the common
-    // base directory of the provided test files
-    let wd = testFilesProvided ? commonTestFiles : cwd;
-    while (true) {
-      const dev = resolve(wd, devConfigName);
-      if (Fs.existsSync(dev)) {
-        configPath = dev;
-        break;
-      }
-
-      const actual = resolve(wd, configName);
-      if (Fs.existsSync(actual)) {
-        configPath = actual;
-        break;
-      }
-
-      if (wd === REPO_ROOT) {
-        break;
-      }
-
-      const parent = resolve(wd, '..');
-      if (parent === wd) {
-        break;
-      }
-
-      wd = parent;
-    }
-
-    if (!configPath) {
-      if (testFilesProvided) {
-        log.error(
-          `unable to find a ${configName} file in ${commonTestFiles} or any parent directory up to the root of the repo. This CLI can only run Jest tests which resolve to a single ${configName} file, and that file must exist in a parent directory of all the paths you pass.`
-        );
-      } else {
-        log.error(
-          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPattern argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
-        );
-      }
-
-      process.exit(1);
-    }
-
-    log.verbose(`no config provided, found ${configPath}`);
-    resolvedConfigPath = configPath;
-    process.argv.push('--config', configPath);
-
     if (!testFilesProvided) {
       log.verbose(`no test files provided, setting to current directory`);
-      process.argv.push(relative(wd, cwd));
+      const commonTestFiles = commonBasePath(testFiles);
+      const workingDirectory = testFilesProvided ? commonTestFiles : currentWorkingDirectory;
+      process.argv.push(relative(workingDirectory, currentWorkingDirectory));
     }
   }
+
+  // Resolve Jest configuration
+  const baseConfig = await resolveJestConfig(parsedArguments, resolvedConfigPath);
+
+  // Set up Scout reporter if enabled
+  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
+    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
+  }
+
+  // Prepare Jest execution context
+  const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig);
+
+  log.info('yarn jest', originalArgv.join(' '));
+
+  log.debug('Setting up Jest with caching:', jestArgv.join(' '));
+
+  // Run Jest and report timing
+  return run(jestArgv).then(() => {
+    // Success means that tests finished, doesn't mean they passed.
+    reportTime(runStartTime, 'total', {
+      success: true,
+      isXpack: currentWorkingDirectory.includes('x-pack'),
+      testFiles: testFiles.map((testFile) => relative(currentWorkingDirectory, testFile)),
+    });
+  });
+}
+
+interface ParsedJestArguments {
+  parsedArguments: any;
+  unknownFlags: string[];
+}
+
+/**
+ * Parses command line arguments and validates Jest flags.
+ *
+ * @returns Object containing parsed arguments and any unknown flags
+ * @throws Error if unknown flags are detected
+ */
+function parseJestArguments(): ParsedJestArguments {
+  const unknownFlags: string[] = [];
+  const parsedArguments = getopts(process.argv.slice(NODE_ARGV_SLICE_INDEX), {
+    ...jestFlags,
+    unknown(flag) {
+      unknownFlags.push(flag);
+      return false;
+    },
+  });
+
+  if (parsedArguments.help) {
+    run();
+    process.exit(0);
+  }
+
+  if (unknownFlags.length > 0) {
+    const flagsList = unknownFlags.join(', ');
+    throw createFailError(`unexpected flag: ${flagsList}
+
+  If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
+
+  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  flags jest supports
+
+`);
+  }
+
+  return { parsedArguments, unknownFlags };
+}
+
+/**
+ * Searches for Jest config files in the directory tree, starting from a given path
+ * and walking up to the repository root.
+ *
+ * @param startPath - Directory path to start searching from
+ * @param configNames - Array of config file names to search for (in priority order)
+ * @returns Path to the first config file found, or null if none found
+ */
+function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null {
+  let currentPath = startPath;
+
+  while (currentPath !== REPO_ROOT && currentPath !== resolve(currentPath, '..')) {
+    for (const configName of configNames) {
+      const configPath = resolve(currentPath, configName);
+      if (existsSync(configPath)) {
+        return configPath;
+      }
+    }
+    currentPath = resolve(currentPath, '..');
+  }
+
+  return null;
+}
+
+/**
+ * Discovers Jest configuration file by searching the directory tree.
+ *
+ * @param testFiles - Array of test file paths
+ * @param currentWorkingDirectory - Current working directory
+ * @param configName - Standard config file name to search for
+ * @param log - Logger instance for verbose output
+ * @returns Path to discovered config file
+ * @throws Error if no config file is found
+ */
+function discoverJestConfig(
+  testFiles: string[],
+  currentWorkingDirectory: string,
+  configName: string,
+  log: ToolingLog
+): string {
+  const commonTestFiles = commonBasePath(testFiles);
+  const testFilesProvided = testFiles.length > 0;
+
+  log.verbose('cwd:', currentWorkingDirectory);
+  log.verbose('testFiles:', testFiles.join(', '));
+  log.verbose('commonTestFiles:', commonTestFiles);
+
+  // Start searching from either the common test files directory or current working directory
+  const searchStartPath = testFilesProvided ? commonTestFiles : currentWorkingDirectory;
+  const configPath = findConfigInDirectoryTree(searchStartPath, ['jest.config.dev.js', configName]);
+
+  if (!configPath) {
+    if (testFilesProvided) {
+      log.error(
+        `unable to find a ${configName} file in ${commonTestFiles} or any parent directory up to the root of the repo. This CLI can only run Jest tests which resolve to a single ${configName} file, and that file must exist in a parent directory of all the paths you pass.`
+      );
+    } else {
+      log.error(
+        `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPattern argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
+      );
+    }
+    process.exit(1);
+  }
+
+  log.verbose(`no config provided, found ${configPath}`);
+  return configPath;
+}
+
+/**
+ * Resolves Jest configuration from either inline JSON or config file path.
+ *
+ * @param parsedArguments - Parsed command line arguments
+ * @param resolvedConfigPath - Path to config file (optional)
+ * @returns Promise resolving to Jest initial options
+ * @throws Error if config cannot be resolved or file doesn't exist
+ */
+async function resolveJestConfig(
+  parsedArguments: any,
+  resolvedConfigPath?: string
+): Promise<Config.InitialOptions> {
   let initialOptions: Config.InitialOptions | undefined;
 
-  // If a config path was provided via argv, use that; otherwise we already set resolvedConfigPath above
-  if (argv.config) {
+  // If a config path was provided via argv, try to parse it as JSON first
+  if (parsedArguments.config) {
     try {
-      initialOptions = JSON.parse(argv.config);
+      initialOptions = JSON.parse(parsedArguments.config);
     } catch (err) {
-      resolvedConfigPath = argv.config;
+      // If JSON parsing fails, treat it as a config file path
+      resolvedConfigPath = parsedArguments.config;
     }
   }
 
   if (!initialOptions && !resolvedConfigPath) {
     throw new Error(
-      `--config is not set or invalid, and no config path was found for any listed files`
+      '--config is not set or invalid, and no config path was found for any listed files'
     );
   }
 
-  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
-    // Expose Jest config file path via environment variables
-    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
-  }
-
   if (!initialOptions) {
-    const configFileExists = await Fs.promises
+    const configFileExists = await fs
       .stat(resolvedConfigPath!)
       .then((stat) => stat.isFile())
       .catch(() => false);
@@ -191,11 +265,28 @@ export async function runJest(configName = 'jest.config.js') {
     // readInitialOptions returns an object that includes the resolved Jest config at `config`
     // along with some metadata (e.g. configPath). We only want to pass the actual Jest
     // config object to --config, augmented with our overrides.
-    initialOptions = (await readInitialOptions(resolvedConfigPath)).config;
+    initialOptions = (await readInitialOptions(resolvedConfigPath!)).config;
   }
-  const baseConfig = initialOptions;
 
-  const cacheDirectory = join(REPO_ROOT, 'data', 'jest-cache');
+  return initialOptions;
+}
+
+interface JestExecutionContext {
+  jestArgv: string[];
+  originalArgv: string[];
+}
+
+/**
+ * Prepares Jest execution context by setting up configuration and arguments.
+ * This will make sure Jest uses an inline JSON config which has a cache directory set.
+ *
+ * @param baseConfig - Base Jest configuration
+ * @returns Jest execution context with processed arguments (already sliced for Jest consumption)
+ */
+async function prepareJestExecution(
+  baseConfig: Config.InitialOptions
+): Promise<JestExecutionContext> {
+  const cacheDirectory = join(REPO_ROOT, JEST_CACHE_DIR);
 
   const inlineConfig = {
     ...baseConfig,
@@ -203,74 +294,85 @@ export async function runJest(configName = 'jest.config.js') {
     cacheDirectory,
   };
 
-  const originalArgv = process.argv.concat();
+  // Create temporary config file for Jest
+  await fs.mkdir(cacheDirectory, { recursive: true });
+  const tmpConfigPath = join(cacheDirectory, `${process.pid}.jest.config.json`);
+  await fs.writeFile(tmpConfigPath, JSON.stringify(inlineConfig, null, 2), 'utf8');
 
-  const tmpConfigPath = Path.join(cacheDirectory, `${process.pid}.jest.config.json`);
+  // Remove existing --config flags and provide the inline JSON config
+  const argumentsWithoutConfig = removeFlagFromArgv(process.argv, 'config');
 
-  await Fs.promises.mkdir(cacheDirectory, { recursive: true });
+  const jestArgv = [
+    `--config`,
+    JSON.stringify(inlineConfig),
+    ...argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX),
+  ];
 
-  await Fs.promises.writeFile(tmpConfigPath, JSON.stringify(inlineConfig, null, 2), 'utf8');
+  const originalArgv = process.argv.concat().slice(NODE_ARGV_SLICE_INDEX);
 
-  const argvWithoutConfig = withoutFlags(process.argv, 'config');
-
-  // Provide the inline JSON config as the last --config argument so it takes precedence
-  const jestArgv = argvWithoutConfig
-    .slice(0, 2)
-    .concat([`--config`, JSON.stringify(inlineConfig), ...argvWithoutConfig.slice(2)]);
-
-  log.info('yarn jest', originalArgv.slice(2).join(' '));
-
-  return run(jestArgv.slice(2)).then(() => {
-    // Success means that tests finished, doesn't mean they passed.
-    reportTime(runStartTime, 'total', {
-      success: true,
-      isXpack: cwd.includes('x-pack'),
-      testFiles: map(testFiles, (testFile) => relative(cwd, testFile)),
-    });
-  });
+  return {
+    jestArgv,
+    originalArgv,
+  };
 }
 
 /**
- * Finds the common basePath by sorting the array
- * and comparing the first and last element
+ * Finds the common base path by sorting the array and comparing the first and last element.
+ * This leverages the fact that string sorting ensures the first and last elements
+ * will have the maximum difference, so their common prefix is the common base for all paths.
+ *
+ * @param paths - Array of file/directory paths
+ * @param sep - Path separator (defaults to OS separator)
+ * @returns Common base path shared by all input paths
  */
-export function commonBasePath(paths: string[] = [], sep = osSep) {
+export function commonBasePath(paths: string[] = [], sep = osSep): string {
   if (paths.length === 0) return '';
 
-  paths = paths.concat().sort();
+  const sortedPaths = paths.concat().sort();
+  const firstPath = sortedPaths[0].split(sep);
+  const lastPath = sortedPaths[sortedPaths.length - 1].split(sep);
 
-  const first = paths[0].split(sep);
-  const last = paths[paths.length - 1].split(sep);
+  const maxLength = firstPath.length;
+  let commonSegmentIndex = 0;
 
-  const length = first.length;
-  let i = 0;
-
-  while (i < length && first[i] === last[i]) {
-    i++;
+  while (
+    commonSegmentIndex < maxLength &&
+    firstPath[commonSegmentIndex] === lastPath[commonSegmentIndex]
+  ) {
+    commonSegmentIndex++;
   }
 
-  return first.slice(0, i).join(sep);
+  return firstPath.slice(0, commonSegmentIndex).join(sep);
 }
 
 /**
- * Remove occurrences of a CLI flag (and its following value if present) from argv array.
+ * Removes occurrences of a CLI flag (and its following value if present) from argv array.
  * Supports both --flag value and --flag=value forms.
+ *
+ * @param argv - Array of command line arguments
+ * @param flag - Flag name (without the -- prefix)
+ * @returns New array with the specified flag and its values removed
  */
-function withoutFlags(argv: string[], flag: string): string[] {
-  const out: string[] = [];
-  const long = `--${flag}`;
+function removeFlagFromArgv(argv: string[], flag: string): string[] {
+  const filteredArguments: string[] = [];
+  const longFlag = `--${flag}`;
+
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === long) {
-      // skip this and the next value if it exists
+    const currentArgument = argv[i];
+
+    if (currentArgument === longFlag) {
+      // Skip this flag and its following value if it exists
       i += 1;
       continue;
     }
-    if (a.startsWith(`${long}=`)) {
-      // skip --flag=value
+
+    if (currentArgument.startsWith(`${longFlag}=`)) {
+      // Skip --flag=value format
       continue;
     }
-    out.push(a);
+
+    filteredArguments.push(currentArgument);
   }
-  return out;
+
+  return filteredArguments;
 }
