@@ -18,7 +18,6 @@ import {
 import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
-import { unstable_batchedUpdates } from 'react-dom';
 import { useAgentId } from '../hooks/use_conversation';
 import { useConversationActions } from '../hooks/use_conversation_actions';
 import { useConversationId } from '../hooks/use_conversation_id';
@@ -122,13 +121,8 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     onMutate: ({ message }) => {
       setPendingMessage(message);
       messageControllerRef.current = new AbortController();
-
-      // Batch state changes to prevent multiple renders in legacy React
-      // This prevents loading indicator flickering in new round
-      unstable_batchedUpdates(() => {
-        conversationActions.addConversationRound({ userMessage: message });
-        setIsResponseLoading(true);
-      });
+      conversationActions.addConversationRound({ userMessage: message });
+      setIsResponseLoading(true);
     },
     onSettled: () => {
       conversationActions.invalidateConversation();
