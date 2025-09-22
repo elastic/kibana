@@ -122,13 +122,7 @@ export const TryInConsoleButton = ({
       return <EuiLink {...commonProps}>{content}</EuiLink>;
     case 'button':
       return (
-        <EuiButton
-          color="primary"
-          iconType={btnIconType}
-          size="s"
-          {...commonProps}
-          {...buttonProps}
-        >
+        <EuiButton color={color} iconType={btnIconType} size="s" {...commonProps} {...buttonProps}>
           {content}
         </EuiButton>
       );
