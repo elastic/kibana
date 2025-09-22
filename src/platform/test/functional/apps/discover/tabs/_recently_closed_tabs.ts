@@ -42,20 +42,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.closeTab(1);
       await discover.waitUntilTabIsLoaded();
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
-      // appeared in the recently closed tabs list
       await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        // appeared in the recently closed tabs list
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
       // restore it
       await unifiedTabs.restoreRecentlyClosedTab(0);
       await discover.waitUntilTabIsLoaded();
-      expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, secondTabLabel]);
-      expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
-      expect(await queryBar.getQueryString()).to.be(query);
-      // still on the recently closed tabs list
       await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel, secondTabLabel]);
+        expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.be(query);
+        // still on the recently closed tabs list
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
         expect(recentlyClosedTabs).to.eql([secondTabLabel]);
       });
