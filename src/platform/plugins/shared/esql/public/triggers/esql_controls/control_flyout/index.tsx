@@ -42,6 +42,7 @@ interface ESQLControlsFlyoutProps {
   initialState?: ESQLControlState;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
 }
 
 export function ESQLControlsFlyout({
@@ -56,6 +57,7 @@ export function ESQLControlsFlyout({
   initialState,
   closeFlyout,
   ariaLabelledBy,
+  currentApp,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -189,6 +191,7 @@ export function ESQLControlsFlyout({
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
+        currentApp={currentApp}
       />
     ) : (
       <IdentifierControlForm
@@ -200,6 +203,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
