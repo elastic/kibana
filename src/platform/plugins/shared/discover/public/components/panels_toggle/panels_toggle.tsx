@@ -45,10 +45,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
-
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
-
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||
     (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))

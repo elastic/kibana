@@ -356,7 +356,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
-    false
+    sidebarToggleState$.getValue().isCollapsed
   );
 
   useEffect(() => {

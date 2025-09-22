@@ -324,9 +324,20 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return () => onAddColumnWithTracking(draggingFieldName);
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
+  const getSidebarToggleStateAccessor = useProfileAccessor('getSidebarToggleState');
+  const sidebarToggleState = useMemo(() => {
+    return getSidebarToggleStateAccessor(() => {
+      return { isCollapsed: false, toggle: () => {} };
+    })();
+  }, [getSidebarToggleStateAccessor]);
+
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
+
+  useMemo(() => {
+    sidebarToggleState$.next(sidebarToggleState);
+  }, [sidebarToggleState, sidebarToggleState$]);
 
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
