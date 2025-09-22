@@ -114,8 +114,6 @@ it('should validate if a module can be imported', () => {
   });
 
   it('does not reuse cache when a different rootDir is passed', () => {
-    fs.mkdirSync(path.join(REPO_ROOT, 'data'), { recursive: true });
-
     const tempA = fs.mkdtempSync(path.join(REPO_ROOT, 'data', 'kbn-jest-cache-rootA-'));
     fs.writeFileSync(path.join(tempA, 'baz_baz_baz.ts'), 'export const X:number = 1;', 'utf8');
 
