@@ -1019,6 +1019,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
     },
+    agentBuilder: {
+      agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
+      getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
+      agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
+      tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,
+      programmaticAccess: `${ELASTIC_DOCS}solutions/search/agent-builder/programmatic-access`,
+      kibanaApi: `${ELASTIC_DOCS}solutions/search/agent-builder/kibana-api`,
+      mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
+      a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
+      limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
+    },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
