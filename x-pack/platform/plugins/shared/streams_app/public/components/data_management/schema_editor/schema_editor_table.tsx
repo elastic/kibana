@@ -10,6 +10,7 @@ import type {
   EuiDataGridColumnSortingConfig,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
   EuiSearchBar,
@@ -48,7 +49,7 @@ export function FieldsTable({
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
-  withToolbar: boolean;
+  withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
   selectedFields: string[];
   onFieldSelection: (names: string[], checked: boolean) => void;
 }) {
