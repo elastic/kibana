@@ -8,6 +8,7 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useStateWithLocalStorage } from '../../../../../hooks/use_state_with_localstorage';
 import { useAppContext } from '../../../../../app_context';
 
@@ -87,6 +88,12 @@ export const MlVcuUsageCostTour = ({
         <EuiButtonEmpty
           data-test-subj="mlVcuUsageCostTourCloseBtn"
           onClick={() => setTourVisible(true)}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.closeButton.ariaLabel',
+            {
+              defaultMessage: 'close the cost tour',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.parameters.mlCostTour.closeButton"
