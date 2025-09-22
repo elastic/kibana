@@ -22,6 +22,8 @@ import {
   TASK_TYPE,
   formatError,
 } from './utils';
+import type { BulkRollbackTaskParams } from './run_bulk_rollback';
+import { _runBulkRollbackTask } from './run_bulk_rollback';
 
 export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
@@ -58,6 +60,12 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
                   abortController,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
+                });
+              } else if (taskParams.type === 'bulk_rollback') {
+                results = await _runBulkRollbackTask({
+                  abortController,
+                  logger,
+                  taskParams: taskParams as BulkRollbackTaskParams,
                 });
               }
               const state: BulkPackageOperationsTaskState = {

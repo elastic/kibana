@@ -11,12 +11,14 @@ import type { LangSmithOptions } from '../../../../common/siem_migrations/model/
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
   SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH,
+  SIEM_DASHBOARD_MIGRATION_INSTALL_PATH,
   SIEM_DASHBOARD_MIGRATION_PATH,
   SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH,
   SIEM_DASHBOARD_MIGRATION_START_PATH,
   SIEM_DASHBOARD_MIGRATION_STATS_PATH,
   SIEM_DASHBOARD_MIGRATION_STOP_PATH,
+  SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH,
   SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH,
   SIEM_DASHBOARD_MIGRATIONS_PATH,
 } from '../../../../common/siem_migrations/dashboards/constants';
@@ -32,7 +34,10 @@ import type {
   UpsertDashboardMigrationResourcesRequestBody,
   UpsertDashboardMigrationResourcesResponse,
   StartDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestBody,
   GetDashboardMigrationDashboardsResponse,
+  InstallMigrationDashboardsResponse,
+  GetAllTranslationStatsDashboardMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { DashboardMigrationStats } from '../types';
@@ -81,6 +86,34 @@ export const getDashboardMigrationStats = async ({
   return KibanaServices.get().http.get<DashboardMigrationStats>(
     replaceParams(SIEM_DASHBOARD_MIGRATION_STATS_PATH, { migration_id: migrationId }),
     { version: VERSION, signal }
+  );
+};
+
+/**
+ * Retrieves the translation stats for the migration.
+ */
+export const getDashboardMigrationTranslationStats = async ({
+  migrationId,
+  signal,
+}: WithSignal<GetDashboardMigrationParams>): Promise<GetAllTranslationStatsDashboardMigrationResponse> => {
+  return KibanaServices.get().http.get<GetAllTranslationStatsDashboardMigrationResponse>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
+  );
+};
+
+export const updateDashboardMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: WithSignal<GetDashboardMigrationParams> & Body<UpdateDashboardMigrationRequestBody>) => {
+  return KibanaServices.get().http.patch<void>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, { migration_id: migrationId }),
+    {
+      version: VERSION,
+      signal,
+      body: JSON.stringify(body),
+    }
   );
 };
 
@@ -145,6 +178,26 @@ export const addDashboardsToDashboardMigration = async ({
       body: JSON.stringify(body),
       signal,
     }
+  );
+};
+
+export interface InstallDashboardsParams {
+  /** `id` of the migration to install dashboards for */
+  migrationId: string;
+  /** The dashboard ids to install */
+  ids?: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Installs the provided dashboard ids for a specific migration. */
+export const installMigrationDashboards = async ({
+  migrationId,
+  ids,
+  signal,
+}: InstallDashboardsParams): Promise<InstallMigrationDashboardsResponse> => {
+  return KibanaServices.get().http.post<InstallMigrationDashboardsResponse>(
+    replaceParams(SIEM_DASHBOARD_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify({ ids }), signal }
   );
 };
 
