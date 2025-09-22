@@ -18,7 +18,10 @@ run(
     const bail = !!(flags.bail || false);
 
     const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
-    const moonCommand = [IS_CI ? 'ci' : 'run', ':eslint'];
+    const moonCommand = ['run', ':eslint'];
+    if (IS_CI) {
+      moonCommand.push('--affected');
+    }
 
     const fullArgs = [...moonCommand, '--', ...eslintArgs].concat(flags._);
 
