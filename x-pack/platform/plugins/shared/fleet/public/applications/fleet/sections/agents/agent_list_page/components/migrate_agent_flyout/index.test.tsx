@@ -36,7 +36,7 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={1}
-        protectedAndFleetAgents={[]}
+        unsupportedMigrateAgents={[]}
       />
     );
   });
@@ -96,7 +96,7 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={2}
-        protectedAndFleetAgents={[]}
+        unsupportedMigrateAgents={[]}
       />
     );
     const replaceTokenButton = component.queryByTestId('migrateAgentFlyoutReplaceTokenButton');
@@ -119,7 +119,7 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={1}
-        protectedAndFleetAgents={[
+        unsupportedMigrateAgents={[
           {
             active: true,
             status: 'online',

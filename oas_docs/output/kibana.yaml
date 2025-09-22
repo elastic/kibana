@@ -84632,6 +84632,7 @@ components:
         - enrich_policy
         - task
         - transform
+        - ilm_policy
       type: string
     Security_Entity_Analytics_API_EngineComponentStatus:
       type: object
