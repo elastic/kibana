@@ -29,14 +29,14 @@ const createElasticModelsMock = (): jest.Mocked<IElasticModels> => {
 
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
-    getLocator: jest.fn().mockResolvedValue(sharePluginMock.createLocator()),
+    locator: sharePluginMock.createLocator(),
     getElasticModels: () => Promise.resolve(createElasticModelsMock()),
   };
 };
 
 const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
-    getLocator: jest.fn().mockResolvedValue(sharePluginMock.createLocator()),
+    locator: sharePluginMock.createLocator(),
     getMlApi: jest.fn(),
     getElasticModels: () => Promise.resolve(createElasticModelsMock()),
     components: {
