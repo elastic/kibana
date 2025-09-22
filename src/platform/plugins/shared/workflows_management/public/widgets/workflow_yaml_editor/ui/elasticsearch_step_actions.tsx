@@ -21,7 +21,7 @@ import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { RunStepButton } from './step_actions/run_step/run_step_button';
+import { RunStepButton } from './run_step_button';
 
 export interface ElasticsearchStepActionsProps {
   actionsProvider: any; // We'll make this optional since we're transitioning to unified providers

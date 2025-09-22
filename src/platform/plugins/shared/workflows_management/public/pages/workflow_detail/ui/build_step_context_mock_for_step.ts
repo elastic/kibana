@@ -18,8 +18,13 @@ export function buildStepContextMockForStep(
   stepId: string
 ): StepContextMockData {
   const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
-  const stepSubGraph = WorkflowGraph.fromWorkflowDefinition(
-    (parsingResult as any).data
-  ).getStepGraph(stepId);
+
+  if (!parsingResult.success) {
+    throw parsingResult.error;
+  }
+
+  const stepSubGraph = WorkflowGraph.fromWorkflowDefinition(parsingResult.data).getStepGraph(
+    stepId
+  );
   return buildStepContextMock(stepSubGraph);
 }

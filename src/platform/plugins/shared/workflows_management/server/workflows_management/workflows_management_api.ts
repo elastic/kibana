@@ -237,8 +237,6 @@ export class WorkflowsManagementApi {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
 
     if (parsedYaml.error) {
-      // TODO: handle error properly
-      // It should throw BadRequestError in the API
       throw parsedYaml.error;
     }
 

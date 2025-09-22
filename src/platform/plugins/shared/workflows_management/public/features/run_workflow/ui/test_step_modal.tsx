@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useGeneratedHtmlId,
+  euiFontSize,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
@@ -56,7 +57,7 @@ export function TestStepModal({
   useEffect(() => {
     const overlayElement = document.createElement('div');
     overlayElement.id = 'step-mock-data-overlay-root';
-    overlayElement.style.zIndex = '2147483647';
+    overlayElement.style.zIndex = '6001'; // should me above modal's z-index (6000)
     overlayElement.style.position = 'fixed';
     overlayElement.classList.add('monaco-editor');
     document.body.appendChild(overlayElement);
@@ -134,11 +135,21 @@ export function TestStepModal({
     <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+            </EuiFlexItem>
+            <EuiFlexItem css={componentStyles.description}>
+              <FormattedMessage
+                id="workflows.testStepModal.description"
+                defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="l" css={styles.codeEditorWrapper}>
+        <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem grow={false}>
             <CodeEditor
               languageId="json"
@@ -152,7 +163,7 @@ export function TestStepModal({
                 language: 'json',
                 overflowWidgetsDomNode,
                 fixedOverflowWidgets: true,
-                theme: 'vs',
+                theme: 'workflows-subdued',
                 automaticLayout: true,
                 fontSize: 12,
                 minimap: {
@@ -186,28 +197,9 @@ export function TestStepModal({
 }
 
 const componentStyles = {
-  codeEditorWrapper: ({ euiTheme }: UseEuiTheme) => css`
-    height: 100%;
-    overflow: auto;
-    position: relative;
-
-    .monaco-editor .editor-widget {
-      background-color: ${euiTheme.colors.mediumShade} !important;
-    }
-
-    /* Monaco editor error popup positioning offset */
-    .monaco-editor .monaco-hover,
-    .monaco-editor .suggest-widget,
-    .monaco-editor .parameter-hints-widget,
-    .monaco-editor .monaco-quick-input-widget {
-      transform: translateY(-290px) translateX(-250px) !important;
-      z-index: 9999 !important;
-    }
-
-    /* Specific styling for hover widgets in modals */
-    .monaco-editor .monaco-hover .hover-contents {
-      border-radius: 4px;
-      max-width: 400px;
-    }
-  `,
+  description: (euiThemeContext: UseEuiTheme) =>
+    css({
+      ...euiFontSize(euiThemeContext, 's'),
+      fontWeight: 'normal',
+    }),
 };

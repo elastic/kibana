@@ -38,10 +38,10 @@ import { buildStepExecutionsTree } from './build_step_executions_tree';
 function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
   const stepType = item.stepType;
   if (
-    stepType === 'foreach-iteration' &&
-    // || stepType === 'foreach' ||
-    // stepType === 'if-branch' ||
-    // stepType === 'if'
+    (stepType === 'foreach-iteration' ||
+      stepType === 'foreach' ||
+      stepType === 'if-branch' ||
+      stepType === 'if') &&
     !item.children.length
   ) {
     return ExecutionStatus.SKIPPED;
