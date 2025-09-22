@@ -193,6 +193,10 @@ export const AutoFillSchedulerFlyoutTrigger = () => {
                   <EuiTitle size="xs">
                     <h3>{i18n.SCHEDULER_LOGS_TITLE}</h3>
                   </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="s">
+                    <p>{i18n.SCHEDULER_LOGS_FILTER_NOTE}</p>
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFilterGroup>
@@ -210,70 +214,70 @@ export const AutoFillSchedulerFlyoutTrigger = () => {
                   </EuiFilterGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="s">
-                <p>{i18n.SCHEDULER_LOGS_FILTER_NOTE}</p>
-              </EuiText>
+              <EuiSpacer size="m" />
+
               <EuiBasicTable
                 loading={isLogsLoading}
                 items={logsData?.data ?? []}
                 itemId="timestamp"
-                columns={[
-                  {
-                    name: '',
-                    width: '40px',
-                    align: 'right',
-                    isExpander: true,
-                    render: (item: SchedulerLog) => (
-                      <EuiButtonIcon
-                        onClick={() => {
-                          const id = item.timestamp;
-                          const next = { ...expandedRowMap } as Record<string, JSX.Element>;
-                          if (next[id]) {
-                            delete next[id];
-                          } else {
-                            next[id] = (
-                              <EuiPanel color="subdued">
-                                <EuiText size="s">{item.message}</EuiText>
-                              </EuiPanel>
-                            );
-                          }
-                          setExpandedRowMap(next);
-                        }}
-                        aria-label={
-                          expandedRowMap[item.timestamp]
-                            ? i18n.COLLAPSE_ARIA_LABEL
-                            : i18n.EXPAND_ARIA_LABEL
-                        }
-                        iconType={expandedRowMap[item.timestamp] ? 'arrowDown' : 'arrowRight'}
-                      />
-                    ),
-                  },
-                  { field: 'timestamp', name: i18n.RUN_TIME_COLUMN },
-                  {
-                    field: 'status',
-                    name: i18n.LOGS_STATUS_COLUMN,
-                    render: (status: SchedulerLog['status']) => {
-                      const badgeColor =
-                        status === 'success'
-                          ? 'success'
-                          : status === 'warning'
-                          ? 'warning'
-                          : status === 'skipped'
-                          ? 'hollow'
-                          : 'danger';
-                      return <EuiBadge color={badgeColor}>{status}</EuiBadge>;
+                columns={
+                  [
+                    { field: 'timestamp', name: i18n.RUN_TIME_COLUMN },
+                    {
+                      field: 'status',
+                      name: i18n.LOGS_STATUS_COLUMN,
+                      render: (status: SchedulerLog['status']) => {
+                        const badgeColor =
+                          status === 'success'
+                            ? 'success'
+                            : status === 'warning'
+                            ? 'warning'
+                            : status === 'skipped'
+                            ? 'hollow'
+                            : 'danger';
+                        return <EuiBadge color={badgeColor}>{status}</EuiBadge>;
+                      },
                     },
-                  },
-                  {
-                    name: i18n.GAPS_SCHEDULED_COLUMN,
-                    render: (item: SchedulerLog) => item.summary?.total_gaps_processed ?? 0,
-                  },
-                  {
-                    name: i18n.RULES_PROCESSED_COLUMN,
-                    render: (item: SchedulerLog) => item.summary?.total_rules ?? 0,
-                  },
-                ] as Array<Record<string, unknown>>}
+                    {
+                      name: i18n.GAPS_SCHEDULED_COLUMN,
+                      render: (item: SchedulerLog) => item.summary?.total_gaps_processed ?? 0,
+                    },
+                    {
+                      name: i18n.RULES_PROCESSED_COLUMN,
+                      render: (item: SchedulerLog) => item.summary?.total_rules ?? 0,
+                    },
+                    {
+                      name: '',
+                      width: '40px',
+                      align: 'right',
+                      isExpander: true,
+                      render: (item: SchedulerLog) => (
+                        <EuiButtonIcon
+                          onClick={() => {
+                            const id = item.timestamp;
+                            const next = { ...expandedRowMap } as Record<string, JSX.Element>;
+                            if (next[id]) {
+                              delete next[id];
+                            } else {
+                              next[id] = (
+                                <EuiPanel color="subdued">
+                                  <EuiText size="s">{item.message}</EuiText>
+                                </EuiPanel>
+                              );
+                            }
+                            setExpandedRowMap(next);
+                          }}
+                          aria-label={
+                            expandedRowMap[item.timestamp]
+                              ? i18n.COLLAPSE_ARIA_LABEL
+                              : i18n.EXPAND_ARIA_LABEL
+                          }
+                          iconType={expandedRowMap[item.timestamp] ? 'arrowDown' : 'arrowRight'}
+                        />
+                      ),
+                    },
+                  ] as Array<Record<string, unknown>>
+                }
                 pagination={{
                   pageIndex,
                   pageSize,
