@@ -6,15 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { createFieldSuggestions, type FieldSuggestion } from '../utils/field_suggestions';
-import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
-import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
+import { useSimulatorSelector } from '../../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
+import { selectPreviewRecords } from '../../stream_detail_enrichment/state_management/simulation_state_machine/selectors';
+import { createFieldSuggestions } from '../../stream_detail_enrichment/steps/blocks/action/utils/field_suggestions';
+import type { FieldSuggestion } from '../field_selector';
 
 /**
- * Hook for providing field suggestions from simulation data for EuiComboBox
+ * Hook for providing field suggestions from enrichment simulation data
  */
-export const useFieldSuggestions = (): Array<EuiComboBoxOptionOption<FieldSuggestion>> => {
+export const useEnrichmentFieldSuggestions = (): FieldSuggestion[] => {
   const previewRecords = useSimulatorSelector((state) => selectPreviewRecords(state.context));
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
@@ -23,7 +23,7 @@ export const useFieldSuggestions = (): Array<EuiComboBoxOptionOption<FieldSugges
 
     return fields.map((field) => ({
       label: field.name,
-      value: field,
+      value: field.name,
       'data-test-subj': `field-suggestion-${field.name}`,
     }));
   }, [previewRecords, detectedFields]);

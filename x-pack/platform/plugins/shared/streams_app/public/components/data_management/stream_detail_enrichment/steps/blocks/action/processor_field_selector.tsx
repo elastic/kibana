@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
 import { FieldSelector } from '../../../../shared/field_selector';
+import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
 
 export interface ProcessorFieldSelectorProps {
   fieldKey?: string;
@@ -25,6 +26,8 @@ export const ProcessorFieldSelector = ({
   label,
   onChange,
 }: ProcessorFieldSelectorProps) => {
+  const suggestions = useEnrichmentFieldSuggestions();
+
   const { field, fieldState } = useController({
     name: fieldKey,
     rules: {
@@ -65,6 +68,7 @@ export const ProcessorFieldSelector = ({
       label={label ?? defaultLabel}
       helpText={helpText ?? defaultHelpText}
       placeholder={placeholder ?? defaultPlaceholder}
+      suggestions={suggestions}
       fullWidth
       dataTestSubj="streamsAppProcessorFieldSelectorComboFieldText"
       isInvalid={fieldState.invalid}

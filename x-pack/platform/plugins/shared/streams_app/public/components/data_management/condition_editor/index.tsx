@@ -36,16 +36,21 @@ import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
 
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
-import { FieldSelector } from '../shared/field_selector';
+import { FieldSelector, type FieldSuggestion } from '../shared/field_selector';
+import {
+  useEnrichmentFieldSuggestions,
+  useRoutingFieldSuggestions,
+} from '../../../hooks/use_field_suggestions';
 
 type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
 
-export type RoutingConditionEditorProps = ConditionEditorProps & {
+export type RoutingConditionEditorProps = Omit<ConditionEditorProps, 'fieldSuggestions'> & {
   onStatusChange: (params: RoutingConditionChangeParams['status']) => void;
 };
 
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
   const isEnabled = isRoutingEnabled(props.status);
+  const fieldSuggestions = useRoutingFieldSuggestions();
 
   return (
     <EuiForm fullWidth>
@@ -73,15 +78,19 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
-      <ConditionEditor {...props} />
+      <ConditionEditor {...props} fieldSuggestions={fieldSuggestions} />
     </EuiForm>
   );
 }
 
-export type ProcessorConditionEditorProps = Omit<ConditionEditorProps, 'status'>;
+export type ProcessorConditionEditorProps = Omit<
+  ConditionEditorProps,
+  'status' | 'fieldSuggestions'
+>;
 
 export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
-  return <ConditionEditor status="enabled" {...props} />;
+  const fieldSuggestions = useEnrichmentFieldSuggestions();
+  return <ConditionEditor status="enabled" {...props} fieldSuggestions={fieldSuggestions} />;
 }
 
 const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
@@ -95,10 +104,11 @@ interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
+  fieldSuggestions?: FieldSuggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange } = props;
+  const { status, onConditionChange, fieldSuggestions = [] } = props;
 
   const isInvalidCondition = !isCondition(props.condition);
 
@@ -161,6 +171,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
           disabled={status === 'disabled'}
           condition={condition}
           onConditionChange={handleConditionChange}
+          fieldSuggestions={fieldSuggestions}
         />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
@@ -175,8 +186,9 @@ function FilterForm(props: {
   condition: FilterCondition;
   disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
+  fieldSuggestions?: FieldSuggestion[];
 }) {
-  const { condition, disabled, onConditionChange } = props;
+  const { condition, disabled, onConditionChange, fieldSuggestions } = props;
 
   const operator = useMemo(() => {
     return getFilterOperator(condition);
@@ -225,6 +237,7 @@ function FilterForm(props: {
           placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
             defaultMessage: 'Field',
           })}
+          suggestions={fieldSuggestions}
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"

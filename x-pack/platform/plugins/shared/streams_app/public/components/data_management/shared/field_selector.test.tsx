@@ -10,32 +10,24 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FieldSelector } from './field_selector';
 
-jest.mock('../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions', () => ({
-  useFieldSuggestions: jest.fn(),
-}));
-
-import { useFieldSuggestions } from '../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions';
-
-const mockUseFieldSuggestions = jest.mocked(useFieldSuggestions);
-
 describe('FieldSelector', () => {
   const mockSuggestions = [
-    { label: '@timestamp', value: { name: '@timestamp' } },
-    { label: 'log.level', value: { name: 'log.level' } },
-    { label: 'service.name', value: { name: 'service.name' } },
-    { label: 'error.message', value: { name: 'error.message' } },
-    { label: 'trace.id', value: { name: 'trace.id' } },
-    { label: 'kubernetes.pod.name', value: { name: 'kubernetes.pod.name' } },
+    { name: '@timestamp' },
+    { name: 'log.level' },
+    { name: 'service.name' },
+    { name: 'error.message' },
+    { name: 'trace.id' },
+    { name: 'kubernetes.pod.name' },
   ];
 
   const defaultProps = {
     value: '',
     onChange: jest.fn(),
+    suggestions: mockSuggestions,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFieldSuggestions.mockReturnValue(mockSuggestions);
   });
 
   describe('Basic Rendering', () => {

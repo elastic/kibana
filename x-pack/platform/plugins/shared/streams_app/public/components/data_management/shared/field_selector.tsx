@@ -9,8 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useFieldSuggestions } from '../stream_detail_enrichment/steps/blocks/action/hooks/use_field_suggestions';
-import type { FieldSuggestion } from '../stream_detail_enrichment/steps/blocks/action/utils/field_suggestions';
+
+export interface FieldSuggestion {
+  name: string;
+  type?: string;
+}
 
 export interface FieldSelectorProps {
   value?: string;
@@ -24,6 +27,7 @@ export interface FieldSelectorProps {
   dataTestSubj?: string;
   isInvalid?: boolean;
   error?: string;
+  suggestions?: FieldSuggestion[];
 }
 
 /**
@@ -41,20 +45,29 @@ export const FieldSelector = ({
   dataTestSubj = 'streamsAppFieldSelector',
   isInvalid,
   error,
+  suggestions = [],
 }: FieldSelectorProps) => {
-  const suggestions = useFieldSuggestions();
+  const comboBoxOptions = useMemo(
+    () =>
+      suggestions.map((suggestion) => ({
+        label: suggestion.name,
+        value: suggestion.name,
+        'data-test-subj': `field-suggestion-${suggestion.name}`,
+      })),
+    [suggestions]
+  );
 
   const selectedOptions = useMemo(() => {
     if (!value) return [];
 
-    const matchingSuggestion = suggestions.find((s) => s.value?.name === value);
-    return matchingSuggestion ? [matchingSuggestion] : [{ label: value, value: { name: value } }];
-  }, [value, suggestions]);
+    const matchingSuggestion = comboBoxOptions.find((option) => option.value === value);
+    return matchingSuggestion ? [matchingSuggestion] : [{ label: value, value }];
+  }, [value, comboBoxOptions]);
 
   const handleSelectionChange = useCallback(
-    (newSelectedOptions: Array<EuiComboBoxOptionOption<FieldSuggestion>>) => {
+    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       const selectedOption = newSelectedOptions[0];
-      const newFieldValue = selectedOption?.value?.name || '';
+      const newFieldValue = selectedOption?.value || '';
       onChange?.(newFieldValue);
     },
     [onChange]
@@ -64,7 +77,7 @@ export const FieldSelector = ({
     (searchValue: string) => {
       const normalizedValue = searchValue.trim();
       if (normalizedValue) {
-        handleSelectionChange([{ label: normalizedValue, value: { name: normalizedValue } }]);
+        handleSelectionChange([{ label: normalizedValue, value: normalizedValue }]);
       }
     },
     [handleSelectionChange]
@@ -90,7 +103,7 @@ export const FieldSelector = ({
         <EuiComboBox
           data-test-subj={dataTestSubj}
           placeholder={placeholder ?? defaultPlaceholder}
-          options={suggestions}
+          options={comboBoxOptions}
           selectedOptions={selectedOptions}
           onChange={handleSelectionChange}
           onCreateOption={handleCreateOption}
