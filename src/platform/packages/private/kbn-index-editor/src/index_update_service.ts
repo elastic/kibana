@@ -576,16 +576,10 @@ export class IndexUpdateService {
             this._isSaving$.next(false);
 
             // Send telemetry about the save event
-            const newRowsCount = Array.from(savingDocs.keys()).filter((id) =>
-              id.startsWith(ROW_PLACEHOLDER_PREFIX)
-            ).length;
-            const newColumnsCount = this._pendingColumnsToBeSaved$
-              .getValue()
-              .filter((col) => !isPlaceholderColumn(col.name)).length;
-            const cellsEditedCount = updates.filter(
-              (update) =>
-                isDocUpdate(update) && !update.payload.id.startsWith(ROW_PLACEHOLDER_PREFIX)
-            ).length;
+            const { newRowsCount, newColumnsCount, cellsEditedCount } = this.summarizeSavingUpdates(
+              savingDocs,
+              updates
+            );
             this.telemetry.trackSaveSubmitted({
               pendingRowsAdded: newRowsCount,
               pendingColsAdded: newColumnsCount,
@@ -793,6 +787,22 @@ export class IndexUpdateService {
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+  }
+
+  private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
+    const newRowsCount = Array.from(savingDocs.keys()).filter((id) =>
+      id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    const newColumnsCount = this._pendingColumnsToBeSaved$
+      .getValue()
+      .filter((col) => !isPlaceholderColumn(col.name)).length;
+
+    const cellsEditedCount = updates.filter(
+      (update) => isDocUpdate(update) && !update.payload.id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    return { newRowsCount, newColumnsCount, cellsEditedCount };
   }
 
   private completeWithPlaceholders(currentColumnsCount: number) {
