@@ -28,10 +28,6 @@ export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 export { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 export { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 export { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-export {
-  savedObjectsServiceMock,
-  simpleSavedObjectMock,
-} from '@kbn/core-saved-objects-browser-mocks';
 export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-browser-mocks';

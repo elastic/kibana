@@ -251,6 +251,18 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
   }
 }
