@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 12323
+  esql: 13323
   esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 15709
+  onechat: 17322
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
