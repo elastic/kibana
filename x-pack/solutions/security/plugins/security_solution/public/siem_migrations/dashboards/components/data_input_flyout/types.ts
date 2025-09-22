@@ -15,5 +15,5 @@ export type OnMissingResourcesFetched = (missingResources: SiemMigrationResource
 
 export type SplunkDashboardsResult = Partial<{
   preview: boolean;
-  result: Record<(typeof SPLUNK_DASHBOARD_COLUMNS)[number], string>;
+  result: Record<(typeof SPLUNK_DASHBOARD_COLUMNS)[number], string | undefined>;
 }>;

@@ -20,6 +20,7 @@ import * as i18n from './translations';
 import type { SplunkDashboardsResult, OnMigrationCreated } from '../../../../types';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import type { SplunkOriginalDashboardExport } from '../../../../../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
+import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 
 export interface DashboardsFileUploadProps {
   createMigration: CreateMigration;
@@ -28,7 +29,7 @@ export interface DashboardsFileUploadProps {
   onDashboardsFileChanged?: (files: FileList | null) => void;
   migrationName: string | undefined;
   apiError: string | undefined;
-  onFileUpload?: (dashboards: SplunkOriginalDashboardExport[]) => void;
+  onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;
   onMigrationCreated: OnMigrationCreated;
 }
 export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
@@ -41,14 +42,12 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     onFileUpload,
     createMigration,
   }) => {
-    const [uploadedDashboards, setUploadedDashboards] = useState<SplunkOriginalDashboardExport[]>(
-      []
-    );
+    const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const onFileParsed = useCallback(
       (content: Array<SplunkRow<SplunkDashboardsResult>>) => {
-        const dashboards = content.map(formatDashboardRow);
+        const dashboards = content.map(formatDashboardRow) as SplunkDashboardsResult[];
         setUploadedDashboards(dashboards);
         onFileUpload?.(dashboards);
       },
@@ -58,7 +57,10 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     const createDashboards = useCallback(() => {
       if (migrationName) {
         filePickerRef.current?.removeFiles();
-        createMigration?.(migrationName, uploadedDashboards);
+        createMigration?.(
+          migrationName,
+          uploadedDashboards as CreateDashboardMigrationDashboardsRequestBody
+        );
       }
     }, [migrationName, createMigration, uploadedDashboards]);
 
