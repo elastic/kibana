@@ -963,7 +963,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Change agent privilege level
-  if (experimentalFeatures.enableAgentMigrations) {
+  if (experimentalFeatures.enableAgentPrivilegeLevelChange) {
     router.versioned
       .post({
         path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,
@@ -976,6 +976,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         description: `Change the privilege level of a single agent to unprivileged.`,
         options: {
           tags: ['oas-tag:Elastic Agents'],
+          availability: {
+            since: '9.2.0',
+            stability: 'experimental',
+          },
         },
       })
       .addVersion(

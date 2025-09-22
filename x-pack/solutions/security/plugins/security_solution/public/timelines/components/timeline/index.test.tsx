@@ -28,6 +28,8 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -103,6 +105,15 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(
+        withIndices(
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string
+        )
+      );
+
     jest.clearAllMocks();
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
@@ -142,6 +153,8 @@ describe('StatefulTimeline', () => {
     ).toEqual(true);
   });
 
+  // TODO: evaluate if this test is still needed
+  // https://github.com/elastic/security-team/issues/11959
   test('on create timeline and timeline savedObjectId: null, sourcerer does not update timeline', () => {
     mount(
       <TestProviders>
@@ -153,6 +166,9 @@ describe('StatefulTimeline', () => {
       mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
     );
   });
+
+  // TODO: evaluate if this test is still needed
+  // https://github.com/elastic/security-team/issues/11959
   test('sourcerer data view updates and timeline already matches the data view, no updates', () => {
     mount(
       <TestProviders
@@ -178,6 +194,8 @@ describe('StatefulTimeline', () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
+  // TODO: evaluate if this test is still needed
+  // https://github.com/elastic/security-team/issues/11959
   test('sourcerer data view updates, update timeline data view', () => {
     mount(
       <TestProviders

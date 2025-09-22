@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a combination of log documents and APM metrics for several services.
+ */
+
 import type { LogDocument, Instance } from '@kbn/apm-synthtrace-client';
 import { log, generateShortId, generateLongId, apm } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

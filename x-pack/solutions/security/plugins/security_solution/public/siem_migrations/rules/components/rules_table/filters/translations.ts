@@ -34,3 +34,10 @@ export const CUSTOM_AUTHOR_FILTER_OPTION = i18n.translate(
     defaultMessage: 'Custom',
   }
 );
+
+export const INDEX_PATTERN_MISSING_FILTER_OPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.filters.statusIndexPatternMissingOption',
+  {
+    defaultMessage: 'Index pattern missing',
+  }
+);

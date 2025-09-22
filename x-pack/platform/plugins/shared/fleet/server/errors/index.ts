@@ -110,6 +110,24 @@ export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
   }
 }
 
+export class CloudConnectorCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorGetListError extends FleetError {
+  constructor(message: string) {
+    super(`Error getting cloud connectors in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorInvalidVarsError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating cloud connector vars in Fleet, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}

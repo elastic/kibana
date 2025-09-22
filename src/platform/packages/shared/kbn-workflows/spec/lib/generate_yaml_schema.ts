@@ -17,6 +17,7 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
@@ -26,6 +27,24 @@ export interface ConnectorContract {
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   outputSchema: z.ZodType;
+  description?: string;
+}
+
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
 }
 
 function generateStepSchemaForConnector(
@@ -57,6 +76,7 @@ function createRecursiveStepSchema(
     );
 
     // Return discriminated union with all step types
+    // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
       forEachSchema,
       ifSchema,
@@ -84,6 +104,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
   });
 }

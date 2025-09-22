@@ -6,21 +6,32 @@
  */
 
 import {
+  EuiButton,
+  EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
   EuiSpacer,
-  EuiButton,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import { DashboardsTab } from './dashboards_tab';
+import { OverviewTab } from './overview_tab';
+import type { GroupStreamFormData } from './types';
+
+type GroupStreamModificationFlyoutTabId = 'overview' | 'dashboards';
+interface GroupStreamModificationFlyoutTab {
+  id: GroupStreamModificationFlyoutTabId;
+  name: string;
+  content: React.JSX.Element;
+}
 
 export function GroupStreamModificationFlyout({
   client,
@@ -28,50 +39,55 @@ export function GroupStreamModificationFlyout({
   streamsList,
   refresh,
   existingStream,
+  existingDashboards,
+  startingTab = 'overview',
 }: {
+  startingTab?: GroupStreamModificationFlyoutTabId;
   client: StreamsRepositoryClient;
   notifications: NotificationsStart;
   streamsList?: Array<{ stream: Streams.all.Definition }>;
   refresh: () => void;
   existingStream?: Streams.GroupStream.Definition;
+  existingDashboards?: string[];
 }) {
+  const {
+    dependencies: {
+      start: { dashboard: dashboardStart },
+    },
+  } = useKibana();
   const { signal } = useAbortController();
-  const [formData, setFormData] = React.useState({
+
+  const [formData, setFormData] = React.useState<GroupStreamFormData>({
     name: existingStream?.name ?? '',
     description: existingStream?.description ?? '',
+    metadata: existingStream?.group.metadata ?? {},
+    tags: existingStream?.group.tags.map((tag) => ({ label: tag })) ?? [],
     members:
       existingStream?.group.members.map((member) => ({
         label: member,
       })) ?? [],
+    dashboards: [],
   });
 
-  const [selectedTags, setSelectedTags] = React.useState<Array<{ label: string }>>(
-    existingStream?.group.tags.map((tag) => ({ label: tag })) ?? []
-  );
-  const [tagsInvalid, setTagsInvalid] = React.useState(false);
-
-  const isValid = (value: string) => /^[a-zA-Z]+$/.test(value);
-
-  const onCreateOption = (searchValue: string) => {
-    if (!isValid(searchValue)) {
-      return false;
+  useEffect(() => {
+    if (!existingDashboards) {
+      return;
     }
-    const newOption = { label: searchValue };
-    setSelectedTags([...selectedTags, newOption]);
-  };
 
-  const onSearchChange = (searchValue: string) => {
-    setTagsInvalid(searchValue ? !isValid(searchValue) : false);
-  };
+    const enrichDashboards = async () => {
+      const findDashboardsService = await dashboardStart.findDashboardsService();
+      const searchResults = await findDashboardsService.findByIds(existingDashboards);
+      setFormData((prevData) => ({
+        ...prevData,
+        dashboards: searchResults.map((hit) => ({
+          id: hit.id,
+          title: hit.status === 'success' ? hit.attributes.title : hit.id,
+        })),
+      }));
+    };
 
-  const onComboChange = (options: Array<{ label: string }>) => {
-    setSelectedTags(options);
-    setTagsInvalid(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    enrichDashboards();
+  }, [existingDashboards, dashboardStart]);
 
   async function modifyGroupStream() {
     let streamBaseData: any = {};
@@ -89,13 +105,15 @@ export function GroupStreamModificationFlyout({
         params: {
           path: { name: formData.name },
           body: {
-            dashboards: [],
             queries: [],
+            rules: [],
             ...streamBaseData,
+            dashboards: formData.dashboards.map((dashboard) => dashboard.id),
             stream: {
               description: formData.description,
               group: {
-                tags: selectedTags.map((opt) => opt.label),
+                metadata: formData.metadata,
+                tags: formData.tags.map((option) => option.label),
                 members: formData.members.map((opt) => opt.label),
               },
             },
@@ -127,9 +145,39 @@ export function GroupStreamModificationFlyout({
       });
   }
 
-  const streamsOptions = streamsList?.map((stream) => ({
-    label: stream.stream.name,
-  }));
+  const availableStreams =
+    streamsList?.map((stream) => ({
+      label: stream.stream.name,
+    })) ?? [];
+
+  const tabs: GroupStreamModificationFlyoutTab[] = [
+    {
+      id: 'overview',
+      name: i18n.translate('xpack.streams.groupStreamModificationFlyout.overviewTabLabel', {
+        defaultMessage: 'Overview',
+      }),
+      content: (
+        <OverviewTab
+          existingStream={!!existingStream}
+          availableStreams={availableStreams}
+          formData={formData}
+          setFormData={setFormData}
+        />
+      ),
+    },
+    {
+      id: 'dashboards',
+      name: i18n.translate('xpack.streams.groupStreamModificationFlyout.dashboardsTabLabel', {
+        defaultMessage: 'Dashboards',
+      }),
+      content: <DashboardsTab formData={formData} setFormData={setFormData} />,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = useState(startingTab);
+  const onSelectedTabChanged = (id: GroupStreamModificationFlyoutTabId) => {
+    setSelectedTabId(id);
+  };
 
   return (
     <>
@@ -137,7 +185,8 @@ export function GroupStreamModificationFlyout({
         <EuiModalHeaderTitle>
           {existingStream
             ? i18n.translate('xpack.streams.groupStreamModificationFlyout.editTitle', {
-                defaultMessage: 'Edit Group stream',
+                defaultMessage: 'Edit {name}',
+                values: { name: formData.name },
               })
             : i18n.translate('xpack.streams.groupStreamModificationFlyout.createTitle', {
                 defaultMessage: 'Create Group stream',
@@ -145,91 +194,21 @@ export function GroupStreamModificationFlyout({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.streamNameLabel', {
-            defaultMessage: 'Stream name',
-          })}
-          helpText={i18n.translate(
-            'xpack.streams.groupStreamModificationFlyout.streamNameHelpText',
-            {
-              defaultMessage: 'Enter a unique stream name',
-            }
-          )}
-        >
-          <EuiFieldText
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            disabled={!!existingStream}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.descriptionLabel', {
-            defaultMessage: 'Description',
-          })}
-        >
-          <EuiFieldText
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.tagsLabel', {
-            defaultMessage: 'Tags',
-          })}
-          helpText={i18n.translate('xpack.streams.groupStreamModificationFlyout.tagsHelpText', {
-            defaultMessage: 'Enter tags (letters only)',
-          })}
-          isInvalid={tagsInvalid}
-          error={
-            tagsInvalid
-              ? i18n.translate('xpack.streams.groupStreamModificationFlyout.tagsError', {
-                  defaultMessage: 'Only letters are allowed',
-                })
-              : undefined
-          }
-        >
-          <EuiComboBox
-            noSuggestions
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.tagsPlaceholder',
-              {
-                defaultMessage: 'Create some tags (letters only)',
-              }
-            )}
-            selectedOptions={selectedTags}
-            onCreateOption={onCreateOption}
-            onChange={onComboChange}
-            onSearchChange={onSearchChange}
-            isInvalid={tagsInvalid}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.groupStreamModificationFlyout.membersLabel', {
-            defaultMessage: 'Members',
-          })}
-          helpText={i18n.translate('xpack.streams.groupStreamModificationFlyout.membersHelpText', {
-            defaultMessage: 'Select the members of this Group stream',
-          })}
-        >
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.membersPlaceholder',
-              {
-                defaultMessage: 'Select members',
-              }
-            )}
-            options={streamsOptions}
-            selectedOptions={formData.members}
-            onChange={(options) => {
-              setFormData({ ...formData, members: options });
-            }}
-          />
-        </EuiFormRow>
+        <EuiTabs>
+          {tabs.map((tab, index) => (
+            <EuiTab
+              key={index}
+              onClick={() => onSelectedTabChanged(tab.id)}
+              isSelected={tab.id === selectedTabId}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
         <EuiSpacer size="m" />
+        {tabs.find((obj) => obj.id === selectedTabId)?.content}
+      </EuiModalBody>
+      <EuiModalFooter>
         <EuiButton onClick={modifyGroupStream} fill>
           {existingStream
             ? i18n.translate('xpack.streams.groupStreamModificationFlyout.updateButtonLabel', {
@@ -239,7 +218,7 @@ export function GroupStreamModificationFlyout({
                 defaultMessage: 'Create',
               })}
         </EuiButton>
-      </EuiModalBody>
+      </EuiModalFooter>
     </>
   );
 }

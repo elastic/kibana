@@ -49,7 +49,6 @@
     "@kbn/datemath",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
-    "@kbn/field-types",
     "@kbn/index-management-shared-types",
     "@kbn/traced-es-client",
     "@kbn/discover-plugin",
@@ -80,6 +79,9 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/utility-types",
     "@kbn/apm-synthtrace-client",
-    "@kbn/streamlang"
+    "@kbn/streamlang",
+    "@kbn/data-quality",
+    "@kbn/core-notifications-browser",
+    "@kbn/io-ts-utils",
   ]
 }
