@@ -44,7 +44,7 @@ export interface RiskScoreService {
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
   resetToZero: (
-    deps: Pick<ResetToZeroDependencies, 'dataViewId' | 'refresh' | 'entityType'>
+    deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'entities'>
   ) => Promise<void>;
 }
 
@@ -107,7 +107,7 @@ export const riskScoreServiceFactory = ({
     };
   },
   resetToZero: async (
-    deps: Pick<ResetToZeroDependencies, 'dataViewId' | 'refresh' | 'entityType'>
+    deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'entities'>
   ) => {
     await resetToZero({
       ...deps,

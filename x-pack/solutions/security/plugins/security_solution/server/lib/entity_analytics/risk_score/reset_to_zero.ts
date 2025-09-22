@@ -14,15 +14,16 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality';
 import type { RiskScoreBucket } from '../types';
 import { processScores } from './calculate_risk_scores';
+import { getIndexPatternDataStream } from './configurations';
 
 export interface ResetToZeroDependencies {
   esClient: ElasticsearchClient;
   dataClient: RiskScoreDataClient;
-  dataViewId: string;
   spaceId: string;
   entityType: EntityType;
   assetCriticalityService: AssetCriticalityService;
   logger: Logger;
+  entities: string[];
   refresh?: 'wait_for';
 }
 
@@ -31,24 +32,34 @@ const RISK_SCORE_FIELD = 'risk.calculated_score_norm';
 export const resetToZero = async ({
   esClient,
   dataClient,
-  dataViewId,
   spaceId,
   entityType,
   assetCriticalityService,
   logger,
   refresh,
+  entities,
 }: ResetToZeroDependencies): Promise<void> => {
-  const { index } = await dataClient.getRiskInputsIndex({ dataViewId });
-
+  const { alias } = await getIndexPatternDataStream(spaceId);
+  const entityField = EntityTypeToIdentifierField[entityType];
+  const excludedEntities = `AND ${entityField} NOT IN (${entities.map((e) => `"${e}"`).join(',')})`;
   const esql = /* sql */ `
-    FROM ${index} 
-    | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0 AND @timestamp <= NOW() - 1 hour 
+    FROM ${alias} 
+    | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0 ${entities.length > 0 ? excludedEntities : ''}
     | KEEP ${EntityTypeToIdentifierField[entityType]}
     `;
 
-  const response = await esClient.esql.query({
-    query: esql,
-  });
+  logger.debug(`Reset to zero ESQL query:\n${esql}`);
+
+  const response = await esClient.esql
+    .query({
+      query: esql,
+    })
+    .catch((e) => {
+      logger.error(
+        `Error executing ESQL query to reset ${entityType} risk scores to zero: ${e.message}`
+      );
+      throw e;
+    });
 
   const buckets: RiskScoreBucket[] = response.values.map((row) => {
     const [entity] = row;
