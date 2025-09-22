@@ -14,6 +14,7 @@ import {
   getEventCategoriesFromData,
   getHighlightedFieldsToDisplay,
 } from '../../../../common/components/event_details/get_alert_summary_rows';
+import { EVENT_SOURCE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 export interface UseHighlightedFieldsParams {
   /**
@@ -92,7 +93,7 @@ export const useHighlightedFields = ({
     }
 
     // if there aren't any values we can skip this highlighted field
-    const fieldValues = item.values;
+    let fieldValues = item.values;
     if (!fieldValues || isEmpty(fieldValues)) {
       return acc;
     }
@@ -112,6 +113,17 @@ export const useHighlightedFields = ({
       return acc;
     }
 
+    /**
+     * Source event use-case.
+     * In this case we only want to show ancestors of level "0".
+     * We can obtain those by using the `kibana.alert.ancestors.depth` field
+     */
+    if (item.field === EVENT_SOURCE_FIELD_NAME) {
+      const depts = dataFormattedForFieldBrowser.find(
+        (_item) => _item.field === `kibana.alert.ancestors.depth`
+      );
+      fieldValues = fieldValues.filter((_, idx) => (depts?.values?.[idx] ?? '0') === '0');
+    }
     return {
       ...acc,
       [field.id]: {

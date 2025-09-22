@@ -11,6 +11,7 @@ import {ParseTreeListener} from "antlr4";
  */
 
 
+import { StatementsContext } from "./esql_parser.js";
 import { SingleStatementContext } from "./esql_parser.js";
 import { CompositeQueryContext } from "./esql_parser.js";
 import { SingleCommandQueryContext } from "./esql_parser.js";
@@ -37,7 +38,9 @@ import { StatsCommandContext } from "./esql_parser.js";
 import { AggFieldsContext } from "./esql_parser.js";
 import { AggFieldContext } from "./esql_parser.js";
 import { QualifiedNameContext } from "./esql_parser.js";
+import { FieldNameContext } from "./esql_parser.js";
 import { QualifiedNamePatternContext } from "./esql_parser.js";
+import { FieldNamePatternContext } from "./esql_parser.js";
 import { QualifiedNamePatternsContext } from "./esql_parser.js";
 import { IdentifierContext } from "./esql_parser.js";
 import { IdentifierPatternContext } from "./esql_parser.js";
@@ -79,6 +82,8 @@ import { LookupCommandContext } from "./esql_parser.js";
 import { InlinestatsCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
+import { SetCommandContext } from "./esql_parser.js";
+import { SetFieldContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -105,6 +110,7 @@ import { FunctionExpressionContext } from "./esql_parser.js";
 import { FunctionNameContext } from "./esql_parser.js";
 import { MapExpressionContext } from "./esql_parser.js";
 import { EntryExpressionContext } from "./esql_parser.js";
+import { MapValueContext } from "./esql_parser.js";
 import { NullLiteralContext } from "./esql_parser.js";
 import { QualifiedIntegerLiteralContext } from "./esql_parser.js";
 import { DecimalLiteralContext } from "./esql_parser.js";
@@ -132,6 +138,16 @@ import { JoinPredicateContext } from "./esql_parser.js";
  * `esql_parser`.
  */
 export default class esql_parserListener extends ParseTreeListener {
+	/**
+	 * Enter a parse tree produced by `esql_parser.statements`.
+	 * @param ctx the parse tree
+	 */
+	enterStatements?: (ctx: StatementsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.statements`.
+	 * @param ctx the parse tree
+	 */
+	exitStatements?: (ctx: StatementsContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.singleStatement`.
 	 * @param ctx the parse tree
@@ -399,6 +415,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitQualifiedName?: (ctx: QualifiedNameContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.fieldName`.
+	 * @param ctx the parse tree
+	 */
+	enterFieldName?: (ctx: FieldNameContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fieldName`.
+	 * @param ctx the parse tree
+	 */
+	exitFieldName?: (ctx: FieldNameContext) => void;
+	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedNamePattern`.
 	 * @param ctx the parse tree
 	 */
@@ -408,6 +434,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitQualifiedNamePattern?: (ctx: QualifiedNamePatternContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fieldNamePattern`.
+	 * @param ctx the parse tree
+	 */
+	enterFieldNamePattern?: (ctx: FieldNamePatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fieldNamePattern`.
+	 * @param ctx the parse tree
+	 */
+	exitFieldNamePattern?: (ctx: FieldNamePatternContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedNamePatterns`.
 	 * @param ctx the parse tree
@@ -833,6 +869,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFuseCommand?: (ctx: FuseCommandContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.setCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSetCommand?: (ctx: SetCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.setCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSetCommand?: (ctx: SetCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.setField`.
+	 * @param ctx the parse tree
+	 */
+	enterSetField?: (ctx: SetFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.setField`.
+	 * @param ctx the parse tree
+	 */
+	exitSetField?: (ctx: SetFieldContext) => void;
+	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.
 	 * @param ctx the parse tree
@@ -1134,6 +1190,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitEntryExpression?: (ctx: EntryExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.mapValue`.
+	 * @param ctx the parse tree
+	 */
+	enterMapValue?: (ctx: MapValueContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mapValue`.
+	 * @param ctx the parse tree
+	 */
+	exitMapValue?: (ctx: MapValueContext) => void;
 	/**
 	 * Enter a parse tree produced by the `nullLiteral`
 	 * labeled alternative in `esql_parser.constant`.

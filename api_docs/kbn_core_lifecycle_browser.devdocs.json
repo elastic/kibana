@@ -498,10 +498,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
               }
             ]
           },

@@ -6,12 +6,12 @@
  */
 
 import expect from 'expect';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
-import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privilege_monitoring/utils';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/utils';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
-import { PrivMonUtils } from './utils';
+import { PrivMonUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACES = ['default', 'space1'];
 
-  describe('@ess @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
     beforeEach(async () => {
       await asyncForEach(SPACES, async (space) => {
         if (space !== 'default') {

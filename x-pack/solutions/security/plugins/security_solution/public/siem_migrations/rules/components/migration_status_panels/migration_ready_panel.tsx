@@ -6,26 +6,20 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiPanel,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
-import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
-import { RuleMigrationsLastError } from './last_error';
-import { MigrationPanelTitle } from './migration_panel_title';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { PanelText } from '../../../../common/components/panel_text';
+import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
+import { useStartMigration } from '../../logic/use_start_migration';
+import { StartTranslationButton } from '../../../common/components/start_translation_button';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -35,7 +29,8 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
+  const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
+  const { startMigration, isLoading: isStarting } = useStartMigration();
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
@@ -56,14 +51,14 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const migrationPanelDescription = useMemo(() => {
     if (migrationStats.last_execution?.error) {
-      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.items.total);
     }
 
     if (isStopped) {
-      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.items.total);
     }
-    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
-  }, [migrationStats.last_execution?.error, migrationStats.rules.total, isStopped]);
+    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
+  }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
@@ -71,7 +66,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} />
+              <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
             </EuiFlexItem>
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
@@ -91,6 +86,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="ruleMigrationMissingResourcesButton"
+                  aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                   iconType="download"
                   iconSide="right"
                   onClick={onOpenFlyout}
@@ -101,7 +97,12 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <StartTranslationButton migrationId={migrationStats.id} isStopped={isStopped} />
+              <StartTranslationButton
+                migrationId={migrationStats.id}
+                isStopped={isStopped}
+                startMigration={startMigration}
+                isStarting={isStarting}
+              />
             </EuiFlexItem>
           </>
         )}
@@ -109,44 +110,10 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       {migrationStats.last_execution?.error && (
         <>
           <EuiSpacer size="m" />
-          <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+          <MigrationsLastError message={migrationStats.last_execution.error} migrationType="rule" />
         </>
       )}
     </EuiPanel>
   );
 });
 MigrationReadyPanel.displayName = 'MigrationReadyPanel';
-
-const StartTranslationButton = React.memo<{ migrationId: string; isStopped: boolean }>(
-  ({ migrationId, isStopped }) => {
-    const { startMigration, isLoading } = useStartMigration();
-    const onStartMigration = useCallback(() => {
-      startMigration(migrationId);
-    }, [migrationId, startMigration]);
-
-    const text = useMemo(() => {
-      if (isStopped) {
-        return isLoading
-          ? i18n.RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_RESUME_TRANSLATION_BUTTON;
-      } else {
-        return isLoading
-          ? i18n.RULE_MIGRATION_STARTING_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON;
-      }
-    }, [isStopped, isLoading]);
-
-    return (
-      <EuiButton
-        data-test-subj={'startMigrationButton'}
-        fill={!isStopped}
-        onClick={onStartMigration}
-        isLoading={isLoading}
-        size="s"
-      >
-        {text}
-      </EuiButton>
-    );
-  }
-);
-StartTranslationButton.displayName = 'StartTranslationButton';

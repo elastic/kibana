@@ -25,7 +25,7 @@
  * DISSECT input "pattern"
  * ```
  */
-export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'sample']);
+export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'sample', 'fork']);
 
 /**
  * This set tracks command options which use an equals sign to separate
@@ -37,6 +37,9 @@ export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'samp
  * ```
  * COMMAND arg1, arg2, arg3 OPTION option
  * FROM index METADATA _id
+ *                    |
+ *                    |
+ *                    space
  * ```
  *
  * However, the `APPEND_SEPARATOR` in the `DISSECT` command uses an equals

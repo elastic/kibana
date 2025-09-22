@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './src/types';
 export * from './src/constants';
+export { Version } from './src/version';

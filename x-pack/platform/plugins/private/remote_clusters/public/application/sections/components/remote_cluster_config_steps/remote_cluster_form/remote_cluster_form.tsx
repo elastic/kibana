@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import type { ReactNode } from 'react-markdown';
 import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
+import { extractHostAndPort } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 import { AppContext } from '../../../../app_context';
 import { skippingDisconnectedClustersUrl } from '../../../../services/documentation';
@@ -162,9 +163,12 @@ export const RemoteClusterForm: React.FC<Props> = ({
       // If we switch off the advanced options, revert the server name to
       // the host name from the proxy address
       if (cloudAdvancedOptionsEnabled === false) {
+        const serverName = fields.proxyAddress
+          ? extractHostAndPort(fields.proxyAddress)?.host
+          : undefined;
         changedFields = {
           ...changedFields,
-          serverName: fields.proxyAddress?.split(':')[0],
+          serverName,
           proxySocketConnections: defaultClusterValues.proxySocketConnections,
         };
       }
