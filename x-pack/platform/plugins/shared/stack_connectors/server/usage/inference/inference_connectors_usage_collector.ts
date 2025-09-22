@@ -30,6 +30,28 @@ export function registerInferenceConnectorsUsageCollector(
     isReady: () => true,
     schema: {
       inference_count_by_provider: {
+        // Known providers from ServiceProviderKeys
+        'alibabacloud-ai-search': { type: 'long' },
+        amazonbedrock: { type: 'long' },
+        amazon_sagemaker: { type: 'long' },
+        anthropic: { type: 'long' },
+        azureaistudio: { type: 'long' },
+        azureopenai: { type: 'long' },
+        cohere: { type: 'long' },
+        deepseek: { type: 'long' },
+        elastic: { type: 'long' },
+        elasticsearch: { type: 'long' },
+        googleaistudio: { type: 'long' },
+        googlevertexai: { type: 'long' },
+        hugging_face: { type: 'long' },
+        jinaai: { type: 'long' },
+        mistral: { type: 'long' },
+        openai: { type: 'long' },
+        voyageai: { type: 'long' },
+        watsonxai: { type: 'long' },
+        ai21: { type: 'long' },
+        llama: { type: 'long' },
+        // Fallback for future additions
         DYNAMIC_KEY: { type: 'long' },
       },
     },

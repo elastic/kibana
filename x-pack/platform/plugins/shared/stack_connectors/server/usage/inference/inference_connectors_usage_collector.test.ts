@@ -68,7 +68,7 @@ describe('inference_connectors_usage_collector', () => {
           byProvider: {
             buckets: [
               { key: 'openai', doc_count: 3 },
-              { key: 'azure-openai', doc_count: 1 },
+              { key: 'azureopenai', doc_count: 1 },
             ],
           },
         },
@@ -80,7 +80,7 @@ describe('inference_connectors_usage_collector', () => {
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        inference_count_by_provider: { openai: 3, 'azure-openai': 1 },
+        inference_count_by_provider: { openai: 3, azureopenai: 1 },
       });
     });
 
