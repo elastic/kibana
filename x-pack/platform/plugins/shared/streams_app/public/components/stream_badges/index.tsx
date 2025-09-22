@@ -93,7 +93,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
 
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
