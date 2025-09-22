@@ -14,6 +14,7 @@ import type {
   BulkDeleteToolResult,
   ResolveSearchSourcesResponse,
   ListWorkflowsResponse,
+  GetWorkflowResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
@@ -158,6 +159,49 @@ export function registerInternalToolsRoutes({
             name: workflow.name,
             description: workflow.description,
           })),
+        },
+      });
+    })
+  );
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_get_workflow/{id}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      if (!workflowsManagement) {
+        return response.ok<GetWorkflowResponse>({
+          body: {
+            id: '',
+            name: '',
+            description: '',
+          },
+        });
+      }
+
+      const [, { spaces }] = await coreSetup.getStartServices();
+      const currentSpace = spaces
+        ? (await spaces.spacesService.getActiveSpace(request)).id
+        : 'default';
+
+      const workflow = await workflowsManagement.management.getWorkflow(
+        request.params.id,
+        currentSpace
+      );
+
+      return response.ok<GetWorkflowResponse>({
+        body: {
+          id: workflow!.id,
+          name: workflow!.name,
+          description: workflow!.description,
         },
       });
     })

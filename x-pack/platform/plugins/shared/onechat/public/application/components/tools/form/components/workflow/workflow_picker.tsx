@@ -28,7 +28,6 @@ export const WorkflowPicker: React.FC = () => {
     return (workflows || []).map((workflow) => ({
       label: workflow.name,
       value: workflow.id,
-      'data-test-subj': `workflow-option-${workflow.id}`,
     }));
   }, [workflows]);
 
@@ -61,7 +60,7 @@ export const WorkflowPicker: React.FC = () => {
       selectedOptions={selectedOptions}
       onChange={handleSelectionChange}
       onBlur={onBlur}
-      singleSelection={{ asPlainText: true }}
+      singleSelection={{ asPlainText: false }}
       isLoading={isLoading}
       isInvalid={fieldState.invalid}
       data-test-subj="onechatWorkflowPicker"

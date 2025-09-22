@@ -25,6 +25,7 @@ export const queryKeys = {
       resolveTargets: (pattern: string) => ['tools', 'indexSearch', 'resolveTargets', pattern],
     },
     workflows: {
+      byId: (workflowId?: string) => ['tools', 'workflows', workflowId],
       list: () => ['tools', 'workflows', 'list'] as const,
     },
   },

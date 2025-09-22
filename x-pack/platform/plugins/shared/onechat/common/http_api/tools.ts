@@ -76,6 +76,12 @@ export interface WorkflowItem {
   description: string;
 }
 
+export interface GetWorkflowResponse {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface ListWorkflowsResponse {
   results: WorkflowItem[];
 }

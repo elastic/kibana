@@ -40,8 +40,8 @@ export const createWorkflowFormValidationSchema = (toolsService: ToolsService) =
             return true;
           }
           try {
-            const response = await toolsService.listWorkflows({});
-            return response.results.some((workflow) => workflow.id === workflowId);
+            const workflow = await toolsService.getWorkflow(workflowId);
+            return workflow.id === workflowId;
           } catch {
             return false;
           }

@@ -19,6 +19,7 @@ import type {
   ExecuteToolResponse,
   ResolveSearchSourcesResponse,
   ListWorkflowsResponse,
+  GetWorkflowResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -74,6 +75,12 @@ export class ToolsService {
     return await this.http.get<ResolveSearchSourcesResponse>(
       `${internalApiPath}/tools/_resolve_search_sources`,
       { query: { pattern } }
+    );
+  }
+
+  async getWorkflow(workflowId: string) {
+    return await this.http.get<GetWorkflowResponse>(
+      `${internalApiPath}/tools/_get_workflow/${workflowId}`
     );
   }
 
