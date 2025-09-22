@@ -20,6 +20,11 @@ import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
 export const visualizationPlugin = () => {
+  const extractAttribute = (value: string, attr: string) => {
+    const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+    return value.match(regex)?.[1];
+  };
+
   const visitor = (node: Node) => {
     if ('children' in node) {
       const parent = node as Parent;
@@ -36,19 +41,9 @@ export const visualizationPlugin = () => {
       return;
     }
 
-    // extract attribute: tool-result-id
-    const toolResultIdRegex = new RegExp(
-      `${visualizationElement.attributes.toolResultId}="([^"]*)"`,
-      'i'
-    );
-    const toolResultId = value.match(toolResultIdRegex)?.[1];
-
-    // extract attribute: chart-type
-    const chartTypeRegex = new RegExp(
-      `${visualizationElement.attributes.chartType}="([^"]*)"`,
-      'i'
-    );
-    const chartType = value.match(chartTypeRegex)?.[1];
+    // extract attributes
+    const toolResultId = extractAttribute(value, visualizationElement.attributes.toolResultId);
+    const chartType = extractAttribute(value, visualizationElement.attributes.chartType);
 
     // transform the node from type `html` to (custom) type `visualization`
     (node as any).type = visualizationElement.tagName;
