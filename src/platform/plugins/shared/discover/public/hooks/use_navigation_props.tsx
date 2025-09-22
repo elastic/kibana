@@ -57,7 +57,7 @@ const getStateParams = ({
     appliedFilters = filters;
   }
 
-  const tabState = getStatesFromKbnUrl(window.location.href)?.[TAB_STATE_URL_KEY];
+  const tabState = getStatesFromKbnUrl(window?.location?.href)?.[TAB_STATE_URL_KEY];
 
   return {
     columns,
