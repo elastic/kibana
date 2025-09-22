@@ -197,29 +197,29 @@ const createFieldSelectionCellRenderer = (
 ): EuiDataGridControlColumn => ({
   id: 'field-selection',
   width: 40,
-  headerCellRender: () => (
-    <EuiCheckbox
-      id="selectAllFields"
-      onChange={(e) => {
-        onChange(
-          fields.filter((field) => isSelectableField(streamName, field)).map((field) => field.name),
-          e.target.checked
-        );
-      }}
-      checked={
-        fields.filter((field) => isSelectableField(streamName, field)).length > 0 &&
-        fields
-          .filter((field) => isSelectableField(streamName, field))
-          .every((field) => selectedFields.includes(field.name))
-      }
-      indeterminate={
-        selectedFields.length > 0 &&
-        !fields
-          .filter((field) => isSelectableField(streamName, field))
-          .every((field) => selectedFields.includes(field.name))
-      }
-    />
-  ),
+  headerCellRender: () => {
+    const selectableFields = fields.filter((field) => isSelectableField(streamName, field));
+    if (selectableFields.length === 0) {
+      return;
+    }
+
+    return (
+      <EuiCheckbox
+        id="selectAllFields"
+        onChange={(e) => {
+          onChange(
+            selectableFields.map((field) => field.name),
+            e.target.checked
+          );
+        }}
+        checked={selectableFields.every((field) => selectedFields.includes(field.name))}
+        indeterminate={
+          selectedFields.length > 0 &&
+          !selectableFields.every((field) => selectedFields.includes(field.name))
+        }
+      />
+    );
+  },
   rowCellRender: ({ rowIndex }) => {
     const field = fields[rowIndex];
 
