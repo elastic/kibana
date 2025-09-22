@@ -50,7 +50,7 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
-import { isMac } from '../../../shared/utils/is_mac';
+import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -340,20 +340,7 @@ export const WorkflowYAMLEditor = ({
     closeActionsPopover();
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const modifierKey = isMac() ? event.metaKey : event.ctrlKey;
-      if (event.key === 'k' && modifierKey) {
-        event.preventDefault();
-        event.stopPropagation();
-        openActionsPopover();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+  const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
@@ -362,16 +349,10 @@ export const WorkflowYAMLEditor = ({
       glyphMargin: true,
     });
 
-    // TODO: handle unmounting of the editor
-    // CMD+K shortcut, while focus is on the editor
-    editor.addCommand(
-      // eslint-disable-next-line no-bitwise
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-      () => {
-        openActionsPopover();
-      },
-      'Open actions popover'
-    );
+    registerKeyboardCommands({
+      editor,
+      openActionsPopover,
+    });
 
     // Listen to content changes to detect typing
     const model = editor.getModel();
@@ -476,6 +457,10 @@ export const WorkflowYAMLEditor = ({
     }
 
     onMount?.(editor, monaco);
+  };
+
+  const handleEditorWillUnmount = () => {
+    unregisterKeyboardCommands();
   };
 
   useEffect(() => {
@@ -1395,6 +1380,7 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.editorContainer}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
+          editorWillUnmount={handleEditorWillUnmount}
           onChange={handleChange}
           options={editorOptions}
           schemas={schemas}
