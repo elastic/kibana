@@ -326,6 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
+        await es.indices.delete({ index: indexName }, { ignore: [404] });
         await api.deleteMonitoringEngine({ query: { data: true } });
       });
 
@@ -392,8 +393,10 @@ export default ({ getService }: FtrProviderContext) => {
     describe('plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const entitySource = createIndexEntitySource(indexName, { name: 'StarWars' });
-
       beforeEach(async () => {
+        await kibanaServer.uiSettings.update({
+          'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': false,
+        });
         await createUserIndex(indexName);
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
