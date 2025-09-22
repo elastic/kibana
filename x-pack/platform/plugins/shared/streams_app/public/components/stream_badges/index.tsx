@@ -73,26 +73,11 @@ export function ClassicStreamBadge() {
 
 export function WiredStreamBadge() {
   return (
-    <EuiToolTip
-      position="top"
-      title={i18n.translate('xpack.streams.badges.wired.title', {
-        defaultMessage: 'Wired Stream',
+    <EuiBadge color="hollow" iconType={iconStreamWired} iconSide="left">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
       })}
-      content={i18n.translate('xpack.streams.badges.wired.description', {
-        defaultMessage: 'Fully powered by the Streams technology',
-      })}
-      anchorProps={{
-        css: css`
-          display: inline-flex;
-        `,
-      }}
-    >
-      <EuiBadge color="hollow" iconType={iconStreamWired} iconSide="left">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
-          defaultMessage: 'Wired',
-        })}
-      </EuiBadge>
-    </EuiToolTip>
+    </EuiBadge>
   );
 }
 
@@ -135,18 +120,12 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
       </EuiBadge>
     );
   } else if (isDslLifecycle(lifecycle)) {
-    badge = lifecycle.dsl.data_retention ? (
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
-          defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention },
-        })}
-      </EuiBadge>
-    ) : (
+    badge = (
       <EuiBadge color="hollow" iconType="clockCounter" iconSide="left">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
-          defaultMessage: 'Forever',
-        })}
+        {lifecycle.dsl.data_retention ??
+          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
+            defaultMessage: 'Forever',
+          })}
       </EuiBadge>
     );
   } else {
