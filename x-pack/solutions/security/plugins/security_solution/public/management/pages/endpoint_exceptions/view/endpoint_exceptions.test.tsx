@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ENDPOINT_EXCEPTIONS_PATH } from '../../../../../common/constants';
@@ -13,6 +14,8 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { EndpointExceptions } from './endpoint_exceptions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+
+requireDeferred();
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

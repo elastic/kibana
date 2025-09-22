@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,6 +21,8 @@ import {
   TEST_SUBJ_HOVER_OUTLINE,
   TEST_SUBJ_TOOLTIP,
 } from './label_node';
+
+requireDeferred();
 
 jest.mock('./label_node_badges', () => {
   // Use the actual exports, except override LIMIT

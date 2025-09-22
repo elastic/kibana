@@ -6,11 +6,14 @@
  */
 
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import { requireDeferred } from '@kbn/lazy-require';
 import 'jest-styled-components';
 import { DonutChart } from './donut_chart';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { mockCore } from '../../../lib/helper/rtl_helpers';
+
+requireDeferred();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockImplementation(() => ({

@@ -14,6 +14,9 @@ import { asTaskPollingCycleEvent } from '../task_events';
 import { bufferCount, take } from 'rxjs';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { FillPoolResult } from '../lib/fill_pool';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 describe('delayOnClaimConflicts', () => {
   beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));

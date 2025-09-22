@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import { fireEvent, screen } from '@testing-library/react';
 import * as React from 'react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
+
+requireDeferred();
 
 jest.mock('../../../utils/kibana_react');
 

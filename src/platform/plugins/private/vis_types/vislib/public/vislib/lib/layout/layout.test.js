@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
@@ -27,6 +28,9 @@ import { VisConfig } from '../vis_config';
 import { getVis } from '../../visualizations/_vis_fixture';
 
 const dateHistogramArray = [series, columns, rows, stackedSeries];
+
+requireDeferred();
+
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
 let mockedHTMLElementClientSizes;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import * as reactTestingLibrary from '@testing-library/react';
@@ -20,6 +21,8 @@ import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/sche
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { EVENT_FILTERS_LABELS } from '../translations';
+
+requireDeferred();
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 

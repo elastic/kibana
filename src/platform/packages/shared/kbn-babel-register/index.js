@@ -61,7 +61,8 @@ const IGNORE_PATTERNS = [
 
   // ignore packages with "babel" in their names
   /[\/\\]packages[\/\\]([^\/\\]+-)?babel(-[^\/\\]+)?[\/\\]/,
-
+  // ignore babel plugins
+  /kbn-lazy-require\/src\/plugin\/.*\.js/,
   // ignore paths matching `/canvas/canvas_plugin/`
   /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
 ];

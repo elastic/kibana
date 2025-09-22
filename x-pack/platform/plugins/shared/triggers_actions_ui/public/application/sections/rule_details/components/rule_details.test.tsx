@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -24,6 +25,8 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 

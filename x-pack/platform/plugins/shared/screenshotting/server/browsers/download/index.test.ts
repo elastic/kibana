@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { PackageInfo } from '@kbn/screenshotting-server';
 import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { access, readdir } from 'fs/promises';
@@ -13,6 +14,8 @@ import path from 'path';
 import { download } from '.';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';
+
+requireDeferred();
 
 jest.mock('./checksum');
 jest.mock('./fetch');

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -13,6 +14,8 @@ import React from 'react';
 import { set } from '@kbn/safer-lodash-set';
 import type { WindowsEventCollectionCardProps } from './windows_event_collection_card';
 import { WindowsEventCollectionCard } from './windows_event_collection_card';
+
+requireDeferred();
 
 describe('Policy Windows Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').windowsEvents;

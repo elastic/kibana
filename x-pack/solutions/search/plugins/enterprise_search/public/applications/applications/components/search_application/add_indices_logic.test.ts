@@ -7,10 +7,14 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
 import { Status } from '../../../../../common/types/api';
 
 import type { AddIndicesLogicValues } from './add_indices_logic';
 import { AddIndicesLogic } from './add_indices_logic';
+
+requireDeferred();
 
 const DEFAULT_VALUES: AddIndicesLogicValues = {
   selectedIndices: [],

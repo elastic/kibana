@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -25,6 +26,8 @@ import { GROUPED_TABLE_TEST_ID } from './table/table_section';
 import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_navigate_to_integrations_page';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateEaseAlertsDataView } from '../../hooks/alert_summary/use_create_data_view';
+
+requireDeferred();
 
 jest.mock('../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID

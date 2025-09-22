@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
@@ -17,6 +18,8 @@ import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { OPERATOR_TITLES } from '../../translations';
+
+requireDeferred();
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
@@ -15,6 +16,8 @@ import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/
 import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
 import { useDeleteAction } from './use_delete_action';
+
+requireDeferred();
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),

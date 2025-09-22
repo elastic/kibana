@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   type AppContextTestRender,
   createAppRootMockRenderer,
@@ -14,6 +15,8 @@ import type { PolicySelectorProps } from './policy_selector';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { PolicySelectorMenuButton } from './policy_selector_menu_button';
+
+requireDeferred();
 
 describe('PolicySelectorMenuButton component', () => {
   let mockedContext: AppContextTestRender;

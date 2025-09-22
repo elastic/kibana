@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
-
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export const LAZY_REQUIRE_IMMEDIATE = '__kbn_lazy_require_immediate__';

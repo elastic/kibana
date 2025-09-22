@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
@@ -51,6 +52,8 @@ import {
 } from '../../../../common/field_maps/field_names';
 import { AGENT_ID } from './highlighted_fields_config';
 import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
+
+requireDeferred();
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { act } from '@testing-library/react';
@@ -20,6 +21,8 @@ import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+
+requireDeferred();
 
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({

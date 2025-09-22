@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -15,6 +16,8 @@ import type { ResponseActionAgentType } from '../../../../../../../common/endpoi
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from '../platforms';
 import { HostStatus } from '../../../../../../../common/endpoint/types';
+
+requireDeferred();
 
 jest.mock('../../../../../hooks/agents/use_get_agent_status');
 

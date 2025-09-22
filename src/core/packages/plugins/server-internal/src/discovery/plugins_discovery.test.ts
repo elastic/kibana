@@ -8,6 +8,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { requireDeferred } from '@kbn/lazy-require';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
@@ -27,6 +28,8 @@ import type { PluginsConfigType } from '../plugins_config';
 import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
+
+requireDeferred();
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),

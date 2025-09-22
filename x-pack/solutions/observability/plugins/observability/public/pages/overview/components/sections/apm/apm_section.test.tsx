@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { screen } from '@elastic/eui/lib/test/rtl';
@@ -20,6 +21,8 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+
+requireDeferred();
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { eventLoopUtilizationMock } from './event_loop_utilization_monitor.test.mocks';
 import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
+
+requireDeferred();
 
 describe('EventLoopUtilizationMonitor', () => {
   afterEach(() => jest.clearAllMocks());

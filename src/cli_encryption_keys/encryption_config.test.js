@@ -10,6 +10,9 @@
 import { EncryptionConfig } from './encryption_config';
 import crypto from 'crypto';
 import fs from 'fs';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 describe('encryption key configuration', () => {
   let encryptionConfig = null;

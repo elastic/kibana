@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import {
   expectIsViewOnly,
@@ -24,6 +25,8 @@ import { AntivirusRegistrationModes } from '../../../../../../common/endpoint/ty
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+
+requireDeferred();
 
 jest.mock('../../../../../common/hooks/use_license');
 

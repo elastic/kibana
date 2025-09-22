@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
 import { act } from '@testing-library/react';
 import type { CommandExecutionComponentProps } from '../types';
+
+requireDeferred();
 
 describe('When using CommandExecutionOutput component', () => {
   let render: (

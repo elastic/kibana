@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import moment from 'moment';
 import {
   getMonitorSummary,
@@ -14,6 +15,8 @@ import {
 } from './message_utils';
 import type { MissingPingMonitorInfo } from '../../../common/runtime_types/alert_rules/common';
 import type { OverviewPing } from '../../../common/runtime_types';
+
+requireDeferred();
 
 describe('message_utils', () => {
   const dateFormat = 'YYYY-MM-DD HH:mm:ss';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
@@ -15,6 +16,8 @@ import { INSPECT } from '../../../../../common/components/inspect/translations';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/config';
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
+
+requireDeferred();
 
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';

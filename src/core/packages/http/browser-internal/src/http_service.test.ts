@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { Observable } from 'rxjs';
 import fetchMock from 'fetch-mock';
 
@@ -15,6 +16,8 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from './http_service';
+
+requireDeferred();
 
 describe('interceptors', () => {
   afterEach(() => fetchMock.restore());

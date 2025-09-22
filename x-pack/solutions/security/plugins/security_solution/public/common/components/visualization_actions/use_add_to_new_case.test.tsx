@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
@@ -15,6 +16,8 @@ import {
   writeCasesPermissions,
 } from '../../../cases_test_utils';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+
+requireDeferred();
 
 jest.mock('../../lib/kibana/kibana_react');
 

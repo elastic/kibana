@@ -13,6 +13,7 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import { requireDeferred } from '@kbn/lazy-require';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { AliasTable } from './alias_table';
@@ -27,6 +28,8 @@ import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+
+requireDeferred();
 
 interface SetupOpts {
   mockSpaces?: Space[];

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { mockStorage } from '../../storage/hashed_item_store/mock';
 import type { IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { createKbnUrlStateStorage } from './create_kbn_url_state_storage';
@@ -17,6 +18,8 @@ import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';
 import { coreMock } from '@kbn/core/public/mocks';
+
+requireDeferred();
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {

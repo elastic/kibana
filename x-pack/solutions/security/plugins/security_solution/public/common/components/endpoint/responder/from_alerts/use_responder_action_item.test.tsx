@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { useResponderActionItem } from './use_responder_action_item';
 import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import { endpointAlertDataMock } from '../../../../mock/endpoint/endpoint_alert_data_mock';
+
+requireDeferred();
 
 jest.mock('../../../user_privileges');
 jest.mock('./use_responder_action_data');

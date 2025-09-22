@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
@@ -13,6 +14,8 @@ import type { AgentTypeVendorLogoProps } from './agent_type_vendor_logo';
 import { AgentTypeVendorLogo } from './agent_type_vendor_logo';
 import { waitFor } from '@testing-library/react';
 import { getAgentTypeName } from '../../../../translations';
+
+requireDeferred();
 
 describe('AgentTypeVendorLogo component', () => {
   let props: AgentTypeVendorLogoProps;

@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { coreMock } from '@kbn/core/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
+
+requireDeferred();
 
 describe('kibana_usage_collection/public', () => {
   const pluginInstance = plugin();

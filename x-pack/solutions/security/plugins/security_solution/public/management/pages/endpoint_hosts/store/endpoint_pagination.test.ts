@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
@@ -31,6 +32,8 @@ import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_ut
 import { createSpyMiddleware } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+
+requireDeferred();
 
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),

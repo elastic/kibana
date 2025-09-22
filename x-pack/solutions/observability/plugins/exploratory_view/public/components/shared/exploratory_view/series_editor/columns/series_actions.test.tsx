@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeriesActions } from './series_actions';
 import { mockUxSeries, render } from '../../rtl_helpers';
+
+requireDeferred();
 
 describe('SeriesActions', function () {
   it('should contain an edit button', function () {

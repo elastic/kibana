@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
@@ -28,6 +29,8 @@ import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+
+requireDeferred();
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,

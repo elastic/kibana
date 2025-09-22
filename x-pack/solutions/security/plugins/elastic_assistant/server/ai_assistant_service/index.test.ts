@@ -28,6 +28,9 @@ import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),

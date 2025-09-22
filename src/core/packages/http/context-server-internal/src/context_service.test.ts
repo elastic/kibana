@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
+
+requireDeferred();
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { FormattedError } from './formatted_error';
+
+requireDeferred();
 
 describe('When using the `FormattedError` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

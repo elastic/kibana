@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
@@ -16,6 +17,8 @@ import { useToasts } from '../../../../../../../common/lib/kibana';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { FleetArtifactsCard } from './fleet_artifacts_card';
 import { EVENT_FILTERS_LABELS } from '..';
+
+requireDeferred();
 
 jest.mock('../../../../../../../common/lib/kibana');
 

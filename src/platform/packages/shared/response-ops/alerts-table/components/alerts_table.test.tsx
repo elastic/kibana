@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -43,6 +44,8 @@ import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows'
 import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+requireDeferred();
 
 type BaseAlertsTableProps = AlertsTableProps;
 

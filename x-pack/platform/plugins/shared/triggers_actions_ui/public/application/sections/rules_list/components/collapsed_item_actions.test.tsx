@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import * as React from 'react';
 import moment from 'moment';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -15,6 +16,9 @@ import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import type { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+
+requireDeferred();
+
 jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();

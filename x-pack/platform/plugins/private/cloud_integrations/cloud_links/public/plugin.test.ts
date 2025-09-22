@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { maybeAddCloudLinksMock } from './plugin.test.mocks';
 import { CloudLinksPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+requireDeferred();
 
 describe('Cloud Links Plugin - public', () => {
   let plugin: CloudLinksPlugin;

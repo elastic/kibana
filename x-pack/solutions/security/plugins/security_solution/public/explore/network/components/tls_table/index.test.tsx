@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { fireEvent, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -15,6 +16,8 @@ import { TestProviders, createMockStore } from '../../../../common/mock';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
+
+requireDeferred();
 
 jest.mock('../../../../common/lib/kibana');
 

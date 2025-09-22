@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   mockTransform,
   mockGetUpgradeableConfig,
@@ -16,6 +17,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+
+requireDeferred();
 
 describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());

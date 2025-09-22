@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { isValidDatemath } from './datemath';
+
+requireDeferred();
 
 describe('isValidDatemath()', () => {
   it('Returns `false` for empty strings', () => {

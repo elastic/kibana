@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 import userEvent from '@testing-library/user-event';
+
+requireDeferred();
 
 const mockSetSelectedCategoryIds = jest.fn();
 const defaultProps = {

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +12,8 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import { CustomCriblForm } from './custom_cribl_form';
+
+requireDeferred();
 
 jest.mock('../api/api');
 const onChange = jest.fn();

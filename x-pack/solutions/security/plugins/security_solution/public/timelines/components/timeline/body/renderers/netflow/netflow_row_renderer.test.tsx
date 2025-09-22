@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -17,6 +18,8 @@ import {
   netflowRowRenderer,
 } from './netflow_row_renderer';
 import { TimelineId } from '../../../../../../../common/types/timeline';
+
+requireDeferred();
 
 export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',

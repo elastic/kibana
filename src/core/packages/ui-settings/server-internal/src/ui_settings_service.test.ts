@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
@@ -24,6 +25,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+
+requireDeferred();
 
 const overrides = {
   overrideBaz: 'baz',

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 import type { PackageInfo } from '@kbn/config';
@@ -16,6 +17,8 @@ import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
 import type { BasePath } from '@kbn/core-http-server-internal';
 import { StaticAssets } from '@kbn/core-http-server-internal';
+
+requireDeferred();
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,

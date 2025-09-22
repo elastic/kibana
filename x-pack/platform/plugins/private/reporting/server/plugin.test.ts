@@ -24,6 +24,10 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
+requireDeferred();
+
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 describe('Reporting Plugin', () => {

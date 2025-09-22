@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
@@ -21,6 +22,8 @@ import { capacityMock } from './capacity.mock';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
 import { TaskTypeDictionary } from '../task_type_dictionary';
+
+requireDeferred();
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],

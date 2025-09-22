@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { BehaviorSubject } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
@@ -17,6 +18,8 @@ import { type LogOverviewContext, createLogsDataSourceProfileProvider } from '..
 import { createNginxAccessLogsDataSourceProfileProvider } from './nginx_access_logs';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+
+requireDeferred();
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,

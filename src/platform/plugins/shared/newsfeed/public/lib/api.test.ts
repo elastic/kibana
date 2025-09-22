@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
 
 import moment from 'moment';
@@ -17,6 +18,8 @@ import { take } from 'rxjs';
 
 import { NewsfeedApiDriver as MockNewsfeedApiDriver } from './driver';
 import { NeverFetchNewsfeedApiDriver as MockNeverFetchNewsfeedApiDriver } from './never_fetch_driver';
+
+requireDeferred();
 
 const kibanaVersion = '8.0.0';
 const newsfeedId = 'test';

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useStore, useReactFlow } from '@xyflow/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { Controls, type ControlsProps } from './controls';
+
+requireDeferred();
 
 const defaultProps: ControlsProps = {
   showZoom: true,

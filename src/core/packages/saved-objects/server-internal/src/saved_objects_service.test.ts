@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
@@ -55,6 +56,8 @@ import {
 
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+
+requireDeferred();
 
 jest.mock('./object_types');
 jest.mock('./deprecations');

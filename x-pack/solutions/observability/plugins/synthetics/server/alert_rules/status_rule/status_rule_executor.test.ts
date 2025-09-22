@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -22,6 +23,8 @@ import type {
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+
+requireDeferred();
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { EndpointUploadActionResult } from './endpoint_upload_action_result';
@@ -15,6 +16,8 @@ import type {
 } from '../../../../common/endpoint/types';
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+
+requireDeferred();
 
 describe('Endpoint Upload Action Result component', () => {
   let appTestContext: AppContextTestRender;

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { registerRoutesMock, registerSettingsMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { BannersPlugin } from './plugin';
 import type { BannersConfigType } from './config';
+
+requireDeferred();
 
 describe('BannersPlugin', () => {
   let plugin: BannersPlugin;

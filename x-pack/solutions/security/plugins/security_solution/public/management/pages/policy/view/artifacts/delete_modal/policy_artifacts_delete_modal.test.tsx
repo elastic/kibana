@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
@@ -21,6 +22,8 @@ import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 import { getDeferred } from '../../../../../mocks/utils';
+
+requireDeferred();
 
 const listType: Array<CreateExceptionListSchema['type']> = [
   'endpoint_events',

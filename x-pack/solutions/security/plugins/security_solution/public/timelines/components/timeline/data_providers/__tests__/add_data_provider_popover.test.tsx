@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { waitForEuiPopoverOpen, waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
 import { AddDataProviderPopover } from '../add_data_provider_popover';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
+
+requireDeferred();
 
 const TEST_ID = {
   ADD_FIELD: 'addField',

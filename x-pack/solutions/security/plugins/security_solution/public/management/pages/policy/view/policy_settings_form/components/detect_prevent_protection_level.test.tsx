@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -19,6 +20,8 @@ import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
+
+requireDeferred();
 
 jest.mock('../../../../../../common/hooks/use_license');
 

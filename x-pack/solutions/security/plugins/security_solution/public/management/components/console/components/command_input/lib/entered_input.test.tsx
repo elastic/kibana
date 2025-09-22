@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { EnteredInput } from './entered_input';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { getCommandListMock } from '../../../mocks';
 import type { EnteredCommand } from '../../console_state/types';
+
+requireDeferred();
 
 describe('When using `EnteredInput` class', () => {
   let enteredInput: EnteredInput;

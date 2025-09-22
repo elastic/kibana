@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { firstValueFrom, Observable } from 'rxjs';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { AnalyticsService } from './analytics_service';
+
+requireDeferred();
 
 function findRegisteredContextProviderByName(contextProviderName: string) {
   return analyticsClientMock.registerContextProvider.mock.calls.find(

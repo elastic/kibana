@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -44,6 +45,8 @@ import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import { INGEST_API_PACKAGE_POLICIES } from '../../../services/policies/ingest';
 import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
+
+requireDeferred();
 
 const mockSendBulkGetPackagePolicies = jest.fn();
 jest.mock('../../../services/policies/ingest', () => ({

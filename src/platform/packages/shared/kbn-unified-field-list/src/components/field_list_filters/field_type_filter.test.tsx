@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,6 +17,8 @@ import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { userEvent } from '@testing-library/user-event';
+
+requireDeferred();
 
 const DATA_TEST_SUBJ = 'filters';
 const TOGGLE_TEST_SUBJ = `${DATA_TEST_SUBJ}FieldTypeFilterToggle`;

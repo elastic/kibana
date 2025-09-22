@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
@@ -26,6 +27,8 @@ import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_availa
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
+
+requireDeferred();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

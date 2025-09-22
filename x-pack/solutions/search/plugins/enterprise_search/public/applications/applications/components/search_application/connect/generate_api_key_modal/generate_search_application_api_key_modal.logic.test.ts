@@ -7,10 +7,14 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
+import { requireDeferred } from '@kbn/lazy-require';
+
 import { Status } from '../../../../../../../common/types/api';
 import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
+
+requireDeferred();
 
 const DEFAULT_VALUES = {
   apiKey: '',

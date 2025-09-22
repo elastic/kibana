@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -30,6 +31,8 @@ import { render } from '../../utils/test_helper';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
+
+requireDeferred();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

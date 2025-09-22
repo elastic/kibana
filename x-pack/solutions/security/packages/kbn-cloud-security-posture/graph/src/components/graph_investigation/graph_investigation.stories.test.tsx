@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { setProjectAnnotations, composeStories } from '@storybook/react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -28,6 +29,8 @@ import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
 import { USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from '../mock/constants';
 import { mockDataView } from '../mock/data_view.mock';
+
+requireDeferred();
 
 setProjectAnnotations(previewAnnotations);
 

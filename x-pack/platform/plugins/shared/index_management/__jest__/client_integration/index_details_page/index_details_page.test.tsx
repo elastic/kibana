@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { setupEnvironment } from '../helpers';
 import type { IndexDetailsPageTestBed } from './index_details_page.helpers';
 import { setup } from './index_details_page.helpers';
@@ -34,6 +35,8 @@ import {
   testIndexSettings,
   testIndexStats,
 } from './mocks';
+
+requireDeferred();
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

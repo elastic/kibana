@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { ArtifactFormComponentProps } from '../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -17,6 +18,8 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { waitFor } from '@testing-library/dom';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { RenderHookResult } from '@testing-library/react';
+
+requireDeferred();
 
 describe('useArtifactRestrictedPolicyAssignments()', () => {
   let testContext: AppContextTestRender;

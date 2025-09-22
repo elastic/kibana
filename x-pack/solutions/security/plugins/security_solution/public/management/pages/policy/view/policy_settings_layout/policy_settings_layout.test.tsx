@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -29,6 +30,8 @@ import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 import { getDeferred } from '../../../../mocks/utils';
+
+requireDeferred();
 
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../../common/components/user_privileges');

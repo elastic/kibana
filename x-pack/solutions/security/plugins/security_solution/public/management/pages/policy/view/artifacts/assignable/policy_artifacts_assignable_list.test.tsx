@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { PolicyArtifactsAssignableListProps } from './policy_artifacts_assignable_list';
 import { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';
@@ -12,6 +13,8 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/react';
 import { getMockListResponse } from '../../../test_utils';
+
+requireDeferred();
 
 describe('Policy artifacts list', () => {
   let mockedContext: AppContextTestRender;

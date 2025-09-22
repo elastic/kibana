@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import {
   MockCapabilitiesService,
   MockHistory,
@@ -37,6 +38,8 @@ import {
 } from '@kbn/core-application-browser';
 import { act } from 'react-dom/test-utils';
 import { DEFAULT_APP_VISIBILITY } from './utils';
+
+requireDeferred();
 
 const createApp = (props: Partial<App>): App => {
   return {

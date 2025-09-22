@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 
@@ -17,6 +18,8 @@ import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_di
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+
+requireDeferred();
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),

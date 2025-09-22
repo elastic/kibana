@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import type { CommandDefinition, ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
 import { getConsoleTestSetup } from '../mocks';
+
+requireDeferred();
 
 describe('ValidationError component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

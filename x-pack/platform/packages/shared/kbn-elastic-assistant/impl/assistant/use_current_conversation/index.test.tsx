@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { Props } from '.';
 import { useCurrentConversation } from '.';
@@ -15,6 +16,8 @@ import type { Conversation } from '../../..';
 import { find } from 'lodash';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { MOCK_CURRENT_USER } from '../../mock/conversation';
+
+requireDeferred();
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());

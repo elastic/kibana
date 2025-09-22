@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../mock/endpoint';
 import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_handler';
 import { act, fireEvent, cleanup } from '@testing-library/react';
+
+requireDeferred();
 
 type ClickHandlerMock<Return = void> = jest.Mock<
   Return,

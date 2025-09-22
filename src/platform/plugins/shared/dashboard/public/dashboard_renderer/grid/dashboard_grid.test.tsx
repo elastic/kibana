@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { requireDeferred } from '@kbn/lazy-require';
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
@@ -29,6 +30,8 @@ import {
 } from '../../mocks';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
+
+requireDeferred();
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
