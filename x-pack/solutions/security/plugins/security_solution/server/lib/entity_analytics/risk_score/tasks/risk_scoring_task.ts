@@ -331,7 +331,11 @@ export const runTask = async ({
          * The last run is always an "extra" run, with empty afterKeys and entities list, used to detect work completion
          * Running reset to zero on an empty list will result in ALL scores being reset to zero, hence skipping it
          **/
-        if (isFirstRunForEntityType || !isWorkComplete) {
+        if (
+          (isFirstRunForEntityType || !isWorkComplete) &&
+          experimentalFeatures.enableRiskScoreResetToZero
+        ) {
+          log(`Resetting to zero all ${identifierType} risk scores without recent risk input data`);
           await riskScoreService.resetToZero({
             entityType: identifierType,
             refresh: 'wait_for',
