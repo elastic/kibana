@@ -34,8 +34,6 @@ import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
 import { convertToFieldDefinitionConfig } from './utils';
 
-const ERR_REQUEST_TIMED_OUT = 'Request timed out';
-
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
   stream: string;
@@ -226,9 +224,7 @@ export function SchemaChangesReviewModal({
           color="primary"
           onClick={handleSubmit}
           isLoading={loading || isSimulating}
-          disabled={
-            isSimulating || (hasSimulationErrors && simulationError !== ERR_REQUEST_TIMED_OUT)
-          }
+          disabled={isSimulating || hasSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
           {isSimulating
