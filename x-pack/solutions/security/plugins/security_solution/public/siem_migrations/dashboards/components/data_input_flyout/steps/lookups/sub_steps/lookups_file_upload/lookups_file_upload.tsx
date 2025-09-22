@@ -11,8 +11,8 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
-import { FILE_UPLOAD_ERROR } from '../../../../translations';
 import * as i18n from './translations';
 import { UploadFileButton } from '../../../common/upload_file_button';
 
