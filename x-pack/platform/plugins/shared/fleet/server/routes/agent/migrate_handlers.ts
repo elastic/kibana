@@ -35,6 +35,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
 
   const body = await AgentService.migrateSingleAgent(
     esClient,
+    soClient,
     request.params.agentId,
     agentPolicy,
     agent,
@@ -53,17 +54,14 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
   const [coreContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const options = request.body;
-  // // First validate all agents exist
-  const agents = await AgentService.getByIds(esClient, soClient, request.body.agents, {
-    ignoreMissing: false, // throw error if any agents are missing
-  });
+  const { agents, ...options } = request.body;
 
-  // then get all the policies for the agents
-  const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, agents);
+  const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
 
-  const body = await AgentService.bulkMigrateAgents(esClient, agents, agentPolicies, {
+  const body = await AgentService.bulkMigrateAgents(esClient, soClient, {
     ...options,
+    ...agentOptions,
   });
+
   return response.ok({ body });
 };

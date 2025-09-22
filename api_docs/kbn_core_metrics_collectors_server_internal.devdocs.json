@@ -277,6 +277,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.OsMetricsCollector.registerMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMetrics",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

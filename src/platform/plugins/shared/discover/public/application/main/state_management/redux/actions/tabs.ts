@@ -29,7 +29,11 @@ import {
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
 } from '../runtime_state';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+} from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
@@ -113,6 +117,20 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       };
 
       if (!existingTab) {
+        // the following assignments for initialAppState, globalState, and dataRequestParams are for supporting `openInNewTab` action
+        tab.initialAppState =
+          'initialAppState' in item
+            ? cloneDeep(item.initialAppState as TabState['initialAppState'])
+            : tab.initialAppState;
+        tab.globalState =
+          'globalState' in item
+            ? cloneDeep(item.globalState as TabState['globalState'])
+            : tab.globalState;
+        tab.dataRequestParams =
+          'dataRequestParams' in item
+            ? (item.dataRequestParams as TabState['dataRequestParams'])
+            : tab.dataRequestParams;
+
         if (item.duplicatedFromId) {
           // the new tab was created by duplicating an existing tab
           const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
@@ -288,7 +306,9 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
   (dispatch, getState) => {
     const currentState = getState();
 
-    if (restoreTabId === currentState.tabs.unsafeCurrentId) {
+    // Restoring the 'new' tab ID is a no-op because it represents a placeholder for creating new tabs,
+    // not an actual tab that can be restored.
+    if (restoreTabId === currentState.tabs.unsafeCurrentId || restoreTabId === NEW_TAB_ID) {
       return;
     }
 
@@ -315,6 +335,46 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
         items,
         selectedItem: selectedItem || currentTab,
       })
+    );
+  };
+
+export const openInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      tabLabel?: string;
+      appState?: TabState['initialAppState'];
+      globalState?: TabState['globalState'];
+      searchSessionId?: string;
+    }
+  ]
+> =
+  ({ tabLabel, appState, globalState, searchSessionId }) =>
+  (dispatch, getState) => {
+    const initialAppState = appState ? cloneDeep(appState) : undefined;
+    const initialGlobalState = globalState ? cloneDeep(globalState) : {};
+    const currentState = getState();
+    const currentTabs = selectAllTabs(currentState);
+
+    const newDefaultTab: TabState = {
+      ...DEFAULT_TAB_STATE,
+      ...createTabItem(currentTabs),
+      initialAppState,
+      globalState: initialGlobalState,
+    };
+
+    if (tabLabel) {
+      newDefaultTab.label = tabLabel;
+    }
+
+    if (searchSessionId) {
+      newDefaultTab.dataRequestParams = {
+        ...newDefaultTab.dataRequestParams,
+        searchSessionId,
+      };
+    }
+
+    return dispatch(
+      updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
     );
   };
 
