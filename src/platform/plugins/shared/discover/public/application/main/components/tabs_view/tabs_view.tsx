@@ -55,7 +55,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={new Set(unsavedTabIds)}
+      unsavedItemIds={unsavedTabIds}
       maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}

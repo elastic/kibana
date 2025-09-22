@@ -119,7 +119,7 @@ export const internalStateSlice = createSlice({
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
       state.hasUnsavedChanges = action.payload.hasUnsavedChanges;
-      state.tabs.unsavedIds = Array.from(action.payload.unsavedTabIds);
+      state.tabs.unsavedIds = action.payload.unsavedTabIds;
     },
 
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>

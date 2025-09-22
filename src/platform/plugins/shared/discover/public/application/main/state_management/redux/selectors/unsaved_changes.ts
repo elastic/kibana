@@ -29,7 +29,7 @@ import type { DiscoverServices } from '../../../../../build_services';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
-  unsavedTabIds: Set<string>;
+  unsavedTabIds: string[];
 }
 
 export const selectHasUnsavedChanges = (
@@ -45,7 +45,7 @@ export const selectHasUnsavedChanges = (
   const persistedDiscoverSession = state.persistedDiscoverSession;
 
   if (!persistedDiscoverSession) {
-    return { hasUnsavedChanges: false, unsavedTabIds: new Set() };
+    return { hasUnsavedChanges: false, unsavedTabIds: [] };
   }
 
   const persistedTabIds = persistedDiscoverSession.tabs.map((tab) => tab.id);
@@ -57,13 +57,13 @@ export const selectHasUnsavedChanges = (
     tabIdsChanged = true;
   }
 
-  const unsavedTabIds = new Set<string>();
+  const unsavedTabIds: string[] = [];
 
   for (const tabId of currentTabsIds) {
     const persistedTab = persistedDiscoverSession.tabs.find((tab) => tab.id === tabId);
 
     if (!persistedTab) {
-      unsavedTabIds.add(tabId);
+      unsavedTabIds.push(tabId);
       continue;
     }
 
@@ -96,7 +96,7 @@ export const selectHasUnsavedChanges = (
           after: nextField,
         });
 
-        unsavedTabIds.add(tabId);
+        unsavedTabIds.push(tabId);
         break;
       }
     }
@@ -104,7 +104,7 @@ export const selectHasUnsavedChanges = (
 
   addLog('[DiscoverSession] no difference between initial and changed version');
 
-  return { hasUnsavedChanges: tabIdsChanged || unsavedTabIds.size > 0, unsavedTabIds };
+  return { hasUnsavedChanges: tabIdsChanged || unsavedTabIds.length > 0, unsavedTabIds };
 };
 
 type FieldComparator<T> = (a: T, b: T) => boolean;
