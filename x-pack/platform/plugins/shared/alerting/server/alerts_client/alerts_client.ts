@@ -209,7 +209,7 @@ export class AlertsClient<
           sort: [{ [TIMESTAMP]: { order: 'desc' } }],
         });
 
-        const executionUuids = executions.hits
+        const executionUuids = (executions.hits || [])
           .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
           .flat();
 
