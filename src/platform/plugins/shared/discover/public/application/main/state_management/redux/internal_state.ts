@@ -40,7 +40,7 @@ import {
   type RecentlyClosedTabState,
 } from './types';
 import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
-import { selectTab } from './selectors';
+import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
@@ -51,6 +51,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
@@ -60,8 +61,9 @@ const initialState: DiscoverInternalState = {
     areInitializing: false,
     byId: {},
     allIds: [],
-    unsafeCurrentId: '',
+    unsavedIds: [],
     recentlyClosedTabIds: [],
+    unsafeCurrentId: '',
   },
 };
 
@@ -113,6 +115,11 @@ export const internalStateSlice = createSlice({
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
+    },
+
+    setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
+      state.hasUnsavedChanges = action.payload.hasUnsavedChanges;
+      state.tabs.unsavedIds = Array.from(action.payload.unsavedTabIds);
     },
 
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>

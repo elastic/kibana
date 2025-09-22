@@ -10,7 +10,7 @@
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
-import { selectHasUnsavedChanges, selectTab } from '../selectors';
+import { selectTab } from '../selectors';
 import {
   fromSavedObjectTabToSavedSearch,
   fromSavedObjectTabToTabState,
@@ -34,9 +34,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     // If an updated session is provided, we know it has just been saved and all tab state is up to date.
     // Otherwise we're resetting the current session, and need to detect changes to mark tabs for refetch.
-    const { unsavedTabIds } = updatedDiscoverSession
-      ? { unsavedTabIds: new Set<string>() }
-      : selectHasUnsavedChanges(state, { runtimeStateManager, services });
+    const unsavedTabIds = updatedDiscoverSession ? [] : state.tabs.unsavedIds;
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
@@ -69,7 +67,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.
         // We don't need to do this for the current tab since it's already being synced.
-        if (tab.id !== state.tabs.unsafeCurrentId && unsavedTabIds.has(tab.id)) {
+        if (tab.id !== state.tabs.unsafeCurrentId && unsavedTabIds.includes(tab.id)) {
           tabState.forceFetchOnSelect = true;
         }
 

@@ -85,6 +85,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -95,6 +96,7 @@ export interface DiscoverInternalState {
     areInitializing: boolean;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
+    unsavedIds: string[];
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

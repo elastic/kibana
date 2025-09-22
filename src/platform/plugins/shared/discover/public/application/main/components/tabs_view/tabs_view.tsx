@@ -18,7 +18,6 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
-  selectHasUnsavedChanges,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
@@ -33,12 +32,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
-  const { unsavedTabIds } = useInternalStateSelector((state) =>
-    selectHasUnsavedChanges(state, {
-      runtimeStateManager: props.runtimeStateManager,
-      services,
-    })
-  );
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -61,7 +55,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={unsavedTabIds}
+      unsavedItemIds={new Set(unsavedTabIds)}
       maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}
