@@ -329,7 +329,8 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   onExpandedAlertIndexChange?: (expandedAlertIndex: number | null) => void;
   /**
-   * Renders the expanded alert. If not provided, a default flyout will be used.
+   * Renders the expanded alert. If undefined, a default flyout will be used. If null, no expanded
+   * view will be rendered.
    *
    * The expanded alert can be retrieved from the `alerts` array by converting `expandedAlertIndex`
    * into a page-relative index (i.e. if expandedAlertIndex = 20 and pageSize = 20, the

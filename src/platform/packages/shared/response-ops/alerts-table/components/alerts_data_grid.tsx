@@ -321,9 +321,11 @@ export const AlertsDataGrid = typedMemo(
     );
 
     const ExpandedAlertView =
-      renderExpandedAlertView ??
-      // Overriding the simplified type here to avoid cyclic problems with generics
-      (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
+      // By checking undefined explicitly, we allow falsy values (null) to skip rendering the flyout
+      renderExpandedAlertView !== undefined
+        ? renderExpandedAlertView
+        : // Overriding the simplified type here to avoid cyclic problems with generics
+          (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
 
     return (
       <InspectButtonContainer>
