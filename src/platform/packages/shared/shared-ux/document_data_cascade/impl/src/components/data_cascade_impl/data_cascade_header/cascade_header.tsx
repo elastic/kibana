@@ -11,6 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
   type GroupNode,
+  type LeafNode,
   useDataCascadeActions,
   useDataCascadeState,
 } from '../../../store_provider';
@@ -18,15 +19,16 @@ import type { CascadeHeaderPrimitiveProps } from '../types';
 import { SelectionDropdown } from './group_selection_combobox';
 import { styles as cascadeHeaderStyles } from './cascade_header.styles';
 
-export function CascadeHeaderPrimitive<G extends GroupNode>({
+export function CascadeHeaderPrimitive<G extends GroupNode, L extends LeafNode>({
+  tableInstance,
   customTableHeader,
   tableTitleSlot: TableTitleSlot,
-  tableRows,
   onCascadeGroupingChange,
 }: CascadeHeaderPrimitiveProps<G>) {
   const { euiTheme } = useEuiTheme();
   const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
-  const actions = useDataCascadeActions();
+  const actions = useDataCascadeActions<G>();
+  const state = useDataCascadeState<G, L>();
 
   const persistGroupByColumnSelection = useCallback(
     (groupByColumn: string[]) => {
@@ -38,11 +40,25 @@ export function CascadeHeaderPrimitive<G extends GroupNode>({
 
   const styles = useMemo(() => cascadeHeaderStyles(euiTheme), [euiTheme]);
 
-  const renderProps = {
-    currentSelectedColumns: currentGroupByColumns,
-    availableColumns: groupByColumns,
-    onSelectionChange: persistGroupByColumnSelection,
-  };
+  const renderProps = useMemo<
+    Parameters<NonNullable<CascadeHeaderPrimitiveProps<G>['customTableHeader']>>[0]
+  >(() => {
+    // pass row selection changes back to the table header component
+
+    return {
+      currentSelectedColumns: currentGroupByColumns,
+      availableColumns: groupByColumns,
+      onGroupSelection: persistGroupByColumnSelection,
+      selectedRows: Object.entries(state.table.rowSelection ?? {})
+        .filter(([_, isSelected]) => isSelected)
+        .map(([rowId]) => rowId),
+    };
+  }, [
+    currentGroupByColumns,
+    groupByColumns,
+    persistGroupByColumnSelection,
+    state.table.rowSelection,
+  ]);
 
   return customTableHeader ? (
     <div css={styles.cascadeHeaderWrapper}>{customTableHeader(renderProps)}</div>
@@ -53,10 +69,10 @@ export function CascadeHeaderPrimitive<G extends GroupNode>({
       css={styles.cascadeHeaderWrapper}
     >
       <EuiFlexItem id="treegrid-label">
-        <TableTitleSlot rows={tableRows} />
+        <TableTitleSlot />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SelectionDropdown {...renderProps} />
+        <SelectionDropdown onSelectionChange={persistGroupByColumnSelection} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
