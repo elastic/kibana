@@ -69,6 +69,8 @@
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

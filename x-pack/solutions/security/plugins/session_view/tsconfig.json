@@ -40,6 +40,8 @@
     "@kbn/analytics",
     "@kbn/securitysolution-rules",
     "@kbn/es-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*",

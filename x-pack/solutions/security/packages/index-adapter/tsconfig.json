@@ -13,6 +13,8 @@
     "@kbn/std",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*"

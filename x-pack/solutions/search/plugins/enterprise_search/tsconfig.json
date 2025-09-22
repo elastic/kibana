@@ -85,6 +85,9 @@
     "@kbn/search-shared-ui",
     "@kbn/search-indices",
     "@kbn/charts-theme",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-server-mocks"
   ]
 }
