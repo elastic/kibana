@@ -136,48 +136,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         </div>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
-      >
-        <div
-          class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
-          id="generated-id-row"
-        >
-          <div
-            class="euiFormRow__labelWrapper"
-          >
-            <label
-              aria-invalid="false"
-              class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
-              for="generated-id"
-              id="generated-id-label"
-            >
-              Time range
-            </label>
-          </div>
-          <div
-            class="euiFormRow__fieldWrapper"
-          >
-            <div
-              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
-            >
-              <div
-                class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
-              >
-                <input
-                  aria-invalid="false"
-                  aria-label="Time range for custom URL 1"
-                  class="euiFieldText emotion-euiFieldText-fullWidth"
-                  id="generated-id"
-                  placeholder="auto"
-                  type="text"
-                  value="auto"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
         class="euiFlexItem emotion-euiFlexItem-grow-6-urlField"
       >
         <div
@@ -387,7 +345,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   id="generated-id"
                   placeholder="auto"
                   type="text"
-                  value="1h"
+                  value="auto"
                 />
               </div>
             </div>
