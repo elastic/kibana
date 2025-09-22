@@ -11,7 +11,7 @@ import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
-import { clusterLogs } from '../../tools/cluster_logs/cluster_logs';
+import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
 

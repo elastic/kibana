@@ -3939,25 +3939,6 @@
       "enabled": true
     },
     {
-      "groupName": "density-clustering",
-      "matchDepNames": [
-        "density-clustering",
-        "@types/density-clustering"
-      ],
-      "reviewers": [
-        "team:streams-program-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "redux-saga",
       "matchDepNames": [
         "redux-saga"

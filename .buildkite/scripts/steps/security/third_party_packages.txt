@@ -9,5 +9,3 @@ inversify
 @types/d3-color
 canvas-confetti
 @types/canvas-confetti
-density-clustering
-@types/density-clustering
