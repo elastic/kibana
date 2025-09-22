@@ -121,9 +121,6 @@ export class AIAssistantManagementSelectionPlugin
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
-          // Hide the setting in Kibana -> Advanced Settigns
-          readonly: true,
-          readonlyMode: 'ui',
         },
       });
     }

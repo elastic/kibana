@@ -54,4 +54,7 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
   },
   requiresPageReload: true,
   solutionViews: ['classic'],
+  // Hide the setting in Kibana -> Advanced Settigns
+  readonly: true,
+  readonlyMode: 'ui',
 };
