@@ -41,9 +41,11 @@ export const useUnsavedChanges = ({
   const services = useDiscoverServices();
   const [onChange$] = useState(() =>
     from(internalState).pipe(
-      map(selectAllTabs),
-      distinctUntilChanged(),
-      switchMap((allTabs) => {
+      map((state) => [selectAllTabs(state), state.persistedDiscoverSession] as const),
+      distinctUntilChanged(([prevTabs, prevSession], [currTabs, currSession]) => {
+        return prevTabs === currTabs && prevSession === currSession;
+      }),
+      switchMap(([allTabs]) => {
         const stateContainerObservables = allTabs.map(
           (tab) => selectTabRuntimeState(runtimeStateManager, tab.id).stateContainer$
         );
