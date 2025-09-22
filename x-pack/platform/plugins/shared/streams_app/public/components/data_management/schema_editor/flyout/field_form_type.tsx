@@ -76,6 +76,7 @@ const typeSelectorOptions = (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
   .map((optionKey) => ({
     value: optionKey,
     inputDisplay: <FieldType type={optionKey} />,
+    'data-test-subj': `option-type-${optionKey}`,
   }));
 
 export const FieldTypeSelector = ({

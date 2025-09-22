@@ -228,4 +228,57 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
       value: 'Unmanaged',
     });
   });
+
+  test('should allow manually adding a new field', async ({ page, pageObjects }) => {
+    // Wait for the schema editor table to load
+    await pageObjects.streams.expectSchemaEditorTableVisible();
+
+    // Click the "Add field" button
+    await page.getByTestId('streamsAppContentAddFieldButton').click();
+
+    // Verify the add field flyout opens
+    await expect(page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')).toBeVisible();
+
+    // Fill in the field name
+    const fieldName = 'attributes.id';
+    await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
+    await page.keyboard.type(fieldName);
+    await page.keyboard.press('Enter');
+
+    // Select field type
+    await page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await page.getByTestId('option-type-keyword').click();
+
+    // Click the "Add field" button in the flyout
+    await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
+
+    // Verify the flyout closes
+    await expect(page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')).toBeHidden();
+
+    // Review and submit the staged changes
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+
+    await pageObjects.streams.closeToasts();
+    await pageObjects.streams.expectSchemaEditorTableVisible();
+    // Search for the newly added field
+    await pageObjects.streams.searchFields(fieldName);
+
+    // Verify the field was added and is mapped
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'name',
+      rowIndex: 0,
+      value: fieldName,
+    });
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'type',
+      rowIndex: 0,
+      value: 'keyword',
+    });
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'status',
+      rowIndex: 0,
+      value: 'Mapped',
+    });
+  });
 });
