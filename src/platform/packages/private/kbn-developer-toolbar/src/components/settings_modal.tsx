@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,7 +26,7 @@ import {
   EuiText,
   isValidHex,
 } from '@elastic/eui';
-import { DeveloperToolbarContext } from '../context/developer_toolbar_context';
+import { useToolbarState } from '../hooks/use_toolbar_state';
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -34,11 +34,7 @@ export interface SettingsModalProps {
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  const context = useContext(DeveloperToolbarContext);
-
-  if (!context) {
-    return null;
-  }
+  const state = useToolbarState();
 
   const {
     items,
@@ -47,7 +43,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     toggleItemEnabled,
     updateCustomEnvironmentLabel,
     updateCustomBackgroundColor,
-  } = context;
+  } = state;
   if (!isOpen) {
     return null;
   }

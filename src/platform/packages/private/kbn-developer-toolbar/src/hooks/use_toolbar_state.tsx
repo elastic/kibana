@@ -7,28 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
-
-import type { DeveloperToolbarItem, ToolbarSettings } from './developer_toolbar_state';
-import { ToolbarStateManager } from './developer_toolbar_state';
-
-export interface DeveloperToolbarContextValue {
-  items: DeveloperToolbarItem[];
-  enabledItems: DeveloperToolbarItem[];
-  settings: ToolbarSettings;
-  registerItem: (item: DeveloperToolbarItem) => () => void;
-  toggleSetting: (key: keyof ToolbarSettings) => void;
-  toggleItemEnabled: (itemId: string) => void;
-  updateCustomEnvironmentLabel: (label: string) => void;
-  updateCustomBackgroundColor: (color: string | undefined) => void;
-}
+import { useState, useCallback, useEffect } from 'react';
+import type { DeveloperToolbarItem, ToolbarSettings } from '../state/developer_toolbar_state';
+import { ToolbarStateManager } from '../state/developer_toolbar_state';
 
 /**
  * Global registry for ensuring single context instance across bundles
@@ -50,18 +31,26 @@ const getGlobalRegistry = (): DeveloperToolbarRegistry => {
 
 const registry = getGlobalRegistry();
 
-export const DeveloperToolbarContext = createContext<DeveloperToolbarContextValue | null>(null);
-
 // Reuse global state manager or create new one
 const getGlobalStateManager = (): ToolbarStateManager => {
   return (registry.developerToolbarStateManager ??= new ToolbarStateManager());
 };
 
-export interface DeveloperToolbarProviderProps {
-  children: ReactNode;
+export interface DeveloperToolbarState {
+  items: DeveloperToolbarItem[];
+  enabledItems: DeveloperToolbarItem[];
+  settings: ToolbarSettings;
+  registerItem: (item: DeveloperToolbarItem) => () => void;
+  toggleSetting: (key: keyof ToolbarSettings) => void;
+  toggleItemEnabled: (itemId: string) => void;
+  updateCustomEnvironmentLabel: (label: string) => void;
+  updateCustomBackgroundColor: (color: string | undefined) => void;
 }
 
-export const DeveloperToolbarProvider: React.FC<DeveloperToolbarProviderProps> = ({ children }) => {
+/**
+ * Hook to access the global toolbar state manager
+ */
+export const useToolbarState = (): DeveloperToolbarState => {
   const developerToolbarStateManager = getGlobalStateManager();
   const [state, setState] = useState(() => ({
     items: developerToolbarStateManager.getItems(),
@@ -112,7 +101,7 @@ export const DeveloperToolbarProvider: React.FC<DeveloperToolbarProviderProps> =
     [developerToolbarStateManager]
   );
 
-  const value: DeveloperToolbarContextValue = {
+  const result: DeveloperToolbarState = {
     items: state.items,
     enabledItems: developerToolbarStateManager.getEnabledItems(),
     settings: state.settings,
@@ -123,15 +112,5 @@ export const DeveloperToolbarProvider: React.FC<DeveloperToolbarProviderProps> =
     updateCustomBackgroundColor,
   };
 
-  return (
-    <DeveloperToolbarContext.Provider value={value}>{children}</DeveloperToolbarContext.Provider>
-  );
-};
-
-export const useDeveloperToolbarContext = (): DeveloperToolbarContextValue => {
-  const context = useContext(DeveloperToolbarContext);
-  if (!context) {
-    throw new Error('useDeveloperToolbarContext must be used within a DeveloperToolbarProvider');
-  }
-  return context;
+  return result;
 };

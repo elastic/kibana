@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { DeveloperToolbar, type DeveloperToolbarProps } from '../components/developer_toolbar';
-import { DeveloperToolbarProvider } from '../context/developer_toolbar_context';
 import { DeveloperToolbarItem } from '../components/developer_toolbar_item';
 import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
 
@@ -125,7 +124,7 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
   };
 
   return (
-    <DeveloperToolbarProvider>
+    <>
       <EuiPanel paddingSize="l" style={{ height: '250px', marginBottom: '40px' }}>
         <EuiText>
           <h3>Developer Toolbar Demo</h3>
@@ -181,7 +180,7 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}>
         <DeveloperToolbar {...props} />
       </div>
-    </DeveloperToolbarProvider>
+    </>
   );
 };
 
@@ -223,7 +222,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
   };
 
   return (
-    <DeveloperToolbarProvider>
+    <>
       <EuiPanel paddingSize="l" style={{ height: '300px', marginBottom: '40px' }}>
         <EuiText>
           <h3>Extensible Developer Toolbar Demo</h3>
@@ -281,7 +280,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}>
         <DeveloperToolbar {...props} />
       </div>
-    </DeveloperToolbarProvider>
+    </>
   );
 };
 

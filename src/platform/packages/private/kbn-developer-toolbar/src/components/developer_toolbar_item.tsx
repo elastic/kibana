@@ -9,7 +9,7 @@
 
 import type React from 'react';
 import { useEffect, useMemo, type ReactNode } from 'react';
-import { useDeveloperToolbarContext } from '../context/developer_toolbar_context';
+import { useToolbarState } from '../hooks';
 
 export interface DeveloperToolbarItemProps {
   /**
@@ -43,7 +43,7 @@ export const DeveloperToolbarItem: React.FC<DeveloperToolbarItemProps> = ({
   children,
   priority = 0,
 }) => {
-  const { registerItem } = useDeveloperToolbarContext();
+  const { registerItem } = useToolbarState();
 
   // Generate stable ID if none provided
   const id = useMemo(

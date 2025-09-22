@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -28,9 +28,8 @@ import { FrameJankIndicator } from '../indicators/frame_jank/frame_jank_indicato
 import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
 import { EnvironmentIndicator } from '../indicators/environment/environment_indicator';
 import { useMinimized } from '../hooks/use_minimized';
-import { CustomItemsPortal } from './custom_items_portal';
 import { SettingsModal } from './settings_modal';
-import { DeveloperToolbarContext } from '../context/developer_toolbar_context';
+import { useToolbarState } from '../hooks/use_toolbar_state';
 
 export interface DeveloperToolbarProps {
   envInfo?: EnvironmentInfo;
@@ -60,9 +59,9 @@ const getToolbarContainerStyles = (euiTheme: EuiThemeComputed) => [
 ];
 
 export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
-  const context = useContext(DeveloperToolbarContext);
-  const settings = context?.settings;
-  const customBackgroundColor = settings?.customBackgroundColor;
+  const state = useToolbarState();
+  const settings = state.settings;
+  const customBackgroundColor = settings.customBackgroundColor;
 
   const colorMode = customBackgroundColor
     ? isColorDark(...hexToRgb(customBackgroundColor))
@@ -80,8 +79,8 @@ export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
 const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, onHeightChange }) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
-  const context = useContext(DeveloperToolbarContext);
-  const settings = context?.settings;
+  const state = useToolbarState();
+  const settings = state.settings;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const customBackgroundColor = settings?.customBackgroundColor;
@@ -150,9 +149,18 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <CustomItemsPortal />
-              </EuiFlexItem>
+              {state.enabledItems.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    {state.enabledItems.map((item) => (
+                      <EuiFlexItem key={item.id} grow={false}>
+                        {item.children}
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+
               <EuiFlexItem grow={false}>
                 <EuiToolTip content="Settings">
                   <EuiButtonIcon
