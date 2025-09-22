@@ -9,7 +9,6 @@
   },
   "include": [
     "**/*.ts",
-    "src/**/*"
   ],
   "exclude": [
     "target/**/*"
