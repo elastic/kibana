@@ -23,7 +23,7 @@ export const useCheckResourcesStep = ({
   onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
   const { getMissingResources, isLoading, error } = useGetMissingResources(
-    'rule',
+    'dashboard',
     onMissingResourcesFetched
   );
 

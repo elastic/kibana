@@ -102,10 +102,10 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
               accept="application/json, application/x-ndjson"
               onChange={onFileChange}
               display="large"
-              aria-label="Upload rules file"
+              aria-label="Upload dashboards file"
               isLoading={showLoader}
               disabled={isDisabled}
-              data-test-subj="rulesFilePicker"
+              data-test-subj="dashboardsFilePicker"
               data-loading={isParsing}
             />
           </EuiFormRow>

@@ -63,7 +63,7 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   }, []);
   const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(2, subStep), onCopied });
 
-  // Upload rules step
+  // Upload dashboards step
   const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
     (stats) => {
       onMigrationCreated(stats);
