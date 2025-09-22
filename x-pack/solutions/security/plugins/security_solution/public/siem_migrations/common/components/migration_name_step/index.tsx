@@ -6,12 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { MigrationNameInput } from './migration_name_input';
 import * as i18n from './translations';
-import { getDefaultMigrationName } from '../../utils/get_default_migration_name';
+import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 
 export interface MigrationNameStepProps {
   status: EuiStepStatus;
@@ -29,16 +28,32 @@ export const useMigrationNameStep = ({
     if (storedMigrationName) {
       return storedMigrationName;
     }
-    return getDefaultMigrationName(currentUserProfile?.user.username);
-  }, [storedMigrationName, currentUserProfile?.user.username]);
+    if (isLoading) {
+      return undefined; // profile is still loading
+    }
+
+    // localized date and time according to the locale including seconds
+    const datetime = moment(Date.now()).format('ddd , ll, LTS');
+
+    const userName = currentUserProfile?.user.full_name || currentUserProfile?.user.username;
+
+    if (userName) {
+      return `${userName}'s migration on ${datetime}`;
+    }
+
+    return `Migration created on ${datetime}`;
+  }, [
+    storedMigrationName,
+    currentUserProfile?.user.username,
+    currentUserProfile?.user.full_name,
+    isLoading,
+  ]);
 
   return {
     title: i18n.MIGRATION_NAME_INPUT_TITLE,
     status,
-    children: isLoading ? (
-      <CenteredLoadingSpinner />
-    ) : (
+    children: migrationName ? (
       <MigrationNameInput migrationName={migrationName} setMigrationName={setMigrationName} />
-    ),
+    ) : null,
   };
 };

@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const MIGRATION_NAME_INPUT_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.migrationName.title',
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationName.title',
   { defaultMessage: 'Migration name' }
 );
 
 export const MIGRATION_NAME_INPUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.migrationName.description',
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationName.description',
   { defaultMessage: 'Name your migration' }
 );
 
 export const MIGRATION_NAME_INPUT_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.migrationName.error',
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationName.error',
   { defaultMessage: 'Migration name is required' }
 );
