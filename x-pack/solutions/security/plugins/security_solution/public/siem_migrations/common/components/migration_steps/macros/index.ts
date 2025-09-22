@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './lookups';
-export * from './macros';
-export * from './migration_name';
-export * from './sub_step';
-export * from './upload_file_button';
-
-export * from './types';
+export * from './check_resources';
