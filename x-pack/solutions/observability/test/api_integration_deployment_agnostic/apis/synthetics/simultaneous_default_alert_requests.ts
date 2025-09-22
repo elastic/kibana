@@ -26,7 +26,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      alertingApi.createIndexConnector({
+      await alertingApi.createIndexConnector({
         roleAuthc: editorUser,
         name: DEFAULT_CONNECTOR_NAME,
         indexName: 'synthetics-*',
@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     beforeEach(async () => {
       const supertestWithRoleScope = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       // ensure alerts are enabled before testing the feature
-      supertestWithRoleScope
+      await supertestWithRoleScope
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
