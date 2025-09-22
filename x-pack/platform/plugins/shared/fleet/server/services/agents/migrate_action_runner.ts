@@ -6,10 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import semverLt from 'semver/functions/lt';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { MIGRATE_AGENT_VERSION } from '../../../common/constants';
+import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
 import { FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
@@ -66,9 +65,9 @@ export async function bulkMigrateAgentsBatch(
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is a fleet-server.`
       );
-    } else if (agent.agent?.version && semverLt(agent.agent.version, MIGRATE_AGENT_VERSION)) {
+    } else if (!isAgentMigrationSupported(agent)) {
       errors[agent.id] = new FleetError(
-        `Agent ${agent.id} cannot be migrated. Migrate action is supported from version ${MIGRATE_AGENT_VERSION}.`
+        `Agent ${agent.id} cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
       );
     } else {
       agentsToAction.push(agent);

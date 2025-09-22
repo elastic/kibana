@@ -6,12 +6,11 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
-import semverLt from 'semver/functions/lt';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-import { MIGRATE_AGENT_VERSION } from '../../../../../../common/constants/agent';
+import { isAgentMigrationSupported } from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -194,9 +193,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         )
       : [];
     const unsupportedVersionAgents = Array.isArray(selectedAgents)
-      ? selectedAgents.filter((agent) =>
-          agent.agent?.version ? semverLt(agent.agent.version, MIGRATE_AGENT_VERSION) : false
-        )
+      ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
       : [];
     return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
   }, [selectedAgents, agentPoliciesIndexedById]);

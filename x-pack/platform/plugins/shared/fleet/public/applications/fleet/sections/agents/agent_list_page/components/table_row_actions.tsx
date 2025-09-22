@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import semverLt from 'semver/functions/lt';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
-import { MIGRATE_AGENT_VERSION } from '../../../../../../../common/constants';
-import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import {
+  isAgentMigrationSupported,
+  isAgentRequestDiagnosticsSupported,
+} from '../../../../../../../common/services';
 
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
@@ -60,13 +61,11 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-  const unsupportedVersion =
-    agent.agent?.version && semverLt(agent.agent.version, MIGRATE_AGENT_VERSION);
   if (
     !agentPolicy?.is_protected &&
     !isFleetServerAgent &&
     agentMigrationsEnabled &&
-    !unsupportedVersion
+    isAgentMigrationSupported(agent)
   ) {
     menuItems.push(
       <EuiContextMenuItem
