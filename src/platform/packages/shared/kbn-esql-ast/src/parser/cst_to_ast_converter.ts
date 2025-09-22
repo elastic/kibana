@@ -1233,8 +1233,8 @@ export class CstToAstConverter {
 
   private fromInlinestatsCommand(
     ctx: cst.InlineStatsCommandContext
-  ): ast.ESQLCommand<'inlinestats'> {
-    const command = this.createCommand('inlinestats', ctx);
+  ): ast.ESQLCommand<'inline stats'> {
+    const command = this.createCommand('inline stats', ctx);
 
     // STATS expression is optional
     if (ctx._stats) {
