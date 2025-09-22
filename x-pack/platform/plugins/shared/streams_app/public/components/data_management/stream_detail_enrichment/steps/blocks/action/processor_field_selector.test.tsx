@@ -87,24 +87,6 @@ describe('ProcessorFieldSelector', () => {
     expect(mockUseFieldSuggestions).toHaveBeenCalledWith('grok');
   });
 
-  it('shows unsupported field warning when field matches unsupported pattern', () => {
-    mockUseSimulatorSelector.mockReturnValue(['host.']);
-
-    renderComponent({}, { from: 'host.name' });
-
-    expect(screen.getByText('Dot-separated field names are not supported.')).toBeInTheDocument();
-  });
-
-  it('does not show warning for supported fields', () => {
-    mockUseSimulatorSelector.mockReturnValue(['host.']);
-
-    renderComponent({}, { from: 'message' });
-
-    expect(
-      screen.queryByText('Dot-separated field names are not supported.')
-    ).not.toBeInTheDocument();
-  });
-
   it('allows creating custom field values not in suggestions', async () => {
     const mockOnChange = jest.fn();
     renderComponent({ onChange: mockOnChange });

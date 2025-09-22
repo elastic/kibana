@@ -28,6 +28,7 @@ export interface BaseToolFormData {
   description: string;
   labels: string[];
 }
+
 export interface EsqlToolFormData extends BaseToolFormData {
   type: ToolType.esql;
   esql: string;
