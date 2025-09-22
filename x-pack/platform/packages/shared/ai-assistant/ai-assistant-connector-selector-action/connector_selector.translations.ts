@@ -7,33 +7,51 @@
 
 import { i18n } from '@kbn/i18n';
 
-const selectableAriaLabel = i18n.translate('xpack.aiAssistant.connectorSelector.selectableAriaLabel', {
-  defaultMessage: 'Select a connector',
-});
+const selectableAriaLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.selectableAriaLabel',
+  {
+    defaultMessage: 'Select a connector',
+  }
+);
 
-const addConnectorAriaLabel = i18n.translate('xpack.aiAssistant.connectorSelector.addConnectorAriaLabel', {
-  defaultMessage: 'Add Connector',
-});
+const addConnectorAriaLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.addConnectorAriaLabel',
+  {
+    defaultMessage: 'Add Connector',
+  }
+);
 
 const addConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.addConnectorLabel', {
   defaultMessage: 'Add Connector',
 });
 
-const manageConnectorAriaLabel = i18n.translate('xpack.aiAssistant.connectorSelector.manageConnectorAriaLabel', {
-  defaultMessage: 'Manage Connector',
-});
+const manageConnectorAriaLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.manageConnectorAriaLabel',
+  {
+    defaultMessage: 'Manage Connector',
+  }
+);
 
-const preConfiguredConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.preConfiguredConnectorLabel', {
-  defaultMessage: 'Pre-configured',
-});
+const preConfiguredConnectorLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.preConfiguredConnectorLabel',
+  {
+    defaultMessage: 'Pre-configured',
+  }
+);
 
-const customConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.customConnectorLabel', {
-  defaultMessage: 'Custom',
-});
+const customConnectorLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.customConnectorLabel',
+  {
+    defaultMessage: 'Custom',
+  }
+);
 
-const defaultConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.defaultConnectorLabel', {
-  defaultMessage: 'Default',
-});
+const defaultConnectorLabel = i18n.translate(
+  'xpack.aiAssistant.connectorSelector.defaultConnectorLabel',
+  {
+    defaultMessage: 'Default',
+  }
+);
 
 /**
  * Translations for the `ConnectorSelector` component.
