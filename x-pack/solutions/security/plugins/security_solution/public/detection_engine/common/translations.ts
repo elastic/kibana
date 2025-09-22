@@ -20,6 +20,13 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
+export const SETTINGS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.settingsButton',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const IMPORT_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {

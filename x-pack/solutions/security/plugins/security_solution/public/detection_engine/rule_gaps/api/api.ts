@@ -13,6 +13,7 @@ import {
   INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+  INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH,
   gapStatus,
 } from '@kbn/alerting-plugin/common';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
@@ -21,6 +22,11 @@ import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/c
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
+import type {
+  GapAutoFillSchedulerRequestBodyV1,
+  GapAutoFillSchedulerResponseBodyV1,
+  UpdateGapAutoFillSchedulerRequestBodyV1,
+} from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
 import dateMath from '@kbn/datemath';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { GapStatus, ScheduleBackfillProps } from '../types';
@@ -107,6 +113,47 @@ export const deleteBackfill = async ({ backfillId }: { backfillId: string }) => 
     }
   );
 };
+
+export const getGapAutoFillScheduler = async ({
+  id,
+  signal,
+}: {
+  id: string;
+  signal?: AbortSignal;
+}): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH}/${encodeURIComponent(id)}`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+export const createGapAutoFillScheduler = async (
+  body: GapAutoFillSchedulerRequestBodyV1
+): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+
+export const updateGapAutoFillScheduler = async ({
+  id,
+  body,
+}: {
+  id: string;
+  body: UpdateGapAutoFillSchedulerRequestBodyV1;
+}): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_GAP_AUTO_FILL_SCHEDULER_API_PATH}/${encodeURIComponent(id)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }
+  );
 
 /**
  * Find rules with gaps

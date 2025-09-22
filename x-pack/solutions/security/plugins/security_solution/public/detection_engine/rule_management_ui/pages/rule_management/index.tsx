@@ -22,6 +22,8 @@ import { MissingPrivilegesCallOut } from '../../../../common/components/missing_
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
+import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
+import * as gapsI18n from '../../../rule_gaps/translations';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -41,6 +43,7 @@ import {
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
+  const [isSettingsOpen, openSettings, closeSettings] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
@@ -106,6 +109,16 @@ const RulesPageComponent: React.FC = () => {
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="rules-settings-button"
+                  iconType="gear"
+                  aria-label={gapsI18n.RULE_SETTINGS_TITLE}
+                  onClick={openSettings}
+                >
+                  {i18n.SETTINGS}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -137,6 +150,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
               <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
                 <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
@@ -151,6 +165,7 @@ const RulesPageComponent: React.FC = () => {
               {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
+          {isSettingsOpen && <RuleSettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
           <EuiSpacer size="s" />
           <MaintenanceWindowCallout

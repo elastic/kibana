@@ -213,3 +213,75 @@ export const BACKFILLS_TABLE_COLUMN_ACTION = i18n.translate(
     defaultMessage: 'Action',
   }
 );
+
+// Rule Settings modal
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.title',
+  {
+    defaultMessage: 'Rule settings',
+  }
+);
+
+export const AUTO_GAP_FILL_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillHeader',
+  {
+    defaultMessage: 'Auto gap fill settings',
+  }
+);
+
+export const AUTO_GAP_FILL_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillToggle',
+  {
+    defaultMessage: 'Enable auto gap fill',
+  }
+);
+
+export const AUTO_GAP_FILL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillDescription',
+  {
+    defaultMessage: 'Detected run gaps will be automatically filled.',
+  }
+);
+
+export const RUN_SCHEDULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.runScheduleLabel',
+  {
+    defaultMessage: 'Run schedule',
+  }
+);
+
+export const SCHEDULE_UNIT_MINUTES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.scheduleMinutes',
+  {
+    defaultMessage: 'minutes',
+  }
+);
+
+export const SCHEDULE_UNIT_HOURS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.scheduleHours',
+  {
+    defaultMessage: 'hours',
+  }
+);
+
+export const SCHEDULE_UNIT_DAYS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.scheduleDays',
+  {
+    defaultMessage: 'days',
+  }
+);
+
+export const SCHEDULE_UNIT_SECONDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.scheduleSeconds',
+  {
+    defaultMessage: 'seconds',
+  }
+);
+
+export const SAVE = i18n.translate('xpack.securitySolution.detectionEngine.ruleSettings.save', {
+  defaultMessage: 'Save',
+});
+
+export const CANCEL = i18n.translate('xpack.securitySolution.detectionEngine.ruleSettings.cancel', {
+  defaultMessage: 'Cancel',
+});
