@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isMac } from '../../../../shared/utils/is_mac';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 
 /**
@@ -29,9 +30,10 @@ export function generateConnectorSnippet(
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder
+    const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     const snippet = `${prepend}${quotedType}\n${
       full ? '  ' : ''
-    }with:\n  # Add parameters here. Click Ctrl+Space (Ctrl+I on Mac) to see all available options\n  `;
+    }with:\n  # Add parameters here. Press ${shortcut} to see all available options\n  `;
     return snippet;
   }
 

@@ -291,7 +291,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     setOptions(nextOptions);
   };
 
-  const handleSearchChange = (searchValue: string, matchingOptions: Array<ActionOptionData>) => {
+  const handleSearchChange = (searchValue: string) => {
     if (searchValue.length > 0) {
       setOptions(
         flatOptions.filter((option) =>

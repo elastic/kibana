@@ -50,6 +50,7 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
+import { isMac } from '../../../shared/utils/is_mac';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -71,10 +72,6 @@ const useWorkflowJsonSchema = () => {
     }
   }, []);
 };
-
-const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-  .toLowerCase()
-  .includes('mac');
 
 /**
  * Since we implemented custom error formatting at the validation level,
@@ -345,7 +342,7 @@ export const WorkflowYAMLEditor = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const modifierKey = isMac ? event.metaKey : event.ctrlKey;
+      const modifierKey = isMac() ? event.metaKey : event.ctrlKey;
       if (event.key === 'k' && modifierKey) {
         event.preventDefault();
         event.stopPropagation();

@@ -13,15 +13,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { isMac } from '../../../shared/utils/is_mac';
 
 export function WorkflowYAMLEditorShortcuts() {
   const styles = useMemoCss(componentStyles);
 
-  const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-    .toLowerCase()
-    .includes('mac');
-
-  const commandKey = isMac ? '⌘' : 'Ctrl';
+  const commandKey = isMac() ? '⌘' : 'Ctrl';
 
   return (
     <div>
