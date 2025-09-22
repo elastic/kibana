@@ -15,6 +15,7 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { AiNavigationIcon } from './icon';
 import { createStackManagementNavigationTree } from '../stack_management_navigation';
 import { renderAiSocCallout } from './callout';
+import { v2EaseFooterItems } from './v2_ease_footer_items';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
@@ -33,6 +34,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       isCollapsible: false,
       children: [
         {
+          id: 'ease_home',
           link: securityLink(SecurityPageName.landing),
           title: SOLUTION_NAME,
           icon: AiNavigationIcon,
@@ -122,6 +124,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
           icon: 'editorCodeBlock',
           iconV2: 'editorCodeBlock',
         },
+        ...v2EaseFooterItems,
         createStackManagementNavigationTree(),
       ],
     },

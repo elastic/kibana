@@ -246,6 +246,8 @@ export const i18nStrings = {
       }),
     },
   },
+  // also used in sidenav v2
+  // for serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
   ingestAndManageData: {
     title: i18n.translate('securitySolutionPackages.navLinks.ingestAndManageData', {
       defaultMessage: 'Ingest and Manage Data',
@@ -268,10 +270,16 @@ export const i18nStrings = {
     },
   },
   // rename this key to stackManagement once we switch to v2 completely
+  // also used in sidenav v2 for
+  // serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
   stackManagementV2: {
     title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
       defaultMessage: 'Stack Management',
     }),
+    serverlessTitle: i18n.translate(
+      'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
+      { defaultMessage: 'Admin and Settings' }
+    ),
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
         defaultMessage: 'Alerts and Insights',
@@ -290,6 +298,12 @@ export const i18nStrings = {
     kibana: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
         defaultMessage: 'Kibana',
+      }),
+    },
+    // serverless only
+    access: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.access', {
+        defaultMessage: 'Access',
       }),
     },
   },
