@@ -139,3 +139,23 @@ export interface DocUpdateAllOptions {
    */
   inferenceIds?: string[];
 }
+
+/**
+ * Options for {@link DocumentationManagerAPI.updateAll}
+ */
+export interface DocUpdateAllOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
+}

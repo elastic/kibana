@@ -115,7 +115,6 @@ export class ProductDocBasePlugin
     documentationManager.updateAll().catch((err) => {
       this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
     });
-
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),

@@ -56,12 +56,14 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": true,
@@ -96,6 +98,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "initialInternalState": Object {
+            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
@@ -122,12 +125,14 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": false,
@@ -162,6 +167,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "initialInternalState": Object {
+            "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
@@ -203,6 +209,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "description",
           "grid": Object {},
@@ -272,6 +279,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -304,6 +312,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -351,6 +360,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "default_column",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
