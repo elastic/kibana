@@ -6,5 +6,18 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/presentation-panel-plugin", "@kbn/kibana-react-plugin"]
+  "kbn_references": [
+    "@kbn/presentation-panel-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/css-utils",
+    "@kbn/presentation-publishing",
+    "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/controls-constants",
+    "@kbn/controls-plugin",
+    "@kbn/i18n",
+    "@kbn/controls-schemas",
+    "@kbn/presentation-containers",
+  ]
 }

@@ -27,7 +27,6 @@
     "@kbn/datemath",
     "@kbn/config-schema",
     "@kbn/ui-actions-plugin",
-    "@kbn/shared-ux-markdown",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/content-management-utils",
@@ -35,7 +34,6 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/std",
-    "@kbn/react-hooks",
     "@kbn/esql-types",
     "@kbn/css-utils",
     "@kbn/esql-utils",
@@ -43,7 +41,6 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/presentation-util",
-    "@kbn/presentation-panel"
   ],
   "exclude": ["target/**/*"]
 }
