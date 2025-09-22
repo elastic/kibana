@@ -8,6 +8,8 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useDispatch } from 'react-redux';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import {
@@ -70,6 +72,7 @@ const RowActionComponent = ({
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
+  const dispatch = useDispatch();
 
   const columnValues = useMemo(
     () =>
@@ -93,21 +96,14 @@ const RowActionComponent = ({
   const showNotes = canReadNotes;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
+    dispatch(
+      dataTableActions.updateExpandedAlertIndex({ id: tableId, expandedAlertIndex: pageRowIndex })
+    );
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'right',
     });
-  }, [eventId, indexName, tableId, openFlyout, telemetry]);
+  }, [dispatch, pageRowIndex, tableId, telemetry]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout({
