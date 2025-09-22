@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const useSharedDetailsStyles = () => {
@@ -17,7 +17,7 @@ export const useSharedDetailsStyles = () => {
       overflow-wrap: break-word;
 
       h3 {
-        font-size: ${euiTheme.size.base};
+        font-size: ${useEuiFontSize('m').fontSize};
       }
 
       &:disabled {

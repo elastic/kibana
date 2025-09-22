@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useStyles as useSharedStyles } from './styles';
 import { useSharedDetailsStyles } from '../styles';
@@ -42,7 +42,7 @@ export const useStyles = () => {
 
     // Detail styling (from prfDevTool__detail - standalone class)
     detail: css`
-      font-size: ${euiTheme.size.s};
+      font-size: ${useEuiFontSize('s').fontSize};
       padding-left: calc(${euiTheme.size.l} - 3px); // Alignment is weird (original comment)
       margin-bottom: ${euiTheme.size.s};
       display: flex;
