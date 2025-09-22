@@ -83,7 +83,7 @@ export function SchemaEditor({
         setIsLoadingRecommendations(false);
       }
     },
-    [fieldSelection, fields, fieldsMetadata, notifications.toasts, onFieldSelection, onFieldUpdate]
+    [fields, fieldsMetadata, notifications.toasts, onFieldSelection, onFieldUpdate]
   );
 
   const toolbarVisibility = React.useMemo(() => {
@@ -135,7 +135,6 @@ export function SchemaEditor({
                   onClick={() => {
                     fieldSelection.forEach((fieldName) => {
                       const field = fields.find(({ name }) => name === fieldName)!;
-                      console.log('UPDATING FIELD', field);
                       onFieldUpdate({
                         name: field.name,
                         parent: field.parent,
@@ -158,7 +157,15 @@ export function SchemaEditor({
         },
       },
     };
-  }, [withToolbar, fieldSelection, onFieldUpdate, isLoadingRecommendations]);
+  }, [
+    fields,
+    getRecommendations,
+    onFieldSelection,
+    withToolbar,
+    fieldSelection,
+    onFieldUpdate,
+    isLoadingRecommendations,
+  ]);
 
   return (
     <SchemaEditorContextProvider
