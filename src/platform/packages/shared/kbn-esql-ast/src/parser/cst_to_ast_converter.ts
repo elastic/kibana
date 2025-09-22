@@ -367,7 +367,7 @@ export class CstToAstConverter {
       return this.fromSampleCommand(sampleCommandCtx);
     }
 
-    const inlinestatsCommandCtx = ctx.inlinestatsCommand();
+    const inlinestatsCommandCtx = ctx.inlineStatsCommand();
 
     if (inlinestatsCommandCtx) {
       return this.fromInlinestatsCommand(inlinestatsCommandCtx);
@@ -627,7 +627,7 @@ export class CstToAstConverter {
    * @todo Do not return array here.
    */
   private toByOption(
-    ctx: cst.StatsCommandContext | cst.InlinestatsCommandContext,
+    ctx: cst.StatsCommandContext | cst.InlineStatsCommandContext,
     expr: cst.FieldsContext | undefined
   ): ast.ESQLCommandOption[] {
     const byCtx = ctx.BY();
@@ -1054,8 +1054,8 @@ export class CstToAstConverter {
     const onOption = this.toOption('on', joinCondition);
     const joinPredicates: ast.ESQLAstItem[] = onOption.args;
 
-    for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {
-      const expression = this.visitValueExpression(joinPredicateCtx.valueExpression());
+    for (const joinPredicateCtx of joinCondition.booleanExpression_list()) {
+      const expression = this.fromBooleanExpression(joinPredicateCtx);
 
       if (expression) {
         joinPredicates.push(expression);
@@ -1232,7 +1232,7 @@ export class CstToAstConverter {
   // -------------------------------------------------------------- INLINESTATS
 
   private fromInlinestatsCommand(
-    ctx: cst.InlinestatsCommandContext
+    ctx: cst.InlineStatsCommandContext
   ): ast.ESQLCommand<'inlinestats'> {
     const command = this.createCommand('inlinestats', ctx);
 
