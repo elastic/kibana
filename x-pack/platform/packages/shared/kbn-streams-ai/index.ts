@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { partitionStream } from './workflows/partition_stream';
+export { generateStreamDescription } from './src/description/generate_description';
+export { identifySystems } from './src/systems/identify_systems';

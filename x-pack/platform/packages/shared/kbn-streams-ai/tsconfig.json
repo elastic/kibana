@@ -4,24 +4,24 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-common-types"
     ]
   },
   "include": [
     "**/*.ts",
-    "globals.d.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/streams-schema",
-    "@kbn/core",
-    "@kbn/inference-common",
     "@kbn/ai-tools",
-    "@kbn/zod",
     "@kbn/std",
-    "@kbn/inference-prompt-utils",
+    "@kbn/core",
     "@kbn/streamlang",
+    "@kbn/streams-schema",
+    "@kbn/inference-common",
+    "@kbn/zod",
+    "@kbn/inference-prompt-utils",
   ]
 }

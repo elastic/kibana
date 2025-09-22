@@ -9,6 +9,7 @@ export { describeDataset } from './src/tools/describe_dataset';
 export type { TruncatedDocumentAnalysis } from './src/tools/describe_dataset/document_analysis';
 export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
 export { sortAndTruncateAnalyzedFields } from './src/tools/describe_dataset/sort_and_truncate_analyzed_fields';
+export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
 export type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
