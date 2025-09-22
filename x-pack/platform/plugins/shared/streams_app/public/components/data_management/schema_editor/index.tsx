@@ -123,7 +123,7 @@ export function SchemaEditor({
                   {i18n.translate(
                     'xpack.streams.streamDetailSchemaEditorFieldsTableActions.guessType',
                     {
-                      defaultMessage: 'Guess type',
+                      defaultMessage: 'Suggest type',
                     }
                   )}
                 </EuiButtonEmpty>
