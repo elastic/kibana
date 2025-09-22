@@ -6,13 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { useController } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
-import { selectUnsupportedDottedFields } from '../../../state_management/simulation_state_machine/selectors';
 import { useFieldSuggestions } from './hooks/use_field_suggestions';
 import type { FieldSuggestion } from './utils/field_suggestions';
 
@@ -33,12 +30,6 @@ export const ProcessorFieldSelector = ({
   label,
   onChange,
 }: ProcessorFieldSelectorProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const unsupportedFields = useSimulatorSelector((state) =>
-    selectUnsupportedDottedFields(state.context)
-  );
-
   const { field, fieldState } = useController({
     name: fieldKey,
     rules: {
@@ -78,11 +69,6 @@ export const ProcessorFieldSelector = ({
       }
     },
     [handleSelectionChange]
-  );
-
-  const isUnsupported = useMemo(
-    () => field.value && unsupportedFields.some((f) => field.value.startsWith(f)),
-    [field.value, unsupportedFields]
   );
 
   const defaultLabel = i18n.translate(
@@ -129,42 +115,6 @@ export const ProcessorFieldSelector = ({
           )}
         />
       </EuiFormRow>
-
-      {isUnsupported && (
-        <EuiCallOut
-          color="warning"
-          iconType="alert"
-          title={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.title',
-            {
-              defaultMessage: 'Dot-separated field names are not supported.',
-            }
-          )}
-          css={css`
-            margin-top: ${euiTheme.size.s};
-            margin-bottom: ${euiTheme.size.m};
-          `}
-        >
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p1',
-              {
-                defaultMessage:
-                  'Dot-separated field names in processors can produce misleading simulation results.',
-              }
-            )}
-          </p>
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p2',
-              {
-                defaultMessage:
-                  'For accurate results, avoid dot-separated field names or expand them into nested objects.',
-              }
-            )}
-          </p>
-        </EuiCallOut>
-      )}
     </>
   );
 };
