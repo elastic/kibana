@@ -8,7 +8,7 @@
 import type { RuleUpgradeTelemetryEvent } from './types';
 import { RuleUpgradeEventTypes } from './types';
 
-export const flyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
+export const ruleUpgradeFlyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick,
   schema: {
     type: {
@@ -28,7 +28,20 @@ export const flyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
   },
 };
 
-export const openFlyoutEvent: RuleUpgradeTelemetryEvent = {
+export const ruleUpgradeSingleButtonClickEvent: RuleUpgradeTelemetryEvent = {
+  eventType: RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick,
+  schema: {
+    hasMissingBaseVersion: {
+      type: 'boolean',
+      _meta: {
+        description: 'Indicates if the rule has a missing base version',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ruleUpgradeOpenFlyoutEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen,
   schema: {
     hasMissingBaseVersion: {
@@ -41,4 +54,8 @@ export const openFlyoutEvent: RuleUpgradeTelemetryEvent = {
   },
 };
 
-export const ruleUpgradeTelemetryEvents = [flyoutButtonClickEvent, openFlyoutEvent];
+export const ruleUpgradeTelemetryEvents = [
+  ruleUpgradeFlyoutButtonClickEvent,
+  ruleUpgradeOpenFlyoutEvent,
+  ruleUpgradeSingleButtonClickEvent,
+];
