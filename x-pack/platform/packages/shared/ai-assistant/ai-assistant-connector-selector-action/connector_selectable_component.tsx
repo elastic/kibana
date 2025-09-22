@@ -7,22 +7,14 @@
 
 import React, { useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiPopoverFooter,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { translations as i8n } from './connector_selector.translations';
 
-/** Props for the `ConnectorSelector` */
-export interface ConnectorSelectorProps<T extends { value: string } = { value: string }> {
+/** Props for the `ConnectorSelectableComponent` */
+export interface ConnectorSelectableComponentProps<
+  T extends { value: string } = { value: string }
+> {
   /** Pre-configured connectors to display in the selector */
   preConfiguredConnectors: (EuiSelectableLIOption<T> & { key?: undefined; checked?: undefined })[];
   /** Custom connectors to display in the selector */
@@ -37,27 +29,13 @@ export interface ConnectorSelectorProps<T extends { value: string } = { value: s
   defaultValue?: string;
   /** Callback that provides the selected connector value (string). */
   onValueChange?: (value: string, option: EuiSelectableOption<T>) => void;
-  /** Label for the "Add Connector" button. Default is "Add Connector" */
-  addConnectorLabel?: string;
-  /** Aria label for the "Add Connector" button. Default is "Add Connector" */
-  addConnectorAriaLabel?: string;
-  /** Aria label for the "Manage Connectors" button. Default is "Manage Connector" */
-  manageConnectorAriaLabel?: string;
-  /** Callback when the "Add Connector" button is clicked */
-  onAddConnectorClick?: () => void;
-  /** Callback when the "Manage Connectors" button is clicked */
-  onManageConnectorsClick?: () => void;
+  /** Selectable footer component */
+  footer?: React.ReactElement;
 }
 
-export const ConnectorSelector = <T extends { value: string } = { value: string }>(
-  props: ConnectorSelectorProps<T>
+export const ConnectorSelectableComponent = <T extends { value: string } = { value: string }>(
+  props: ConnectorSelectableComponentProps<T>
 ) => {
-  const {
-    addConnectorLabel = i8n.addConnectorLabel,
-    addConnectorAriaLabel = i8n.addConnectorAriaLabel,
-    manageConnectorAriaLabel = i8n.manageConnectorAriaLabel,
-  } = props;
-
   // Determine controlled vs uncontrolled
   const isControlled = Object.prototype.hasOwnProperty.call(props, 'value');
   const controlledValue = props.value ?? undefined;
@@ -150,38 +128,7 @@ export const ConnectorSelector = <T extends { value: string } = { value: string 
         {(list) => (
           <>
             {list}
-            {(props.onAddConnectorClick || props.onManageConnectorsClick) && (
-              <EuiPopoverFooter paddingSize="s">
-                <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                  {props.onAddConnectorClick && (
-                    <EuiFlexItem grow={true}>
-                      <EuiButton
-                        size="s"
-                        fullWidth
-                        onClick={props.onAddConnectorClick}
-                        aria-label={addConnectorAriaLabel}
-                        data-test-subj="aiAssistantAddConnectorButton"
-                      >
-                        <EuiIcon type="plus" />
-                        {addConnectorLabel}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
-                  {props.onManageConnectorsClick && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        data-test-subj="aiAssistantManageConnectorsButton"
-                        size="s"
-                        display="base"
-                        iconType={'gear'}
-                        onClick={props.onManageConnectorsClick}
-                        aria-label={manageConnectorAriaLabel}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPopoverFooter>
-            )}
+            {props.footer}
           </>
         )}
       </EuiSelectable>

@@ -11,16 +11,15 @@ import { action } from '@storybook/addon-actions';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
-import type { ConnectorSelectorProps } from '../connector_selector';
-import { ConnectorSelector as Component } from '../connector_selector';
+import { ConnectorSelectable as Component, ConnectorSelectableProps } from '../connector_selectable';
 
-const preConfiguredConnectors: ConnectorSelectorProps['preConfiguredConnectors'] = [
+const preConfiguredConnectors: ConnectorSelectableProps['preConfiguredConnectors'] = [
   { label: 'Connector 1', value: '1' },
   { label: 'Connector 2', value: '2' },
   { label: 'Connector 3', value: '3' },
 ];
 
-const customConnectors: ConnectorSelectorProps['customConnectors'] = [
+const customConnectors: ConnectorSelectableProps['customConnectors'] = [
   { label: 'Custom Connector 1', value: '4' },
   { label: 'Custom Connector 2', value: '5' },
   { label: 'Custom Connector 3', value: '6' },
@@ -78,11 +77,11 @@ export const UncontrolledContextMenu: StoryFn<typeof Component> = (args) => <Com
 UncontrolledContextMenu.args = {
   defaultValue: '2',
   defaultConnectorId: '3',
-} as Partial<ConnectorSelectorProps>;
+} as Partial<ConnectorSelectableProps>;
 
 export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
   const [value, setValue] = React.useState<string | undefined>(
-    (args as ConnectorSelectorProps).value
+    (args as ConnectorSelectableProps).value
   );
 
   return (
@@ -100,4 +99,4 @@ export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
 ControlledContextMenu.args = {
   value: '3',
   defaultConnectorId: '4',
-} as Partial<ConnectorSelectorProps>;
+} as Partial<ConnectorSelectableProps>;

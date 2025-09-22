@@ -10,20 +10,21 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
 
-import type { ConnectorSelectorProps } from './connector_selector';
-import { ConnectorSelector } from './connector_selector';
+import type { ConnectorSelectableComponentProps } from './connector_selectable_component';
+import { ConnectorSelectableComponent } from './connector_selectable_component';
 import { translations } from './connector_selector.translations';
+import type { ConnectorSelectableProps } from './connector_selectable';
 
-describe('ConnectorSelector', () => {
+describe('ConnectorSelectableComponent', () => {
   describe('Controlled', () => {
-    const renderComponent = (props: ConnectorSelectorProps) =>
-      render(<ConnectorSelector {...props} />, { wrapper: EuiThemeProvider });
+    const renderComponent = (props: ConnectorSelectableComponentProps) =>
+      render(<ConnectorSelectableComponent {...props} />, { wrapper: EuiThemeProvider });
 
     const onValueChange = jest.fn();
     const onAddConnectorClick = jest.fn();
     const onManageConnectorsClick = jest.fn();
 
-    const defaultProps: ConnectorSelectorProps = {
+    const defaultProps: ConnectorSelectableProps = {
       preConfiguredConnectors: [
         { label: 'Connector 1', value: '1', 'data-test-subj': 'connector1' },
         { label: 'Connector 2', value: '2', 'data-test-subj': 'connector2' },
@@ -63,10 +64,6 @@ describe('ConnectorSelector', () => {
       });
 
       expect(allConnectors.length).toBe(6);
-
-      expect(screen.queryByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('aiAssistantManageConnectorsButton')).toBeInTheDocument();
-      expect(screen.queryByText(translations.addConnectorLabel)).toBeInTheDocument();
     });
 
     it('renders panel with pre-configured connectors', async () => {
@@ -103,15 +100,6 @@ describe('ConnectorSelector', () => {
       });
     });
 
-    it('renders panel without manage connectors button', async () => {
-      renderComponent({
-        ...defaultProps,
-        onManageConnectorsClick: undefined,
-      });
-
-      expect(screen.queryByTestId('aiAssistantManageConnectorsButton')).not.toBeInTheDocument();
-    });
-
     it('renders default connector badge when connector is pre-configured', async () => {
       renderComponent({
         ...defaultProps,
@@ -146,43 +134,6 @@ describe('ConnectorSelector', () => {
       expect(defaultConnectorBadge).not.toBeInTheDocument();
     });
 
-    it('renders panel without add connectors button', async () => {
-      renderComponent({
-        ...defaultProps,
-        onAddConnectorClick: undefined,
-      });
-
-      expect(screen.queryByTestId('aiAssistantAddConnectorButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('aiAssistantManageConnectorsButton')).toBeInTheDocument();
-      expect(screen.queryByText(translations.addConnectorLabel)).not.toBeInTheDocument();
-    });
-
-    it('renders panel with custom add connectors button label', async () => {
-      renderComponent({
-        ...defaultProps,
-        addConnectorLabel: 'New Connector',
-      });
-
-      expect(screen.queryByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
-      expect(screen.queryByText('New Connector')).toBeInTheDocument();
-    });
-
-    it('onClick callback for add connector button', async () => {
-      renderComponent(defaultProps);
-
-      act(() => screen.queryByTestId('aiAssistantAddConnectorButton')?.click());
-
-      expect(onAddConnectorClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('onClick callback for manage connector button', async () => {
-      renderComponent(defaultProps);
-
-      act(() => screen.queryByTestId('aiAssistantManageConnectorsButton')?.click());
-
-      expect(onManageConnectorsClick).toHaveBeenCalledTimes(1);
-    });
-
     it('renders panel with correct initial selection', async () => {
       renderComponent(defaultProps);
 
@@ -195,13 +146,19 @@ describe('ConnectorSelector', () => {
     });
 
     it('renders panel with correct selection change', async () => {
-      const ControlledWrapper = (props: ConnectorSelectorProps) => {
+      const ControlledWrapper = (props: ConnectorSelectableComponentProps) => {
         const [value, setValue] = React.useState<string>(String(props.value));
         const handleValueChange = (val: string, option: EuiSelectableOption) => {
           setValue(String(val));
           onValueChange(val, option);
         };
-        return <ConnectorSelector {...props} value={value} onValueChange={handleValueChange} />;
+        return (
+          <ConnectorSelectableComponent
+            {...props}
+            value={value}
+            onValueChange={handleValueChange}
+          />
+        );
       };
 
       render(<ControlledWrapper {...defaultProps} />, { wrapper: EuiThemeProvider });
@@ -223,16 +180,24 @@ describe('ConnectorSelector', () => {
     });
 
     it('renders panel with correct selection change when value is undefined initially', async () => {
-      const ControlledWrapper = (props: ConnectorSelectorProps) => {
+      const ControlledWrapper = (props: ConnectorSelectableComponentProps) => {
         const [value, setValue] = React.useState<string>(String(props.value));
         const handleValueChange = (val: string, option: EuiSelectableOption) => {
           setValue(String(val));
           onValueChange(val, option);
         };
-        return <ConnectorSelector {...props} value={value} onValueChange={handleValueChange} />;
+        return (
+          <ConnectorSelectableComponent
+            {...props}
+            value={value}
+            onValueChange={handleValueChange}
+          />
+        );
       };
 
-      render(<ControlledWrapper {...defaultProps} value={undefined} />, { wrapper: EuiThemeProvider });
+      render(<ControlledWrapper {...defaultProps} value={undefined} />, {
+        wrapper: EuiThemeProvider,
+      });
 
       expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
       expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
@@ -259,12 +224,12 @@ describe('ConnectorSelector', () => {
   });
 
   describe('Uncontrolled', () => {
-    const renderComponent = (props: ConnectorSelectorProps) =>
-      render(<ConnectorSelector {...props} />, { wrapper: EuiThemeProvider });
+    const renderComponent = (props: ConnectorSelectableComponentProps) =>
+      render(<ConnectorSelectableComponent {...props} />, { wrapper: EuiThemeProvider });
 
     const onValueChange = jest.fn();
 
-    const baseProps: ConnectorSelectorProps = {
+    const baseProps: ConnectorSelectableComponentProps = {
       preConfiguredConnectors: [
         { label: 'Connector 1', value: '1', 'data-test-subj': 'connector1' },
         { label: 'Connector 2', value: '2', 'data-test-subj': 'connector2' },
