@@ -20,7 +20,6 @@ import type {
   Location,
   ESQLColumnData,
 } from '../commands_registry/types';
-import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
@@ -216,11 +215,7 @@ export function getFunctionSignaturesByReturnType(
         if (ignoreAsSuggestion) {
           return false;
         }
-        if (
-          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-            (loc) => locationsAvailable.includes(loc)
-          )
-        ) {
+        if (!locations.some((loc) => locationsAvailable.includes(loc))) {
           return false;
         }
         const filteredByReturnType = signatures.filter(
