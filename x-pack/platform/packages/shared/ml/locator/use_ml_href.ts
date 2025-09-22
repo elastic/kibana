@@ -27,14 +27,13 @@ export const useMlHref = (
 
   useEffect(() => {
     async function getUrl() {
-      if (!ml?.getLocator) {
+      if (!ml?.locator) {
         setUrl('');
         return;
       }
 
       try {
-        const locator = await ml.getLocator();
-        const result = await locator.getUrl(params);
+        const result = await ml.locator.getUrl(params);
         if (!isMounted()) return;
         setUrl(result);
       } catch (error) {

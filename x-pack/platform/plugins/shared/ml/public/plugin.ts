@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -47,26 +48,27 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   initEnabledFeatures,
-  type MlFeatures,
+  initExperimentalFeatures,
+  initModelDeploymentSettings,
   ML_APP_ROUTE,
   PLUGIN_ICON_SOLUTION,
   PLUGIN_ID,
+  type MlFeatures,
   type ConfigSchema,
   type ExperimentalFeatures,
-  initExperimentalFeatures,
-  initModelDeploymentSettings,
   type NLPSettings,
 } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
-import { isFullLicense } from '@kbn/ml-license/is_full_license';
-import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import type { getMlManagementLocator } from '@kbn/ml-locator/get_ml_management_locator';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { isFullLicense } from '@kbn/ml-license/is_full_license';
+import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
 import { MlLocatorDefinition } from '@kbn/ml-locator/ml_locator';
 
@@ -135,6 +137,7 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
+  private locator: undefined | LocatorPublic<MlLocatorParams>;
   private getManagementLocator: undefined | (() => ReturnType<typeof getMlManagementLocator>);
 
   private isServerless: boolean = false;
@@ -220,7 +223,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
       this.getManagementLocator = async () =>
         await new MlManagementLocatorInternal(pluginsSetup.share);
     }
@@ -312,6 +315,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       .subscribe();
 
     return {
+      locator: this.locator,
       getManagementLocator: this.getManagementLocator,
       getElasticModels: async () => await getElasticModels(core.http),
     };
@@ -321,6 +325,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     return {
       getElasticModels: async () => await getElasticModels(core.http),
       getMlApi: async () => await getMlSharedServices(core.http),
+      locator: this.locator,
       getManagementLocator: this.getManagementLocator,
       components: {
         AnomalySwimLane,
