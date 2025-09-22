@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 import { MigrationDataInputFlyout } from './data_input_flyout';
 
 interface RuleMigrationDataInputWrapperProps {

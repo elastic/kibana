@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import type { DashboardMigrationStats } from '../../types';
 import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 

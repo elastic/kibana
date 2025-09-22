@@ -64,7 +64,7 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <MigrationsReadMore />
+                  <MigrationsReadMore migrationType="rule" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

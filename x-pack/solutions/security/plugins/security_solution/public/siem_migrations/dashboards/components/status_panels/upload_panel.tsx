@@ -69,7 +69,7 @@ export const UploadDashboardsSectionPanel = React.memo<UploadDashboardsSectionPa
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <MigrationsReadMore />
+                  <MigrationsReadMore migrationType="dashboard" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

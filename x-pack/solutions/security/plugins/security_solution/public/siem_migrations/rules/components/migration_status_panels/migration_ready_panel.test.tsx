@@ -14,7 +14,7 @@ import type { RuleMigrationStats } from '../../types';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 

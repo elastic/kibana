@@ -16,7 +16,7 @@ import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_mis
 import * as useStartMigrationModule from '../../logic/use_start_migration';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { TestProviders } from '../../../../common/mock';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 const mockMigrationStats: DashboardMigrationStats = {
   id: 'mig-1',

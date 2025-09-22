@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { DashboardMigrationDataInputFlyout } from './data_input_flyout';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 interface DashboardMigrationDataInputWrapperProps {
   onFlyoutClosed: () => void;
