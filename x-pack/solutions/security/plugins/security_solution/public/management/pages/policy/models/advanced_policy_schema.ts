@@ -437,6 +437,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.ransomware.diagnostic',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ransomware.diagnostic',
+      {
+        defaultMessage:
+          'Set this to false to disable diagnostic ransomware protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.populate_file_data',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Set this to false to disable collection of header bytes on file events. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(

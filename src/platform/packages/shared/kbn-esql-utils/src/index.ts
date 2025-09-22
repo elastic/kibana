@@ -27,6 +27,7 @@ export {
   getCategorizeColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getKqlSearchQueries,
   getRemoteClustersFromESQLQuery,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';

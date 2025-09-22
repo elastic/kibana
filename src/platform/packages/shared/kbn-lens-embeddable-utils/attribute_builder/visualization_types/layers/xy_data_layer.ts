@@ -10,7 +10,6 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
-  FormulaPublicApi,
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
   XYDataLayerConfig as LensXYDataLayerConfig,
@@ -115,8 +114,7 @@ export class XYDataLayer implements ChartLayer<LensXYDataLayerConfig> {
   getLayer(
     layerId: string,
     accessorId: string,
-    chartDataView: DataView,
-    formulaAPI: FormulaPublicApi
+    chartDataView: DataView
   ): FormBasedPersistedState['layers'] {
     const columnOrder: string[] = [];
     if (this.layerConfig.options?.breakdown?.type === 'top_values') {
@@ -143,8 +141,7 @@ export class XYDataLayer implements ChartLayer<LensXYDataLayerConfig> {
           ...curr.getData(
             `${accessorId}_${index}`,
             acc,
-            this.layerConfig.dataView ?? chartDataView,
-            formulaAPI
+            this.layerConfig.dataView ?? chartDataView
           ),
         }),
         baseLayer
