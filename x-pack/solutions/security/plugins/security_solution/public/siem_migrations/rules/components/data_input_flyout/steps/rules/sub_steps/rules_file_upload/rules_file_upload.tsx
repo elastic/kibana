@@ -12,7 +12,7 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
+import { UploadFileButton } from '../../../../../../../common/components';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import {
   useParseFileInput,

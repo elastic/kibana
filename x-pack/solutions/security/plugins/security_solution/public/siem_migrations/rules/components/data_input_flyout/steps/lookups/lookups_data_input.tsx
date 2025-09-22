@@ -15,11 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  AddUploadedLookups,
-  UploadedLookups,
-} from '../../../../../common/components/migration_steps';
-import { SubSteps } from '../../../../../common/components/migration_steps';
+import type { AddUploadedLookups, UploadedLookups } from '../../../../../common/components';
+import { SubSteps } from '../../../../../common/components';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';

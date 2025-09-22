@@ -22,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import * as i18n from './translations';
-import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
+import { useMigrationDataInputContext } from '../../../common/components';
 import type { RuleMigrationStats } from '../../types';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 
