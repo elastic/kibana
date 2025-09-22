@@ -64265,7 +64265,13 @@ components:
         reason:
           $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
         signal_ids:
-          $ref: '#/components/schemas/Security_Detections_API_SignalIds'
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            format: nonempty
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         status:
           enum:
             - closed
@@ -68174,7 +68180,13 @@ components:
       type: object
       properties:
         signal_ids:
-          $ref: '#/components/schemas/Security_Detections_API_SignalIds'
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            format: nonempty
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
       required:
@@ -68264,14 +68276,6 @@ components:
       required:
         - status_code
         - message
-    Security_Detections_API_SignalIds:
-      description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
-      items:
-        format: nonempty
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
     Security_Detections_API_SortOrder:
       enum:
         - asc
