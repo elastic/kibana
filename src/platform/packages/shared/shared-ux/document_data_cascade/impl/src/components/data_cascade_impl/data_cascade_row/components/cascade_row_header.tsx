@@ -58,7 +58,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     rowToggleFn,
     rowSelectionFn,
     rowHasSelectedChildren,
-    rowIsSelected,
+    isRowSelected,
     rowCanSelect,
   } = useAdaptedTableRows<G, L>({ rowInstance });
 
@@ -129,20 +129,31 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <React.Fragment>
-              {enableRowSelection && rowCanSelect && (
-                <EuiFlexItem>
+              {enableRowSelection && rowCanSelect() && (
+                <EuiFlexItem grow={false}>
                   <EuiCheckbox
                     id={`dataCascadeSelectRowCheckbox-${rowId}`}
-                    indeterminate={rowHasSelectedChildren}
-                    checked={rowIsSelected}
+                    indeterminate={rowHasSelectedChildren()}
+                    checked={isRowSelected()}
                     onChange={rowSelectionFn}
                   />
                 </EuiFlexItem>
               )}
             </React.Fragment>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color="text"
+                iconType={rowIsExpanded ? 'arrowDown' : 'arrowRight'}
+                onClick={rowToggleFn}
+                aria-label={i18n.translate('sharedUXPackages.dataCascade.toggleRowButtonLabel', {
+                  defaultMessage: 'toggle row',
+                })}
+                data-test-subj={`toggle-row-${rowId}-button`}
+              />
+            </EuiFlexItem>
             <React.Fragment>
               {enableSecondaryExpansionAction && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="text"
                     iconType="expand"
@@ -158,17 +169,6 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 </EuiFlexItem>
               )}
             </React.Fragment>
-            <EuiFlexItem>
-              <EuiButtonIcon
-                color="text"
-                iconType={rowIsExpanded ? 'arrowDown' : 'arrowRight'}
-                onClick={rowToggleFn}
-                aria-label={i18n.translate('sharedUXPackages.dataCascade.toggleRowButtonLabel', {
-                  defaultMessage: 'toggle row',
-                })}
-                data-test-subj={`toggle-row-${rowId}-button`}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
