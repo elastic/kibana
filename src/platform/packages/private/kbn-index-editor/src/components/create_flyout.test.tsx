@@ -72,7 +72,7 @@ describe('createFlyout', () => {
       doesIndexExist: true,
       indexName: 'test-index',
       canEditIndex: true,
-      invocationSource: 'test-source',
+      triggerSource: 'test-source',
     });
 
     indexUpdateService.totalHits$.next(10);
@@ -90,7 +90,7 @@ describe('createFlyout', () => {
     createFlyout(deps, {
       doesIndexExist: false,
       canEditIndex: true,
-      invocationSource: 'test-source',
+      triggerSource: 'test-source',
     });
 
     expect(trackFlyoutOpenedSpy).toHaveBeenCalledWith({

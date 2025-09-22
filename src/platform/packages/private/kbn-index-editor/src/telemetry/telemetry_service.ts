@@ -17,17 +17,17 @@ type FlyoutMode = 'create' | 'view' | 'edit';
 export class IndexEditorTelemetryService {
   private _analytics: AnalyticsServiceStart;
   private _flyoutMode: FlyoutMode;
-  private _invocationSource: string;
+  private _triggerSource: string;
 
   constructor(
     analytics: AnalyticsServiceStart,
     canEditIndex: boolean,
     doesIndexExists: boolean,
-    invocationSource: string
+    triggerSource: string
   ) {
     this._analytics = analytics;
     this._flyoutMode = this.getFlyoutMode(canEditIndex, doesIndexExists);
-    this._invocationSource = invocationSource;
+    this._triggerSource = triggerSource;
   }
 
   private reportEvent(eventType: string, eventData: Record<string, unknown>) {
@@ -42,7 +42,7 @@ export class IndexEditorTelemetryService {
   public trackFlyoutOpened(eventData: { docCount: number; fieldCount: number }) {
     this.reportEvent(INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE, {
       flyout_mode: this._flyoutMode,
-      invocation_source: this._invocationSource,
+      trigger_source: this._triggerSource,
       doc_count_bucket: getBucket(eventData.docCount, [
         { label: '1-100', to: 100 },
         { label: '101-10k', to: 10000 },

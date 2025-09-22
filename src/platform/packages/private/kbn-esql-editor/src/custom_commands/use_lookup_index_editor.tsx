@@ -79,7 +79,7 @@ export function getMonacoCommandString(
       indexName,
       doesIndexExist: isExistingIndex,
       canEditIndex,
-      invocationSource: 'esql_hover',
+      triggerSource: 'esql_hover',
     })
   )})`;
 }
@@ -259,13 +259,13 @@ export const useLookupIndexCommand = (
       indexName: string,
       doesIndexExist?: boolean,
       canEditIndex = true,
-      invocationSource = 'esql_autocomplete'
+      triggerSource = 'esql_autocomplete'
     ) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
         canEditIndex,
-        invocationSource,
+        triggerSource,
         onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
           await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },
@@ -288,11 +288,11 @@ export const useLookupIndexCommand = (
           indexName: string;
           doesIndexExist?: boolean;
           canEditIndex?: boolean;
-          invocationSource?: string;
+          triggerSource?: string;
         }
       ) => {
-        const { indexName, doesIndexExist, canEditIndex, invocationSource } = args;
-        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, invocationSource);
+        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
+        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
       }
     );
     return () => {

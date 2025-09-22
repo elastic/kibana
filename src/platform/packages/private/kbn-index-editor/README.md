@@ -76,7 +76,7 @@ const context: EditLookupIndexContentContext = {
   indexName: 'my-lookup-index',
   doesIndexExist: true,
   canEditIndex: true,
-  invocationSource: 'your_source', // Used only for telemetry
+  triggerSource: 'your_source', // Used only for telemetry
   onClose: (result) => {
     console.log('Index editor closed:', result);
   }

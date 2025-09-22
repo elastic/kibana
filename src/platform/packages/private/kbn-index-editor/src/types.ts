@@ -24,7 +24,7 @@ export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
   canEditIndex: boolean;
-  invocationSource: string;
+  triggerSource: string;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */

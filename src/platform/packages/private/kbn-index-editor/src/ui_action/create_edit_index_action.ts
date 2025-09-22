@@ -37,7 +37,7 @@ export function createEditLookupIndexContentAction(
         coreStart.analytics,
         context.canEditIndex,
         context.doesIndexExist,
-        context.invocationSource
+        context.triggerSource
       );
 
       const indexUpdateService = new IndexUpdateService(

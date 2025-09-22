@@ -31,11 +31,11 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
             'The mode in which the index editor flyout was opened. Possible values are: create|view|edit',
         },
       },
-      invocation_source: {
+      trigger_source: {
         type: 'keyword',
         _meta: {
           description:
-            'The source from which the index editor flyout was invoked. Possible values are: esql_hover|esql_autocomplete',
+            'The way how the index editor flyout has been triggered. Possible values are: esql_hover|esql_autocomplete',
         },
       },
       doc_count_bucket: {
