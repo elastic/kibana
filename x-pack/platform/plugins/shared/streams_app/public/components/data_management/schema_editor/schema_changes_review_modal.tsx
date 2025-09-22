@@ -20,6 +20,8 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiToken,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
@@ -29,6 +31,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
 import { convertToFieldDefinitionConfig } from './utils';
@@ -90,25 +93,30 @@ export function SchemaChangesReviewModal({
           name: field.name,
         }));
 
-      const simulationResults = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/schema/fields_simulation',
-        {
-          signal,
-          params: {
-            path: { name: stream },
-            body: {
-              field_definitions: mappedFields,
+      try {
+        const simulationResults = await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            signal,
+            params: {
+              path: { name: stream },
+              body: {
+                field_definitions: mappedFields,
+              },
             },
-          },
+          }
+        );
+
+        if (simulationResults.status === 'failure') {
+          setHasSimulationErrors(true);
+          setSimulationError(simulationResults.simulationError);
         }
-      );
-
-      if (simulationResults.status === 'failure') {
+      } catch (err) {
         setHasSimulationErrors(true);
-        setSimulationError(simulationResults.simulationError);
+        setSimulationError(getFormattedError(err).message);
+      } finally {
+        setIsSimulating(false);
       }
-
-      setIsSimulating(false);
     }
 
     simulate();
@@ -216,11 +224,16 @@ export function SchemaChangesReviewModal({
           fill
           color="primary"
           onClick={handleSubmit}
-          isLoading={loading}
+          isLoading={loading || isSimulating}
           disabled={isSimulating || hasSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
-          {confirmChangesTitle}
+          {isSimulating
+            ? i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.verifyingChangesText',
+                { defaultMessage: 'Verifying changes' }
+              )
+            : confirmChangesTitle}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

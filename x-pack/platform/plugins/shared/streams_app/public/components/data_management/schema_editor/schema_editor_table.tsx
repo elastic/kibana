@@ -197,18 +197,33 @@ const createFieldSelectionCellRenderer = (
   id: 'field-selection',
   width: 40,
   headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSelectionTitle', {
-          defaultMessage: 'Field selection',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
+    <EuiCheckbox
+      id="selectAllFields"
+      onChange={(e) => {
+        fields.forEach((field) => {
+          if (isSelectableField(streamName, field)) {
+            onChange(field.name, e.target.checked);
+          }
+        });
+      }}
+      checked={
+        fields.filter((field) => isSelectableField(streamName, field)).length > 0 &&
+        fields
+          .filter((field) => isSelectableField(streamName, field))
+          .every((field) => selectedFields.includes(field.name))
+      }
+      indeterminate={
+        selectedFields.length > 0 &&
+        !fields
+          .filter((field) => isSelectableField(streamName, field))
+          .every((field) => selectedFields.includes(field.name))
+      }
+    />
   ),
   rowCellRender: ({ rowIndex }) => {
     const field = fields[rowIndex];
 
-    if (!field || field.parent !== streamName || field.alias_for) return null;
+    if (!isSelectableField(streamName, field)) return null;
 
     return (
       <EuiCheckbox
@@ -237,4 +252,8 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   });
 
   return filteredByGroupsFields;
+};
+
+const isSelectableField = (streamName: string, field: SchemaField) => {
+  return field.parent === streamName && !field.alias_for && field.type !== 'system';
 };
