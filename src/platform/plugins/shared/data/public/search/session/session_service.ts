@@ -632,7 +632,7 @@ export class SessionService {
       } catch (e) {
         const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
           BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
+          true
         );
 
         this.toastService?.addError(e, {
@@ -734,7 +734,7 @@ export class SessionService {
       } catch (e) {
         const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
           BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
+          true
         );
 
         this.toastService?.addError(e, {

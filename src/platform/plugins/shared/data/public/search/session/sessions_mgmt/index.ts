@@ -86,17 +86,4 @@ export async function updateSearchSessionMgmtSectionTitle(
 ) {
   if (!app) return;
 
-  const [coreStart] = await getStartServices();
-  const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
-    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    false
-  );
-
-  if (hasBackgroundSearchEnabled) {
-    // @ts-expect-error
-    // This apps are supposed to be readonly but I can't find a different workaround to make it work.
-    // If I go in manually everything works correctly but if I await the start services before registering the app the
-    // functional tests can't find it. This is temporary until we remove the feature flag.
-    app.title = APP.getI18nName(true);
-  }
 }

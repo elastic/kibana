@@ -44,7 +44,7 @@ export const createConnectedSearchSessionIndicator = ({
 }: SearchSessionIndicatorDeps): React.FC => {
   const hasBackgroundSearchEnabled = featureFlags.getBooleanValue(
     BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    false
+    true
   );
 
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');

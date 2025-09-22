@@ -55,7 +55,7 @@ export class SearchSessionsMgmtAPI {
       tap(() => {
         const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
           BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
+          true
         );
 
         this.deps.notifications.toasts.addDanger(
@@ -111,7 +111,7 @@ export class SearchSessionsMgmtAPI {
   public async sendDelete(id: string): Promise<void> {
     const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
       BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
+      true
     );
 
     this.deps.usageCollector?.trackSessionDeleted();
@@ -144,7 +144,7 @@ export class SearchSessionsMgmtAPI {
   public async sendExtend(id: string, expires: string): Promise<void> {
     const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
       BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
+      true
     );
 
     this.deps.usageCollector?.trackSessionExtended();
@@ -177,7 +177,7 @@ export class SearchSessionsMgmtAPI {
   public async sendRename(id: string, newName: string): Promise<void> {
     const hasBackgroundSearchEnabled = this.deps.featureFlags.getBooleanValue(
       BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
+      true
     );
 
     try {

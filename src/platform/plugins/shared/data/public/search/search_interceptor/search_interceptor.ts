@@ -653,7 +653,7 @@ export class SearchInterceptor {
   private showRestoreWarningToast = async (_sessionId?: string) => {
     const isBackgroundSearchEnabled = await this.featureFlags.getBooleanValue(
       BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
+      true
     );
 
     this.deps.toasts.addWarning(

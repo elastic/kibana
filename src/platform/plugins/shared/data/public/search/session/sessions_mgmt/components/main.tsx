@@ -35,7 +35,7 @@ interface Props {
 export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
   const hasBackgroundSearchEnabled = tableProps.core.featureFlags.getBooleanValue(
     BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    false
+    true
   );
 
   if (hasBackgroundSearchEnabled) {

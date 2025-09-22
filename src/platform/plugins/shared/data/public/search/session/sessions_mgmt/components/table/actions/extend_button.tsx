@@ -105,7 +105,7 @@ export const createExtendActionDescriptor = (
         <ExtendConfirm
           hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
             BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-            false
+            true
           )}
           onActionDismiss={() => ref?.close()}
           searchSession={uiSession}

@@ -57,7 +57,7 @@ function wrapSearchBarInContext(
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
 
-  const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? false;
+  const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? true;
   const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
   const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
