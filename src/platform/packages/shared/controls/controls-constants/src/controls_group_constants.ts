@@ -19,4 +19,4 @@ export const CONTROL_WIDTH_MEDIUM = 'medium';
 export const CONTROL_WIDTH_LARGE = 'large';
 
 export const DEFAULT_CONTROL_WIDTH = CONTROL_WIDTH_MEDIUM;
-export const DEFAULT_CONTROL_GROW = true;
+export const DEFAULT_CONTROL_GROW = false;

@@ -33,7 +33,7 @@ import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import { ControlsRendererParentApi } from './types';
+import type { ControlsRendererParentApi } from './types';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -83,7 +83,8 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
         parentApi.layout$.next({
           ...parentApi.layout$.getValue(),
           controls: result.reduce((prev, control, index) => {
-            return { ...prev, [control.id!]: { ...control, order: index } };
+            const { id, ...rest } = control;
+            return { ...prev, [id!]: { ...rest, order: index } };
           }, {}),
         });
       }

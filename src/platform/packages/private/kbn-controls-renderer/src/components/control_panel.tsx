@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -48,9 +48,14 @@ export const ControlPanel = ({
   parentApi: ControlsRendererParentApi;
   uuid: string;
   type: string;
-  setControlPanelRef?: (id: string, ref: HTMLElement | null) => void;
+  setControlPanelRef: (id: string, ref: HTMLElement | null) => void;
 }) => {
+  const styles = useMemoCss(controlPanelStyles);
+
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
+  const initialState = useMemo(() => {
+    return parentApi.layout$.getValue().controls[uuid];
+  }, [parentApi, uuid]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,
@@ -60,18 +65,14 @@ export const ControlPanel = ({
     parentApi.viewMode$,
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
-  const [panelTitle, setPanelTitle] = useState<string | undefined>();
-  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
-
-  const initialState = useMemo(() => {
-    return parentApi.layout$.getValue().controls[uuid];
-  }, [parentApi, uuid]);
   const [grow, setGrow] = useState<ControlPanelState['grow']>(
     initialState.grow ?? DEFAULT_CONTROL_GROW
   );
   const [width, setWidth] = useState<ControlPanelState['width']>(
     initialState.width ?? DEFAULT_CONTROL_WIDTH
   );
+  const [panelTitle, setPanelTitle] = useState<string | undefined>();
+  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
@@ -113,25 +114,26 @@ export const ControlPanel = ({
     };
   }, [api]);
 
+  const setRefs = useCallback(
+    (ref: HTMLElement | null) => {
+      setNodeRef(ref);
+      setControlPanelRef(uuid, ref);
+    },
+    [uuid, setNodeRef, setControlPanelRef]
+  );
+
   const isEditable = viewMode === 'edit';
-
-  const styles = useMemoCss(controlPanelStyles);
-
   return (
     <EuiFlexItem
       component="li"
-      ref={(ref: HTMLElement | null) => {
-        setNodeRef(ref);
-        setControlPanelRef?.(uuid, ref);
-      }}
+      ref={setRefs}
       style={{
         transition,
         transform: CSS.Translate.toString(transform),
       }}
-      grow={grow}
+      grow={Boolean(grow)}
       data-control-id={uuid}
       data-test-subj="control-frame"
-      data-render-complete="true"
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={classNames({
         'controlFrameWrapper--medium': width === 'medium',

@@ -85,14 +85,19 @@ describe('render', () => {
   });
 
   describe('control width', () => {
-    test('defaults to medium and grow enabled', async () => {
+    test('defaults to medium and grow disabled', async () => {
       const controlPanel = render(
-        <ControlPanel uuid="control1" type="optionsListControl" parentApi={parentApi} />
+        <ControlPanel
+          uuid="control1"
+          type="optionsListControl"
+          parentApi={parentApi}
+          setControlPanelRef={jest.fn()}
+        />
       );
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
-        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
       });
     });
 
@@ -102,17 +107,22 @@ describe('render', () => {
           control1: {
             type: 'optionsListControl',
             width: 'small',
-            grow: false,
+            grow: true,
           },
         },
       } as unknown as DashboardLayout);
       const controlPanel = render(
-        <ControlPanel uuid="control1" type="optionsListControl" parentApi={parentApi} />
+        <ControlPanel
+          uuid="control1"
+          type="optionsListControl"
+          parentApi={parentApi}
+          setControlPanelRef={jest.fn()}
+        />
       );
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
-        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
       });
     });
   });
