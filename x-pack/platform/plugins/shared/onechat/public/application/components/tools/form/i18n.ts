@@ -174,6 +174,12 @@ export const i18nMessages = {
             defaultMessage: 'Index search',
           }
         ),
+        workflowOption: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.type.workflowOption',
+          {
+            defaultMessage: 'Workflow',
+          }
+        ),
       },
       indexSearch: {
         patternLabel: i18n.translate(
@@ -194,6 +200,14 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.esql.parametersLabel',
           {
             defaultMessage: 'ES|QL Parameters',
+          }
+        ),
+      },
+      workflow: {
+        workflowLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.workflowLabel',
+          {
+            defaultMessage: 'Workflow',
           }
         ),
       },
