@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { AxiosInstance, AxiosResponse, AxiosStatic } from 'axios';
 import { AxiosError } from 'axios';
 import axios from 'axios';
@@ -25,7 +23,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
-import { httpResponseUserErrorCodes } from './categorize_http_errors';
+import { httpResponseUserErrorCodes } from './create_and_throw_user_error';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { ClientRequest } from 'http';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
@@ -254,7 +252,8 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
-    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1] as any;
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(false);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
   });
@@ -277,7 +276,8 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
-    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1] as any;
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(true);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
   });
@@ -300,7 +300,8 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
-    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1] as any;
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(true);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
   });
@@ -323,7 +324,8 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
-    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1] as any;
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(false);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
   });

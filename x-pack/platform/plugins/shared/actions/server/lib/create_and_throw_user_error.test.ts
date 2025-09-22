@@ -6,10 +6,10 @@
  */
 
 import type { AxiosError } from 'axios';
-import { handleActionHttpUserErrors, httpResponseUserErrorCodes } from './categorize_http_errors';
+import { createAndThrowUserError, httpResponseUserErrorCodes } from './create_and_throw_user_error';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
-describe('handleActionHttpUserErrors', () => {
+describe('createAndThrowUserError', () => {
   it.each(httpResponseUserErrorCodes)(
     'should throw a user error for %s error responses',
     (statusCode) => {
@@ -19,7 +19,7 @@ describe('handleActionHttpUserErrors', () => {
         },
       } as AxiosError;
       try {
-        handleActionHttpUserErrors(error);
+        createAndThrowUserError(error);
       } catch (e) {
         expect(getErrorSource(e)).toEqual(TaskErrorSource.USER);
       }
@@ -32,19 +32,6 @@ describe('handleActionHttpUserErrors', () => {
         status: 500,
       },
     } as AxiosError;
-    expect(() => handleActionHttpUserErrors(error)).not.toThrow();
-  });
-
-  it('should mark overridden status code as user error', () => {
-    const error = {
-      response: {
-        status: 499,
-      },
-    } as AxiosError;
-    try {
-      handleActionHttpUserErrors(error);
-    } catch (e) {
-      expect(getErrorSource(e)).toEqual(TaskErrorSource.USER);
-    }
+    expect(() => createAndThrowUserError(error)).not.toThrow();
   });
 });

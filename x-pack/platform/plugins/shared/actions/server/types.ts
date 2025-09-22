@@ -288,5 +288,3 @@ export type AwsSesConfig = {
   port: number;
   secure: boolean;
 } | null;
-
-export type ActionHttpErrorType = 'user' | 'framework';

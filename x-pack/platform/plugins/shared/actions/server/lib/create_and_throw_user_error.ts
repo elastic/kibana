@@ -16,10 +16,10 @@ export const httpResponseUserErrorCodes = [
  * Categorizes errored actions HTTP requests against external systems, creating user errors based
  * on the status code of the response and any overrides provided.
  */
-export const handleActionHttpUserErrors = <T = unknown, D = unknown>(error: AxiosError<T, D>) => {
+export const createAndThrowUserError = <T = unknown, D = unknown>(error: AxiosError<T, D>) => {
   const statusCode = error.response?.status;
-  if (error.response && statusCode != null) {
-    if (httpResponseUserErrorCodes.includes(statusCode)) {
+  if (statusCode != null) {
+    if (httpResponseUserErrorCodes.includes(Number(statusCode))) {
       throw createTaskRunError(error, TaskErrorSource.USER);
     }
   }
