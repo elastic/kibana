@@ -20,7 +20,11 @@ import type {
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
+} from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -138,6 +142,12 @@ export const getFullInputStreams = (
                 data_stream: {
                   ...stream.data_stream,
                   ...compiledDataStream,
+                  ...(stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
+                    ? { type: stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value }
+                    : {}),
+                  ...(stream.vars?.[DATASET_VAR_NAME]?.value
+                    ? { dataset: stream.vars?.[DATASET_VAR_NAME]?.value }
+                    : {}),
                 },
                 ...compiledStream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
