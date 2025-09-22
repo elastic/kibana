@@ -74,18 +74,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
-    label: Trigger promotion
-    timeout_in_minutes: 10
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    depends_on:
-      - ftr-configs
-      - jest-integration
-
   - wait: ~
     continue_on_failure: true
 
