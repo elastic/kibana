@@ -19,6 +19,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 export const mockUnifiedDocViewer: jest.Mocked<UnifiedDocViewerStart> = {
   registry: new DocViewsRegistry(),
@@ -36,4 +37,5 @@ export const mockUnifiedDocViewerServices: jest.Mocked<UnifiedDocViewerServices>
   share: sharePluginMock.createStartContract(),
   core: coreMock.createStart(),
   discoverShared: discoverSharedPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
 };
