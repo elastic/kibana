@@ -46,6 +46,8 @@ export interface SchemaEditorProps {
   isLoading?: boolean;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
+  onFieldSelection: (names: string[], selected: boolean) => void;
+  fieldSelection: string[];
   stream: Streams.ingest.all.Definition;
   withControls?: boolean;
   withFieldSimulation?: boolean;

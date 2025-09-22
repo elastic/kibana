@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPortal, EuiProgress } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiPortal,
+  EuiProgress,
+  EuiText,
+  euiPaddingSize,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { getRegularEcsField } from '@kbn/streams-schema';
@@ -24,6 +33,8 @@ export function SchemaEditor({
   isLoading,
   onFieldUpdate,
   onRefreshData,
+  onFieldSelection,
+  fieldSelection,
   stream,
   withControls = false,
   withFieldSimulation = false,
@@ -32,46 +43,49 @@ export function SchemaEditor({
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
-  const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
   const {
     dependencies: {
       start: { fieldsMetadata },
     },
   } = useKibana();
 
-  const getRecommendations = React.useCallback(async () => {
-    setIsLoadingRecommendations(true);
-    const client = await fieldsMetadata.getClient();
-    const ecsToOriginalField = selectedFields.reduce((acc, name) => {
-      acc[getRegularEcsField(name)] = name;
-      return acc;
-    }, {} as Record<string, string>);
+  const getRecommendations = React.useCallback(
+    async (selection: string[]) => {
+      setIsLoadingRecommendations(true);
+      const client = await fieldsMetadata.getClient();
+      const ecsToOriginalField = selection.reduce((acc, name) => {
+        acc[getRegularEcsField(name)] = name;
+        return acc;
+      }, {} as Record<string, string>);
 
-    try {
-      const response = await client.find({
-        attributes: ['type'],
-        fieldNames: Object.keys(ecsToOriginalField),
-      });
+      try {
+        const response = await client.find({
+          attributes: ['type'],
+          fieldNames: Object.keys(ecsToOriginalField),
+        });
 
-      Object.entries(response.fields).forEach(([key, value]) => {
-        const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
-        const type = value.type ?? originalField.type;
-        onFieldUpdate({
-          ...originalField,
-          type,
-          status: type ? 'mapped' : 'unmapped',
-        } as SchemaField);
-      });
-      setSelectedFields([]);
-    } catch (err) {
-    } finally {
-      setIsLoadingRecommendations(false);
-    }
-  }, [selectedFields]);
+        Object.entries(response.fields).forEach(([key, value]) => {
+          const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
+          const type = value.type ?? originalField.type;
+          onFieldUpdate({
+            ...originalField,
+            type,
+            status: type ? 'mapped' : 'unmapped',
+          } as SchemaField);
+        });
+      } catch (err) {
+      } finally {
+        setIsLoadingRecommendations(false);
+      }
+    },
+    [fieldSelection]
+  );
 
   return (
     <SchemaEditorContextProvider
       fields={fields}
+      onFieldSelection={onFieldSelection}
+      fieldSelection={fieldSelection}
       isLoading={isLoading}
       onFieldUpdate={onFieldUpdate}
       stream={stream}
@@ -98,47 +112,56 @@ export function SchemaEditor({
         {withControls && (
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>{selectedFields.length} selected</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              type="single"
-              legend=""
-              options={[
-                {
-                  id: 'guess',
-                  label: i18n.translate('dataManagement.schemaEditor.guessType', {
-                    defaultMessage: 'Guess type',
-                  }),
-                  isLoading: isLoadingRecommendations,
-                },
-                {
-                  id: 'unmap',
-                  label: i18n.translate('dataManagement.schemaEditor.removeType', {
-                    defaultMessage: 'Remove type (unmap)',
-                  }),
-                },
-              ]}
-              onChange={(id) => {
-                if (id === 'guess') {
-                  getRecommendations();
-                } else if (id === 'unmap') {
-                  selectedFields.forEach((fieldName) => {
-                    const field = fields.find(({ name }) => name === fieldName)!;
-                    onFieldUpdate({
-                      name: field.name,
-                      parent: field.parent,
-                      status: 'unmapped',
-                    } as SchemaField);
-                  });
-
-                  setSelectedFields([]);
-                }
-              }}
-              idSelected=""
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {fieldSelection.length > 0 && (
+          <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('dataManagement.schemaEditor.selectedFields', {
+                    defaultMessage: '{count} selected',
+                    values: { count: fieldSelection.length },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  type="single"
+                  legend=""
+                  options={[
+                    {
+                      id: 'guess',
+                      label: i18n.translate('dataManagement.schemaEditor.guessType', {
+                        defaultMessage: 'Guess type',
+                      }),
+                      isLoading: isLoadingRecommendations,
+                    },
+                    {
+                      id: 'unmap',
+                      label: i18n.translate('dataManagement.schemaEditor.removeType', {
+                        defaultMessage: 'Remove type (unmap)',
+                      }),
+                    },
+                  ]}
+                  onChange={(id) => {
+                    if (id === 'guess') {
+                      getRecommendations(fieldSelection);
+                    } else if (id === 'unmap') {
+                      fieldSelection.forEach((fieldName) => {
+                        const field = fields.find(({ name }) => name === fieldName)!;
+                        onFieldUpdate({
+                          name: field.name,
+                          parent: field.parent,
+                          status: 'unmapped',
+                        } as SchemaField);
+                      });
+                    }
+                  }}
+                  idSelected=""
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        )}
         <FieldsTable
           isLoading={isLoading ?? false}
           controls={controls}
@@ -147,16 +170,8 @@ export function SchemaEditor({
           fields={fields}
           stream={stream}
           withTableActions={withTableActions}
-          selectedFields={selectedFields}
-          onFieldSelection={(name, checked) => {
-            setSelectedFields((selection) => {
-              if (checked) {
-                return [...selection, name];
-              } else {
-                return selection.filter((field) => field !== name);
-              }
-            });
-          }}
+          selectedFields={fieldSelection}
+          onFieldSelection={onFieldSelection}
         />
       </EuiFlexGroup>
     </SchemaEditorContextProvider>

@@ -10,6 +10,7 @@ import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { uniq } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
@@ -30,6 +31,7 @@ const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => co
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
   const { loading } = useStreamDetail();
+  const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
 
   const {
     fields,
@@ -92,6 +94,16 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           stream={definition.stream}
           onFieldUpdate={updateField}
           onRefreshData={refreshFields}
+          onFieldSelection={(names, checked) => {
+            setSelectedFields((selection) => {
+              if (checked) {
+                return uniq([...selection, ...names]);
+              } else {
+                return selection.filter((name) => !names.includes(name));
+              }
+            });
+          }}
+          fieldSelection={selectedFields}
           withControls
           withFieldSimulation
           withTableActions={

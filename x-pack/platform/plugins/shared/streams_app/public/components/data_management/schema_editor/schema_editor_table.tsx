@@ -50,7 +50,7 @@ export function FieldsTable({
   withTableActions: boolean;
   withToolbar: boolean;
   selectedFields: string[];
-  onFieldSelection: (name: string, checked: boolean) => void;
+  onFieldSelection: (names: string[], checked: boolean) => void;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -191,7 +191,7 @@ const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridContr
 const createFieldSelectionCellRenderer = (
   fields: SchemaField[],
   selectedFields: string[],
-  onChange: (name: string, checked: boolean) => void,
+  onChange: (names: string[], checked: boolean) => void,
   streamName: string
 ): EuiDataGridControlColumn => ({
   id: 'field-selection',
@@ -200,11 +200,10 @@ const createFieldSelectionCellRenderer = (
     <EuiCheckbox
       id="selectAllFields"
       onChange={(e) => {
-        fields.forEach((field) => {
-          if (isSelectableField(streamName, field)) {
-            onChange(field.name, e.target.checked);
-          }
-        });
+        onChange(
+          fields.filter((field) => isSelectableField(streamName, field)).map((field) => field.name),
+          e.target.checked
+        );
       }}
       checked={
         fields.filter((field) => isSelectableField(streamName, field)).length > 0 &&
@@ -228,7 +227,7 @@ const createFieldSelectionCellRenderer = (
     return (
       <EuiCheckbox
         id={field.name}
-        onChange={(e) => onChange(field.name, e.target.checked)}
+        onChange={(e) => onChange([field.name], e.target.checked)}
         checked={selectedFields.includes(field.name)}
       />
     );
