@@ -206,10 +206,13 @@ export function ContentFrameworkTable({
   return (
     <div
       ref={setContainerRef}
-      // EUI Override: This is necessary to prevent a blank space at the bottom of the grid due to an internal height calculation
+      // EUI Override: .euiDataGrid__virtualized is necessary to prevent a blank space at the bottom of the grid due to an internal height calculation
       css={css`
         .euiDataGrid__virtualized {
           height: auto !important;
+        }
+        .euiDataGridRow:last-of-type .euiDataGridRowCell {
+          border-bottom: none;
         }
       `}
       data-test-subj={dataTestSubj}
