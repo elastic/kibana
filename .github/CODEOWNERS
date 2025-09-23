@@ -491,6 +491,7 @@ src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-ux-infra_services-team @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-esql-multiterm-transformer @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
@@ -508,6 +509,7 @@ src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
@@ -3019,6 +3021,9 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
