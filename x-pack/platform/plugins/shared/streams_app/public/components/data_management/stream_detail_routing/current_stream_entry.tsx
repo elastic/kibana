@@ -6,11 +6,12 @@
  */
 
 import type { EuiBreadcrumb } from '@elastic/eui';
-import { EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
 import React from 'react';
+import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 export function CurrentStreamEntry({
@@ -18,6 +19,7 @@ export function CurrentStreamEntry({
 }: {
   definition: Streams.WiredStream.GetResponse;
 }) {
+  const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.stream.name).map(
     (parentId) => {
@@ -40,7 +42,13 @@ export function CurrentStreamEntry({
   return (
     <>
       {!isRoot(definition.stream.name) && (
-        <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />
+        <EuiBreadcrumbs
+          breadcrumbs={breadcrumbs}
+          truncate={false}
+          className={css`
+            padding-bottom: ${euiTheme.size.s};
+          `}
+        />
       )}
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
