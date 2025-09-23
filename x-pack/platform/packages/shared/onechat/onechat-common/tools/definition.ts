@@ -6,6 +6,8 @@
  */
 
 import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
+
 
 /**
  * Possible types of tools
@@ -24,6 +26,7 @@ export enum ToolType {
    */
   index_search = 'index_search',
 }
+
 
 /**
  * Serializable representation of a tool, without its handler or schema.

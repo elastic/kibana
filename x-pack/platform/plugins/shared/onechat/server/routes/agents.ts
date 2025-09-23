@@ -18,14 +18,11 @@ import type {
   ListAgentResponse,
 } from '../../common/http_api/agents';
 import { getTechnicalPreviewWarning } from './utils';
+import { AGENT_DEFINITION_SCHEMA } from '@kbn/onechat-common/agents/definition';
+import { TOOL_SELECTION_SCHEMA } from '@kbn/onechat-common/tools';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
-const TOOL_SELECTION_SCHEMA = schema.arrayOf(
-  schema.object({
-    tool_ids: schema.arrayOf(schema.string()),
-  })
-);
 
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -50,7 +47,13 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          response: { 
+            200: {
+              body: () => schema.object({ results: schema.arrayOf(AGENT_DEFINITION_SCHEMA) })
+            }
+          }
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents: agentsService } = getInternalServices();
@@ -82,6 +85,11 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: { params: schema.object({ id: schema.string() }) },
+          response: { 
+            200: {
+              body: () => AGENT_DEFINITION_SCHEMA
+            }
+          }
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -128,6 +136,11 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               }),
             }),
           },
+          response: {
+            200: {
+              body: () => AGENT_DEFINITION_SCHEMA
+            }
+          }
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -175,6 +188,11 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               ),
             }),
           },
+          response: {
+            200: {
+              body: () => AGENT_DEFINITION_SCHEMA
+            }
+          },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -207,6 +225,11 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: { params: schema.object({ id: schema.string() }) },
+          response: {
+            200: {
+              body: () => schema.object({ success: schema.boolean() })
+            }
+          }
         },
       },
       wrapHandler(async (ctx, request, response) => {

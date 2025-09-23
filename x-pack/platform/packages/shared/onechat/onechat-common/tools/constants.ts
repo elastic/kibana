@@ -7,6 +7,7 @@
 
 import { ToolType } from './definition';
 import { internalNamespaces } from './namespaces';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const platformCoreTool = (toolName: string) => {
   return `${internalNamespaces.platformCore}.${toolName}`;
@@ -42,3 +43,27 @@ export const defaultAgentToolIds = [
  * Agent will perform poorly if it has too many tools.
  */
 export const activeToolsCountWarningThreshold = 24;
+
+
+export const TOOL_DEFINITION_SCHEMA = schema.object({
+  id: schema.string(),
+  // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
+  type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
+  description: schema.string({ defaultValue: '' }),
+  readonly: schema.boolean(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  // actual config validation is done in the tool service
+  configuration: schema.recordOf(schema.string(), schema.any()),
+});
+
+export const TOOL_DEFINITION_WITH_SCHEMA_SCHEMA = schema.object({
+  id: schema.string(),
+  // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
+  type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
+  description: schema.string({ defaultValue: '' }),
+  readonly: schema.boolean(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  // actual config validation is done in the tool service
+  configuration: schema.recordOf(schema.string(), schema.any()),
+  schema: schema.object({}, { unknowns: 'allow' })
+});
