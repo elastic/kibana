@@ -36,6 +36,7 @@ import type { UrlValidator } from '../lib/url_validator';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -65,6 +66,7 @@ export class NodesFactory {
     private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
+    private workflowExecutionState: WorkflowExecutionState,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
@@ -153,6 +155,7 @@ export class NodesFactory {
         return new EnterTimeoutZoneNodeImpl(
           node as EnterTimeoutZoneNode,
           this.workflowRuntime,
+          this.workflowExecutionState,
           stepLogger
         );
       case 'exit-timeout-zone':

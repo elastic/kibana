@@ -417,6 +417,7 @@ async function createContainer(
     contextManager,
     connectorExecutor,
     workflowRuntime,
+    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
