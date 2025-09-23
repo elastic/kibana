@@ -16,6 +16,7 @@ import {
   transformEsqlMultiTermBreakdown,
   getMultiTermsFormatterParams,
 } from '@kbn/esql-multiterm-transformer';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
 import { FormatSelector } from '../../dimension_panel/format_selector';

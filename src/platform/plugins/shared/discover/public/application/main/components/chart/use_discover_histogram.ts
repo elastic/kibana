@@ -44,6 +44,7 @@ import {
   getMultiTermsFormatterParams,
 } from '@kbn/esql-multiterm-transformer';
 
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
