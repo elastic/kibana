@@ -430,6 +430,14 @@ export function buildComponentTemplates(params: {
   const isPkgConfiguringDynamicSettings =
     Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.dynamic !== undefined;
 
+  // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
+  // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
+  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringDynamicSettings;
+
+  // Override `subobjects: false` to avoid conflicts with traces-otel@mappings
+  const shouldOverrideSettingsForOtelInputsTraces =
+    shouldOverrideSettingsForOtelInputs && type === 'traces' && !indexTemplateMappings.runtime;
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -463,16 +471,8 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
-        // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
-        // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
-        ...(isOtelInputType && !isPkgConfiguringDynamicSettings ? { dynamic: true } : {}),
-        // Override `subobjects: false` to avoid clonflicts with traces-otel@mappings
-        ...(isOtelInputType &&
-        !isPkgConfiguringDynamicSettings &&
-        type === 'traces' &&
-        !indexTemplateMappings.runtime
-          ? { subobjects: undefined }
-          : {}),
+        ...(shouldOverrideSettingsForOtelInputs ? { dynamic: true } : {}),
+        ...(shouldOverrideSettingsForOtelInputsTraces ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
