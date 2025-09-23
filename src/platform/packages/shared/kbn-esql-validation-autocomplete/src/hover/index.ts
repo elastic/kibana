@@ -33,17 +33,26 @@ interface HoverContent {
   contents: Array<{ value: string }>;
 }
 
-const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
-  defaultMessage: 'Acceptable types',
-});
+const ACCEPTABLE_TYPES_HOVER = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.hover.acceptableTypes',
+  {
+    defaultMessage: 'Acceptable types',
+  }
+);
 
 const TIME_SYSTEM_DESCRIPTIONS = {
-  '?_tstart': i18n.translate('monaco.esql.autocomplete.timeSystemParamStart', {
-    defaultMessage: 'The start time from the date picker',
-  }),
-  '?_tend': i18n.translate('monaco.esql.autocomplete.timeSystemParamEnd', {
-    defaultMessage: 'The end time from the date picker',
-  }),
+  '?_tstart': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?_tend': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
 };
 
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
@@ -127,19 +136,25 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
       hoverContent.contents.push(
         ...[
           {
-            value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
+            value: `${i18n.translate('kbn-esql-validation-autocomplete.esql.hover.policyIndexes', {
               defaultMessage: '**Indexes**',
             })}: ${policyMetadata.sourceIndices.join(', ')}`,
           },
           {
-            value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
-              defaultMessage: '**Matching field**',
-            })}: ${policyMetadata.matchField}`,
+            value: `${i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.hover.policyMatchingField',
+              {
+                defaultMessage: '**Matching field**',
+              }
+            )}: ${policyMetadata.matchField}`,
           },
           {
-            value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
-              defaultMessage: '**Fields**',
-            })}: ${policyMetadata.enrichFields.join(', ')}`,
+            value: `${i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.hover.policyEnrichedFields',
+              {
+                defaultMessage: '**Fields**',
+              }
+            )}: ${policyMetadata.enrichFields.join(', ')}`,
           },
         ]
       );
