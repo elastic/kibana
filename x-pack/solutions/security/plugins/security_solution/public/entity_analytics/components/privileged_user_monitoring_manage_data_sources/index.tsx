@@ -13,7 +13,6 @@ import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { IndexImportManageDataSource } from './index_import_manage_data_source';
-import { UserLimitCallOut } from '../user_limit_callout';
 
 export interface AddDataSourceResult {
   successful: boolean;
@@ -52,14 +51,10 @@ export const PrivilegedUserMonitoringManageDataSources = ({
       />
 
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <UserLimitCallOut variant="compact" />
-          <EuiSpacer size="l" />
-        </EuiFlexItem>
-
         {addDataSourceResult?.successful && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               title={
                 addDataSourceResult.userCount > 0
                   ? i18n.translate(

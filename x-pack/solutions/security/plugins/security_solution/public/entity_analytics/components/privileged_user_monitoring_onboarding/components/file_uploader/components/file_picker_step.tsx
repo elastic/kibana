@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormatBytes } from '../../../../../../common/components/formatted_bytes';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES } from '../../../../../../../common/constants';
 import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from '../constants';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
 interface PrivilegedUserMonitoringFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
@@ -41,6 +42,9 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+    const { services } = useKibana();
+    const maxUsersAllowed =
+      services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
     const listStyle = css`
       list-style-type: disc;
@@ -80,6 +84,15 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.uploadFileSizeLimit"
                 values={{
                   maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
+                }}
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                defaultMessage="Maximum number of privileged users: {maxUsers}"
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.maxUsersLimit"
+                values={{
+                  maxUsers: maxUsersAllowed,
                 }}
               />
             </li>
