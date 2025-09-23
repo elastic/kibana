@@ -1805,6 +1805,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
 /.ci/.storybook @elastic/kibana-operations
+/src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/obs-ui-devex-team
 
 # QA - Appex QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa

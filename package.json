@@ -1588,6 +1588,7 @@
     "@kbn/json-ast": "link:packages/kbn-json-ast",
     "@kbn/kbn-genai-cli": "link:x-pack/solutions/observability/packages/kbn-genai-cli",
     "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
+    "@kbn/lazy-object": "link:src/platform/packages/shared/kbn-lazy-object",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",
     "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",
