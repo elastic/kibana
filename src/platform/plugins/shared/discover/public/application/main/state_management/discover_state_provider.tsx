@@ -24,13 +24,6 @@ function createStateHelpers() {
       container!.savedSearchState.getCurrent$().getValue()
     );
   };
-  const useSavedSearchInitial = () => {
-    const container = useContainer();
-    return useObservable<SavedSearch>(
-      container!.savedSearchState.getInitial$(),
-      container!.savedSearchState.getInitial$().getValue()
-    );
-  };
   const useSavedSearchHasChanged = () => {
     const container = useContainer();
     return useObservable<boolean>(
@@ -42,14 +35,12 @@ function createStateHelpers() {
   return {
     Provider: context.Provider,
     useSavedSearch,
-    useSavedSearchInitial,
     useSavedSearchHasChanged,
   };
 }
 
 export const {
   Provider: DiscoverStateProvider,
-  useSavedSearchInitial,
   useSavedSearch,
   useSavedSearchHasChanged,
 } = createStateHelpers();

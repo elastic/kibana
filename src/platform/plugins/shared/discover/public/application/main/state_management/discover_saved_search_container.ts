@@ -53,7 +53,6 @@ export interface UpdateParams {
  * It centralizes functionality that was spread across the Discover main codebase
  * There are 2 hooks to access the state of the saved search in React components:
  * - useSavedSearch for the current state, that's updated on every relevant state change
- * - useSavedSearchInitial for the persisted or initial state, just updated when the saved search is peristed or loaded
  */
 export interface DiscoverSavedSearchContainer {
   /**

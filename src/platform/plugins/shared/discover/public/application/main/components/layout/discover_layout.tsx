@@ -35,7 +35,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -65,6 +64,7 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
+  useInternalStateSelector,
 } from '../../state_management/redux';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
@@ -125,7 +125,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataView = useCurrentDataView();
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
-  const savedSearch = useSavedSearchInitial();
+  const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+
   const fetchCounter = useRef<number>(0);
 
   useEffect(() => {
@@ -414,11 +415,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
       >
-        {savedSearch.title
+        {discoverSession?.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: savedSearch.title,
+                savedSearchTitle: discoverSession.title,
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {
@@ -442,7 +443,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             </EuiDelayRender>
           )}
           <SavedSearchURLConflictCallout
-            savedSearch={savedSearch}
+            savedSearch={discoverSession}
             spaces={spaces}
             history={history}
           />
