@@ -100,6 +100,7 @@ export const EngineComponentResource = z.enum([
   'entity_engine',
   'entity_definition',
   'index',
+  'data_stream',
   'component_template',
   'index_template',
   'ingest_pipeline',
