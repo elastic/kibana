@@ -71,7 +71,7 @@ export class StreamsApp {
       await expect(
         this.page.getByTestId(`streamsNameLink-${name}`),
         `Stream ${name} should not be present in the table`
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
   }
 
@@ -279,6 +279,10 @@ export class StreamsApp {
     await this.page
       .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
       .click();
+  }
+
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
   }
 
   async clickSaveProcessor() {
