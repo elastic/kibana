@@ -18,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiPopover,
   EuiText,
   useEuiTheme,
@@ -27,10 +26,10 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLabels } from './data_view_labels';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
-import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
@@ -102,9 +101,15 @@ export function ChangeDataView({
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
-  const isAdHocSelected = useMemo(() => {
-    return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
-  }, [adHocDataViews, currentDataViewId]);
+  const isAdHocSelected = useMemo(
+    () => adHocDataViews?.some((dataView) => dataView.id === currentDataViewId),
+    [adHocDataViews, currentDataViewId]
+  );
+
+  const isManagedSelected = useMemo(
+    () => dataViewsList.find((dataView) => dataView.id === currentDataViewId)?.managed,
+    [currentDataViewId, dataViewsList]
+  );
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -136,13 +141,10 @@ export function ChangeDataView({
         {...rest}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={adhoc} color="primary" size="s" />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>{trigger.label}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DataViewLabels isAdhoc={isAdHocSelected} isManaged={isManagedSelected} name={label} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiButtonEmpty>
     );
