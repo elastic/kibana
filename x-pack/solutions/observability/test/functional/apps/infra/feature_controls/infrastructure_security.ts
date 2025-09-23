@@ -99,7 +99,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await retry.try(async () => {
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });
@@ -206,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await retry.try(async () => {
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });

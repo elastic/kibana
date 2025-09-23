@@ -38,22 +38,6 @@ import type {
 } from './types';
 
 export function fromBucketLensApiToLensState(
-  options: LensApiFiltersOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): FiltersIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiTermsOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): TermsIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiRangeOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): RangeIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiDateHistogramOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): DateHistogramIndexPatternColumn;
-export function fromBucketLensApiToLensState(
   options: LensApiBucketOperations,
   columns: { column: AnyMetricLensStateColumn; id: string }[]
 ): AnyBucketLensStateColumn {

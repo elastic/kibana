@@ -25,6 +25,7 @@ import {
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
   esqlColumnSchema,
+  genericOperationOptionsSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -36,6 +37,12 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+
+const compareToSchemaShared = schema.object({
+  palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
+  icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
+  value: schema.maybe(schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })),
+});
 
 export const complementaryVizSchema = schema.oneOf([
   schema.object({
@@ -140,7 +147,23 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Compare to
    */
-  compare_to: schema.maybe(schema.string({ meta: { description: 'Compare to' } })),
+  compare: schema.maybe(
+    schema.oneOf([
+      schema.allOf([
+        compareToSchemaShared,
+        schema.object({
+          to: schema.literal('baseline'),
+          baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
+        }),
+      ]),
+      schema.allOf([
+        compareToSchemaShared,
+        schema.object({
+          to: schema.literal('primary'),
+        }),
+      ]),
+    ])
+  ),
   /**
    * Color configuration
    */
@@ -250,12 +273,20 @@ const esqlMetricState = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlColumnSchema]),
+  metric: schema.allOf([
+    schema.object(genericOperationOptionsSchema),
+    metricStatePrimaryMetricOptionsSchema,
+    esqlColumnSchema,
+  ]),
   /**
    * Secondary value configuration, must define operation.
    */
   secondary_metric: schema.maybe(
-    schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlColumnSchema])
+    schema.allOf([
+      schema.object(genericOperationOptionsSchema),
+      metricStateSecondaryMetricOptionsSchema,
+      esqlColumnSchema,
+    ])
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
@@ -266,3 +297,5 @@ const esqlMetricState = schema.object({
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
+export type MetricStateNoESQL = TypeOf<typeof metricStateSchemaNoESQL>;
+export type MetricStateESQL = TypeOf<typeof esqlMetricState>;

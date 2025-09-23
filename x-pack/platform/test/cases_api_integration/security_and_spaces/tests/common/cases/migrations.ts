@@ -125,6 +125,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalAlerts: 0,
+          totalEvents: 0,
           totalComment: 1,
           updated_at: null,
           updated_by: null,

@@ -76,6 +76,12 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
         });
       }
 
+      if ('stepExecutionId' in params && params.stepExecutionId) {
+        mustQueries.push({
+          term: { 'workflow.step_execution_id.keyword': params.stepExecutionId },
+        });
+      }
+
       if ('stepId' in params && params.stepId) {
         mustQueries.push({
           term: { 'workflow.step_id.keyword': params.stepId },
