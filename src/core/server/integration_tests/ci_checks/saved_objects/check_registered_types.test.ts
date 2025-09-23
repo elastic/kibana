@@ -80,11 +80,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "canvas-workpad": "5cd605383a100a27941cca6cbf2d954aa96a16e2",
         "canvas-workpad-template": "f9a6ffab76ddfcd8fa3823002aa576c8f1d0e686",
         "cases": "9f91e6f385bbc09dc16c63309363822700a1ae53",
-<<<<<<< HEAD
-        "cases-comments": "9e336aceb6a330452d1cbf0ba1b8fd542c9e3856",
-=======
         "cases-comments": "235311d14fbba84faf8ce1f32c31ddb3a435bacb",
->>>>>>> upstream/main
         "cases-configure": "66d4c64d83b464f5166005b8ffa03b721fcaaf8b",
         "cases-connector-mappings": "877bb4d52e9821e330622bd75fba799490ec6952",
         "cases-incrementing-id": "3dfb6dac9c28faab1b484d80cf274aa726399e36",
@@ -412,19 +408,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases|global: 58923536ede82aed6c22799b52c4f51f4bf66aba",
         "cases|mappings: 2ee9c5f866298b30dbdcfd22d952ebbecb6582fb",
         "cases|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-<<<<<<< HEAD
-        "cases|10.5.0: 3d1ed50ab71d41702eebcd6ad894bfc556bd4213",
-        "cases|10.4.0: b228632dfb5a8cae50f82c4b0fe78305fa6d1fdd",
-        "cases|10.3.0: 6bf633e6147007b80adfe8da94b3e57d6004a803",
-        "cases|10.2.0: 9b3de0b9947e9d6bfb5d63ea9d5e9df9afca2601",
-        "cases|10.1.0: 932fb3a37b3346e4c6bb6ad78dc3c0fd323b858f",
-=======
         "cases|10.5.0: 96204bccc728de96e75fd5cc7d82c5990429fbf6",
         "cases|10.4.0: 3b1d7eee41677f6b5e78b5d3b6108e6c12ae0222",
         "cases|10.3.0: e75b333589e368f47fb160e6dd01200590e3c313",
         "cases|10.2.0: bf34bde323a6d193f85d11a9ca87d52263beace6",
         "cases|10.1.0: 2084c62dbe41da4fa3560ff80fe37af3bc0cc15c",
->>>>>>> upstream/main
         "cases|8.7.0: 54c152a2584673672445346cf69d72bda587cc52",
         "cases|8.5.0: a2c0c0dcdbac64d71ddb583dc02e83aa760eb784",
         "cases|8.3.0: 09aaac909eff1a6a2d944aa6c1dd297dda05b5ce",
@@ -1269,11 +1257,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "canvas-workpad": "10.0.0",
         "canvas-workpad-template": "10.0.0",
         "cases": "10.5.0",
-<<<<<<< HEAD
-        "cases-comments": "10.0.0",
-=======
         "cases-comments": "10.1.0",
->>>>>>> upstream/main
         "cases-configure": "10.0.0",
         "cases-connector-mappings": "10.0.0",
         "cases-incrementing-id": "10.0.0",
@@ -1420,11 +1404,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "canvas-workpad": "8.9.0",
         "canvas-workpad-template": "8.9.0",
         "cases": "10.5.0",
-<<<<<<< HEAD
-        "cases-comments": "8.9.0",
-=======
         "cases-comments": "10.1.0",
->>>>>>> upstream/main
         "cases-configure": "7.15.0",
         "cases-connector-mappings": "7.14.0",
         "cases-incrementing-id": "0.0.0",
