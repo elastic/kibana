@@ -14,7 +14,6 @@
 
 import React from 'react';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
-import type { EuiTitleSize } from '@elastic/eui';
 import { EuiBadge, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import semverLt from 'semver/functions/lt';
 
@@ -70,7 +69,7 @@ export interface IntegrationCardItem {
   // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;
   titleBadge?: React.ReactNode;
-  titleSize?: EuiTitleSize;
+  titleSize?: 'xs' | 's';
   url: string;
   version: string;
   type?: string;
