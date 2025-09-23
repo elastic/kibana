@@ -31,7 +31,10 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
   });
 
   test('should edit an existing processor', async ({ page, pageObjects }) => {
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+    // An nth selector is used here as 2 elements will exist with the same text.
+    // This is due to the truncation component creating a duplicate element for measuring purposes.
+    // eslint-disable-next-line playwright/no-nth-methods
+    await expect(page.getByText('%{WORD:attributes.method}').first()).toBeVisible();
     await pageObjects.streams.clickEditProcessor(0);
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
