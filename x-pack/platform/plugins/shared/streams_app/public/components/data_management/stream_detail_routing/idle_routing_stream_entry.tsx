@@ -87,6 +87,7 @@ export function IdleRoutingStreamEntry({
           margin-left: 0;
         }
         padding: ${euiTheme.size.m} 16px;
+        border-radius: ${euiTheme.size.s};
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="none">

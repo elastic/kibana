@@ -36,8 +36,9 @@ export function CurrentStreamEntry({
         hasShadow={false}
         hasBorder
         paddingSize="m"
-        css={css`
+        className={css`
           overflow: hidden;
+          border-radius: ${euiTheme.size.s};
         `}
       >
         <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={true}>

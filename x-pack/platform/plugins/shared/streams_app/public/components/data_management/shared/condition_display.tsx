@@ -49,7 +49,7 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
   return (
     <>
       <BadgeItem text={field} />
-      <OperatorText operator={operatorText} />
+      <OperatorText operator={operatorText} subdued />
       <BadgeItem text={value?.toString() ?? ''} />
     </>
   );
@@ -132,12 +132,21 @@ const RecursiveConditionDisplay = ({
   );
 };
 
-const OperatorText = ({ operator, bold }: { operator: string; bold?: boolean }) => {
+const OperatorText = ({
+  operator,
+  bold,
+  subdued,
+}: {
+  operator: string;
+  bold?: boolean;
+  subdued?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem grow={false}>
       <EuiText
         size="s"
+        color={subdued ? 'subdued' : 'default'}
         style={{ fontWeight: bold ? euiTheme.font.weight.bold : euiTheme.font.weight.regular }}
       >
         {operator}
