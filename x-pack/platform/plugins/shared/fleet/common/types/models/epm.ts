@@ -313,6 +313,7 @@ export enum RegistryStreamKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
+  ingestion_method = 'ingestion_method',
 }
 
 export interface RegistryStream {
@@ -323,6 +324,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
+  [RegistryStreamKeys.ingestion_method]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };

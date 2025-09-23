@@ -184,10 +184,12 @@ async function runConfigs(
         ];
 
         const proc = spawn(process.execPath, args, {
-          env: {
-            ...process.env,
-            JEST_CONFIG_PATH: config, // Needed to enable Scout reporting
-          },
+          env: process.env,
+
+          // {
+          //   ...process.env,
+          //   JEST_CONFIG_PATH: config, // Needed to enable Scout reporting
+          // },
           stdio: ['ignore', 'pipe', 'pipe'],
         });
         let buffer = '';
