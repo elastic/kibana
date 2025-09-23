@@ -13,10 +13,10 @@ import { getAllSecurityModules } from '../entity/utils/security_modules';
  *
  * This filter includes:
  * - All native events (event.kind: "event") - essential for process tree integrity
- * - Security alerts from relevant modules (event.kind: "alert" + module filter)
+ * - Security signals from relevant modules (event.kind: "signal" + module filter)
  *
  * This approach maintains complete process trees while reducing noise from
- * irrelevant alerts
+ * irrelevant signals
  *
  * @returns Elasticsearch bool query for event.kind filtering
  */
@@ -30,11 +30,11 @@ export function createEventKindFilter(): JsonObject {
         {
           term: { 'event.kind': 'event' },
         },
-        // Include security alerts from relevant modules only
+        // Include security signals from relevant modules only
         {
           bool: {
             must: [
-              { term: { 'event.kind': 'alert' } },
+              { term: { 'event.kind': 'signal' } },
               { terms: { 'event.module': securityModules } },
             ],
           },

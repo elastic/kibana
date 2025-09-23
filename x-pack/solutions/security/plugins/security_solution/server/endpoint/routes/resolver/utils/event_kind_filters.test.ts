@@ -10,6 +10,34 @@ import * as securityModules from '../entity/utils/security_modules';
 
 jest.mock('../entity/utils/security_modules');
 
+/**
+ * Type interface for the expected structure of the event kind filter result
+ * This helps with type assertions in tests
+ */
+interface EventKindFilterResult {
+  bool: {
+    should: Array<{
+      term?: { 'event.kind': string } | { [key: string]: string };
+      bool?: {
+        must: Array<{
+          term?: { 'event.kind': string };
+          terms?: { 'event.module': string[] };
+        }>;
+      };
+    }>;
+    minimum_should_match: number;
+  };
+}
+
+
+/**
+ * Test helper function to create and properly cast the event kind filter result
+ * This centralizes the type casting to avoid repetition and type errors
+ */
+const createEventKindFilterForTest = (): EventKindFilterResult => {
+  return createEventKindFilter() as unknown as EventKindFilterResult;
+};
+
 const mockGetAllSecurityModules = securityModules.getAllSecurityModules as jest.MockedFunction<
   typeof securityModules.getAllSecurityModules
 >;
@@ -24,7 +52,7 @@ describe('event_kind_filters', () => {
       const mockModules = ['crowdstrike', 'sentinel_one', 'microsoft_defender_endpoint'];
       mockGetAllSecurityModules.mockReturnValue(mockModules);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result).toEqual({
         bool: {
@@ -35,7 +63,7 @@ describe('event_kind_filters', () => {
             {
               bool: {
                 must: [
-                  { term: { 'event.kind': 'alert' } },
+                  { term: { 'event.kind': 'signal' } },
                   { terms: { 'event.module': mockModules } },
                 ],
               },
@@ -49,25 +77,22 @@ describe('event_kind_filters', () => {
     it('should include native events filter', () => {
       mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result.bool.should).toContainEqual({
         term: { 'event.kind': 'event' },
       });
     });
 
-    it('should include security alerts filter with module constraints', () => {
+    it('should include security signals filter with module constraints', () => {
       const mockModules = ['crowdstrike', 'sentinel_one'];
       mockGetAllSecurityModules.mockReturnValue(mockModules);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result.bool.should).toContainEqual({
         bool: {
-          must: [
-            { term: { 'event.kind': 'alert' } },
-            { terms: { 'event.module': mockModules } },
-          ],
+          must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': mockModules } }],
         },
       });
     });
@@ -75,7 +100,7 @@ describe('event_kind_filters', () => {
     it('should set minimum_should_match to 1', () => {
       mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result.bool.minimum_should_match).toBe(1);
     });
@@ -92,7 +117,7 @@ describe('event_kind_filters', () => {
     it('should work with empty security modules list', () => {
       mockGetAllSecurityModules.mockReturnValue([]);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result).toEqual({
         bool: {
@@ -102,10 +127,7 @@ describe('event_kind_filters', () => {
             },
             {
               bool: {
-                must: [
-                  { term: { 'event.kind': 'alert' } },
-                  { terms: { 'event.module': [] } },
-                ],
+                must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': [] } }],
               },
             },
           ],
@@ -117,12 +139,12 @@ describe('event_kind_filters', () => {
     it('should work with single security module', () => {
       mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result.bool.should[1]).toEqual({
         bool: {
           must: [
-            { term: { 'event.kind': 'alert' } },
+            { term: { 'event.kind': 'signal' } },
             { terms: { 'event.module': ['crowdstrike'] } },
           ],
         },
@@ -140,14 +162,11 @@ describe('event_kind_filters', () => {
       ];
       mockGetAllSecurityModules.mockReturnValue(mockModules);
 
-      const result = createEventKindFilter();
+      const result = createEventKindFilterForTest();
 
       expect(result.bool.should[1]).toEqual({
         bool: {
-          must: [
-            { term: { 'event.kind': 'alert' } },
-            { terms: { 'event.module': mockModules } },
-          ],
+          must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': mockModules } }],
         },
       });
     });
@@ -156,7 +175,7 @@ describe('event_kind_filters', () => {
       it('should always have exactly 2 should clauses', () => {
         mockGetAllSecurityModules.mockReturnValue(['crowdstrike', 'sentinel_one']);
 
-        const result = createEventKindFilter();
+        const result = createEventKindFilterForTest();
 
         expect(result.bool.should).toHaveLength(2);
       });
@@ -164,35 +183,35 @@ describe('event_kind_filters', () => {
       it('should have the first should clause for event.kind: event', () => {
         mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-        const result = createEventKindFilter();
+        const result = createEventKindFilterForTest();
 
         expect(result.bool.should[0]).toEqual({
           term: { 'event.kind': 'event' },
         });
       });
 
-      it('should have the second should clause for event.kind: alert with module filtering', () => {
+      it('should have the second should clause for event.kind: signal with module filtering', () => {
         const mockModules = ['crowdstrike', 'sentinel_one'];
         mockGetAllSecurityModules.mockReturnValue(mockModules);
 
-        const result = createEventKindFilter();
+        const result = createEventKindFilterForTest();
 
         expect(result.bool.should[1]).toEqual({
           bool: {
             must: [
-              { term: { 'event.kind': 'alert' } },
+              { term: { 'event.kind': 'signal' } },
               { terms: { 'event.module': mockModules } },
             ],
           },
         });
       });
 
-      it('should have bool.must with exactly 2 clauses in the alert filter', () => {
+      it('should have bool.must with exactly 2 clauses in the signal filter', () => {
         mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-        const result = createEventKindFilter();
+        const result = createEventKindFilterForTest();
 
-        expect(result.bool.should[1].bool.must).toHaveLength(2);
+        expect(result.bool.should[1].bool!.must).toHaveLength(2);
       });
     });
 
@@ -200,17 +219,20 @@ describe('event_kind_filters', () => {
       it('should use the latest security modules configuration', () => {
         // First call returns some modules
         mockGetAllSecurityModules.mockReturnValueOnce(['crowdstrike']);
-        const result1 = createEventKindFilter();
+        const result1 = createEventKindFilterForTest();
 
         // Second call returns different modules (simulating feature flag changes)
-        mockGetAllSecurityModules.mockReturnValueOnce(['crowdstrike', 'microsoft_defender_endpoint']);
-        const result2 = createEventKindFilter();
+        mockGetAllSecurityModules.mockReturnValueOnce([
+          'crowdstrike',
+          'microsoft_defender_endpoint',
+        ]);
+        const result2 = createEventKindFilterForTest();
 
-        expect(result1.bool.should[1].bool.must[1]).toEqual({
+        expect(result1.bool.should[1].bool!.must[1]).toEqual({
           terms: { 'event.module': ['crowdstrike'] },
         });
 
-        expect(result2.bool.should[1].bool.must[1]).toEqual({
+        expect(result2.bool.should[1].bool!.must[1]).toEqual({
           terms: { 'event.module': ['crowdstrike', 'microsoft_defender_endpoint'] },
         });
       });
@@ -225,9 +247,9 @@ describe('event_kind_filters', () => {
 
         moduleConfigurations.forEach((modules, index) => {
           mockGetAllSecurityModules.mockReturnValueOnce(modules);
-          const result = createEventKindFilter();
+          const result = createEventKindFilterForTest();
 
-          expect(result.bool.should[1].bool.must[1]).toEqual({
+          expect(result.bool.should[1].bool!.must[1]).toEqual({
             terms: { 'event.module': modules },
           });
           expect(mockGetAllSecurityModules).toHaveBeenCalledTimes(index + 1);
@@ -239,8 +261,8 @@ describe('event_kind_filters', () => {
       it('should return a new object each time (not cached)', () => {
         mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-        const result1 = createEventKindFilter();
-        const result2 = createEventKindFilter();
+        const result1 = createEventKindFilterForTest();
+        const result2 = createEventKindFilterForTest();
 
         expect(result1).not.toBe(result2);
         expect(result1).toEqual(result2);
@@ -250,12 +272,12 @@ describe('event_kind_filters', () => {
       it('should be safe to mutate the returned object', () => {
         mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
 
-        const result = createEventKindFilter();
+        const result = createEventKindFilterForTest();
 
         // Mutating the result should not affect future calls
         result.bool.should.push({ term: { 'test.field': 'test' } });
 
-        const result2 = createEventKindFilter();
+        const result2 = createEventKindFilterForTest();
         expect(result2.bool.should).toHaveLength(2);
       });
     });
