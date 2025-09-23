@@ -6,5 +6,5 @@
  */
 declare module '*.text' {
   const content: string;
-  export default content;
+  export default content; // eslint-disable-line import/no-default-export
 }
