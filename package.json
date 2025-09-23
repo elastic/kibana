@@ -1207,7 +1207,7 @@
     "brok": "^6.0.0",
     "byte-size": "^9.0.1",
     "cacheable-lookup": "6",
-    "camelcase-keys": "7.0.2",
+    "camelcase-keys": "9.1.3",
     "canvas-confetti": "^1.9.3",
     "canvg": "^3.0.9",
     "chalk": "^4.1.0",
