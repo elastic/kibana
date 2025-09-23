@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 12323
+  esql: 13323
   esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 15709
+  onechat: 17322
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -150,8 +150,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79987
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
+  securitySolutionEss: 43319
+  securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
@@ -175,7 +175,7 @@ pageLoadAssetSize:
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedSearch: 23000
+  unifiedSearch: 24000
   upgradeAssistant: 6898
   uptime: 48184
   urlDrilldown: 21563
