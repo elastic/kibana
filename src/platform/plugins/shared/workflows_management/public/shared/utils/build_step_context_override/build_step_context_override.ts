@@ -41,7 +41,25 @@ function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
   return z.any();
 }
 
-export function buildContextOverride(workflowGraph: WorkflowGraph): ContextOverrideData {
+function readPropertyRecursive(
+  propertyPath: string[],
+  object: Record<string, unknown> | null | undefined
+): unknown {
+  if (typeof object === 'object' && object !== null && propertyPath.length) {
+    const currentProp = propertyPath[0] as string;
+    return readPropertyRecursive(
+      propertyPath.slice(1),
+      object[currentProp] as Record<string, unknown>
+    );
+  }
+
+  return object;
+}
+
+export function buildContextOverride(
+  workflowGraph: WorkflowGraph,
+  staticData: Pick<StepContext, 'consts' | 'workflow'>
+): ContextOverrideData {
   const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
   const allInputs = Object.values(inputsInGraph).flat();
@@ -61,7 +79,8 @@ export function buildContextOverride(workflowGraph: WorkflowGraph): ContextOverr
 
       if (isLastPart) {
         // Set a default value for the final property
-        current[part] = current[part] || null;
+        current[part] =
+          current[part] || readPropertyRecursive(pathParts.slice(0, i + 1), staticData);
       } else {
         // Create nested object if it doesn't exist
         if (!current[part]) {

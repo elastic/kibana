@@ -8,9 +8,19 @@
  */
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { buildcontextOverride } from './build_step_context_override';
+import { buildContextOverride } from './build_step_context_override';
 
-describe('buildcontextOverride', () => {
+describe('buildContextOverride', () => {
+  const mockStaticData = {
+    workflow: {
+      id: 'test-workflow-id',
+      name: 'test-workflow',
+      enabled: true,
+      spaceId: 'default',
+    },
+    consts: {},
+  };
+
   describe('with simple workflow', () => {
     it('should return empty context when no inputs are found in graph', () => {
       const simpleWorkflow = {
@@ -35,7 +45,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(simpleWorkflow);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({});
       expect(result.schema).toBeDefined();
@@ -71,13 +81,13 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithStepReferences);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
           first_step: {
             output: {
-              result: null,
+              result: undefined,
             },
           },
         },
@@ -116,7 +126,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithNestedReferences);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -125,12 +135,12 @@ describe('buildcontextOverride', () => {
               data: {
                 rows: {
                   '0': {
-                    name: null,
+                    name: undefined,
                   },
                 },
               },
               meta: {
-                total: null,
+                total: undefined,
               },
             },
           },
@@ -171,7 +181,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeach);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       // The foreach workflow might not extract inputs as expected,
       // let's just check that it handles it gracefully
@@ -203,14 +213,14 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeachUsage);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         foreach: {
           item: {
-            name: null,
+            name: undefined,
           },
-          index: null,
+          index: undefined,
         },
       });
       expect(result.schema).toBeDefined();
@@ -240,14 +250,14 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithExecutionRefs);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         execution: {
           workflow: {
-            id: null,
+            id: undefined,
           },
-          id: null,
+          id: undefined,
         },
       });
       expect(result.schema).toBeDefined();
@@ -279,28 +289,28 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMixedRefs);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
           previous_step: {
             output: {
-              data: null,
+              data: undefined,
             },
           },
         },
         workflow: {
-          name: null,
+          name: 'test-workflow',
         },
         event: {
           payload: {
             user: {
-              id: null,
+              id: undefined,
             },
           },
         },
         inputs: {
-          userInput: null,
+          userInput: undefined,
         },
       });
       expect(result.schema).toBeDefined();
@@ -332,7 +342,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       // The schema should successfully parse the mock data
       expect(() => result.schema.parse(result.stepContext)).not.toThrow();
@@ -361,7 +371,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -369,7 +379,7 @@ describe('buildcontextOverride', () => {
             output: {
               items: {
                 '0': {
-                  name: null,
+                  name: undefined,
                 },
               },
             },
@@ -393,7 +403,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(emptyWorkflow);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({});
       expect(result.schema).toBeDefined();
@@ -425,14 +435,14 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithDuplicates);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
           source: {
             output: {
-              data: null,
-              meta: null,
+              data: undefined,
+              meta: undefined,
             },
           },
         },
@@ -462,7 +472,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithDeepNesting);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -473,7 +483,7 @@ describe('buildcontextOverride', () => {
                   user: {
                     profile: {
                       settings: {
-                        theme: null,
+                        theme: undefined,
                       },
                     },
                   },
@@ -509,7 +519,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMultipleArrays);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -518,13 +528,13 @@ describe('buildcontextOverride', () => {
               matrix: {
                 '0': {
                   '1': {
-                    value: null,
+                    value: undefined,
                   },
                 },
               },
               list: {
                 '5': {
-                  name: null,
+                  name: undefined,
                 },
               },
             },
@@ -556,7 +566,7 @@ describe('buildcontextOverride', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMixedNotation);
-      const result = buildcontextOverride(workflowGraph);
+      const result = buildContextOverride(workflowGraph, mockStaticData);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -566,7 +576,7 @@ describe('buildcontextOverride', () => {
                 'user-info': {
                   '0': {
                     profile: {
-                      name: null,
+                      name: undefined,
                     },
                   },
                 },
