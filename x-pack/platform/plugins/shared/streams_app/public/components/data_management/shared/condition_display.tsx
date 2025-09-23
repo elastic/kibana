@@ -31,13 +31,9 @@ export const ConditionDisplay = ({
   showKeyword = false,
   keyword = 'WHERE',
 }: ConditionDisplayProps) => {
-  if (isAlwaysCondition(condition) || isNeverCondition(condition)) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-      {showKeyword && <OperatorText operator={keyword} />}
+      {showKeyword && <OperatorText operator={keyword} bold />}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
   );
@@ -47,68 +43,103 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
   const operator = getFilterOperator(condition);
   const value = getFilterValue(condition);
   const field = condition.field;
+  const operatorText =
+    operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap];
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{field}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap]}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{value?.toString()}</EuiBadge>
-      </EuiFlexItem>
+      <BadgeItem text={field} />
+      <OperatorText operator={operatorText} />
+      <BadgeItem text={value?.toString() ?? ''} />
     </>
   );
 };
 
-const RecursiveConditionDisplay = ({ condition }: { condition: Condition }) => {
+const BadgeItem = ({ text }: { text: string }) => (
+  <EuiFlexItem grow={false}>
+    <EuiBadge color="hollow">{text}</EuiBadge>
+  </EuiFlexItem>
+);
+
+const RecursiveConditionDisplay = ({
+  condition,
+  needsParentheses = false,
+}: {
+  condition: Condition;
+  needsParentheses?: boolean;
+}) => {
   const renderConditionsWithOperator = (conditions: Condition[], operator: string) => (
     <>
-      {conditions.map((subCondition, index) => (
-        <React.Fragment key={index}>
-          {index > 0 && <OperatorText operator={operator} />}
-          <RecursiveConditionDisplay condition={subCondition} />
-        </React.Fragment>
-      ))}
+      {conditions.map((subCondition, index) => {
+        // Only add parentheses when mixing different operator types
+        const needsParens =
+          (operator === 'AND' && isOrCondition(subCondition)) ||
+          (operator === 'OR' && isAndCondition(subCondition));
+
+        return (
+          <React.Fragment key={index}>
+            {index > 0 && <OperatorText operator={operator} bold />}
+            <RecursiveConditionDisplay condition={subCondition} needsParentheses={needsParens} />
+          </React.Fragment>
+        );
+      })}
     </>
   );
 
-  if (isAndCondition(condition)) {
-    return renderConditionsWithOperator(condition.and, 'AND');
-  }
+  const content = () => {
+    if (isAndCondition(condition)) {
+      return renderConditionsWithOperator(condition.and, 'AND');
+    }
 
-  if (isOrCondition(condition)) {
-    return renderConditionsWithOperator(condition.or, 'OR');
-  }
+    if (isOrCondition(condition)) {
+      return renderConditionsWithOperator(condition.or, 'OR');
+    }
 
-  if (isNotCondition(condition)) {
-    return (
-      <>
-        <OperatorText operator="NOT" />
-        <RecursiveConditionDisplay condition={condition.not} />
-      </>
-    );
-  }
+    if (isNotCondition(condition)) {
+      return (
+        <>
+          <OperatorText operator="NOT" bold />
+          <RecursiveConditionDisplay
+            condition={condition.not}
+            needsParentheses={isAndCondition(condition.not) || isOrCondition(condition.not)}
+          />
+        </>
+      );
+    }
 
-  if (isFilterConditionObject(condition)) {
-    return <FilterBadges condition={condition as FilterCondition} />;
-  }
+    if (isAlwaysCondition(condition)) {
+      return <BadgeItem text="always" />;
+    }
 
-  // Fallback for any unknown condition types
+    if (isNeverCondition(condition)) {
+      return <BadgeItem text="never" />;
+    }
+
+    if (isFilterConditionObject(condition)) {
+      return <FilterBadges condition={condition} />;
+    }
+
+    // Fallback for any unknown condition types
+    return <BadgeItem text={JSON.stringify(condition)} />;
+  };
+
   return (
-    <EuiFlexItem grow={false}>
-      <EuiBadge>{JSON.stringify(condition)}</EuiBadge>
-    </EuiFlexItem>
+    <>
+      {needsParentheses && <OperatorText operator="(" />}
+      {content()}
+      {needsParentheses && <OperatorText operator=")" />}
+    </>
   );
 };
 
-const OperatorText = ({ operator }: { operator: string }) => {
+const OperatorText = ({ operator, bold }: { operator: string; bold?: boolean }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem grow={false}>
-      <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.bold }}>
+      <EuiText
+        size="s"
+        style={{ fontWeight: bold ? euiTheme.font.weight.bold : euiTheme.font.weight.regular }}
+      >
         {operator}
       </EuiText>
     </EuiFlexItem>

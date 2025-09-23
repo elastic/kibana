@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
-import { isAlwaysCondition, isNeverCondition } from '@kbn/streamlang';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { ConditionDisplay } from '../shared';
 import type { RoutingDefinitionWithUIAttributes } from './types';
@@ -33,6 +32,7 @@ function VerticalRule() {
   const CentralizedContainer = styled.div`
     display: flex;
     align-items: center;
+    padding: 0 ${euiTheme.size.xs};
   `;
 
   const Border = styled.div`
@@ -166,25 +166,23 @@ export function IdleRoutingStreamEntry({
             />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        {!(isAlwaysCondition(routingRule.where) || isNeverCondition(routingRule.where)) && (
-          <EuiFlexItem
-            grow={false}
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            overflow: hidden;
+            padding: ${euiTheme.size.xs} 0px;
+          `}
+        >
+          <EuiPanel
+            color="subdued"
+            paddingSize="s"
             className={css`
-              overflow: hidden;
-              padding: ${euiTheme.size.xs} 0px;
+              border-radius: ${euiTheme.size.s};
             `}
           >
-            <EuiPanel
-              color="subdued"
-              paddingSize="s"
-              className={css`
-                border-radius: ${euiTheme.size.s};
-              `}
-            >
-              <ConditionDisplay condition={routingRule.where} showKeyword={true} keyword="WHERE" />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
+            <ConditionDisplay condition={routingRule.where} showKeyword={true} keyword="WHERE" />
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

@@ -512,6 +512,10 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
+  }
+
   /**
    * Share utility methods
    */

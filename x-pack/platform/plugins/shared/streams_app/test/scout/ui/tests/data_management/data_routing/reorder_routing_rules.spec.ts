@@ -8,11 +8,9 @@
 /* Assertions are performed by re-using the streams_app fixtures and page objects. */
 /* eslint-disable playwright/expect-expect */
 
-import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/235995
-test.describe.skip(
+test.describe(
   'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -63,13 +61,14 @@ test.describe.skip(
       await pageObjects.streams.expectRoutingOrder(['logs.first', 'logs.second', 'logs.third']);
     });
 
-    test('should handle multiple reorder operations', async ({ pageObjects, page }) => {
+    test('should handle multiple reorder operations', async ({ pageObjects }) => {
       // Perform drag operations
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
-      await expect(page.getByTestId('streamsAppManagementBottomBarButton')).toBeVisible();
+      await pageObjects.streams.checkDraggingOver();
 
       // Perform another reorder while in reordering state
       await pageObjects.streams.dragRoutingRule('logs.third', -1);
+      await pageObjects.streams.checkDraggingOver();
 
       // Save all changes
       await pageObjects.streams.saveRuleOrder();
