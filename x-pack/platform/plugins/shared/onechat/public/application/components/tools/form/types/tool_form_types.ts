@@ -11,6 +11,7 @@ export interface EsqlParam {
   name: string;
   type: EsqlToolFieldTypes;
   description: string;
+  optional: boolean;
 }
 
 export enum EsqlParamSource {
@@ -28,6 +29,7 @@ export interface BaseToolFormData {
   description: string;
   labels: string[];
 }
+
 export interface EsqlToolFormData extends BaseToolFormData {
   type: ToolType.esql;
   esql: string;
