@@ -56,5 +56,27 @@ export const userEntityEngineDescription: EntityDescription = {
     collect({ source: 'user.roles' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
+
+    collect({
+      source: `user.entity.relationships.Accesses_frequently`,
+      destination: 'entity.relationships.Accesses_frequently',
+      mapping: { type: 'keyword' },
+    }),
+    collect({
+      source: `user.entity.relationships.Owns`,
+      destination: 'entity.relationships.Owns',
+      mapping: { type: 'keyword' },
+    }),
+
+    collect({
+      source: `user.entity.relationships.Supervises`,
+      destination: 'entity.relationships.Supervises',
+      mapping: { type: 'keyword' },
+    }),
+    collect({
+      source: `user.entity.relationships.Supervised_by`,
+      destination: 'entity.relationships.Supervised_by',
+      mapping: { type: 'keyword' },
+    }),
   ],
 };

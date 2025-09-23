@@ -29,7 +29,8 @@ import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_e
 interface CustomEntityFieldsAttributesHolder {
   attributes?: Record<string, unknown>;
   lifecycle?: Record<string, unknown>;
-  behavior?: Record<string, unknown>;
+  behaviors?: Record<string, unknown>;
+  relationships?: Record<string, unknown>;
 }
 
 type CustomECSEntityField = EntityField & CustomEntityFieldsAttributesHolder;
@@ -48,7 +49,8 @@ const ID_FIELD = 'entity.id';
 const nonForcedAttributesPathRegex = [
   /entity\.attributes\..*/,
   /entity\.lifecycle\..*/,
-  /entity\.behavior\..*/,
+  /entity\.behaviors\..*/,
+  /entity\.relationships\..*/,
 ];
 
 export class EntityStoreCrudClient {
@@ -162,8 +164,8 @@ function isPropAllowed(prop: string) {
 function normalizeToECS(doc: Entity): CustomECSDocument {
   const normalizedDoc = { ...doc }; // create copy
 
-  const { attributes, lifecycle, behavior } = doc.entity;
-  const objsToCheck = { attributes, lifecycle, behavior };
+  const { attributes, lifecycle, behaviors, relationships } = doc.entity;
+  const objsToCheck = { attributes, lifecycle, behaviors, relationships };
   for (const key of Object.keys(objsToCheck)) {
     const typedKey = key as keyof typeof objsToCheck;
     const value = objsToCheck[typedKey];

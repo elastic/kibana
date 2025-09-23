@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { EntityRiskScoreRecord } from '../../common/common.gen';
+import { EntityRiskLevels, EntityRiskScoreRecord } from '../../common/common.gen';
 import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
 
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
@@ -38,13 +38,75 @@ export const EntityField = z
     attributes: z
       .object({
         privileged: z.boolean().optional(),
+        asset: z.boolean().optional(),
+        managed: z.boolean().optional(),
+        mfa_enabled: z.boolean().optional(),
       })
       .strict()
       .optional(),
-    behavior: z.object({}).strict().optional(),
+    behaviors: z
+      .object({
+        brute_force_victim: z.boolean().optional(),
+        new_country_login: z.boolean().optional(),
+        used_usb_device: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     lifecycle: z
       .object({
         first_seen: z.string().datetime().optional(),
+        last_activity: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+    relationships: z
+      .object({
+        communicates_with: z.array(z.string()).optional(),
+        depends_on: z.array(z.string()).optional(),
+        dependent_of: z.array(z.string()).optional(),
+        owns: z.array(z.string()).optional(),
+        owned_by: z.array(z.string()).optional(),
+        accesses_frequently: z.array(z.string()).optional(),
+        accessed_frequently_by: z.array(z.string()).optional(),
+        supervises: z.array(z.string()).optional(),
+        supervised_by: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    risk: z
+      .object({
+        /**
+         * Lexical description of the entity's risk.
+         */
+        calculated_level: EntityRiskLevels.optional(),
+        /**
+         * The raw numeric value of the given entity's risk score.
+         */
+        calculated_score: z.number().optional(),
+        /**
+         * The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+         */
+        calculated_score_norm: z.number().min(0).max(100).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type Asset = z.infer<typeof Asset>;
+export const Asset = z
+  .object({
+    id: z.string().optional(),
+    name: z.string().optional(),
+    owner: z.string().optional(),
+    serial_number: z.string().optional(),
+    model: z.string().optional(),
+    vendor: z.string().optional(),
+    environment: z.string().optional(),
+    criticality: AssetCriticalityLevel.optional(),
+    business: z
+      .object({
+        unit: z.string().optional(),
       })
       .strict()
       .optional(),
@@ -69,12 +131,7 @@ export const UserEntity = z
       })
       .strict()
       .optional(),
-    asset: z
-      .object({
-        criticality: AssetCriticalityLevel,
-      })
-      .strict()
-      .optional(),
+    asset: Asset.optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -104,12 +161,7 @@ export const HostEntity = z
       })
       .strict()
       .optional(),
-    asset: z
-      .object({
-        criticality: AssetCriticalityLevel,
-      })
-      .strict()
-      .optional(),
+    asset: Asset.optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -132,12 +184,7 @@ export const ServiceEntity = z
       })
       .strict()
       .optional(),
-    asset: z
-      .object({
-        criticality: AssetCriticalityLevel,
-      })
-      .strict()
-      .optional(),
+    asset: Asset.optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -152,12 +199,7 @@ export const GenericEntity = z
   .object({
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField,
-    asset: z
-      .object({
-        criticality: AssetCriticalityLevel,
-      })
-      .strict()
-      .optional(),
+    asset: Asset.optional(),
   })
   .strict();
 

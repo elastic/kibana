@@ -19,7 +19,15 @@ export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldD
       source: '_index',
       destination: 'entity.source',
     }),
+    newestValue({ source: 'asset.id' }),
+    newestValue({ source: 'asset.name' }),
+    newestValue({ source: 'asset.owner' }),
+    newestValue({ source: 'asset.serial_number' }),
+    newestValue({ source: 'asset.model' }),
+    newestValue({ source: 'asset.vendor' }),
+    newestValue({ source: 'asset.environment' }),
     newestValue({ source: 'asset.criticality' }),
+    newestValue({ source: 'asset.business.unit' }),
     newestValue({
       source: `${ecsField}.risk.calculated_level`,
     }),
@@ -47,15 +55,72 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
+
     newestValue({
       source: `${prefix}.attributes.Privileged`,
       destination: 'entity.attributes.Privileged',
       mapping: { type: 'boolean' },
     }),
     newestValue({
+      source: `${prefix}.attributes.Asset`,
+      destination: 'entity.attributes.Asset',
+      mapping: { type: 'boolean' },
+    }),
+    newestValue({
+      source: `${prefix}.attributes.Managed`,
+      destination: 'entity.attributes.Managed',
+      mapping: { type: 'boolean' },
+    }),
+    newestValue({
+      source: `${prefix}.attributes.Mfa_enabled`,
+      destination: 'entity.attributes.Mfa_enabled',
+      mapping: { type: 'boolean' },
+    }),
+
+    newestValue({
       source: `${prefix}.lifecycle.First_seen`,
       destination: 'entity.lifecycle.First_seen',
       mapping: { type: 'date' },
+    }),
+    newestValue({
+      source: `${prefix}.lifecycle.Last_activity`,
+      destination: 'entity.lifecycle.Last_activity',
+      mapping: { type: 'date' },
+    }),
+
+    newestValue({
+      source: `${prefix}.behaviors.Brute_force_victim`,
+      destination: 'entity.behaviors.Brute_force_victim',
+      mapping: { type: 'boolean' },
+    }),
+    newestValue({
+      source: `${prefix}.behaviors.New_country_login`,
+      destination: 'entity.behaviors.New_country_login',
+      mapping: { type: 'boolean' },
+    }),
+    newestValue({
+      source: `${prefix}.behaviors.Used_usb_device`,
+      destination: 'entity.behaviors.Used_usb_device',
+      mapping: { type: 'boolean' },
+    }),
+
+    newestValue({
+      source: `${prefix}.risk.calculated_level`,
+      destination: 'entity.risk.calculated_level',
+    }),
+    newestValue({
+      source: `${prefix}.risk.calculated_score`,
+      destination: 'entity.risk.calculated_score',
+      mapping: {
+        type: 'float',
+      },
+    }),
+    newestValue({
+      source: `${prefix}.risk.calculated_score_norm`,
+      destination: 'entity.risk.calculated_score_norm',
+      mapping: {
+        type: 'float',
+      },
     }),
   ];
 };

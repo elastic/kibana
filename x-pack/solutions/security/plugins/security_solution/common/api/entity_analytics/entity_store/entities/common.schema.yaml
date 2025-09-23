@@ -39,9 +39,22 @@ components:
           properties:
             privileged:
               type: boolean
-        behavior: 
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
+        behaviors: 
           type: object
           additionalProperties: false
+          properties:
+            brute_force_victim:
+              type: boolean
+            new_country_login:
+              type: boolean
+            used_usb_device:
+              type: boolean
         lifecycle:
           type: object
           additionalProperties: false
@@ -49,6 +62,94 @@ components:
             first_seen:
               type: string
               format: date-time
+            last_activity:
+              type: string
+              format: date-time
+        relationships:
+          type: object
+          additionalProperties: false
+          properties:
+            communicates_with:
+              type: array
+              items:
+                type: string
+            depends_on:
+              type: array
+              items:
+                type: string
+            dependent_of:
+              type: array
+              items:
+                type: string
+            owns:
+              type: array
+              items:
+                type: string
+            owned_by:
+              type: array
+              items:
+                type: string
+            accesses_frequently:
+              type: array
+              items:
+                type: string
+            accessed_frequently_by:
+              type: array
+              items:
+                type: string
+            supervises:
+              type: array
+              items:
+                type: string
+            supervised_by:
+              type: array
+              items:
+                type: string
+        risk:
+          type: object
+          additionalProperties: false
+          properties:
+            calculated_level:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskLevels'
+              example: 'Critical'
+              description: Lexical description of the entity's risk.
+            calculated_score:
+              type: number
+              format: double
+              description: The raw numeric value of the given entity's risk score.
+            calculated_score_norm:
+              type: number
+              format: double
+              minimum: 0
+              maximum: 100
+              description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+
+    Asset:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        model:
+          type: string
+        vendor:
+          type: string
+        environment:
+          type: string
+        criticality:
+          $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+        business:
+          type: object
+          additionalProperties: false
+          properties:
+            unit:
+              type: string
 
     UserEntity:
       type: object
@@ -97,13 +198,8 @@ components:
           required:
             - name
         asset:
-          type: object
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          properties:
-            criticality:
-              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         event:
           type: object
           additionalProperties: false
@@ -164,13 +260,8 @@ components:
           required:
             - name
         asset:
-          type: object
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          properties:
-            criticality:
-              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         event:
           type: object
           additionalProperties: false
@@ -203,13 +294,8 @@ components:
           required:
             - name
         asset:
-          type: object
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          properties:
-            criticality:
-              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         event:
           type: object
           additionalProperties: false
@@ -236,13 +322,8 @@ components:
         entity:
           $ref: '#/components/schemas/EntityField'
         asset:
-          type: object
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          properties:
-            criticality:
-              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
     
     # These entities represent the API of Entity Store
     # where entity is a root field, as it's in the final

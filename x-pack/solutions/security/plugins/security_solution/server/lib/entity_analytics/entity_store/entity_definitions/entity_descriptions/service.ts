@@ -43,5 +43,21 @@ export const serviceEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
+
+    collect({
+      source: `service.entity.relationships.Communicates_with`,
+      destination: 'entity.relationships.Communicates_with',
+      mapping: { type: 'date' },
+    }),
+    collect({
+      source: `service.entity.relationships.Depends_on`,
+      destination: 'entity.relationships.Depends_on',
+      mapping: { type: 'date' },
+    }),
+    collect({
+      source: `service.entity.relationships.Dependent_of`,
+      destination: 'entity.relationships.Dependent_of',
+      mapping: { type: 'date' },
+    }),
   ],
 };

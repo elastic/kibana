@@ -98,8 +98,108 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "entity.attributes.Asset",
+      "source": "entity.attributes.Asset",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Managed",
+      "source": "entity.attributes.Managed",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Mfa_enabled",
+      "source": "entity.attributes.Mfa_enabled",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "entity.lifecycle.First_seen",
       "source": "entity.lifecycle.First_seen",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.Last_activity",
+      "source": "entity.lifecycle.Last_activity",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Brute_force_victim",
+      "source": "entity.behaviors.Brute_force_victim",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.New_country_login",
+      "source": "entity.behaviors.New_country_login",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Used_usb_device",
+      "source": "entity.behaviors.Used_usb_device",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_level",
+      "source": "entity.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score",
+      "source": "entity.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "entity.risk.calculated_score_norm",
     },
     Object {
       "aggregation": Object {
@@ -638,8 +738,88 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "asset.id",
+      "source": "asset.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.name",
+      "source": "asset.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.owner",
+      "source": "asset.owner",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.serial_number",
+      "source": "asset.serial_number",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.model",
+      "source": "asset.model",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.vendor",
+      "source": "asset.vendor",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.environment",
+      "source": "asset.environment",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "asset.criticality",
       "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.business.unit",
+      "source": "asset.business.unit",
     },
     Object {
       "aggregation": Object {
@@ -684,7 +864,31 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
+    "asset.business.unit": Object {
+      "type": "keyword",
+    },
     "asset.criticality": Object {
+      "type": "keyword",
+    },
+    "asset.environment": Object {
+      "type": "keyword",
+    },
+    "asset.id": Object {
+      "type": "keyword",
+    },
+    "asset.model": Object {
+      "type": "keyword",
+    },
+    "asset.name": Object {
+      "type": "keyword",
+    },
+    "asset.owner": Object {
+      "type": "keyword",
+    },
+    "asset.serial_number": Object {
+      "type": "keyword",
+    },
+    "asset.vendor": Object {
       "type": "keyword",
     },
     "cloud.account.id": Object {
@@ -720,13 +924,34 @@ Object {
     "cloud.service.name": Object {
       "type": "keyword",
     },
+    "entity.attributes.Asset": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Managed": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Mfa_enabled": Object {
+      "type": "boolean",
+    },
     "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Brute_force_victim": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.New_country_login": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
     },
     "entity.id": Object {
       "type": "keyword",
     },
     "entity.lifecycle.First_seen": Object {
+      "type": "date",
+    },
+    "entity.lifecycle.Last_activity": Object {
       "type": "date",
     },
     "entity.name": Object {
@@ -1007,8 +1232,88 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "asset.id",
+      "source": "asset.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.name",
+      "source": "asset.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.owner",
+      "source": "asset.owner",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.serial_number",
+      "source": "asset.serial_number",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.model",
+      "source": "asset.model",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.vendor",
+      "source": "asset.vendor",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.environment",
+      "source": "asset.environment",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "asset.criticality",
       "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.business.unit",
+      "source": "asset.business.unit",
     },
     Object {
       "aggregation": Object {
@@ -1107,8 +1412,148 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "entity.attributes.Asset",
+      "source": "host.entity.attributes.Asset",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Managed",
+      "source": "host.entity.attributes.Managed",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Mfa_enabled",
+      "source": "host.entity.attributes.Mfa_enabled",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "entity.lifecycle.First_seen",
       "source": "host.entity.lifecycle.First_seen",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.Last_activity",
+      "source": "host.entity.lifecycle.Last_activity",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Brute_force_victim",
+      "source": "host.entity.behaviors.Brute_force_victim",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.New_country_login",
+      "source": "host.entity.behaviors.New_country_login",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Used_usb_device",
+      "source": "host.entity.behaviors.Used_usb_device",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_level",
+      "source": "host.entity.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score",
+      "source": "host.entity.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "host.entity.risk.calculated_score_norm",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Communicates_with",
+      "source": "host.entity.relationships.Communicates_with",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Depends_on",
+      "source": "host.entity.relationships.Depends_on",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Dependent_of",
+      "source": "host.entity.relationships.Dependent_of",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Owned_by",
+      "source": "host.entity.relationships.Owned_by",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Accessed_frequently_by",
+      "source": "host.entity.relationships.Accessed_frequently_by",
     },
   ],
   "name": "Security 'host' Entity Store Definition",
@@ -1123,17 +1568,86 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
+    "asset.business.unit": Object {
+      "type": "keyword",
+    },
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "asset.environment": Object {
+      "type": "keyword",
+    },
+    "asset.id": Object {
+      "type": "keyword",
+    },
+    "asset.model": Object {
+      "type": "keyword",
+    },
+    "asset.name": Object {
+      "type": "keyword",
+    },
+    "asset.owner": Object {
+      "type": "keyword",
+    },
+    "asset.serial_number": Object {
+      "type": "keyword",
+    },
+    "asset.vendor": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.Asset": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Managed": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Mfa_enabled": Object {
+      "type": "boolean",
+    },
     "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Brute_force_victim": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.New_country_login": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
       "type": "date",
     },
+    "entity.lifecycle.Last_activity": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
+    },
+    "entity.relationships.Accessed_frequently_by": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Communicates_with": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Dependent_of": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Depends_on": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Owned_by": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
     },
     "entity.source": Object {
       "type": "keyword",
@@ -1327,8 +1841,88 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "asset.id",
+      "source": "asset.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.name",
+      "source": "asset.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.owner",
+      "source": "asset.owner",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.serial_number",
+      "source": "asset.serial_number",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.model",
+      "source": "asset.model",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.vendor",
+      "source": "asset.vendor",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.environment",
+      "source": "asset.environment",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "asset.criticality",
       "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.business.unit",
+      "source": "asset.business.unit",
     },
     Object {
       "aggregation": Object {
@@ -1427,8 +2021,132 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "entity.attributes.Asset",
+      "source": "service.entity.attributes.Asset",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Managed",
+      "source": "service.entity.attributes.Managed",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Mfa_enabled",
+      "source": "service.entity.attributes.Mfa_enabled",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "entity.lifecycle.First_seen",
       "source": "service.entity.lifecycle.First_seen",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.Last_activity",
+      "source": "service.entity.lifecycle.Last_activity",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Brute_force_victim",
+      "source": "service.entity.behaviors.Brute_force_victim",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.New_country_login",
+      "source": "service.entity.behaviors.New_country_login",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Used_usb_device",
+      "source": "service.entity.behaviors.Used_usb_device",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_level",
+      "source": "service.entity.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score",
+      "source": "service.entity.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "service.entity.risk.calculated_score_norm",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Communicates_with",
+      "source": "service.entity.relationships.Communicates_with",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Depends_on",
+      "source": "service.entity.relationships.Depends_on",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Dependent_of",
+      "source": "service.entity.relationships.Dependent_of",
     },
   ],
   "name": "Security 'service' Entity Store Definition",
@@ -1443,17 +2161,80 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
+    "asset.business.unit": Object {
+      "type": "keyword",
+    },
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "asset.environment": Object {
+      "type": "keyword",
+    },
+    "asset.id": Object {
+      "type": "keyword",
+    },
+    "asset.model": Object {
+      "type": "keyword",
+    },
+    "asset.name": Object {
+      "type": "keyword",
+    },
+    "asset.owner": Object {
+      "type": "keyword",
+    },
+    "asset.serial_number": Object {
+      "type": "keyword",
+    },
+    "asset.vendor": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.Asset": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Managed": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Mfa_enabled": Object {
+      "type": "boolean",
+    },
     "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Brute_force_victim": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.New_country_login": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
       "type": "date",
     },
+    "entity.lifecycle.Last_activity": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
+    },
+    "entity.relationships.Communicates_with": Object {
+      "type": "date",
+    },
+    "entity.relationships.Dependent_of": Object {
+      "type": "date",
+    },
+    "entity.relationships.Depends_on": Object {
+      "type": "date",
+    },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
     },
     "entity.source": Object {
       "type": "keyword",
@@ -1609,8 +2390,88 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "asset.id",
+      "source": "asset.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.name",
+      "source": "asset.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.owner",
+      "source": "asset.owner",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.serial_number",
+      "source": "asset.serial_number",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.model",
+      "source": "asset.model",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.vendor",
+      "source": "asset.vendor",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.environment",
+      "source": "asset.environment",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "asset.criticality",
       "source": "asset.criticality",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "asset.business.unit",
+      "source": "asset.business.unit",
     },
     Object {
       "aggregation": Object {
@@ -1709,8 +2570,140 @@ Object {
         },
         "type": "top_value",
       },
+      "destination": "entity.attributes.Asset",
+      "source": "user.entity.attributes.Asset",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Managed",
+      "source": "user.entity.attributes.Managed",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.attributes.Mfa_enabled",
+      "source": "user.entity.attributes.Mfa_enabled",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
       "destination": "entity.lifecycle.First_seen",
       "source": "user.entity.lifecycle.First_seen",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.lifecycle.Last_activity",
+      "source": "user.entity.lifecycle.Last_activity",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Brute_force_victim",
+      "source": "user.entity.behaviors.Brute_force_victim",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.New_country_login",
+      "source": "user.entity.behaviors.New_country_login",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.behaviors.Used_usb_device",
+      "source": "user.entity.behaviors.Used_usb_device",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_level",
+      "source": "user.entity.risk.calculated_level",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score",
+      "source": "user.entity.risk.calculated_score",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "user.entity.risk.calculated_score_norm",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Accesses_frequently",
+      "source": "user.entity.relationships.Accesses_frequently",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Owns",
+      "source": "user.entity.relationships.Owns",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Supervises",
+      "source": "user.entity.relationships.Supervises",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.relationships.Supervised_by",
+      "source": "user.entity.relationships.Supervised_by",
     },
   ],
   "name": "Security 'user' Entity Store Definition",
@@ -1725,17 +2718,83 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
+    "asset.business.unit": Object {
+      "type": "keyword",
+    },
     "asset.criticality": Object {
       "type": "keyword",
     },
+    "asset.environment": Object {
+      "type": "keyword",
+    },
+    "asset.id": Object {
+      "type": "keyword",
+    },
+    "asset.model": Object {
+      "type": "keyword",
+    },
+    "asset.name": Object {
+      "type": "keyword",
+    },
+    "asset.owner": Object {
+      "type": "keyword",
+    },
+    "asset.serial_number": Object {
+      "type": "keyword",
+    },
+    "asset.vendor": Object {
+      "type": "keyword",
+    },
+    "entity.attributes.Asset": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Managed": Object {
+      "type": "boolean",
+    },
+    "entity.attributes.Mfa_enabled": Object {
+      "type": "boolean",
+    },
     "entity.attributes.Privileged": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Brute_force_victim": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.New_country_login": Object {
+      "type": "boolean",
+    },
+    "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
     },
     "entity.lifecycle.First_seen": Object {
       "type": "date",
     },
+    "entity.lifecycle.Last_activity": Object {
+      "type": "date",
+    },
     "entity.name": Object {
       "type": "keyword",
+    },
+    "entity.relationships.Accesses_frequently": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Owns": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Supervised_by": Object {
+      "type": "keyword",
+    },
+    "entity.relationships.Supervises": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
     },
     "entity.source": Object {
       "type": "keyword",
