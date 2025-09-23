@@ -474,8 +474,9 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
-      let acceptedTypes: string[] = ['any'];
+      let acceptedTypes: FunctionParameterType[] = ['any'];
 
+      /** Is this expression within a function parameter context? */
       if (functionParameterContext) {
         const { paramDefinitions } = functionParameterContext;
 
@@ -491,6 +492,16 @@ export async function suggestForExpression({
         }
 
         acceptedTypes = ensureKeywordAndText(paramDefinitions.map((p) => p.type));
+
+        suggestions.push(
+          ...getCompatibleLiterals(
+            acceptedTypes,
+            {
+              supportsControls: context?.supportsControls,
+            },
+            context?.variables
+          )
+        );
       }
 
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
