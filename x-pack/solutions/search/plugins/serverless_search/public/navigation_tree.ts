@@ -9,6 +9,8 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
 import { i18n } from '@kbn/i18n';
+import agentsIcon from './assets/robot.svg';
+import playgroundIcon from './assets/playground.svg';
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -99,6 +101,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
+            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            title: AGENTS_TITLE,
+            link: 'agent_builder',
+          },
+          {
             link: 'workflows',
             withBadge: true,
             badgeTypeV2: 'techPreview' as const,
@@ -109,17 +116,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
-          },
-          {
-            title: AGENTS_TITLE,
-            link: 'agent_builder',
-            sideNavVersion: 'v1',
-          },
-          {
-            iconV2: 'comment',
-            link: 'agent_builder',
-            sideNavVersion: 'v2',
-            title: AGENTS_TITLE,
           },
           {
             id: 'build',
@@ -151,7 +147,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
-                iconV2: 'broom' /* TODO: review icon */,
+                iconV2: playgroundIcon, // Temp svg until we have icon in EUI
               }),
             ],
           },
