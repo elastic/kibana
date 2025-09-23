@@ -355,9 +355,6 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                   data-test-subj="dashboardSyncTooltipsCheckbox"
                 />
               </EuiFormRow>
-              {controlGroupApi ? (
-                <EditControlGroupButton controlGroupApi={controlGroupApi} />
-              ) : null}
             </>
           </EuiFormRow>
         </EuiForm>

@@ -11,7 +11,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ReactDOM from 'react-dom';
 
-import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
+import {
+  type EuiContextMenuPanelDescriptor,
+  EuiContextMenu,
+  EuiWrappingPopover,
+} from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DefaultControlApi } from '@kbn/controls-plugin/public';
@@ -31,6 +35,7 @@ import {
   getAddESQLControlButtonTitle,
   getAddTimeSliderControlButtonTitle,
   getCreateVisualizationButtonTitle,
+  getEditControlGroupButtonTitle,
 } from '../../_dashboard_app_strings';
 
 interface AddMenuProps {
@@ -111,7 +116,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
     });
   }, [closePopover, coreServices, dashboardApi]);
 
-  const panels = [
+  const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       initialFocusedItemIndex: 0,
@@ -174,6 +179,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         {
           name: getAddControlButtonTitle(),
           icon: 'empty',
+          disabled: !controlGroupApi,
           'data-test-subj': 'controls-create-button',
           onClick: () => {
             controlGroupApi?.openAddDataControlFlyout({ onSave });
@@ -183,6 +189,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         {
           name: getAddESQLControlButtonTitle(),
           icon: 'empty',
+          disabled: !controlGroupApi,
           'data-test-subj': 'esql-control-create-button',
           onClick: async () => {
             try {
@@ -233,6 +240,20 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
               },
             });
             dashboardApi.scrollToTop();
+            closePopover();
+          },
+        },
+        {
+          isSeparator: true,
+          key: 'sep',
+        },
+        {
+          name: getEditControlGroupButtonTitle(),
+          icon: 'gear',
+          'data-test-subj': 'controls-settings-button',
+          disabled: !controlGroupApi,
+          onClick: async () => {
+            controlGroupApi?.onEdit();
             closePopover();
           },
         },

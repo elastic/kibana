@@ -130,7 +130,7 @@ export class DashboardPageControls extends FtrService {
 
   public async openControlGroupSettingsFlyout() {
     this.log.debug('Open controls group settings flyout');
-    await this.dashboard.openSettingsFlyout();
+    await this.openControlsMenu();
     await this.testSubjects.click('controls-settings-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-group-settings-flyout');
