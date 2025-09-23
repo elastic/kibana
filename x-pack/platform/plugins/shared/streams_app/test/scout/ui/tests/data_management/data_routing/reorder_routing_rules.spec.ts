@@ -11,7 +11,8 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/235995
+test.describe.skip(
   'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
