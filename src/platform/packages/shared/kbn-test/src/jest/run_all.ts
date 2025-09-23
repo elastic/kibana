@@ -13,6 +13,7 @@ import { relative, dirname } from 'path';
 import { spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { getJestConfigs } from './configs/get_jest_configs';
 
 interface JestConfigResult {
@@ -33,6 +34,10 @@ export async function runJestAll() {
     alias: {},
     default: {},
   });
+
+  if (SCOUT_REPORTER_ENABLED && argv.config) {
+    process.env.JEST_CONFIG_PATH = argv.config;
+  }
 
   const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
   const reporter = getTimeReporter(log, 'scripts/jest_all');
@@ -91,7 +96,10 @@ export async function runJestAll() {
 
     if (fixed.length) {
       log.info('Configs fixed after retry:');
-      for (const f of fixed) log.info(`  - ${f}`);
+
+      for (const f of fixed) {
+        log.info(`  - ${f}`);
+      }
     }
 
     if (stillFailing.length) {
@@ -173,6 +181,7 @@ async function runConfigs(
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
+          '--retryTimes=3',
         ];
 
         const proc = spawn(process.execPath, args, {
@@ -185,7 +194,7 @@ async function runConfigs(
           buffer += d.toString();
         });
         proc.stderr.on('data', (d) => {
-          buffer += d.toString();
+          process.stderr.write(d);
         });
 
         proc.on('exit', (c) => {
