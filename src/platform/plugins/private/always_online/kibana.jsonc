@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/always-online",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Overrides window.navigator.onLine to trick browsers into thinking they are always online (useful for some air-gapped customers).",
+  "plugin": {
+    "id": "alwaysOnline",
+    "configPath": ["alwaysOnline"],
+    "browser": true,
+    "server": true,
+  }
+}

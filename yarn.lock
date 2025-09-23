@@ -4112,6 +4112,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/always-online@link:src/platform/plugins/private/always_online":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""

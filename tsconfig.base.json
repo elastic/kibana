@@ -72,6 +72,8 @@
       "@kbn/alerts-restricted-fixtures-plugin/*": ["x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted/*"],
       "@kbn/alerts-ui-shared": ["src/platform/packages/shared/kbn-alerts-ui-shared"],
       "@kbn/alerts-ui-shared/*": ["src/platform/packages/shared/kbn-alerts-ui-shared/*"],
+      "@kbn/always-online": ["src/platform/plugins/private/always_online"],
+      "@kbn/always-online/*": ["src/platform/plugins/private/always_online/*"],
       "@kbn/ambient-common-types": ["src/platform/packages/private/kbn-ambient-common-types"],
       "@kbn/ambient-common-types/*": ["src/platform/packages/private/kbn-ambient-common-types/*"],
       "@kbn/ambient-ftr-types": ["src/platform/packages/private/kbn-ambient-ftr-types"],
