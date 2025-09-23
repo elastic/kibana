@@ -44,6 +44,12 @@ import {
 
 export type PackageCardProps = IntegrationCardItem;
 
+const badgeContainerStyles = css`
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow: hidden;
+`;
+
 export function PackageCard({
   description,
   name,
@@ -80,7 +86,7 @@ export function PackageCard({
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={badgeContainerStyles}>
         <EuiSpacer size="xs" />
         <span>
           <InlineReleaseBadge release={release} />
@@ -92,7 +98,7 @@ export function PackageCard({
   let verifiedBadge: React.ReactNode | null = null;
   if (isUnverified && showLabels) {
     verifiedBadge = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={badgeContainerStyles}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="warning">
@@ -109,7 +115,7 @@ export function PackageCard({
   let hasDeferredInstallationsBadge: React.ReactNode | null = null;
   if (isReauthorizationRequired && showLabels) {
     hasDeferredInstallationsBadge = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={badgeContainerStyles}>
         <EuiSpacer size="xs" />
         <span>
           <EuiToolTip
@@ -127,7 +133,7 @@ export function PackageCard({
   let updateAvailableBadge: React.ReactNode | null = null;
   if (isUpdateAvailable && showLabels) {
     updateAvailableBadge = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={badgeContainerStyles}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="hollow" iconType="sortUp">
@@ -162,7 +168,7 @@ export function PackageCard({
   let contentBadge: React.ReactNode | null = null;
   if (type === 'content') {
     contentBadge = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={badgeContainerStyles}>
         <EuiSpacer size="xs" />
         <span>
           <EuiBadge color="hollow">
@@ -191,6 +197,12 @@ export function PackageCard({
     }
   };
 
+  const installationStatusVisible = shouldShowInstallationStatus({
+    installStatus,
+    showInstallationStatus,
+    isActive: hasDataStreams,
+  });
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -209,18 +221,16 @@ export function PackageCard({
           [class*='euiCard__description'] {
             flex-grow: 1;
             ${descriptionLineClamp
-              ? shouldShowInstallationStatus({
-                  installStatus,
-                  showInstallationStatus,
-                  isActive: hasDataStreams,
-                })
+              ? installationStatusVisible
                 ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                 : getLineClampStyles(descriptionLineClamp)
               : ''}
           }
 
           [class*='euiCard__titleButton'] {
-            width: 100%;
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
             ${getLineClampStyles(titleLineClamp)}
           }
 
@@ -247,7 +257,18 @@ export function PackageCard({
         }
         onClick={onClickProp ?? onCardClick}
       >
-        <EuiFlexGroup gutterSize="xs" wrap={true}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          wrap={true}
+          css={css`
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
+            overflow: hidden scroll;
+            text-overflow: ellipsis;
+            max-height: ${theme.euiTheme.base * 2}px;
+          `}
+        >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
           {verifiedBadge}
           {updateAvailableBadge}
