@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'common',
     'searchStart',
-    'searchOverview',
     'apiKeys',
     'searchHomePage',
     'searchNavigation',

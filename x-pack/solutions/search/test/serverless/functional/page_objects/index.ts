@@ -10,7 +10,6 @@ import { searchSharedPageObjects } from '../../../page_objects';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
-import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 
 export const pageObjects = {
   ...svlPlatformPageObjects,
@@ -20,5 +19,4 @@ export const pageObjects = {
   svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
-  svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
 };

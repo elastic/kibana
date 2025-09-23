@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
-export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
+export function SearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 

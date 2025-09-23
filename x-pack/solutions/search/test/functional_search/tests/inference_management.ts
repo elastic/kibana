@@ -4,29 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { testHasEmbeddedConsole } from './embedded_console';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
-    'svlCommonPage',
+    'common',
     'embeddedConsole',
     'searchInferenceManagementPage',
     'header',
   ]);
-  const svlSearchNavigation = getService('svlSearchNavigation');
-
-  describe('Serverless Inference Management UI', function () {
-    // see details: https://github.com/elastic/kibana/issues/204539
-    this.tags(['failsOnMKI']);
+  const browser = getService('browser');
+  const spaces = getService('spaces');
+  describe('Inference Management UI', function () {
+    let cleanUp: () => Promise<unknown>;
+    let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('developer');
+      // Navigate to the spaces management page which will log us in Kibana
+      await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
+        shouldUseHashForSubUrl: false,
+      });
+
+      // Create a space with the search solution and navigate to its home page
+      ({ cleanUp, space: spaceCreated } = await spaces.create({
+        name: 'search-inference-management-ftr',
+        solution: 'es',
+      }));
+      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+    });
+
+    after(async () => {
+      // Clean up space created
+      if (!cleanUp) return;
+      await cleanUp();
     });
 
     beforeEach(async () => {
-      await svlSearchNavigation.navigateToInferenceManagementPage();
+      // Navigate to search solution space
+      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      // Navigate to index management app
+      await pageObjects.common.navigateToApp('searchInferenceEndpoints', {
+        basePath: `s/${spaceCreated.id}`,
+      });
     });
 
     describe('endpoint tabular view', () => {
