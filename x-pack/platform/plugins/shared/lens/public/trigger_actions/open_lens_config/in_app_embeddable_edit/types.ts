@@ -34,5 +34,5 @@ export interface InlineEditLensEmbeddableContext {
   // in that case, the styling is responsibility of the consumer
   container?: HTMLElement | null;
 
-  applyButtonText?: string;
+  applyButtonLabel?: string;
 }

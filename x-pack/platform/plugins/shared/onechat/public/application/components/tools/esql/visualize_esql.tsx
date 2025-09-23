@@ -85,6 +85,9 @@ export function VisualizeESQL({
 
   const isLoading = !lensInput;
 
+  console.log('isLoading', isLoading);
+  console.log('lensInput', lensInput);
+
   return (
     <>
       <EditVisualization
@@ -109,13 +112,15 @@ export function VisualizeESQL({
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
-          <lens.EmbeddableComponent
-            {...lensInput}
-            style={{
-              height: VISUALIZATION_HEIGHT,
-            }}
-            onLoad={onLoad}
-          />
+          <div data-test-subj="observabilityAiAssistantLensESQLVisualization">
+            <lens.EmbeddableComponent
+              {...lensInput}
+              style={{
+                height: VISUALIZATION_HEIGHT,
+              }}
+              onLoad={onLoad}
+            />
+          </div>
         )}
       </div>
 
@@ -148,7 +153,7 @@ function EditVisualization({
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
     if (lensInput?.attributes) {
       return {
-        applyButtonText: saveToDashboardLabel,
+        applyButtonLabel: saveToDashboardLabel,
         attributes: lensInput?.attributes,
         lensEvent: lensLoadEvent ?? { adapters: {} },
         onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
