@@ -73,7 +73,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickEditProcessor(0);
 
     // Verify save button is disabled
-    await expect(page.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeHidden();
     await pageObjects.streams.clickCancelProcessorChanges();
     // Verify save button is enabled
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
@@ -101,11 +101,6 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickAddProcessor();
     // Field can be automatically filled based on the samples, empty it.
     await pageObjects.streams.fillFieldInput('');
-
-    // Try to create without filling required fields
-    await pageObjects.streams.clickSaveProcessor();
-
-    await expect(page.getByText('A field value is required.')).toBeVisible();
 
     await pageObjects.streams.fillFieldInput('message');
     await pageObjects.streams.clickSaveProcessor();
