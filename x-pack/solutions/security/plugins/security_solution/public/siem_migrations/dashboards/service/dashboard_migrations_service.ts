@@ -153,11 +153,11 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
     const result = await api.startDashboardMigration(params);
 
-    // Should take a few seconds to stop the task, so we poll until it is not running anymore
+    // Should take a few seconds to start the task, so we poll until it is running
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status !== SiemMigrationTaskStatus.RUNNING, // may be STOPPED, FINISHED or INTERRUPTED
-      { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to stop
+      ({ status }) => status === SiemMigrationTaskStatus.RUNNING,
+      { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to start
     );
 
     this.startPolling();
