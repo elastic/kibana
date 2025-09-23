@@ -82,13 +82,14 @@ export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
   }
 );
 
-export const DEPRECATED_LABEL = i18n.translate('xpack.triggersActionsUI.deprecatedLabel', {
-  defaultMessage: 'Deprecated',
+export const REPLACEMENT_LABEL = i18n.translate('xpack.triggersActionsUI.replacementSoonLabel', {
+  defaultMessage: 'Replacement soon',
 });
 
-export const DEPRECATED_DESCRIPTION = i18n.translate(
+export const REPLACEMENT_DESCRIPTION = i18n.translate(
   'xpack.triggersActionsUI.deprecatedBadgeDescription',
   {
-    defaultMessage: 'This connector is deprecated and will be removed in a future update.',
+    defaultMessage:
+      'This type of connector will soon be deprecated. Only connectors created with the new AI Connector flow will remain. While you can still access existing connectors and create new ones with this flow, make sure to migrate in a timely manner to avoid interruptions in your workflow.',
   }
 );

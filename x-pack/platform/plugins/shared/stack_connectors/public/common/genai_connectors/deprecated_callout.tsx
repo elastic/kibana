@@ -44,7 +44,7 @@ const DeprecatedAIConnectorCallOut: React.FC<Props> = ({
       title={
         <FormattedMessage
           id="xpack.stackConnectors.components.actionConnectorAdd.deprecatedBannerTitle"
-          defaultMessage="{icon} {connectorName} is deprecated"
+          defaultMessage="{icon} {connectorName} connector flow will soon be replaced and existing connectors will be deprecated."
           values={{
             icon: <EuiIcon type="info" size="s" />,
             connectorName: name,
@@ -56,13 +56,13 @@ const DeprecatedAIConnectorCallOut: React.FC<Props> = ({
     >
       <FormattedMessage
         id="xpack.stackConnectors.components.actionConnectorAdd.deprecatedBannerMessage"
-        defaultMessage="To keep up with GenAI innovation and take advantage of our Inference service, we will deprecate this connector in a future update. Consider using the {aiConnectorLink} instead."
+        defaultMessage="Only connectors created with the {aiConnectorLink} will remain. While you can still access existing connectors and create new ones with this flow, make sure to migrate in a timely manner to avoid interruptions in your workflow."
         values={{
           aiConnectorLink: (
             <EuiLink onClick={redirectToInferenceConnector}>
               <FormattedMessage
                 id="xpack.stackConnectors.components.actionConnectorAdd.deprecatedBannerLinkTitle"
-                defaultMessage="AI Connector"
+                defaultMessage="new AI Connector flow"
               />
             </EuiLink>
           ),

@@ -15,8 +15,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import {
-  DEPRECATED_LABEL,
-  DEPRECATED_DESCRIPTION,
+  REPLACEMENT_LABEL,
+  REPLACEMENT_DESCRIPTION,
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
 } from '../translations';
@@ -143,10 +143,10 @@ export const ActionTypeMenu = ({
       const betaBadgeProps =
         item.isExperimental || item.isDeprecated
           ? ({
-              label: item.isExperimental ? TECH_PREVIEW_LABEL : DEPRECATED_LABEL,
+              label: item.isExperimental ? TECH_PREVIEW_LABEL : REPLACEMENT_LABEL,
               tooltipContent: item.isExperimental
                 ? TECH_PREVIEW_DESCRIPTION
-                : DEPRECATED_DESCRIPTION,
+                : REPLACEMENT_DESCRIPTION,
               color: item.isDeprecated ? 'subdued' : undefined,
             } as EuiBetaBadgeProps)
           : undefined;

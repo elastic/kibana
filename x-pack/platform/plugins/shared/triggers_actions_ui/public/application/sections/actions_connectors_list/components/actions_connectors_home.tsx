@@ -11,9 +11,26 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiPageHeader,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabs,
+  EuiTab,
+} from '@elastic/eui';
 import type { Section } from '../../../constants';
-import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
+import {
+  routeToConnectorEdit,
+  routeToConnectors,
+  routeToLogs,
+  INFERENCE_ID,
+} from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -28,6 +45,7 @@ import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_
 import type { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { DeprecatedAIConnectorsCallOut } from './deprecated_ai_connectors_callout';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -56,6 +74,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
+  const [defaultActionTypeId, setDefaultActionTypeId] = useState<string | undefined>();
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
 
   const editItem = useCallback(
@@ -152,6 +171,11 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     });
   };
 
+  const handleCalloutClick = useCallback(() => {
+    setDefaultActionTypeId(INFERENCE_ID);
+    setAddFlyoutVisibility(true);
+  }, [setAddFlyoutVisibility, setDefaultActionTypeId]);
+
   const createConnectorButton = (
     <EuiButton
       data-test-subj="createConnectorButton"
@@ -193,45 +217,82 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   ) {
     topRightSideButtons = [];
     const canSave = hasSaveActionsCapability(capabilities);
+    topRightSideButtons.push(documentationButton);
     if (canSave) {
       topRightSideButtons.push(createConnectorButton);
     }
-    topRightSideButtons.push(documentationButton);
   } else if (matchPath(location.pathname, { path: routeToLogs, exact: true })) {
     topRightSideButtons = [documentationButton];
   }
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        paddingSize="none"
-        pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
-          defaultMessage: 'Connectors',
-        })}
-        description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
-          defaultMessage: 'Connect third-party software with your alerting data.',
-        })}
-        rightSideItems={topRightSideButtons}
-        tabs={tabs.map((tab) => ({
-          label: tab.name,
-          onClick: () => onSectionChange(tab.id),
-          isSelected: tab.id === section,
-          key: tab.id,
-          'data-test-subj': `${tab.id}Tab`,
-        }))}
-      />
+      <EuiPageHeader bottomBorder>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiTitle size="l">
+                      <h1>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.connectors.home.appTitle"
+                          defaultMessage="Connectors"
+                        />
+                      </h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.connectors.home.description"
+                        defaultMessage="Connect third-party software with your alerting data."
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="m">
+                  {topRightSideButtons.map((button) => (
+                    <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DeprecatedAIConnectorsCallOut handleCalloutClick={handleCalloutClick} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabs>
+              {tabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  onClick={() => onSectionChange(tab.id)}
+                  isSelected={tab.id === section}
+                  data-test-subj={`${tab.id}Tab`}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageHeader>
 
       <EuiSpacer size="l" />
-
       {addFlyoutVisible && (
         <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
+            setDefaultActionTypeId(undefined);
           }}
           onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
           onConnectorCreated={loadActions}
           actionTypeRegistry={actionTypeRegistry}
+          defaultActionTypeId={defaultActionTypeId}
         />
       )}
       {editConnectorProps.initialConnector && (
@@ -254,7 +315,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           actionTypeRegistry={actionTypeRegistry}
         />
       )}
-
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Routes>

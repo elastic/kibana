@@ -137,3 +137,5 @@ export const MULTI_CONSUMER_RULE_TYPE_IDS = [
 export const ALERT_TABLE_GENERIC_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-generic-alerts-table`;
 
 export const ALERT_TABLE_GLOBAL_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-global-alerts-table`;
+
+export const INFERENCE_ID = '.inference';

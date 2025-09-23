@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorFormSchema, InferenceConnectorProviderConfig } from './types';
+import { INFERENCE_ID } from '../../constants';
 
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
@@ -13,7 +14,7 @@ const DEFAULT_NUM_THREADS = 1;
 // TODO remove when https://github.com/elastic/kibana/issues/231016 is resolved
 export const connectorOverrides = (connectorId: string) => {
   switch (connectorId) {
-    case '.inference':
+    case INFERENCE_ID:
       // explicit check to see if this field exists as it only exists in serverless
       const formSerializer = (data: ConnectorFormSchema) => {
         if (

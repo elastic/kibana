@@ -36,7 +36,7 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { DEPRECATED_LABEL, DEPRECATED_DESCRIPTION } from '../../translations';
+import { REPLACEMENT_LABEL, REPLACEMENT_DESCRIPTION } from '../../translations';
 
 import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
@@ -286,10 +286,10 @@ const ActionsConnectorsList = ({
             {item.isDeprecated ? (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  data-test-subj="deprecatedLabelMessage"
-                  label={DEPRECATED_LABEL}
-                  color="warning"
-                  tooltipContent={DEPRECATED_DESCRIPTION}
+                  data-test-subj="replacementSoonLabelMessage"
+                  label={REPLACEMENT_LABEL}
+                  color="subdued"
+                  tooltipContent={REPLACEMENT_DESCRIPTION}
                 />
               </EuiFlexItem>
             ) : null}
