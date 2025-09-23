@@ -13,7 +13,6 @@ import { relative, dirname } from 'path';
 import { spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { getJestConfigs } from './configs/get_jest_configs';
 
 interface JestConfigResult {
@@ -34,10 +33,6 @@ export async function runJestAll() {
     alias: {},
     default: {},
   });
-
-  if (SCOUT_REPORTER_ENABLED && argv.config) {
-    process.env.JEST_CONFIG_PATH = argv.config;
-  }
 
   const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
   const reporter = getTimeReporter(log, 'scripts/jest_all');
@@ -190,10 +185,13 @@ async function runConfigs(
         let buffer = '';
 
         proc.stdout.on('data', (d) => {
-          buffer += d.toString();
+          const output = d.toString();
+          buffer += output;
         });
+
         proc.stderr.on('data', (d) => {
-          process.stderr.write(d);
+          const output = d.toString();
+          buffer += output;
         });
 
         proc.on('exit', (c) => {
