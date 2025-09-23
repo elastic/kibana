@@ -443,7 +443,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             </EuiDelayRender>
           )}
           <SavedSearchURLConflictCallout
-            savedSearch={discoverSession}
+            discoverSession={discoverSession}
             spaces={spaces}
             history={history}
           />

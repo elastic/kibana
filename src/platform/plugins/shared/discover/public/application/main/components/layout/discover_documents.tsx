@@ -457,8 +457,8 @@ function DiscoverDocumentsComponent({
             }
             rows={rows}
             sort={(sort as SortOrder[]) || []}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
+            searchDescription={discoverSession?.description}
+            searchTitle={discoverSession?.title}
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
             settings={grid}
