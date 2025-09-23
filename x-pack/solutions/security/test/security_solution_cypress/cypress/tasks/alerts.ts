@@ -113,10 +113,21 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_MENU).should('be.visible');
   cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
+
+export const selectAndConfirmClosingReason = () => {
+  cy.get('[data-test-subj="euiSelectableList"]').within(() => {
+    //  Select first available closing reason
+    cy.get('li').eq(0).click();
+  });
+  //  Confirm selection
+  cy.get('button').contains('Close alert').click();
+};
+
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
+   selectAndConfirmClosingReason();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
@@ -124,6 +135,9 @@ export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+
+  selectAndConfirmClosingReason();
+
   cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
@@ -167,6 +181,7 @@ export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 export const closeAlertFromStatusBadge = () => {
   cy.get(ALERT_STATUS_BADGE_BUTTON).click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 
@@ -354,6 +369,7 @@ export const bulkCloseSelectedAlerts = () => {
   cy.get(SELECTED_ALERTS).should('have.text', `Selected 2 alerts`);
   cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
+  selectAndConfirmClosingReason();
 };
 
 export const groupAlertsBy = (field: string) => {
@@ -364,11 +380,13 @@ export const groupAlertsBy = (field: string) => {
 export const closeFirstGroupedAlerts = () => {
   cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
 };
 
 export const closeAlertFromFlyoutActions = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(CLOSE_ALERT_BTN).click();
+  selectAndConfirmClosingReason();
 };
 
 export const investigateFirstAlertInTimeline = () => {
