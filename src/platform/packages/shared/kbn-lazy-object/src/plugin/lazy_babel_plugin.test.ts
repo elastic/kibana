@@ -24,26 +24,23 @@ function transform(code: string) {
   return result.code;
 }
 
-// Minimal runtime shim for the "macro" marker
-function lazyObject<T extends object>(obj: T): T {
-  return obj;
-}
+type Context<T extends Record<string, any> | undefined> = {
+  __hits: number;
+  module: { exports: {} };
+  exports: {};
+  lazyObject: typeof lazyObject;
+  require: (id: string) => typeof import('@kbn/lazy-object');
+  globalThis: Context<T>;
+} & T;
 
-describe('lazyBabelPlugin', () => {
-  it('wraps properties in lazy getters and memoizes on first access', () => {
-    const code = transform(`
-      const o = lazyObject({
-        a: (() => { globalThis.__hits = (globalThis.__hits||0)+1; return 1; })(),
-      });
-      o;
-    `);
-
-    // Execute transformed code in isolated context
-    const ctx: any = { __hits: 0, module: { exports: {} }, exports: {} };
-    ctx.globalThis = ctx;
-    ctx.lazyObject = lazyObject;
-    // Provide a CJS require stub for the injected import from '@kbn/lazy-object'
-    ctx.require = (id: string) => {
+function createContext<T extends Record<string, any> | undefined>(init?: T): Context<T>;
+function createContext(init?: Record<string, any>) {
+  const ctx = {
+    __hits: 0,
+    module: { exports: {} },
+    exports: {},
+    lazyObject,
+    require: (id: string) => {
       if (id === '@kbn/lazy-object') {
         return {
           createLazyObjectFromAnnotations,
@@ -52,7 +49,34 @@ describe('lazyBabelPlugin', () => {
         };
       }
       throw new Error(`Unknown module: ${id}`);
-    };
+    },
+    get globalThis(): Context<any> {
+      return ctx;
+    },
+    ...init,
+  };
+  return ctx;
+}
+
+// Minimal runtime shim for the "macro" marker
+function lazyObject<T extends object>(obj: T): T {
+  return obj;
+}
+
+describe('lazyBabelPlugin', () => {
+  it('wraps properties in lazy getters and memoizes on first access', () => {
+    const code = transform(`
+      import { lazyObject } from '@kbn/lazy-object';
+
+      const o = lazyObject({
+        a: (() => { globalThis.__hits = (globalThis.__hits||0)+1; return 1; })(),
+      });
+      o;
+    `);
+
+    // Execute transformed code in isolated context
+    const ctx = createContext();
+
     runInNewContext(code + '\nmodule.exports = o;', ctx);
     const o: any = ctx.module.exports;
 
@@ -65,25 +89,16 @@ describe('lazyBabelPlugin', () => {
 
   it('allows setting property to override memoized value', () => {
     const code = transform(`
+      import { lazyObject } from '@kbn/lazy-object';
+      
       const o = lazyObject({
         x: (() => { globalThis.__hits = (globalThis.__hits||0)+1; return 5; })(),
       });
       o;
     `);
 
-    const ctx: any = { __hits: 0, module: { exports: {} }, exports: {} };
-    ctx.globalThis = ctx;
-    ctx.lazyObject = lazyObject;
-    ctx.require = (id: string) => {
-      if (id === '@kbn/lazy-object') {
-        return {
-          createLazyObjectFromAnnotations,
-          annotateLazy,
-          lazyObject: (x: any) => x,
-        };
-      }
-      throw new Error(`Unknown module: ${id}`);
-    };
+    const ctx = createContext();
+
     runInNewContext(code + '\nmodule.exports = o;', ctx);
     const o: any = ctx.module.exports;
 
@@ -92,24 +107,24 @@ describe('lazyBabelPlugin', () => {
     expect(ctx.__hits).toBe(0); // setter should not trigger original evaluation
   });
 
-  it('keeps properties enumerable', () => {
+  it('only transforms lazyObject calls from @kbn/lazy-object', () => {
     const code = transform(`
+      import { lazyObject } from '@kbn/not-lazy-object';
       const o = lazyObject({ a: 1, b: 2 });
       o;
     `);
-    const ctx: any = { module: { exports: {} }, exports: {} };
-    ctx.globalThis = ctx;
-    ctx.lazyObject = lazyObject;
-    ctx.require = (id: string) => {
-      if (id === '@kbn/lazy-object') {
-        return {
-          createLazyObjectFromAnnotations,
-          annotateLazy,
-          lazyObject: (x: any) => x,
-        };
-      }
-      throw new Error(`Unknown module: ${id}`);
-    };
+
+    expect(code).not.toContain('_lazyObject.');
+  });
+
+  it('keeps properties enumerable', () => {
+    const code = transform(`
+      import { lazyObject } from '@kbn/lazy-object';
+      const o = lazyObject({ a: 1, b: 2 });
+      o;
+    `);
+    const ctx = createContext();
+
     runInNewContext(code + '\nmodule.exports = o;', ctx);
     const o: any = ctx.module.exports;
     expect(Object.keys(o)).toEqual(['a', 'b']);
@@ -117,24 +132,14 @@ describe('lazyBabelPlugin', () => {
 
   it('handles spread properties without crashing', () => {
     const code = transform(`
+      import { lazyObject } from '@kbn/lazy-object';
       const base = { a: 1 };
       const o = lazyObject({ ...base, b: (() => { globalThis.__hits = (globalThis.__hits||0)+1; return 2; })() });
       o;
     `);
 
-    const ctx: any = { __hits: 0, module: { exports: {} }, exports: {} };
-    ctx.globalThis = ctx;
-    ctx.lazyObject = lazyObject;
-    ctx.require = (id: string) => {
-      if (id === '@kbn/lazy-object') {
-        return {
-          createLazyObjectFromAnnotations,
-          annotateLazy,
-          lazyObject: (x: any) => x,
-        };
-      }
-      throw new Error(`Unknown module: ${id}`);
-    };
+    const ctx = createContext();
+
     runInNewContext(code + '\nmodule.exports = o;', ctx);
     const o: any = ctx.module.exports;
 
@@ -149,6 +154,8 @@ describe('lazyBabelPlugin', () => {
 
   it('handles spread of call expressions without crashing', () => {
     const code = transform(`
+      import { lazyObject } from '@kbn/lazy-object';
+
       function createCoreMock() {
         globalThis.__spreadHits = (globalThis.__spreadHits||0)+1;
         return { a: 1 };
@@ -160,19 +167,11 @@ describe('lazyBabelPlugin', () => {
       o;
     `);
 
-    const ctx: any = { __spreadHits: 0, __lazyHits: 0, module: { exports: {} }, exports: {} };
-    ctx.globalThis = ctx;
-    ctx.lazyObject = lazyObject;
-    ctx.require = (id: string) => {
-      if (id === '@kbn/lazy-object') {
-        return {
-          createLazyObjectFromAnnotations,
-          annotateLazy,
-          lazyObject: (x: any) => x,
-        };
-      }
-      throw new Error(`Unknown module: ${id}`);
-    };
+    const ctx = createContext({
+      __lazyHits: 0,
+      __spreadHits: 0,
+    });
+
     runInNewContext(code + '\nmodule.exports = o;', ctx);
     const o: any = ctx.module.exports;
 
