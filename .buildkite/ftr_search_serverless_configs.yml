@@ -29,3 +29,4 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group12.ts
   - x-pack/platform/test/onechat_api_integration/configs/config.serverless.ts
+  - x-pack/platform/test/onechat_functional/configs/config.ts
