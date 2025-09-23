@@ -29,11 +29,11 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
       <EuiFormRow
         label={
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            {i18n.translate('xpack.streams.conditionEditor.title', {
+            {i18n.translate('xpack.streams.routing.conditionEditor.title', {
               defaultMessage: 'Status',
             })}
             <EuiIconTip
-              content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
+              content={i18n.translate('xpack.streams.routing.conditionEditor.disableTooltip', {
                 defaultMessage:
                   'When disabled, the routing rule stops sending documents to this stream. It does not remove existing data.',
               })}
@@ -42,7 +42,7 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
         }
       >
         <EuiSwitch
-          label={i18n.translate('xpack.streams.conditionEditor.switch', {
+          label={i18n.translate('xpack.streams.routing.conditionEditor.switch', {
             defaultMessage: 'Enabled',
           })}
           compressed
