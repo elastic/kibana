@@ -17,7 +17,7 @@ import {
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
-import { ESQLDataCascade } from '../../application/context/components/data_cascade/esql_data_cascade';
+import { ESQLDataCascade } from '../../application/main/components/layout/cascaded_documents';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];

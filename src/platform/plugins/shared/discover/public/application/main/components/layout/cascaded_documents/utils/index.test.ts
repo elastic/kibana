@@ -8,7 +8,7 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLStatsQueryMeta, constructCascadeQuery } from './util';
+import { getESQLStatsQueryMeta, constructCascadeQuery } from '.';
 
 describe('utils', () => {
   describe('getESQLStatsQueryMeta', () => {
@@ -86,19 +86,15 @@ describe('utils', () => {
       ]);
     });
 
-    it(`should return the correct metadata when the stats query provides functions as the by option`, () => {
-      const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), ABS(bytes)`;
+    it(`when the stats query provides unsupported functions as the by option, said functions should not be present in the returned metadata`, () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), CATEGORIZE(bytes)`;
 
       const result = getESQLStatsQueryMeta(queryString);
 
       expect(result.groupByFields).toEqual([
         {
-          field: 'BUCKET(@timestamp, 1 hour)',
-          type: 'bucket',
-        },
-        {
-          field: 'ABS(bytes)',
-          type: 'abs',
+          field: 'CATEGORIZE(bytes)',
+          type: 'categorize',
         },
       ]);
       expect(result.appliedFunctions).toEqual([{ identifier: 'var0', operator: 'AVG' }]);
