@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useRef } from 'react';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -25,6 +25,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -64,6 +65,10 @@ export function TransactionColdstartRateChart({
   offset,
 }: Props) {
   const { euiTheme } = useEuiTheme();
+  const group = useRef<HTMLElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: group.current,
+  });
 
   const {
     query: { rangeFrom, rangeTo },
@@ -84,7 +89,7 @@ export function TransactionColdstartRateChart({
         return Promise.resolve(INITIAL_STATE);
       }
 
-      if (transactionType && serviceName && start && end) {
+      if (intersected && transactionType && serviceName && start && end) {
         return callApmApi(endpoint, {
           params: {
             path: {
@@ -115,6 +120,7 @@ export function TransactionColdstartRateChart({
       offset,
       endpoint,
       comparisonEnabled,
+      intersected,
     ]
   );
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -142,7 +148,7 @@ export function TransactionColdstartRateChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup ref={group} alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>

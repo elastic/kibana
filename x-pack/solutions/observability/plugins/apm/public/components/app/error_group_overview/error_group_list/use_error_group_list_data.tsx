@@ -37,9 +37,11 @@ const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
 export function useErrorGroupListData({
   renderedItemIndices,
   sorting,
+  load,
 }: {
   renderedItemIndices: VisibleItemsStartEnd;
   sorting: TableOptions<ErrorGroupItem>['sort'];
+  load: boolean;
 }) {
   const { serviceName } = useApmServiceContext();
   const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('');
@@ -53,7 +55,7 @@ export function useErrorGroupListData({
   const { data: mainStatistics = INITIAL_MAIN_STATISTICS, status: mainStatisticsStatus } =
     useFetcher(
       (callApmApi) => {
-        if (start && end) {
+        if (load && start && end) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
             {
@@ -78,7 +80,17 @@ export function useErrorGroupListData({
           });
         }
       },
-      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery]
+      [
+        sorting.direction,
+        sorting.field,
+        start,
+        end,
+        serviceName,
+        environment,
+        kuery,
+        searchQuery,
+        load,
+      ]
     );
 
   const itemsToFetch = useMemo(
@@ -95,7 +107,7 @@ export function useErrorGroupListData({
     status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (mainStatistics.requestId && itemsToFetch.length && start && end) {
+      if (load && mainStatistics.requestId && itemsToFetch.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -119,7 +131,7 @@ export function useErrorGroupListData({
     },
     // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatistics.requestId, itemsToFetch, comparisonEnabled, offset],
+    [mainStatistics.requestId, itemsToFetch, comparisonEnabled, offset, load],
     { preservePreviousData: false }
   );
 

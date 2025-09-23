@@ -95,7 +95,7 @@ export function ApmOverview() {
   const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s">
       {!sloCalloutDismissed && (
         <>
           <SloCallout
@@ -212,14 +212,12 @@ export function ApmOverview() {
       </EuiFlexItem>
       {!isRumAgent && !isServerless && (
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <ServiceOverviewInstancesChartAndTable
-              chartHeight={nonLatencyChartHeight}
-              serviceName={serviceName}
-            />
-          </EuiFlexGroup>
+          <ServiceOverviewInstancesChartAndTable
+            chartHeight={nonLatencyChartHeight}
+            serviceName={serviceName}
+          />
         </EuiFlexItem>
       )}
-    </>
+    </EuiFlexGroup>
   );
 }

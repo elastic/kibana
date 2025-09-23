@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -55,9 +54,7 @@ export function ServiceOverview() {
         end={end}
       >
         <ChartPointerEventContextProvider>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <ApmOverview />
-          </EuiFlexGroup>
+          <ApmOverview />
         </ChartPointerEventContextProvider>
       </AnnotationsContextProvider>
     </>

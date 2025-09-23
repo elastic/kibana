@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
@@ -26,6 +26,7 @@ import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_pref
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -56,6 +57,10 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
 export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
+  const group = useRef<HTMLElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: group.current,
+  });
   const {
     urlParams: { transactionName },
   } = useLegacyUrlParams();
@@ -92,7 +97,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         return Promise.resolve(INITIAL_STATE);
       }
 
-      if (transactionType && serviceName && start && end && preferred) {
+      if (intersected && transactionType && serviceName && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           {
@@ -129,6 +134,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
       offset,
       comparisonEnabled,
       preferred,
+      intersected,
     ]
   );
 
@@ -160,7 +166,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup ref={group} alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>

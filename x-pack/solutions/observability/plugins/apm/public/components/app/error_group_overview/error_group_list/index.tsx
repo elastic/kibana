@@ -8,7 +8,7 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { Timestamp } from '@kbn/apm-ui-shared';
@@ -32,6 +32,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import type { ErrorGroupItem } from './use_error_group_list_data';
 import { useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
@@ -78,6 +79,10 @@ export function ErrorGroupList({
   showPerPageOptions = true,
   onLoadTable,
 }: Props) {
+  const table = useRef<HTMLDivElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: table.current,
+  });
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/errors'
@@ -98,7 +103,7 @@ export function ErrorGroupList({
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-  } = useErrorGroupListData({ renderedItemIndices, sorting });
+  } = useErrorGroupListData({ renderedItemIndices, sorting, load: intersected });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
@@ -315,28 +320,30 @@ export function ErrorGroupList({
   }, [isTableSearchBarEnabled, mainStatistics.maxCountExceeded, setDebouncedSearchQuery]);
 
   return (
-    <ManagedTable
-      noItemsMessage={
-        isMainStatsLoading
-          ? i18n.translate('xpack.apm.errorsTable.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-              defaultMessage: 'No errors found',
-            })
-      }
-      items={mainStatistics.errorGroups}
-      columns={columns}
-      initialSortField={defaultSorting.field}
-      initialSortDirection={defaultSorting.direction}
-      sortItems={false}
-      initialPageSize={initialPageSize}
-      isLoading={isMainStatsLoading}
-      tableSearchBar={tableSearchBar}
-      onChangeSorting={setSorting}
-      saveTableOptionsToUrl={saveTableOptionsToUrl}
-      showPerPageOptions={showPerPageOptions}
-      onChangeItemIndices={setRenderedItemIndices}
-    />
+    <div ref={table}>
+      <ManagedTable
+        noItemsMessage={
+          isMainStatsLoading
+            ? i18n.translate('xpack.apm.errorsTable.loading', {
+                defaultMessage: 'Loading...',
+              })
+            : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+                defaultMessage: 'No errors found',
+              })
+        }
+        items={mainStatistics.errorGroups}
+        columns={columns}
+        initialSortField={defaultSorting.field}
+        initialSortDirection={defaultSorting.direction}
+        sortItems={false}
+        initialPageSize={initialPageSize}
+        isLoading={isMainStatsLoading}
+        tableSearchBar={tableSearchBar}
+        onChangeSorting={setSorting}
+        saveTableOptionsToUrl={saveTableOptionsToUrl}
+        showPerPageOptions={showPerPageOptions}
+        onChangeItemIndices={setRenderedItemIndices}
+      />
+    </div>
   );
 }

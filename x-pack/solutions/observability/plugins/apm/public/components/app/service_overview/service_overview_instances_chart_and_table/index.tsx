@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -19,6 +19,7 @@ import type { TableOptions } from '../service_overview_instances_table';
 import { ServiceOverviewInstancesTable } from '../service_overview_instances_table';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { InstancesSortField } from '../../../../../common/instances';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -53,6 +54,10 @@ export function ServiceOverviewInstancesChartAndTable({
   chartHeight,
   serviceName,
 }: ServiceOverviewInstancesChartAndTableProps) {
+  const group = useRef<HTMLElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: group.current,
+  });
   const { transactionType, transactionTypeStatus } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<TableOptions>({
     pageIndex: 0,
@@ -82,7 +87,7 @@ export function ServiceOverviewInstancesChartAndTable({
         return Promise.resolve(INITIAL_STATE_MAIN_STATS);
       }
 
-      if (!start || !end || !transactionType || !latencyAggregationType) {
+      if (!intersected || !start || !end || !transactionType || !latencyAggregationType) {
         return;
       }
 
@@ -135,6 +140,7 @@ export function ServiceOverviewInstancesChartAndTable({
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
       tableOptions.sort,
+      intersected,
     ]
   );
 
@@ -152,6 +158,7 @@ export function ServiceOverviewInstancesChartAndTable({
   } = useFetcher(
     (callApmApi) => {
       if (
+        !intersected ||
         !start ||
         !end ||
         !transactionType ||
@@ -191,7 +198,7 @@ export function ServiceOverviewInstancesChartAndTable({
   );
 
   return (
-    <>
+    <EuiFlexGroup ref={group} direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
@@ -226,6 +233,6 @@ export function ServiceOverviewInstancesChartAndTable({
           />
         </EuiPanel>
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 }

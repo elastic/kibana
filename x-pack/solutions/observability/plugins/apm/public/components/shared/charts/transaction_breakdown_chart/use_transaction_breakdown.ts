@@ -14,9 +14,11 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 export function useTransactionBreakdown({
   kuery,
   environment,
+  load,
 }: {
   kuery: string;
   environment: string;
+  load: boolean;
 }) {
   const {
     urlParams: { transactionName },
@@ -40,7 +42,7 @@ export function useTransactionBreakdown({
         return Promise.resolve({ timeseries: undefined });
       }
 
-      if (serviceName && start && end && transactionType) {
+      if (load && serviceName && start && end && transactionType) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transaction/charts/breakdown', {
           params: {
             path: { serviceName },
@@ -65,6 +67,7 @@ export function useTransactionBreakdown({
       transactionType,
       transactionTypeStatus,
       transactionName,
+      load,
     ]
   );
 

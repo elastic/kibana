@@ -9,7 +9,7 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -22,6 +22,7 @@ import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import type { TablesLoadedState } from '../apm_overview';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
@@ -38,6 +39,11 @@ export function ServiceOverviewDependenciesTable({
   showSparkPlots,
   onLoadTable,
 }: ServiceOverviewDependenciesTableProps) {
+  const table = useRef<HTMLDivElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: table.current,
+  });
+
   const {
     query: {
       environment,
@@ -58,7 +64,7 @@ export function ServiceOverviewDependenciesTable({
   const trackEvent = useUiTracker();
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (!intersected || !start || !end) {
         return;
       }
 
@@ -75,7 +81,7 @@ export function ServiceOverviewDependenciesTable({
         },
       });
     },
-    [start, end, serviceName, environment, offset, comparisonEnabled]
+    [start, end, serviceName, environment, offset, comparisonEnabled, intersected]
   );
 
   useEffect(() => {
@@ -148,36 +154,38 @@ export function ServiceOverviewDependenciesTable({
     }) ?? [];
 
   return (
-    <DependenciesTable
-      dependencies={dependencies}
-      fixedHeight={fixedHeight}
-      title={
-        <>
-          {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitle', {
-            defaultMessage: 'Dependencies',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="question"
-            className="eui-alignCenter"
-            content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
-              defaultMessage:
-                'Downstream services and external connections to uninstrumented services',
+    <div ref={table}>
+      <DependenciesTable
+        dependencies={dependencies}
+        fixedHeight={fixedHeight}
+        title={
+          <>
+            {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitle', {
+              defaultMessage: 'Dependencies',
             })}
-          />
-        </>
-      }
-      nameColumnTitle={i18n.translate('xpack.apm.serviceOverview.dependenciesTableColumn', {
-        defaultMessage: 'Dependency',
-      })}
-      status={status}
-      link={link}
-      showPerPageOptions={showPerPageOptions}
-      initialPageSize={5}
-      showSparkPlots={showSparkPlots}
-      saveTableOptionsToUrl={false}
-    />
+            &nbsp;
+            <EuiIconTip
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignCenter"
+              content={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitleTip', {
+                defaultMessage:
+                  'Downstream services and external connections to uninstrumented services',
+              })}
+            />
+          </>
+        }
+        nameColumnTitle={i18n.translate('xpack.apm.serviceOverview.dependenciesTableColumn', {
+          defaultMessage: 'Dependency',
+        })}
+        status={status}
+        link={link}
+        showPerPageOptions={showPerPageOptions}
+        initialPageSize={5}
+        showSparkPlots={showSparkPlots}
+        saveTableOptionsToUrl={false}
+      />
+    </div>
   );
 }

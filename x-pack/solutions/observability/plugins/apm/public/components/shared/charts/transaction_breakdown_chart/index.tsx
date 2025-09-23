@@ -7,10 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useRef } from 'react';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
 import { useTransactionBreakdown } from './use_transaction_breakdown';
 import { BreakdownChart } from '../breakdown_chart';
+import { useIntersectionObserver } from '../../../../hooks/use_intersection_observer';
 
 export function TransactionBreakdownChart({
   height,
@@ -23,13 +24,17 @@ export function TransactionBreakdownChart({
   environment: string;
   kuery: string;
 }) {
-  const { data, status } = useTransactionBreakdown({ environment, kuery });
+  const group = useRef<HTMLElement>(null);
+  const { intersected } = useIntersectionObserver({
+    target: group.current,
+  });
+  const { data, status } = useTransactionBreakdown({ environment, kuery, load: intersected });
   const { annotations } = useAnnotationsContext();
   const { timeseries } = data;
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup ref={group} direction="column" gutterSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
