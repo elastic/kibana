@@ -14,11 +14,13 @@ import { readKibanaConfig } from './read_kibana_config';
 import type { Logger } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
+import { getApiKeyHeader } from './get_api_key_header';
 
-async function getFetchStatus(url: string) {
+async function getFetchStatus(url: string, apiKey?: string) {
   try {
     const response = await fetch(url, {
       agent: getFetchAgent(url),
+      headers: getApiKeyHeader(apiKey),
     });
     return response.status;
   } catch (error) {
@@ -59,13 +61,27 @@ async function discoverAuth(parsedTarget: Url) {
 
 async function getKibanaUrl({
   targetKibanaUrl,
+  apiKey,
   logger,
 }: {
   targetKibanaUrl: string;
+  apiKey?: string;
   logger: Logger;
 }) {
   try {
     logger.debug(`Checking Kibana URL ${stripAuthIfCi(targetKibanaUrl)} for a redirect`);
+
+    if (apiKey) {
+      const status = await getFetchStatus(targetKibanaUrl, apiKey);
+      if (status !== 200) {
+        throw new Error(`Expected HTTP 200 from ${stripAuthIfCi(targetKibanaUrl)}, got ${status}`);
+      }
+
+      return {
+        kibanaUrl: targetKibanaUrl.replace(/\/$/, ''),
+        kibanaHeaders: getApiKeyHeader(apiKey),
+      };
+    }
 
     const targetAuth = parse(targetKibanaUrl).auth;
 
@@ -102,7 +118,9 @@ async function getKibanaUrl({
 
     logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
 
-    return discoveredKibanaUrlWithAuth.replace(/\/$/, '');
+    return {
+      kibanaUrl: discoveredKibanaUrlWithAuth.replace(/\/$/, ''),
+    };
   } catch (error) {
     throw new Error(
       `Could not connect to Kibana. ${error.message} \n If your Kibana URL differs, consider using '--kibana' parameter to customize it. \n`
@@ -208,7 +226,12 @@ function logCertificateWarningsIfNeeded(parsedTarget: Url, parsedKibanaUrl: Url,
   }
 }
 
-export async function getServiceUrls({ logger, target, kibana }: RunOptions & { logger: Logger }) {
+export async function getServiceUrls({
+  logger,
+  target,
+  kibana,
+  apiKey,
+}: RunOptions & { logger: Logger }) {
   if (!target) {
     target = discoverTargetFromKibanaConfig();
     if (!kibana) {
@@ -223,8 +246,11 @@ export async function getServiceUrls({ logger, target, kibana }: RunOptions & { 
   const parsedTarget = parse(target);
 
   let auth = parsedTarget.auth;
+  let esHeaders;
 
-  if (!parsedTarget.auth) {
+  if (apiKey) {
+    esHeaders = getApiKeyHeader(apiKey);
+  } else if (!auth) {
     auth = await discoverAuth(parsedTarget);
   }
 
@@ -235,21 +261,28 @@ export async function getServiceUrls({ logger, target, kibana }: RunOptions & { 
     })
   );
 
-  const suspectedKibanaUrl = kibana || getKibanaUrlFromTarget(formattedEsUrl);
+  let targetKibanaUrl = kibana || getKibanaUrlFromTarget(formattedEsUrl);
+  const parsedKibanaUrl = parse(targetKibanaUrl);
 
-  const parsedKibanaUrl = parse(suspectedKibanaUrl);
+  if (!apiKey) {
+    targetKibanaUrl = format({
+      ...parsedKibanaUrl,
+      auth,
+    });
+  }
 
-  const kibanaUrlWithAuth = format({
-    ...parsedKibanaUrl,
-    auth,
+  const { kibanaUrl, kibanaHeaders } = await getKibanaUrl({
+    targetKibanaUrl,
+    apiKey,
+    logger,
   });
-
-  const validatedKibanaUrl = await getKibanaUrl({ targetKibanaUrl: kibanaUrlWithAuth, logger });
 
   logCertificateWarningsIfNeeded(parsedTarget, parsedKibanaUrl, logger);
 
   return {
-    kibanaUrl: validatedKibanaUrl,
+    kibanaUrl,
     esUrl: formattedEsUrl,
+    kibanaHeaders,
+    esHeaders,
   };
 }

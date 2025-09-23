@@ -25,7 +25,7 @@ import {
   mockedMigrationResultsObj,
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
-import * as useGetMissingResourcesModule from '../service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -112,9 +112,14 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
       },
     },
   };
-  return render(<MigrationRulesPage {...finalProps} />, {
-    wrapper: args?.wrapper,
-  });
+  return render(
+    <TestProviders>
+      <MigrationRulesPage {...finalProps} />
+    </TestProviders>,
+    {
+      wrapper: args?.wrapper,
+    }
+  );
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =
