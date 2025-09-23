@@ -5,36 +5,50 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolbarPopoverProps } from '../../../shared_components';
-import { ToolbarPopover } from '../../../shared_components';
-import type { MetricVisualizationState } from '../types';
-import { AppearanceSettings } from './appearance_settings';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { hasIcon } from '@kbn/visualization-ui-components';
+import type {
+  MetricVisualizationState,
+  TitleFontWeight,
+  PrimaryMetricFontSize,
+  IconPosition,
+  Alignment,
+  PrimaryMetricPosition,
+} from '../types';
+import {
+  METRIC_LAYOUT_BY_POSITION,
+  legacyMetricStateDefaults,
+  metricStateDefaults,
+  type MetricLayoutWithDefault,
+} from '../constants';
 
-interface AppearancePopoverProps {
-  state: MetricVisualizationState;
-  setState: (newState: MetricVisualizationState) => void;
-  groupPosition?: ToolbarPopoverProps['groupPosition'];
-}
+/** Get default layout config based on primary metric position */
+const getDefaultLayoutConfig = (
+  primaryMetricPosition: PrimaryMetricPosition,
+  { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
+): MetricLayoutWithDefault => {
+  let config = { ...METRIC_LAYOUT_BY_POSITION[primaryMetricPosition] };
 
-export function AppearancePopover({ state, setState, groupPosition }: AppearancePopoverProps) {
-  return (
-    <ToolbarPopover
-      title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
-        defaultMessage: 'Appearance',
-      })}
-      type="titlesAndText"
-      groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTextOptionsButton"
-    >
-      <AppearanceSettings state={state} setState={setState} />
-    </ToolbarPopover>
-  );
-}
+  if (!hasMetricIcon) {
+    const { iconAlign, ...rest } = config;
+    config = rest;
+  }
 
-export function SettingsContent({
+  if (!hasSecondaryMetric) {
+    const { secondaryAlign, ...rest } = config;
+    config = rest;
+  }
+
+  return config;
+};
+
+export function AppearanceSettings({
   state,
   setState,
 }: {
@@ -51,14 +65,7 @@ export function SettingsContent({
   };
 
   return (
-    <ToolbarPopover
-      title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
-        defaultMessage: 'Appearance',
-      })}
-      type="visualOptions"
-      groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTextOptionsButton"
-    >
+    <>
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.primaryMetric.title', {
           defaultMessage: 'Primary metric',

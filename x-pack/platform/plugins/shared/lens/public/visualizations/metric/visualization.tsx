@@ -34,7 +34,7 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { Toolbar } from './toolbar';
-import { SettingsPanelToolbar } from './settingsPanelToolbar';
+import { SettingsPanelToolbar } from './appearance_flyout';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
