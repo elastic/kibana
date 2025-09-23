@@ -24,6 +24,7 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import type { DiscoverServices } from '../../build_services';
 import {
@@ -37,7 +38,7 @@ export const deserializeState = async ({
   serializedState,
   discoverServices,
 }: {
-  serializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+  serializedState: SerializedPanelState<SearchEmbeddableSerializedState<DiscoverSessionAttributes>>;
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
