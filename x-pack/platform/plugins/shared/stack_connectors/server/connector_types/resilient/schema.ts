@@ -32,6 +32,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
     externalId: schema.nullable(schema.string()),
     incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
     severityCode: schema.nullable(schema.number()),
+    additional_fields: schema.nullable(schema.string()),
   }),
   comments: schema.nullable(
     schema.arrayOf(

@@ -50,10 +50,17 @@ const ConnectorJiraTypeFieldsRt = rt.strict({
  * Resilient
  */
 
-export const ResilientFieldsRt = rt.strict({
-  incidentTypes: rt.union([rt.array(rt.string), rt.null]),
-  severityCode: rt.union([rt.string, rt.null]),
-});
+export const ResilientFieldsRt = rt.intersection([
+  rt.strict({
+    incidentTypes: rt.union([rt.array(rt.string), rt.null]),
+    severityCode: rt.union([rt.string, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRt>;
 
