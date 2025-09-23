@@ -16,24 +16,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchInferenceManagementPage',
     'header',
   ]);
-  const browser = getService('browser');
-  const spaces = getService('spaces');
+  const searchSpace = getService('searchSpace');
   describe('Inference Management UI', function () {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      // Navigate to the spaces management page which will log us in Kibana
-      await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-inference-management-ftr',
-        solution: 'es',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+        'search-inference-management-ftr'
+      ));
+      await searchSpace.navigateTo(spaceCreated.id);
     });
 
     after(async () => {
@@ -44,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       // Navigate to search solution space
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await searchSpace.navigateTo(spaceCreated.id);
       // Navigate to index management app
       await pageObjects.common.navigateToApp('searchInferenceEndpoints', {
         basePath: `s/${spaceCreated.id}`,
