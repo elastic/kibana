@@ -88,12 +88,12 @@ export const AdvancedFieldMappingOptions = ({
               height={120}
               languageId="json"
               value={jsonOptions}
-              onChange={(value) => {
+              onChange={(updatedValue) => {
                 try {
                   const additionalParameters =
-                    value === ''
+                    updatedValue === ''
                       ? undefined
-                      : (JSON.parse(value) as FieldDefinitionConfigAdvancedParameters);
+                      : (JSON.parse(updatedValue) as FieldDefinitionConfigAdvancedParameters);
                   onChange(additionalParameters);
                   if (onValidate) onValidate(getValidFlag(additionalParameters));
                   resetParsingErrorFlag();
