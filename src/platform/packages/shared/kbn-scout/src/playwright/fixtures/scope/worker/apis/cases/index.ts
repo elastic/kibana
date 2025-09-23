@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type {
   ApiResponse,
   ApiStatusResponse,
@@ -17,6 +16,7 @@ import type {
   CaseCreateRequest,
   CasesFindRequest,
   CasesFindResponse,
+  AttachmentRequest,
 } from './types';
 
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
@@ -27,7 +27,7 @@ export interface CasesApiService {
   get: (caseId: string, spaceId?: string) => Promise<ApiResponse<Case>>;
   update: (request: CaseUpdateRequest[], spaceId?: string) => Promise<ApiResponse<Case[]>>;
   delete: (caseIds: string[], spaceId?: string) => Promise<ApiStatusResponse>;
-  find: (request?: CasesFindRequest, spaceId?: string) => Promise<ApiResponse<CasesFindResponse>>;
+  find: (request?: CasesFindRequest, spaceId?: string) => Promise<ApiResponse<Case[]>>;
   connectors: {
     get: (spaceId?: string) => Promise<ApiResponse<any>>;
   };
@@ -166,7 +166,9 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
           retries: 3,
           query: request,
         });
-        return { data: response.data as CasesFindResponse, status: response.status };
+        const data = response.data as CasesFindResponse;
+
+        return { data: data.cases, status: response.status };
       });
     },
     connectors: {

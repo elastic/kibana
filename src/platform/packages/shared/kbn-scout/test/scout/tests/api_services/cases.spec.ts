@@ -157,8 +157,8 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   });
 
   apiTest('should search for a case by category', async ({ apiServices }) => {
-    const fetchedResponse = await apiServices.cases.find({ category: 'test' });
-    expect(fetchedResponse.status).toBe(200);
-    expect(fetchedResponse.data.total).toBe(1);
+    const { data: cases, status } = await apiServices.cases.find({ category: 'test' });
+    expect(status).toBe(200);
+    expect(cases.length).toBe(1);
   });
 });
