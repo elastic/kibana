@@ -15,6 +15,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
@@ -72,6 +73,13 @@ export class CreateESQLControlAction implements Action<Context> {
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
+    }
+
+    // Close all existing flyouts before opening the control flyout
+    try {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlControls);
+    } catch (error) {
+      // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
     }
 
     openLazyFlyout({
