@@ -133,7 +133,9 @@ export const useTopNavLinks = ({
         services.capabilities.discover_v2.storeSearchSession
       ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
-          onClick: () => services.data.search.showSearchSessionsFlyout({ appId }),
+          onClick: () => {
+            services.data.search.showSearchSessionsFlyout({ appId });
+          },
         });
         items.push(backgroundSearchFlyoutMenuItem);
       }
