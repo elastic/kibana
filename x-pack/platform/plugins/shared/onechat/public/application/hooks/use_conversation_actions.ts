@@ -60,7 +60,10 @@ export const useConversationActions = () => {
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
     // Navigate to the new conversation if user is still on the "new" conversation page
     if (!conversationId && shouldAllowConversationRedirectRef.current) {
-      navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+      const path = appPaths.chat.conversation({ conversationId: nextConversationId });
+      const params = undefined;
+      const state = { shouldStickToBottom: false };
+      navigateToOnechatUrl(path, params, state);
     }
   };
 
