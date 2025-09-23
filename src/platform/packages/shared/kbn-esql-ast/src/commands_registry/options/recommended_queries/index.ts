@@ -141,7 +141,9 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
-            queryString: `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+            queryString: timeField
+              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
+              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
           },
         ]
       : []),
