@@ -32,13 +32,11 @@ import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awarenes
 import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
-  SingleTabView,
   NoDataPage,
   InitializationError,
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
@@ -136,7 +134,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -280,7 +277,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+        <TabsView {...props} />
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
   );

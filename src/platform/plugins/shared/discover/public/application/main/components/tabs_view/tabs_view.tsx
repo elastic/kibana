@@ -8,7 +8,7 @@
  */
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -21,6 +21,7 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 
 const MAX_TABS_COUNT = 25;
 
@@ -32,6 +33,10 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const tabsEnabled = useMemo(
+    () => services.core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false),
+    [services.core.featureFlags]
+  );
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -55,7 +60,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
       maxItemsCount={MAX_TABS_COUNT}
-      hideTabsBar={hideTabsBar}
+      hideTabsBar={!tabsEnabled || hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}
       renderContent={renderContent}
