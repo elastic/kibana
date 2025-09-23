@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
+import { test } from '../../../fixtures';
 
 test.describe(
   'Stream data retention - updating data retention',
@@ -76,76 +76,6 @@ test.describe(
       await page.getByRole('button', { name: 'Save' }).click();
 
       await expect(page.getByTestId('retention-metric').getByText('∞')).toBeVisible();
-      await pageObjects.streams.closeToasts();
-    });
-
-    test('should enable failure store', async ({ page, pageObjects }) => {
-      await page.getByTestId('streamsAppFailureStoreEnableButton').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('30 days')
-      ).toBeVisible();
-      await expect(
-        page
-          .getByTestId('failureStoreRetention-metric-subtitle')
-          .getByText('Default retention period')
-      ).toBeVisible();
-      await pageObjects.streams.closeToasts();
-    });
-
-    test('should edit failure store successfully', async ({ page, pageObjects }) => {
-      await page.getByTestId('streamsAppFailureStoreEnableButton').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('30 days')
-      ).toBeVisible();
-      await expect(
-        page
-          .getByTestId('failureStoreRetention-metric-subtitle')
-          .getByText('Default retention period')
-      ).toBeVisible();
-      await pageObjects.streams.closeToasts();
-
-      // Update the retention period
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('7');
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('7 days')
-      ).toBeVisible();
-      await expect(
-        page
-          .getByTestId('failureStoreRetention-metric-subtitle')
-          .getByText('Custom retention period')
-      ).toBeVisible();
-      await pageObjects.streams.closeToasts();
-    });
-
-    test('should disable failure store', async ({ page, pageObjects }) => {
-      await page.getByTestId('streamsAppFailureStoreEnableButton').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('failureStoreRetention-metric').getByText('30 days')
-      ).toBeVisible();
-      await expect(
-        page
-          .getByTestId('failureStoreRetention-metric-subtitle')
-          .getByText('Default retention period')
-      ).toBeVisible();
-      await pageObjects.streams.closeToasts();
-
-      // Disable failure store
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('enableFailureStoreToggle').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
-      await expect(
-        page.getByTestId('disabledFailureStorePanel').getByText('Failure store disabled')
-      ).toBeVisible();
       await pageObjects.streams.closeToasts();
     });
   }
