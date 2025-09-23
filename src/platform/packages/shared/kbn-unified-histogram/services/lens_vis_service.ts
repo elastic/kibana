@@ -252,10 +252,13 @@ export class LensVisService {
             breakdownField,
             preferredVisAttributes: externalVisContext?.attributes,
           });
-          availableSuggestionsWithType.push({
-            suggestion: histogramSuggestionForESQL,
-            type: UnifiedHistogramSuggestionType.histogramForESQL,
-          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
         } else if (hasTransformationalCommand(queryParams.query.esql)) {
           // appends the first lens suggestion if available
           const allSuggestions = this.getAllSuggestions({
