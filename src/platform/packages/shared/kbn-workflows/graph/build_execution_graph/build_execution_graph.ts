@@ -725,7 +725,19 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.G
     parentKey: '',
   };
 
-  return createStepsSequence(workflowSchema.steps, context);
+  let finalGraph = createStepsSequence(workflowSchema.steps, context);
+
+  if (workflowSchema.settings?.timeout) {
+    finalGraph = handleStepTimeout(
+      'workflow_timeout_handler',
+      'workflow_timeout_handler',
+      workflowSchema.settings.timeout,
+      finalGraph,
+      context
+    );
+  }
+
+  return finalGraph;
 }
 
 export function convertToSerializableGraph(graph: graphlib.Graph): any {

@@ -60,6 +60,7 @@ export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
