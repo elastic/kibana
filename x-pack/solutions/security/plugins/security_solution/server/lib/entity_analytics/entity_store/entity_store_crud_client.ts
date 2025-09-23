@@ -48,7 +48,6 @@ const ID_FIELD = 'entity.id';
 
 const nonForcedAttributesPathRegex = [
   /entity\.attributes\..*/,
-  /entity\.lifecycle\..*/,
   /entity\.behaviors\..*/,
   /entity\.relationships\..*/,
 ];

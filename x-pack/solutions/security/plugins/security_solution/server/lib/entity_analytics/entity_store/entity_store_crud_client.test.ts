@@ -107,8 +107,8 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: new Date().toISOString(),
+          behaviors: {
+            brute_force_victim: true,
           },
         },
       };
@@ -137,8 +137,8 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
+          behaviors: {
+            brute_force_victim: true,
           },
         },
       };
@@ -163,8 +163,8 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
-            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['behaviors'] = ctx._source['entity']['behaviors'] == null ? [:] : ctx._source['entity']['behaviors'];` +
+            `ctx._source['entity']['behaviors']['Brute_force_victim'] = true;`,
         },
       });
 
@@ -180,9 +180,9 @@ describe('EntityStoreCrudClient', () => {
               attributes: {
                 Privileged: true,
               },
-              lifecycle: {
+              behaviors: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                First_seen: '1995-12-17T03:24:00',
+                Brute_force_victim: true,
               },
             },
           },
@@ -212,8 +212,8 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: false,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
+          behaviors: {
+            brute_force_victim: true,
           },
         },
       };
@@ -239,8 +239,8 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['name'] = 'mysql-db';` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = false;` +
-            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['behaviors'] = ctx._source['entity']['behaviors'] == null ? [:] : ctx._source['entity']['behaviors'];` +
+            `ctx._source['entity']['behaviors']['Brute_force_victim'] = true;`,
         },
       });
 
@@ -255,9 +255,9 @@ describe('EntityStoreCrudClient', () => {
             attributes: {
               Privileged: false,
             },
-            lifecycle: {
+            behaviors: {
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              First_seen: '1995-12-17T03:24:00',
+              Brute_force_victim: true,
             },
           },
         },
@@ -289,8 +289,8 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
+          behaviors: {
+            brute_force_victim: true,
           },
         },
       };
@@ -318,8 +318,8 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
-            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['behaviors'] = ctx._source['entity']['behaviors'] == null ? [:] : ctx._source['entity']['behaviors'];` +
+            `ctx._source['entity']['behaviors']['Brute_force_victim'] = true;`,
         },
       });
 
@@ -336,9 +336,9 @@ describe('EntityStoreCrudClient', () => {
               attributes: {
                 Privileged: true,
               },
-              lifecycle: {
+              behaviors: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                First_seen: '1995-12-17T03:24:00',
+                Brute_force_victim: true,
               },
             },
           },
