@@ -722,6 +722,9 @@
           }
         }
       },
+      "eventId": {
+        "type": "keyword"
+      },
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"
       },
