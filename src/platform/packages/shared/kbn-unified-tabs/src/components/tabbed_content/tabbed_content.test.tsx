@@ -26,10 +26,12 @@ describe('TabbedContent', () => {
     initialItems,
     initialSelectedItemId,
     onChanged,
+    onEvent,
   }: {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
     onChanged: TabbedContentProps['onChanged'];
+    onEvent: TabbedContentProps['onEvent'];
   }) => {
     const [{ managedItems, managedSelectedItemId }, setState] = useState<{
       managedItems: TabbedContentProps['items'];
@@ -53,6 +55,7 @@ describe('TabbedContent', () => {
             managedSelectedItemId: updatedState.selectedItem?.id,
           });
         }}
+        onEvent={onEvent}
         renderContent={(item) => (
           <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
         )}
@@ -60,27 +63,32 @@ describe('TabbedContent', () => {
     );
   };
 
-  it('can create a new tab', async () => {
+  it('can create a new tab and sends tabCreated EBT event', async () => {
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-
     const onChanged = jest.fn();
+    const onEvent = jest.fn();
 
     render(
       <TabsWrapper
         initialItems={initialItems}
         initialSelectedItemId={initialItems[0].id}
         onChanged={onChanged}
+        onEvent={onEvent}
       />
     );
-
     screen.getByTestId('unifiedTabs_tabsBar_newTabBtn').click();
     expect(onChanged).toHaveBeenCalledWith({
       items: [...initialItems, NEW_TAB],
       selectedItem: NEW_TAB,
     });
+    expect(onEvent).toHaveBeenCalledWith('tabCreated', {
+      tabId: NEW_TAB.id,
+      totalTabsOpen: initialItems.length,
+    });
+
     await waitFor(() => {
       expect(screen.getByText('Content for tab: New tab')).toBeInTheDocument();
       const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${NEW_TAB.id}`);
@@ -89,7 +97,7 @@ describe('TabbedContent', () => {
     });
   });
 
-  it('can close a tab', async () => {
+  it('can close a tab and sends tabClosed EBT event', async () => {
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -98,12 +106,14 @@ describe('TabbedContent', () => {
     const secondTab = initialItems[1];
 
     const onChanged = jest.fn();
+    const onEvent = jest.fn();
 
     render(
       <TabsWrapper
         initialItems={initialItems}
         initialSelectedItemId={firstTab.id}
         onChanged={onChanged}
+        onEvent={onEvent}
       />
     );
 
@@ -113,11 +123,16 @@ describe('TabbedContent', () => {
     ).toBe('true');
 
     screen.getByTestId(`unifiedTabs_closeTabBtn_${firstTab.id}`).click();
-
     expect(onChanged).toHaveBeenCalledWith({
       items: [secondTab],
       selectedItem: secondTab,
     });
+    expect(onEvent).toHaveBeenCalledWith('tabClosed', {
+      tabId: firstTab.id,
+      totalTabsOpen: 2,
+      remainingTabsCount: 1,
+    });
+
     await waitFor(() => {
       expect(screen.getByText(`Content for tab: ${secondTab.label}`)).toBeInTheDocument();
       const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`);
@@ -126,7 +141,7 @@ describe('TabbedContent', () => {
     });
   });
 
-  it('can duplicate a tab', async () => {
+  it('can duplicate a tab and sends tabDuplicated event', async () => {
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -134,12 +149,14 @@ describe('TabbedContent', () => {
     const firstTab = initialItems[0];
     const secondTab = initialItems[1];
     const onChanged = jest.fn();
+    const onEvent = jest.fn();
 
     render(
       <TabsWrapper
         initialItems={initialItems}
         initialSelectedItemId={firstTab.id}
         onChanged={onChanged}
+        onEvent={onEvent}
       />
     );
 
@@ -155,14 +172,16 @@ describe('TabbedContent', () => {
     });
 
     screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
-
     const duplicatedTab = {
       ...NEW_TAB,
       label: `${firstTab.label} (copy)`,
       duplicatedFromId: firstTab.id,
     };
-
     await waitFor(() => {
+      expect(onEvent).toHaveBeenCalledWith('tabDuplicated', {
+        tabId: firstTab.id,
+        totalTabsOpen: 2,
+      });
       expect(onChanged).toHaveBeenCalledWith({
         items: [firstTab, duplicatedTab, secondTab],
         selectedItem: duplicatedTab,
@@ -183,12 +202,14 @@ describe('TabbedContent', () => {
     ];
     const firstTab = initialItems[0];
     const onChanged = jest.fn();
+    const onEvent = jest.fn();
 
     render(
       <TabsWrapper
         initialItems={initialItems}
         initialSelectedItemId={firstTab.id}
         onChanged={onChanged}
+        onEvent={onEvent}
       />
     );
 
@@ -215,12 +236,14 @@ describe('TabbedContent', () => {
     const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
     const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
     const onChanged = jest.fn();
+    const onEvent = jest.fn();
 
     render(
       <TabsWrapper
         initialItems={initialItems}
         initialSelectedItemId={tabWithSpecialChars.id}
         onChanged={onChanged}
+        onEvent={onEvent}
       />
     );
 
