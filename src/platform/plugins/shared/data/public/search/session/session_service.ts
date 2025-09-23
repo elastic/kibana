@@ -31,6 +31,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
+import { LRUCache } from 'lru-cache';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
@@ -49,6 +50,16 @@ import { formatSessionName } from './lib/session_name_formatter';
  * until the user saves the session
  */
 const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30000;
+
+/**
+ * To prevent the session ids map from growing indefinitely we can use an LRU cache - we will limit it to 30 sessions for
+ * now given that there can be 25 tabs opened at the same time (see src/platform/packages/shared/kbn-unified-tabs/src/constants.ts)
+ * and we want to make room for the other apps that may use background search.
+ */
+const LRU_OPTIONS = {
+  max: 30,
+  ttl: 1000 * 60 * 60, // 1 hour TTL
+};
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -184,7 +195,7 @@ export class SessionService {
 
   private toastService?: ToastService;
 
-  private sessionSnapshots: Map<string, SessionSnapshot>;
+  private sessionSnapshots: LRUCache<string, SessionSnapshot>;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -204,7 +215,7 @@ export class SessionService {
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
 
-    this.sessionSnapshots = new Map<string, SessionSnapshot>();
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -406,7 +417,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
-    this.sessionSnapshots = new Map();
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
   }
 
   /**
@@ -430,15 +441,19 @@ export class SessionService {
   /**
    * Is current session already saved as SO (send to background)
    */
-  public isStored() {
-    return this.state.get().isStored;
+  public isStored(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isStored;
   }
 
   /**
    * Is restoring the older saved searches
    */
-  public isRestore() {
-    return this.state.get().isRestore;
+  public isRestore(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isRestore;
   }
 
   /**
@@ -681,11 +696,14 @@ export class SessionService {
       return null;
     }
 
-    const isCurrentSession = this.isCurrentSession(sessionId);
+    const state = this.isCurrentSession(sessionId)
+      ? this.state
+      : this.sessionSnapshots.get(sessionId);
+
     return {
       sessionId,
-      isRestore: isCurrentSession ? this.isRestore() : false,
-      isStored: isCurrentSession ? this.isStored() : false,
+      isRestore: state ? this.isRestore(state) : false,
+      isStored: state ? this.isStored(state) : false,
     };
   }
 
