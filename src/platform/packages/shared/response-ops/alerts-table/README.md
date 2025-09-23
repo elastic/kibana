@@ -5,7 +5,8 @@ An abstraction on top of `EuiDataGrid` dedicated to rendering alert documents.
 ## Usage
 
 In addition to `EuiDataGrid`'s functionality, the table manages the paginated and cached fetching of alerts, based on
-the provided `ruleTypeIds` and `consumers` (the final query can be refined through the `query` and `initialSort` props).
+the provided `ruleTypeIds` and `consumers` (the final query can be refined through the `query`, `sort`, `minScore`
+props).
 The `id` prop is used to persist the table state in `localStorage`.
 
 ```tsx
@@ -14,7 +15,7 @@ The `id` prop is used to persist the table state in `localStorage`.
   ruleTypeIds={ruleTypeIds}
   consumers={consumers}
   query={esQuery}
-  initialSort={defaultAlertsTableSort}
+  sort={defaultAlertsTableSort}
   renderCellValue={renderCellValue}
   renderActionsCell={AlertActionsCell}
   services={{ ... }}
@@ -41,11 +42,11 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 ]} />
 ```
 
-## Cells, popovers and flyouts
+## Custom renderers
 
-All the sub-components of the table are customizable through the `render*`
-props (`renderCellValue`, `renderCellPopover`, `renderActionsCell`, etc.). Values passed to these props are treated as
-components, allowing hooks, context, and other React concepts to be used.
+All the sub-components of the table are customizable through the `render*` props (`renderCellValue`,
+`renderCellPopover`, `renderActionsCell`, etc.). Values passed to these props are treated as components, allowing hooks,
+context, and other React concepts to be used.
 
 ```tsx
 const CustomCellValue: GetAlertsTableProp<'renderCellValue'> = ({ alert }) => {
@@ -57,8 +58,8 @@ const CustomCellValue: GetAlertsTableProp<'renderCellValue'> = ({ alert }) => {
 
 ## Render context
 
-All the sub-component renderers receive as part of their props a context object (
-see [EuiDataGrid's `cellContext`](https://eui.elastic.co/#/tabular-content/data-grid-cells-popovers%23cell-context))
+All the sub-component renderers receive as part of their props a context object (see [EuiDataGrid's
+`cellContext`](https://eui.elastic.co/#/tabular-content/data-grid-cells-popovers%23cell-context))
 with common utilities and services (i.e. the fetched alerts, loading states etc.).
 You can add properties to this context by means of the `additionalContext` prop:
 
@@ -74,7 +75,8 @@ You can add properties to this context by means of the `additionalContext` prop:
 ```
 
 The context type is inferred based on the `additionalContext` prop and all render functions props are typed accordingly.
-To avoid prop drilling, you can use the `useAlertsTableContext` hook to access the same context in any sub-component.
+To reduce reliance on a large number of props, you can use the `useAlertsTableContext` hook to access the same context
+in any sub-component.
 
 ```tsx
 const CustomCellValue = ({ alert }) => {
@@ -122,6 +124,54 @@ export const CustomCellValue: GetMyAlertsTableProp<'renderCellValue'> = ({ myCus
 />
 ```
 
+## Expanded alert view
+
+The table supports opening rows in a detailed view. By default, this is rendered as a flyout and is triggered through
+the "View alert details" row action. You can take control of which row is expanded by setting the `expandedAlertIndex`
+and `onExpandedAlertIndexChange` props:
+
+```tsx
+const [expandedAlertIndex, setExpandedAlertIndex] = useState<number | null>(null);
+
+<AlertsTable
+  expandedAlertIndex={expandedAlertIndex}
+  onExpandedAlertIndexChange={setExpandedAlertIndex}
+/>
+```
+
+`expandedAlertIndex` is a zero-based index that refers to the position of the alert in overall results, not just the
+current page (so it goes from `0` to `alertsCount - 1`). This is to facilitate the implementation of pagination
+controls that can change the expanded alert independently of the current page. The table will automatically switch to
+a new page when crossing page boundaries using this navigation method.
+
+Moreover, you can customize the expanded alert view through the `renderExpandedAlertView` prop:
+
+```tsx
+const CustomExpandedAlertView: GetAlertsTableProp<'renderExpandedAlertView'> = ({
+  // Like any other renderer, this receives the render context as part of its props
+  pageSize,
+  pageIndex,
+  expandedAlertIndex,
+  onExpandedAlertIndexChange,
+  isLoading,
+  alerts,
+}) => {
+  // `alerts` contains only the alerts of the current page, so we need to calculate
+  // the index of the expanded alert in this array
+  const alertIndexInPage = expandedAlertIndex - pageIndex * pageSize;
+  // This can be undefined when a new page of alerts is still loading.
+  // Use this in combination with isLoading to show a loading indicator
+  const alert = alerts[alertIndexInPage] as Alert | undefined;
+
+  // To implement pagination controls, use `onExpandedAlertIndexChange` to change
+  // the expanded alert index
+  
+  render (...);
+};
+
+<AlertsTable renderExpandedAlertView={CustomExpandedAlertView} />
+```
+
 ## Dependencies
 
 The table relies on the following Kibana services, expected in the `services` prop:
@@ -163,7 +213,7 @@ generic types), but it's actually a memoized, forwardRef'ed component. To mock i
 
 ```tsx
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn().mockImplementation(() => <div data-test-subj="alerts-table"/>),
+  AlertsTable: jest.fn().mockImplementation(() => <div data-test-subj="alerts-table" />),
 }));
 ```
 
