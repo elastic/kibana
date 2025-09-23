@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -26,7 +25,7 @@ import type {
   AgentUpdateRequest,
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
-import { isDefaultSpace } from '../../../../utils/spaces';
+import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { PersistedAgentDefinition } from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
@@ -120,7 +119,7 @@ class AgentClientImpl implements AgentClient {
       size: 1000,
       query: {
         bool: {
-          filter: [createSpaceFilter(this.space)],
+          filter: [createSpaceDslFilter(this.space)],
         },
       },
     });
@@ -232,7 +231,7 @@ class AgentClientImpl implements AgentClient {
       query: {
         bool: {
           filter: [
-            createSpaceFilter(this.space),
+            createSpaceDslFilter(this.space),
             {
               bool: {
                 // BWC compatibility with M1 - agentId was stored as the _id
@@ -261,20 +260,4 @@ const hasAccess = ({
 }) => {
   // no access control for now
   return true;
-};
-
-const createSpaceFilter = (space: string): QueryDslQueryContainer => {
-  return isDefaultSpace(space)
-    ? {
-        bool: {
-          should: [{ term: { space } }, { bool: { must_not: { exists: { field: 'space' } } } }],
-          minimum_should_match: 1,
-        },
-      }
-    : {
-        bool: {
-          should: [{ term: { space } }],
-          minimum_should_match: 1,
-        },
-      };
 };

@@ -66,6 +66,7 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      spaces,
       elasticsearch,
     });
 

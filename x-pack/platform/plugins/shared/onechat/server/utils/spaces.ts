@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -21,4 +22,20 @@ export const getCurrentSpace = ({
   spaces: SpacesPluginStart | undefined;
 }): string => {
   return spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+};
+
+export const createSpaceDslFilter = (space: string): QueryDslQueryContainer => {
+  return isDefaultSpace(space)
+    ? {
+        bool: {
+          should: [{ term: { space } }, { bool: { must_not: { exists: { field: 'space' } } } }],
+          minimum_should_match: 1,
+        },
+      }
+    : {
+        bool: {
+          should: [{ term: { space } }],
+          minimum_should_match: 1,
+        },
+      };
 };
