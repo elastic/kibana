@@ -173,6 +173,8 @@ export function useFileUpload(
     fileUploadManager.getExistingIndexName()
   );
 
+  const hasPermissionToImport = useObservable(fileUploadManager.hasPermissionToImport$, false);
+
   const canImport = useMemo(() => {
     return (
       uploadStatus.analysisStatus === STATUS.COMPLETED &&
@@ -181,17 +183,19 @@ export function useFileUpload(
       uploadStatus.mappingsJsonValid === true &&
       uploadStatus.settingsJsonValid === true &&
       uploadStatus.pipelinesJsonValid === true &&
-      dataViewNameError === ''
+      dataViewNameError === '' &&
+      hasPermissionToImport
     );
   }, [
-    dataViewNameError,
-    indexName,
-    indexValidationStatus,
     uploadStatus.analysisStatus,
     uploadStatus.mappingsJsonValid,
-    uploadStatus.pipelinesJsonValid,
     uploadStatus.settingsJsonValid,
+    uploadStatus.pipelinesJsonValid,
+    indexValidationStatus,
     existingIndexName,
+    indexName,
+    dataViewNameError,
+    hasPermissionToImport,
   ]);
 
   const mappings = useObservable(fileUploadManager.mappings$, fileUploadManager.getMappings());
@@ -248,6 +252,7 @@ export function useFileUpload(
     indices,
     existingIndexName,
     setExistingIndexName,
+    hasPermissionToImport,
   };
 }
 

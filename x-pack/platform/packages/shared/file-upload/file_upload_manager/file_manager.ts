@@ -108,6 +108,8 @@ export class FileUploadManager {
 
   private readonly _existingIndexName$ = new BehaviorSubject<string | null>(null);
   public readonly existingIndexName$ = this._existingIndexName$.asObservable();
+  private readonly _hasPermissionToImport$ = new BehaviorSubject<boolean>(false);
+  public readonly hasPermissionToImport$ = this._hasPermissionToImport$.asObservable();
 
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
@@ -153,6 +155,12 @@ export class FileUploadManager {
     onIndexSearchable?: (indexName: string) => void,
     onAllDocsSearchable?: (indexName: string) => void
   ) {
+    this.fileUpload
+      .hasImportPermission({ checkCreateDataView: false, checkHasManagePipeline: true })
+      .then((hasPermission) => {
+        this._hasPermissionToImport$.next(hasPermission);
+      });
+
     this.setExistingIndexName(existingIndexName);
     this.initializedWithExistingIndex = existingIndexName !== null;
 
