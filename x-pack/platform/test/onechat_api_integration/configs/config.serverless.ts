@@ -13,6 +13,6 @@ export default createServerlessTestConfig({
   services: oneChatServices,
   testFiles: [require.resolve('../apis')],
   junit: {
-    reportName: 'X-Pack Agent Builder API Integration Tests',
+    reportName: 'X-Pack Agent Builder Serverless API Integration Tests',
   },
 });
