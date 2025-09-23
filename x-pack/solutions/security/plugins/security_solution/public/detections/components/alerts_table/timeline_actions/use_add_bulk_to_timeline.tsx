@@ -20,8 +20,7 @@ import {
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields, useDataView, useSelectedPatterns } from '../../../../data_view_manager';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';

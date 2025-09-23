@@ -10,8 +10,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
-import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import {
+  useBrowserFields,
+  useDataView,
+  useSelectDataView,
+  useSelectedPatterns,
+} from '../../data_view_manager';
 import { convertKueryToElasticSearchQuery } from '../../common/lib/kuery';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../sourcerer/containers';
@@ -23,9 +27,7 @@ import { useGetInitialUrlParamValue } from '../../common/utils/global_query_stri
 import { buildGlobalQuery } from '../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';

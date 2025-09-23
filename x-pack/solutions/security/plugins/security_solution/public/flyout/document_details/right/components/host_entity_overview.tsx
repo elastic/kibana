@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiIcon,
-  useEuiTheme,
-  useEuiFontSize,
   EuiSkeletonText,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
@@ -47,18 +47,18 @@ import { getField } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
-  LAST_SEEN,
   HOST_RISK_LEVEL,
+  LAST_SEEN,
 } from '../../../../overview/components/host_overview/translations';
 import {
-  ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
@@ -67,7 +67,7 @@ import { MisconfigurationsInsight } from '../../shared/components/misconfigurati
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';

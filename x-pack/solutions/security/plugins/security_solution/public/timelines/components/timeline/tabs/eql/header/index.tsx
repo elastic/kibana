@@ -18,7 +18,7 @@ import type { TimelineFullScreen } from '../../../../../../common/containers/use
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
 import { Sourcerer } from '../../../../../../sourcerer/components';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
-import { DataViewPicker } from '../../../../../../data_view_manager/components/data_view_picker';
+import { DataViewPicker } from '../../../../../../data_view_manager';
 
 export type EqlTabHeaderProps = {
   activeTab: TimelineTabs;

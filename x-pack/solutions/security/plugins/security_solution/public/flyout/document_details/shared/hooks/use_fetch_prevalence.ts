@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';

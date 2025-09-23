@@ -32,7 +32,7 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {

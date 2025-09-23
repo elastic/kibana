@@ -20,7 +20,7 @@ import { isActiveTimeline } from '../../../../helpers';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 

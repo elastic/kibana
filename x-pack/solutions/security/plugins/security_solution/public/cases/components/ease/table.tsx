@@ -17,8 +17,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { DataViewManagerScopeName, useBrowserFields } from '../../../data_view_manager';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
