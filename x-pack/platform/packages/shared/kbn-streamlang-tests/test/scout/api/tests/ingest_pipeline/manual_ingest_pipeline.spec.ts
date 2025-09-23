@@ -139,7 +139,7 @@ streamlangApiTest.describe(
         ];
         await testBed.ingest(indexName, docs, processors);
 
-        const ingestedDocs = await testBed.getDocs(indexName);
+        const ingestedDocs = await testBed.getDocsOrdered(indexName);
         expect(ingestedDocs.length).toBe(2);
 
         const processedDoc = ingestedDocs.find((doc) => doc.message === 'should be processed');
