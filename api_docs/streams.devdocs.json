@@ -838,7 +838,27 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"POST /internal/streams/{name}/systems/_bulk\": ",
+            ", undefined>; \"POST /internal/streams/{name}/systems/_identify\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/{name}/systems/_identify\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; query: Zod.ZodObject<{ connectorId: Zod.ZodString; from: Zod.ZodEffects<Zod.ZodString, Date, string>; to: Zod.ZodEffects<Zod.ZodString, Date, string>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "Observable",
+            "<{ systems: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.System",
+              "text": "System"
+            },
+            "[]; } & { type: \"identified_systems\"; }>, undefined>; \"POST /internal/streams/{name}/systems/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2325,7 +2345,27 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"POST /internal/streams/{name}/systems/_bulk\": ",
+          ", undefined>; \"POST /internal/streams/{name}/systems/_identify\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/{name}/systems/_identify\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; query: Zod.ZodObject<{ connectorId: Zod.ZodString; from: Zod.ZodEffects<Zod.ZodString, Date, string>; to: Zod.ZodEffects<Zod.ZodString, Date, string>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "Observable",
+          "<{ systems: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.System",
+            "text": "System"
+          },
+          "[]; } & { type: \"identified_systems\"; }>, undefined>; \"POST /internal/streams/{name}/systems/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
