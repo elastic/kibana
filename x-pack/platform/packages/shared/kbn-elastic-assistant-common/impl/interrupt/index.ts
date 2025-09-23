@@ -1,0 +1,1 @@
+export {typedInterrupt} from './interrupt'
