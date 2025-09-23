@@ -356,7 +356,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderExpandedAlertView?: ComponentType<
     Omit<RenderContext<AC>, 'expandedAlertIndex'> & { expandedAlertIndex: number }
-  >;
+  > | null;
   /**
    * Timestamp of the last data refetch request
    */

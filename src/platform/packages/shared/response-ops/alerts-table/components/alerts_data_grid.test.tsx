@@ -467,6 +467,19 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('Expanded alert view', () => {
+      it('should render the default alert flyout when `renderExpandedAlertView` is undefined', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+            }}
+          />
+        );
+
+        expect(await screen.findByTestId('alertFlyout')).toBeInTheDocument();
+      });
+
       it('should render the expanded alert view when `expandedAlertIndex` is defined', async () => {
         render(
           <TestComponent
@@ -492,6 +505,21 @@ describe('AlertsDataGrid', () => {
           />
         );
 
+        expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
+      });
+
+      it('should not render any expanded alert view when `renderExpandedAlertView` is null', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+              renderExpandedAlertView: null,
+            }}
+          />
+        );
+
+        await expect(screen.findByTestId('alertFlyout')).rejects.toThrow();
         expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
       });
     });
