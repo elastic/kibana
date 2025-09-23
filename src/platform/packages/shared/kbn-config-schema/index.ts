@@ -306,19 +306,17 @@ function siblingRef<T = any>(key: string): SiblingReference<T> {
 }
 
 function conditional<
-  A extends ConditionalTypeValue,
-  B,
-  C,
-  BDV extends DefaultValue<B> = never,
-  CDV extends DefaultValue<C> = never,
-  DV extends DefaultValue<B | C> = never
+  T extends ConditionalTypeValue,
+  A extends SomeType,
+  B extends SomeType,
+  D extends DefaultValue<A['_input'] | B['_input']> = never
 >(
-  leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A | Type<unknown>,
-  equalType: Type<B, B, BDV>,
-  notEqualType: Type<C, C, CDV>,
-  options?: TypeOptions<B | C, B | C, DV>
-): ConditionalType<A, B, C, BDV, CDV, DV> {
+  leftOperand: Reference<T>,
+  rightOperand: Reference<T> | T | Type<unknown>,
+  equalType: A,
+  notEqualType: B,
+  options?: ConditionalTypeOptions<A, B, D>
+): ConditionalType<T, A, B, D> {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
@@ -370,6 +368,7 @@ import {
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
 } from './src/oas_meta_fields';
+import type { ConditionalTypeOptions } from './src/types/conditional_type';
 
 export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DISCONTINUED,

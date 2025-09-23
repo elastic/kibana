@@ -67,6 +67,22 @@ test('properly handles nested types with defaults', () => {
   ).toEqual('not equal');
 });
 
+test('properly handles oneOf types with defaults', () => {
+  const type = schema.conditional(
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
+    schema.never(),
+    schema.oneOf([schema.literal('good'), schema.literal('bad')], { defaultValue: 'good' })
+  );
+
+  expect(
+    type.validate(undefined, {
+      context_value_1: 0,
+      context_value_2: 1,
+    })
+  ).toEqual('good');
+});
+
 test('properly validates types according chosen schema', () => {
   const type = schema.conditional(
     schema.contextRef<number>('context_value_1'),
