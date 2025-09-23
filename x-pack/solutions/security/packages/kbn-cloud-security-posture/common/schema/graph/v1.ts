@@ -48,6 +48,7 @@ export const graphRequestSchema = schema.object({
 
 export const DOCUMENT_TYPE_EVENT = 'event' as const;
 export const DOCUMENT_TYPE_ALERT = 'alert' as const;
+export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 
 export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
@@ -56,7 +57,11 @@ export const entitySchema = schema.object({
 
 export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
-  type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
+  type: schema.oneOf([
+    schema.literal(DOCUMENT_TYPE_EVENT),
+    schema.literal(DOCUMENT_TYPE_ALERT),
+    schema.literal(DOCUMENT_TYPE_ENTITY),
+  ]),
   index: schema.maybe(schema.string()),
   event: schema.maybe(
     schema.object({
