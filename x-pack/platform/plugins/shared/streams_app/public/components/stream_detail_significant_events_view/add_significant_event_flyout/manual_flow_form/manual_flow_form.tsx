@@ -155,7 +155,6 @@ export function ManualFlowForm({
       <PreviewDataSparkPlot
         definition={definition}
         query={query}
-        timeRange={timeRange}
         isQueryValid={!validation.kql.isInvalid}
       />
     </EuiFlexGroup>

@@ -23,7 +23,7 @@ export function useSignificantEventPreviewFetch({
   isQueryValid,
 }: {
   name: string;
-  system: {
+  system?: {
     name: string;
     filter: Condition;
   };
@@ -64,10 +64,12 @@ export function useSignificantEventPreviewFetch({
             },
             body: {
               query: {
-                system: {
-                  name: system.name,
-                  filter: system.filter,
-                },
+                system: system
+                  ? {
+                      name: system.name,
+                      filter: system.filter,
+                    }
+                  : undefined,
                 kql: { query: kqlQuery },
               },
             },
@@ -75,15 +77,7 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [
-      isQueryValid,
-      timeState.timeRange,
-      streams.streamsRepositoryClient,
-      name,
-      system.name,
-      system.filter,
-      kqlQuery,
-    ]
+    [isQueryValid, timeState.timeRange, streams.streamsRepositoryClient, name, system, kqlQuery]
   );
 
   return previewFetch;

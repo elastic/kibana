@@ -19,7 +19,7 @@ interface StreamQueryBase {
 }
 
 export interface StreamQueryKql extends StreamQueryBase {
-  system: {
+  system?: {
     name: string;
     filter: Condition;
   };
@@ -56,10 +56,12 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
-  system: z.object({
-    name: NonEmptyString,
-    filter: conditionSchema,
-  }),
+  system: z.optional(
+    z.object({
+      name: NonEmptyString,
+      filter: conditionSchema,
+    })
+  ),
   kql: z.object({
     query: z.string(),
   }),
