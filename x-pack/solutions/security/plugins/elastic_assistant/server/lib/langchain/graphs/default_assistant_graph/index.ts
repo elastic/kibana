@@ -38,6 +38,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   assistantTools = [],
   connectorId,
   threadId,
+  interruptResumeValue,
   contentReferencesStore,
   conversationId,
   core,
@@ -242,6 +243,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     replacements,
     newMessages,
+    threadId,
+    interruptResumeValue,
   });
 
   const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
@@ -306,16 +309,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       telemetry,
       telemetryTracer,
       traceOptions,
+      interruptResumeValue
     });
   }
 
   const graphResponse = await invokeGraph({
+    logger,
     apmTracer,
     assistantGraph,
     inputs,
     onLlmResponse,
     telemetryTracer,
     traceOptions,
+    interruptResumeValue
   });
 
   const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(

@@ -107,7 +107,12 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          const threadId = uuidv4();
+          if (request.body.interruptResumeValue && request.body.threadId === undefined) {
+            throw new Error('threadId is required when interruptResumeValue is provided');
+          }
+
+          const threadId = request.body.threadId || uuidv4();
+
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -224,6 +229,7 @@ export const postActionsConnectorExecuteRoute = (
               actionTypeId,
               connectorId,
               threadId,
+              interruptResumeValue: request.body.interruptResumeValue,
               contentReferencesStore,
               isOssModel,
               inferenceChatModelDisabled,

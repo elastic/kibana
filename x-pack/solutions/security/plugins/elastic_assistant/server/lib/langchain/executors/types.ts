@@ -14,6 +14,7 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type {
   ContentReferencesStore,
   ExecuteConnectorRequestBody,
+  InterruptResumeValue,
   InterruptValue,
   Message,
   Replacements,
@@ -54,6 +55,7 @@ export interface AgentExecutorParams<T extends boolean> {
   assistantTools?: AssistantTool[];
   connectorId: string;
   threadId: string;
+  interruptResumeValue?: InterruptResumeValue
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore;
   core: CoreRequestHandlerContext;

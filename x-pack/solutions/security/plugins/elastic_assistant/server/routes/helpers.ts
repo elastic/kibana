@@ -25,6 +25,7 @@ import type {
   MessageMetadata,
   ScreenContext,
   InterruptValue,
+  InterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -240,6 +241,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   threadId: string;
+  interruptResumeValue?: InterruptResumeValue
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -270,6 +272,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   threadId,
+  interruptResumeValue,
   contentReferencesStore,
   inferenceChatModelDisabled,
   isOssModel,
@@ -336,6 +339,7 @@ export const langChainExecute = async ({
     assistantTools,
     conversationId,
     threadId,
+    interruptResumeValue,
     connectorId,
     contentReferencesStore,
     esClient,

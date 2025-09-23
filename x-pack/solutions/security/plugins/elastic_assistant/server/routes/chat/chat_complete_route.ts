@@ -116,7 +116,7 @@ export const chatCompleteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          const threadId = uuidv4();
+          const threadId = request.body.threadId ?? uuidv4();
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -214,6 +214,7 @@ export const chatCompleteRoute = (
             content,
             traceData = {},
             isError = false,
+            interruptValue,
           }): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -229,6 +230,7 @@ export const chatCompleteRoute = (
                 isError,
                 traceData,
                 contentReferences: prunedContentReferencesStore,
+                interruptValue,
               });
             }
           };
@@ -241,6 +243,7 @@ export const chatCompleteRoute = (
               actionTypeId,
               connectorId,
               threadId,
+              interruptResumeValue: request.body.interruptResumeValue,
               isOssModel,
               conversationId,
               context: ctx,

@@ -11,8 +11,10 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import {
   contentReferenceBlock,
-  productDocumentationReference,
+  productDocumentationReference
 } from '@kbn/elastic-assistant-common';
+
+import {typedInterrupt} from '@kbn/elastic-assistant-common/impl/interrupt'
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
@@ -46,7 +48,23 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
       params as ProductDocumentationToolParams;
 
     return tool(
-      async ({ query, product }) => {
+      async ({ query, product }, { configurable }) => {
+
+        const result = await typedInterrupt({
+          type: 'SELECT_OPTION',
+          description: `Trying to access user knowledge base`,
+          options: [
+            { label: 'Reject', value: 'REJECT', buttonColor: 'danger' },
+            { label: 'Approve', value: 'APPROVE', buttonColor: 'success' },
+          ],
+          threadId: configurable.thread_id,
+        });
+        if (result.value === 'APPROVE') {
+          // proceed to execute the tool logic
+        } else {
+          throw new Error(`User did not give permission to access their knowledge base`);
+        }
+
         const response = await llmTasks.retrieveDocumentation({
           searchTerm: query,
           products: product ? [product] : undefined,
