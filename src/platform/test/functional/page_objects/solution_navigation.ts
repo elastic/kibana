@@ -54,10 +54,27 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   async function expandMoreIfNeeded() {
     if (!(await isV2())) return;
 
+    log.debug(
+      'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
+    );
     if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
       const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
       const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
       if (isExpanded === 'false') {
+        await moreMenuItem.click();
+      }
+    }
+  }
+
+  async function collapseMoreIfNeeded() {
+    if (!(await isV2())) return;
+    log.debug(
+      'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
+    );
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
+      const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+      const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+      if (isExpanded === 'true') {
         await moreMenuItem.click();
       }
     }
@@ -118,9 +135,15 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         } else if ('navId' in by) {
           await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
         } else if ('panelNavLinkId' in by) {
-          await testSubjects.existOrFail(`~panelNavItem-id-${by.panelNavLinkId}`, {
-            timeout: TIMEOUT_CHECK,
-          });
+          if (await isV2()) {
+            await testSubjects.existOrFail(`~nav-item-id-${by.panelNavLinkId}`, {
+              timeout: TIMEOUT_CHECK,
+            });
+          } else {
+            await testSubjects.existOrFail(`~panelNavItem-id-${by.panelNavLinkId}`, {
+              timeout: TIMEOUT_CHECK,
+            });
+          }
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
@@ -221,8 +244,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async clickPanelLink(deepLinkId: string) {
         if (await isV2()) {
+          await collapseMoreIfNeeded();
           await this.feedbackCallout.dismiss();
-          await this.clickLink({ deepLinkId: deepLinkId as AppDeepLinkId });
+          await this.clickLink({ navId: deepLinkId });
         } else {
           await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
         }
@@ -307,11 +331,21 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         });
       },
       async isPanelOpen(sectionId: NavigationId) {
-        try {
-          const panel = await testSubjects.find(`~sideNavPanel-id-${sectionId}`, TIMEOUT_CHECK);
-          return !!panel;
-        } catch (err) {
-          return false;
+        if (await this.isV2()) {
+          try {
+            await this.expectLinkActive({ navId: sectionId });
+            // TODO: check if panel is actually open
+            return true;
+          } catch (e) {
+            return false;
+          }
+        } else {
+          try {
+            const panel = await testSubjects.find(`~sideNavPanel-id-${sectionId}`, TIMEOUT_CHECK);
+            return !!panel;
+          } catch (err) {
+            return false;
+          }
         }
       },
       async openPanel(sectionId: NavigationId) {
