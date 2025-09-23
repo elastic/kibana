@@ -132,7 +132,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     if (!isSelected) {
       await onSelect(item);
     }
-    onDoubleClick();
+    // Wait for the selection to propagate before enabling edit mode
+    setTimeout(() => onDoubleClick(), 0);
   }, [item, isSelected, onDoubleClick, onSelect]);
 
   const onKeyDownEvent = useCallback(
