@@ -15,7 +15,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
-import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
+import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -94,6 +94,7 @@ export function StreamDetailView() {
             {key}
             <EuiBadgeGroup gutterSize="s">
               {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>
