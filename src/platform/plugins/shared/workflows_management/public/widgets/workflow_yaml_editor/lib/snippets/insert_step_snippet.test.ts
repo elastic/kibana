@@ -19,14 +19,15 @@ describe('insertStepSnippet', () => {
     const inputYaml = `name: one_step_workflow`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', { full: true });
+    const snippetText = generateBuiltInStepSnippet('http', { full: true, withStepsSection: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
         {
+          // we expect the snippet to be inserted at the second line
           range: new monaco.Range(2, 1, 2, 1),
-          text: 'steps:\n  ' + snippetText + '\n',
+          text: snippetText,
         },
       ],
       expect.any(Function)
@@ -47,8 +48,9 @@ steps:
       null,
       [
         {
+          // we expect the snippet to be inserted at the seventh line after the last step
           range: new monaco.Range(7, 1, 7, 1),
-          text: prependIndentToLines(snippetText, 2) + '\n',
+          text: prependIndentToLines(snippetText, 2),
         },
       ],
       expect.any(Function)
@@ -75,7 +77,7 @@ steps:
         {
           range: new monaco.Range(11, 1, 11, 1),
           // since the last step is in a nested step, it should have 6 spaces of indent
-          text: prependIndentToLines(snippetText, 6) + '\n',
+          text: prependIndentToLines(snippetText, 6),
         },
       ],
       expect.any(Function)
@@ -111,7 +113,7 @@ steps:
       [
         {
           range: new monaco.Range(11, 1, 11, 1),
-          text: prependIndentToLines(snippetText, 6) + '\n',
+          text: prependIndentToLines(snippetText, 6),
         },
       ],
       expect.any(Function)

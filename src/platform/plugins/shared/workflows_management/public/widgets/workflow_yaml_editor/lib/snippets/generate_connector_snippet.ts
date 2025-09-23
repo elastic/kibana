@@ -14,6 +14,7 @@ import { getCachedAllConnectors } from '../connectors_cache';
 
 interface GenerateConnectorSnippetOptions {
   full?: boolean;
+  withStepsSection?: boolean;
 }
 
 /**
@@ -21,11 +22,12 @@ interface GenerateConnectorSnippetOptions {
  * @param connectorType - The type of connector to generate a snippet for
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
+ * @param options.withStepsSection - Whether to include the "steps:" section
  * @returns The formatted YAML connector snippet with required parameters as placeholders
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  { full }: GenerateConnectorSnippetOptions = {}
+  { full, withStepsSection }: GenerateConnectorSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>;
@@ -60,22 +62,22 @@ export function generateConnectorSnippet(
     // - name: ${stepType}_step
     //   type: ${stepType}
     //   ...parameters
-    return stringify(
-      [
-        {
-          name: `${connectorType.replaceAll('.', '_')}_step`,
-          type: connectorType,
-          'connector-id': isConnectorIdRequired ? '# A Kibana connector name' : undefined,
-          ...parameters,
-        },
-      ],
-      stringifyOptions
-    ).slice(0, -1); // remove the last newline
+    const step = [
+      {
+        name: `${connectorType.replaceAll('.', '_')}_step`,
+        type: connectorType,
+        'connector-id': isConnectorIdRequired ? '# A Kibana connector name' : undefined,
+        ...parameters,
+      },
+    ];
+    if (withStepsSection) {
+      return stringify({ steps: step }, stringifyOptions);
+    }
+    return stringify(step, stringifyOptions);
   }
 
   // otherwise, the "type:" is already present, so we just return the type value and parameters
   // (type:)${stepType}
   // ...parameters
-  // stringify always adds a newline, so we need to remove it
-  return `${connectorType}\n${stringify(parameters, stringifyOptions).slice(0, -1)}`;
+  return `${connectorType}\n${stringify(parameters, stringifyOptions)}`;
 }

@@ -10,26 +10,43 @@
 import { parseDocument } from 'yaml';
 import { insertTriggerSnippet } from './insert_trigger_snippet';
 import { monaco } from '@kbn/monaco';
-import { generateTriggerSnippet } from './generate_trigger_snippet';
+import * as generateTriggerSnippetModule from './generate_trigger_snippet';
 import { createMockModel } from '../../../../../common/mocks/monaco_model';
 
 describe('insertTriggerSnippet', () => {
+  let generateTriggerSnippetSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    generateTriggerSnippetSpy = jest.spyOn(generateTriggerSnippetModule, 'generateTriggerSnippet');
+    jest.clearAllMocks();
+  });
+
   it('should insert a trigger snippet after the last trigger', () => {
     const inputYaml = `triggers:\n  - type: alert\n`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateTriggerSnippet('manual', {
+
+    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+      full: true,
+      monacoSuggestionFormat: false,
+      withTriggersSection: false,
+    });
+
+    const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
       full: true,
       monacoSuggestionFormat: false,
     });
-    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
         {
+          // we expect the snippet to be inserted at the third line after the alert trigger
           range: new monaco.Range(3, 1, 3, 1),
-          // should have 2 spaces before the snippet and a newline after it
-          text: '  ' + snippetText + '\n',
+          // should have 2 spaces before the snippet
+          text: '  ' + expectedSnippet,
         },
       ],
       expect.any(Function)
@@ -40,20 +57,32 @@ describe('insertTriggerSnippet', () => {
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+    expect(generateTriggerSnippetSpy).not.toHaveBeenCalled();
     expect(model.pushEditOperations).not.toHaveBeenCalled();
   });
   it('should add the triggers section if it does not exist', () => {
     const inputYaml = `steps:\n  - type: http`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateTriggerSnippet('manual', {
+
+    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+    expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
       full: true,
       monacoSuggestionFormat: false,
+      withTriggersSection: true,
     });
-    insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+    const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+      full: true,
+      monacoSuggestionFormat: false,
+      withTriggersSection: true,
+    });
+
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
-      [{ range: new monaco.Range(1, 1, 1, 1), text: 'triggers:\n  ' + snippetText + '\n' }],
+      [{ range: new monaco.Range(1, 1, 1, 1), text: expectedSnippet }],
       expect.any(Function)
     );
   });

@@ -10,6 +10,6 @@
 export function prependIndentToLines(lines: string, indentLevel: number) {
   return lines
     .split('\n')
-    .map((line) => ' '.repeat(indentLevel) + line)
+    .map((line) => (line.length > 0 ? ' '.repeat(indentLevel) + line : line))
     .join('\n');
 }

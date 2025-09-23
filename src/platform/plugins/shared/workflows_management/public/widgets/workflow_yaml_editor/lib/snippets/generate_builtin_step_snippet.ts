@@ -13,6 +13,7 @@ import { stringify } from 'yaml';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
+  withStepsSection?: boolean;
 }
 
 /**
@@ -20,11 +21,12 @@ interface GenerateBuiltInStepSnippetOptions {
  * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', etc.)
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
+ * @param options.withStepsSection - Whether to include the "steps:" section
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
-  { full }: GenerateBuiltInStepSnippetOptions = {}
+  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>;
@@ -82,21 +84,21 @@ export function generateBuiltInStepSnippet(
     // - name: ${stepType}_step
     //   type: ${stepType}
     //   ...parameters
-    return stringify(
-      [
-        {
-          name: `${stepType.replaceAll('.', '_')}_step`,
-          type: stepType,
-          ...parameters,
-        },
-      ],
-      stringifyOptions
-    ).slice(0, -1); // remove the last newline
+    const step = [
+      {
+        name: `${stepType.replaceAll('.', '_')}_step`,
+        type: stepType,
+        ...parameters,
+      },
+    ];
+    if (withStepsSection) {
+      return stringify({ steps: step }, stringifyOptions);
+    }
+    return stringify(step, stringifyOptions);
   }
 
   // otherwise, the "type:" is already present, so we just return the type value and parameters
   // (type:)${stepType}
   // ...parameters
-  // stringify always adds a newline, so we need to remove it
-  return `${stepType}\n${stringify(parameters, stringifyOptions).slice(0, -1)}`;
+  return `${stepType}\n${stringify(parameters, stringifyOptions)}`;
 }

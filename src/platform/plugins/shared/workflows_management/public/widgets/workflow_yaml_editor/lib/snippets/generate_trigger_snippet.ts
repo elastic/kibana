@@ -14,6 +14,7 @@ import { stringify } from 'yaml';
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
+  withTriggersSection?: boolean;
 }
 
 /**
@@ -22,11 +23,12 @@ interface GenerateTriggerSnippetOptions {
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with '- type: ' prefix
  * @param options.monacoSuggestionFormat - Whether to format the snippet for Monaco editor suggestions with placeholders
+ * @param options.withTriggersSection - Whether to include the "triggers:" section
  * @returns The formatted YAML trigger snippet as a string
  */
 export function generateTriggerSnippet(
   triggerType: TriggerType,
-  { full, monacoSuggestionFormat }: GenerateTriggerSnippetOptions = {}
+  { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>;
@@ -61,20 +63,21 @@ export function generateTriggerSnippet(
     // if the full snippet is requested, return the whole trigger node as a sequence item
     // - type: ${triggerType}
     //   ...parameters
-    return stringify(
-      [
-        {
-          type: triggerType,
-          ...parameters,
-        },
-      ],
-      stringifyOptions
-    ).slice(0, -1); // remove the last newline
+    const trigger = [
+      {
+        type: triggerType,
+        ...parameters,
+      },
+    ];
+    if (withTriggersSection) {
+      return stringify({ triggers: trigger }, stringifyOptions);
+    }
+    return stringify(trigger, stringifyOptions);
   }
 
   // otherwise, the "type:" is already present, so we just return the type value and parameters
   // (type:)${triggerType}
   // ...parameters
   // stringify always adds a newline, so we need to remove it
-  return `${triggerType}\n${stringify(parameters, stringifyOptions).slice(0, -1)}`;
+  return `${triggerType}\n${stringify(parameters, stringifyOptions)}`;
 }

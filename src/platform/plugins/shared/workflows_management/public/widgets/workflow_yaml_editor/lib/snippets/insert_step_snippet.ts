@@ -30,14 +30,9 @@ export function insertStepSnippet(
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   let snippetText = '';
-  if (isBuiltInStepType(stepType)) {
-    snippetText = generateBuiltInStepSnippet(stepType, { full: true });
-  } else {
-    snippetText = generateConnectorSnippet(stepType, { full: true });
-  }
   // we need it to be 1-indexed
   const lastLineNumber = model.getLineCount();
-  let prepend = '';
+  let insertStepsSection = false;
   // by default, insert at line after the last line of the yaml file
   let insertAtLineNumber = lastLineNumber + 1;
   const stepNodes = getStepNodesWithType(yamlDocument);
@@ -50,7 +45,7 @@ export function insertStepSnippet(
     nearestStepNode || (stepNodes.length > 0 ? stepNodes[stepNodes.length - 1] : null);
   let indentLevel = 0;
   if (!stepNode) {
-    prepend = '\nsteps:\n';
+    insertStepsSection = true;
     indentLevel = 2;
   } else {
     const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
@@ -61,6 +56,19 @@ export function insertStepSnippet(
       indentLevel = getIndentLevelFromLineNumber(model, stepRange.startLineNumber);
     }
   }
+
+  if (isBuiltInStepType(stepType)) {
+    snippetText = generateBuiltInStepSnippet(stepType, {
+      full: true,
+      withStepsSection: insertStepsSection,
+    });
+  } else {
+    snippetText = generateConnectorSnippet(stepType, {
+      full: true,
+      withStepsSection: insertStepsSection,
+    });
+  }
+
   // Create separate undo boundary for each snippet insertion
   if (editor) {
     editor.pushUndoStop();
@@ -71,7 +79,8 @@ export function insertStepSnippet(
     [
       {
         range: new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, 1),
-        text: prepend + prependIndentToLines(snippetText, indentLevel) + '\n',
+        // if we are inserting the steps section, we don't need to indent the snippet, the step is at root level
+        text: insertStepsSection ? snippetText : prependIndentToLines(snippetText, indentLevel),
       },
     ],
     () => null

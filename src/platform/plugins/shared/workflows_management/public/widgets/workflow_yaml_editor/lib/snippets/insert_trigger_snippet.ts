@@ -26,14 +26,10 @@ export function insertTriggerSnippet(
   triggerType: TriggerType,
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
-  const triggerSnippet = generateTriggerSnippet(triggerType, {
-    full: true,
-    monacoSuggestionFormat: false,
-  });
   // find triggers: line number and column number
   const triggerNodes = getTriggerNodes(yamlDocument);
   const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);
-  let prepend = '';
+  let insertTriggersSection = false;
   let insertAtLineNumber = 1;
   let indentLevel = 0;
   if (triggerNode) {
@@ -51,8 +47,15 @@ export function insertTriggerSnippet(
       indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
     }
   } else {
-    prepend = 'triggers:\n  ';
+    insertTriggersSection = true;
   }
+
+  const triggerSnippet = generateTriggerSnippet(triggerType, {
+    full: true,
+    monacoSuggestionFormat: false,
+    withTriggersSection: insertTriggersSection,
+  });
+
   // Create separate undo boundary for each snippet insertion
   if (editor) {
     editor.pushUndoStop();
@@ -63,7 +66,9 @@ export function insertTriggerSnippet(
     [
       {
         range: new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, 1),
-        text: prepend + prependIndentToLines(triggerSnippet, indentLevel) + '\n',
+        text: insertTriggersSection
+          ? triggerSnippet
+          : prependIndentToLines(triggerSnippet, indentLevel),
       },
     ],
     () => null
