@@ -10,9 +10,7 @@ import type {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
-import moment from 'moment';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { conditionSchema } from '@kbn/streamlang';
@@ -153,26 +151,6 @@ const readSignificantEventsRoute = createServerRoute({
   },
 });
 
-const durationSchema = z.string().transform((value) => {
-  const match = value.match(/^(\d+)([mhd])$/);
-  if (!match) {
-    throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');
-  }
-
-  const [, numberStr, unit] = match;
-  const number = parseInt(numberStr, 10);
-
-  // Map units to moment duration units
-  const unitMap: Record<string, moment.unitOfTime.DurationConstructor> = {
-    m: 'minute',
-    h: 'hour',
-    d: 'day',
-  };
-
-  const momentUnit = unitMap[unit];
-  return moment.duration(number, momentUnit);
-});
-
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
@@ -180,8 +158,8 @@ const generateSignificantEventsRoute = createServerRoute({
     query: z.object({
       connectorId: z.string(),
       currentDate: dateFromString.optional(),
-      shortLookback: durationSchema.optional(),
-      longLookback: durationSchema.optional(),
+      from: dateFromString,
+      to: dateFromString,
     }),
   }),
   options: {
@@ -218,17 +196,12 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           definition,
           connectorId: params.query.connectorId,
-          currentDate: params.query.currentDate,
-          shortLookback: params.query.shortLookback,
-          longLookback: params.query.longLookback,
+          start: params.query.from.valueOf(),
+          end: params.query.to.valueOf(),
         },
         {
           inferenceClient,
-          esClient: createTracedEsClient({
-            client: scopedClusterClient.asCurrentUser,
-            logger,
-            plugin: 'streams',
-          }),
+          esClient: scopedClusterClient.asCurrentUser,
           logger,
         }
       )
