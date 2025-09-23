@@ -137,7 +137,13 @@ export const FeedbackPanel = ({
 
   const positiveFooter = (
     <EuiFlexItem grow={false}>
-      <EuiIcon type="faceHappy" color="success" size="l" aria-label={faceHappyIconLabel} />
+      <EuiIcon
+        data-test-subj="feedbackSnippetPanelPositiveIcon"
+        type="faceHappy"
+        color="success"
+        size="l"
+        aria-label={faceHappyIconLabel}
+      />
     </EuiFlexItem>
   );
 

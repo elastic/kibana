@@ -29,7 +29,9 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
     schema: createSchemaFromParams(configuration.params) as TSchema,
     handler: async (params, { esClient }) => {
       const client = esClient.asCurrentUser;
-      const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
+      const paramArray = Object.keys(configuration.params).map((param) => ({
+        [param]: params[param] ?? null,
+      }));
 
       const result = await client.esql.query({
         query: configuration.query,
@@ -94,6 +96,10 @@ function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<a
       case 'nested':
         field = z.array(z.record(z.unknown()));
         break;
+    }
+
+    if (param.optional) {
+      field = field.optional();
     }
 
     field = field.describe(param.description);
