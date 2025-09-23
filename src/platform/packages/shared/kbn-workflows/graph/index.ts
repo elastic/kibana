@@ -38,5 +38,7 @@ export type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
+  EnterTimeoutZoneNode,
+  ExitTimeoutZoneNode,
   UnionExecutionGraphNode,
 } from './types';

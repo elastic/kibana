@@ -27,6 +27,8 @@ import {
   ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
   ExitFallbackPathNodeSchema,
+  EnterTimeoutZoneNodeSchema,
+  ExitTimeoutZoneNodeSchema,
 } from './on_failure_nodes';
 
 const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
@@ -49,6 +51,8 @@ const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
   ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
   ExitFallbackPathNodeSchema,
+  EnterTimeoutZoneNodeSchema,
+  ExitTimeoutZoneNodeSchema,
 ]);
 
 export type UnionExecutionGraphNode = z.infer<typeof UnionExecutionGraphNodeSchema>;
