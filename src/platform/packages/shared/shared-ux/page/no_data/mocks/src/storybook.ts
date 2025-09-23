@@ -13,7 +13,7 @@ import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
 
 const dataCardMock = new NoDataCardStorybookMock();
-export type Params = NoDataPageStorybookParams;
+export type Params = NoDataCardStorybookParams;
 
 export class NoDataPageStorybookMock extends AbstractStorybookMock<
   NoDataPageProps,

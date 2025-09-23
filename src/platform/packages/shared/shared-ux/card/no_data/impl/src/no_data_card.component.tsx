@@ -73,24 +73,31 @@ export const NoDataCard = ({
       icon={cardIcon}
       body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
       actions={
-        canAccessFleet && href && !disabledButtonTooltipText ? (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
-          <EuiButton
-            color="primary"
-            fill
-            href={href}
-            data-test-subj="noDataDefaultActionButton"
-            onClick={onClick}
-            disabled={buttonIsDisabled ?? false}
-          >
-            {buttonText || defaultButtonText}
-          </EuiButton>
-        ) : disabledButtonTooltipText ? (
-          <EuiToolTip position="right" content={disabledButtonTooltipText}>
-            <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+        canAccessFleet && href ? (
+          buttonIsDisabled ? (
+            disabledButtonTooltipText ? (
+              <EuiToolTip position="right" content={disabledButtonTooltipText}>
+                <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+                  {buttonText || defaultButtonText}
+                </EuiButton>
+              </EuiToolTip>
+            ) : (
+              <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+                {buttonText || defaultButtonText}
+              </EuiButton>
+            )
+          ) : (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              color="primary"
+              fill
+              href={href}
+              data-test-subj="noDataDefaultActionButton"
+              onClick={onClick}
+            >
               {buttonText || defaultButtonText}
             </EuiButton>
-          </EuiToolTip>
+          )
         ) : undefined
       }
       footer={
