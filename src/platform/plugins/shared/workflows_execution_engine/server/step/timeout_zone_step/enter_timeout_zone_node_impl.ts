@@ -8,7 +8,7 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { NodeImplementation, NodeWithPing } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
@@ -16,7 +16,7 @@ import type { WorkflowExecutionState } from '../../workflow_context_manager/work
 
 import { buildStepExecutionId, parseDuration } from '../../utils';
 
-export class EnterTimeoutZoneNodeImpl implements NodeImplementation {
+export class EnterTimeoutZoneNodeImpl implements NodeImplementation, NodeWithPing {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
@@ -41,9 +41,13 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation {
     )!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
+    const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
-    if (currentTimeMs > whenStepStartedTime + timeoutMs) {
-      throw new Error('Timeout ERRROR!!!!!!!!');
+    if (currentStepDuration > timeoutMs) {
+      this.workflowLogger.logDebug(
+        `Step timeout happened because it ran for ${currentStepDuration / 1000}ms`
+      );
+      throw new Error(`Step timeout happened because it ran for ${currentStepDuration / 1000}ms`);
     }
   }
 }

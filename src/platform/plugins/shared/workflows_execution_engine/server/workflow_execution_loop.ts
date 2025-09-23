@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { NodesFactory } from './step/nodes_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
-import type { StepErrorCatcher } from './step/node_implementation';
+import type { NodeWithErrorCatching, NodeWithPing } from './step/node_implementation';
 import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
 
@@ -68,60 +69,57 @@ async function runStep(
 ): Promise<void> {
   const currentNode = workflowRuntime.getCurrentNode();
   const nodeImplementation = nodesFactory.create(currentNode as any);
+  const stepAbortController = new AbortController();
+  const monitorAbortController = new AbortController();
 
   try {
-    await monitor(workflowRuntime, nodesFactory, workflowGraph, (abortController) =>
-      nodeImplementation.run()
-    );
+    await Promise.race([
+      runStackMonitor(
+        workflowRuntime.getCurrentNodeScope(),
+        workflowGraph,
+        nodesFactory,
+        monitorAbortController
+      ),
+      nodeImplementation.run(),
+    ]);
+    monitorAbortController.abort();
   } catch (error) {
+    stepAbortController.abort();
     workflowRuntime.setWorkflowError(error);
     await workflowRuntime.failStep(error);
   } finally {
+    monitorAbortController.abort();
     await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }
 
-async function monitor(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  nodesFactory: NodesFactory,
+async function runStackMonitor(
+  nodeStackFrames: StackFrame[],
   workflowGraph: WorkflowGraph,
-  runStepCallback: (abortController: AbortController) => Promise<void>
+  nodesFactory: NodesFactory,
+  monitorAbortController: AbortController
 ): Promise<void> {
-  const stepAbortController = new AbortController();
-  const monitorAbortController = new AbortController();
+  while (!monitorAbortController.signal.aborted) {
+    await new Promise((resolve) => {
+      const timeout = setTimeout(resolve, 500);
+      monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
+    });
 
-  // capture current node stack as it might be changed
-  const nodeStackFrames = workflowRuntime.getCurrentNodeScope();
+    let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
 
-  async function continuous(): Promise<void> {
-    while (!monitorAbortController.signal.aborted) {
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, 500);
-        monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
-      });
+    while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
+      const scopeData = nodeStack.getCurrentScope()!;
+      const node = workflowGraph.getNode(scopeData.nodeId);
+      nodeStack = nodeStack.exitScope();
 
-      let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
+      const nodeImplementation = nodesFactory.create(node as UnionExecutionGraphNode);
 
-      while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
-        const scopeData = nodeStack.getCurrentScope()!;
-        const node = workflowGraph.getNode(scopeData.nodeId);
-        const nodeImplementation = nodesFactory.create(node as UnionExecutionGraphNode);
-        if (typeof (nodeImplementation as any).ping === 'function') {
-          await (nodeImplementation as any).ping(nodeStack);
-        }
-        nodeStack = nodeStack.exitScope();
+      if (typeof (nodeImplementation as unknown as NodeWithPing).ping === 'function') {
+        const nodePing = nodeImplementation as unknown as NodeWithPing;
+        await nodePing.ping(nodeStack);
       }
     }
-  }
-
-  try {
-    await Promise.race([continuous(), runStepCallback(stepAbortController)]);
-  } catch (err) {
-    stepAbortController.abort();
-    throw err;
-  } finally {
-    monitorAbortController.abort();
   }
 }
 
@@ -200,8 +198,8 @@ async function catchError(
         workflowRuntime.navigateToNode(node.id);
         const stepImplementation = nodesFactory.create(node as any);
 
-        if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
-          const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
+        if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
+          const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
 
           try {
             await stepErrorCatcher.catchError();

@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitTimeoutZoneNode } from '@kbn/workflows/graph';
 import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class ExitTimeoutZoneNodeImpl implements NodeImplementation {
-  constructor(
-    private node: ExitTimeoutZoneNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
-  ) {}
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.exitScope();

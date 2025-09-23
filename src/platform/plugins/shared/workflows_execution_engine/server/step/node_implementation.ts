@@ -13,6 +13,7 @@ import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 export interface RunStepResult {
   input: any;
@@ -37,8 +38,12 @@ export interface NodeImplementation {
   run(): Promise<void>;
 }
 
-export interface StepErrorCatcher {
+export interface NodeWithErrorCatching {
   catchError(): Promise<void>;
+}
+
+export interface NodeWithPing {
+  ping(nodeStack: WorkflowScopeStack): Promise<void>;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>

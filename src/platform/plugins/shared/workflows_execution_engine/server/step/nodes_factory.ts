@@ -22,7 +22,6 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  ExitTimeoutZoneNode,
   GraphNode,
   HttpGraphNode,
   UnionExecutionGraphNode,
@@ -159,11 +158,7 @@ export class NodesFactory {
           stepLogger
         );
       case 'exit-timeout-zone':
-        return new ExitTimeoutZoneNodeImpl(
-          node as ExitTimeoutZoneNode,
-          this.workflowRuntime,
-          stepLogger
-        );
+        return new ExitTimeoutZoneNodeImpl(this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           node as EnterIfNode,
