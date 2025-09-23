@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { i18n } from '@kbn/i18n';
 import { TIME_SYSTEM_PARAMS, Walker, parse, within, type ESQLAstItem } from '@kbn/esql-ast';
 import {
   ENRICH_MODES,
@@ -24,13 +24,14 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
-import { type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
-import { getColumnsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
-import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
-import { i18n } from '@kbn/i18n';
-import type { monaco } from '../../../../monaco_imports';
-import { monacoPositionToOffset } from '../shared/utils';
+import type { ESQLCallbacks } from '../shared/types';
+import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
+import { getPolicyHelper } from '../shared/resources_helpers';
 import { getVariablesHoverContent } from './helpers';
+
+interface HoverContent {
+  contents: Array<{ value: string }>;
+}
 
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
@@ -45,21 +46,7 @@ const TIME_SYSTEM_DESCRIPTIONS = {
   }),
 };
 
-export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
-
-/**
- * @todo Monaco dependencies are not necesasry here: (1) replace {@link HoverMonacoModel}
- * by some generic `getText(): string` method; (2) replace {@link monaco.Position} by
- * `offset: number`.
- */
-export async function getHoverItem(
-  model: HoverMonacoModel,
-  position: monaco.Position,
-  callbacks?: ESQLCallbacks
-) {
-  const fullText = model.getValue();
-  const offset = monacoPositionToOffset(fullText, position);
-
+export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
   const { root } = parse(fullText);
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
@@ -93,7 +80,7 @@ export async function getHoverItem(
     },
   });
 
-  const hoverContent: monaco.languages.Hover = {
+  const hoverContent: HoverContent = {
     contents: [],
   };
 
