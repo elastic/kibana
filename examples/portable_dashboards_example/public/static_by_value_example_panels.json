@@ -8,7 +8,7 @@
       "h": 10,
       "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
     },
-    "panelIndex": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+    "uid": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
     "config": {
       "savedVis": {
         "id": "",
@@ -44,7 +44,7 @@
       "h": 21,
       "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
     },
-    "panelIndex": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+    "uid": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
     "config": {
       "title": "Destinations",
       "attributes": {
@@ -151,7 +151,7 @@
       "h": 11,
       "i": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a"
     },
-    "panelIndex": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
+    "uid": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
     "explicitInput": {
       "enhancements": {},
       "attributes": {

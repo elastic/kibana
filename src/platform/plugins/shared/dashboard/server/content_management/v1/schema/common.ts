@@ -65,7 +65,12 @@ export const panelSchema = schema.object({
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   grid: panelGridDataSchema,
-  panelIndex: schema.maybe(
+  /**
+   * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
+   * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
+   * In the stored object, `uid` continues to map to `panelIndex`.
+   */
+  uid: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the panel.' },
     })
@@ -112,7 +117,7 @@ const dashboardPanels = {
   panels: schema.arrayOf(
     schema.oneOf([
       panelSchema.extends({
-        panelIndex: schema.string(),
+        uid: schema.string(),
         grid: panelGridDataSchema.extends({
           i: schema.string(),
         }),
@@ -123,7 +128,7 @@ const dashboardPanels = {
         }),
         panels: schema.arrayOf(
           panelSchema.extends({
-            panelIndex: schema.string(),
+            uid: schema.string(),
             grid: panelGridDataSchema.extends({
               i: schema.string(),
             }),
@@ -350,7 +355,7 @@ const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.exten
   panels: schema.arrayOf(
     schema.oneOf([
       panelSchema.extends({
-        panelIndex: schema.string(),
+        uid: schema.string(),
         grid: panelGridDataSchema.extends({
           i: schema.string(),
         }),
@@ -361,7 +366,7 @@ const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.exten
         }),
         panels: schema.arrayOf(
           panelSchema.extends({
-            panelIndex: schema.string(),
+            uid: schema.string(),
             grid: panelGridDataSchema.extends({
               i: schema.string(),
             }),

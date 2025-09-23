@@ -82,7 +82,7 @@ describe('savedObjectToItem', () => {
               title: 'title1',
             },
             grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-            panelIndex: '1',
+            uid: '1',
             type: 'type1',
             version: '2',
           },

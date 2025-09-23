@@ -16,7 +16,7 @@ describe('deserializeLayout', () => {
         {
           grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
           config: { title: 'panel One' },
-          panelIndex: '1',
+          uid: '1',
           type: 'testPanelType',
         },
         {
@@ -30,7 +30,7 @@ describe('deserializeLayout', () => {
             {
               grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
               config: { title: 'panel Three' },
-              panelIndex: '3',
+              uid: '3',
               type: 'testPanelType',
             },
           ],

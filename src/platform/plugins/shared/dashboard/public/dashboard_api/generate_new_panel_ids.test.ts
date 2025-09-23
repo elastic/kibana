@@ -23,7 +23,7 @@ describe('generateNewPanelIds', () => {
         {
           grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
           config: { title: 'panel One' },
-          panelIndex: '1',
+          uid: '1',
           type: 'testPanelType',
         },
       ],
@@ -40,7 +40,7 @@ describe('generateNewPanelIds', () => {
       {
         grid: { x: 0, y: 0, w: 6, h: 6, i: '100' },
         config: { title: 'panel One' },
-        panelIndex: '100',
+        uid: '100',
         type: 'testPanelType',
       },
     ]);
@@ -68,7 +68,7 @@ describe('generateNewPanelIds', () => {
             {
               grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
               config: { title: 'panel One' },
-              panelIndex: '1',
+              uid: '1',
               type: 'testPanelType',
             },
           ],
@@ -95,7 +95,7 @@ describe('generateNewPanelIds', () => {
           {
             grid: { x: 0, y: 0, w: 6, h: 6, i: '102' },
             config: { title: 'panel One' },
-            panelIndex: '102',
+            uid: '102',
             type: 'testPanelType',
           },
         ],

@@ -92,7 +92,7 @@ function transformPanelProperties(
   return {
     grid: rest,
     config: transformedPanelConfig ? transformedPanelConfig : config,
-    panelIndex,
+    uid: panelIndex,
     type: panelType,
     version,
   };

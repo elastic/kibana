@@ -45,7 +45,7 @@ export class ReferencedPanelManager {
     return panelId ? this.panelsById.get(panelId) : undefined;
   }
 
-  // This method adds the panel type to the map, so that we can fetch the panel later and it links the panelIndex to the panelId.
+  // This method adds the panel type to the map, so that we can fetch the panel later and it links the panel uid to the panelId.
   addReferencedPanel({
     dashboard,
     panel,
@@ -53,23 +53,23 @@ export class ReferencedPanelManager {
     dashboard: SavedObjectsFindResult<DashboardAttributes>;
     panel: DashboardPanel;
   }) {
-    const { panelIndex, type } = panel;
-    if (!panelIndex) return;
+    const { uid, type } = panel;
+    if (!uid) return;
 
     const panelReference = dashboard.references.find(
-      (r) => r.name.includes(panelIndex) && r.type === type
+      (r) => r.name.includes(uid) && r.type === type
     );
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
+        `Reference for panel of type ${type} and panelIndex ${uid} was not found in dashboard with id ${dashboard.id}`
       );
       return;
     }
 
     const panelId = panelReference.id;
 
-    this.panelIndexToId.set(panelIndex, panelId);
+    this.panelIndexToId.set(uid, panelId);
 
     if (!this.panelsTypeById.has(panelId)) {
       this.panelsTypeById.set(panelId, panel.type);

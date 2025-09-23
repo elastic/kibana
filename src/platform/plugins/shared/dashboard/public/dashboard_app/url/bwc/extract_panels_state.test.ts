@@ -16,7 +16,25 @@ describe('extractPanelsState', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
-            gridData: { x: 0, y: 0, w: 24, h: 15, i: 'fizz' },
+            gridData: { x: 0, y: 0, w: 24, h: 15 },
+            type: 'lens',
+            config: {},
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          config: {},
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          type: 'lens',
+        },
+      ]);
+    });
+    test('should move panelIndex to uid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 24, h: 15 },
             type: 'lens',
             panelIndex: 'fizz',
             config: {},
@@ -26,9 +44,9 @@ describe('extractPanelsState', () => {
       expect(panels).toEqual([
         {
           config: {},
-          grid: { x: 0, y: 0, w: 24, h: 15, i: 'fizz' },
+          grid: { x: 0, y: 0, w: 24, h: 15 },
           type: 'lens',
-          panelIndex: 'fizz',
+          uid: 'fizz',
         },
       ]);
     });
@@ -43,7 +61,6 @@ describe('extractPanelsState', () => {
               },
             },
             grid: {},
-            id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             type: 'map',
           },
         ],
@@ -51,7 +68,6 @@ describe('extractPanelsState', () => {
       expect(panels).toEqual([
         {
           config: {
-            savedObjectId: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             timeRange: {
               from: 'now-7d/d',
               to: 'now',
@@ -59,6 +75,27 @@ describe('extractPanelsState', () => {
           },
           grid: {},
           type: 'map',
+        },
+      ]);
+    });
+    test('should create saved object reference', () => {
+      const { savedObjectReferences } = extractPanelsState({
+        panels: [
+          {
+            config: {
+              savedObjectId: 'e5b21d58-abf3-459a-ab1b-da438094752a',
+            },
+            grid: {},
+            uid: '19fd37e4-906a-48a3-a6c4-cca557f89e2c',
+            type: 'visualization',
+          },
+        ],
+      });
+      expect(savedObjectReferences).toEqual([
+        {
+          id: 'e5b21d58-abf3-459a-ab1b-da438094752a',
+          name: '19fd37e4-906a-48a3-a6c4-cca557f89e2c:savedObjectRef',
+          type: 'visualization',
         },
       ]);
     });
@@ -116,9 +153,9 @@ describe('extractPanelsState', () => {
             },
             title: 'Custom title',
           },
-          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           grid: {},
           type: 'map',
+          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });
@@ -149,9 +186,9 @@ describe('extractPanelsState', () => {
               to: 'now',
             },
           },
-          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           grid: {},
           type: 'map',
+          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });

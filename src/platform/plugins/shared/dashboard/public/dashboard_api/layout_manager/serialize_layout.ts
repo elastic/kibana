@@ -30,7 +30,7 @@ export function serializeLayout(
     const panelState = {
       type,
       grid: restOfGridData,
-      panelIndex: panelId,
+      uid: panelId,
       config,
     };
 

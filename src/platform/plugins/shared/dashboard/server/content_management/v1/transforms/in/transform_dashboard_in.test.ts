@@ -51,7 +51,7 @@ describe('transformDashboardIn', () => {
             enhancements: {},
             savedObjectId: '1',
           },
-          panelIndex: '1',
+          uid: '1',
           title: 'title1',
           type: 'type1',
           version: '2',

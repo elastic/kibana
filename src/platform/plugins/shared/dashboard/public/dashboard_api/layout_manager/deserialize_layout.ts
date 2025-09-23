@@ -24,7 +24,7 @@ export function deserializeLayout(
   const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
-    const panelId = panel.panelIndex ?? v4();
+    const panelId = panel.uid ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
       grid: {

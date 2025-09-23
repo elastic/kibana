@@ -38,7 +38,7 @@ describe('layout manager', () => {
     grid: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
     type: 'testPanelType',
     config: { title: 'Panel One' },
-    panelIndex: PANEL_ONE_ID,
+    uid: PANEL_ONE_ID,
   };
 
   const titleManager = initializeTitleManager(panel1.config);

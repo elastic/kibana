@@ -135,13 +135,13 @@ export function getMockPanels() {
     {
       grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       config: { title: 'panel One' },
-      panelIndex: '1',
+      uid: '1',
       type: 'testPanelType',
     },
     {
       grid: { x: 6, y: 0, w: 6, h: 6, i: '2' },
       config: { title: 'panel Two' },
-      panelIndex: '2',
+      uid: '2',
       type: 'testPanelType',
     },
   ];
@@ -161,7 +161,7 @@ export function getMockPanelsWithSections() {
         {
           grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
           config: { title: 'panel Three' },
-          panelIndex: '3',
+          uid: '3',
           type: 'testPanelType',
         },
       ],
@@ -177,7 +177,7 @@ export function getMockPanelsWithSections() {
         {
           grid: { x: 0, y: 0, w: 6, h: 6, i: '4' },
           config: { title: 'panel Four' },
-          panelIndex: '4',
+          uid: '4',
           type: 'testPanelType',
         },
       ],

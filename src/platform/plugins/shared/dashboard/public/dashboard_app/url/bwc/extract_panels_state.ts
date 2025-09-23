@@ -53,7 +53,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   }
 
   const savedObjectReferences: Reference[] = [];
-  const standardizedPanels = panels.map((legacyPanel) => {
+  const standardizedPanels: DashboardState['panels'] = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
@@ -74,6 +74,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       delete panel.gridData;
     }
 
+    // < 9.3 uid stored as panelIndex
+    if (panel?.panelIndex) {
+      panel.uid = panel.panelIndex;
+      delete panel.panelIndex;
+    }
+
     // <8.19 'id' (saved object id) stored as siblings to config
     if (panel.id && panel.config && typeof panel.config === 'object') {
       panel.config.savedObjectId = panel.id;
@@ -89,10 +95,10 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     // < 9.2 dashboard managed saved object refs for panels
     // Add saved object ref for panels that contain savedObjectId
     // TODO remove once all panels inject references in dashboard server api
-    const { config, panelIndex, type } = panel;
-    if (panelIndex && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
+    const { config, uid, type } = panel;
+    if (uid && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
       savedObjectReferences.push(
-        ...prefixReferencesFromPanel(panelIndex, [
+        ...prefixReferencesFromPanel(uid, [
           {
             id: config.savedObjectId,
             name: SAVED_OBJECT_REF_NAME,

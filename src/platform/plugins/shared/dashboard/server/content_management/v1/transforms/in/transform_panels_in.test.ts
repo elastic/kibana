@@ -19,7 +19,7 @@ describe('transformPanelsIn', () => {
     const panels = [
       {
         type: 'foo',
-        panelIndex: '1',
+        uid: '1',
         grid: { x: 0, y: 0, w: 12, h: 12, i: '1' },
         config: { foo: 'bar' },
       },

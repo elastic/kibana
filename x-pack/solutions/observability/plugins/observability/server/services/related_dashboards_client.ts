@@ -72,8 +72,8 @@ export class RelatedDashboardsClient {
       let references = this.isLensVizAttributes(panel.config.attributes)
         ? panel.config.attributes.references
         : undefined;
-      if (!references && panel.panelIndex) {
-        references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
+      if (!references && panel.uid) {
+        references = this.referencedPanelManager.getByIndex(panel.uid)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -91,8 +91,8 @@ export class RelatedDashboardsClient {
       let state: unknown = this.isLensVizAttributes(panel.config.attributes)
         ? panel.config.attributes.state
         : undefined;
-      if (!state && panel.panelIndex) {
-        state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
+      if (!state && panel.uid) {
+        state = this.referencedPanelManager.getByIndex(panel.uid)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
