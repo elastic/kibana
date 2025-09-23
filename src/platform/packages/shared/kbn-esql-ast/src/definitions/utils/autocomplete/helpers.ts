@@ -11,7 +11,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
-import { uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
 import { within } from '../../../ast/location';
 import type {
@@ -36,6 +36,7 @@ import {
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
 import { getColumnByName, getOverlapRange, isParamExpressionType } from '../shared';
+import { buildValueDefinitions } from '../values';
 
 export const shouldBeQuotedText = (
   text: string,
@@ -477,6 +478,18 @@ export async function suggestForExpression({
 
       if (functionParameterContext) {
         const { paramDefinitions } = functionParameterContext;
+
+        const suggestedValues = uniq(
+          paramDefinitions
+            .map((d) => d.suggestedValues)
+            .filter((d) => d)
+            .flat()
+        ) as string[];
+
+        if (suggestedValues.length) {
+          return buildValueDefinitions(suggestedValues);
+        }
+
         acceptedTypes = ensureKeywordAndText(paramDefinitions.map((p) => p.type));
       }
 
