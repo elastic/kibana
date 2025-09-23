@@ -14,19 +14,19 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiIcon,
+  EuiIconTip,
   EuiCallOut,
   EuiLoadingElastic,
   EuiInMemoryTable,
-  EuiToolTip,
   EuiText,
   EuiSpacer,
   EuiLoadingSpinner,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
@@ -34,7 +34,7 @@ import {
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import type { v1 } from '../../../../common';
-import {
+import type {
   SavedObjectWithMetadata,
   SavedObjectRelationKind,
   SavedObjectRelation,
@@ -91,6 +91,36 @@ export class RelationshipsClass extends Component<
   RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>,
   RelationshipsState
 > {
+  render() {
+    const modalTitleId = htmlIdGenerator()('relationshipsFlyoutTitle');
+    const { close, savedObject, allowedTypes } = this.props;
+    const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
+
+    return (
+      <EuiFlyout onClose={close} aria-labelledby={modalTitleId}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id={modalTitleId}>
+              <EuiIconTip
+                position="top"
+                content={typeLabel}
+                type={savedObject.meta.icon || 'apps'}
+                size="m"
+                aria-label={typeLabel}
+              />
+              &nbsp;&nbsp;
+              {savedObject.meta.title || getDefaultTitle(savedObject)}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {this.renderInvalidRelationship()}
+          {this.renderRelationshipsTable()}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+
   constructor(props: RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>) {
     super(props);
 
@@ -259,14 +289,16 @@ export class RelationshipsClass extends Component<
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={object.meta.icon || 'apps'}
-                size="s"
-                data-test-subj="relationshipsObjectType"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              position="top"
+              content={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              aria-label={typeLabel}
+              iconProps={{
+                'data-test-subj': 'relationshipsObjectType',
+              }}
+            />
           );
         },
       },
@@ -407,31 +439,6 @@ export class RelationshipsClass extends Component<
           })}
         />
       </>
-    );
-  }
-
-  render() {
-    const { close, savedObject, allowedTypes } = this.props;
-    const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
-
-    return (
-      <EuiFlyout onClose={close}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
-              </EuiToolTip>
-              &nbsp;&nbsp;
-              {savedObject.meta.title || getDefaultTitle(savedObject)}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {this.renderInvalidRelationship()}
-          {this.renderRelationshipsTable()}
-        </EuiFlyoutBody>
-      </EuiFlyout>
     );
   }
 }

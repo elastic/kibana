@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import { isEqual } from 'lodash';
-import useObservable from 'react-use/lib/useObservable';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
@@ -16,23 +15,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -124,7 +125,8 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import { XYPersistedState, convertPersistedState, convertToPersistable } from './persistence';
+import type { XYPersistedState } from './persistence';
+import { convertPersistedState, convertToPersistable } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
@@ -149,7 +151,6 @@ export const getXyVisualization = ({
   data,
   paletteService,
   fieldFormats,
-  useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
@@ -162,7 +163,6 @@ export const getXyVisualization = ({
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
-  useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
@@ -306,7 +306,7 @@ export const getXyVisualization = ({
     mainPalette?,
     datasourceStates?,
     annotationGroups?: AnnotationGroups,
-    references?: SavedObjectReference[]
+    references?: Reference[]
   ) {
     if (persistedState) {
       const convertedState = convertPersistedState(persistedState, annotationGroups, references);
@@ -743,7 +743,7 @@ export const getXyVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
+    return <XyToolbar {...props} />;
   },
 
   DimensionEditorComponent(props) {
@@ -754,15 +754,16 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
+
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} palettes={palettes} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={theme.darkMode} />
+      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={isDarkMode} />
     );
 
     return dimensionEditor;
@@ -1357,6 +1358,7 @@ export const stackingTypes = [
       defaultMessage: 'Stacked',
     }),
     subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+    dataTestSubj: 'lnsStackingOptionsButtonStacked',
   },
   {
     type: 'unstacked',
@@ -1364,6 +1366,7 @@ export const stackingTypes = [
       defaultMessage: 'Unstacked',
     }),
     subtypes: ['bar', 'area', 'bar_horizontal'],
+    dataTestSubj: 'lnsStackingOptionsButtonUnstacked',
   },
   {
     type: 'percentage',
@@ -1375,6 +1378,7 @@ export const stackingTypes = [
       'area_percentage_stacked',
       'bar_horizontal_percentage_stacked',
     ],
+    dataTestSubj: 'lnsStackingOptionsButtonPercentage',
   },
 ];
 
@@ -1392,10 +1396,11 @@ const SubtypeSwitch = ({
     return null;
   }
   const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
-  const options = stackingTypes.map(({ label, subtypes }) => ({
+  const options = stackingTypes.map(({ label, subtypes, dataTestSubj }) => ({
     label,
     value: subtypes[subTypeIndex],
     checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+    'data-test-subj': dataTestSubj,
   }));
 
   return (
@@ -1412,6 +1417,7 @@ const SubtypeSwitch = ({
             fullWidth
             size="s"
             label={stackingType.label}
+            data-test-subj="lnsStackingOptionsButton"
           />
         }
         isOpen={flyoutOpen}

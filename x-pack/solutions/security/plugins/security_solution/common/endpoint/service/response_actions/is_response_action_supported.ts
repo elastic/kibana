@@ -16,7 +16,7 @@ type SupportMap = Record<
   Record<ResponseActionType, Record<ResponseActionAgentType, boolean>>
 >;
 
-/** @private */
+/** @internal */
 const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   isolate: {
     automated: {
@@ -153,9 +153,23 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     },
     manual: {
       endpoint: false,
-      sentinel_one: false,
+      sentinel_one: true,
       crowdstrike: true,
+      microsoft_defender_endpoint: true,
+    },
+  },
+  cancel: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
       microsoft_defender_endpoint: false,
+    },
+    manual: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+      microsoft_defender_endpoint: true,
     },
   },
 };

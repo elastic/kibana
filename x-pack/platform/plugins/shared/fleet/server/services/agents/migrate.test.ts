@@ -9,13 +9,28 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Agent } from '../../types';
 
-import { migrateSingleAgent } from './migrate';
-import { createAgentAction } from './actions';
+import { FleetError } from '../../errors';
+
+import { bulkMigrateAgents, migrateSingleAgent } from './migrate';
+import { createAgentAction, createErrorActionResults } from './actions';
+import { getAgentPolicyForAgents, getAgents } from './crud';
 
 // Mock the imported functions
 jest.mock('./actions');
 
+jest.mock('./crud', () => {
+  return {
+    getAgentPolicyForAgents: jest.fn(),
+    getAgents: jest.fn(),
+    getAgentsByKuery: jest.fn(),
+    openPointInTime: jest.fn(),
+  };
+});
+
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+  typeof createErrorActionResults
+>;
 
 const mockedAgent: Agent = {
   id: 'agent-123',
@@ -48,11 +63,16 @@ const mockedPolicy: AgentPolicy = {
 
 describe('Agent migration', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  const soClientMock = {
+    getCurrentNamespace: jest.fn(),
+  } as any;
 
   beforeEach(() => {
     // Reset mocks before each test
     jest.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
 
     // Mock the createAgentAction response
     mockedCreateAgentAction.mockResolvedValue({
@@ -61,6 +81,7 @@ describe('Agent migration', () => {
       agents: ['agent-123'],
       created_at: new Date().toISOString(),
     });
+    mockedPolicy.is_protected = false;
   });
 
   describe('migrateSingleAgent', () => {
@@ -75,6 +96,7 @@ describe('Agent migration', () => {
 
       const result = await migrateSingleAgent(
         esClientMock,
+        soClientMock,
         agentId,
         mockedPolicy,
         mockedAgent,
@@ -83,14 +105,18 @@ describe('Agent migration', () => {
 
       // Verify createAgentAction was called with correct params
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
-      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
         agents: [agentId],
         created_at: expect.any(String),
         type: 'MIGRATE',
         policyId: options.policyId,
-        enrollment_token: options.enrollment_token,
-        target_uri: options.uri,
-        additionalSettings: options.settings,
+        data: {
+          target_uri: options.uri,
+          settings: options.settings,
+        },
+        secrets: {
+          enrollment_token: options.enrollment_token,
+        },
       });
 
       // Verify result contains the action ID from createAgentAction
@@ -105,13 +131,27 @@ describe('Agent migration', () => {
         uri: 'https://test-fleet-server.example.com',
       };
 
-      await migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options);
+      await migrateSingleAgent(
+        esClientMock,
+        soClientMock,
+        agentId,
+        mockedPolicy,
+        mockedAgent,
+        options
+      );
 
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
+        soClientMock,
         expect.objectContaining({
-          additionalSettings: undefined,
+          data: {
+            target_uri: options.uri,
+            settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
+          },
         })
       );
     });
@@ -125,8 +165,183 @@ describe('Agent migration', () => {
       };
       mockedPolicy.is_protected = true;
       await expect(
-        migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
+        migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
       ).rejects.toThrowError('Agent is protected and cannot be migrated');
+    });
+
+    it('should throw an error if the agent is a fleet server', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          { ...mockedAgent, components: [{ type: 'fleet-server' } as any] },
+          options
+        )
+      ).rejects.toThrowError('Fleet server agents cannot be migrated');
+    });
+
+    it('should throw an error if the agent has a not supported version', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          { ...mockedAgent, agent: { version: '9.1.0' } as any },
+          options
+        )
+      ).rejects.toThrowError(
+        'Agent cannot be migrated. Migrate action is supported from version 9.2.0.'
+      );
+    });
+  });
+
+  // Bulk migrate
+
+  describe('migrateBulkAgents', () => {
+    it('should create a MIGRATE action for the specified agents', async () => {
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [mockedAgent.id, mockedAgent.id],
+      });
+
+      // Verify createAgentAction was called with correct params
+      expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(
+        esClientMock,
+        soClientMock,
+        expect.objectContaining({
+          agents: [mockedAgent.id, mockedAgent.id],
+          type: 'MIGRATE',
+          data: {
+            target_uri: options.uri,
+            settings: options.settings,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
+          },
+          total: 2,
+          namespaces: ['default'],
+        })
+      );
+    });
+
+    it('should handle empty additional settings', async () => {
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [mockedAgent.id, mockedAgent.id],
+      });
+
+      // Verify createAgentAction was called with correct params and undefined additionalSettings
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(
+        esClientMock,
+        soClientMock,
+        expect.objectContaining({
+          data: {
+            target_uri: options.uri,
+            settings: undefined,
+          },
+          secrets: {
+            enrollment_token: options.enrollment_token,
+          },
+        })
+      );
+    });
+
+    it('should record error result if the agent is protected', async () => {
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      mockedPolicy.is_protected = true;
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [mockedAgent.id, mockedAgent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is protected.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+    });
+
+    it('should record error result if the agent is fleet-server', async () => {
+      const agent = { ...mockedAgent, components: [{ type: 'fleet-server' } as any] };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is a fleet-server.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+    });
+
+    it('should record error result if the agent is on unsupported version', async () => {
+      const agent = { ...mockedAgent, agent: { version: '9.1.0' } as any };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated. Migrate action is supported from version 9.2.0.'
+          ),
+        },
+        'agent does not support migration action'
+      );
     });
   });
 });

@@ -7,63 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
-  savedObjectSchema,
-  objectTypeToGetResultSchema,
-  createOptionsSchemas,
-  updateOptionsSchema,
-  createResultSchema,
-} from '@kbn/content-management-utils';
-import { dashboardAttributesSchema } from '../../dashboard_saved_object/schema/v1';
+  dashboardGetResultSchema,
+  dashboardCreateOptionsSchema,
+  dashboardCreateSchema,
+  dashboardUpdateOptionsSchema,
+  dashboardUpdateRequestAttributesSchema,
+  dashboardSearchOptionsSchema,
+  dashboardItemSchema,
+} from './schema';
 
-export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
-
-const searchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
-
-const createOptionsSchema = schema.object({
-  id: schema.maybe(createOptionsSchemas.id),
-  overwrite: schema.maybe(createOptionsSchemas.overwrite),
-  references: schema.maybe(createOptionsSchemas.references),
-});
-
-const dashboardUpdateOptionsSchema = schema.object({
-  references: schema.maybe(updateOptionsSchema.references),
-  mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
-});
-
-/**
- * Content management service definition v1.
- * Dashboard attributes in content management version v1 are tightly coupled with the v1 model version saved object schema.
- */
 export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(dashboardSavedObjectSchema),
+        schema: dashboardGetResultSchema,
       },
     },
   },
   create: {
     in: {
       options: {
-        schema: createOptionsSchema,
+        schema: dashboardCreateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchema,
+        schema: dashboardCreateSchema,
       },
     },
     out: {
       result: {
-        schema: createResultSchema(dashboardSavedObjectSchema),
+        schema: dashboardItemSchema,
       },
     },
   },
@@ -73,14 +47,14 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardUpdateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchema,
+        schema: dashboardUpdateRequestAttributesSchema,
       },
     },
   },
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: dashboardSearchOptionsSchema,
       },
     },
   },

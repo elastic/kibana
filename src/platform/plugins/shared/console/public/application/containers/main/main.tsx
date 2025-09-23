@@ -36,13 +36,13 @@ import {
   useEditorActionContext,
   useRequestActionContext,
 } from '../../contexts';
+import type { ConsoleTourStepProps } from '../../components';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
   ShortcutsPopover,
   ConsoleTourStep,
-  ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';
@@ -54,7 +54,6 @@ import {
   HISTORY_TAB_ID,
   CONFIG_TAB_ID,
   EDITOR_TOUR_STEP,
-  TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
   EXPORT_FILE_NAME,
@@ -84,13 +83,10 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     services: { notifications, routeHistory },
   } = useServicesContext();
 
-  const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
-  const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
-  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(docLinks), initialTourState);
-
-  useEffect(() => {
-    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
-  }, [tourState]);
+  const [tourStepProps, actions, tourState] = useEuiTour(
+    getTourSteps(docLinks),
+    INITIAL_TOUR_CONFIG
+  );
 
   // Clean up request output when switching tabs
   useEffect(() => {
@@ -198,7 +194,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const helpButton = (
     <NavIconButton
-      iconType="questionInCircle"
+      iconType="question"
       onClick={() => setIsHelpOpen(!isHelpOpen)}
       ariaLabel={MAIN_PANEL_LABELS.helpButton}
       dataTestSubj="consoleHelpButton"

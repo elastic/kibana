@@ -41,7 +41,9 @@
     "@kbn/serverless",
     "@kbn/utility-types",
     "@kbn/search-navigation",
-    "@kbn/search-queries"
+    "@kbn/search-queries",
+    "@kbn/sample-data-ingest",
+    "@kbn/management-settings-ids",
   ],
   "exclude": [
     "target/**/*",

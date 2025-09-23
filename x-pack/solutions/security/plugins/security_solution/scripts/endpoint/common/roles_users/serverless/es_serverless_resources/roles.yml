@@ -35,6 +35,7 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -54,16 +55,19 @@ viewer:
         - 'risk-score.risk-score-*'
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.updates.security_*'
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -105,6 +109,7 @@ editor:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -113,6 +118,8 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
+        - '.internal.adhoc.alerts*'
+        - '.adhoc.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -122,6 +129,9 @@ editor:
     - names:
         - '.asset-criticality.asset-criticality-*'
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
+        - .entities.v1.updates.security_*
       privileges:
         - 'read'
         - 'write'
@@ -134,19 +144,21 @@ editor:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.policy_management_read # Elastic Defend Policy Management
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response actions history
-        - feature_siemV2.file_operations_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.policy_management_read # Elastic Defend Policy Management
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response actions history
+        - feature_siemV3.file_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -191,16 +203,20 @@ t1_analyst:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -245,7 +261,11 @@ t2_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -257,9 +277,9 @@ t2_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -291,6 +311,7 @@ t3_analyst:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -313,28 +334,33 @@ t3_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.policy_management_read # Elastic Defend Policy Management
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response actions history
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.policy_management_read # Elastic Defend Policy Management
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response actions history
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -365,6 +391,7 @@ threat_intelligence_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -387,6 +414,8 @@ threat_intelligence_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -394,9 +423,10 @@ threat_intelligence_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.endpoint_list_read
-        - feature_siemV2.blocklist_all
+        - feature_siemV3.all
+        - feature_siemV3.endpoint_list_read
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.blocklist_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -427,6 +457,7 @@ rule_author:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -435,6 +466,8 @@ rule_author:
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
+        - .internal.adhoc.alerts-security*
+        - .adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -452,24 +485,29 @@ rule_author:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_read
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.actions_log_management_read
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_read
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.actions_log_management_read
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -501,6 +539,9 @@ soc_manager:
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -509,6 +550,8 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -526,28 +569,31 @@ soc_manager:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.execute_operations_all
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.execute_operations_all
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -585,6 +631,9 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -594,6 +643,7 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -603,6 +653,8 @@ detections_admin:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
@@ -610,9 +662,10 @@ detections_admin:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.global_artifact_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -649,34 +702,42 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
         - risk-score.risk-score-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
     - names:
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.actions_log_management_read
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.actions_log_management_read
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -719,7 +780,11 @@ endpoint_operations_analyst:
         - .items*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -727,6 +792,8 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -740,21 +807,23 @@ endpoint_operations_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response History
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.execute_operations_all # Execute
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response History
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.execute_operations_all # Execute
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -795,7 +864,10 @@ endpoint_policy_manager:
         - winlogbeat-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - '.entities.v1.history.*.security_*'
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -810,6 +882,8 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -818,16 +892,18 @@ endpoint_policy_manager:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.global_artifact_management_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.trusted_devices_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
@@ -15,6 +15,7 @@ jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
 }));
 
+jest.mock('../../../../../containers/plugin_config_context');
 jest.mock('../../hooks/use_snaphot');
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -34,12 +35,58 @@ const NODE: InfraWaffleMapNode = {
   metrics: [{ name: 'cpuV2' }],
 };
 
-export const nextTick = () => new Promise((res) => process.nextTick(res));
+const mockedUseWaffleOptionsContextReturnValue = {
+  metric: {
+    type: 'cpu',
+    field: 'host.cpuV2.pct',
+    color: 'color0',
+    label: 'CPU Usage',
+    aggregation: 'avg',
+    formatTemplate: '{{value}}%',
+  },
+  groupBy: [],
+  nodeType: 'host',
+  view: 'map',
+  customOptions: {
+    legend: { steps: 10 },
+  },
+  customMetrics: [
+    {
+      aggregation: 'avg',
+      field: 'host.cpuV2.pct',
+      id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
+      label: 'My Custom Label',
+      type: 'custom',
+    },
+    {
+      aggregation: 'avg',
+      field: 'host.network.out.packets',
+      id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
+      type: 'custom',
+    },
+  ],
+  options: {
+    fields: {
+      cpuV2: { name: 'cpuV2', units: '%' },
+      memory: { name: 'memory', units: '%' },
+      rxV2: { name: 'rxV2', units: 'bytes' },
+      txV2: { name: 'txV2', units: 'bytes' },
+      cpu: { name: 'cpu', units: '%' },
+      rx: { name: 'rx', units: 'bytes' },
+      tx: { name: 'tx', units: 'bytes' },
+    },
+  },
+  setWaffleOptions: jest.fn(),
+};
 
 describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
 
-  it('renders correctly', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders correctly with node data', () => {
     mockedUseSnapshot.mockReturnValue({
       nodes: [
         {
@@ -73,14 +120,17 @@ describe('ConditionalToolTip', () => {
       interval: '60s',
       reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
     });
-    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
-    const expectedQuery = JSON.stringify({
-      bool: {
-        filter: {
-          match_phrase: { 'host.name': 'host-01' },
-        },
-      },
-    });
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      mockedUseWaffleOptionsContextReturnValue as unknown as ReturnType<
+        typeof useWaffleOptionsContext
+      >
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />);
+
+    const tooltip = screen.getByTestId('conditionalTooltipContent-host-01');
+    expect(tooltip).toBeInTheDocument();
+
     const expectedMetrics = [
       { type: 'cpuV2' },
       { type: 'memory' },
@@ -103,14 +153,9 @@ describe('ConditionalToolTip', () => {
         type: 'custom',
       },
     ];
-    const wrapper = mount(
-      <ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />
-    );
-    const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
-    expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith({
-      filterQuery: expectedQuery,
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"host.name": host-01',
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',
@@ -119,47 +164,7 @@ describe('ConditionalToolTip', () => {
       accountId: '',
       region: '',
     } as UseSnapshotRequest);
+
+    expect(tooltip).toMatchSnapshot();
   });
 });
-
-const mockedUseWaffleOptionsContexReturnValue: ReturnType<typeof useWaffleOptionsContext> = {
-  changeMetric: jest.fn(() => {}),
-  changeGroupBy: jest.fn(() => {}),
-  changeNodeType: jest.fn(() => {}),
-  changeView: jest.fn(() => {}),
-  changeCustomOptions: jest.fn(() => {}),
-  changeAutoBounds: jest.fn(() => {}),
-  changeBoundsOverride: jest.fn(() => {}),
-  changeAccount: jest.fn(() => {}),
-  changeRegion: jest.fn(() => {}),
-  changeCustomMetrics: jest.fn(() => {}),
-  changeLegend: jest.fn(() => {}),
-  changeSort: jest.fn(() => {}),
-  changeTimelineOpen: jest.fn(() => {}),
-  setWaffleOptionsState: jest.fn(() => {}),
-  boundsOverride: { max: 1, min: 0 },
-  autoBounds: true,
-  accountId: '',
-  region: '',
-  sort: { by: 'name', direction: 'desc' },
-  groupBy: [],
-  nodeType: 'host',
-  customOptions: [],
-  view: 'map',
-  metric: { type: 'cpuV2' },
-  customMetrics: [
-    {
-      aggregation: 'avg',
-      field: 'host.cpuV2.pct',
-      id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
-      label: 'My Custom Label',
-      type: 'custom',
-    },
-    {
-      aggregation: 'avg',
-      field: 'host.network.out.packets',
-      id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
-      type: 'custom',
-    },
-  ],
-};

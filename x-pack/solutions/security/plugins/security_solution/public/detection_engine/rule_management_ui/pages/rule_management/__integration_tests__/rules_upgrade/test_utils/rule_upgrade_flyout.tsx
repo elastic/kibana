@@ -33,6 +33,7 @@ import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 // Mocks necessary to render Rule Upgrade Flyout
 jest.mock('../../../../../../../detections/components/user_info');
 jest.mock('../../../../../../../detections/containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../../../components/rules_table/feature_tour/rules_feature_tour');
 /** **********************************************/
 
 /**
@@ -111,6 +112,7 @@ export function mockRuleUpgradeReviewData({
         target_rule: {
           rule_id: 'test-rule',
           type: ruleType,
+          threshold: { value: 30, field: ['fieldC'] }, // We use the `convertRuleToDiffable` util in the FieldUpgradeContext which needs relevant fields to convert
         },
         diff: {
           num_fields_with_updates: 2, // tested field + version field

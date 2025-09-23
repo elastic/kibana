@@ -7,19 +7,21 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { LegendValue, Position, ScaleType } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
+import { LegendValue, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import type { AxesSettingsConfig, XYLegendValue } from '@kbn/visualizations-plugin/common';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
-import { State, XYState } from '../types';
+import type { State, XYState } from '../types';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, getXDomain, AxisGroupConfiguration } from '../axes_configuration';
+import type { AxisGroupConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
@@ -287,10 +289,8 @@ const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
   defaultMessage: 'Legend',
 });
 
-export const XyToolbar = memo(function XyToolbar(
-  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
-) {
-  const { state, setState, frame, useLegacyTimeAxis } = props;
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
@@ -584,9 +584,7 @@ export const XyToolbar = memo(function XyToolbar(
             setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
-            useMultilayerTimeAxis={
-              isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
-            }
+            useMultilayerTimeAxis={isTimeHistogramModeEnabled && !shouldRotate}
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
             setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}

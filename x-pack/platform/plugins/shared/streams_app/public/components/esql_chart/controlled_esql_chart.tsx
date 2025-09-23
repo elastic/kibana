@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { DomainRange } from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
@@ -17,15 +18,14 @@ import {
   Settings,
   Tooltip,
   niceTimeFormatter,
-  DomainRange,
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { AbortableAsyncState } from '@kbn/react-hooks';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
@@ -140,7 +140,7 @@ export function ControlledEsqlChart<T extends string>({
                   style={{ fontWeight: 'normal' }}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
+                    <EuiIcon type="info" />
                   </EuiFlexItem>
                   <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                 </EuiFlexGroup>
@@ -183,12 +183,14 @@ export function ControlledEsqlChart<T extends string>({
             key={serie.id}
             color="#61A2FF"
             id={serie.id}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={serie.metricNames}
             data={serie.data}
             curve={CurveType.CURVE_MONOTONE_X}
+            enableHistogramMode
           />
         );
       })}

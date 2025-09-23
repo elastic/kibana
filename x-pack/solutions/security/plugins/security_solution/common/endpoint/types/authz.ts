@@ -54,6 +54,8 @@ export interface EndpointAuthz {
   canGetRunningProcesses: boolean;
   /** If the user has permissions to use the Response Actions Console */
   canAccessResponseConsole: boolean;
+  /** If the user has permissions to use the Cancel Response Action */
+  canCancelAction: boolean;
   /** If the user has write permissions to use execute action */
   canWriteExecuteOperations: boolean;
   /** If the user has write permissions to use file operations */
@@ -64,6 +66,10 @@ export interface EndpointAuthz {
   canWriteTrustedApplications: boolean;
   /** If the user has read permissions for trusted applications */
   canReadTrustedApplications: boolean;
+  /** If the user has write permissions for trusted devices */
+  canWriteTrustedDevices: boolean;
+  /** If the user has read permissions for trusted devices */
+  canReadTrustedDevices: boolean;
   /** If the user has write permissions for host isolation exceptions */
   canWriteHostIsolationExceptions: boolean;
   /** If the user has read permissions for host isolation exceptions */
@@ -100,6 +106,14 @@ export interface EndpointAuthz {
   canWriteWorkflowInsights: boolean;
   /** if the user has read permissions for workflow insights */
   canReadWorkflowInsights: boolean;
+
+  /**
+   * If user has ability to read/write admin type of data.
+   * Introduced with v9.1 in support of spaces and currently tied to the user having the
+   * `superuser` role.
+   */
+  canReadAdminData: boolean;
+  canWriteAdminData: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

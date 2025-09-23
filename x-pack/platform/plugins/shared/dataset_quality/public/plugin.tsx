@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
 import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
 import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
-import { DataStreamsStatsService } from './services/data_streams_stats';
+import { registerRuleTypes } from './rule_types';
 import { DataStreamDetailsService } from './services/data_stream_details';
-import {
+import { DataStreamsStatsService } from './services/data_streams_stats';
+import type {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
   DatasetQualitySetupDeps,
@@ -25,8 +26,12 @@ export class DatasetQualityPlugin
 {
   private telemetry = new TelemetryService();
 
-  public setup(core: CoreSetup, _plugins: DatasetQualitySetupDeps) {
+  public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
+
+    registerRuleTypes({
+      ruleTypeRegistry: plugins.triggersActionsUi.ruleTypeRegistry,
+    });
 
     return {};
   }
@@ -40,6 +45,7 @@ export class DatasetQualityPlugin
 
     const dataStreamDetailsService = new DataStreamDetailsService().start({
       http: core.http,
+      telemetryClient,
     });
 
     const DatasetQuality = createDatasetQuality({

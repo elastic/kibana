@@ -76,28 +76,21 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  buildEsQuery,
-  Filter,
-  isOfQueryType,
-  isPhraseFilter,
-  isPhrasesFilter,
-} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
-import {
-  ExpressionAstExpression,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
+import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
 
-import { AggConfigs, EsQuerySortValue } from '../..';
+import type { EsQuerySortValue } from '../..';
+import { AggConfigs } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -110,14 +103,13 @@ import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
-import { AggsStart } from '../aggs';
+import type { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
-import {
+import type {
   EsdslExpressionFunctionDefinition,
   ExpressionFunctionKibanaContext,
-  filtersToAst,
-  queryToAst,
 } from '../expressions';
+import { filtersToAst, queryToAst } from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -224,7 +216,7 @@ export class SearchSource {
   /**
    * Internal, do not use. Overrides all search source fields with the new field array.
    *
-   * @private
+   * @internal
    * @param newFields New field array.
    */
   private setFields(newFields: SearchSourceFields) {
@@ -1223,23 +1215,16 @@ export class SearchSource {
   }
 
   parseActiveIndexPatternFromQueryString(queryString: string): string[] {
-    let m;
     const indexPatternSet: Set<string> = new Set();
-    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+    //  Regex to capture full index names including dashes, numbers, and periods
+    const indexNameRegExp = /\s?(_index)\s*:\s*(['"]?)([^\s'"]+)\2/g;
 
-    while ((m = regex.exec(queryString)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
+    for (const match of queryString.matchAll(indexNameRegExp)) {
+      const indexName = match[3];
+      if (indexName) {
+        indexPatternSet.add(indexName);
       }
-
-      m.forEach((match, groupIndex) => {
-        if (groupIndex === 2) {
-          indexPatternSet.add(match);
-        }
-      });
     }
-
     return [...indexPatternSet];
   }
 }

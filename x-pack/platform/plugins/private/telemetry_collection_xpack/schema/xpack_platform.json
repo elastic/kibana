@@ -3153,6 +3153,31 @@
               "type": "long"
             }
           }
+        },
+        "count_backfill_executions": {
+          "type": "long"
+        },
+        "count_backfills_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_gaps": {
+          "type": "long"
+        },
+        "total_unfilled_gap_duration_ms": {
+          "type": "long"
+        },
+        "total_filled_gap_duration_ms": {
+          "type": "long"
         }
       }
     },
@@ -3614,6 +3639,22 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -3712,6 +3753,22 @@
                           }
                         }
                       }
+                    }
+                  }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
                     }
                   }
                 }
@@ -3814,6 +3871,22 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -3868,6 +3941,63 @@
         "alerts": {
           "properties": {
             "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "main": {
               "properties": {
                 "total": {
                   "type": "long"
@@ -4115,6 +4245,12 @@
             "description": "The Serverless Project type"
           }
         },
+        "productTier": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Product Tier"
+          }
+        },
         "orchestratorTarget": {
           "type": "keyword",
           "_meta": {
@@ -4292,6 +4428,9 @@
                 "type": "keyword"
               },
               "enabled": {
+                "type": "boolean"
+              },
+              "agent_based": {
                 "type": "boolean"
               }
             }
@@ -5607,11 +5746,67 @@
     },
     "reporting": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
         "available": {
           "type": "boolean"
         },
         "enabled": {
           "type": "boolean"
+        },
+        "number_of_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_enabled_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_enabled_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_scheduled_reports_with_notifications": {
+          "type": "long"
         }
       }
     },
@@ -5752,6 +5947,16 @@
               }
             },
             "osquery-saved-query": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "alerting_rule_template": {
               "properties": {
                 "usedTags": {
                   "type": "integer"
@@ -6149,6 +6354,77 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    },
+    "stack_connectors": {
+      "properties": {
+        "inference_count_by_provider": {
+          "properties": {
+            "alibabacloud-ai-search": {
+              "type": "long"
+            },
+            "amazonbedrock": {
+              "type": "long"
+            },
+            "amazon_sagemaker": {
+              "type": "long"
+            },
+            "anthropic": {
+              "type": "long"
+            },
+            "azureaistudio": {
+              "type": "long"
+            },
+            "azureopenai": {
+              "type": "long"
+            },
+            "cohere": {
+              "type": "long"
+            },
+            "deepseek": {
+              "type": "long"
+            },
+            "elastic": {
+              "type": "long"
+            },
+            "elasticsearch": {
+              "type": "long"
+            },
+            "googleaistudio": {
+              "type": "long"
+            },
+            "googlevertexai": {
+              "type": "long"
+            },
+            "hugging_face": {
+              "type": "long"
+            },
+            "jinaai": {
+              "type": "long"
+            },
+            "mistral": {
+              "type": "long"
+            },
+            "openai": {
+              "type": "long"
+            },
+            "voyageai": {
+              "type": "long"
+            },
+            "watsonxai": {
+              "type": "long"
+            },
+            "ai21": {
+              "type": "long"
+            },
+            "llama": {
+              "type": "long"
+            },
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
           }
         }
       }

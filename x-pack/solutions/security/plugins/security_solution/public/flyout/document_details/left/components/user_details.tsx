@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -387,6 +387,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               userName={userName}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
@@ -423,7 +425,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
+              <EuiIconTip
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
@@ -431,9 +433,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                     values={{ userName }}
                   />
                 }
-              >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-              </EuiToolTip>
+                type="info"
+                className="eui-alignTop"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />

@@ -15,11 +15,12 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   ACTIVITY_TAB,
   ALERTS_TAB,
+  EVENTS_TAB,
   FILES_TAB,
   OBSERVABLES_TAB,
   SIMILAR_CASES_TAB,
 } from './translations';
-import type { CaseUI } from '../../../common';
+import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
@@ -137,6 +138,28 @@ const AlertsBadge = ({
 
 AlertsBadge.displayName = 'AlertsBadge';
 
+const EventsBadge = ({
+  activeTab,
+  totalEvents,
+  euiTheme,
+}: {
+  activeTab: string;
+  totalEvents: number | undefined;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <EuiNotificationBadge
+    css={css`
+      margin-left: ${euiTheme.size.xs};
+    `}
+    data-test-subj="case-view-events-stats-badge"
+    color={activeTab === CASE_VIEW_PAGE_TABS.EVENTS ? 'accent' : 'subdued'}
+  >
+    {totalEvents || 0}
+  </EuiNotificationBadge>
+);
+
+EventsBadge.displayName = 'EventsBadge';
+
 export interface CaseViewTabsProps {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
@@ -151,13 +174,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
 
-  const { observablesAuthorized: canShowObservableTabs } = useCasesFeatures();
+  const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
+    useCasesFeatures();
 
   const { data: similarCasesData } = useGetSimilarCases({
     caseId: caseData.id,
     perPage: 0,
     page: 0,
-    enabled: canShowObservableTabs,
+    enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
   const tabs = useMemo(
@@ -182,6 +206,21 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             },
           ]
         : []),
+      ...(features.events.enabled
+        ? [
+            {
+              id: CASE_VIEW_PAGE_TABS.EVENTS,
+              name: EVENTS_TAB,
+              badge: (
+                <EventsBadge
+                  totalEvents={caseData.totalEvents}
+                  activeTab={activeTab}
+                  euiTheme={euiTheme}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
         name: FILES_TAB,
@@ -194,7 +233,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
-      ...(canShowObservableTabs
+      ...(canShowObservableTabs && isObservablesFeatureEnabled
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
@@ -225,12 +264,15 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     [
       features.alerts.enabled,
       features.alerts.isExperimental,
+      features.events.enabled,
       caseData.totalAlerts,
+      caseData.totalEvents,
       activeTab,
       euiTheme,
       isLoadingFiles,
       fileStatsData,
       canShowObservableTabs,
+      isObservablesFeatureEnabled,
       isLoadingObservables,
       observables.length,
       similarCasesData?.total,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Ref, FC } from 'react';
 import React, {
   useState,
   useCallback,
@@ -16,18 +17,16 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
-  Ref,
   memo,
-  FC,
 } from 'react';
 import { isEmpty } from 'lodash';
-import {
+import type {
   EuiDataGridColumn,
-  EuiProgress,
   EuiDataGridSorting,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
 } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -41,7 +40,7 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
@@ -50,8 +49,8 @@ import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
-import { RenderContext, RowSelectionState } from '../types';
-import {
+import type { RenderContext, RowSelectionState } from '../types';
+import type {
   AdditionalContext,
   AlertsDataGridProps,
   AlertsTableImperativeApi,
@@ -187,8 +186,7 @@ const AlertsTableContent = typedForwardRef(
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight = false,
-      emptyStateHeight,
-      emptyStateVariant,
+      emptyState,
       openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
@@ -288,29 +286,46 @@ const AlertsTableContent = typedForwardRef(
       trackScores,
     });
 
+    /*
+     * if prevQueryParams is directly compared without selective prop assignment to a new object,
+     * deepEqual will return a false negative, even if the objects are structurally identical.
+     */
     useEffect(() => {
-      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        ruleTypeIds,
-        consumers,
-        fields,
-        query,
-        sort,
-        runtimeMappings,
-        minScore,
-        trackScores,
-        // Go back to the first page if the query changes
-        pageIndex: !deepEqual(prevQueryParams, {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => {
+        const resetPageIndex = !deepEqual(
+          {
+            ruleTypeIds: prevQueryParams.ruleTypeIds,
+            consumers: prevQueryParams.consumers,
+            fields: prevQueryParams.fields,
+            query: prevQueryParams.query,
+            sort: prevQueryParams.sort,
+            runtimeMappings: prevQueryParams.runtimeMappings,
+            trackScores: prevQueryParams.trackScores,
+          },
+          {
+            ruleTypeIds,
+            consumers,
+            fields,
+            query,
+            sort,
+            runtimeMappings,
+            trackScores,
+          }
+        );
+        return {
           ruleTypeIds,
           consumers,
           fields,
           query,
           sort,
           runtimeMappings,
-        })
-          ? 0
-          : oldPageIndex,
-        pageSize: oldPageSize,
-      }));
+          minScore,
+          trackScores,
+          // Go back to the first page if the query changes
+          pageIndex: resetPageIndex ? 0 : oldPageIndex,
+          pageSize: oldPageSize,
+        };
+      });
     }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
@@ -332,9 +347,9 @@ const AlertsTableContent = typedForwardRef(
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
-        onLoaded(alerts, columns);
+        onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
-    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -399,13 +414,18 @@ const AlertsTableContent = typedForwardRef(
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
-        const newSort = _sort.map((sortItem) => {
-          return {
-            [sortItem.id]: {
-              order: sortItem.direction,
-            },
-          };
-        });
+        const newSort = _sort
+          .map((sortItem) => {
+            return {
+              [sortItem.id]: {
+                order: sortItem.direction,
+              },
+            };
+          })
+          .filter((entry) => {
+            const sortKey = Object.keys(entry)[0];
+            return visibleColumns.includes(sortKey);
+          });
 
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
@@ -414,7 +434,7 @@ const AlertsTableContent = typedForwardRef(
         storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
-      [id]
+      [id, visibleColumns]
     );
 
     const CasesContext = useMemo(() => {
@@ -603,8 +623,10 @@ const AlertsTableContent = typedForwardRef(
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
-              height={emptyStateHeight}
-              variant={emptyStateVariant}
+              messageTitle={emptyState?.messageTitle}
+              messageBody={emptyState?.messageBody}
+              height={emptyState?.height}
+              variant={emptyState?.variant}
             />
           </InspectButtonContainer>
         )}

@@ -20,7 +20,6 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
 import type { InternalStateStore, TabState } from './redux';
 import {
@@ -60,14 +59,14 @@ describe('Test discover app state container', () => {
       urlStateStorage: stateStorage,
       tabsStorageManager,
     });
-    internalState.dispatch(
-      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
-    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
-      globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
+      getCurrentTab: () => getCurrentTab(),
     });
+    await internalState.dispatch(
+      internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })
+    );
     getCurrentTab = () =>
       selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });
@@ -297,12 +296,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -314,12 +315,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -331,13 +334,34 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: false,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial hide chart', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ hideChart: true });
+      const state = getStateContainer();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      state.initAndSync();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: false,
+        rowHeight: true,
         breakdownField: true,
       });
     });
@@ -354,12 +378,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });

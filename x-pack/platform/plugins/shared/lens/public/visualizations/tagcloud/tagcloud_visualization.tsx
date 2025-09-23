@@ -8,21 +8,19 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionTheme,
-} from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
+import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
-import { FormatFactory } from '@kbn/visualization-ui-components';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -312,13 +310,13 @@ export const getTagcloudVisualization = ({
       return (
         <TagsDimensionEditor
           isDarkMode={theme.darkMode}
-          paletteService={paletteService}
           palettes={palettes}
           state={props.state}
           setState={props.setState}
           frame={props.frame}
           panelRef={props.panelRef}
           isInlineEditing={props.isInlineEditing}
+          paletteService={paletteService}
           formatFactory={formatFactory}
         />
       );

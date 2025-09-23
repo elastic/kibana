@@ -13,8 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
-import { SchemaField } from './types';
-import { UnpromoteFieldModal } from './unpromote_field_modal';
+import type { SchemaField } from './types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
@@ -30,7 +29,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
-    const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
+    const { onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
 
     let actions = [];
 
@@ -41,26 +40,12 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             <SchemaEditorFlyout
               field={field}
               onClose={() => overlay.close()}
-              onSave={onFieldUpdate}
+              onStage={onFieldUpdate}
               stream={stream}
               withFieldSimulation={withFieldSimulation}
               {...props}
             />
           </StreamsAppContextProvider>,
-          core
-        ),
-        { maxWidth: 500 }
-      );
-    };
-
-    const openUnpromoteModal = () => {
-      const overlay = core.overlays.openModal(
-        toMountPoint(
-          <UnpromoteFieldModal
-            field={field}
-            onClose={() => overlay.close()}
-            onFieldUnmap={onFieldUnmap}
-          />,
           core
         ),
         { maxWidth: 500 }
@@ -88,7 +73,13 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
-            onClick: openUnpromoteModal,
+            onClick: () => {
+              onFieldUpdate({
+                name: field.name,
+                parent: field.parent,
+                status: 'unmapped',
+              } as SchemaField);
+            },
           },
         ];
         break;

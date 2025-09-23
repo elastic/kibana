@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { type Observable, map, debounceTime } from 'rxjs';
+import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type {
+  EuiSideNavItemTypeEnhanced,
   NavigationTreeDefinition,
   NodeDefinition,
-  EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -31,6 +32,9 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
+const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
+  defaultMessage: 'Agents',
+});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -71,7 +75,7 @@ export const getNavigationTreeDefinition = ({
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: 'enterpriseSearch',
+    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -83,31 +87,67 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: SEARCH_HOMEPAGE,
+                  title,
+                  icon,
+                  renderAs: 'home',
+                  sideNavVersion: 'v2',
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
                     );
                   },
-                  link: 'enterpriseSearch',
                 },
-
                 {
-                  children: [
-                    {
-                      link: 'discover',
-                    },
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                      },
-                      link: 'dashboards',
-                    },
-                  ],
-                  id: 'analyze',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.analyze', {
-                    defaultMessage: 'Analyze',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
+                    );
+                  },
+                  link: SEARCH_HOMEPAGE,
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                    defaultMessage: 'Home',
                   }),
+                  sideNavVersion: 'v1',
+                },
+                {
+                  link: 'discover',
+                },
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                  },
+                  link: 'dashboards',
+                },
+                {
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate(
+                      'xpack.enterpriseSearch.searchNav.workflowsBadgeTooltip',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    ),
+                  },
+                  badgeTypeV2: 'techPreview' as const,
+                  link: 'workflows',
+                  withBadge: true,
+                },
+                {
+                  link: 'agent_builder',
+                  sideNavVersion: 'v1',
+                  title: AGENTS_TITLE,
+                },
+                {
+                  iconV2: 'comment',
+                  link: 'agent_builder',
+                  sideNavVersion: 'v2',
+                  title: AGENTS_TITLE,
                 },
                 {
                   children: [
@@ -120,28 +160,11 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'elasticsearchIndexManagement',
-                    },
-                    { link: 'enterpriseSearchContent:connectors' },
-                    { link: 'enterpriseSearchContent:webCrawlers' },
-                  ],
-                  id: 'data',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.data', {
-                    defaultMessage: 'Data',
-                  }),
-                },
-                {
-                  children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                      },
-                      id: 'dev_tools',
-                      link: 'dev_tools',
-                      title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                        defaultMessage: 'Dev Tools',
-                      }),
+                      sideNavVersion: 'v1',
                     },
                     {
+                      breadcrumbStatus: 'hidden',
+                      iconV2: 'broom' /* TODO: review icon */,
                       link: 'searchPlayground',
                     },
                     {
@@ -159,12 +182,6 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
@@ -172,6 +189,7 @@ export const getNavigationTreeDefinition = ({
                             renderAs: 'accordion',
                           }
                         : {}),
+                      sideNavVersion: 'v1',
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -198,6 +216,7 @@ export const getNavigationTreeDefinition = ({
                             renderAs: 'accordion',
                           }
                         : {}),
+                      sideNavVersion: 'v1',
                     },
                   ],
                   id: 'build',
@@ -207,22 +226,83 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
                     { link: 'searchQueryRules' },
+                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                   ],
                   id: 'relevance',
+                  sideNavVersion: 'v1',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
                   }),
                 },
                 {
-                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
-                  id: 'otherTools',
-                  renderAs: 'accordion',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
-                    defaultMessage: 'Other tools',
+                  children: [
+                    {
+                      id: 'ml_overview',
+                      title: '',
+                      children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+                    },
+                    {
+                      id: 'category-anomaly_detection',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection',
+                        {
+                          defaultMessage: 'Anomaly detection',
+                        }
+                      ),
+                      breadcrumbStatus: 'hidden',
+                      children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+                    },
+                    {
+                      id: 'category-data_frame analytics',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.dataFrameAnalytics',
+                        {
+                          defaultMessage: 'Data frame analytics',
+                        }
+                      ),
+                      breadcrumbStatus: 'hidden',
+                      children: [{ link: 'ml:resultExplorer' }, { link: 'ml:analyticsMap' }],
+                    },
+                    {
+                      id: 'category-aiops_labs',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.aiops_labs',
+                        {
+                          defaultMessage: 'AIOps labs',
+                        }
+                      ),
+                      breadcrumbStatus: 'hidden',
+                      children: [
+                        { link: 'ml:logRateAnalysis' },
+                        { link: 'ml:logPatternAnalysis' },
+                        { link: 'ml:changePointDetections' },
+                      ],
+                    },
+                  ],
+                  iconV2: 'machineLearningApp',
+                  id: 'machine_learning',
+                  renderAs: 'panelOpener',
+                  sideNavVersion: 'v2',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {
+                    defaultMessage: 'Machine Learning',
                   }),
+                },
+                {
+                  iconV2: 'globe' /* TODO: review icon */,
+                  link: 'maps',
+                  sideNavVersion: 'v2',
+                },
+                {
+                  iconV2: 'graphApp',
+                  link: 'graph',
+                  sideNavVersion: 'v2',
+                },
+                {
+                  iconV2: 'visualizeApp',
+                  link: 'visualize',
+                  sideNavVersion: 'v2',
                 },
               ],
               defaultIsCollapsed: false,
@@ -237,6 +317,77 @@ export const getNavigationTreeDefinition = ({
             {
               children: [
                 {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                  },
+                  iconV2: 'code',
+                  id: 'dev_tools',
+                  link: 'dev_tools',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                    defaultMessage: 'Developer Tools',
+                  }),
+                },
+                {
+                  children: [
+                    {
+                      children: [
+                        {
+                          getIsActive: ({ pathNameSerialized, prepend }) => {
+                            return (
+                              pathNameSerialized.startsWith(
+                                prepend('/app/elasticsearch/index_management/indices')
+                              ) ||
+                              pathNameSerialized.startsWith(
+                                prepend('/app/management/data/index_management')
+                              )
+                            );
+                          },
+                          link: 'management:index_management',
+                        },
+                        { link: 'management:index_lifecycle_management' },
+                        { link: 'management:snapshot_restore' },
+                        { link: 'management:transform' },
+                        { link: 'management:rollup_jobs' },
+                      ],
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.indices.title',
+                        {
+                          defaultMessage: 'Indices, data streams and roll ups',
+                        }
+                      ),
+                    },
+                    {
+                      children: [
+                        { link: 'management:ingest_pipelines' },
+                        { link: 'management:pipelines' },
+                      ],
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.pipelines.title',
+                        {
+                          defaultMessage: 'Ingest',
+                        }
+                      ),
+                    },
+                    {
+                      children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                      id: 'search_relevance',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.ingest.relevance.title',
+                        {
+                          defaultMessage: 'Relevance',
+                        }
+                      ),
+                    },
+                  ],
+                  iconV2: 'database',
+                  id: 'ingest_and_data',
+                  sideNavVersion: 'v2',
+                  renderAs: 'panelOpener',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
+                    defaultMessage: 'Ingest and manage data',
+                  }),
+                },
+                {
                   breadcrumbStatus: 'hidden',
                   children: [
                     {
@@ -247,15 +398,34 @@ export const getNavigationTreeDefinition = ({
                           defaultMessage: 'Trained Models',
                         }
                       ),
+                      sideNavVersion: 'v1',
                     },
                     {
+                      iconV2: 'managementApp',
                       children: [
+                        {
+                          children: [
+                            {
+                              id: 'monitoring',
+                              link: 'monitoring',
+                            },
+                          ],
+                          id: 'monitoring',
+                          sideNavVersion: 'v2',
+                          title: '',
+                        },
                         {
                           children: [
                             { link: 'management:ingest_pipelines' },
                             { link: 'management:pipelines' },
                           ],
-                          title: 'Ingest',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.ingest',
+                            {
+                              defaultMessage: 'Ingest',
+                            }
+                          ),
+                          sideNavVersion: 'v1',
                         },
                         {
                           children: [
@@ -268,23 +438,57 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:remote_clusters' },
                             { link: 'management:migrate_data' },
                           ],
-                          title: 'Data',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.data',
+                            {
+                              defaultMessage: 'Data',
+                            }
+                          ),
+                          sideNavVersion: 'v1',
                         },
                         {
                           children: [
+                            { link: 'management:triggersActionsAlerts' },
                             { link: 'management:triggersActions' },
-                            { link: 'management:cases' },
                             { link: 'management:triggersActionsConnectors' },
                             { link: 'management:reporting' },
                             { link: 'management:jobsListLink' },
                             { link: 'management:watcher' },
                             { link: 'management:maintenanceWindows' },
                           ],
-                          title: 'Alerts and Insights',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.alerts',
+                            {
+                              defaultMessage: 'Alerts and Insights',
+                            }
+                          ),
                         },
                         {
-                          children: [{ link: 'management:trained_models' }],
-                          title: 'Machine Learning',
+                          children: [
+                            { link: 'management:trained_models' },
+                            {
+                              link: 'searchInferenceEndpoints:inferenceEndpoints',
+                              sideNavVersion: 'v2',
+                            },
+                            { link: 'management:anomaly_detection' },
+                            { link: 'management:analytics' },
+                          ],
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.machineLearning',
+                            {
+                              defaultMessage: 'Machine Learning',
+                            }
+                          ),
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:agentBuilder' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
+                            defaultMessage: 'AI',
+                          }),
                         },
                         {
                           children: [
@@ -293,7 +497,25 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:api_keys' },
                             { link: 'management:role_mappings' },
                           ],
-                          title: 'Security',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.security',
+                            {
+                              defaultMessage: 'Security',
+                            }
+                          ),
+                        },
+                        {
+                          children: [
+                            { link: 'management:cross_cluster_replication' },
+                            { link: 'management:remote_clusters' },
+                          ],
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.dataV2',
+                            {
+                              defaultMessage: 'Data',
+                            }
+                          ),
+                          sideNavVersion: 'v2',
                         },
                         {
                           children: [
@@ -302,18 +524,27 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
-                            { link: 'management:aiAssistantManagementSelection' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
                           ],
-                          title: 'Kibana',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.kibana',
+                            {
+                              defaultMessage: 'Kibana',
+                            }
+                          ),
                         },
                         {
                           children: [
                             { link: 'management:license_management' },
                             { link: 'management:upgrade_assistant' },
                           ],
-                          title: 'Stack',
+                          title: i18n.translate(
+                            'xpack.enterpriseSearch.searchNav.management.stack',
+                            {
+                              defaultMessage: 'Stack',
+                            }
+                          ),
                         },
                       ],
                       id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
@@ -322,10 +553,6 @@ export const getNavigationTreeDefinition = ({
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                         defaultMessage: 'Stack Management',
                       }),
-                    },
-                    {
-                      id: 'monitoring',
-                      link: 'monitoring',
                     },
                   ],
                   icon: 'gear',

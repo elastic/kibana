@@ -8,14 +8,14 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
-import {
-  createDashboardSavedObjectTypeMigrations,
-  DashboardSavedObjectTypeMigrationsDeps,
-} from './migrations/dashboard_saved_object_migrations';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
+
+import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
+import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
 
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
@@ -69,8 +69,23 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV2,
       },
     },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            sections: { properties: {}, dynamic: false },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+        create: dashboardAttributesSchemaV3,
+      },
+    },
   },
   mappings: {
+    dynamic: false,
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
@@ -79,6 +94,10 @@ export const createDashboardSavedObjectType = ({
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
+      sections: {
+        properties: {},
+        dynamic: false,
+      },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },

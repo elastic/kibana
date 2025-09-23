@@ -12,12 +12,12 @@ import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { APP_NAME } from '../../common/constants';
@@ -48,7 +48,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     upselling,
   } = services;
 
-  const darkMode = useKibanaIsDarkMode();
+  const darkMode = useDarkMode();
 
   return (
     <KibanaRenderContextProvider {...services}>
@@ -65,9 +65,9 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                       >
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
-                            <AssistantProvider>
-                              <PageRouter history={history}>{children}</PageRouter>
-                            </AssistantProvider>
+                            <PageRouter history={history}>
+                              <AssistantProvider>{children}</AssistantProvider>
+                            </PageRouter>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>
                       </CellActionsProvider>

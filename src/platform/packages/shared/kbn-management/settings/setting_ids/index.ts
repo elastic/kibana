@@ -59,6 +59,9 @@ export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
+// Agent builder settings
+export const AGENT_BUILDER_ENABLED_SETTING_ID = 'agentBuilder:enabled';
+
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
 export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSuggestionMethod';
@@ -107,29 +110,33 @@ export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
   'observability:apmAWSLambdaRequestCostPerMillion';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
-export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
-export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =
+export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
-export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
-  'observability:profilingElasticsearchPlugin';
-export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
-  'observability:apmEnableProfilingIntegration';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
-export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
+export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConnector';
+export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
+  'genAiSettings:defaultAIConnectorOnly';
+export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
+export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
+  'observability:streamsEnableSignificantEvents';
+export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
+export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
+export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -160,6 +167,8 @@ export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl'
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
@@ -170,7 +179,8 @@ export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
 export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
-
+export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
+  'securitySolution:enableCloudConnector' as const;
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
 export const TIMELION_ES_TIME_FIELD_ID = 'timelion:es.timefield';
@@ -180,7 +190,6 @@ export const TIMELION_TARGET_BUCKETS_ID = 'timelion:target_buckets';
 
 // Visualization settings
 export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBuckets';
-export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =
   'visualization:visualize:legacyGaugeChartsLibrary';
 export const VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID =

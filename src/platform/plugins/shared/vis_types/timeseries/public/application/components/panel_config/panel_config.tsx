@@ -14,15 +14,13 @@ import type { TimeseriesVisData } from '../../../../common/types';
 import { FormValidationContext } from '../../contexts/form_validation_context';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelModelContext } from '../../contexts/panel_model_context';
-import { PanelConfigProps } from './types';
+import type { PanelConfigProps } from './types';
 import { TimeseriesPanelConfig as timeseries } from './timeseries';
 import { MetricPanelConfig as metric } from './metric';
 import { TopNPanelConfig as topN } from './top_n';
 import { TablePanelConfig as table } from './table';
 import { GaugePanelConfig as gauge } from './gauge';
 import { MarkdownPanelConfig as markdown } from './markdown';
-
-import './_panel_config.scss';
 
 const panelConfigTypes = {
   timeseries,

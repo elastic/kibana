@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterComponentTemplate,
   IndicesDataStream,
-  IndicesDataStreamLifecycleWithRollover,
+  IndicesGetDataStreamSettingsDataStreamSettings,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -22,35 +25,53 @@ interface BaseParams {
 
 export function getDataStreamLifecycle(
   dataStream: IndicesDataStream | null
-): UnwiredIngestStreamEffectiveLifecycle {
+): ClassicIngestStreamEffectiveLifecycle {
   if (!dataStream) {
-    return {
-      error: {
-        message: 'Data stream not found',
-      },
-    };
-  }
-  if (
-    dataStream.ilm_policy &&
-    (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
-  ) {
-    return { ilm: { policy: dataStream.ilm_policy } };
+    return { error: { message: 'Data stream not found' } };
   }
 
-  const lifecycle = dataStream.lifecycle as
-    | (IndicesDataStreamLifecycleWithRollover & {
-        enabled: boolean;
-      })
-    | undefined;
-  if (lifecycle && lifecycle.enabled) {
-    return {
-      dsl: {
-        data_retention: lifecycle.data_retention ? String(lifecycle.data_retention) : undefined,
-      },
+  if (dataStream.next_generation_managed_by === 'Index Lifecycle Management') {
+    return { ilm: { policy: dataStream.ilm_policy! } };
+  }
+
+  if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
+    const retention = dataStream.lifecycle?.data_retention;
+    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+  }
+
+  if (dataStream.next_generation_managed_by === 'Unmanaged') {
+    return { disabled: {} };
+  }
+
+  return {
+    error: {
+      message: `Unknown data stream lifecycle state [${dataStream.next_generation_managed_by}]`,
+    },
+  };
+}
+
+export function getDataStreamSettings(dataStream?: IndicesGetDataStreamSettingsDataStreamSettings) {
+  const settings: IngestStreamSettings = {};
+
+  if (dataStream?.effective_settings.index?.number_of_replicas) {
+    settings['index.number_of_replicas'] = {
+      value: Number(dataStream.effective_settings.index.number_of_replicas),
     };
   }
 
-  return { disabled: {} };
+  if (dataStream?.effective_settings.index?.number_of_shards) {
+    settings['index.number_of_shards'] = {
+      value: Number(dataStream.effective_settings.index.number_of_shards),
+    };
+  }
+
+  if (dataStream?.effective_settings.index?.refresh_interval) {
+    settings['index.refresh_interval'] = {
+      value: dataStream.effective_settings.index.refresh_interval,
+    };
+  }
+
+  return settings;
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {
@@ -75,7 +96,7 @@ export async function getUnmanagedElasticsearchAssets({
     name: templateName,
   });
   if (template.index_templates.length) {
-    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+    template.index_templates[0].index_template.composed_of?.forEach((componentTemplateName) => {
       componentTemplates.push(componentTemplateName);
     });
   }
@@ -149,7 +170,7 @@ async function fetchComponentTemplates(
     .map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .filter((template) => template.index_template.composed_of?.includes(componentTemplate.name))
         .map((template) => template.name),
     }));
 }

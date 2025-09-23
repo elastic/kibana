@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
@@ -24,6 +23,7 @@ import type {
   ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import type { Attachment } from '.';
@@ -78,6 +78,7 @@ export async function sendEmail(
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
+  const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
@@ -87,10 +88,17 @@ export async function sendEmail(
       options,
       renderedMessage,
       connectorTokenClient,
-      connectorUsageCollector
+      connectorUsageCollector,
+      attachments
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      attachments
+    );
   }
 }
 
@@ -100,7 +108,8 @@ export async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -118,7 +127,6 @@ export async function sendEmailWithExchange(
     credentials: {
       config: {
         clientId: clientId as string,
-        tenantId: tenantId as string,
       },
       secrets: {
         clientSecret: clientSecret as string,
@@ -138,35 +146,19 @@ export async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
+  const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+    connectorTokenClient,
+    connectorId,
+  });
   const axiosInstance = axios.create();
-  axiosInstance.interceptors.response.use(
-    async (response: AxiosResponse) => {
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (response.status >= 400 && response.status < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return response;
-    },
-    async (error) => {
-      const statusCode = error?.response?.status;
-
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (statusCode >= 400 && statusCode < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return Promise.reject(error);
-    }
-  );
+  axiosInstance.interceptors.response.use(onFulfilled, onRejected);
 
   return await sendEmailGraphApi(
     {
       options,
       headers,
       messageHTML,
+      attachments,
     },
     logger,
     configurationUtilities,
@@ -180,7 +172,8 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -197,6 +190,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments.length > 0 && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

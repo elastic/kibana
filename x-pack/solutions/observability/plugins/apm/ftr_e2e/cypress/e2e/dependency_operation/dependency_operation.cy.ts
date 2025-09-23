@@ -43,7 +43,15 @@ describe('Dependency operation', () => {
 
   it('opens the action menu popup when clicking the investigate button', () => {
     cy.visitKibana(dependencyOperationHref);
+    cy.contains('1 Error');
     cy.getByTestSubj('apmActionMenuButtonInvestigateButton').click();
     cy.getByTestSubj('apmActionMenuInvestigateButtonPopup');
+  });
+
+  it('opens Span link flyout', () => {
+    cy.visitKibana(dependencyOperationHref);
+    cy.contains('Span links').click();
+    cy.contains('Span details');
+    cy.contains('Span B');
   });
 });

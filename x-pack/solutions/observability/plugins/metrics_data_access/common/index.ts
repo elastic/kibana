@@ -11,43 +11,52 @@ export {
   getFieldByType,
   findInventoryFields,
   metrics,
-  type InventoryModels,
   isBasicMetricAgg,
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
 } from './inventory_models';
 
-export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
-export { containerSnapshotMetricTypes } from './inventory_models/container';
-export { awsS3SnapshotMetricTypes } from './inventory_models/aws_s3';
-export { hostSnapshotMetricTypes } from './inventory_models/host';
-export { awsEC2SnapshotMetricTypes } from './inventory_models/aws_ec2';
-export { awsRDSSnapshotMetricTypes } from './inventory_models/aws_rds';
-export { awsSQSSnapshotMetricTypes } from './inventory_models/aws_sqs';
-
 export {
-  InventoryMetricRT,
+  InventoryTsvbTypeKeysRT,
   InventoryFormatterTypeRT,
   InventoryVisTypeRT,
   ItemTypeRT,
   SnapshotMetricTypeRT,
   SnapshotMetricTypeKeys,
+  DataSchemaFormatEnum,
 } from './inventory_models/types';
 
 export type {
   InventoryItemType,
-  InventoryMetric,
+  InventoryTsvbType,
   InventoryFormatterType,
   InventoryVisType,
   MetricsUIAggregation,
   SnapshotMetricType,
   TSVBMetricModelCreator,
   TSVBMetricModel,
+  DataSchemaFormat,
 } from './inventory_models/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
-export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';
+export {
+  METRICS_EXPLORER_API_MAX_METRICS,
+  TIMESTAMP,
+  HOST_NAME,
+  CONTAINER_ID,
+  KUBERNETES_POD_UID,
+  HOST_OS_NAME,
+  CLOUD_PROVIDER,
+  SERVICE_NAME,
+  EVENT_MODULE,
+  METRICSET_MODULE,
+  METRICSET_NAME,
+  DATASTREAM_DATASET,
+  OS_NAME,
+  SYSTEM_INTEGRATION,
+  HOST_METRICS_RECEIVER_OTEL,
+} from './constants';
 
 export {
   MetricsAPIMetricRT,

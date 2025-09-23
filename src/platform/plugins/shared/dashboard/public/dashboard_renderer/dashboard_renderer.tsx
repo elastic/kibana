@@ -7,44 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_dashboard_container.scss';
-
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { i18n } from '@kbn/i18n';
+
 import type { DashboardLocatorParams } from '../../common';
-import { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
-import { coreServices, screenshotModeService } from '../services/kibana_services';
+import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import type { DashboardCreationOptions } from '..';
-import { Dashboard404Page } from './dashboard_404';
-import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import { DashboardViewport } from './viewport/dashboard_viewport';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
+import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
-import { DashboardRedirect } from '../dashboard_app/types';
+import type { DashboardRedirect } from '../dashboard_app/types';
+import { coreServices, screenshotModeService } from '../services/kibana_services';
+
+import { Dashboard404Page } from './dashboard_404';
+import { DashboardViewport } from './viewport/dashboard_viewport';
+import { GlobalPrintStyles } from './print_styles';
 
 export interface DashboardRendererProps {
-  onApiAvailable?: (api: DashboardApi) => void;
+  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  onApiAvailable?: (api: DashboardApi) => void;
 }
 
 export function DashboardRenderer({
-  savedObjectId,
-  getCreationOptions,
-  dashboardRedirect,
-  showPlainSpinner,
   locator,
+  savedObjectId,
+  showPlainSpinner,
+  dashboardRedirect,
+  getCreationOptions,
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
@@ -59,6 +60,15 @@ export function DashboardRenderer({
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardApi) dashboardApi.locator = locator;
   }, [dashboardApi, locator]);
+
+  useEffect(() => {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboardInternalApi]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -92,10 +102,12 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
+  const isDashboardViewportLoading = !dashboardApi && !error;
+
   const viewportClasses = classNames(
     'dashboardViewport',
     { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': !error && !dashboardApi }
+    { 'dashboardViewport--loading': isDashboardViewportLoading }
   );
 
   const loadingSpinner = showPlainSpinner ? (
@@ -125,13 +137,24 @@ export function DashboardRenderer({
     }
 
     return dashboardApi && dashboardInternalApi ? (
-      <div className="dashboardContainer" ref={(e) => (dashboardContainerRef.current = e)}>
+      <div
+        className="dashboardContainer"
+        data-test-subj="dashboardContainer"
+        css={styles.renderer}
+        ref={(e) => {
+          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
+            dashboardInternalApi.setDashboardContainerRef(e);
+          }
+          dashboardContainerRef.current = e;
+        }}
+      >
+        <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
+              <DashboardViewport />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
@@ -142,7 +165,7 @@ export function DashboardRenderer({
   };
 
   return (
-    <div ref={dashboardViewport} className={viewportClasses}>
+    <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
       {dashboardViewport?.current && dashboardApi && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
@@ -153,6 +176,18 @@ export function DashboardRenderer({
     </div>
   );
 }
+
+const styles = {
+  renderer: css({
+    display: 'flex',
+    flex: 'auto',
+    width: '100%',
+    '&.dashboardViewport--loading': {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  }),
+};
 
 /**
  * Maximizing a panel in Dashboard only works if the parent div has a certain class. This

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import type { GridPanelData } from '../grid_panel';
 import type { GridLayoutData, OrderedLayout } from '../types';
 
@@ -16,7 +17,8 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
     a?.column === b?.column &&
     a?.row === b?.row &&
     a?.width === b?.width &&
-    a?.height === b?.height
+    a?.height === b?.height &&
+    deepEqual(a?.resizeOptions, b?.resizeOptions)
   );
 };
 
@@ -62,6 +64,7 @@ export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
   for (const key of keys) {
     const widgetA = a[key];
     const widgetB = b[key];
+    if (!widgetA || !widgetB) return widgetA === widgetB;
 
     if (widgetA.type === 'panel' && widgetB.type === 'panel') {
       isEqual = isGridDataEqual(widgetA, widgetB);

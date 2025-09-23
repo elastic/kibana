@@ -7,29 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULE_MIGRATION_READY_DESCRIPTION = (
-  totalRules: number,
-  missingResourcesText: string
-) =>
+export const RULE_MIGRATION_READY_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.ready.description', {
-    defaultMessage:
-      'Migration of {totalRules} rules is created but the translation has not started yet. {missingResourcesText}',
-    values: { totalRules, missingResourcesText },
+    defaultMessage: 'Migration of {totalRules} rules is created and ready to start.',
+    values: { totalRules },
   });
+
+export const RULE_MIGRATION_ERROR_DESCRIPTION = (totalRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.error.description', {
+    defaultMessage:
+      'Migration of {totalRules} rules failed. Please correct the below error and try again.',
+    values: { totalRules },
+  });
+};
+
+export const RULE_MIGRATION_STOPPED_DESCRIPTION = (totalRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.stopped.description', {
+    defaultMessage: 'Migration of {totalRules} rules was stopped, you can resume it any time.',
+    values: { totalRules },
+  });
+};
+
 export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
-  { defaultMessage: 'Upload macros & lookups and start the translation process' }
+  { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
 );
 
-export const RULE_MIGRATION_START_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.button',
-  { defaultMessage: 'Start translation' }
+export const RULE_MIGRATION_STOP_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.stopButton',
+  { defaultMessage: 'Stop' }
 );
-export const RULE_MIGRATION_TITLE = (number: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.migrationTitle', {
-    defaultMessage: 'SIEM rules migration #{number}',
-    values: { number },
-  });
+export const RULE_MIGRATION_STOPPING_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.stoppingButton',
+  { defaultMessage: 'Stopping' }
+);
 
 export const RULE_MIGRATION_PROGRESS_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.progress.description', {
@@ -117,4 +128,9 @@ export const RULE_MIGRATION_COLLAPSE = i18n.translate(
 export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.error',
   { defaultMessage: 'The last execution of this migration failed with the following message:' }
+);
+
+export const RENAME_MIGRATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationButton',
+  { defaultMessage: 'Rename' }
 );

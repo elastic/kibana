@@ -6,12 +6,13 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import type { MockRouter } from './__mocks__/routes.mock';
+import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
-jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
@@ -25,6 +26,7 @@ describe('Disk space API', () => {
     routeDependencies = {
       router: mockRouter,
       lib: { handleEsError },
+      current: { major: 8 },
     };
     registerNodeDiskSpaceRoute(routeDependencies);
   });

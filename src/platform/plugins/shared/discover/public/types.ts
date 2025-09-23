@@ -45,6 +45,9 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -135,6 +138,7 @@ export interface DiscoverSetupPlugins {
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
+  inspector: InspectorPublicPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -177,4 +181,6 @@ export interface DiscoverStartPlugins {
   usageCollection?: UsageCollectionSetup;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  fileUpload?: FileUploadPluginStart;
+  metricsExperience?: MetricsExperiencePluginStart;
 }

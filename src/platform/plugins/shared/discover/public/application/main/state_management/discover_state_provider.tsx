@@ -31,19 +31,11 @@ function createStateHelpers() {
       container!.savedSearchState.getInitial$().getValue()
     );
   };
-  const useSavedSearchHasChanged = () => {
-    const container = useContainer();
-    return useObservable<boolean>(
-      container!.savedSearchState.getHasChanged$(),
-      container!.savedSearchState.getHasChanged$().getValue()
-    );
-  };
 
   return {
     Provider: context.Provider,
     useSavedSearch,
     useSavedSearchInitial,
-    useSavedSearchHasChanged,
   };
 }
 
@@ -51,7 +43,6 @@ export const {
   Provider: DiscoverStateProvider,
   useSavedSearchInitial,
   useSavedSearch,
-  useSavedSearchHasChanged,
 } = createStateHelpers();
 
 export const DiscoverMainProvider = ({
@@ -64,8 +55,8 @@ export const DiscoverMainProvider = ({
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
         {/**
-         * InternalStateProvider should only render in DiscoverMainRoute, and this be removed,
-         * but it's being duplicated during the refactoring to avoid breaking every Jest test
+         * TODO: We should be able to remove this since it already wraps the whole application,
+         * but doing so causes FTR flakiness in CI, so it needs to be investigated further.
          */}
         <InternalStateProvider store={value.internalState}>{children}</InternalStateProvider>
       </DiscoverAppStateProvider>

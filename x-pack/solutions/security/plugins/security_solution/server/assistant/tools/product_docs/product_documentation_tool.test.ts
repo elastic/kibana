@@ -22,6 +22,8 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
+const DEFAULT_INFERENCE_ID = '.elser-2-elasticsearch';
+
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;
   const esClient = {
@@ -57,14 +59,14 @@ describe('ProductDocumentationTool', () => {
   });
 
   describe('getTool', () => {
-    it('should return a tool as expected when all required values are present', () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicTool;
+    it('should return a tool as expected when all required values are present', async () => {
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicTool;
       expect(tool.name).toEqual('ProductDocumentationTool');
       expect(tool.tags).toEqual(['product-documentation']);
     });
 
-    it('returns null if llmTasks plugin is not provided', () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
+    it('returns null if llmTasks plugin is not provided', async () => {
+      const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool({
         ...defaultArgs,
         llmTasks: undefined,
       });
@@ -72,8 +74,8 @@ describe('ProductDocumentationTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null if connectorId is not provided', () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
+    it('returns null if connectorId is not provided', async () => {
+      const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool({
         ...defaultArgs,
         connectorId: undefined,
       });
@@ -86,7 +88,7 @@ describe('ProductDocumentationTool', () => {
       retrieveDocumentation.mockResolvedValue({ documents: [] });
     });
     it('the tool invokes retrieveDocumentation', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
       await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
 
@@ -97,11 +99,12 @@ describe('ProductDocumentationTool', () => {
         connectorId: 'fake-connector',
         request,
         functionCalling: 'auto',
+        inferenceId: DEFAULT_INFERENCE_ID,
       });
     });
 
     it('includes citations', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
       (retrieveDocumentation as jest.Mock).mockResolvedValue({
         documents: [

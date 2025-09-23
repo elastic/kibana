@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import { QualityIndicators } from '../../../common/types';
+import type { QualityIndicators } from '../../../common/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -100,6 +100,12 @@ export interface DatasetDetailsNavigatedEbtProps extends DatasetDetailsEbtProps 
   source: NavigationSource;
 }
 
+export interface FailureStoreUpdateEbtProps {
+  data_stream_name: string;
+  failure_store_enabled: boolean;
+  custom_retention_period?: string;
+}
+
 export interface ITelemetryClient {
   trackDatasetNavigated: (eventProps: DatasetNavigatedEbtProps) => void;
   startDatasetDetailsTracking: () => void;
@@ -107,6 +113,7 @@ export interface ITelemetryClient {
   trackDatasetDetailsOpened: (eventProps: DatasetDetailsEbtProps) => void;
   trackDatasetDetailsNavigated: (eventProps: DatasetDetailsNavigatedEbtProps) => void;
   trackDatasetDetailsBreakdownFieldChanged: (eventProps: DatasetDetailsEbtProps) => void;
+  trackFailureStoreUpdated: (eventProps: FailureStoreUpdateEbtProps) => void;
 }
 
 export enum DatasetQualityTelemetryEventTypes {
@@ -114,6 +121,7 @@ export enum DatasetQualityTelemetryEventTypes {
   DETAILS_OPENED = 'Dataset Quality Dataset Details Opened',
   DETAILS_NAVIGATED = 'Dataset Quality Dataset Details Navigated',
   BREAKDOWN_FIELD_CHANGED = 'Dataset Quality Dataset Details Breakdown Field Changed',
+  FAILURE_STORE_UPDATED = 'Failure Store Status Updated For A dataStream',
 }
 
 export type DatasetQualityTelemetryEvent =
@@ -132,4 +140,8 @@ export type DatasetQualityTelemetryEvent =
   | {
       eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED;
       schema: RootSchema<DatasetDetailsEbtProps & WithTrackingId>;
+    }
+  | {
+      eventType: DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED;
+      schema: RootSchema<FailureStoreUpdateEbtProps>;
     };

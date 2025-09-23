@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import type { GridLayoutStateManager, OrderedLayout } from '../../types';
@@ -75,9 +75,17 @@ export const moveAction = (
 
   const previewRect = (() => {
     if (isResize) {
-      const layoutRef = gridLayoutStateManager.layoutRef.current;
-      const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
-      return getResizePreviewRect({ activePanel, pointerPixel, maxRight });
+      const { resizeOptions } = currentPanelData;
+      const maxRight = gridLayoutElement
+        ? gridLayoutElement.getBoundingClientRect().right
+        : window.innerWidth;
+      return getResizePreviewRect({
+        activePanel,
+        pointerPixel,
+        runtimeSettings,
+        resizeOptions,
+        maxRight,
+      });
     } else {
       return getDragPreviewRect({ activePanel, pointerPixel });
     }
@@ -88,9 +96,17 @@ export const moveAction = (
   let previousSection;
   let targetSectionId: string | undefined = (() => {
     if (isResize) return lastSectionId;
-    // early return - target the first "main" section if the panel is dragged above the layout element
-    if (previewRect.top < (gridLayoutElement?.getBoundingClientRect().top ?? 0)) {
+    const layoutRect = gridLayoutElement?.getBoundingClientRect();
+    // early returns for edge cases
+    if (previewRect.top < (layoutRect?.top ?? 0)) {
+      // target the first "main" section if the panel is dragged above the layout element
       return `main-0`;
+    } else if (previewRect.top > (layoutRect?.bottom ?? Infinity)) {
+      // target the last "main" section if the panel is dragged below the layout element
+      const sections = Object.values(currentLayout);
+      const maxOrder = sections.length - 1;
+      previousSection = sections.filter(({ order }) => order === maxOrder)[0].id;
+      return `main-${maxOrder}`;
     }
 
     const previewBottom = previewRect.top + rowHeight;

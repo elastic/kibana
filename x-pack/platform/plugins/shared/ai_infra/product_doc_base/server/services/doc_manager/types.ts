@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InstallationStatus } from '../../../common/install_status';
+import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 
 /**
  * APIs to manage the product documentation.
@@ -24,14 +24,20 @@ export interface DocumentationManagerAPI {
    */
   update(options?: DocUpdateOptions): Promise<void>;
   /**
+   * Update the product documentation for all previously installed inference IDs to the latest version.
+   * No-op if the product documentation is not currently installed.
+   */
+  updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
+  /**
    * Uninstall the product documentation.
    * No-op if the product documentation is not currently installed.
    */
   uninstall(options?: DocUninstallOptions): Promise<void>;
   /**
    * Returns the overall installation status of the documentation.
+   * @param inferenceId - The inference ID to get the status for.
    */
-  getStatus(): Promise<DocGetStatusResponse>;
+  getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
 }
 
 /**
@@ -39,6 +45,7 @@ export interface DocumentationManagerAPI {
  */
 export interface DocGetStatusResponse {
   status: InstallationStatus;
+  installStatus?: Record<string, ProductInstallState>;
 }
 
 /**
@@ -61,6 +68,10 @@ export interface DocInstallOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be installed with the model indicated by Inference ID
+   */
+  inferenceId: string;
 }
 
 /**
@@ -78,6 +89,10 @@ export interface DocUninstallOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be uninstalled with the model indicated by Inference ID
+   */
+  inferenceId: string;
 }
 
 /**
@@ -95,4 +110,28 @@ export interface DocUpdateOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be updated with the model indicated by Inference ID
+   */
+  inferenceId: string;
+}
+
+/**
+ * Options for {@link DocumentationManagerAPI.updateAll}
+ */
+export interface DocUpdateAllOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
 }

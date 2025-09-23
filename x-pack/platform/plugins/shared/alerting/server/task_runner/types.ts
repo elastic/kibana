@@ -24,6 +24,8 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -32,7 +34,6 @@ import type {
   AlertInstanceState,
   RuleTypeParams,
   IntervalSchedule,
-  RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
@@ -44,6 +45,7 @@ import type {
 import type { ActionsConfigMap } from '../lib/get_actions_config_map';
 import type { NormalizedRuleType } from '../rule_type_registry';
 import type {
+  AsyncSearchParams,
   CombinedSummarizedAlerts,
   RawRule,
   RuleTypeRegistry,
@@ -59,15 +61,23 @@ import type { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
+  shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 }
 
+export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
+  state: {},
+  schedule: undefined,
+  shouldDeleteTask: true,
+});
+
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
-export type RuleTaskStateAndMetrics = RuleTaskState & {
+export interface RunRuleResult {
   metrics: RuleRunMetrics;
-};
+  state: RuleTaskState;
+}
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
@@ -183,3 +193,23 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
 }
+
+export interface AsyncSearchClient<T extends AsyncSearchParams> {
+  getMetrics: () => {
+    numSearches: number;
+    esSearchDurationMs: number;
+    totalSearchDurationMs: number;
+  };
+  search: ({
+    request,
+    options,
+  }: {
+    request: IKibanaSearchRequest<T>;
+    options?: IAsyncSearchOptions;
+  }) => Promise<IKibanaSearchResponse['rawResponse']>;
+}
+
+export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
+  AsyncSearchClient<T>,
+  'getMetrics'
+>;

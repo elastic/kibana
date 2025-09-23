@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { StreamsConfig } from '../common/config';
-import { StreamsPluginSetup, StreamsPluginStart, config } from './plugin';
-import { StreamsRouteRepository } from './routes';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { StreamsConfig } from '../common/config';
+import type { StreamsPluginSetup, StreamsPluginStart } from './plugin';
+import { config } from './plugin';
+import type { StreamsRouteRepository } from './routes';
+import type { SimulationDocReport } from './routes/internal/streams/processing/simulation_handler';
 
-export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
+export type {
+  StreamsConfig,
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsRouteRepository,
+  SimulationDocReport,
+};
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

@@ -10,19 +10,20 @@
 import { upperFirst, isFunction, omit } from 'lodash';
 
 import { css } from '@emotion/react';
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 
+import type { EuiButtonColor } from '@elastic/eui';
 import {
   EuiToolTip,
   EuiButton,
   EuiHeaderLink,
   EuiBetaBadge,
-  EuiButtonColor,
   EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { TopNavMenuData } from './top_nav_menu_data';
+import type { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;
@@ -83,6 +84,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     : { onClick: handleClick };
 
   const commonButtonProps = {
+    id: props.htmlId,
     isDisabled: isDisabled(),
     isLoading: props.isLoading,
     iconType: props.iconType,
@@ -103,7 +105,18 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
       // icon only buttons are not supported by EuiHeaderLink
-      <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom" delay="long">
+      React.createElement(
+        props.disableButton ? React.Fragment : EuiToolTip,
+        // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
+        {
+          ...(props.disableButton
+            ? { key: props.label || props.id! }
+            : {
+                content: upperFirst(props.label || props.id!),
+                position: 'bottom',
+                delay: 'long',
+              }),
+        },
         <EuiButtonIcon
           size="s"
           {...omit(commonButtonProps, 'iconSide')}
@@ -111,7 +124,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}
         />
-      </EuiToolTip>
+      )
     ) : props.emphasize ? (
       // fill is not compatible with EuiHeaderLink
       <EuiButton

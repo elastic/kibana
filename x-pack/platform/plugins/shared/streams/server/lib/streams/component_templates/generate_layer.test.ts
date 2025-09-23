@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { generateLayer } from './generate_layer';
 
 describe('generateLayer', () => {
@@ -13,7 +13,7 @@ describe('generateLayer', () => {
     name: 'logs.abc',
     description: '',
     ingest: {
-      processing: [],
+      processing: { steps: [] },
       wired: {
         routing: [],
         fields: {
@@ -26,6 +26,7 @@ describe('generateLayer', () => {
         // simulate DSL lifecycle
         dsl: { data_retention: '30d' },
       },
+      settings: {},
     },
   };
 
@@ -39,10 +40,6 @@ describe('generateLayer', () => {
         },
         "name": "logs.abc@stream.layer",
         "template": Object {
-          "lifecycle": Object {
-            "data_retention": "30d",
-            "enabled": true,
-          },
           "mappings": Object {
             "dynamic": false,
             "properties": Object {
@@ -63,10 +60,7 @@ describe('generateLayer', () => {
               },
             },
           },
-          "settings": Object {
-            "index.lifecycle.name": undefined,
-            "index.lifecycle.prefer_ilm": false,
-          },
+          "settings": Object {},
         },
         "version": 1,
       }
@@ -83,9 +77,6 @@ describe('generateLayer', () => {
         },
         "name": "logs@stream.layer",
         "template": Object {
-          "lifecycle": Object {
-            "data_retention": "30d",
-          },
           "mappings": Object {
             "dynamic": false,
             "properties": Object {
@@ -104,10 +95,8 @@ describe('generateLayer', () => {
               "body": Object {
                 "properties": Object {
                   "structured": Object {
-                    "type": "flattened",
-                  },
-                  "text": Object {
-                    "type": "match_only_text",
+                    "subobjects": false,
+                    "type": "object",
                   },
                 },
                 "type": "object",
@@ -128,13 +117,6 @@ describe('generateLayer', () => {
                   "attributes": Object {
                     "subobjects": false,
                     "type": "object",
-                  },
-                  "dropped_attributes_count": Object {
-                    "type": "long",
-                  },
-                  "schema_url": Object {
-                    "ignore_above": 1024,
-                    "type": "keyword",
                   },
                 },
                 "type": "object",

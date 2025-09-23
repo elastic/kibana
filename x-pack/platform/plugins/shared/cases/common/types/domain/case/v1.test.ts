@@ -61,6 +61,7 @@ const basicCase = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updated_at: '2020-02-20T15:02:57.995Z',
   updated_by: {
     full_name: 'Leslie Knope',
@@ -92,6 +93,11 @@ const basicCase = {
     },
   ],
   observables: [],
+  incremental_id: undefined,
+  in_progress_at: undefined,
+  time_to_acknowledge: undefined,
+  time_to_investigate: undefined,
+  time_to_resolve: undefined,
 };
 
 describe('RelatedCaseRt', () => {
@@ -104,6 +110,7 @@ describe('RelatedCaseRt', () => {
     totals: {
       alerts: 5,
       userComments: 2,
+      events: 0,
     },
   };
   it('has expected attributes in request', () => {
@@ -206,6 +213,10 @@ describe('CaseAttributesRt', () => {
       },
     ],
     observables: [],
+    in_progress_at: undefined,
+    time_to_acknowledge: undefined,
+    time_to_investigate: undefined,
+    time_to_resolve: undefined,
   };
 
   it('has expected attributes in request', () => {

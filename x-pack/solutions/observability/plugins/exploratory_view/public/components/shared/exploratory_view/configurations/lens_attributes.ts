@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
-import {
+import type {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
@@ -22,7 +22,6 @@ import {
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  OperationMetadata,
   OperationType,
   PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -38,10 +37,10 @@ import {
   MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -56,7 +55,7 @@ import {
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
 } from './constants';
-import {
+import type {
   ColumnFilter,
   MetricOption,
   ParamFilter,
@@ -78,7 +77,6 @@ export function buildNumberColumn(sourceField: string) {
     sourceField,
     dataType: 'number' as DataType,
     isBucketed: false,
-    scale: 'ratio' as OperationMetadata['scale'],
   };
 }
 
@@ -175,13 +173,11 @@ export class LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper?: FormulaPublicApi,
     dslFilters?: QueryDslQueryContainer[]
   ) {
     this.layers = {};
     this.seriesReferenceLines = {};
     this.reportType = reportType;
-    this.lensFormulaHelper = lensFormulaHelper;
     this.isMultiSeries = layerConfigs.length > 1;
     this.dslFilters = dslFilters;
 
@@ -266,7 +262,6 @@ export class LensAttributes {
       label: labels[sourceField],
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         orderBy,
@@ -281,7 +276,6 @@ export class LensAttributes {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
               },
             }
@@ -301,7 +295,6 @@ export class LensAttributes {
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
-      scale: 'interval',
       params: {
         type: 'histogram',
         ranges: [{ from: 0, to: 1000, label: '' }],
@@ -321,7 +314,6 @@ export class LensAttributes {
       label: label ?? 'Filters',
       dataType: 'string',
       operationType: 'filters',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         filters: paramFilters,
@@ -495,7 +487,6 @@ export class LensAttributes {
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto', includeEmptyRows: true },
-      scale: 'interval',
     };
   }
 
@@ -506,7 +497,6 @@ export class LensAttributes {
       label: 'Top values of ' + label || sourceField,
       dataType: 'string',
       isBucketed: true,
-      scale: 'ordinal',
       params: {
         size: 10,
         orderBy: {
@@ -601,8 +591,7 @@ export class LensAttributes {
         format,
         label: columnLabel ?? label,
         dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).main;
+      });
     }
 
     if (showPercentileAnnotations) {
@@ -747,8 +736,7 @@ export class LensAttributes {
           layerId,
           columnFilter,
           dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).main,
+        }),
       ];
     }
 
@@ -803,29 +791,17 @@ export class LensAttributes {
       FieldBasedIndexPatternColumn | SumIndexPatternColumn | FormulaIndexPatternColumn
     > = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
-    const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
+    const { sourceField: mainSourceField } = yAxisColumns[0];
 
     if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId && !forAccessorsKeys) {
-      return getDistributionInPercentageColumn({
-        label: mainLabel,
-        layerId,
-        columnFilter,
-        dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).supportingColumns;
+      return {};
     }
 
     if (mainSourceField && !forAccessorsKeys) {
-      const { columnLabel, formula, columnType } = this.getFieldMeta(mainSourceField, layerConfig);
+      const { columnType } = this.getFieldMeta(mainSourceField, layerConfig);
 
       if (columnType === FORMULA_COLUMN) {
-        return getDistributionInPercentageColumn({
-          label: columnLabel,
-          layerId,
-          formula,
-          dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).supportingColumns;
+        return {};
       }
     }
 
@@ -864,7 +840,6 @@ export class LensAttributes {
       label: label || 'Count of records',
       customLabel: true,
       operationType: 'count',
-      scale: 'ratio',
       sourceField: RECORDS_FIELD,
       filter: columnFilter,
       ...(timeScale ? { timeScale } : {}),

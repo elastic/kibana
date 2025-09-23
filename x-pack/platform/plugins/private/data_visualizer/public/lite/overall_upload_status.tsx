@@ -11,9 +11,8 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import type { FileAnalysis } from './file_manager/file_wrapper';
-import { STATUS } from './file_manager/file_manager';
-import { type UploadStatus } from './file_manager/file_manager';
+import type { UploadStatus, FileAnalysis } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import { FileStatus } from './file_status';
 
 interface Props {
@@ -61,6 +60,15 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
     },
     {
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.indexSearchable', {
+        defaultMessage: 'Index searchable',
+      }),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.indexSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
+    },
+    {
       title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
         defaultMessage: 'Uploading files',
       }),
@@ -101,6 +109,15 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       }),
       children: <></>,
       status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
+    },
+    {
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.allDocsSearchable', {
+        defaultMessage: 'All docs searchable',
+      }),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.allDocsSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
     },
   ];
 

@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
+import {
+  MAX_FILE_SIZE_BYTES,
+  MAX_TIKA_FILE_SIZE_BYTES,
+} from '@kbn/file-upload-common/src/constants';
+import { omit } from 'lodash';
+import type { IngestPipelineWrapper } from '@kbn/file-upload-common';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -24,7 +29,6 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
-import type { IngestPipelineWrapper } from '../common/types';
 
 /**
  * Routes for the file upload.
@@ -116,7 +120,14 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          const result = await analyzeFile(esClient, request.body, request.query);
+          const { includePreview } = request.query;
+          const result = await analyzeFile(
+            esClient,
+            logger,
+            request.body,
+            omit(request.query, 'includePreview'),
+            includePreview === true
+          );
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -162,13 +173,19 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       },
       async (context, request, response) => {
         try {
-          const { index, settings, mappings, ingestPipelines } = request.body;
+          const { index, settings, mappings, ingestPipelines, existingIndex } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           await updateTelemetry();
 
           const { initializeImport } = importDataProvider(esClient);
-          const result = await initializeImport(index, settings, mappings, ingestPipelines);
+          const result = await initializeImport(
+            index,
+            settings,
+            mappings,
+            ingestPipelines,
+            existingIndex
+          );
 
           return response.ok({ body: result });
         } catch (e) {
@@ -530,6 +547,98 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const resp = await Promise.all(
             pipelineIds.split(',').map((id) => esClient.asCurrentUser.ingest.deletePipeline({ id }))
           );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/index_searchable Check if an index is searchable
+   * @apiName CheckIndexSearchable
+   * @apiDescription Check if an index is searchable
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/index_searchable',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({ index: schema.string(), expectedCount: schema.number() }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, expectedCount } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const { count } = await esClient.asCurrentUser.count({ index });
+          const isSearchable = count >= expectedCount;
+
+          return response.ok({
+            body: { isSearchable, count },
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_docs',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+      options: {
+        body: {
+          accepts: ['application/json'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              docs: schema.arrayOf(schema.any()),
+              pipeline: schema.any(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { docs, pipeline } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await esClient.asInternalUser.ingest.simulate({
+            pipeline,
+            docs: docs.map((doc) => {
+              return {
+                _source: doc,
+              };
+            }),
+          });
 
           return response.ok({
             body: resp,

@@ -17,6 +17,7 @@ import {
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
+  useGetPackageVerificationKeyId,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -34,6 +35,7 @@ import {
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
+  isAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
@@ -49,6 +51,7 @@ export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
+  onlyAgentless?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -109,7 +112,13 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       pkg.policy_templates_behavior,
       topPackage,
       integrationsPolicyTemplates
-    );
+    ).map((tile) => {
+      return {
+        ...tile,
+        supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+      };
+    });
+
     return [...acc, ...tiles];
   }, []);
 };
@@ -142,9 +151,12 @@ export const useAvailablePackages = ({
 
   const { isAgentlessEnabled } = useAgentless();
 
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
+
   const {
     initialSelectedCategory,
     initialSubcategory,
+    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -158,6 +170,7 @@ export const useAvailablePackages = ({
     initialSubcategory
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
 
   const {
     data: eprPackages,
@@ -198,12 +211,36 @@ export const useAvailablePackages = ({
   const cards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-    return eprAndCustomPackages
-      .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
-      })
-      .sort((a, b) => a.title.localeCompare(b.title));
-  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
+    return (
+      eprAndCustomPackages
+        // If only showing agentless integrations, filter out non-agentless ones
+        .filter((item) => {
+          if (isAgentlessEnabled && onlyAgentlessFilter) {
+            return 'supportsAgentless' in item && item.supportsAgentless === true;
+          }
+          return true;
+        })
+        .map((item) => {
+          return mapToCard({
+            getAbsolutePath,
+            getHref,
+            item,
+            addBasePath,
+            packageVerificationKeyId,
+          });
+        })
+        .sort((a, b) => a.title.localeCompare(b.title))
+    );
+  }, [
+    addBasePath,
+    appendCustomIntegrations,
+    getAbsolutePath,
+    getHref,
+    mergedEprPackages,
+    onlyAgentlessFilter,
+    isAgentlessEnabled,
+    packageVerificationKeyId,
+  ]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
@@ -265,6 +302,9 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    onlyAgentlessFilter,
+    setOnlyAgentlessFilter,
+    isAgentlessEnabled,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||

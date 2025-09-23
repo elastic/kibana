@@ -5,39 +5,44 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import type { StreamsConfig } from '../common/config';
+import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
-import { RouteHandlerScopedClients } from './routes/types';
-import {
+import type { RouteHandlerScopedClients } from './routes/types';
+import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { SystemService } from './lib/streams/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -62,7 +67,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemtryService = new StreamsTelemetryService();
+  private telemetryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -79,23 +84,20 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemtryService.setup(core.analytics);
+    this.telemetryService.setup(core.analytics);
 
-    const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
-    const alertingFeatures = isSignificantEventsEnabled
-      ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-          ruleTypeId,
-          consumers: [STREAMS_CONSUMER],
-        }))
-      : [];
+    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [STREAMS_CONSUMER],
+    }));
 
-    if (isSignificantEventsEnabled) {
-      registerRules({ plugins, logger: this.logger.get('rules') });
-    }
+    registerRules({ plugins, logger: this.logger.get('rules') });
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
+    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -104,8 +106,10 @@ export class StreamsPlugin
       }),
       order: 600,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [STREAMS_FEATURE_ID],
+      privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
+        defaultMessage: 'All Spaces is required for Streams access.',
+      }),
       alerting: alertingFeatures,
       privileges: {
         all: {
@@ -114,6 +118,7 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
+          requireAllSpaces: true,
           alerting: {
             rule: {
               all: alertingFeatures,
@@ -131,6 +136,7 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
+          requireAllSpaces: true,
           alerting: {
             rule: {
               read: alertingFeatures,
@@ -145,36 +151,61 @@ export class StreamsPlugin
       },
     });
 
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
+
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
+        systems: systemService,
         server: this.server,
-        telemetry: this.telemtryService.getClient(),
+        telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
-            core.getStartServices(),
-            assetService.getClientWithRequest({ request }),
-            contentService.getClient(),
+          const [[coreStart, pluginsStart], assetClient, systemClient, contentClient] =
+            await Promise.all([
+              core.getStartServices(),
+              assetService.getClientWithRequest({ request }),
+              systemService.getClientWithRequest({ request }),
+              contentService.getClient(),
+            ]);
+
+          const [queryClient, uiSettingsClient] = await Promise.all([
+            queryService.getClientWithRequest({
+              request,
+              assetClient,
+            }),
+            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
           ]);
 
-          const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });
+          const streamsClient = await streamsService.getClientWithRequest({
+            request,
+            assetClient,
+            queryClient,
+            systemClient,
+          });
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
+          const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
             soClient,
             assetClient,
             streamsClient,
+            systemClient,
             inferenceClient,
             contentClient,
+            queryClient,
+            fieldsMetadataClient,
+            licensing,
+            uiSettingsClient,
           };
         },
       },
@@ -182,6 +213,14 @@ export class StreamsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    registerFeatureFlags(core, this.logger);
+
+    if (plugins.globalSearch) {
+      plugins.globalSearch.registerResultProvider(
+        createStreamsGlobalSearchResultProvider(core, this.logger)
+      );
+    }
 
     return {};
   }

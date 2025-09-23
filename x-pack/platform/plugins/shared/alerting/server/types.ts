@@ -5,17 +5,27 @@
  * 2.0.
  */
 
+import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EqlRequestParams,
+  ISearchStartSearchSource,
+} from '@kbn/data-plugin/common';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -29,6 +39,7 @@ import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
 import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -57,14 +68,25 @@ import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
+import type { AlertDeletionClient } from './alert_deletion';
+import type { PublicAsyncSearchClient } from './task_runner/types';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
 export type { Artifacts };
+
+export interface HasRequiredPrivilegeGrantedInAllSpaces {
+  spaceIds: string[];
+  requiredPrivilege: string;
+  request: KibanaRequest;
+}
+
 /**
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
+  getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -117,7 +139,18 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => PublicAsyncSearchClient<T>;
 }
+
+export type AsyncSearchStrategies =
+  | typeof ESQL_ASYNC_SEARCH_STRATEGY // ESQL
+  | typeof EQL_SEARCH_STRATEGY // EQL
+  | typeof ENHANCED_ES_SEARCH_STRATEGY; // search
+
+export type ESQLQueryRequest = ESQLSearchParams & Omit<SqlQueryRequest, 'filter'>;
+export type AsyncSearchParams = ESQLQueryRequest | IAsyncSearchRequestParams | EqlRequestParams;
 
 export interface RuleExecutorOptions<
   Params extends RuleTypeParams = never,
@@ -264,6 +297,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   isSpaceAware?: boolean;
 
   /**
+   * Optional flag to indicate that these alerts should not be space aware. When set
+   * to true, alerts for this rule type will be created with the `*` space id.
+   */
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -340,6 +379,16 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
+   * normal priority.
+   */
+  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  /**
+   * Indicates that the rule type is managed internally by a Kibana plugin.
+   * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -347,6 +396,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceState,
   AlertInstanceContext
 >;
+
+export type UntypedRuleTypeAlerts = IRuleTypeAlerts<RuleAlertData>;
 
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
@@ -430,5 +481,7 @@ export type {
   RawRuleLastRun,
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
+
+export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

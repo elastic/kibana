@@ -8,21 +8,37 @@
  */
 
 import React from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 
-import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { SavedObjectNotFound } from '..';
+import type { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
-const ReactMarkdown = React.lazy(() => import('react-markdown'));
-const ErrorRenderer = (props: { children: string }) => (
+type MarkdownRendererProps = {
+  basePath: HttpStart['basePath'];
+  children: string;
+};
+
+const MarkdownRenderer = React.lazy(async () => {
+  const { default: ReactMarkdown } = await import('react-markdown');
+  const WrappedRenderer = ({ basePath, children }: MarkdownRendererProps) => (
+    <ReactMarkdown
+      transformLinkUri={(href) => ReactMarkdown.uriTransformer(basePath.prepend(href))}
+      children={children}
+    />
+  );
+
+  return { default: WrappedRenderer };
+});
+
+const ErrorRenderer = (props: MarkdownRendererProps) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown {...props} />
+    <MarkdownRenderer {...props} />
   </React.Suspense>
 );
 
@@ -102,7 +118,7 @@ export function redirectWhenMissing({
       text: (element: HTMLElement) => {
         ReactDOM.render(
           <KibanaThemeProvider theme$={theme.theme$} userProfile={userProfile}>
-            <ErrorRenderer>{error.message}</ErrorRenderer>
+            <ErrorRenderer basePath={basePath}>{error.message}</ErrorRenderer>
           </KibanaThemeProvider>,
           element
         );

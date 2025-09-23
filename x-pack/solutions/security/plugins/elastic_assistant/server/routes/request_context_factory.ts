@@ -10,13 +10,14 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
-import {
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { AIAssistantService } from '../ai_assistant_service';
+import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
@@ -34,15 +35,18 @@ interface ConstructorOptions {
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
   assistantService: AIAssistantService;
+  adhocAttackDiscoveryDataClient: IRuleDataClient;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
+  private adhocAttackDiscoveryDataClient: IRuleDataClient;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
+    this.adhocAttackDiscoveryDataClient = options.adhocAttackDiscoveryDataClient;
   }
 
   public async create(
@@ -83,10 +87,10 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
     return {
       core: coreContext,
-
+      userProfile: coreStart.userProfile,
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
@@ -99,12 +103,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getCurrentUser,
 
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
 
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
+      },
+
+      checkPrivileges: () => {
+        return startPlugins.security.authz.checkPrivilegesWithRequest(request);
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
@@ -146,11 +154,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
+          adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
         });
       }),
 
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          actionsClient,
+          logger: this.logger,
           rulesClient,
         });
       }),
@@ -203,6 +214,19 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           currentUser,
           contentReferencesEnabled: params?.contentReferencesEnabled,
+        });
+      }),
+
+      getCheckpointSaver: memoize(async () => {
+        if (!this.assistantService.getIsCheckpointSaverEnabled()) {
+          return null;
+        }
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createCheckpointSaver({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
         });
       }),
     };

@@ -15,6 +15,7 @@ import {
   getIndexFilters,
   sourceOrDestinationIpExistsFilter,
   getNetworkDetailsPageFilter,
+  getESQLGlobalFilters,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -25,6 +26,11 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -34,10 +40,21 @@ jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
+
+jest.mock('../../hooks/use_global_filter_query', () => ({
+  useGlobalFilterQuery: () => () => ({
+    filterQuery: undefined,
+  }),
+}));
+
 const params = {
   euiTheme: {} as EuiThemeComputed,
 };
 describe('useLensAttributes', () => {
+  beforeAll(() => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+  });
+
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
@@ -163,6 +180,35 @@ describe('useLensAttributes', () => {
     ]);
   });
 
+  it('should apply esql query and filter', () => {
+    const esql = 'SELECT * FROM test-*';
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: SecurityPageName.entityAnalytics,
+        tabName: undefined,
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+          applyGlobalQueriesAndFilters: true,
+          esql,
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query as Query).toEqual({ esql });
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getIndexFilters(['auditbeat-*']),
+      ...getESQLGlobalFilters(undefined),
+    ]);
+  });
+
   it('should not apply tabs and pages when applyPageAndTabsFilters = false', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       {
@@ -242,6 +288,8 @@ describe('useLensAttributes', () => {
   });
 
   it('should return null if no indices exist', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
       indicesExist: false,

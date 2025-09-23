@@ -24,9 +24,15 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
-import { ReportingRequestHandlerContext } from './types';
-import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
+import type { ReportingRequestHandlerContext } from './types';
+import {
+  initializeReportingTelemetryTask,
+  registerReportingEventTypes,
+  registerReportingUsageCollector,
+  scheduleReportingTelemetry,
+} from './usage';
 import { registerFeatures } from './features';
+import { setupSavedObjects } from './saved_objects';
 
 /*
  * @internal
@@ -34,14 +40,16 @@ import { registerFeatures } from './features';
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {
+  private readonly telemetryLogger: Logger;
   private logger: Logger;
   private reportingCore?: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
+    this.telemetryLogger = initContext.logger.get('usage');
   }
 
-  public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+  public setup(core: CoreSetup<ReportingStartDeps, unknown>, plugins: ReportingSetupDeps) {
     const { http, status } = core;
     const reportingCore = new ReportingCore(core, this.logger, this.initContext);
     this.reportingCore = reportingCore;
@@ -56,6 +64,8 @@ export class ReportingPlugin
         return null;
       }
     });
+
+    const taskManagerStartPromise = core.getStartServices().then(([_, start]) => start.taskManager);
 
     // Usage counter for reporting telemetry
     const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
@@ -72,8 +82,20 @@ export class ReportingPlugin
 
     registerUiSettings(core);
     registerDeprecations({ core });
-    registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+
+    if (plugins.usageCollection) {
+      registerReportingUsageCollector(
+        reportingCore,
+        taskManagerStartPromise,
+        plugins.usageCollection
+      );
+      initializeReportingTelemetryTask(this.telemetryLogger, core, plugins.taskManager);
+    }
+
     registerReportingEventTypes(core);
+
+    // Saved objects
+    setupSavedObjects(core.savedObjects);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
@@ -120,6 +142,8 @@ export class ReportingPlugin
 
       // Note: this must be called after ReportingCore.pluginStart
       await store.start();
+
+      scheduleReportingTelemetry(this.telemetryLogger, plugins.taskManager);
 
       this.logger.debug('Start complete');
     })().catch((e) => {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { ESQL_CONTROL } from '../../common';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import {
   createEsqlControlInject,
   createEsqlControlExtract,

@@ -9,8 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationRule } from '@kbn/inference-common';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
@@ -18,6 +21,9 @@ export interface CreateChatModelOptions {
   actions: ActionsPluginStart;
   logger: Logger;
   chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
 }
 
 export const createChatModel = async ({
@@ -26,15 +32,19 @@ export const createChatModel = async ({
   actions,
   logger,
   chatModelOptions,
+  anonymizationRulesPromise,
+  regexWorker,
+  esClient,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
     request,
+    anonymizationRulesPromise,
+    regexWorker,
+    esClient,
     logger,
   });
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-  const connector = await getConnectorById({ connectorId, actionsClient });
-
+  const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({
     ...chatModelOptions,
     chatComplete: client.chatComplete,

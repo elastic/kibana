@@ -10,11 +10,21 @@ import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
+export const createEntityAnalyticsNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
+  iconV2: 'anomalyChart',
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
+  sideNavVersion,
   children: [
+    {
+      id: SecurityPageName.entityAnalyticsOverview,
+      link: securityLink(SecurityPageName.entityAnalyticsOverview),
+    },
     {
       id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),

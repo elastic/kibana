@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { sendMessageEvent } from './analytics/events';
-import {
+import type {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginSetupDependencies,
   SearchPlaygroundPluginStart,
@@ -61,7 +60,6 @@ export class SearchPlaygroundPlugin
       name: PLUGIN_NAME,
       order: 1,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', PLUGIN_ID],
       catalogue: [PLUGIN_ID],
       privileges: {

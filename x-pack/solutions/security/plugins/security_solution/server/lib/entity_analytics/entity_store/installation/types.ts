@@ -11,7 +11,7 @@ import type {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition, EntityStoreCapability } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
@@ -21,6 +21,7 @@ export interface EntityEngineInstallationDescriptor {
   version: string;
   entityType: EntityType;
   identityField: string;
+  identityFieldMapping: MappingProperty;
 
   /**
    * Default static index patterns to use as the source of entity data.
@@ -51,12 +52,37 @@ export interface EntityEngineInstallationDescriptor {
     docsPerSecond?: number;
     lookbackPeriod: string;
     timestampField: string;
+    maxPageSearchSize?: number;
   };
 
   /**
    * The ingest pipeline to apply to the entity data.
-   * This can be an array of processors which get appended to the default pipeline,
-   * or a function that takes the default processors and returns an array of processors.
+   * This can be an array of processors which get appended to the platform pipeline,
+   * or a function that takes the default platform processors and returns an array of processors.
+   *
+   * Function usage example:
+   * ```ts
+   *   pipeline: (defaultProcessors) => [
+   * ...defaultProcessors, // include the default processors
+   * {
+   *   set: {
+   *     field: 'entity.type',
+   *     value: 'Identity',
+   *   },
+   * },
+   * ],
+   * ```
+   * Array usage example:
+   * ```ts
+   * pipeline: [
+   *   {
+   *     set: {
+   *       field: 'entity.type',
+   *       value: 'Host',
+   *     },
+   *   },
+   * ],
+   * ```
    **/
   pipeline?:
     | IngestProcessorContainer[]
@@ -69,6 +95,8 @@ export interface EntityEngineInstallationDescriptor {
    * This is mainly used for the Asset Inventory use case.
    */
   dynamic: boolean;
+
+  capabilities?: EntityStoreCapability[];
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {

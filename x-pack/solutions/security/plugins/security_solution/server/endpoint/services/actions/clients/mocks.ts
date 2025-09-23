@@ -55,6 +55,7 @@ import type {
   UploadActionApiRequestBody,
   ScanActionRequestBody,
   RunScriptActionRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../common/api/endpoint';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -83,6 +84,8 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
     scan: jest.fn().mockReturnValue(Promise.resolve()),
     runscript: jest.fn().mockReturnValue(Promise.resolve()),
+    getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+    cancel: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -106,15 +109,64 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 
   esClient.search.mockImplementation(async (payload) => {
     if (payload) {
-      switch (payload.index) {
-        case ENDPOINT_ACTIONS_INDEX:
-          return createActionRequestsEsSearchResultsMock();
-        case ACTION_RESPONSE_INDICES:
-          return createActionResponsesEsSearchResultsMock();
+      if (
+        !Array.isArray(payload.index) &&
+        (payload.index ?? '').startsWith(
+          ENDPOINT_ACTIONS_INDEX.substring(0, ENDPOINT_ACTIONS_INDEX.length - 1)
+        )
+      ) {
+        return createActionRequestsEsSearchResultsMock();
+      }
+
+      if (payload.index === ACTION_RESPONSE_INDICES) {
+        return createActionResponsesEsSearchResultsMock();
       }
     }
 
     return BaseDataGenerator.toEsSearchResponse([]);
+  });
+
+  esClient.indices.getMapping.mockResolvedValue({
+    '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
+      mappings: { properties: {} },
+    },
+  });
+
+  esClient.cluster.existsComponentTemplate.mockResolvedValue(true);
+
+  esClient.cluster.getComponentTemplate.mockResolvedValue({
+    component_templates: [
+      {
+        name: '.logs-endpoint.actions@package',
+        component_template: {
+          template: {
+            settings: {},
+            mappings: {
+              dynamic: false,
+              properties: {
+                agent: {
+                  properties: {
+                    policy: {
+                      properties: {
+                        agentId: { ignore_above: 1024, type: 'keyword' },
+                        agentPolicyId: { ignore_above: 1024, type: 'keyword' },
+                        elasticAgentId: { ignore_above: 1024, type: 'keyword' },
+                        integrationPolicyId: { ignore_above: 1024, type: 'keyword' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _meta: {
+            package: { name: 'endpoint' },
+            managed_by: 'fleet',
+            managed: true,
+          },
+        },
+      },
+    ],
   });
 
   (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(
@@ -163,6 +215,13 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     ...endpointServiceStartContract,
     esClient,
   });
+
+  // Enable the mocking of internal fleet services
+  const fleetServices = endpointService.getInternalFleetServices();
+  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+  const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
+  getInternalFleetServicesMock.mockReturnValue(fleetServices);
 
   return {
     esClient,
@@ -294,13 +353,27 @@ const createScanOptionsMock = (
   return merge(options, overrides);
 };
 
-const createRunScriptOptionsMock = (
-  overrides: Partial<RunScriptActionRequestBody> = {}
-): RunScriptActionRequestBody => {
+const createRunScriptOptionsMock = <
+  TParams extends RunScriptActionRequestBody['parameters'] = RunScriptActionRequestBody['parameters']
+>(
+  overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
+): RunScriptActionRequestBody<TParams> => {
   const options: RunScriptActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters: {
       raw: 'ls',
+    },
+  };
+  return merge(options, overrides);
+};
+
+const createCancelActionOptionsMock = (
+  overrides: Partial<CancelActionRequestBody> = {}
+): CancelActionRequestBody => {
+  const options: CancelActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      id: 'test-action-id-123',
     },
   };
   return merge(options, overrides);
@@ -468,6 +541,9 @@ const getOptionsForResponseActionMethod = (method: ResponseActionsClientMethods)
     case 'getFile':
       return createGetFileOptionsMock();
 
+    case 'cancel':
+      return createCancelActionOptionsMock();
+
     default:
       throw new Error(`Mock options are not defined for response action method [${method}]`);
   }
@@ -490,6 +566,7 @@ export const responseActionsClientMock = Object.freeze({
   createUploadOptions: createUploadOptionsMock,
   createScanOptions: createScanOptionsMock,
   createRunScriptOptions: createRunScriptOptionsMock,
+  createCancelActionOptions: createCancelActionOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 

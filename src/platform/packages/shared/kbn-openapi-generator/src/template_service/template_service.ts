@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_direct_handlebars_import
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
+import type { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 

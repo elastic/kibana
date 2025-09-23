@@ -10,21 +10,24 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
-import { PreviewState } from './preview/types';
+import type { PreviewState } from './preview/types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
-import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
+import type { FieldEditorFormState } from './field_editor/field_editor';
+import { FieldEditor } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';
@@ -37,6 +40,13 @@ const i18nTexts = {
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
   }),
+  disabledSaveCalloutMessage: i18n.translate(
+    'indexPatternFieldEditor.editor.flyoutDisabledSaveCalloutMessage',
+    {
+      defaultMessage:
+        "You can't edit managed data view fields. Instead, you can duplicate the data view and make changes to your newly created copy.",
+    }
+  ),
 };
 
 const defaultModalVisibility = {
@@ -77,6 +87,7 @@ const FieldEditorFlyoutContentComponent = ({
   const isEditingExistingField = !!fieldToEdit;
   const { dataView, subfields$ } = useFieldEditorContext();
 
+  const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinMaxBreakpoint('s');
 
   const { controller } = useFieldPreviewContext();
@@ -242,12 +253,22 @@ const FieldEditorFlyoutContentComponent = ({
                   />
                 </p>
               </EuiText>
+              {dataView.managed && (
+                <EuiCallOut
+                  title={i18nTexts.disabledSaveCalloutMessage}
+                  color="primary"
+                  iconType="info"
+                  size="s"
+                  css={{ marginTop: euiTheme.base }}
+                />
+              )}
             </FlyoutPanels.Header>
 
             <FieldEditor
               field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
+              isDisabled={dataView.managed}
             />
           </FlyoutPanels.Content>
 
@@ -271,7 +292,7 @@ const FieldEditorFlyoutContentComponent = ({
                     onClick={onClickSave}
                     data-test-subj="fieldSaveButton"
                     fill
-                    disabled={hasErrors}
+                    disabled={hasErrors || dataView.managed}
                     isLoading={isSavingField || isSubmitting}
                   >
                     {i18nTexts.saveButtonLabel}

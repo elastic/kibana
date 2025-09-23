@@ -9,11 +9,8 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';
-import {
-  useChangeCspRuleState,
-  createRulesWithUpdatedState,
-  RuleStateUpdateRequest,
-} from './use_change_csp_rule_state';
+import type { RuleStateUpdateRequest } from './use_change_csp_rule_state';
+import { useChangeCspRuleState, createRulesWithUpdatedState } from './use_change_csp_rule_state';
 import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
@@ -190,8 +187,8 @@ describe('use_change_csp_rule_state', () => {
 
     await waitFor(() => {
       expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
-      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith([CSPM_STATS_QUERY_KEY]);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith([KSPM_STATS_QUERY_KEY]);
       expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
     });
   });

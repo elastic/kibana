@@ -10,7 +10,7 @@ import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { OperatorOption } from '../types';
+import type { OperatorOption } from '../types';
 
 export const isOperator: OperatorOption = {
   message: i18n.translate('lists.exceptions.isOperatorLabel', {
@@ -102,7 +102,10 @@ export const doesNotMatchOperator: OperatorOption = {
   value: 'does_not_match',
 };
 
-export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
+/**
+ * Operators valid for event filters, trusted apps and endpoint exceptions
+ */
+export const ENDPOINT_ARTIFACT_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
   isOneOfOperator,
@@ -140,6 +143,10 @@ export const ALL_OPERATORS: OperatorOption[] = [
   matchesOperator,
   doesNotMatchOperator,
 ];
+
+export const ALL_OPERATORS_SANS_MATCHES: OperatorOption[] = ALL_OPERATORS.filter(
+  (operator) => operator !== matchesOperator && operator !== doesNotMatchOperator
+);
 
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
   isOperator,

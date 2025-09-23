@@ -14,7 +14,10 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { IRouter } from '@kbn/core-http-server';
 import {
   type HttpConfigType,
   type ExternalUrlConfigType,
@@ -22,6 +25,7 @@ import {
   HttpService,
   config,
 } from '@kbn/core-http-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -97,41 +101,87 @@ export const createConfigService = ({
         report_to: [],
       });
     }
+    if (path === 'pricing') {
+      return new BehaviorSubject({
+        tiers: {
+          enabled: true,
+          products: [],
+        },
+      });
+    }
     throw new Error(`Unexpected config path: ${path}`);
   });
   return configService;
 };
 
 const createDefaultContext = (): CoreContext => {
-  return {
+  return lazyObject({
     coreId,
     env,
     logger,
     configService: createConfigService(),
-  };
+  });
 };
 
-export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({
-  ...createDefaultContext(),
-  ...overrides,
-});
+export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext =>
+  lazyObject({
+    ...createDefaultContext(),
+    ...overrides,
+  });
 
 /**
- * Creates a concrete HttpService with a mocked context.
+ * A mock of the HttpService that can be used in tests.
+ *
+ * @remarks intended to mirror the pubilc HTTP contracts where possible to avoid
+ *          drifting or leaking too many internal details of the actual HttpService.
  */
-export const createHttpService = ({
-  buildNum,
-  ...overrides
-}: Partial<CoreContext & { buildNum: number }> = {}): HttpService => {
-  const ctx = createCoreContext(overrides);
-  if (buildNum !== undefined) {
-    ctx.env = {
-      ...ctx.env,
-      packageInfo: {
-        ...ctx.env.packageInfo,
-        buildNum,
-      },
-    };
-  }
-  return new HttpService(ctx);
+export interface HttpIntegrationTestService {
+  preboot: () => Promise<void>;
+  setup: () => Promise<{ createRouter: (path: string) => IRouter<any>; server: { listener: any } }>;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+}
+
+export type HttpIntegrationServicePrebootContractMock = Awaited<
+  ReturnType<HttpIntegrationTestService['preboot']>
+>;
+
+export type HttpIntegrationServiceSetupContractMock = Awaited<
+  ReturnType<HttpIntegrationTestService['setup']>
+>;
+
+export type HttpIntegrationServiceStartContractMock = Awaited<
+  ReturnType<HttpIntegrationTestService['start']>
+>;
+
+export type HttpIntegrationServiceStopContractMock = Awaited<
+  ReturnType<HttpIntegrationTestService['stop']>
+>;
+
+/**
+ * Creates an HTTP service instance for external services to test against.
+ * @public
+ */
+export const createHttpService = (): HttpIntegrationTestService => {
+  const ctx = createCoreContext();
+  const svc = new HttpService(ctx);
+  return {
+    preboot: async () => {
+      await svc.preboot({
+        context: contextServiceMock.createPrebootContract(),
+      });
+    },
+    setup: () => {
+      return svc.setup({
+        context: contextServiceMock.createSetupContract(),
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
+      });
+    },
+    start: async () => {
+      await svc.start();
+    },
+    stop: async () => {
+      await svc.stop();
+    },
+  };
 };

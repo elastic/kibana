@@ -59,6 +59,7 @@ const otherOpenAiConnector = {
     apiUrl: 'https://localhost/oss-llm',
     apiProvider: OpenAiProviderType.Other,
     defaultModel: 'local-model',
+    enableNativeFunctionCalling: false,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -129,7 +130,71 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
     expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
     expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
+
+  test('enableNativeFunctionCalling toggle only renders for Other provider', async () => {
+    const { queryByTestId: queryByTestIdOpenAi } = render(
+      <ConnectorFormTestProvider connector={openAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOpenAi('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdAzure } = render(
+      <ConnectorFormTestProvider connector={azureConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdAzure('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdOther } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOther('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
+  });
+
+  test('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
+    const onSubmit = jest.fn();
+    render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+
+    const toggle = await screen.findByTestId('config.enableNativeFunctionCallingSwitch');
+    expect(toggle).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+
+    await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+
+    const testFormData = {
+      ...otherOpenAiConnector,
+      config: {
+        ...otherOpenAiConnector.config,
+        enableNativeFunctionCalling: true,
+      },
+      __internal__: {
+        hasHeaders: false,
+        hasPKI: false,
+      },
+    };
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      data: {
+        ...testFormData,
+      },
+      isValid: true,
+    });
+  });
+
   describe('Headers', () => {
     it('toggles headers as expected', async () => {
       const testFormData = {
@@ -395,6 +460,103 @@ describe('ConnectorFields renders', () => {
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+  });
+
+  describe('PKI Configuration', () => {
+    it('toggles pki as expected', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+
+      expect(screen.queryByTestId('openAISSLCRTInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openAISSLKEYInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
+      expect(pkiToggle).toBeInTheDocument();
+
+      await userEvent.click(pkiToggle);
+      expect(screen.getByTestId('openAISSLCRTInput')).toBeInTheDocument();
+      expect(screen.getByTestId('openAISSLKEYInput')).toBeInTheDocument();
+      expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
+    });
+    it('succeeds without pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+          },
+          isValid: true,
+        });
+      });
+    });
+    it('succeeds with pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+      await userEvent.click(pkiToggle);
+      const certFile = new File(['hello'], 'cert.crt', { type: 'text/plain' });
+      const keyFile = new File(['world'], 'key.key', { type: 'text/plain' });
+      await userEvent.upload(screen.getByTestId('openAISSLCRTInput'), certFile);
+      await userEvent.upload(screen.getByTestId('openAISSLKEYInput'), keyFile);
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+            config: {
+              ...testFormData.config,
+              verificationMode: 'full',
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+              certificateData: Buffer.from('hello').toString('base64'),
+              privateKeyData: Buffer.from('world').toString('base64'),
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasPKI: true,
+            },
+          },
+          isValid: true,
+        });
+      });
     });
   });
 });

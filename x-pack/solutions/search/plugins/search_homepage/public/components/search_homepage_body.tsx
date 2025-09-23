@@ -4,18 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
-import { ConsoleLinkButton } from './console_link_button';
+import { ConnectToElasticsearch } from './connect_to_elasticsearch';
+import { AlternateSolutions } from './alternate_solutions/alternate_solutions';
+import { DiveDeeperWithElasticsearch } from './dive_deeper/dive_deeper_with_elasticsearch';
+import { Footer } from './footer/footer';
+import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../analytics/constants';
+import { GetStartedWithElasticsearch } from './get_started_with_elasticsearch';
 
-export const SearchHomepageBody = () => (
-  <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <ConsoleLinkButton />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </KibanaPageTemplate.Section>
-);
+export const SearchHomepageBody = () => {
+  const usageTracker = useUsageTracker();
+
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.homepageLoaded);
+  }, [usageTracker]);
+
+  return (
+    <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
+      <EuiFlexGroup gutterSize="l" direction="column">
+        <EuiFlexItem>
+          <ConnectToElasticsearch />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <GetStartedWithElasticsearch />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <DiveDeeperWithElasticsearch />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AlternateSolutions />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Footer />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </KibanaPageTemplate.Section>
+  );
+};

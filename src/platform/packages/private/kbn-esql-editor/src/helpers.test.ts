@@ -8,7 +8,14 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { parseErrors, parseWarning, getIndicesList, getRemoteIndicesList } from './helpers';
+import {
+  filterDataErrors,
+  getIndicesList,
+  getRemoteIndicesList,
+  parseErrors,
+  parseWarning,
+} from './helpers';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -25,6 +32,7 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 8,
           startLineNumber: 1,
+          code: 'errorFromES',
         },
       ]);
     });
@@ -49,6 +57,7 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 7,
           startLineNumber: 3,
+          code: 'errorFromES',
         },
       ]);
     });
@@ -64,6 +73,7 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'unknownError',
         },
       ]);
     });
@@ -82,6 +92,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -98,6 +109,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 169,
@@ -107,6 +119,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 84,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -123,6 +136,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 169,
@@ -132,6 +146,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 84,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -148,6 +163,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -157,6 +173,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -166,6 +183,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -181,6 +199,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -190,6 +209,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 138,
@@ -199,6 +219,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -213,6 +234,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 40,
@@ -221,6 +243,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 9,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 18,
@@ -229,6 +252,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 9,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -345,6 +369,22 @@ describe('helpers', function () {
       };
       const indices = await getRemoteIndicesList(updatedDataViewsMock, false);
       expect(indices).toStrictEqual([]);
+    });
+  });
+
+  describe('filterDataErrors', function () {
+    it('should return an empty array if no errors are provided', function () {
+      expect(filterDataErrors([])).toEqual([]);
+    });
+
+    it('should filter properly filter data errors', function () {
+      const errors = [
+        { code: 'unknownIndex' },
+        { code: 'unknownColumn' },
+        { code: 'other' },
+      ] as MonacoMessage[];
+
+      expect(filterDataErrors(errors)).toEqual([{ code: 'other' }]);
     });
   });
 });

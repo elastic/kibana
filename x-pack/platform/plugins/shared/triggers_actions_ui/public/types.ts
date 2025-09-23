@@ -106,6 +106,11 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+
+type RuleTemplate = Pick<
+  Rule,
+  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
+>;
 type ResolvedRule = Omit<
   ResolvedSanitizedRule<RuleTypeParams>,
   'alertTypeId' | 'actions' | 'systemActions'
@@ -145,6 +150,7 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
+  RuleTemplate,
   RuleType,
   RuleTypeIndex,
   RuleTypeMetaData,
@@ -235,6 +241,7 @@ export type RuleSnoozeSettings = Pick<
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
+  autoRecoverAlerts?: RuleType['autoRecoverAlerts'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
@@ -353,6 +360,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export enum Percentiles {
@@ -399,6 +407,8 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+  enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
+  isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
 }
 
 export interface RulesListFilters {

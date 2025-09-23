@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,8 +27,11 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPoliciesToAdd = [],
   agentPoliciesToRemove = [],
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   return agentPolicies.length === 0 && agentPoliciesToRemove.length === 0 ? (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.fleet.agentPolicy.noPolicies.confirmModalTitle"
@@ -52,7 +55,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       buttonColor="primary"
     >
       <EuiCallOut
-        iconType="iInCircle"
+        iconType="info"
         data-test-subj="confirmNoPoliciesCallout"
         title={i18n.translate('xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutTitle', {
           defaultMessage: 'No agent policies selected',
@@ -68,6 +71,8 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
     </EuiConfirmModal>
   ) : (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.fleet.agentPolicy.confirmModalTitle"
@@ -92,7 +97,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
     >
       {agentCount > 0 ? (
         <EuiCallOut
-          iconType="iInCircle"
+          iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
             defaultMessage:
               'This action will update {agentCount, plural, one {# agent} other {# agents}}',
@@ -116,7 +121,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       ) : (
         <EuiCallOut
           data-test-subj="confirmAddRemovePoliciesCallout"
-          iconType="iInCircle"
+          iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
             defaultMessage: 'This action will update the selected agent policies',
           })}

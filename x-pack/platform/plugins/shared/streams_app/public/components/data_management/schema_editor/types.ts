@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   FieldDefinitionConfig,
   FieldDefinitionConfigAdvancedParameters,
   Streams,
 } from '@kbn/streams-schema';
-import { TableColumnName } from './constants';
+import type { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 export type SchemaFieldType = FieldDefinitionConfig['type'];
@@ -31,6 +31,10 @@ export interface MappedSchemaField extends BaseSchemaField {
 export interface UnmappedSchemaField extends BaseSchemaField {
   status: 'unmapped';
   type?: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - only available for fields of classic streams that are not mapped through streams but from the underlying index.
+   */
+  esType?: string;
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
@@ -40,13 +44,14 @@ export interface SchemaEditorProps {
   defaultColumns?: TableColumnName[];
   fields: SchemaField[];
   isLoading?: boolean;
-  onFieldUnmap: (fieldName: SchemaField['name']) => void;
+  onAddField?: (field: SchemaField) => void;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
   stream: Streams.ingest.all.Definition;
   withControls?: boolean;
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
+  withToolbar?: boolean;
 }
 
 export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {

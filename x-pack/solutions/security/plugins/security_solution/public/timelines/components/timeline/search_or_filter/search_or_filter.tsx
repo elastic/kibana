@@ -147,16 +147,16 @@ export const SearchOrFilter = React.memo<Props>(
               */
               timelineType === TimelineTypeEnum.default ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={dataProviderIconTooltipContent}>
+                  <EuiToolTip content={dataProviderIconTooltipContent} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      color={buttonColor}
-                      isSelected={isDataProviderVisible}
-                      iconType="timeline"
-                      data-test-subj="toggle-data-provider"
-                      size="m"
-                      display="base"
                       aria-label={dataProviderIconTooltipContent}
+                      color={buttonColor}
+                      data-test-subj="toggle-data-provider"
+                      display="base"
+                      iconType="timeline"
+                      isSelected={isDataProviderVisible}
                       onClick={toggleDataProviderVisibility}
+                      size="s"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -168,10 +168,11 @@ export const SearchOrFilter = React.memo<Props>(
 
             <EuiFlexItem grow={false} data-test-subj="timeline-date-picker-container">
               <SuperDatePicker
-                width="auto"
+                compressed={true}
+                disabled={false}
                 id={InputsModelId.timeline}
                 timelineId={timelineId}
-                disabled={false}
+                width="auto"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

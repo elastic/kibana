@@ -48,7 +48,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       }),
       logsUIEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
       }),
       metricsExplorerEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
@@ -71,11 +71,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: true }),
       }),
-      /**
-       * Depends on optional "profilingDataAccess" and "profiling"
-       * plugins. Enable both with `xpack.profiling.enabled: true` before
-       * enabling this feature flag.
-       */
+      // to be removed in https://github.com/elastic/kibana/issues/221904
       profilingEnabled: schema.boolean({ defaultValue: false }),
       ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
     }),

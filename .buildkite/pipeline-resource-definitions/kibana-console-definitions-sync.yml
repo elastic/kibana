@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
-      branch_configuration: main 8.19
+      branch_configuration: main 9.1 9.0 8.19 8.18
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/console_definitions_sync.yml

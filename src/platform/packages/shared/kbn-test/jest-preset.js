@@ -10,6 +10,18 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const ciStatsJestReporter = [
+  '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+  {
+    testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+  },
+];
+
+const scoutReporter = [
+  '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+  { name: 'Jest tests (unit)', configCategory: 'unit-test' },
+];
+
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
   // The directory where Jest should output its coverage files
@@ -42,24 +54,8 @@ module.exports = {
         rootDirectory: '.',
       },
     ],
-    ...(process.env.TEST_GROUP_TYPE_UNIT
-      ? [
-          [
-            '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
-            {
-              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
-            },
-          ],
-        ]
-      : []),
-    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
-      ? [
-          [
-            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
-            { name: 'Jest tests (unit)', configCategory: 'unit-test' },
-          ],
-        ]
-      : []),
+    ...(process.env.TEST_GROUP_TYPE_UNIT ? [ciStatsJestReporter] : []),
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED) ? [scoutReporter] : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
@@ -113,6 +109,8 @@ module.exports = {
     '^.+\\.(txt|html)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
+    '^.+\\.text?$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/dot_text.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

@@ -8,10 +8,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
-import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
-import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import type { AssetInput } from './types';
+import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, 'aws', vars);
@@ -21,9 +19,10 @@ export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, 'azure', vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
-export const getMockPackageInfoAssetInventoryAWS = () => {
+export const getMockPackageInfoAWS = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -49,9 +48,10 @@ export const getMockPackageInfoAssetInventoryAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetGCP = () => {
+export const getMockPackageInfoGCP = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -80,6 +80,7 @@ export const getMockPackageInfoAssetGCP = () => {
 export const getMockPackageInfoAssetAzure = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -135,6 +136,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    'azure.credentials.cloud_connector_id': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };
@@ -170,6 +172,11 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'asset_inventory',
+        config: {
+          cloud_shell_url: {
+            value: 'https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=',
+          },
+        },
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -197,12 +204,13 @@ const getPolicyMock = (
 
 export const getPackageInfoMock = () => {
   return {
+    version: '1.0.0',
     data_streams: [
       {
         dataset: 'cloud_asset_inventory.asset_inventory',
         type: 'logs',
 
-        package: 'cloud_security_posture',
+        package: 'cloud_asset_inventory',
         path: 'asset_inventory',
         release: 'ga' as RegistryRelease,
 
@@ -271,13 +279,30 @@ export const getPackageInfoMock = () => {
                 title: 'Client Certificate Password',
                 type: 'text' as RegistryVarType,
               },
+              {
+                name: 'azure.credentials.client_id',
+                type: 'text',
+                secret: true,
+                title: 'Client ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.tenant_id',
+                type: 'text',
+                secret: true,
+                title: 'Tenant ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
             ],
           },
         ],
       },
     ],
     format_version: '3.3.2',
-    version: '0.0.0',
     name: 'cloud_asset_inventory',
     description: 'Discover and Create Cloud Assets Inventory',
     owner: {
@@ -290,4 +315,81 @@ export const getPackageInfoMock = () => {
       kibana: {},
     },
   } as PackageInfo;
+};
+
+export const getAwsPackageInfoMock = () => {
+  return {
+    ...getPackageInfoMock(),
+    policy_templates: [
+      {
+        name: 'asset_inventory',
+        title: 'Cloud Asset Inventory',
+        description: 'Discover and Create Cloud Assets Inventory',
+        multiple: true,
+        inputs: [
+          {
+            title: 'Amazon Web Services',
+            vars: [
+              {
+                name: 'cloud_formation_template',
+                type: 'text',
+                title: 'CloudFormation Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Quick Create Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-8.18.0.yml&stackName=Elastic-Cloud-Security-Posture-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent',
+              },
+              {
+                name: 'cloud_formation_credentials_template',
+                type: 'text',
+                title: 'CloudFormation Credentials Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Credentials Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-8.18.0.yml',
+              },
+              {
+                name: 'cloud_formation_cloud_connectors_template',
+                type: 'text',
+                title: 'CloudFormation Cloud Connectors Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Connectors Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-8.18.0.yml&param_ElasticResourceId=RESOURCE_ID',
+              },
+            ],
+            type: 'cloudbeat/asset_inventory_aws',
+            description: 'Cloud Asset Discovery for AWS',
+          },
+        ],
+        categories: ['security', 'cloud', 'aws', 'google_cloud'],
+        icons: [
+          {
+            src: '/img/logo_cspm.svg',
+            title: 'Asset Inventory logo',
+            size: '32x32',
+            type: 'image/svg+xml',
+          },
+        ],
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: true,
+            is_default: true,
+            organization: 'security',
+            division: 'engineering',
+            team: 'cloud-security-posture',
+          },
+        },
+      },
+    ],
+  };
 };

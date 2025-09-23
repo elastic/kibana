@@ -6,11 +6,14 @@
  */
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { createInferenceExecutor, type InferenceExecutor } from './inference_executor';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 describe('createInferenceExecutor', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let executor: InferenceExecutor;
 
   const connector: InferenceConnector = {
@@ -18,11 +21,19 @@ describe('createInferenceExecutor', () => {
     name: 'My Connector',
     type: InferenceConnectorType.OpenAI,
     config: {},
+    capabilities: {},
   };
 
   beforeEach(() => {
     actionsClient = actionsClientMock.create();
-    executor = createInferenceExecutor({ actionsClient, connector });
+    request = httpServerMock.createKibanaRequest();
+    executor = createInferenceExecutor({
+      connector,
+      actions: {
+        getActionsClientWithRequest: () => actionsClient,
+      } as any,
+      request,
+    });
   });
 
   describe('#invoke()', () => {

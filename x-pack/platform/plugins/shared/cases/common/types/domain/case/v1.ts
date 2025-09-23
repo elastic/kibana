@@ -127,6 +127,15 @@ export const CaseAttributesRt = rt.intersection([
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
   }),
+  rt.exact(
+    rt.partial({
+      incremental_id: rt.union([rt.number, rt.null]),
+      in_progress_at: rt.union([rt.string, rt.null]),
+      time_to_acknowledge: rt.union([rt.number, rt.null]),
+      time_to_investigate: rt.union([rt.number, rt.null]),
+      time_to_resolve: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CaseRt = rt.intersection([
@@ -135,6 +144,7 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
+    totalEvents: rt.number,
     version: rt.string,
   }),
   rt.exact(
@@ -148,6 +158,7 @@ export const CasesRt = rt.array(CaseRt);
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
+  events: rt.number,
   userComments: rt.number,
 });
 

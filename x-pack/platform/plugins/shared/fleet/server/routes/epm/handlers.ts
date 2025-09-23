@@ -7,7 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
-import type { HttpResponseOptions } from '@kbn/core/server';
+
+import { type HttpResponseOptions } from '@kbn/core/server';
 
 import { omit, pick } from 'lodash';
 
@@ -33,6 +34,7 @@ import type {
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
 } from '../../../common/types';
@@ -54,7 +56,10 @@ import type {
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
   CustomIntegrationRequestSchema,
+  RollbackPackageRequestSchema,
+  GetKnowledgeBaseRequestSchema,
 } from '../../types';
+import { KibanaSavedObjectType } from '../../types';
 import {
   bulkInstallPackages,
   getCategories,
@@ -73,6 +78,7 @@ import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
 import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { rollbackInstallation } from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -87,6 +93,7 @@ import { NamingCollisionError } from '../../services/epm/packages/custom_integra
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
+import { getPackageKnowledgeBase } from '../../services/epm/packages';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -115,7 +122,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+  const flattenedRes = res
+    // exclude the security_ai_prompts package from being shown in Kibana UI
+    // https://github.com/elastic/kibana/pull/227308
+    .filter((pkg) => pkg.id !== 'security_ai_prompts')
+    .map((pkg) => soToInstallationInfo(pkg)) as PackageList;
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
@@ -249,7 +260,9 @@ export const getBulkAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const { assetIds } = request.body;
-  const savedObjectsClient = coreContext.savedObjects.client;
+  const savedObjectsClient = coreContext.savedObjects.getClient({
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+  });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
     savedObjectsClient,
@@ -620,20 +633,42 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'json',
+      undefined,
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
       pkgName,
       pkgVersion,
       'yml',
+      undefined,
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
+};
+
+export const getKnowledgeBaseHandler: FleetRequestHandler<
+  TypeOf<typeof GetKnowledgeBaseRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
+  const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName });
+
+  if (!knowledgeBase) {
+    return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
+  }
+
+  return response.ok({
+    body: knowledgeBase,
+  });
 };
 
 // Don't expose the whole SO in the API response, only selected fields
@@ -655,6 +690,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
+      previous_version: attributes.previous_version,
     };
 
     return {
@@ -663,4 +699,29 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
   }
   return pkg;
+};
+
+export const rollbackPackageHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const fleetContext = await context.fleet;
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  const spaceId = fleetContext.spaceId;
+  try {
+    const body: RollbackPackageResponse = await rollbackInstallation({
+      esClient,
+      savedObjectsClient: internalSoClientWithoutSpaceExtension,
+      pkgName,
+      spaceId,
+    });
+    return response.ok({ body });
+  } catch (error) {
+    error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
+    throw error;
+  }
 };

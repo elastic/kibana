@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { PluginInitializerContext } from '@kbn/core/public';
-import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
+import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { MapsPluginSetup, MapsPluginStart } from './plugin';
+import { MapsPlugin } from './plugin';
 import type { MapsXPackConfig } from '../server/config';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
@@ -28,7 +29,7 @@ export type {
 export type { MapsSetupApi, MapsStartApi } from './api';
 export type { CreateLayerDescriptorParams } from './classes/sources/es_search_source/create_layer_descriptor';
 
-export { type MapApi, type MapSerializedState, isMapApi } from './react_embeddable/types';
+export { type MapApi, isMapApi } from './react_embeddable/types';
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 
@@ -49,3 +50,4 @@ export type {
 export type { IField } from './classes/fields/field';
 export type { LayerWizard, RenderWizardArguments } from './classes/layers';
 export type { DataRequest } from './classes/util/data_request';
+export type { TableSourceDescriptor } from './classes/sources/join_sources/table_source';

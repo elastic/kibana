@@ -14,6 +14,7 @@ export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
+export const CLOUD_CONNECTOR_API_ROOT = `${API_ROOT}/cloud_connectors`;
 export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
 export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
 
@@ -31,6 +32,8 @@ export const EPM_API_ROUTES = {
   BULK_UPGRADE_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade/{taskId}`,
   BULK_UNINSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall`,
   BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
+  BULK_ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback`,
+  BULK_ROLLBACK_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback/{taskId}`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -45,11 +48,14 @@ export const EPM_API_ROUTES = {
   INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
+  KNOWLEDGE_BASE_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/knowledge_base`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
   BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
   INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
+  PACKAGES_DATASTREAM_ASSETS: `${EPM_API_ROOT}/packages/{pkgName}/{pkgVersion}/datastream_assets`,
+  ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/rollback`,
 
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
@@ -87,6 +93,12 @@ export const AGENT_POLICY_API_ROUTES = {
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
+};
+
+// Cloud Connector API routes
+export const CLOUD_CONNECTOR_API_ROUTES = {
+  LIST_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
+  CREATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
 };
 
 // Kubernetes Manifest API routes
@@ -153,6 +165,7 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
   MIGRATE_PATTERN: `${API_ROOT}/agents/{agentId}/migrate`,
+  BULK_MIGRATE_PATTERN: `${API_ROOT}/agents/bulk_migrate`,
   CANCEL_ACTIONS_PATTERN: `${API_ROOT}/agents/actions/{actionId}/cancel`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
@@ -170,6 +183,7 @@ export const AGENT_API_ROUTES = {
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
+  PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

@@ -20,8 +20,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { i18n } from '@kbn/i18n';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { withLensData } from '../../../hoc/with_lens_data';
@@ -175,24 +176,32 @@ export const AnalyticsCollectionViewMetricWithLens = withLensData<
               LENS_LAYERS.metrics.percentage
             ] ?? null,
         },
-  getAttributes: (dataView, formulaApi, props) => {
-    let metric = formulaApi.insertOrReplaceFormulaColumn(
-      LENS_LAYERS.metrics.percentage,
-      {
-        formula: `round((${props.getFormula()}/${props.getFormula('previous')}-1) * 100)`,
+  getAttributes: (dataView, props) => {
+    const percentageFormula = `round((${props.getFormula()}/${props.getFormula(
+      'previous'
+    )}-1) * 100)`;
+    const hitsTotalFormula = props.getFormula();
+    const metric = {
+      columnOrder: [LENS_LAYERS.metrics.percentage, LENS_LAYERS.metrics.hitsTotal],
+      columns: {
+        [LENS_LAYERS.metrics.percentage]: {
+          dataType: 'number',
+          isBucketed: false,
+          label: percentageFormula,
+          operationType: 'formula',
+          params: { formula: percentageFormula, isFormulaBroken: false },
+          references: [],
+        } satisfies FormulaIndexPatternColumn,
+        [LENS_LAYERS.metrics.hitsTotal]: {
+          dataType: 'number',
+          isBucketed: false,
+          label: hitsTotalFormula,
+          operationType: 'formula',
+          params: { formula: hitsTotalFormula, isFormulaBroken: false },
+          references: [],
+        } satisfies FormulaIndexPatternColumn,
       },
-      {
-        columnOrder: [],
-        columns: {},
-      },
-      dataView
-    )!;
-    metric = formulaApi.insertOrReplaceFormulaColumn(
-      LENS_LAYERS.metrics.hitsTotal,
-      { formula: props.getFormula() },
-      metric,
-      dataView
-    )!;
+    };
 
     return {
       references: [

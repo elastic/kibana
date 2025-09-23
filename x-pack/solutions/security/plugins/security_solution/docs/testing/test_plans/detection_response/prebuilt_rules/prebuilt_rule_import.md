@@ -1,6 +1,6 @@
 # Test plan: importing prebuilt rules <!-- omit from toc -->
 
-**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+**Status**: `implemented`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
 > [!TIP]
 > If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
@@ -31,11 +31,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Importing a single non-customized prebuilt rule](#importing-a-single-non-customized-prebuilt-rule)
-    - [**Scenario: Importing a non-customized rule when it's not installed**](#scenario-importing-a-non-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a non-customized prebuilt rule without overwriting**](#scenario-importing-a-non-customized-prebuilt-rule-without-overwriting)
     - [**Scenario: Importing a non-customized rule on top of an installed non-customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a non-customized rule on top of an installed customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing a single customized prebuilt rule](#importing-a-single-customized-prebuilt-rule)
-    - [**Scenario: Importing a customized rule when it's not installed**](#scenario-importing-a-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a customized rule without overwriting**](#scenario-importing-a-customized-rule-without-overwriting)
     - [**Scenario: Importing a customized rule on top of an installed non-customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a customized rule on top of an installed customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing a single custom rule](#importing-a-single-custom-rule)
@@ -68,6 +68,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Importing a new custom rule missing a `version` field**](#scenario-importing-a-new-custom-rule-missing-a-version-field)
     - [**Scenario: Importing an existing custom rule missing a `version` field**](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
   - [Licensing](#licensing)
+    - [**Scenario: Importing a mixture of new prebuilt and custom rules under insufficient license**](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules-under-insufficient-license)
+    - [**Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules under insufficient license**](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules-under-insufficient-license)
 
 ## Useful information
 
@@ -127,7 +129,7 @@ User stories:
 
 ### Importing a single non-customized prebuilt rule
 
-#### **Scenario: Importing a non-customized rule when it's not installed**
+#### **Scenario: Importing a non-customized prebuilt rule without overwriting**
 
 **Automation**: 1 API integration test.
 
@@ -177,7 +179,7 @@ And the updated rule's parameters should match the import payload
 
 ### Importing a single customized prebuilt rule
 
-#### **Scenario: Importing a customized rule when it's not installed**
+#### **Scenario: Importing a customized rule without overwriting**
 
 **Automation**: 1 API integration test.
 
@@ -553,10 +555,10 @@ If this rule is already installed, it should be updated. Its `is_customized` fie
 **Automation**: 1 API integration test.
 
 ```Gherkin
-Given the import payload contains a non-customized prebuilt rule
+Given the import payload contains a prebuilt rule
 And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
-And this rule is already installed and marked as non-customized
+And this rule is already installed and marked as <customization_state>
 And the installed rule is NOT equal to the import payload
 When the user imports the rule
 Then the rule should be updated
@@ -565,6 +567,10 @@ And the updated rule should be marked as customized
 And the updated rule's version should match the import payload
 And the updated rule's parameters should match the import payload
 ```
+
+**Examples:**
+
+`<customization_state>` = `customized` | `non-customized`
 
 #### **Scenario: Importing a prebuilt rule with a missing base version when it's already installed, is not customized, and is equal to the import payload**
 
@@ -659,4 +665,34 @@ And the updated rule's "version" field should stay unchanged
 
 ### Licensing
 
-TODO: describe licensing restrictions that apply to rule import.
+#### **Scenario: Importing a mixture of new prebuilt and custom rules under insufficient license**
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And an import payload contains a mix of non-customized prebuilt, customized prebuilt, and custom rules
+And the prebuilt rules have a base version in the installed package
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are not installed or created yet
+When the user imports these rules
+Then the rules should be created
+And the created rules should be correctly identified as prebuilt or custom
+And the created rules' parameters should match the import payload
+```
+
+#### **Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules under insufficient license**
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And an import payload contains non-customized prebuilt, customized prebuilt, and custom rules
+And the prebuilt rules have a base version in the installed package
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are already installed or created
+When the user imports these rules
+Then the rules should be updated
+And the updated rules should be correctly identified as prebuilt or custom
+And the updated rules' parameters should match the import payload
+```

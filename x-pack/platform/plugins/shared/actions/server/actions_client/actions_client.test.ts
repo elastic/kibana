@@ -50,7 +50,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_USAGE_API_URL } from '../config';
+import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -120,7 +120,12 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
+        }),
+      }),
       inMemoryMetrics
     ),
     actionsConfigUtils: actionsConfigMock.create(),
@@ -584,16 +589,18 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-      usage: {
-        url: DEFAULT_USAGE_API_URL,
-      },
     });
 
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOCanEncrypt: true }),
+        new ActionExecutor({
+          isESOCanEncrypt: true,
+          connectorRateLimiter: new ConnectorRateLimiter({
+            config: { email: { limit: 100, lookbackWindow: '1m' } },
+          }),
+        }),
         inMemoryMetrics
       ),
       actionsConfigUtils: localConfigUtils,
@@ -1839,7 +1846,6 @@ describe('getOAuthAccessToken()', () => {
         scope: 'https://graph.microsoft.com/.default',
         config: {
           clientId: 'abc',
-          tenantId: 'def',
         },
         secrets: {
           clientSecret: 'iamasecret',
@@ -1855,7 +1861,6 @@ describe('getOAuthAccessToken()', () => {
       credentials: {
         config: {
           clientId: 'abc',
-          tenantId: 'def',
         },
         secrets: {
           clientSecret: 'iamasecret',
@@ -1868,7 +1873,7 @@ describe('getOAuthAccessToken()', () => {
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"}",
+          "Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\"}",
         ],
       ]
     `);
@@ -1918,7 +1923,6 @@ describe('getOAuthAccessToken()', () => {
           scope: 'https://graph.microsoft.com/.default',
           config: {
             clientId: 'abc',
-            tenantId: 'def',
           },
           secrets: {
             clientSecret: 'iamasecret',
@@ -1931,7 +1935,7 @@ describe('getOAuthAccessToken()', () => {
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"} - Something went wrong!",
+          "Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\"} - Something went wrong!",
         ],
       ]
     `);

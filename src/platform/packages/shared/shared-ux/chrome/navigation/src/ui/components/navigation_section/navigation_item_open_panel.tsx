@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Theme, css } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import React, { useCallback, type FC } from 'react';
 
@@ -93,7 +94,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [selectedNode?.id, item, closePanel, openPanel]
   );
 
-  const onLinkClick = useCallback(
+  const onTogglePanelClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       togglePanel(e.target);
@@ -103,7 +104,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
 
   return (
     <EuiButton
-      onClick={onLinkClick}
+      aria-label={title}
+      aria-expanded={isExpanded}
+      onClick={onTogglePanelClick}
       iconSide="right"
       iconSize="s"
       iconType="arrowRight"

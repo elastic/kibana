@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProperties } from './dynamic_config/types';
+import type { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
   key: string;
@@ -27,6 +27,7 @@ export interface Config {
   inferenceId: string;
   provider: string;
   providerConfig?: Record<string, unknown>;
+  contextWindowLength?: number;
 }
 
 export interface Secrets {
@@ -39,13 +40,6 @@ export interface InferenceProvider {
   task_types: string[];
   logo?: string;
   configurations: FieldsConfiguration;
-}
-export interface Config {
-  taskType: string;
-  taskTypeConfig?: Record<string, unknown>;
-  inferenceId: string;
-  provider: string;
-  providerConfig?: Record<string, unknown>;
 }
 
 export interface Secrets {

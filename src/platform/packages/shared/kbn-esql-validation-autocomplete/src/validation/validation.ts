@@ -7,53 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ESQLAst,
-  ESQLColumn,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLMessage,
-  ESQLSource,
-  isIdentifier,
-  parse,
-  walk,
-} from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import {
-  areFieldAndUserDefinedColumnTypesCompatible,
-  getColumnExists,
-  getCommandDefinition,
-  hasWildcard,
-  isColumnItem,
-  isFunctionItem,
-  isOptionItem,
-  isParametrized,
-  isSingleItem,
-  isSourceItem,
-  isTimeIntervalItem,
-  sourceExists,
-} from '../shared/helpers';
-import type { ESQLCallbacks } from '../shared/types';
-import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { errors, getMessageFromId } from './errors';
-import { validateFunction } from './function_validation';
-import {
-  retrieveFields,
-  retrieveFieldsFromStringSources,
-  retrievePolicies,
-  retrievePoliciesFields,
-  retrieveSources,
-} from './resources';
+import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
+import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ErrorTypes,
-  ReferenceMaps,
-  ValidationOptions,
-  ValidationResult,
-} from './types';
+  ICommandCallbacks,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import type { LicenseType } from '@kbn/licensing-types';
 
-import { validate as validateJoinCommand } from './commands/join';
+import { QueryColumns } from '../shared/resources_helpers';
+import type { ESQLCallbacks } from '../shared/types';
+import { retrievePolicies, retrieveSources } from './resources';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
+import { getSubqueriesToValidate } from './helpers';
 
 /**
  * ES|QL validation public API
@@ -105,18 +72,23 @@ export async function validateQuery(
 }
 
 /**
- * @private
+ * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
   getVariables: [],
   canSuggestVariables: [],
-  getJoinIndices: [],
-  getTimeseriesIndices: [],
+  getJoinIndices: ['invalidJoinIndex'],
+  getTimeseriesIndices: ['unknownIndex'],
+  getEditorExtensions: [],
+  getInferenceEndpoints: [],
+  getLicense: [],
+  getActiveProduct: [],
+  canCreateLookupIndex: [],
 };
 
 /**
@@ -131,69 +103,85 @@ async function validateAst(
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = parse(queryString);
+  const parsingResult = EsqlQuery.fromSrc(queryString);
+  const rootCommands = parsingResult.ast.commands;
 
-  const { ast } = parsingResult;
-
-  const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
+  const [sources, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
-    retrieveSources(ast, callbacks),
-    // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, ast, callbacks),
+    retrieveSources(rootCommands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(ast, callbacks),
+    retrievePolicies(rootCommands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
-  if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
-    fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  }
+  const sourceQuery = queryString.split('|')[0];
+  const sourceFields = await new QueryColumns(
+    EsqlQuery.fromSrc(sourceQuery).ast,
+    sourceQuery,
+    callbacks
+  ).asMap();
 
-  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
-    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
-      queryString,
-      ast,
-      callbacks
+  // TODO move into the loop?
+  messages.push(
+    ...validateUnsupportedTypeFields(
+      sourceFields as Map<string, ESQLFieldWithMetadata>,
+      rootCommands
+    )
+  );
+
+  const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
+
+  /**
+   * Even though we are validating single commands, we work with subqueries.
+   *
+   * The reason is that building the list of columns available in each command requires
+   * the full command subsequence that precedes that command.
+   */
+  const subqueries = getSubqueriesToValidate(rootCommands);
+  for (let i = 0; i < subqueries.length; i++) {
+    const subquery = subqueries[i];
+
+    // gather columns available after previous subquery
+    const columns =
+      i > 0 ? await new QueryColumns(subqueries[i - 1], queryString, callbacks).asMap() : new Map();
+
+    const references: ReferenceMaps = {
+      sources,
+      columns,
+      policies: availablePolicies,
+      query: queryString,
+      joinIndices: joinIndices?.indices || [],
+    };
+
+    const commandMessages = validateCommand(
+      subquery.commands[subquery.commands.length - 1],
+      references,
+      rootCommands,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      }
     );
-    fieldsFromGrokOrDissect.forEach((value, key) => {
-      // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some userDefinedColumns
-      if (!availableFields.has(key)) {
-        availableFields.set(key, value);
-      }
-    });
-  }
-
-  const userDefinedColumns = collectUserDefinedColumns(ast, availableFields, queryString);
-  // notify if the user is rewriting a column as userDefinedColumn with another type
-  messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
-  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
-
-  const references: ReferenceMaps = {
-    sources,
-    fields: availableFields,
-    policies: availablePolicies,
-    userDefinedColumns,
-    query: queryString,
-    joinIndices: joinIndices?.indices || [],
-  };
-  let seenFork = false;
-  for (const [index, command] of ast.entries()) {
-    if (command.name === 'fork') {
-      if (seenFork) {
-        messages.push(errors.tooManyForks(command));
-      } else {
-        seenFork = true;
-      }
-    }
-    const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
 
+  const parserErrors = parsingResult.errors;
+
+  /**
+   * Some changes to the grammar deleted the literal names for some tokens.
+   * This is a workaround to restore the literals that were lost.
+   *
+   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+   */
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
   return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
@@ -202,164 +190,52 @@ function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
   ast: ESQLAst,
-  currentCommandIndex: number
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
   }
   // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(command.name);
 
-  if (!commandDef) {
+  if (!commandDefinition) {
     return messages;
   }
 
-  if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
-  }
+  // Check license requirements for the command
+  if (callbacks?.hasMinimumLicenseRequired) {
+    const license = commandDefinition.metadata.license;
 
-  switch (commandDef.name) {
-    case 'join': {
-      const join = command as ESQLAstJoinCommand;
-      const joinCommandErrors = validateJoinCommand(join, references);
-      messages.push(...joinCommandErrors);
-      break;
-    }
-    case 'fork': {
-      references.fields.set('_fork', {
-        name: '_fork',
-        type: 'keyword',
-      });
-
-      for (const arg of command.args.flat()) {
-        if (isSingleItem(arg) && arg.type === 'query') {
-          // all the args should be commands
-          arg.commands.forEach((subCommand) => {
-            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
-          });
-        }
-      }
-    }
-    default: {
-      // Now validate arguments
-      for (const arg of command.args) {
-        if (!Array.isArray(arg)) {
-          if (isFunctionItem(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: undefined,
-                references,
-                parentAst: ast,
-                currentCommandIndex,
-              })
-            );
-          } else if (isOptionItem(arg)) {
-            messages.push(...validateOption(arg, command, references));
-          } else if (isColumnItem(arg) || isIdentifier(arg)) {
-            if (command.name === 'stats' || command.name === 'inlinestats') {
-              messages.push(errors.unknownAggFunction(arg));
-            } else {
-              messages.push(...validateColumnForCommand(arg, command.name, references));
-            }
-          } else if (isTimeIntervalItem(arg)) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'unsupportedTypeForCommand',
-                values: {
-                  command: command.name.toUpperCase(),
-                  type: 'date_period',
-                  value: arg.name,
-                },
-                locations: arg.location,
-              })
-            );
-          }
-        }
-      }
-
-      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
-      messages.push(...validateSources(sources, references));
-    }
-  }
-
-  // no need to check for mandatory options passed
-  // as they are already validated at syntax level
-  return messages;
-}
-
-function validateOption(
-  option: ESQLCommandOption,
-  command: ESQLCommand,
-  referenceMaps: ReferenceMaps
-): ESQLMessage[] {
-  // check if the arguments of the option are of the correct type
-  const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete || option.name === 'metadata') {
-    return messages;
-  }
-
-  if (option.name === 'metadata') {
-    // Validation for the metadata statement is handled in the FROM command's validate method
-    return messages;
-  }
-
-  for (const arg of option.args) {
-    if (Array.isArray(arg)) {
-      continue;
-    }
-    if (isColumnItem(arg)) {
-      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionItem(arg)) {
+    if (license && !callbacks.hasMinimumLicenseRequired(license.toLowerCase() as LicenseType)) {
       messages.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
-          references: referenceMaps,
+        getMessageFromId({
+          messageId: 'licenseRequired',
+          values: {
+            name: command.name.toUpperCase(),
+            requiredLicense: license.toUpperCase(),
+          },
+          locations: command.location,
         })
       );
     }
   }
 
-  return messages;
-}
+  const context = {
+    columns: references.columns,
+    policies: references.policies,
+    sources: [...references.sources].map((source) => ({
+      name: source,
+    })),
+    joinSources: references.joinIndices,
+  };
 
-function validateFieldsShadowing(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
-) {
-  const messages: ESQLMessage[] = [];
-  for (const userDefinedColumn of userDefinedColumns.keys()) {
-    if (fields.has(userDefinedColumn)) {
-      const userDefinedColumnHits = userDefinedColumns.get(userDefinedColumn)!;
-      if (
-        !areFieldAndUserDefinedColumnTypesCompatible(
-          fields.get(userDefinedColumn)?.type,
-          userDefinedColumnHits[0].type
-        )
-      ) {
-        const fieldType = fields.get(userDefinedColumn)!.type;
-        const userDefinedColumnType = userDefinedColumnHits[0].type;
-        const flatFieldType = fieldType;
-        const flatUserDefinedColumnType = userDefinedColumnType;
-        messages.push(
-          getMessageFromId({
-            messageId: 'shadowFieldType',
-            values: {
-              field: userDefinedColumn,
-              fieldType: flatFieldType,
-              newType: flatUserDefinedColumnType,
-            },
-            locations: userDefinedColumnHits[0].location,
-          })
-        );
-      }
-    }
+  if (commandDefinition.methods.validate) {
+    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
   }
 
+  // no need to check for mandatory options passed
+  // as they are already validated at syntax level
   return messages;
 }
 
@@ -383,85 +259,5 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata
       );
     }
   }
-  return messages;
-}
-
-export function validateSources(
-  sources: ESQLSource[],
-  { sources: availableSources }: ReferenceMaps
-) {
-  const messages: ESQLMessage[] = [];
-
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
-
-  for (const source of sources) {
-    if (source.incomplete) {
-      return messages;
-    }
-
-    if (source.sourceType === 'index') {
-      const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
-      if (!sourceName) continue;
-
-      if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
-      }
-    }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    });
-  }
-
-  return messages;
-}
-
-export function validateColumnForCommand(
-  column: ESQLColumn | ESQLIdentifier,
-  commandName: string,
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!references.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
-    }
-  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
-  }
-
   return messages;
 }

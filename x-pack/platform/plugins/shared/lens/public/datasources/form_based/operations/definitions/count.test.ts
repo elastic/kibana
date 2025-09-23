@@ -7,10 +7,10 @@
 
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
-import { IndexPattern } from '../../../../types';
-import { FormBasedLayer } from '../../../..';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DateRange } from '../../../../../common/types';
+import type { IndexPattern } from '../../../../types';
+import type { FormBasedLayer } from '../../../..';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DateRange } from '../../../../../common/types';
 
 describe('count operation', () => {
   describe('getGroupByKey', () => {
@@ -138,15 +138,6 @@ describe('count operation', () => {
         {} as unknown as IUiSettingsClient,
         {} as unknown as DateRange
       );
-
-    test('doesnt support filters', () => {
-      const esql = callToESQL({
-        sourceField: 'bytes',
-        operationType: 'count',
-        filter: { language: 'kquery' },
-      });
-      expect(esql).toBeUndefined();
-    });
 
     test('doesnt support timeShift', () => {
       const esql = callToESQL({

@@ -29,7 +29,8 @@
  * @packageDocumentation
  */
 
-import { Type } from '@kbn/config-schema';
+import 'reflect-metadata';
+import type { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
@@ -110,6 +111,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -292,7 +294,6 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,

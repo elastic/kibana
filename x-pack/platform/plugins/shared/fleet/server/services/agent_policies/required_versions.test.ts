@@ -6,7 +6,9 @@
  */
 
 import { appContextService } from '..';
-import { AgentPolicyInvalidError } from '../../errors';
+import { AgentPolicyInvalidError, FleetUnauthorizedError } from '../../errors';
+
+import { licenseService } from '..';
 
 import { validateRequiredVersions } from './required_versions';
 
@@ -30,6 +32,10 @@ describe('validateRequiredVersions', () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    });
+    afterEach(() => {
+      jest.spyOn(licenseService, 'isEnterprise').mockClear();
     });
 
     it('should throw error if duplicate versions', () => {
@@ -41,6 +47,20 @@ describe('validateRequiredVersions', () => {
       }).toThrow(
         new AgentPolicyInvalidError(
           `Policy "test policy" failed required_versions validation: duplicate versions not allowed`
+        )
+      );
+    });
+
+    it('should throw error if license is not at least Enterprise', () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 10 },
+          { version: '9.0.0', percentage: 10 },
+        ]);
+      }).toThrow(
+        new FleetUnauthorizedError(
+          `Agents auto upgrades feature requires at least Enterprise license`
         )
       );
     });
@@ -93,6 +113,69 @@ describe('validateRequiredVersions', () => {
 
     it('should not throw error if required_versions undefined', () => {
       validateRequiredVersions('test policy');
+    });
+
+    it('should not throw error if there is no change between required_versions and isAuthorized is false', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        false
+      );
+    });
+
+    it('should throw error if required_versions changed and isAuthorized is false', () => {
+      expect(() => {
+        validateRequiredVersions(
+          'test policy',
+          [
+            { version: '9.0.0', percentage: 80 },
+            { version: '9.1.0', percentage: 20 },
+          ],
+          [
+            { version: '9.0.0', percentage: 90 },
+            { version: '9.1.0', percentage: 10 },
+          ],
+          false
+        );
+      }).toThrow(
+        new FleetUnauthorizedError(`updating 'required_versions' requires Agents 'All' privilege`)
+      );
+    });
+
+    it('should not throw error if required_versions changed and isAuthorized is true', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 80 },
+          { version: '9.1.0', percentage: 20 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        true
+      );
+    });
+
+    it('should not throw if required_versions changed and isAuthorized is undefined', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 80 },
+          { version: '9.1.0', percentage: 20 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ]
+      );
     });
   });
 });

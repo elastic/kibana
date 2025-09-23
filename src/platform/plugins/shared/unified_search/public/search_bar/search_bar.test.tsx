@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import SearchBar from './search_bar';
-
+import type { SearchBarProps, SearchBarState } from './search_bar';
+import SearchBar, { SearchBarUI } from './search_bar';
+import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,37 +23,12 @@ import { mount } from 'enzyme';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
-
-const mockTimeHistory = {
-  get: () => {
-    return [];
-  },
-  add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
-};
+import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { createMockStorage, createMockTimeHistory } from './mocks';
+import { SearchSessionState } from '@kbn/data-plugin/public';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 
 const noop = jest.fn();
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 const kqlQuery = {
   query: 'response:200',
@@ -63,15 +39,27 @@ const esqlQuery = {
   esql: 'from test',
 };
 
-function wrapSearchBarInContext(testProps: any) {
+function wrapSearchBarInContext(
+  testProps: any,
+  options?: {
+    backgroundSearch?: {
+      enabled?: boolean;
+      initialState?: SearchSessionState;
+    };
+  }
+) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: mockTimeHistory,
+    timeHistory: createMockTimeHistory(),
     intl: null as any,
   };
 
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+
+  const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? false;
+  const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
+  const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
   const services = {
     application: {
@@ -84,15 +72,22 @@ function wrapSearchBarInContext(testProps: any) {
         },
       },
     },
+    chrome: {
+      ...startMock.chrome,
+      getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
+    },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
-    savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
     theme: startMock.theme,
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      search: searchServiceMock.createStartContract({
+        isBackgroundSearchEnabled: backgroundSearchEnabled,
+        session: getSessionServiceMock({ state$: sessionState$ }),
+      }),
       query: {
         savedQueries: {
           findSavedQueries: () =>
@@ -360,6 +355,132 @@ describe('SearchBar', () => {
       // isUpdate is true because the default value in state ({ from: 'now-15m', to: 'now' })
       // is not equal with props for dateRange which is undefined
       true
+    );
+  });
+
+  describe('SearchBarUI.getDerivedStateFromProps', () => {
+    it('should not return the esql query if props.query doesnt change but loading state changes', () => {
+      const nextProps = {
+        query: { esql: 'test' },
+        isLoading: false,
+      } as unknown as SearchBarProps;
+      const prevState = {
+        currentProps: {
+          query: { esql: 'test' },
+        },
+        query: { esql: 'test_edited' },
+        isLoading: true,
+      } as unknown as SearchBarState;
+
+      const result = SearchBarUI.getDerivedStateFromProps(nextProps, prevState);
+      // if the query was returned, it would overwrite the state in the underlying ES|QL editor
+      expect(result).toEqual({
+        currentProps: { isLoading: false, query: { esql: 'test' } },
+      });
+    });
+    it('should return the query if props.query and loading state changes', () => {
+      const nextProps = {
+        query: { esql: 'test_new_props' },
+        isLoading: false,
+      } as unknown as SearchBarProps;
+      const prevState = {
+        currentProps: {
+          query: { esql: 'test' },
+        },
+        query: { esql: 'test_edited' },
+        isLoading: true,
+      } as unknown as SearchBarState;
+
+      const result = SearchBarUI.getDerivedStateFromProps(nextProps, prevState);
+      // here it makes sense to return the query, because the props.query has changed
+      expect(result).toEqual({
+        currentProps: { isLoading: false, query: { esql: 'test_new_props' } },
+        query: {
+          esql: 'test_new_props',
+        },
+      });
+    });
+  });
+
+  describe('draft', () => {
+    it('should prefill with the draft query if provided', () => {
+      const draft = {
+        query: { language: 'kuery', query: 'test_draft' },
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(draft);
+      expect(component.find('textarea').prop('value')).toEqual(draft.query.query);
+    });
+
+    it('should check for query type mismatch', () => {
+      const draft = {
+        query: esqlQuery,
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
+      expect(component.find('textarea').prop('value')).toEqual(kqlQuery.query);
+    });
+  });
+
+  it('renders BackgroundSearchRestoredCallout when feature flag enabled and session restored', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: true,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      true
+    );
+  });
+
+  it('does not render BackgroundSearchRestoredCallout when feature flag disabled', () => {
+    const component = mount(
+      wrapSearchBarInContext(
+        { indexPatterns: [stubIndexPattern] },
+        {
+          backgroundSearch: {
+            enabled: false,
+            initialState: SearchSessionState.Restored,
+          },
+        }
+      )
+    );
+
+    expect(component.find('[data-test-subj="backgroundSearchRestoredCallout"]').exists()).toBe(
+      false
     );
   });
 });

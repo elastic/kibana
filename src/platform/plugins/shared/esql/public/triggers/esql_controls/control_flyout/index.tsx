@@ -9,18 +9,18 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
 import {
   updateQueryStringWithVariable,
-  getFlyoutStyling,
+  flyoutStyles,
   getVariableSuggestion,
   getRecurrentVariableName,
   validateVariableName,
@@ -35,11 +35,14 @@ interface ESQLControlsFlyoutProps {
   initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
+  timeRange?: TimeRange;
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
+  ariaLabelledBy: string;
+  currentApp?: string;
 }
 
 export function ESQLControlsFlyout({
@@ -47,11 +50,14 @@ export function ESQLControlsFlyout({
   initialVariableType,
   queryString,
   esqlVariables,
+  timeRange,
   onSaveControl,
   onCancelControl,
   cursorPosition,
   initialState,
   closeFlyout,
+  ariaLabelledBy,
+  currentApp,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -65,7 +71,6 @@ export function ESQLControlsFlyout({
   }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
-  const styling = useMemo(() => getFlyoutStyling(), []);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
@@ -135,12 +140,12 @@ export function ESQLControlsFlyout({
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !controlState?.availableOptions.length
+        !controlState?.availableOptions?.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.availableOptions.length,
+    controlState?.availableOptions?.length,
     esqlVariables,
     variableName,
     variableType,
@@ -151,7 +156,7 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.availableOptions.length) {
+    if (controlState && controlState.availableOptions?.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
@@ -185,27 +190,27 @@ export function ESQLControlsFlyout({
         setControlState={setControlState}
         search={search}
         valuesRetrieval={valuesField}
+        timeRange={timeRange}
+        currentApp={currentApp}
       />
     ) : (
       <IdentifierControlForm
         variableType={variableType}
+        esqlVariables={esqlVariables}
         variableName={variableName}
         queryString={queryString}
         setControlState={setControlState}
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
   return (
     <>
-      <Header isInEditMode={isControlInEditMode} />
-      <EuiFlyoutBody
-        css={css`
-          ${styling}
-        `}
-      >
+      <Header isInEditMode={isControlInEditMode} ariaLabelledBy={ariaLabelledBy} />
+      <EuiFlyoutBody css={flyoutStyles}>
         <ControlType
           isDisabled={variableType !== ESQLVariableType.VALUES}
           initialControlFlyoutType={controlFlyoutType}

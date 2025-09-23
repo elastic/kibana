@@ -8,17 +8,23 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { chatClient, kibanaClient, synthtraceEsClients, logger } from '../../services';
+import { chatClient, kibanaClient, synthtraceEsClients, logger, esClient } from '../../services';
 import {
   apmTransactionRateAIAssistant,
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
 
-describe('Alert function', () => {
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/alerts/alerts.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
+describe('Alerts', () => {
   const ruleIds: any[] = [];
 
   before(async () => {
@@ -114,7 +120,7 @@ describe('Alert function', () => {
 
   it('filtered alerts', async () => {
     let conversation = await chatClient.complete({
-      messages: 'Do I have any active threshold alerts related to the AI Assistant?',
+      messages: 'Do I have any active threshold alerts?',
     });
 
     conversation = await chatClient.complete({
@@ -127,8 +133,8 @@ describe('Alert function', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Uses the get_alerts_dataset_info function',
-      'Correctly uses the alerts function without a filter',
-      'Returns two alerts related to "Threshold surpassed in AI Assistant eval"',
+      'Correctly uses the alerts function',
+      'Returns two alerts related to threshold',
       'After the second question, uses alerts function to filtering on service.name my-service to retrieve active alerts for that service. The filter should be `service.name:"my-service"` or `service.name:my-service`.',
       'Summarizes the active alerts for the `my-service` service',
     ]);
@@ -138,11 +144,16 @@ describe('Alert function', () => {
 
   after(async () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
-
+    await esClient.deleteByQuery({
+      index: '.alerts-observability-*',
+      query: {
+        match_all: {},
+      },
+      refresh: true,
+    });
     for (const ruleId of ruleIds) {
       await kibanaClient.callKibana('delete', { pathname: `/api/alerting/rule/${ruleId}` });
     }
-
     await kibanaClient.callKibana(
       'post',
       { pathname: `/api/content_management/rpc/delete` },

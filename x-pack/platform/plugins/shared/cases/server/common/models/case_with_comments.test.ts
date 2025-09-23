@@ -9,7 +9,14 @@ import type { AlertAttachmentAttributes } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
-import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
+import {
+  alertComment,
+  comment,
+  eventComment,
+  mockCaseComments,
+  mockCases,
+  multipleAlert,
+} from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 import {
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
@@ -33,11 +40,13 @@ describe('CaseCommentModel', () => {
   clientArgs.services.attachmentService.bulkCreate.mockResolvedValue({
     saved_objects: mockCaseComments,
   });
+  clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
 
   const alertIdsAttachedToCase = new Set(['test-id-4']);
   clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValue(
     alertIdsAttachedToCase
   );
+  clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
 
   let model: CaseCommentModel;
 
@@ -85,7 +94,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -136,7 +145,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -189,7 +198,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -244,7 +253,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -289,6 +298,64 @@ describe('CaseCommentModel', () => {
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
       expect(args.version).toBeUndefined();
+    });
+
+    it('updates the total number of comments correctly', async () => {
+      // user comment
+      clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[0]);
+
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([
+          [
+            'mock-id-1',
+            {
+              userComments: 2,
+              alerts: 2,
+              events: 0,
+            },
+          ],
+        ])
+      );
+
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: comment,
+        createdDate,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.updatedAttributes.total_comments).toEqual(2);
+      expect(args.updatedAttributes.total_alerts).toEqual(2);
+    });
+
+    it('updates the total number of alerts correctly', async () => {
+      // alert comment
+      clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[3]);
+
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([
+          [
+            'mock-id-1',
+            {
+              userComments: 1,
+              alerts: 3,
+              events: 0,
+            },
+          ],
+        ])
+      );
+
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: alertComment,
+        createdDate,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.updatedAttributes.total_alerts).toEqual(3);
+      expect(args.updatedAttributes.total_comments).toEqual(1);
     });
 
     describe('validation', () => {
@@ -365,6 +432,43 @@ describe('CaseCommentModel', () => {
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
+      expect(attachments[1].attributes.type).toBe('alert');
+      expect(attachments[2].attributes.type).toBe('alert');
+
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
+
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
+      expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
+      expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    it('does not remove events when filtering out duplicate alerts', async () => {
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...eventComment,
+          },
+          {
+            id: 'comment-2',
+            ...alertComment,
+          },
+          {
+            id: 'comment-3',
+            ...multipleAlert,
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
+
+      expect(attachments.length).toBe(3);
+      expect(attachments[0].attributes.type).toBe('event');
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
@@ -611,6 +715,59 @@ describe('CaseCommentModel', () => {
       expect(args.version).toBeUndefined();
     });
 
+    it('updates the total number of comments and alerts correctly', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValue({
+        saved_objects: mockCaseComments,
+      });
+
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([
+          [
+            'mock-id-1',
+            {
+              userComments: 4,
+              alerts: 5,
+              events: 0,
+            },
+          ],
+        ])
+      );
+
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'mock-comment-1',
+            ...comment,
+          },
+          {
+            id: 'mock-comment-2',
+            ...comment,
+          },
+          {
+            id: 'mock-comment-3',
+            ...comment,
+          },
+          {
+            id: 'mock-comment-4',
+            ...alertComment,
+          },
+          {
+            id: 'mock-comment-5',
+            ...alertComment,
+          },
+          {
+            id: 'mock-comment-6',
+            ...alertComment,
+          },
+        ],
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.updatedAttributes.total_alerts).toEqual(5);
+      expect(args.updatedAttributes.total_comments).toEqual(4);
+    });
+
     describe('validation', () => {
       clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
         MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
@@ -669,6 +826,74 @@ describe('CaseCommentModel', () => {
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
       expect(args.version).toBeUndefined();
+    });
+
+    it('does not increase the counters when updating a user comment', async () => {
+      // the case has 1 user comment and 2 alert comments
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([
+          [
+            'mock-id-1',
+            {
+              userComments: 1,
+              alerts: 2,
+              events: 0,
+            },
+          ],
+        ])
+      );
+
+      await model.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          type: AttachmentType.user,
+          comment: 'my updated comment',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        updatedAt: createdDate,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.updatedAttributes.total_alerts).toEqual(2);
+      expect(args.updatedAttributes.total_comments).toEqual(1);
+    });
+
+    it('does not increase the counters when updating an alert', async () => {
+      // the case has 1 user comment and 2 alert comments
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([
+          [
+            'mock-id-1',
+            {
+              userComments: 1,
+              alerts: 2,
+              events: 0,
+            },
+          ],
+        ])
+      );
+
+      await model.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          type: AttachmentType.alert,
+          alertId: ['alert-id-1'],
+          index: ['alert-index-1'],
+          rule: { id: 'rule-id-1', name: 'rule-name-1' },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        updatedAt: createdDate,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.updatedAttributes.total_alerts).toEqual(2);
+      expect(args.updatedAttributes.total_comments).toEqual(1);
     });
   });
 });

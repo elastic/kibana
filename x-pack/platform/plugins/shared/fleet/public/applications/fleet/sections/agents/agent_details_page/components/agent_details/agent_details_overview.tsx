@@ -76,7 +76,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="CPU"
                           />
                           &nbsp;
-                          <EuiIcon type="iInCircle" />
+                          <EuiIcon type="info" />
                         </span>
                       </EuiToolTip>
                     ),
@@ -98,7 +98,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="Memory"
                           />
                           &nbsp;
-                          <EuiIcon type="iInCircle" />
+                          <EuiIcon type="info" />
                         </span>
                       </EuiToolTip>
                     ),
@@ -322,6 +322,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Tags',
               }),
               description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+                defaultMessage: 'FIPS mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.fips === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.fipsModeCompliantText"
+                    defaultMessage="Enabled"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Not enabled"
+                  />
+                ),
             },
           ].map(({ title, description }) => {
             const tooltip =

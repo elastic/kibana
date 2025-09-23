@@ -16,21 +16,22 @@ import {
   EuiStep,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
-import {
+import type {
   SecurityCreateApiKeyResponse,
   SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import './api_key.scss';
 import { useGetApiKeys } from '../../hooks/api/use_api_key';
+import * as Styles from './styles';
 
 function isCreatedResponse(
   value: SecurityCreateApiKeyResponse | SecurityUpdateApiKeyResponse
@@ -42,6 +43,7 @@ function isCreatedResponse(
 }
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
+  const { euiTheme } = useEuiTheme();
   const { http, user } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useGetApiKeys();
@@ -76,7 +78,10 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         />
       )}
       {apiKey ? (
-        <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
+        <EuiPanel
+          css={Styles.apiKeySuccessPanel(euiTheme)}
+          data-test-subj="api-key-create-success-panel"
+        >
           <EuiStep
             css={css`
               .euiStep__content {
@@ -183,7 +188,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               {!!data?.apiKeys && (
                 <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon size="s" type="iInCircle" color="subdued" />
+                    <EuiIcon size="s" type="info" color="subdued" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">

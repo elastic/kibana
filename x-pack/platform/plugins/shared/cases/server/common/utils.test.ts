@@ -150,6 +150,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -206,6 +207,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -266,6 +268,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -332,6 +335,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -393,6 +397,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -406,6 +411,7 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -437,6 +443,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-2",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -450,6 +457,7 @@ describe('common utils', () => {
               "title": "Damaging Data Destruction Detected",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -485,6 +493,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-3",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -498,6 +507,7 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -537,6 +547,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-4",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -550,6 +561,7 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -618,6 +630,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -631,6 +644,7 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -687,6 +701,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -700,6 +715,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -747,6 +763,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -760,6 +777,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -830,6 +848,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -843,6 +862,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -888,6 +908,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -901,6 +922,7 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -951,6 +973,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -964,6 +987,7 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",

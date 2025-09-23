@@ -12,6 +12,7 @@ import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
@@ -111,7 +112,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       const prevValue = prev(params);
 
       // This is what is available via params:
-      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+      // const { dataView, services, isEsqlMode, adHocDataViews, actions } = params;
 
       return {
         appMenuRegistry: (registry) => {
@@ -197,10 +198,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return [
         ...additionalControls,
         ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType, index): RowControlColumn => ({
+          (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
-            headerAriaLabel: `Example Row Control ${iconType}`,
-            renderControl: (Control, rowProps) => {
+            render: (Control, rowProps) => {
               return (
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
@@ -259,6 +259,28 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ...prev(),
       paginationMode: 'singlePage',
     }),
+    /**
+     * The `getRecommendedFields` extension point allows profiles to define fields that should be surfaced
+     * as recommended in the field list sidebar. These fields appear in a dedicated "Recommended Fields" section.
+     * This is useful for highlighting important fields for specific data source types.
+     * @param prev
+     */
+    getRecommendedFields: (prev) => () => {
+      const prevValue = prev ? prev() : {};
+
+      // Define example recommended field names for the example logs data source
+      const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
+        'log.level',
+        'message',
+        'service.name',
+        'host.name',
+      ];
+
+      return {
+        ...prevValue,
+        recommendedFields: exampleRecommendedFieldNames,
+      };
+    },
   },
   resolve: (params) => {
     let indexPattern: string | undefined;

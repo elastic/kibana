@@ -47,7 +47,9 @@ const createRulesClientMock = () => {
     findBackfill: jest.fn(),
     deleteBackfill: jest.fn(),
     getSpaceId: jest.fn(),
+    bulkGetRules: jest.fn(),
     bulkEdit: jest.fn(),
+    bulkEditRuleParamsWithReadAuth: jest.fn(),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),
     bulkDisableRules: jest.fn(),
@@ -61,6 +63,9 @@ const createRulesClientMock = () => {
     fillGapById: jest.fn(),
     getRuleIdsWithGaps: jest.fn(),
     getGapsSummaryByRuleIds: jest.fn(),
+    bulkFillGapsByRuleIds: jest.fn(),
+    getRuleTypesByQuery: jest.fn(),
+    getTemplate: jest.fn(),
   };
   return mocked;
 };

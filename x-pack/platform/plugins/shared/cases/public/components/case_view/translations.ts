@@ -183,6 +183,10 @@ export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
   defaultMessage: 'Alerts',
 });
 
+export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
+  defaultMessage: 'Events',
+});
+
 export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
   defaultMessage: 'Files',
 });
@@ -236,3 +240,7 @@ export const TOTAL_USERS_ASSIGNED = (total: number) =>
     defaultMessage: '{total} assigned',
     values: { total },
   });
+
+export const CASE_SUMMARY_TITLE = i18n.translate('xpack.cases.caseSummary.title', {
+  defaultMessage: 'Case summary',
+});

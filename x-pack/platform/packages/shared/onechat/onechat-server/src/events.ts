@@ -5,88 +5,33 @@
  * 2.0.
  */
 
-import type { OnechatEvent } from '@kbn/onechat-common';
-import type { RunContextStackEntry } from './runner';
+import type { ChatEventType, ToolProgressEventData, ChatEventBase } from '@kbn/onechat-common';
 
-export enum OnechatRunEventType {
-  toolCall = 'toolCall',
-  toolResponse = 'toolResponse',
-}
+export type InternalToolProgressEventData = Omit<ToolProgressEventData, 'tool_call_id'>;
 
-/**
- * Base set of meta for all onechat run events.
- */
-export interface OnechatRunEventMeta {
-  /**
-   * Current runId
-   */
-  runId: string;
-  /**
-   * Execution stack
-   */
-  stack: RunContextStackEntry[];
-}
+export type InternalToolProgressEvent = ChatEventBase<
+  ChatEventType.toolProgress,
+  InternalToolProgressEventData
+>;
 
-/**
- * Public-facing events, as received by the API consumer.
- */
-export type OnechatRunEvent<
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends OnechatRunEventMeta = OnechatRunEventMeta
-> = OnechatEvent<TEventType, TData, TMeta>;
+export type OnechatToolEvent = InternalToolProgressEvent;
 
-/**
- * Internal-facing events, as emitted by tool or agent owners.
- */
-export type InternalRunEvent<
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends Record<string, any> = Record<string, any>
-> = Omit<OnechatEvent<TEventType, TData, TMeta>, 'meta'> & {
-  meta?: TMeta;
-};
 /**
  * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
  */
-export type RunEventHandlerFn = (event: OnechatRunEvent) => void;
+export type ToolEventHandlerFn = (event: OnechatToolEvent) => void;
 
 /**
- * Event emitter function, exposed from tool or agent runnable context.
+ * Progress event reporter, sending a tool progress event based on the provided progress info
  */
-export type RunEventEmitterFn = (event: InternalRunEvent) => void;
+export type ToolProgressEmitterFn = (progressMessage: string) => void;
 
-export interface RunEventEmitter {
-  emit: RunEventEmitterFn;
+/**
+ * Tool event emitter, exposed to tool handlers
+ */
+export interface ToolEventEmitter {
+  /**
+   * Emit a tool progress event based on the provided progress text.
+   */
+  reportProgress: ToolProgressEmitterFn;
 }
-
-// toolCall
-
-export type ToolCallEvent = OnechatRunEvent<OnechatRunEventType.toolCall, ToolCallEventData>;
-
-export interface ToolCallEventData {
-  toolId: string;
-  toolParams: Record<string, unknown>;
-}
-
-export const isToolCallEvent = (event: OnechatEvent<any, any, any>): event is ToolCallEvent => {
-  return event.type === OnechatRunEventType.toolCall;
-};
-
-// toolResponse
-
-export type ToolResponseEvent = OnechatRunEvent<
-  OnechatRunEventType.toolResponse,
-  ToolResponseEventData
->;
-
-export interface ToolResponseEventData {
-  toolId: string;
-  toolResult: unknown;
-}
-
-export const isToolResponseEvent = (
-  event: OnechatEvent<any, any, any>
-): event is ToolResponseEvent => {
-  return event.type === OnechatRunEventType.toolResponse;
-};

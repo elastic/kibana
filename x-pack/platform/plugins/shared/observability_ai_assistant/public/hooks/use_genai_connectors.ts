@@ -12,6 +12,11 @@ import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { useKibana } from './use_kibana';
 import { isInferenceEndpointExists } from './inference_endpoint_exists';
+import { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from '../utils/get_elastic_managed_llm_connector';
+import {
+  type InferenceConnector,
+  getInferenceConnectorInfo,
+} from '../../common/utils/get_inference_connector';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];
@@ -20,6 +25,7 @@ export interface UseGenAIConnectorsResult {
   error?: Error;
   selectConnector: (id: string) => void;
   reloadConnectors: () => void;
+  getConnector: (id: string) => InferenceConnector | undefined;
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -57,8 +63,8 @@ export function useGenAIConnectorsWithoutContext(
         return results
           .reduce<Promise<FindActionResult[]>>(async (result, connector) => {
             if (
-              connector.actionTypeId !== '.inference' ||
-              (connector.actionTypeId === '.inference' &&
+              connector.actionTypeId !== INFERENCE_CONNECTOR_ACTION_TYPE_ID ||
+              (connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
                 (await isInferenceEndpointExists(
                   http,
                   (connector as FindActionResult)?.config?.inferenceId
@@ -98,6 +104,11 @@ export function useGenAIConnectorsWithoutContext(
     };
   }, [assistant, controller, fetchConnectors, setSelectedConnector]);
 
+  const getConnector = (id: string) => {
+    const connector = connectors?.find((_connector) => _connector.id === id);
+    return getInferenceConnectorInfo(connector);
+  };
+
   return {
     connectors,
     loading,
@@ -109,5 +120,6 @@ export function useGenAIConnectorsWithoutContext(
     reloadConnectors: () => {
       fetchConnectors();
     },
+    getConnector,
   };
 }

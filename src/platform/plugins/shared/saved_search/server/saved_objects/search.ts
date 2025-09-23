@@ -10,6 +10,7 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { extractTabsBackfillFn } from '../../common/service/extract_tabs';
 import { getAllMigrations } from './search_migrations';
 import { SavedSearchTypeDisplayName } from '../../common/constants';
 import {
@@ -19,6 +20,9 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_3,
   SCHEMA_SEARCH_MODEL_VERSION_4,
   SCHEMA_SEARCH_MODEL_VERSION_5,
+  SCHEMA_SEARCH_MODEL_VERSION_6,
+  SCHEMA_SEARCH_MODEL_VERSION_7,
+  SCHEMA_SEARCH_MODEL_VERSION_8,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -79,6 +83,32 @@ export function getSavedSearchObjectType(
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_5.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_5,
+        },
+      },
+      6: {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: extractTabsBackfillFn,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_6.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_6,
+        },
+      },
+      7: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_7.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_7,
+        },
+      },
+      8: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_8,
         },
       },
     },

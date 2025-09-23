@@ -10,9 +10,10 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { css } from '@emotion/react';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   AGENT_NAME_FIELD,
   DATASTREAM_TYPE_FIELD,
@@ -21,19 +22,20 @@ import {
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRANSACTION_DURATION_FIELD,
-  DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
+  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/discover-utils';
-import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
+import type { TraceDocument } from '@kbn/discover-utils/src';
+import { formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
-import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldBadgeWithActionsProps } from '../cell_actions_popover';
+import { FieldBadgeWithActions } from '../cell_actions_popover';
 import { TransactionNameIcon } from './icons/transaction_name_icon';
 
 type FieldKey = keyof DataTableRecord['flattened'];
@@ -83,6 +85,7 @@ export interface ResourceFieldDescriptor {
   Icon?: () => JSX.Element;
   name: string;
   value: string;
+  property?: DataViewField;
   rawValue: unknown;
 }
 
@@ -92,10 +95,6 @@ const getResourceBadgeComponent = (
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
   switch (name) {
-    case SERVICE_NAME_FIELD:
-      return (props: FieldBadgeWithActionsProps) => (
-        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-      );
     case EVENT_OUTCOME_FIELD:
       return EventOutcomeBadge;
     default:
@@ -111,9 +110,12 @@ const getResourceBadgeIcon = (
     case SERVICE_NAME_FIELD:
       return () => {
         const { euiTheme } = useEuiTheme();
+        const agentName = (fields[OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE] ||
+          fields[AGENT_NAME_FIELD]) as AgentName;
+
         return (
           <AgentIcon
-            agentName={fields[AGENT_NAME_FIELD] as AgentName}
+            agentName={agentName}
             size="m"
             css={css`
               margin-right: ${euiTheme.size.xs};
@@ -158,12 +160,13 @@ export const createResourceFields = ({
   const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => {
+    const property = dataView.getFieldByName(name);
     const value = formatFieldValue(
       resourceDoc[name],
       row.raw,
       fieldFormats,
       dataView,
-      dataView.getFieldByName(name),
+      property,
       'html'
     );
 
@@ -171,6 +174,7 @@ export const createResourceFields = ({
       name,
       rawValue: resourceDoc[name],
       value,
+      property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
     };

@@ -15,12 +15,12 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -390,6 +390,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               refetch={refetch}
               inspect={inspect}
               deleteQuery={deleteQuery}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
@@ -434,7 +436,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
+              <EuiIconTip
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
@@ -442,9 +444,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                     values={{ hostName }}
                   />
                 }
-              >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-              </EuiToolTip>
+                type="info"
+                color="subdued"
+                anchorClassName="eui-alignTop"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />

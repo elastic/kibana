@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -28,11 +29,13 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
+  color?: EuiButtonColor;
   showIcon?: boolean;
   iconType?: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
   onClick?: () => void;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 export const TryInConsoleButton = ({
@@ -41,11 +44,13 @@ export const TryInConsoleButton = ({
   consolePlugin,
   sharePlugin,
   content = RUN_IN_CONSOLE,
+  color,
   showIcon = true,
   iconType = 'console',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
+  disabled = false,
   'data-test-subj': dataTestSubj,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
@@ -102,6 +107,7 @@ export const TryInConsoleButton = ({
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
+    disabled,
   };
   const btnIconType = showIcon ? iconType : undefined;
 
@@ -114,7 +120,7 @@ export const TryInConsoleButton = ({
       return <EuiLink {...commonProps}>{content}</EuiLink>;
     case 'button':
       return (
-        <EuiButton color="primary" iconType={btnIconType} size="s" {...commonProps}>
+        <EuiButton color={color} iconType={btnIconType} size="s" {...commonProps}>
           {content}
         </EuiButton>
       );
@@ -127,7 +133,7 @@ export const TryInConsoleButton = ({
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={btnIconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={btnIconType} color={color} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );

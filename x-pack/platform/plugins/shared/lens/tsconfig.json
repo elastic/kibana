@@ -59,7 +59,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/monaco",
     "@kbn/language-documentation",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/safer-lodash-set",
@@ -123,6 +122,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-http-server",
+    "@kbn/presentation-util",
+    "@kbn/content-management-table-list-view-common",
   ],
   "exclude": ["target/**/*"]
 }

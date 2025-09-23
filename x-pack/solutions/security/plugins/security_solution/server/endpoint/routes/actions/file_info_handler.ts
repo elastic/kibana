@@ -7,7 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { ensureUserHasAuthzToFilesForAction } from './utils';
-import { stringify } from '../../utils/stringify';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../services';
@@ -34,12 +33,17 @@ export const getActionFileInfoRouteHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointContext.logFactory.get('actionFileInfo');
+  const logger = endpointContext.logFactory.get('actionFileInfoRoute');
 
   return async (context, req, res) => {
-    logger.debug(() => `Get response action file info:\n${stringify(req.params)}`);
-
+    const spaceId = (await context.securitySolution).getSpaceId();
     const { action_id: requestActionId, file_id: fileId } = req.params;
+
+    logger.debug(
+      () =>
+        `Retrieving info for response action ${requestActionId} file [${fileId}] in space [${spaceId}]`
+    );
+
     const coreContext = await context.core;
 
     try {
@@ -48,7 +52,6 @@ export const getActionFileInfoRouteHandler = (
       const user = coreContext.security.authc.getCurrentUser();
       const casesClient = await endpointContext.service.getCasesClient(req);
       const connectorActions = (await context.actions).getActionsClient();
-      const spaceId = (await context.securitySolution).getSpaceId();
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
         esClient,
         casesClient,

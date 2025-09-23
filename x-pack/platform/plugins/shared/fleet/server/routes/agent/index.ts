@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { AGENT_API_ROUTES } from '../../constants';
 import {
@@ -17,6 +18,7 @@ import {
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   MigrateSingleAgentRequestSchema,
+  BulkMigrateAgentsRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
@@ -36,11 +38,14 @@ import {
   DeleteAgentUploadFileRequestSchema,
   GetTagsResponseSchema,
   MigrateSingleAgentResponseSchema,
+  BulkMigrateAgentsResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 
 import {
+  ChangeAgentPrivilegeLevelRequestSchema,
+  ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
   DeleteAgentUploadFileResponseSchema,
   GetActionStatusResponseSchema,
@@ -90,9 +95,11 @@ import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
-import { migrateSingleAgentHandler } from './migrate_handlers';
+import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
+import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
   // Get one
   router.versioned
     .get({
@@ -127,37 +134,74 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Migrate
-  router.versioned
-    .post({
-      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+  if (experimentalFeatures.enableAgentMigrations) {
+    // Single agent migration
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
-      },
-      summary: `Migrate a single agent`,
-      description: `Migrate a single agent to another cluster.`,
-      options: {
-        tags: ['oas-tag:Elastic Agents'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: MigrateSingleAgentRequestSchema,
-          response: {
-            200: {
-              body: () => MigrateSingleAgentResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
+        summary: `Migrate a single agent`,
+        description: `Migrate a single agent to another cluster.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: MigrateSingleAgentRequestSchema,
+            response: {
+              200: {
+                body: () => MigrateSingleAgentResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
             },
           },
         },
-      },
-      migrateSingleAgentHandler
-    );
+
+        migrateSingleAgentHandler
+      );
+
+    // Bulk migrate multiple agents
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Migrate multiple agents`,
+        description: `Bulk migrate agents to another cluster.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: BulkMigrateAgentsRequestSchema,
+            response: {
+              200: {
+                body: () => BulkMigrateAgentsResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        bulkMigrateAgentsHandler
+      );
+  }
   // Update
   router.versioned
     .put({
@@ -167,7 +211,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
       },
-      summary: `Update an agent`,
+      summary: `Update an agent by ID`,
       description: `Update an agent by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
@@ -917,4 +961,44 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentStatusRuntimeFieldHandler
     );
+
+  // Change agent privilege level
+  if (experimentalFeatures.enableAgentPrivilegeLevelChange) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Change agent privilege level`,
+        description: `Change the privilege level of a single agent to unprivileged.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+          availability: {
+            since: '9.2.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: ChangeAgentPrivilegeLevelRequestSchema,
+            response: {
+              200: {
+                body: () => ChangeAgentPrivilegeLevelResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+
+        changeAgentPrivilegeLevelHandler
+      );
+  }
 };

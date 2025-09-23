@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -30,6 +27,8 @@ import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import { createSavedObjectsClientFactoryMock } from '../../saved_objects/saved_objects_client_factory.mocks';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -67,7 +66,8 @@ export enum ManifestManagerMockType {
   NormalFlow,
 }
 
-export interface ManifestManagerMockOptions {
+export interface ManifestManagerMockOptions
+  extends Pick<ManifestManagerContext, 'savedObjectsClientFactory'> {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -79,10 +79,17 @@ export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>,
   customProductFeatures?: ProductFeatureKeys
 ): ManifestManagerMockOptions => {
-  const savedObjectMock = savedObjectsClientMock.create();
+  const savedObjectsClientFactory = createSavedObjectsClientFactoryMock().service;
+  const savedObjectMock = savedObjectsClientFactory.createInternalScopedSoClient() as ReturnType<
+    typeof savedObjectsClientMock.create
+  >;
+
+  (savedObjectsClientFactory.createInternalScopedSoClient as jest.Mock).mockClear();
+
   return {
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
+    savedObjectsClientFactory,
     savedObjectsClient: savedObjectMock,
     productFeaturesService: createProductFeaturesServiceMock(customProductFeatures),
     ...opts,
@@ -103,6 +110,7 @@ export const buildManifestManagerContextMock = (
       .features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    licenseService: createLicenseServiceMock(),
   };
 };
 

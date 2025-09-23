@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
@@ -19,15 +18,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { TranslationTabHeader } from './header';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
-} from '../../../../utils/translation_results';
+} from '../../../../../common/utils';
 import { TranslationCallOut } from './callout';
 import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
@@ -52,70 +50,64 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiAccordion
-          id="translationQueryItem"
-          buttonContent={<TranslationTabHeader />}
-          initialIsOpen={true}
-        >
-          <EuiFlexItem>
-            <EuiSpacer size="s" />
-            <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
-              <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.securitySolution.detectionEngine.translationDetails.translationTab.statusTitle"
-                          defaultMessage="Translation status"
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      data-test-subj="translationResultBadge"
-                      color={convertTranslationResultIntoColor(migrationRule.translation_result)}
-                    >
-                      {isInstalled
-                        ? i18n.INSTALLED_LABEL
-                        : convertTranslationResultIntoText(migrationRule.translation_result)}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner grow>
-                <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-                  <EuiFlexItem grow={1}>
-                    <OriginalRuleQuery migrationRule={migrationRule} />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={0}
-                    css={css`
-                      align-self: stretch;
-                      border-right: ${euiTheme.border.thin};
-                    `}
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+            <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.securitySolution.detectionEngine.translationDetails.translationTab.statusTitle"
+                        defaultMessage="Translation status"
+                      />
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    data-test-subj="translationResultBadge"
+                    color={convertTranslationResultIntoColor(migrationRule.translation_result)}
+                  >
+                    {isInstalled
+                      ? i18n.INSTALLED_LABEL
+                      : convertTranslationResultIntoText(migrationRule.translation_result)}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner grow>
+              <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+                <EuiFlexItem grow={1}>
+                  <OriginalRuleQuery migrationRule={migrationRule} />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={0}
+                  css={css`
+                    align-self: stretch;
+                    border-right: ${euiTheme.border.thin};
+                  `}
+                />
+                <EuiFlexItem grow={1}>
+                  <TranslatedRuleQuery
+                    migrationRule={migrationRule}
+                    matchedPrebuiltRule={matchedPrebuiltRule}
+                    onTranslationUpdate={onTranslationUpdate}
                   />
-                  <EuiFlexItem grow={1}>
-                    <TranslatedRuleQuery
-                      migrationRule={migrationRule}
-                      matchedPrebuiltRule={matchedPrebuiltRule}
-                      onTranslationUpdate={onTranslationUpdate}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
-          </EuiFlexItem>
-        </EuiAccordion>
-        {migrationRule.translation_result === RuleTranslationResult.FULL &&
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiFlexItem>
+        {migrationRule.translation_result === MigrationTranslationResult.FULL &&
           !migrationRule.elastic_rule?.id && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
                 color={'primary'}
                 title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
-                iconType={'iInCircle'}
+                iconType={'info'}
                 size={'s'}
               >
                 {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}

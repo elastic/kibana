@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
@@ -73,14 +75,16 @@ import {
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import {
+import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from './operations';
+import {
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
-  TermsIndexPatternColumn,
 } from './operations';
 import {
   copyColumn,
@@ -88,7 +92,11 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import type {
+  FormBasedPrivateState,
+  FormBasedPersistedState,
+  DataViewDragDropOperation,
+} from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
@@ -96,9 +104,10 @@ import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { isColumnOfType } from './operations/definitions/helpers';
+import type { DateRange } from '../../../common/types';
+import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';
@@ -163,7 +172,21 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+
+  const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error(
+      i18n.translate('xpack.lens.indexPattern.operationNotFoundErrorMessage', {
+        defaultMessage: 'Operation {operationType} not found',
+        values: { operationType },
+      })
+    );
+  }
+
+  const scale = operationDefinition.scale
+    ? operationDefinition.scale(column, dataView as IndexPattern)
+    : 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -226,10 +249,11 @@ export function getFormBasedDatasource({
 
     initialize(
       persistedState?: FormBasedPersistedState,
-      references?: SavedObjectReference[],
+      references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>
+      indexPatterns?: Record<string, IndexPattern>,
+      dateRange?: DateRange
     ) {
       return loadInitialState({
         persistedState,
@@ -239,11 +263,14 @@ export function getFormBasedDatasource({
         initialContext,
         indexPatternRefs,
         indexPatterns,
+        dateRange,
       });
     },
 
     getPersistableState(state: FormBasedPrivateState) {
-      return extractReferences(state);
+      const { references, state: persistableState } = extractReferences(state);
+      const newPersistableState = cleanupFormulaColumns(persistableState);
+      return { references, state: newPersistableState };
     },
 
     insertLayer(
@@ -854,9 +881,9 @@ export function getFormBasedDatasource({
     },
     isEqual: (
       persistableState1: FormBasedPersistedState,
-      references1: SavedObjectReference[],
+      references1: Reference[],
       persistableState2: FormBasedPersistedState,
-      references2: SavedObjectReference[]
+      references2: Reference[]
     ) =>
       isEqual(
         injectReferences(persistableState1, references1),

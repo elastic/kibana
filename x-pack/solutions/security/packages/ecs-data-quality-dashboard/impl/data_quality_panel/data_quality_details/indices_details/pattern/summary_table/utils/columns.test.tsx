@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CustomItemAction,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
@@ -25,7 +25,7 @@ import {
   getSummaryTableSizeInBytesColumn,
 } from './columns';
 import { VIEW_HISTORY } from '../translations';
-import { IndexSummaryTableItem } from '../../../../../types';
+import type { IndexSummaryTableItem } from '../../../../../types';
 import { CHECK_NOW } from '../../translations';
 
 const defaultBytesFormat = '0,0.[0]b';
@@ -202,62 +202,6 @@ describe('helpers', () => {
         await userEvent.click(button);
 
         expect(onViewHistoryAction).toBeCalledWith(indexSummaryTableItem.indexName);
-      });
-
-      test('adds data-tour-element attribute to the first view history button', () => {
-        const pattern = 'auditbeat-*';
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          isILMAvailable,
-          pattern,
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
-          firstIndexName: indexName,
-          dangerColor: testColor,
-        });
-
-        const expandActionRender = (
-          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
-        ).render;
-
-        render(
-          <TestExternalProviders>
-            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
-          </TestExternalProviders>
-        );
-
-        const button = screen.getByLabelText(VIEW_HISTORY);
-        expect(button).toHaveAttribute('data-tour-element', pattern);
-      });
-
-      test('doesn`t add data-tour-element attribute to non-first view history buttons', () => {
-        const pattern = 'auditbeat-*';
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          isILMAvailable,
-          pattern,
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
-          firstIndexName: 'another-index',
-          dangerColor: testColor,
-        });
-
-        const expandActionRender = (
-          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
-        ).render;
-
-        render(
-          <TestExternalProviders>
-            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
-          </TestExternalProviders>
-        );
-
-        const button = screen.getByLabelText(VIEW_HISTORY);
-        expect(button).not.toHaveAttribute('data-tour-element');
       });
     });
 

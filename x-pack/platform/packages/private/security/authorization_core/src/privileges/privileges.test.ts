@@ -565,6 +565,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -574,6 +575,7 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
       ],
       ...[
         'create',
@@ -741,6 +743,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -750,6 +753,7 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
       ],
       ...[
         'create',

@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingChart } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { DashboardPanelState } from '../../../common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
+import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: string;
   index?: number;
-  type: DashboardPanelState['type'];
+  type: string;
   key: string;
   isRenderable?: boolean;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -36,7 +41,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
-      dashboardContainerRef,
       id,
       index,
       type,
@@ -57,13 +61,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId,
       useMargins,
       viewMode,
+      dashboardContainerRef,
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardInternalApi.dashboardContainerRef$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -101,19 +107,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
+    const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-
-    const focusStyles = blurPanel
-      ? css`
-          pointer-events: none;
-          opacity: 0.25;
-        `
-      : css`
-          scroll-margin-top: ${dashboardContainerTopOffset +
-          globalNavTopOffset +
-          DASHBOARD_MARGIN_SIZE}px;
-        `;
+    const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
@@ -139,9 +135,23 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       );
     }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
 
+    const { euiTheme } = useEuiTheme();
+    const hoverActionsHeight = euiTheme.base * 2;
+
+    const focusStyles = blurPanel
+      ? styles.focusPanelBlur
+      : css({
+          scrollMarginTop: `${
+            dashboardContainerTopOffset +
+            globalNavTopOffset +
+            DASHBOARD_MARGIN_SIZE +
+            hoverActionsHeight
+          }px`,
+        });
+
     return (
       <div
-        css={focusStyles}
+        css={[focusStyles, styles.item]}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
@@ -196,20 +206,36 @@ export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, pane
 
 export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
   const dashboardApi = useDashboardApi();
-  const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.focusedPanelId$,
-    dashboardApi.viewMode$
-  );
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
 
   const deferBelowFoldEnabled = useMemo(
     () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
     []
   );
 
-  const isEnabled =
-    viewMode !== 'print' &&
-    deferBelowFoldEnabled &&
-    (!focusedPanelId || focusedPanelId === props.id);
+  const isEnabled = viewMode !== 'print' && deferBelowFoldEnabled;
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });
+
+const dashboardGridItemStyles = {
+  item: (context: UseEuiTheme) =>
+    css([
+      {
+        height: '100%',
+        // Remove padding in fullscreen mode
+        '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
+        '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
+      },
+      getHighlightStyles(context),
+      printViewportVisStyles(context),
+    ]),
+  focusPanelBlur: css({
+    pointerEvents: 'none',
+    opacity: '0.25',
+  }),
+};

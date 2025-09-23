@@ -24,6 +24,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
+  esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
@@ -251,8 +252,11 @@ describe('getAlertSummary()', () => {
                     },
                   },
                   Object {
-                    "term": Object {
-                      "kibana.space_ids": "test_default_space_id",
+                    "terms": Object {
+                      "kibana.space_ids": Array [
+                        "test_default_space_id",
+                        "*",
+                      ],
                     },
                   },
                   Object {

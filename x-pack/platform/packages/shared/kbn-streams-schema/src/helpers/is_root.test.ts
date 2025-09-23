@@ -14,7 +14,8 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
+        settings: {},
         wired: { fields: {}, routing: [] },
       },
     };
@@ -27,23 +28,25 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
+        settings: {},
         wired: { fields: {}, routing: [] },
       },
     };
     expect(isRootStreamDefinition(nonRootWired)).toBe(false);
   });
 
-  it('returns false for an unwired stream definition even with a root name', () => {
-    const unwired = {
+  it('returns false for a classic stream definition even with a root name', () => {
+    const classic = {
       name: 'logs-test-default',
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
-        unwired: {},
+        processing: { steps: [] },
+        settings: {},
+        classic: {},
       },
     };
-    expect(isRootStreamDefinition(unwired)).toBe(false);
+    expect(isRootStreamDefinition(classic)).toBe(false);
   });
 });

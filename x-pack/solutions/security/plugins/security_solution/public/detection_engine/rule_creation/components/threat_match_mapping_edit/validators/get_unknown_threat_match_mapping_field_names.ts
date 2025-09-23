@@ -6,10 +6,10 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
-import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 interface GetUnknownThreatMatchMappingFieldNamesParams {
-  entries: ThreatMapEntries[];
+  entries: ThreatMapping;
   indexPatterns: DataViewBase;
   threatIndexPatterns: DataViewBase;
 }

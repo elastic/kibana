@@ -40,8 +40,13 @@ export interface PackageSpecManifest {
     fields?: Array<{
       name: string;
     }>;
+    datasets?: DiscoveryDataset[];
   };
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];
@@ -55,6 +60,7 @@ export type PackageSpecCategory =
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'
+  | 'asset_inventory'
   | 'auditd'
   | 'authentication'
   | 'aws'
@@ -96,6 +102,7 @@ export type PackageSpecCategory =
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'

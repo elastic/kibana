@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  MouseEvent,
-  KeyboardEvent,
-  useCallback,
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -30,6 +23,8 @@ import {
   keys,
   useGeneratedHtmlId,
   EuiProgress,
+  EuiTextTruncate,
+  EuiIcon,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -38,10 +33,12 @@ import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../
 import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview } from '../tab_preview';
+import { useTabLabelWidth } from './use_tab_label_width';
 
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  isUnsaved?: boolean;
   isDragging?: boolean;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
@@ -56,10 +53,19 @@ export interface TabProps {
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
 }
 
+const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
+  defaultMessage: 'Close tab',
+});
+
+const unsavedChangesIndicatorTitle = i18n.translate('unifiedTabs.unsavedChangesTabIndicatorTitle', {
+  defaultMessage: 'Unsaved changes',
+});
+
 export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    isUnsaved,
     isDragging,
     dragHandleProps,
     tabContentId,
@@ -79,10 +85,6 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
   const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
-
-  const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
-    defaultMessage: 'Close session',
-  });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
@@ -138,7 +140,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     if (!isSelected) {
       await onSelect(item);
     }
-    onDoubleClick();
+    // Wait for the selection to propagate before enabling edit mode
+    setTimeout(() => onDoubleClick(), 0);
   }, [item, isSelected, onDoubleClick, onSelect]);
 
   const onKeyDownEvent = useCallback(
@@ -166,6 +169,11 @@ export const Tab: React.FC<TabProps> = (props) => {
     },
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
+
+  const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
+    item,
+    tabsSizeConfig,
+  });
 
   useEffect(() => {
     if (isInlineEditActive && !isSelected) {
@@ -204,9 +212,31 @@ export const Tab: React.FC<TabProps> = (props) => {
               {previewData.status === TabStatus.RUNNING && (
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
-              <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                {item.label}
-              </EuiText>
+              <EuiFlexGroup
+                ref={tabLabelRef}
+                gutterSize="xs"
+                alignItems="center"
+                justifyContent="spaceBetween"
+                wrap={false}
+                responsive={false}
+                style={{ width: tabLabelWidth }}
+              >
+                <EuiText
+                  id={tabLabelId}
+                  color="inherit"
+                  size="s"
+                  css={getTabLabelCss()}
+                  className="unifiedTabs__tabLabelText"
+                >
+                  <EuiTextTruncate
+                    text={item.label}
+                    width={tabLabelTextWidth}
+                    truncation="middle"
+                    title=""
+                  />
+                </EuiText>
+                {isUnsaved && <EuiIcon type="dot" title={unsavedChangesIndicatorTitle} />}
+              </EuiFlexGroup>
             </div>
           )}
         </div>
@@ -276,14 +306,10 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    display: inline-block;
     border-right: ${euiTheme.border.thin};
     border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
-    height: ${euiTheme.size.xl};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
-
-    color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
 
     .unifiedTabs__tabActions {
       position: absolute;
@@ -291,7 +317,14 @@ function getTabContainerCss(
       right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
-      pointer-events: auto;
+    }
+
+    .unifiedTabs__tabLabelText {
+      color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
+    }
+
+    &:hover .unifiedTabs__tabLabelText {
+      color: ${euiTheme.colors.text};
     }
 
     &:hover,
@@ -301,24 +334,20 @@ function getTabContainerCss(
       }
 
       .unifiedTabs__tabLabel {
-        width: calc(100% - ${euiTheme.size.l} * 2);
+        width: calc(100% - ${euiTheme.size.l} * 2 - ${euiTheme.size.xs});
+        mask-image: linear-gradient(
+          to right,
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgba(255, 0, 0, 0.1) 100%
+        );
       }
     }
-
-    ${!isSelected
-      ? `
-          &:hover {
-            color: ${euiTheme.colors.text};
-        }`
-      : ''}
   `;
 }
 
 function getTabContentCss(euiTheme: EuiThemeComputed) {
   return css`
-    position: relative;
     display: inline-flex;
-    flex-direction: row;
     align-items: center;
     width: 100%;
     height: ${euiTheme.size.xl};
@@ -328,28 +357,12 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
   return css`
-    width: 100%;
-    height: ${euiTheme.size.l};
-    padding-top: ${euiTheme.size.xxs};
     padding-inline: ${euiTheme.size.xs};
-    text-align: left;
-    color: inherit;
-    border: none;
-    border-radius: 0;
-    background: transparent;
   `;
 }
 
-function getTabLabelCss(euiTheme: EuiThemeComputed) {
+function getTabLabelCss() {
   return css`
-    padding-right: ${euiTheme.size.s};
-    white-space: nowrap;
-    mask-image: linear-gradient(
-      to right,
-      rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
-      rgba(255, 0, 0, 0.1) 100%
-    );
-    transform: translateZ(0);
     overflow: hidden;
   `;
 }

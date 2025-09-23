@@ -147,9 +147,25 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
-          "StreamsFeatureRenderDeps",
-          ") => JSX.Element) | undefined; } & React.RefAttributes<",
+          ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; renderFlyoutStreamProcessingLink?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; indexes: ",
+          "TraceIndexes",
+          "; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -207,24 +223,24 @@
       },
       {
         "parentPluginId": "unifiedDocViewer",
-        "id": "def-public.UnifiedDocViewerObservabilityTracesSpanOverview",
+        "id": "def-public.UnifiedDocViewerObservabilityAttributesOverview",
         "type": "Function",
         "tags": [],
-        "label": "UnifiedDocViewerObservabilityTracesSpanOverview",
+        "label": "UnifiedDocViewerObservabilityAttributesOverview",
         "description": [],
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { transactionIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & React.RefAttributes<{}>>"
         ],
-        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerObservabilityTracesSpanOverview.$1",
+            "id": "def-public.UnifiedDocViewerObservabilityAttributesOverview.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -241,24 +257,26 @@
       },
       {
         "parentPluginId": "unifiedDocViewer",
-        "id": "def-public.UnifiedDocViewerObservabilityTracesTransactionOverview",
+        "id": "def-public.UnifiedDocViewerObservabilityTracesOverview",
         "type": "Function",
         "tags": [],
-        "label": "UnifiedDocViewerObservabilityTracesTransactionOverview",
+        "label": "UnifiedDocViewerObservabilityTracesOverview",
         "description": [],
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & { indexes: ",
+          "TraceIndexes",
+          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
-        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerObservabilityTracesTransactionOverview.$1",
+            "id": "def-public.UnifiedDocViewerObservabilityTracesOverview.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -288,9 +306,9 @@
           ") => [",
           {
             "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-common.ElasticRequestState",
+            "section": "def-public.ElasticRequestState",
             "text": "ElasticRequestState"
           },
           ", ",
@@ -394,9 +412,25 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
-          "StreamsFeatureRenderDeps",
-          ") => JSX.Element) | undefined; }"
+          ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; renderFlyoutStreamProcessingLink?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; indexes: ",
+          "TraceIndexes",
+          "; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "deprecated": false,
@@ -426,9 +460,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],
@@ -461,9 +495,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],

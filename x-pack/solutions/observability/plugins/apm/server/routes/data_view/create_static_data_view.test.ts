@@ -111,7 +111,7 @@ describe('createStaticDataView', () => {
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
-    const expectedDataViewTitle = 'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
+    const expectedDataViewTitle = 'apm-*-error-*,apm-*-metrics-*,apm-*-span-*,apm-*-transaction-*';
 
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
@@ -137,7 +137,7 @@ describe('createStaticDataView', () => {
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+      'apm-*-error-*,apm-*-metrics-*,apm-*-span-*,apm-*-transaction-*'
     );
 
     await createOrUpdateStaticDataView({

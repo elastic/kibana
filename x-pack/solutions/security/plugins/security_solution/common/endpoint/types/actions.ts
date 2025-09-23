@@ -9,10 +9,11 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
-  UploadActionApiRequestBody,
   ActionStatusRequestSchema,
   KillProcessRequestBody,
+  RunScriptActionRequestBody,
   SuspendProcessRequestBody,
+  UploadActionApiRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -102,6 +103,10 @@ export interface ResponseActionRunScriptOutputContent {
   code: string;
 }
 
+export interface ResponseActionCancelOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -146,6 +151,8 @@ export interface LogsEndpointAction<
    *        initializing the Response Actions Client to process pending actions.
    */
   originSpaceId: string;
+  /** Tags assigned to the action */
+  tags: string[];
   agent: {
     id: string | string[];
     /**
@@ -250,20 +257,11 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-// Currently reflecting CrowdStrike's RunScript parameters
-interface ActionsRunScriptParametersBase {
-  Raw?: string;
-  HostPath?: string;
-  CloudFile?: string;
-  CommandLine?: string;
-  Timeout?: number;
+export interface ResponseActionCancelParameters {
+  id: string;
 }
 
-// Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
+export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -272,7 +270,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -284,7 +283,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -623,6 +623,33 @@ export interface ResponseActionUploadOutputContent {
   disk_free_space: number;
 }
 
-type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
-  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
-  : never;
+/**
+ * A Response Action script
+ */
+export interface ResponseActionScript<TMeta extends {} = {}> {
+  /**
+   * Unique identifier for the script
+   */
+  id: string;
+  /**
+   * Display name of the script
+   */
+  name: string;
+  /**
+   * Description of what the script does
+   */
+  description: string;
+
+  /**
+   * Additional meta info. about the script. Can be used to store EDR specific
+   * information about the script for use in the UI
+   */
+  meta?: TMeta;
+}
+
+/**
+ * API response with list of Response Actions scripts available on the system
+ */
+export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
+  data: ResponseActionScript<TMeta>[];
+}

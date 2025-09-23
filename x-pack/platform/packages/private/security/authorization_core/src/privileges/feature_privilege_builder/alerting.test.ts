@@ -82,6 +82,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -91,6 +92,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
           ]
         `);
       });
@@ -170,6 +172,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -179,6 +182,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/alert/get",
             "alerting:alert-type/my-consumer/alert/find",
             "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
@@ -220,6 +224,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -229,6 +234,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -329,6 +335,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -338,6 +345,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -399,6 +407,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -408,6 +417,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -429,6 +439,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/deleteBackfill",
             "alerting:alert-type/my-consumer/rule/fillGaps",
             "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkGet",
             "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
             "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
@@ -438,6 +449,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/getBackfill",
             "alerting:readonly-alert-type/my-consumer/rule/findBackfill",
             "alerting:readonly-alert-type/my-consumer/rule/findGaps",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
           ]
         `);
       });
@@ -524,6 +536,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -533,6 +546,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/getBackfill",
             "alerting:alert-type/my-consumer/rule/findBackfill",
             "alerting:alert-type/my-consumer/rule/findGaps",
+            "alerting:alert-type/my-consumer/rule/bulkEditParams",
             "alerting:alert-type/my-consumer/rule/create",
             "alerting:alert-type/my-consumer/rule/delete",
             "alerting:alert-type/my-consumer/rule/update",
@@ -554,6 +568,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/deleteBackfill",
             "alerting:alert-type/my-consumer/rule/fillGaps",
             "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkGet",
             "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
             "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
@@ -563,6 +578,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-consumer/rule/getBackfill",
             "alerting:readonly-alert-type/my-consumer/rule/findBackfill",
             "alerting:readonly-alert-type/my-consumer/rule/findGaps",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkEditParams",
             "alerting:another-alert-type/my-consumer/alert/get",
             "alerting:another-alert-type/my-consumer/alert/find",
             "alerting:another-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
@@ -643,6 +659,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type-1/my-consumer-1/rule/get",
+            "alerting:alert-type-1/my-consumer-1/rule/bulkGet",
             "alerting:alert-type-1/my-consumer-1/rule/getRuleState",
             "alerting:alert-type-1/my-consumer-1/rule/getAlertSummary",
             "alerting:alert-type-1/my-consumer-1/rule/getExecutionLog",
@@ -652,6 +669,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-1/rule/getBackfill",
             "alerting:alert-type-1/my-consumer-1/rule/findBackfill",
             "alerting:alert-type-1/my-consumer-1/rule/findGaps",
+            "alerting:alert-type-1/my-consumer-1/rule/bulkEditParams",
             "alerting:alert-type-1/my-consumer-1/rule/create",
             "alerting:alert-type-1/my-consumer-1/rule/delete",
             "alerting:alert-type-1/my-consumer-1/rule/update",
@@ -673,6 +691,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-1/rule/deleteBackfill",
             "alerting:alert-type-1/my-consumer-1/rule/fillGaps",
             "alerting:alert-type-1/my-consumer-2/rule/get",
+            "alerting:alert-type-1/my-consumer-2/rule/bulkGet",
             "alerting:alert-type-1/my-consumer-2/rule/getRuleState",
             "alerting:alert-type-1/my-consumer-2/rule/getAlertSummary",
             "alerting:alert-type-1/my-consumer-2/rule/getExecutionLog",
@@ -682,6 +701,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-2/rule/getBackfill",
             "alerting:alert-type-1/my-consumer-2/rule/findBackfill",
             "alerting:alert-type-1/my-consumer-2/rule/findGaps",
+            "alerting:alert-type-1/my-consumer-2/rule/bulkEditParams",
             "alerting:alert-type-1/my-consumer-2/rule/create",
             "alerting:alert-type-1/my-consumer-2/rule/delete",
             "alerting:alert-type-1/my-consumer-2/rule/update",
@@ -703,6 +723,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-2/rule/deleteBackfill",
             "alerting:alert-type-1/my-consumer-2/rule/fillGaps",
             "alerting:alert-type-2/my-consumer-3/rule/get",
+            "alerting:alert-type-2/my-consumer-3/rule/bulkGet",
             "alerting:alert-type-2/my-consumer-3/rule/getRuleState",
             "alerting:alert-type-2/my-consumer-3/rule/getAlertSummary",
             "alerting:alert-type-2/my-consumer-3/rule/getExecutionLog",
@@ -712,6 +733,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-2/my-consumer-3/rule/getBackfill",
             "alerting:alert-type-2/my-consumer-3/rule/findBackfill",
             "alerting:alert-type-2/my-consumer-3/rule/findGaps",
+            "alerting:alert-type-2/my-consumer-3/rule/bulkEditParams",
             "alerting:alert-type-2/my-consumer-3/rule/create",
             "alerting:alert-type-2/my-consumer-3/rule/delete",
             "alerting:alert-type-2/my-consumer-3/rule/update",
@@ -733,6 +755,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-2/my-consumer-3/rule/deleteBackfill",
             "alerting:alert-type-2/my-consumer-3/rule/fillGaps",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/get",
+            "alerting:readonly-alert-type-1/my-read-consumer-1/rule/bulkGet",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getRuleState",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getAlertSummary",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getExecutionLog",
@@ -742,7 +765,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/findBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/findGaps",
+            "alerting:readonly-alert-type-1/my-read-consumer-1/rule/bulkEditParams",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/get",
+            "alerting:readonly-alert-type-1/my-read-consumer-2/rule/bulkGet",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getRuleState",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getAlertSummary",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getExecutionLog",
@@ -752,7 +777,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/findBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/findGaps",
+            "alerting:readonly-alert-type-1/my-read-consumer-2/rule/bulkEditParams",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/get",
+            "alerting:readonly-alert-type-2/my-read-consumer-3/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getRuleState",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getAlertSummary",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getExecutionLog",
@@ -762,7 +789,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getBackfill",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/findBackfill",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/findGaps",
+            "alerting:readonly-alert-type-2/my-read-consumer-3/rule/bulkEditParams",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/get",
+            "alerting:readonly-alert-type-2/my-read-consumer-4/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getRuleState",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getAlertSummary",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getExecutionLog",
@@ -772,6 +801,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getBackfill",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/findBackfill",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/findGaps",
+            "alerting:readonly-alert-type-2/my-read-consumer-4/rule/bulkEditParams",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/get",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/find",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/getAuthorizedAlertsIndices",

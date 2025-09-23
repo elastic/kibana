@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,11 +21,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiStepStatus,
   EuiTitle,
+  useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,16 +43,17 @@ import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { ReviewPipeline } from './review_pipeline';
+import * as Styles from './styles';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
-
-import './add_inference_pipeline_flyout.scss';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
 }
 
 export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId();
   const { indexName } = useValues(IndexNameLogic);
   const { setIndexName, makeMlInferencePipelinesRequest, startPollingModels, makeMappingRequest } =
     useActions(MLInferenceLogic);
@@ -65,10 +67,15 @@ export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProp
   }, [indexName]);
 
   return (
-    <EuiFlyout onClose={props.onClose} className="enterpriseSearchInferencePipelineFlyout" size="l">
+    <EuiFlyout
+      onClose={props.onClose}
+      css={Styles.enterpriseSearchInferencePipelineFlyoutStyles(euiTheme)}
+      size="l"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title',
               {

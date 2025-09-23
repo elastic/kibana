@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('tryESQLLink');
 
       await PageObjects.discover.expectOnDiscover();
-      await esql.expectEsqlStatement('FROM logs* | LIMIT 10');
+      await esql.expectEsqlStatement('FROM logs*');
     });
   });
 }

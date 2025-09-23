@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -48,7 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_read',
+      ]);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
@@ -137,6 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
+
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -266,8 +271,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // chart and time picker updated
         await elasticChart.waitForRenderingCount(renderingCount + 1);
         const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:41:22.854');
-        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 04:14:56.951');
+        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:23:44.196');
+        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 02:32:51.702');
       });
     });
 
@@ -457,7 +462,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {

@@ -265,7 +265,7 @@ export class StepLogistics extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateLogisticsDocsButton"
             >
               <FormattedMessage

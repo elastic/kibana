@@ -77,7 +77,7 @@ export const NoDataEmptyState = memo<{
         ) : (
           <EmptyPrompt
             data-test-subj={dataTestSubj}
-            iconType="iInCircle"
+            iconType="info"
             title={<h2 data-test-subj={getTestId('title-no-entries')}>{titleNoEntriesLabel}</h2>}
           />
         )}

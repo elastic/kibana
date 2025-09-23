@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { monaco } from '../../../../monaco_imports';
-import { MonacoAutocompleteCommandDefinition } from '../types';
+import type { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';
 
+function escapeForStringLiteral(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinition[],
-  fullText: string
-): MonacoAutocompleteCommandDefinition[] {
-  return suggestions.map<MonacoAutocompleteCommandDefinition>(
+  suggestions: ISuggestionItem[],
+  fullText: string,
+  defineRange: boolean = true,
+  escapeSpecialChars: boolean = false
+): monaco.languages.CompletionList {
+  let hasAnIncompleteSuggestion = false;
+
+  const monacoSuggestions = suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({
       label,
       text,
@@ -28,10 +36,15 @@ export function wrapAsMonacoSuggestions(
       filterText,
       command,
       rangeToReplace,
+      incomplete,
     }) => {
+      if (incomplete) {
+        hasAnIncompleteSuggestion = true;
+      }
+
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
-        insertText: text,
+        insertText: escapeSpecialChars ? escapeForStringLiteral(text) : text,
         filterText,
         kind:
           kind in monaco.languages.CompletionItemKind
@@ -44,9 +57,17 @@ export function wrapAsMonacoSuggestions(
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
+        range:
+          rangeToReplace && defineRange
+            ? offsetRangeToMonacoRange(fullText, rangeToReplace)
+            : undefined,
       };
       return monacoSuggestion;
     }
   );
+  return {
+    incomplete: hasAnIncompleteSuggestion,
+    // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
+    suggestions: monacoSuggestions,
+  };
 }

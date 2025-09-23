@@ -15,6 +15,14 @@ import {
   DEFAULT_OPTIONS,
   DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+jest.mock('../../../../hooks/use_kibana');
+
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+  typeof useKibanaContextForPlugin
+>;
 
 let PREFILL: Record<string, any> = {};
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
@@ -62,6 +70,12 @@ describe('useMetricExplorerOptions', () => {
     delete STORE.MetricsExplorerOptions;
     delete STORE.MetricsExplorerTimeRange;
     PREFILL = {};
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: {
+        data: dataPluginMock.createStartContract(),
+      },
+    } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   });
 
   it('should just work', () => {

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
+import type { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
+} from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  calendarAlignedTimeWindowSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
@@ -23,14 +25,8 @@ import {
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import {
-  DateRange,
-  GroupBy,
-  Objective,
-  SLOId,
-  TimeWindow,
-  toCalendarAlignedTimeWindowMomentUnit,
-} from '../domain/models';
+import type { DateRange, GroupBy, Objective, SLOId, TimeWindow } from '../domain/models';
+import { toCalendarAlignedTimeWindowMomentUnit } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -382,8 +378,8 @@ function generateSearchQuery({
 /**
  * queryRange is used for the filter range on the query,
  * while range is used for storing the actual range requested
- * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
- * For calednar window, the query range is the same as the range.
+ * For rolling SLO, the query range starts 1 timeWindow duration before the actual range from.
+ * For calendar aligned SLO, the query range is the same as the range.
  *
  * @param timeWindow
  * @param range
@@ -428,8 +424,10 @@ function getDateRange(
   }
 
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const now = moment();
+    // If range is provided, we use the lower bound to calculate the calendar aligned range.
+    const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 

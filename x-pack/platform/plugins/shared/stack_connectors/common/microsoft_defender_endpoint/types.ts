@@ -18,6 +18,9 @@ import type {
   AgentDetailsParamsSchema,
   GetActionsParamsSchema,
   AgentListParamsSchema,
+  GetLibraryFilesResponse,
+  RunScriptParamsSchema,
+  CancelParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -58,6 +61,11 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
   page: number;
   pageSize: number;
   value: MicrosoftDefenderEndpointMachineAction[];
+}
+
+export interface MicrosoftDefenderEndpointGetActionResultsResponse {
+  '@odata.context': string;
+  value: string; // Downloadable link
 }
 
 /**
@@ -144,8 +152,8 @@ export interface MicrosoftDefenderEndpointMachineAction {
   externalID?: string;
   /** The name of the user/application that submitted the action. */
   requestSource: string;
-  /** Commands to run. Allowed values are PutFile, RunScript, GetFile. */
-  commands: Array<'PutFile' | 'RunScript' | 'GetFile'>;
+  /** Array of command execution details for this action. */
+  commands: MicrosoftDefenderCommandEntry[];
   /** Identity of the person that canceled the action. */
   cancellationRequestor: string;
   /** Comment that was written when issuing the action. */
@@ -177,6 +185,8 @@ export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestCon
 export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
 
 export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
+export type MicrosoftDefenderEndpointRunScriptParams = TypeOf<typeof RunScriptParamsSchema>;
+export type MicrosoftDefenderEndpointCancelParams = TypeOf<typeof CancelParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
@@ -187,4 +197,27 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
   /** The amount of time that an access token is valid (in seconds NOT milliseconds). */
   expires_in: number;
   access_token: string;
+}
+
+export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;
+
+/**
+ * Represents a single command execution entry as returned by Microsoft Defender API.
+ */
+export interface MicrosoftDefenderCommandEntry {
+  /** The index of the command in the sequence. */
+  index: number;
+  /** The UTC start time (ISO string) of the command execution. */
+  startTime: string;
+  /** The UTC end time (ISO string) of the command execution. */
+  endTime: string;
+  /** Status of the command execution. */
+  commandStatus: string;
+  /** Array of error messages (if any) for the command execution. */
+  errors: string[];
+  /** The command details (type and params). */
+  command: {
+    type: 'PutFile' | 'RunScript' | 'GetFile';
+    params: Array<{ key: string; value: string }>;
+  };
 }

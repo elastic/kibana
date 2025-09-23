@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiText,
-  EuiProgress,
-  EuiToolTip,
-  CENTER_ALIGNMENT,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, EuiProgress, EuiToolTip, CENTER_ALIGNMENT, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
 
 import { getDocsCountPercent } from '../../../../../utils/stats';
-import { IndexSummaryTableItem } from '../../../../../types';
+import type { IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
@@ -36,7 +30,6 @@ import { IndexResultBadge } from '../../index_result_badge';
 import { Stat } from '../../../../../stat';
 import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 import { CHECK_NOW } from '../../translations';
-import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../../constants';
 
 const styles = {
   progressContainer: css({
@@ -106,7 +99,6 @@ export const getSummaryTableColumns = ({
   pattern,
   onCheckNowAction,
   onViewHistoryAction,
-  firstIndexName,
   dangerColor,
 }: {
   formatBytes: (value: number | undefined) => string;
@@ -115,7 +107,6 @@ export const getSummaryTableColumns = ({
   pattern: string;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
-  firstIndexName?: string;
   dangerColor: string;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
@@ -127,7 +118,7 @@ export const getSummaryTableColumns = ({
         name: CHECK_NOW,
         render: (item) => {
           return (
-            <EuiToolTip content={CHECK_NOW}>
+            <EuiToolTip content={CHECK_NOW} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="refresh"
@@ -142,18 +133,14 @@ export const getSummaryTableColumns = ({
       {
         name: i18n.VIEW_HISTORY,
         render: (item) => {
-          const isFirstIndexName = firstIndexName === item.indexName;
           return (
-            <EuiToolTip content={i18n.VIEW_HISTORY}>
+            <EuiToolTip content={i18n.VIEW_HISTORY} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="clockCounter"
                 aria-label={i18n.VIEW_HISTORY}
                 data-test-subj={`viewHistoryAction-${item.indexName}`}
                 onClick={() => onViewHistoryAction(item.indexName)}
-                {...(isFirstIndexName && {
-                  [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: pattern,
-                })}
               />
             </EuiToolTip>
           );

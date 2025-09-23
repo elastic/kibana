@@ -49,7 +49,7 @@ jest.mock('../../../lib/autocomplete/engine', () => {
 });
 
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -95,7 +95,7 @@ describe('Editor actions provider', () => {
 
     const setEditorActionsCssMock = jest.fn();
 
-    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock, true);
+    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock);
   });
 
   describe('getCurl', () => {
@@ -171,14 +171,12 @@ describe('Editor actions provider', () => {
     } as unknown as jest.Mocked<monaco.editor.ITextModel>;
     const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
     const mockContext = {} as jest.Mocked<monaco.languages.CompletionContext>;
-    const token = {} as jest.Mocked<monaco.CancellationToken>;
     it('returns completion items for method if no requests', async () => {
       mockGetParsedRequests.mockResolvedValue([]);
       const completionItems = await editorActionsProvider.provideCompletionItems(
         mockModel,
         mockPosition,
-        mockContext,
-        token
+        mockContext
       );
       expect(completionItems?.suggestions.length).toBe(6);
       const methods = completionItems?.suggestions.map((suggestion) => suggestion.label);
@@ -207,8 +205,7 @@ describe('Editor actions provider', () => {
       const completionItems = await editorActionsProvider.provideCompletionItems(
         mockModel,
         mockPosition,
-        mockContext,
-        token
+        mockContext
       );
       expect(completionItems?.suggestions.length).toBe(2);
       const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);

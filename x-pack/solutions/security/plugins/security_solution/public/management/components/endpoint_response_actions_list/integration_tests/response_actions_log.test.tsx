@@ -57,73 +57,78 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
-            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
-              const x = {
-                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-                'timepicker:quickRanges': [
-                  {
-                    from: 'now/d',
-                    to: 'now/d',
-                    display: 'Today',
-                  },
-                  {
-                    from: 'now/w',
-                    to: 'now/w',
-                    display: 'This week',
-                  },
-                  {
-                    from: 'now-15m',
-                    to: 'now',
-                    display: 'Last 15 minutes',
-                  },
-                  {
-                    from: 'now-30m',
-                    to: 'now',
-                    display: 'Last 30 minutes',
-                  },
-                  {
-                    from: 'now-1h',
-                    to: 'now',
-                    display: 'Last 1 hour',
-                  },
-                  {
-                    from: 'now-24h',
-                    to: 'now',
-                    display: 'Last 24 hours',
-                  },
-                  {
-                    from: 'now-7d',
-                    to: 'now',
-                    display: 'Last 7 days',
-                  },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
-                ],
+    useKibana: () => {
+      const originalUseKibana = original.useKibana();
+      return {
+        ...originalUseKibana,
+        services: {
+          ...originalUseKibana.services,
+          uiSettings: {
+            get: jest.fn().mockImplementation((key) => {
+              const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
+                const x = {
+                  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+                  'timepicker:quickRanges': [
+                    {
+                      from: 'now/d',
+                      to: 'now/d',
+                      display: 'Today',
+                    },
+                    {
+                      from: 'now/w',
+                      to: 'now/w',
+                      display: 'This week',
+                    },
+                    {
+                      from: 'now-15m',
+                      to: 'now',
+                      display: 'Last 15 minutes',
+                    },
+                    {
+                      from: 'now-30m',
+                      to: 'now',
+                      display: 'Last 30 minutes',
+                    },
+                    {
+                      from: 'now-1h',
+                      to: 'now',
+                      display: 'Last 1 hour',
+                    },
+                    {
+                      from: 'now-24h',
+                      to: 'now',
+                      display: 'Last 24 hours',
+                    },
+                    {
+                      from: 'now-7d',
+                      to: 'now',
+                      display: 'Last 7 days',
+                    },
+                    {
+                      from: 'now-30d',
+                      to: 'now',
+                      display: 'Last 30 days',
+                    },
+                    {
+                      from: 'now-90d',
+                      to: 'now',
+                      display: 'Last 90 days',
+                    },
+                    {
+                      from: 'now-1y',
+                      to: 'now',
+                      display: 'Last 1 year',
+                    },
+                  ],
+                };
+                return x[k];
               };
-              return x[k];
-            };
-            return get(key);
-          }),
+              return get(key);
+            }),
+          },
         },
-      },
-    }),
+      };
+    },
   };
 });
 
@@ -1522,6 +1527,7 @@ describe('Response actions history', () => {
       featureFlags = {
         responseActionUploadEnabled: true,
         crowdstrikeRunScriptEnabled: true,
+        microsoftDefenderEndpointCancelEnabled: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1541,7 +1547,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `runscript`) when opened', async () => {
+    it('should show a list of actions (with `runscript` and `cancel`) when opened', async () => {
       // Note: when we enable new commands, it might be needed to increase the height
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1551,6 +1557,38 @@ describe('Response actions history', () => {
       expect(filterList).toBeTruthy();
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
+        'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
+        'cancel. To check this option, press Enter.',
+      ]);
+    });
+
+    it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
+      // Set the cancel feature flag to false
+      const featureFlagsWithoutCancel = {
+        ...featureFlags,
+        microsoftDefenderEndpointCancelEnabled: false,
+      };
+      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+
+      render({ 'data-test-height': 350 });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'isolate. To check this option, press Enter.',

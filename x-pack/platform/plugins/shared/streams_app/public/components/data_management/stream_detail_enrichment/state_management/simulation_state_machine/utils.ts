@@ -5,118 +5,155 @@
  * 2.0.
  */
 
-import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
-import { isEmpty, uniq } from 'lodash';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
-import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
+import { uniq } from 'lodash';
+import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation, SimulationContext } from './types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function composeSamplingCondition(
-  processors: ProcessorDefinitionWithUIAttributes[]
-): Condition | undefined {
-  if (isEmpty(processors)) {
-    return undefined;
-  }
+export function getSourceField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
+  const processorSourceField = (() => {
+    switch (processor.action) {
+      case 'append':
+      case 'set':
+        return processor.to;
+      case 'rename':
+      case 'grok':
+      case 'dissect':
+      case 'date':
+        return processor.from;
+      case 'manual_ingest_pipeline':
+        return undefined;
+      default:
+        return undefined;
+    }
+  })();
 
-  const uniqueFields = uniq(getSourceFields(processors));
-
-  if (isEmpty(uniqueFields)) {
-    return ALWAYS_CONDITION;
-  }
-
-  const conditions = uniqueFields.map((field) => ({
-    field,
-    operator: 'exists' as UnaryOperator,
-  }));
-
-  return { or: conditions };
+  const trimmedSourceField = processorSourceField?.trim();
+  return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
 }
 
-export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
+export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
+  return uniq(detectedFields.map((field) => field.name));
 }
 
-export function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
+export function getAllFieldsInOrder(
+  previewRecords: FlattenRecord[] = [],
+  detectedFields: DetectedField[] = []
+): string[] {
+  const fields = new Set<string>();
+  previewRecords.forEach((record) => {
+    Object.keys(record).forEach((key) => {
+      fields.add(key);
+    });
+  });
 
-  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
-    return uniqueProcessorsFields;
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+  const otherFields = Array.from(fields).filter((field) => !uniqueDetectedFields.includes(field));
+
+  return [...uniqueDetectedFields, ...otherFields.sort()];
+}
+
+export function getTableColumns({
+  currentProcessorSourceField,
+  detectedFields = [],
+  previewDocsFilter,
+}: {
+  currentProcessorSourceField?: string;
+  detectedFields?: DetectedField[];
+  previewDocsFilter: PreviewDocsFilterOption;
+}) {
+  if (!currentProcessorSourceField) {
+    return [];
   }
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
+  if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
+    return [currentProcessorSourceField];
+  }
 
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+
+  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
 
-export function filterSimulationDocuments(
-  documents: Simulation['documents'],
-  filter: PreviewDocsFilterOption
-) {
+type SimulationDocReport = Simulation['documents'][number];
+
+export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) {
   switch (filter) {
     case 'outcome_filter_parsed':
-      return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'parsed';
     case 'outcome_filter_partially_parsed':
-      return documents.filter((doc) => doc.status === 'partially_parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'partially_parsed';
     case 'outcome_filter_skipped':
-      return documents.filter((doc) => doc.status === 'skipped').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
-      return documents.filter((doc) => doc.status === 'failed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_all':
     default:
-      return documents.map((doc) => doc.value);
+      return (_doc: SimulationDocReport) => true;
   }
 }
 
-export function getSchemaFieldsFromSimulation(
-  detectedFields: DetectedField[],
-  previousDetectedFields: SchemaField[],
-  streamName: string
-) {
-  const previousDetectedFieldsMap = previousDetectedFields.reduce<Record<string, SchemaField>>(
-    (acc, field) => {
-      acc[field.name] = field;
-      return acc;
-    },
-    {}
-  );
+export function getSchemaFieldsFromSimulation(context: SimulationContext): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  if (!context.simulation) {
+    return {
+      detectedSchemaFields: context.detectedSchemaFields,
+      detectedSchemaFieldsCache: context.detectedSchemaFieldsCache,
+    };
+  }
+
+  const detectedFields = context.simulation.detected_fields;
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+  const streamName = context.streamName;
 
   const schemaFields: SchemaField[] = detectedFields.map((field) => {
     // Detected field already mapped by the user on previous simulation
-    if (previousDetectedFieldsMap[field.name]) {
-      return previousDetectedFieldsMap[field.name];
+    const cachedField = updatedCache.get(field.name);
+    if (cachedField) {
+      return cachedField;
     }
+
+    // Detected field unmapped by default
+    let fieldSchema: SchemaField = {
+      status: 'unmapped',
+      esType: field.esType,
+      name: field.name,
+      parent: streamName,
+    };
+
     // Detected field already inherited
     if ('from' in field) {
-      return {
+      fieldSchema = {
         ...field,
         status: 'inherited',
         parent: field.from,
       };
     }
     // Detected field already mapped
-    if ('type' in field) {
-      return {
+    else if ('type' in field) {
+      fieldSchema = {
         ...field,
         status: 'mapped',
         parent: streamName,
       };
     }
-    // Detected field still unmapped
-    return {
-      status: 'unmapped',
-      name: field.name,
-      parent: streamName,
-    };
+
+    updatedCache.set(fieldSchema.name, fieldSchema);
+    return fieldSchema;
   });
 
-  return schemaFields.sort(compareFieldsByStatus);
+  return {
+    detectedSchemaFields: schemaFields.sort(compareFieldsByStatus),
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
 const statusOrder = { inherited: 0, mapped: 1, unmapped: 2 };
@@ -125,22 +162,49 @@ const compareFieldsByStatus = (curr: SchemaField, next: SchemaField) => {
 };
 
 export function mapField(
-  schemaFields: SchemaField[],
+  context: SimulationContext,
   updatedField: MappedSchemaField
-): SchemaField[] {
-  return schemaFields.map((field) => {
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+
+  const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== updatedField.name) return field;
 
-    return { ...updatedField, status: 'mapped' };
+    const schemaField: SchemaField = { ...updatedField, status: 'mapped' };
+    updatedCache.set(schemaField.name, schemaField);
+    return schemaField;
   });
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
-export function unmapField(schemaFields: SchemaField[], fieldName: string): SchemaField[] {
-  return schemaFields.map((field) => {
+export function unmapField(
+  context: SimulationContext,
+  fieldName: string
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+
+  const updatedFields = context.detectedSchemaFields.map((field) => {
     if (field.name !== fieldName) return field;
 
-    return { ...field, status: 'unmapped' };
+    const schemaField: SchemaField = { ...field, status: 'unmapped' };
+    updatedCache.set(schemaField.name, schemaField);
+    return schemaField;
   });
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
 }
 
 export function getMappedSchemaFields(fields: SchemaField[]) {

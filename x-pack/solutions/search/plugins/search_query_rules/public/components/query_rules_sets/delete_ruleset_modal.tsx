@@ -20,25 +20,25 @@ import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
 export interface DeleteRulesetModalProps {
   rulesetId: string;
   closeDeleteModal: () => void;
-  onSuccess?: () => void;
+  onSuccessAction?: () => void;
 }
 
 export const DeleteRulesetModal = ({
   closeDeleteModal,
   rulesetId,
-  onSuccess: onSuccessProp,
+  onSuccessAction,
 }: DeleteRulesetModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
-    if (onSuccessProp) {
-      onSuccessProp();
+    if (onSuccessAction) {
+      onSuccessAction();
     }
   };
-
   const confirmCheckboxId = useGeneratedHtmlId({
     prefix: 'confirmCheckboxId',
   });
@@ -55,6 +55,8 @@ export const DeleteRulesetModal = ({
   };
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.queryRules.deleteRulesetModal.title', {
         defaultMessage: 'Delete query ruleset?',
       })}
@@ -78,6 +80,7 @@ export const DeleteRulesetModal = ({
       <EuiCheckbox
         id={confirmCheckboxId}
         label="This ruleset is safe to delete"
+        data-test-subj="confirmDeleteRulesetCheckbox"
         checked={checked}
         onChange={(e) => {
           setChecked(e.target.checked);

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  LoggerFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   AgentService,
@@ -17,8 +24,10 @@ import type {
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
+import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
+import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -34,6 +43,7 @@ export type OsqueryAppContextServiceStartContract = Partial<
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   ruleRegistryService?: RuleRegistryPluginStartContract;
+  spacesService: SpacesServiceStart | undefined;
 };
 
 /**
@@ -47,6 +57,7 @@ export class OsqueryAppContextService {
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private ruleRegistryService: RuleRegistryPluginStartContract | undefined;
   private fleetActionsClient: FleetActionsClientInterface | undefined;
+  private spacesService: SpacesServiceStart | undefined;
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -55,9 +66,9 @@ export class OsqueryAppContextService {
     this.agentPolicyService = dependencies.agentPolicyService;
     this.ruleRegistryService = dependencies.ruleRegistryService;
     this.fleetActionsClient = dependencies.createFleetActionsClient?.('osquery');
+    this.spacesService = dependencies.spacesService;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 
   public getAgentService(): AgentService | undefined {
@@ -82,6 +93,34 @@ export class OsqueryAppContextService {
 
   public getFleetActionsClient(): FleetActionsClientInterface | undefined {
     return this.fleetActionsClient;
+  }
+
+  public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> | undefined {
+    return this.spacesService?.getActiveSpace(httpRequest);
+  }
+
+  /**
+   * Retrieves namespaces used by specified integrations.
+   */
+  public async getIntegrationNamespaces(
+    integrationNames: string[],
+    soClient: SavedObjectsClientContract,
+    logger: Logger
+  ): Promise<Record<string, string[]>> {
+    const packagePolicyService = this.getPackagePolicyService();
+    const agentPolicyService = this.getAgentPolicyService();
+
+    if (!packagePolicyService || !agentPolicyService) {
+      throw new Error('Fleet services are not available');
+    }
+
+    return getIntegrationNamespaces({
+      logger,
+      soClient,
+      packagePolicyService,
+      agentPolicyService,
+      integrationNames,
+    });
   }
 }
 

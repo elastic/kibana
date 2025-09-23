@@ -7,36 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BarSeriesProps } from '@elastic/charts';
 import {
   AreaSeries,
   BarSeries,
-  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
 } from '@elastic/charts';
-import React, { FC } from 'react';
-import { PaletteRegistry } from '@kbn/coloring';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { FC } from 'react';
+import React from 'react';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { KbnPalettes } from '@kbn/palettes';
-import {
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { KbnPalettes } from '@kbn/palettes';
+import type {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XScaleType,
+  PointVisibility,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
-import {
-  getColorAssignments,
-  getFitOptions,
+import type {
   GroupsConfiguration,
-  getSeriesProps,
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
+} from '../helpers';
+import {
+  getColorAssignments,
+  getFitOptions,
+  getSeriesProps,
   hasMultipleLayersWithSplits,
 } from '../helpers';
 
@@ -64,6 +68,7 @@ interface Props {
   uiState?: PersistedState;
   singleTable?: boolean;
   isDarkMode: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -90,6 +95,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
+  pointVisibility,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -178,6 +184,7 @@ export const DataLayers: FC<Props> = ({
             singleTable,
             multipleLayersWithSplits,
             isDarkMode,
+            pointVisibility,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

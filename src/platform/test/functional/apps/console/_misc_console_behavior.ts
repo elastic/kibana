@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -26,9 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
 
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     beforeEach(async () => {
@@ -113,8 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/218255
-      describe.skip('open documentation', () => {
+      describe('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {
@@ -131,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const url = await browser.getCurrentUrl();
               // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
               // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
-              expect(url).to.contain('operation-search');
+              expect(url).to.contain('www.elastic.co/docs');
             });
           });
         });
@@ -142,10 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Enter a sample command
       await PageObjects.console.enterText('GET _search');
 
-      // Disable keyboard shorcuts
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(false);
-      await PageObjects.console.openConsole();
+      // Disable keyboard shortcuts
+      await PageObjects.console.setKeyboardShortcutsEnabled(false);
 
       // Upon clicking ctrl enter a newline character should be added to the editor
       await PageObjects.console.pressCtrlEnter();
@@ -153,9 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
 
       // Restore setting
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
+      await PageObjects.console.setKeyboardShortcutsEnabled(true);
     });
 
     describe('customizable font size', () => {

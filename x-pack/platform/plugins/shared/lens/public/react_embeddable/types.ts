@@ -32,7 +32,7 @@ import type {
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
@@ -47,9 +47,9 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
   OverlayRef,
-  SavedObjectReference,
   ThemeServiceStart,
 } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
@@ -63,8 +63,8 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { CanAddNewPanel, TracksOverlays } from '@kbn/presentation-containers';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -187,7 +187,7 @@ interface ContentManagementProps {
 }
 
 export type LensPropsVariants = (LensByValue & LensByReference) & {
-  references?: SavedObjectReference[];
+  references?: Reference[];
 };
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
@@ -205,15 +205,6 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
-  mountInlineFlyout: (
-    Component: React.ComponentType,
-    overlayTracker?: TracksOverlays,
-    options?: {
-      dataTestSubj?: string;
-      uuid?: string;
-      container?: HTMLElement | null;
-    }
-  ) => void;
 }
 
 /**
@@ -274,6 +265,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface LensRequestHandlersProps {
@@ -373,6 +365,13 @@ export type LensRuntimeState = Simplify<
     ContentManagementProps
 >;
 
+export interface LensHasEditPanel {
+  getEditPanel?: (options?: {
+    closeFlyout?: () => void;
+    showOnly?: boolean;
+  }) => Promise<JSX.Element | undefined>;
+}
+
 export interface LensInspectorAdapters {
   getInspectorAdapters: () => Adapters;
   inspect: (options?: InspectorOptions) => OverlayRef;
@@ -416,7 +415,8 @@ export type LensApi = Simplify<
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
-    LensApiCallbacks
+    LensApiCallbacks &
+    LensHasEditPanel
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere

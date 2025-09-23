@@ -7,7 +7,7 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
@@ -92,6 +92,19 @@ describe('thehive createAlert action params validation', () => {
         type: 'type test',
         source: 'source test',
         sourceRef: 'source reference test',
+        body: JSON.stringify(
+          {
+            observables: [
+              {
+                dataType: 'ip',
+                data: '127.0.0.1',
+                tags: ['source.ip'],
+              },
+            ],
+          },
+          null,
+          2
+        ),
       },
       comments: [],
     };

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KeyboardEvent } from 'react';
 import React, {
-  KeyboardEvent,
   useCallback,
   useEffect,
   useRef,
@@ -18,8 +18,8 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { DropResult } from '@elastic/eui';
 import {
-  DropResult,
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
@@ -57,6 +57,7 @@ export type TabsBarProps = Pick<
   items: TabItem[];
   selectedItem: TabItem | null;
   recentlyClosedItems: TabItem[];
+  unsavedItemIds?: string[];
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
@@ -74,6 +75,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       items,
       selectedItem,
       recentlyClosedItems,
+      unsavedItemIds,
       maxItemsCount,
       tabContentId,
       getTabMenuItems,
@@ -110,7 +112,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
 
     const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
-      defaultMessage: 'New session',
+      defaultMessage: 'New tab',
     });
 
     const { tabsSizeConfig, scrollRightButton, scrollLeftButton, tabsContainerCss } =
@@ -241,6 +243,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                               key={item.id}
                               item={item}
                               isSelected={selectedItem?.id === item.id}
+                              isUnsaved={unsavedItemIds?.includes(item.id)}
                               isDragging={isDragging}
                               dragHandleProps={dragHandleProps}
                               tabContentId={tabContentId}
@@ -265,7 +268,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel}>
+                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="unifiedTabs_tabsBar_newTabBtn"
                     iconType="plus"

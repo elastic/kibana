@@ -15,7 +15,6 @@ import {
   mockApmPluginContextValue,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useApmServiceContext from '../../../context/apm_service/use_apm_service_context';
-import type { ServiceEntitySummary } from '../../../context/apm_service/use_service_entity_summary_fetcher';
 import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { fromQuery } from '../../shared/links/url_helpers';
@@ -63,10 +62,14 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['metrics'],
-          } as unknown as ServiceEntitySummary,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -89,10 +92,14 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['metrics'],
-          } as unknown as ServiceEntitySummary,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -109,16 +116,20 @@ describe('Metrics', () => {
     describe('APM agent / otel sdk with no dashboard', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'opentelemetry/go',
+          agentName: 'opentelemetry/erlang',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['metrics'],
-          } as unknown as ServiceEntitySummary,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -126,29 +137,6 @@ describe('Metrics', () => {
         const result = render(<MetricsWithWrapper />);
         const apmMetricsNoDashboardFound = result.getByTestId('apmMetricsNoDashboardFound');
         expect(apmMetricsNoDashboardFound).toBeInTheDocument();
-      });
-    });
-
-    describe('Logs signals', () => {
-      beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'java',
-          serviceName: 'testServiceName',
-          transactionTypeStatus: FETCH_STATUS.SUCCESS,
-          transactionTypes: [],
-          fallbackToTransactions: true,
-          serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['logs'],
-          } as unknown as ServiceEntitySummary,
-        });
-      });
-
-      it('shows service from logs metrics content', () => {
-        const result = render(<MetricsWithWrapper />);
-        const apmAddApmCallout = result.getByTestId('apmAddApmCallout');
-        expect(apmAddApmCallout).toBeInTheDocument();
       });
     });
   });

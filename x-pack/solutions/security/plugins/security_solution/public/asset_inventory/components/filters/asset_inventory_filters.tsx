@@ -12,12 +12,21 @@ import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import type { Filter } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_FILTER_CRITICALITY_APPLIED,
+  ASSET_INVENTORY_FILTER_ID_APPLIED,
+  ASSET_INVENTORY_FILTER_TYPE_APPLIED,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataViewContext } from '../../hooks/data_view_context';
 import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { ASSET_FIELDS } from '../../constants';
 import { FilterGroupLoading } from './asset_inventory_filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './asset_inventory_rule_type_ids';
+import { addEmptyDataFilter } from '../../utils/add_empty_data_filter';
 
 const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   {
@@ -42,13 +51,14 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
 
 export interface AssetInventoryFiltersProps {
   setQuery: (v: Partial<AssetsURLQuery>) => void;
+  query: AssetsURLQuery;
 }
 
-export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) => {
+export const AssetInventoryFilters = ({ setQuery, query }: AssetInventoryFiltersProps) => {
   const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
-  if (!spaceId) {
+  if (!spaceId || !dataView?.id) {
     // TODO Add error handling if no spaceId is found
     return null;
   }
@@ -61,10 +71,34 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
     );
   }
 
+  const filters = addEmptyDataFilter(query.filters, dataView.id);
+
   return (
     <FilterGroup
-      dataViewId={dataView.id || null}
+      dataViewId={dataView.id}
       onFiltersChange={(pageFilters: Filter[]) => {
+        pageFilters.forEach((filter) => {
+          const field = filter.meta?.key;
+          if (field === 'entity.name') {
+            uiMetricService.trackUiMetric(
+              METRIC_TYPE.CLICK,
+              ASSET_INVENTORY_FILTER_CRITICALITY_APPLIED,
+              ASSET_INVENTORY_APP_NAME
+            );
+          } else if (field === 'entity.id') {
+            uiMetricService.trackUiMetric(
+              METRIC_TYPE.CLICK,
+              ASSET_INVENTORY_FILTER_ID_APPLIED,
+              ASSET_INVENTORY_APP_NAME
+            );
+          } else {
+            uiMetricService.trackUiMetric(
+              METRIC_TYPE.CLICK,
+              ASSET_INVENTORY_FILTER_TYPE_APPLIED,
+              ASSET_INVENTORY_APP_NAME
+            );
+          }
+        });
         setQuery({ pageFilters });
       }}
       ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
@@ -74,6 +108,8 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
       spaceId={spaceId}
       ControlGroupRenderer={ControlGroupRenderer}
       maxControls={4}
+      query={query.query}
+      filters={filters}
     />
   );
 };

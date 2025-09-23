@@ -6,55 +6,74 @@
  */
 
 import { useMemo } from 'react';
-import {
-  ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
-  LIST_ENTITIES_URL,
-} from '../../../common/entity_analytics/entity_store/constants';
-import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
-import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
-import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type { InitRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
-import type { EnableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
-import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
-import type {
-  RiskScoresPreviewRequest,
-  RiskScoresPreviewResponse,
-} from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
-import type {
-  RiskScoresEntityCalculationRequest,
-  RiskScoresEntityCalculationResponse,
-} from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type {
   AssetCriticalityRecord,
+  CreateEntitySourceResponse,
+  CreatePrivilegesImportIndexResponse,
+  DisableRiskEngineResponse,
+  EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
+  FindAssetCriticalityRecordsResponse,
+  InitMonitoringEngineResponse,
+  InitRiskEngineResponse,
+  ListEntitiesRequestQuery,
+  ListEntitiesResponse,
+  ListEntitySourcesResponse,
+  PrivmonBulkUploadUsersCSVResponse,
+  PrivMonHealthResponse,
+  PrivMonPrivilegesResponse,
+  ReadRiskEngineSettingsResponse,
+  RiskEngineScheduleNowResponse,
+  RiskEngineStatusResponse,
+  RiskScoresEntityCalculationRequest,
+  RiskScoresEntityCalculationResponse,
+  RiskScoresPreviewRequest,
+  RiskScoresPreviewResponse,
   SearchPrivilegesIndicesResponse,
+  UpdateEntitySourceResponse,
+  UploadAssetCriticalityRecordsResponse,
 } from '../../../common/api/entity_analytics';
 import {
-  RISK_ENGINE_STATUS_URL,
-  RISK_SCORE_PREVIEW_URL,
-  RISK_ENGINE_ENABLE_URL,
+  API_VERSIONS,
+  ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
+  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PUBLIC_LIST_URL,
+  ASSET_CRITICALITY_PUBLIC_URL,
+  ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
+  getPrivmonMonitoringSourceByIdUrl,
+  LIST_ENTITIES_URL,
+  MONITORING_ENGINE_INIT_URL,
+  MONITORING_ENTITY_LIST_SOURCES_URL,
+  MONITORING_ENTITY_SOURCE_URL,
+  MONITORING_USERS_CSV_UPLOAD_URL,
+  PRIVMON_HEALTH_URL,
+  PRIVMON_INDICES_URL,
+  PRIVMON_PRIVILEGE_CHECK_API,
+  RISK_ENGINE_CLEANUP_URL,
+  RISK_ENGINE_CONFIGURE_SO_URL,
   RISK_ENGINE_DISABLE_URL,
+  RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
-  ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-  ASSET_CRITICALITY_PUBLIC_URL,
-  RISK_ENGINE_SETTINGS_URL,
-  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
-  RISK_SCORE_ENTITY_CALCULATION_URL,
-  API_VERSIONS,
-  RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
-  RISK_ENGINE_CONFIGURE_SO_URL,
+  RISK_ENGINE_SETTINGS_URL,
+  RISK_ENGINE_STATUS_URL,
+  RISK_SCORE_ENTITY_CALCULATION_URL,
+  RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
-import type { ListEntitiesResponse } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import { type ListEntitiesRequestQuery } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
 }
+
+/**
+ * This hardcoded name was temporarily introduced for 9.1.0.
+ * It is used to identify the only entity source that can be edited by the UI.
+ */
+const ENTITY_SOURCE_NAME = 'User Monitored Indices';
+
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
@@ -191,20 +210,69 @@ export const useEntityAnalyticsRoutes = () => {
       query: string | undefined;
       signal?: AbortSignal;
     }) =>
-      http.fetch<SearchPrivilegesIndicesResponse>(
-        '/api/entity_analytics/monitoring/privileges/indices',
-        {
-          version: API_VERSIONS.public.v1,
-          method: 'GET',
-          query: {
-            searchQuery: params.query,
-          },
-          signal: params.signal,
-        }
-      );
+      http.fetch<SearchPrivilegesIndicesResponse>(PRIVMON_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
+    /**
+     * Create an index for privilege monitoring import
+     */
+    const createPrivMonImportIndex = async (params: {
+      name: string;
+      mode: 'standard' | 'lookup';
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<CreatePrivilegesImportIndexResponse>(PRIVMON_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify({
+          name: params.name,
+          mode: params.mode,
+        }),
+        signal: params.signal,
+      });
+    /**
+     * Register a data source for privilege monitoring engine
+     */
+    const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
+      http.fetch<CreateEntitySourceResponse>(MONITORING_ENTITY_SOURCE_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'index',
+          name: ENTITY_SOURCE_NAME,
+          indexPattern,
+        }),
+      });
+
+    /**
+     * Update a data source for privilege monitoring engine
+     */
+    const updatePrivMonMonitoredIndices = async (id: string, indexPattern: string | undefined) =>
+      http.fetch<UpdateEntitySourceResponse>(getPrivmonMonitoringSourceByIdUrl(id), {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify({
+          type: 'index',
+          name: ENTITY_SOURCE_NAME,
+          indexPattern,
+        }),
+      });
 
     /**
      * Create asset criticality
+    /**
+     *
+     *
+     * @param {(Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
+     *         refresh?: 'wait_for';
+     *       })} params
+     * @return {*}  {Promise<AssetCriticalityRecord>}
      */
     const createAssetCriticality = async (
       params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
@@ -254,6 +322,26 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
+    /**
+     * Get multiple asset criticality records
+     */
+    const fetchAssetCriticalityList = async (params: {
+      idField: string;
+      idValues: string[];
+    }): Promise<FindAssetCriticalityRecordsResponse> => {
+      const wrapWithQuotes = (each: string) => `"${each}"`;
+      const kueryValues = `${params.idValues.map(wrapWithQuotes).join(' OR ')}`;
+      const kuery = `${params.idField}: (${kueryValues})`;
+
+      return http.fetch<FindAssetCriticalityRecordsResponse>(ASSET_CRITICALITY_PUBLIC_LIST_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          kuery,
+        },
+      });
+    };
+
     const uploadAssetCriticalityFile = async (
       fileContent: string,
       fileName: string
@@ -278,6 +366,59 @@ export const useEntityAnalyticsRoutes = () => {
     };
 
     /**
+     * List all data source for privilege monitoring engine
+     */
+    const listPrivMonMonitoredIndices = async ({ signal }: { signal?: AbortSignal }) =>
+      http.fetch<ListEntitySourcesResponse>(MONITORING_ENTITY_LIST_SOURCES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal,
+        query: {
+          type: 'index',
+          managed: false,
+          name: ENTITY_SOURCE_NAME,
+        },
+      });
+
+    const uploadPrivilegedUserMonitoringFile = async (
+      fileContent: string,
+      fileName: string
+    ): Promise<PrivmonBulkUploadUsersCSVResponse> => {
+      const file = new File([new Blob([fileContent])], fileName, {
+        type: 'text/csv',
+      });
+      const body = new FormData();
+      body.append('file', file);
+
+      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(MONITORING_USERS_CSV_UPLOAD_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        headers: {
+          'Content-Type': undefined, // Lets the browser set the appropriate content type
+        },
+        body,
+      });
+    };
+
+    const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
+      http.fetch<InitMonitoringEngineResponse>(MONITORING_ENGINE_INIT_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+      });
+
+    const fetchPrivilegeMonitoringEngineStatus = (): Promise<PrivMonHealthResponse> =>
+      http.fetch<PrivMonHealthResponse>(PRIVMON_HEALTH_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
+    const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
+      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
+    /**
      * Fetches risk engine settings
      */
     const fetchRiskEngineSettings = () =>
@@ -296,13 +437,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) => {
+    const updateSavedObjectConfiguration = (params: {}) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify(params),
       });
-    };
 
     return {
       fetchRiskScorePreview,
@@ -315,15 +455,24 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
       searchPrivMonIndices,
+      createPrivMonImportIndex,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
+      fetchAssetCriticalityList,
       uploadAssetCriticalityFile,
+      uploadPrivilegedUserMonitoringFile,
+      initPrivilegedMonitoringEngine,
+      registerPrivMonMonitoredIndices,
+      updatePrivMonMonitoredIndices,
+      fetchPrivilegeMonitoringEngineStatus,
+      fetchPrivilegeMonitoringPrivileges,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
       updateSavedObjectConfiguration,
+      listPrivMonMonitoredIndices,
     };
   }, [http]);
 };

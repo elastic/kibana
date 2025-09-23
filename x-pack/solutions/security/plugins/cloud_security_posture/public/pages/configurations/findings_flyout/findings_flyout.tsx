@@ -6,27 +6,21 @@
  */
 
 import React from 'react';
+import type { PropsOf, EuiIconProps } from '@elastic/eui';
 import {
-  useEuiTheme,
   EuiFlexItem,
   EuiFlexGroup,
-  PropsOf,
   EuiCodeBlock,
   EuiMarkdownFormat,
-  EuiIcon,
+  EuiIconTip,
   EuiToolTip,
-  EuiCallOut,
   EuiLink,
-  EuiIconProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { createMisconfigurationFindingsQuery } from '@kbn/cloud-security-posture';
-import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
-import { BenchmarkName } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
-import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import type { BenchmarkId } from '@kbn/cloud-security-posture-common';
+import type { BenchmarkName } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -54,9 +48,7 @@ export const BenchmarkIcons = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {benchmarkId.startsWith('cis') && (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Center for Internet Security">
-          <EuiIcon type={cisLogoIcon} size={size} />
-        </EuiToolTip>
+        <EuiIconTip content="Center for Internet Security" type={cisLogoIcon} size={size} />
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>
@@ -84,37 +76,6 @@ export const RuleNameLink = ({
     </EuiToolTip>
   ) : (
     <>{ruleName}</>
-  );
-};
-
-export const MissingFieldsCallout = ({
-  finding,
-}: {
-  finding: CspFinding | CspVulnerabilityFinding;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const vendor = getVendorName(finding);
-
-  return (
-    <EuiCallOut
-      style={{
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
-      size="s"
-      iconType="iInCircle"
-      title={
-        <span style={{ color: euiTheme.colors.text }}>
-          <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {vendor}"
-            values={{
-              vendor: vendor || 'the vendor',
-            }}
-          />
-        </span>
-      }
-    />
   );
 };
 

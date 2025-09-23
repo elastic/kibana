@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
@@ -122,6 +122,12 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
   parsePipeline() {
     try {
+      if (this.props.pipelineString === '') {
+        return {
+          description: '',
+          processors: [],
+        };
+      }
       return JSON.parse(this.props.pipelineString);
     } catch (error) {
       throw new Error(

@@ -58,9 +58,13 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
     anchorElement?.focus();
   }, [anchorElement, originalOnClose]);
 
-  const items = appMenuItem.actions.map((action) => {
+  const items = appMenuItem.actions.map((action, i) => {
     if (action.type === AppMenuActionType.submenuHorizontalRule) {
-      return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
+      if (i === 0 || i === appMenuItem.actions.length - 1) {
+        return <></>;
+      } else {
+        return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
+      }
     }
 
     const controlProps = action.controlProps;

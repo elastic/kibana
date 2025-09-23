@@ -239,7 +239,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                 defaultMessage:
                   'Document count found is based on a smaller set of sampled records.',
               })}
-              type="questionInCircle"
+              type="question"
             />
           </div>
         ),
@@ -303,6 +303,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                         defaultMessage: 'Hide distributions',
                       })
                 }
+                disableScreenReaderOutput={true}
               >
                 <EuiButtonIcon
                   style={{ marginLeft: 4 }}
@@ -310,7 +311,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                   iconType={!showDistributions ? 'eye' : 'eyeClosed'}
                   onClick={() => toggleShowDistribution()}
                   aria-label={
-                    showDistributions
+                    !showDistributions
                       ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
                           defaultMessage: 'Show distributions',
                         })

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-      expect(panelTypes.length).to.eql(10);
+      expect(panelTypes.length).to.eql(11);
     });
   });
 }

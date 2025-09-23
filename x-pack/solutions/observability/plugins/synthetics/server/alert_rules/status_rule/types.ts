@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { ActionGroupIdsOf } from '@kbn/alerting-types';
-import {
+import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { ActionGroupIdsOf } from '@kbn/alerting-types';
+import type {
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
-import {
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
+import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';
@@ -52,7 +52,7 @@ export interface MonitorSummaryStatusRule {
   configId: string;
   hostName: string;
   monitorId: string;
-  checkedAt: string;
+  checkedAt?: string;
   monitorUrl: string;
   locationId: string;
   monitorType: string;
@@ -70,6 +70,6 @@ export interface MonitorSummaryStatusRule {
   stateId?: string;
   lastErrorMessage?: string;
   lastErrorStack?: string | null;
-  timestamp: string;
+  timestamp?: string;
   labels?: Record<string, string>;
 }

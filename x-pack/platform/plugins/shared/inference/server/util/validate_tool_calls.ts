@@ -5,19 +5,25 @@
  * 2.0.
  */
 import Ajv from 'ajv';
+import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
+import type { ToolCallOfToolOptions } from '@kbn/inference-common';
 import {
-  ToolCallsOf,
-  ToolChoiceType,
-  ToolOptions,
-  UnvalidatedToolCall,
-} from '@kbn/inference-common';
-import { createToolNotFoundError, createToolValidationError } from '../chat_complete/errors';
+  createToolNotFoundError,
+  createToolValidationError,
+} from '../../common/chat_complete/errors';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallsOf<TToolOptions>['toolCalls'] {
+}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+
+export function validateToolCalls({
+  toolCalls,
+  toolChoice,
+  tools,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
   const validator = new Ajv();
 
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
@@ -38,7 +44,7 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
 
-    let serializedArguments: ToolCallsOf<TToolOptions>['toolCalls'][0]['function']['arguments'];
+    let serializedArguments: Record<string, unknown>;
 
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);

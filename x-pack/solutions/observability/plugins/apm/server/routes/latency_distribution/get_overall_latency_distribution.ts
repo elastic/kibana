@@ -27,6 +27,7 @@ export async function getOverallLatencyDistribution({
   durationMinOverride,
   durationMaxOverride,
   searchMetrics,
+  isOtel = false,
 }: {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
@@ -39,6 +40,7 @@ export async function getOverallLatencyDistribution({
   durationMinOverride?: number;
   durationMaxOverride?: number;
   searchMetrics: boolean;
+  isOtel?: boolean;
 }) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
@@ -54,6 +56,7 @@ export async function getOverallLatencyDistribution({
       query,
       percentileThreshold,
       searchMetrics,
+      isOtel,
     });
 
     // finish early if we weren't able to identify the percentileThresholdValue.
@@ -73,6 +76,7 @@ export async function getOverallLatencyDistribution({
       searchMetrics,
       durationMinOverride,
       durationMaxOverride,
+      isOtel,
     });
 
     if (!rangeSteps) {
@@ -90,6 +94,7 @@ export async function getOverallLatencyDistribution({
       query,
       rangeSteps,
       searchMetrics,
+      isOtel,
     });
 
     overallLatencyDistribution.durationMin = durationMin;

@@ -8,7 +8,6 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { Theme, css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -23,10 +22,10 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 
 import { SubItemTitle } from '../subitem_title';
 import { useNavigation as useServices } from '../../../services';
-import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../../utils';
+import { isAbsoluteLink, isActiveFromUrl, isAccordionNode, isSpecialClick } from '../../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../../types';
 import { useNavigation } from '../../navigation';
-import { EventTracker } from '../../../analytics';
+import type { EventTracker } from '../../../analytics';
 import { useAccordionState } from '../../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
@@ -34,89 +33,10 @@ import {
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
 } from '../../constants';
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../../types';
-import { PanelContext, usePanel } from '../panel';
+import type { PanelContext } from '../panel';
+import { usePanel } from '../panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
-
-const sectionStyles = {
-  blockTitle: ({ euiTheme }: Theme) => ({
-    paddingBlock: euiTheme.size.xs,
-    paddingInline: euiTheme.size.s,
-  }),
-  euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
-    & > .euiCollapsibleNavLink {
-      /* solution title in primary nav  */
-      font-weight: ${euiTheme.font.weight.bold};
-      margin: ${euiTheme.size.s} 0;
-      margin-bottom: calc(${euiTheme.size.xs} * 1.5);
-    }
-
-    .euiCollapsibleNavAccordion {
-      &.euiAccordion__triggerWrapper,
-      &.euiCollapsibleNavLink {
-        &:focus-within {
-          background: ${euiTheme.colors.backgroundBasePlain};
-        }
-
-        &:hover {
-          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-      }
-
-      &.isSelected {
-        .euiAccordion__triggerWrapper,
-        .euiCollapsibleNavLink {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-
-          * {
-            color: ${euiTheme.colors.textPrimary};
-          }
-        }
-      }
-    }
-
-    .euiAccordion__children .euiCollapsibleNavItem__items {
-      padding-inline-start: ${euiTheme.size.m};
-      margin-inline-start: ${euiTheme.size.m};
-    }
-
-    &:only-child .euiCollapsibleNavItem__icon {
-      transform: scale(1.33);
-    }
-  `,
-  euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
-    .euiAccordion__button:focus,
-    .euiAccordion__button:hover {
-      text-decoration: none;
-    }
-
-    &.euiLink,
-    &.euiCollapsibleNavLink {
-      &:focus,
-      &:hover {
-        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        text-decoration: none;
-      }
-
-      &.isSelected {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-        &:focus,
-        &:hover {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-        }
-
-        * {
-          color: ${euiTheme.colors.textPrimary};
-        }
-      }
-    }
-  `,
-  euiAccordionChildWrapper: ({ euiTheme }: Theme) => css`
-    .euiAccordion__childWrapper {
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-    }
-  `,
-};
+import { sectionStyles } from './styles';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
@@ -125,7 +45,7 @@ const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNod
 
 /** Predicate to determine if a node should be visible in the main side nav.*/
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
-  if (item.sideNavStatus === 'hidden') return false;
+  if (item.sideNavStatus === 'hidden' || item.sideNavVersion === 'v2') return false;
 
   if (item.renderItem) return true;
 
@@ -142,8 +62,7 @@ const getRenderAs = (
   navNode: ChromeProjectNavigationNode,
   { isSideNavCollapsed }: { isSideNavCollapsed: boolean }
 ): RenderAs => {
-  if (isSideNavCollapsed && navNode.renderAs === 'panelOpener' && !nodeHasLink(navNode))
-    return 'accordion'; // When the side nav is collapsed, we render panel openers as accordions if they don't have a landing page
+  if (isSideNavCollapsed && navNode.renderAs === 'panelOpener') return 'accordion'; // When the side nav is collapsed, we render panel openers as accordions
   if (navNode.renderAs) return navNode.renderAs;
   if (!navNode.children) return 'item';
   return DEFAULT_RENDER_AS;
@@ -189,7 +108,7 @@ const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): st
   });
 };
 
-const serializeNavNode = (
+export const serializeNavNode = (
   navNode: ChromeProjectNavigationNode,
   {
     isSideNavCollapsed,
@@ -368,25 +287,17 @@ const getEuiProps = (
         })
         .flat();
 
-  /**
-   * Check if the click event is a special click (e.g. right click, click with modifier key)
-   * We do not want to prevent the default behavior in these cases.
-   */
-  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
-    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
-    const isLeftClickEvent = e.button === 0;
-    return isModifiedEvent || !isLeftClickEvent;
-  };
-
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
         external: isExternal,
+        'aria-label': navNode.title,
         onClick: (e) => {
           if (href) {
             eventTracker.clickNavLink({
-              href: basePath.remove(href),
               id: navNode.id,
+              path: navNode.path,
+              href: basePath.remove(href),
               hrefPrev: basePath.remove(window.location.pathname),
             });
           }
@@ -411,8 +322,9 @@ const getEuiProps = (
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
     if (href) {
       eventTracker.clickNavLink({
-        href: basePath.remove(href),
         id: navNode.id,
+        path: navNode.path,
+        href: basePath.remove(href),
         hrefPrev: basePath.remove(window.location.pathname),
       });
     }

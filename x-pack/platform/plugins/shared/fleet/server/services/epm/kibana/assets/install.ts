@@ -75,6 +75,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
+  [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -110,7 +111,6 @@ export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
-  pkgName: string;
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
 }): Promise<SavedObjectsImportSuccess[]> {
   const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
@@ -279,7 +279,7 @@ export async function installKibanaAssetsAndReferences({
   const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
 
   if (installedPkg) {
-    await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
+    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   }
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
 
@@ -287,7 +287,6 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     logger,
     savedObjectsImporter,
-    pkgName,
     kibanaAssetsArchiveIterator,
   });
   const assets = importedAssets.map(
@@ -344,7 +343,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
-  await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
+  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
 }
 
@@ -373,6 +372,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
       const soType = KibanaSavedObjectTypeMapping[assetType];
       if (!validKibanaAssetTypes.has(assetType)) {
+        return;
+      }
+
+      if (
+        soType === KibanaSavedObjectType.alertingRuleTemplate &&
+        !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+      ) {
         return;
       }
 

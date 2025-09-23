@@ -19,6 +19,8 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -47,6 +49,13 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import type { ServerlessProjectType } from '../common/constants/types';
+
+import {
+  createCasesAnalyticsIndexes,
+  registerCasesAnalyticsIndexesTasks,
+  scheduleCasesAnalyticsSyncTasks,
+} from './cases_analytics';
 
 export class CasePlugin
   implements
@@ -66,6 +75,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -75,9 +85,13 @@ export class CasePlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -90,6 +104,12 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
+    registerCasesAnalyticsIndexesTasks({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      core,
+      analyticsConfig: this.caseConfig.analytics,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -130,13 +150,11 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    const isServerless = plugins.cloud?.isServerlessEnabled;
-
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -159,16 +177,18 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const isServerlessSecurity =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+    const serverlessProjectType = this.isServerless
+      ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
+      : undefined;
 
     registerConnectorTypes({
       actions: plugins.actions,
       alerting: plugins.alerting,
       core,
+      logger: this.logger,
       getCasesClient,
       getSpaceId,
-      isServerlessSecurity,
+      serverlessProjectType,
     });
 
     return {
@@ -180,6 +200,7 @@ export class CasePlugin
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
       },
+      config: this.caseConfig,
     };
   }
 
@@ -188,6 +209,16 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+
+      if (this.caseConfig.analytics.index?.enabled) {
+        scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
+        createCasesAnalyticsIndexes({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          isServerless: this.isServerless,
+          taskManager: plugins.taskManager,
+        }).catch(() => {}); // it shouldn't reject, but just in case
+      }
     }
 
     this.userProfileService.initialize({
@@ -228,6 +259,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      config: this.caseConfig,
     };
   }
 
@@ -251,6 +283,13 @@ export class CasePlugin
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
+        },
+        getInferenceClient: async (): Promise<InferenceClient | undefined> => {
+          const [, pluginsStart] = await core.getStartServices();
+          const inferenceClient = (
+            pluginsStart as { inference?: InferenceServerStart }
+          )?.inference?.getClient({ request });
+          return inferenceClient;
         },
       };
     };

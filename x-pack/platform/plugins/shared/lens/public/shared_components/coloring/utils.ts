@@ -7,24 +7,26 @@
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
-import {
+import type {
   DataBounds,
   PaletteRegistry,
   PaletteOutput,
   CustomPaletteParams,
+  ColorMapping,
+} from '@kbn/coloring';
+import {
   getFallbackDataBounds,
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
   enforceColorContrast,
-  ColorMapping,
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
-import { DataType, DatasourcePublicAPI } from '../../types';
+import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '../../types';
 
 /**
  * Returns array of colors for provided palette or colorMapping
@@ -45,6 +47,19 @@ export function getPaletteDisplayColors(
         .getCategoricalColors(palette?.params?.steps || 10, palette);
 }
 
+export function getAccessorTypeFromOperation(
+  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null
+) {
+  const isNumericTypeFromOperation = Boolean(
+    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
+  );
+  const isBucketableTypeFromOperationType = Boolean(
+    operation?.isBucketed ||
+      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
+  );
+  return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
+}
+
 /**
  * Analyze the column from the datasource prospective (formal check)
  * to know whether it's a numeric type or not
@@ -58,15 +73,10 @@ export function getAccessorType(
   if (!accessor || !datasource) {
     return { isNumeric: false, isCategory: false };
   }
+
   const operation = datasource.getOperationForColumnId(accessor);
-  const isNumericTypeFromOperation = Boolean(
-    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
-  );
-  const isBucketableTypeFromOperationType = Boolean(
-    operation?.isBucketed ||
-      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
-  );
-  return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
+
+  return getAccessorTypeFromOperation(operation);
 }
 
 /**

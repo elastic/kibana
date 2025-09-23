@@ -8,16 +8,16 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationSearchEsMock } from './conversations_schema.mock';
 import type { estypes } from '@elastic/elasticsearch';
-import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
-import { FindResponse } from '../ai_assistant_data_clients/find';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import type { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import type { FindResponse } from '../ai_assistant_data_clients/find';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { getPromptsSearchEsMock } from './prompts_schema.mock';
-import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
 import { getKnowledgeBaseEntrySearchEsMock } from './knowledge_base_entry_schema.mock';
-import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
-import { EsAlertSummarySchema } from '../ai_assistant_data_clients/alert_summary/types';
+import type { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
+import type { EsAlertSummarySchema } from '../ai_assistant_data_clients/alert_summary/types';
 import { getAlertSummarySearchEsMock } from './alert_summary.mock';
 
 export const responseMock = {
@@ -105,4 +105,61 @@ export const getConversationResponseMock = (
       name: 'elastic',
     },
   ],
+  createdBy: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
 });
+
+export const getSuggestUsersResponseMock = () => [
+  {
+    uid: 'u_BpVmcgKeRZ8a1-SoLadysLvounWfD_HHVMagTW1DUGQ_0',
+    enabled: true,
+    data: {},
+    user: {
+      username: 'test_madisen_homenick',
+      email: 'test_madisen_homenick@elastic.co',
+      full_name: 'Madisen Homenick',
+    },
+  },
+  {
+    uid: 'u_H4dvS8y4Ea7CR8zUkMGlP8QAwC93U04HoeeshzhKC0U_0',
+    enabled: true,
+    data: {},
+    user: {
+      username: 'test_everette_konopelski',
+      email: 'test_everette_konopelski@elastic.co',
+      full_name: 'Everette Konopelski',
+    },
+  },
+  {
+    uid: 'u_GAOUoLZmYHAWYFOBpRfgucICfMPzd7oA6akO5FyQqFI_0',
+    enabled: true,
+    data: {},
+    user: {
+      username: 'test_terrill_bradtke',
+      email: 'test_terrill_bradtke@elastic.co',
+      full_name: 'Terrill Bradtke',
+    },
+  },
+  {
+    uid: 'u_s1gS_ARa2hBaUbBaq4eeHE7ZGCKl2HNgZpxeTqedx8U_0',
+    enabled: true,
+    data: {},
+    user: {
+      username: 'test_bernadette_dubuque',
+      email: 'test_bernadette_dubuque@elastic.co',
+      full_name: 'Bernadette DuBuque',
+    },
+  },
+  {
+    uid: 'u_23dig2_LiJBxztf2iImjtAOW6zxfPJTkrOrrgwgYk4M_0',
+    enabled: true,
+    data: {},
+    user: {
+      username: 'test_delpha_swaniawski',
+      email: 'test_delpha_swaniawski@elastic.co',
+      full_name: 'Delpha Swaniawski',
+    },
+  },
+];

@@ -43,7 +43,7 @@ export const importRuleExceptions = async ({
   const {
     errors,
     success,
-    // return only count of exception list items, without count excpetions list
+    // return only count of exception list items, without count exceptions list
     // to be consistent with UI, and users shouldn't know about backend structure
     success_count_exception_list_items: successCount,
   } = await exceptionsClient.importExceptionListAndItemsAsArray({

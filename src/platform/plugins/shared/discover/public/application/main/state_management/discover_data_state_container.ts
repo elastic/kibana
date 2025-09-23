@@ -25,17 +25,17 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
-import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
+import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -161,7 +161,7 @@ export function getDataStateContainer({
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications, profilesManager } = services;
+  const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<void>(1);
@@ -249,19 +249,26 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
+            selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const scopedProfilesManager = scopedProfilesManager$.getValue();
+          const scopedEbtManager = scopedEbtManager$.getValue();
 
           const searchSessionId =
             (options.fetchMore && dataRequestParams.searchSessionId) ||
             searchSessionManager.getNextSearchSessionId();
 
-          const commonFetchDeps = {
+          const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
+            dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
             searchSessionId,
             services,
-            getAppState: appStateContainer.getState,
+            appStateContainer,
             internalState,
             savedSearch: savedSearchContainer.getState(),
+            scopedProfilesManager,
+            scopedEbtManager,
           };
 
           abortController?.abort();
@@ -269,17 +276,20 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreStartTime = window.performance.now();
+            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
 
-            await fetchMoreDocuments(dataSubjects, {
+            // Calculate query range in seconds
+            const timeRange = timefilter.getAbsoluteTime();
+            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+
+            await fetchMoreDocuments({
+              ...commonFetchParams,
               abortController: abortControllerFetchMore,
-              ...commonFetchDeps,
             });
 
-            const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
-            reportPerformanceMetricEvent(services.analytics, {
-              eventName: 'discoverFetchMore',
-              duration: fetchMoreDuration,
+            fetchMoreTracker.reportEvent({
+              key1: 'query_range_secs',
+              value1: queryRangeSeconds,
             });
 
             return;
@@ -295,16 +305,15 @@ export function getDataStateContainer({
             })
           );
 
-          await profilesManager.resolveDataSourceProfile({
+          await scopedProfilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: savedSearchContainer.getState().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
-          const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
-            ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
+            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
             : undefined;
           const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
 
@@ -320,17 +329,18 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllStartTime = window.performance.now();
+          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 
-          await fetchAll(
-            dataSubjects,
-            options.reset,
-            {
-              abortController,
-              ...commonFetchDeps,
-            },
+          // Calculate query range in seconds
+          const timeRange = timefilter.getAbsoluteTime();
+          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+
+          await fetchAll({
+            ...commonFetchParams,
+            reset: options.reset,
+            abortController,
             getCurrentTab,
-            async () => {
+            onFetchRecordsComplete: async () => {
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
@@ -356,16 +366,16 @@ export function getDataStateContainer({
                     columns: false,
                     rowHeight: false,
                     breakdownField: false,
+                    hideChart: false,
                   },
                 })
               );
-            }
-          );
+            },
+          });
 
-          const fetchAllDuration = window.performance.now() - fetchAllStartTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAll',
-            duration: fetchAllDuration,
+          fetchAllTracker.reportEvent({
+            key1: 'query_range_secs',
+            value1: queryRangeSeconds,
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

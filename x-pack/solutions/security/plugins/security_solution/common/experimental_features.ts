@@ -84,6 +84,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * `runscript` response actions for SentinelOne hosts.
+   *
+   * Release: 9.2.0 (earlier for serverless)
+   */
+  responseActionsSentinelOneRunScriptEnabled: true,
+
+  /**
    * Space awareness for Elastic Defend management.
    * Feature depends on Fleet's corresponding features also being enabled:
    * - `subfeaturePrivileges`
@@ -91,7 +98,7 @@ export const allowedExperimentalValues = Object.freeze({
    * and Fleet must set it runtime mode to spaces by calling the following API:
    * - `POST /internal/fleet/enable_space_awareness`
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: true,
 
   /**
    * Disables new notes
@@ -102,11 +109,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -122,6 +124,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: true,
+
+  /**
+   * Disables ESQL-based risk scoring
+   */
+  disableESQLRiskScoring: true,
+  /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -166,7 +177,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
-  responseActionsTelemetryEnabled: false,
+  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
@@ -191,12 +202,33 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
+
+  /**
+   * Enables scheduling gap fills for rules
+   */
+  bulkFillRuleGapsEnabled: true,
+
+  /**
+   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
+   */
+
+  continueSuppressionWindowAdvancedSettingEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the rule's bulk action to manage alert suppression
+   */
+  bulkEditAlertSuppressionEnabled: true,
+
+  /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
    * Enables the new data ingestion hub
@@ -213,11 +245,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
   serviceEntityStoreEnabled: true,
+  /**
 
   /**
-   * Enables Privilege Monitoring
+   * Enables Integrations Sync for Privileged User Monitoring
    */
-  privilegeMonitoringEnabled: false,
+  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -225,9 +258,14 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
+   * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsights: true,
+  defendInsightsPolicyResponseFailure: false,
+
+  /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
 
   /**
    * Disables flyout history and new preview navigation
@@ -237,7 +275,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to edit highlighted fields in the alertflyout
    */
-  editHighlightedFieldsEnabled: false,
+  editHighlightedFields: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -260,9 +298,36 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Automatically installs the security AI prompts package
+   * Enables Microsoft Defender for Endpoint's RunScript command
+   * Release: 8.19/9.1
    */
-  securityAIPromptsEnabled: false,
+  microsoftDefenderEndpointRunScriptEnabled: true,
+
+  /**
+   * Enables advanced mode for Trusted Apps creation and update
+   */
+  trustedAppsAdvancedMode: true,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: false,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: false,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -278,7 +343,6 @@ const disableExperimentalPrefix = 'disable:' as const;
  * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]

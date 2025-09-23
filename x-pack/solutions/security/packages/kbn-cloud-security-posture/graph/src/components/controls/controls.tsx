@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
+  EuiHorizontalRule,
+  EuiIcon,
   useEuiTheme,
   type CommonProps,
 } from '@elastic/eui';
@@ -23,6 +24,8 @@ import {
   GRAPH_CONTROLS_ZOOM_IN_ID,
   GRAPH_CONTROLS_ZOOM_OUT_ID,
 } from '../test_ids';
+import fitToViewIcon from '../../assets/icons/fit_to_view.svg';
+import type { NodeViewModel } from '../types';
 
 const selector = (s: ReactFlowState) => ({
   minZoomReached: s.transform[2] <= s.minZoom,
@@ -32,7 +35,8 @@ const selector = (s: ReactFlowState) => ({
 export interface ControlsProps extends CommonProps {
   showZoom?: boolean;
   showFitView?: boolean;
-  showCenter?: boolean;
+  /** Array of node IDs the graph must center on */
+  nodeIdsToCenterOn?: NodeViewModel['id'][];
   fitViewOptions?: FitViewOptions;
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
@@ -57,10 +61,12 @@ const CenterLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.
   defaultMessage: 'Center',
 });
 
+const fitToViewIconFn = () => <EuiIcon type={fitToViewIcon} size="m" color="text" />;
+
 export const Controls = ({
   showZoom = true,
   showFitView = true,
-  showCenter = true,
+  nodeIdsToCenterOn = [],
   fitViewOptions,
   onZoomIn,
   onZoomOut,
@@ -72,73 +78,99 @@ export const Controls = ({
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
-  const onZoomInHandler = () => {
-    zoomIn();
+  // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
+  // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
+  const sanitizedNodeIds = useMemo(
+    () =>
+      (nodeIdsToCenterOn ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
+    [nodeIdsToCenterOn]
+  );
+
+  const onZoomInHandler = useCallback(() => {
+    zoomIn({ duration: fitViewOptions?.duration });
     onZoomIn?.();
-  };
+  }, [fitViewOptions?.duration, zoomIn, onZoomIn]);
 
-  const onZoomOutHandler = () => {
-    zoomOut();
+  const onZoomOutHandler = useCallback(() => {
+    zoomOut({ duration: fitViewOptions?.duration });
     onZoomOut?.();
-  };
+  }, [fitViewOptions?.duration, zoomOut, onZoomOut]);
 
-  const onFitViewHandler = () => {
+  const onFitViewHandler = useCallback(() => {
     fitView(fitViewOptions);
     onFitView?.();
-  };
+  }, [fitViewOptions, fitView, onFitView]);
+
+  const onCenterHandler = useCallback(() => {
+    fitView({ ...fitViewOptions, nodes: sanitizedNodeIds });
+    onCenter?.();
+  }, [fitViewOptions, fitView, onCenter, sanitizedNodeIds]);
 
   const btnCss = css`
+    border-radius: 0;
+  `;
+
+  const groupCss = css`
     border: ${euiTheme.border.thin};
     border-radius: ${euiTheme.border.radius.medium};
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    box-sizing: content-box;
   `;
 
+  const showCenter = sanitizedNodeIds.length > 0;
+
   if (!showZoom && !showCenter && !showFitView) {
-    return <></>;
+    return null;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
+    <EuiFlexGroup direction="column" gutterSize="none" css={groupCss} {...props}>
       {showZoom && (
-        <EuiFlexItem grow={false} css={btnCss}>
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="plusInCircle"
+              aria-label={ZoomInLabel}
+              size="m"
+              color="text"
+              data-test-subj={GRAPH_CONTROLS_ZOOM_IN_ID}
+              disabled={maxZoomReached}
+              css={btnCss}
+              onClick={onZoomInHandler}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="minusInCircle"
+              aria-label={ZoomOutLabel}
+              size="m"
+              color="text"
+              data-test-subj={GRAPH_CONTROLS_ZOOM_OUT_ID}
+              disabled={minZoomReached}
+              css={btnCss}
+              onClick={onZoomOutHandler}
+            />
+          </EuiFlexItem>
+        </>
+      )}
+      {showCenter && (
+        <EuiFlexItem grow={false}>
+          {showZoom ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
-            iconType="plusInCircle"
-            aria-label={ZoomInLabel}
+            iconType="bullseye"
+            aria-label={CenterLabel}
             size="m"
             color="text"
-            data-test-subj={GRAPH_CONTROLS_ZOOM_IN_ID}
-            disabled={maxZoomReached}
-            onClick={onZoomInHandler}
-          />
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            aria-label={ZoomOutLabel}
-            size="m"
-            color="text"
-            data-test-subj={GRAPH_CONTROLS_ZOOM_OUT_ID}
-            disabled={minZoomReached}
-            onClick={onZoomOutHandler}
+            data-test-subj={GRAPH_CONTROLS_CENTER_ID}
+            css={btnCss}
+            onClick={onCenterHandler}
           />
         </EuiFlexItem>
       )}
-      {showZoom && showCenter && <EuiSpacer size="xs" />}
-      {showCenter && (
-        <EuiButtonIcon
-          iconType="bullseye"
-          aria-label={CenterLabel}
-          size="m"
-          color="text"
-          data-test-subj={GRAPH_CONTROLS_CENTER_ID}
-          css={btnCss}
-          onClick={() => onCenter?.()}
-        />
-      )}
-      {(showZoom || showCenter) && showFitView && <EuiSpacer size="xs" />}
       {showFitView && (
         <EuiFlexItem grow={false}>
+          {showZoom || showCenter ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
-            iconType="continuityWithin"
+            iconType={fitToViewIconFn}
             aria-label={FitViewLabel}
             size="m"
             color="text"

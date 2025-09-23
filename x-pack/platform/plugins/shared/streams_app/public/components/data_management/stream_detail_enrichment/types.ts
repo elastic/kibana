@@ -5,36 +5,41 @@
  * 2.0.
  */
 
-import {
-  DateProcessorConfig,
-  DissectProcessorConfig,
-  GrokProcessorConfig,
-  ProcessorDefinition,
-  ProcessorTypeOf,
-} from '@kbn/streams-schema';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type {
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  SetProcessor,
+  StreamlangWhereBlockWithUIAttributes,
+} from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+/**
+ * Processors' types
+ */
 
-export type WithUIAttributes<T extends ProcessorDefinition> = T & {
-  id: string;
-  type: ProcessorTypeOf<T>;
-};
-
-export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
-
-export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
-  type: 'grok';
+export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
   patterns: DraftGrokExpression[];
 };
 
-export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
+export type DissectFormState = DissectProcessor;
+export type DateFormState = DateProcessor;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 
-export type DateFormState = DateProcessorConfig & { type: 'date' };
+export type SetFormState = SetProcessor;
 
-export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
+export type SpecialisedFormState =
+  | GrokFormState
+  | DissectFormState
+  | DateFormState
+  | ManualIngestPipelineFormState
+  | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>
@@ -42,4 +47,26 @@ export type ExtractBooleanFields<TInput> = NonNullable<
         [K in keyof TInput]: boolean extends TInput[K] ? K : never;
       }[keyof TInput]
     : never
+>;
+
+/**
+ * Data sources types
+ */
+export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
+  id: string;
+};
+
+export type RandomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'random-samples' }
+>;
+
+export type KqlSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'kql-samples' }
+>;
+
+export type CustomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'custom-samples' }
 >;

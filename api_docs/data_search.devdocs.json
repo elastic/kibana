@@ -159,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -601,6 +601,82 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStart.showSearchSessionsFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "showSearchSessionsFlyout",
+            "description": [
+              "\nShows a flyout with a table to manage search sessions."
+            ],
+            "signature": [
+              "(attrs?: { appId?: string | undefined; onBackgroundSearchOpened?: ",
+              "BackgroundSearchOpenedHandler",
+              " | undefined; } | undefined) => void"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attrs",
+                "description": [],
+                "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.appId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "appId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.onBackgroundSearchOpened",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "onBackgroundSearchOpened",
+                    "description": [],
+                    "signature": [
+                      "BackgroundSearchOpenedHandler",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStart.isBackgroundSearchEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBackgroundSearchEnabled",
+            "description": [
+              "\nFeature flag value to make it easier to use in different plugins"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStart.searchSource",
             "type": "Object",
             "tags": [],
@@ -631,7 +707,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -1133,7 +1209,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1667,7 +1743,7 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "({ savedObjectsClient, asCurrentUserElasticsearchClient }: ",
               "SearchSessionStatusDependencies",
               ", user: ",
               "AuthenticatedUser",
@@ -1692,7 +1768,7 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient, internalElasticsearchClient }",
+                "label": "{ savedObjectsClient, asCurrentUserElasticsearchClient }",
                 "description": [],
                 "signature": [
                   "SearchSessionStatusDependencies"
@@ -6660,7 +6736,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -6838,7 +6914,7 @@
                     "section": "def-common.SearchSourceSearchOptions",
                     "text": "SearchSourceSearchOptions"
                   },
-                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7228,60 +7304,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggType.Unnamed",
-            "type": "Function",
-            "tags": [
-              "class",
-              "private"
-            ],
-            "label": "Constructor",
-            "description": [
-              "\nGeneric AggType Constructor\n\nUsed to create the values exposed by the agg_types module.\n"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [
-                  "- used to set the properties of the AggType"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggTypeConfig",
-                    "text": "AggTypeConfig"
-                  },
-                  "<TAggConfig, ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggParamType",
-                    "text": "AggParamType"
-                  },
-                  "<TAggConfig>>"
-                ],
-                "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -12889,7 +12911,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12925,6 +12947,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -33650,7 +33699,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33828,7 +33877,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

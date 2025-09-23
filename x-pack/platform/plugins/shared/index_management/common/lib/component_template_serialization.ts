@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   TemplateFromEs,
   ComponentTemplateFromEs,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
   ComponentTemplateSerialized,
 } from '../types';
-import { DataStreamOptions } from '../types/data_streams';
+import type { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -72,25 +72,27 @@ export function deserializeComponentTemplate(
 }
 
 export function deserializeComponentTemplateList(
-  componentTemplateEs: ComponentTemplateFromEs,
+  componentTemplatesEs: ComponentTemplateFromEs[],
   indexTemplatesEs: TemplateFromEs[]
 ) {
-  const { name, component_template: componentTemplate } = componentTemplateEs;
-  const { template, _meta, deprecated } = componentTemplate;
-
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
-  const componentTemplateListItem: ComponentTemplateListItem = {
-    name,
-    usedBy: indexTemplatesToUsedBy[name] || [],
-    isDeprecated: Boolean(deprecated === true),
-    isManaged: Boolean(_meta?.managed === true),
-    hasSettings: hasEntries(template.settings),
-    hasMappings: hasEntries(template.mappings),
-    hasAliases: hasEntries(template.aliases),
-  };
+  return componentTemplatesEs.map((componentTemplateEs) => {
+    const { name, component_template: componentTemplate } = componentTemplateEs;
+    const { template, _meta, deprecated } = componentTemplate;
 
-  return componentTemplateListItem;
+    const componentTemplateListItem: ComponentTemplateListItem = {
+      name,
+      usedBy: indexTemplatesToUsedBy[name] || [],
+      isDeprecated: Boolean(deprecated === true),
+      isManaged: Boolean(_meta?.managed === true),
+      hasSettings: hasEntries(template.settings),
+      hasMappings: hasEntries(template.mappings),
+      hasAliases: hasEntries(template.aliases),
+    };
+
+    return componentTemplateListItem;
+  });
 }
 
 export function serializeComponentTemplate(

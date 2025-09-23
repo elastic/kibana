@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanelProps,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,7 +20,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { OverviewPanel } from './overview_panel';
-import './select_client.scss';
 
 export interface SelectClientPanelProps {
   docLinks: { elasticsearchClients: string; kibanaRunApiInConsole: string };
@@ -72,7 +66,7 @@ export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = 
             defaultMessage: 'Try it now in Console',
           })}
           size="m"
-          iconType="iInCircle"
+          iconType="info"
         >
           <p>
             {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {

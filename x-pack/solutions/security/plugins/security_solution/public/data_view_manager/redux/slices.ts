@@ -10,8 +10,12 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
-import type { ScopedDataViewSelectionState, SharedDataViewSelectionState } from './types';
-import { selectDataViewAsync } from './actions';
+import type {
+  ScopedDataViewSelectionState,
+  SharedDataViewSelectionState,
+  SignalIndexMetadata,
+} from './types';
+import { selectDataViewAsync, type SelectDataViewAsyncPayload } from './actions';
 
 export const initialScopeState: ScopedDataViewSelectionState = {
   dataViewId: null,
@@ -22,6 +26,9 @@ export const initialSharedState: SharedDataViewSelectionState = {
   dataViews: [],
   adhocDataViews: [],
   status: 'pristine',
+  signalIndex: null,
+  defaultDataViewId: null,
+  alertDataViewId: null,
 };
 
 export const sharedDataViewManagerSlice = createSlice({
@@ -31,6 +38,16 @@ export const sharedDataViewManagerSlice = createSlice({
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
       state.dataViews = action.payload;
       state.status = 'ready';
+    },
+    setSignalIndex: (state, action: PayloadAction<SignalIndexMetadata>) => {
+      state.signalIndex = action.payload;
+    },
+    setDataViewId: (
+      state,
+      action: PayloadAction<{ defaultDataViewId: string; alertDataViewId: string }>
+    ) => {
+      state.defaultDataViewId = action.payload.defaultDataViewId;
+      state.alertDataViewId = action.payload.alertDataViewId;
     },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();
@@ -42,14 +59,20 @@ export const sharedDataViewManagerSlice = createSlice({
 
         state.dataViews.push(dataViewSpec);
       } else {
-        if (state.adhocDataViews.find((dv) => dv.title === dataViewSpec.title)) {
+        if (
+          // NOTE: user is allowed to duplicate a managed data view and
+          // we want both to show up in the list
+          state.adhocDataViews.find(
+            (dv) => dv.title === dataViewSpec.title && dv.managed === dataViewSpec.managed
+          )
+        ) {
           return;
         }
 
         state.adhocDataViews.push(dataViewSpec);
       }
     },
-    init: (state) => {
+    init: (state, _: PayloadAction<SelectDataViewAsyncPayload[]>) => {
       state.status = 'loading';
     },
     error: (state) => {

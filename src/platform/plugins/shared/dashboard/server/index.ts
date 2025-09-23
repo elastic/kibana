@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   /**
@@ -39,7 +40,13 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
-export type { DashboardAttributes, DashboardPanel } from './content_management';
-export type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+export type {
+  DashboardAttributes,
+  DashboardPanel,
+  DashboardSection,
+  DashboardFilter,
+  DashboardQuery,
+} from './content_management';
+export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 
 export { PUBLIC_API_PATH } from './api/constants';

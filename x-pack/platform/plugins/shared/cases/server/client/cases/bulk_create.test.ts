@@ -121,6 +121,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -134,6 +135,7 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -165,6 +167,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -178,6 +181,7 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -245,6 +249,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -284,6 +289,7 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {

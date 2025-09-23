@@ -6,6 +6,7 @@
  */
 
 import { assign, concat } from 'lodash/fp';
+import { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   EntityType,
   InitEntityEngineRequestBody,
@@ -39,6 +40,8 @@ interface EngineDescriptionParams {
   defaultIndexPatterns: string[];
 }
 
+const ENABLED_CAPABILITIES: EntityStoreCapability[] = [EntityStoreCapability.CRUD_API];
+
 export const createEngineDescription = (params: EngineDescriptionParams) => {
   const { entityType, namespace, config, requestParams = {}, defaultIndexPatterns } = params;
 
@@ -59,6 +62,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
     docsPerSecond: options.docsPerSecond,
     lookbackPeriod: options.lookbackPeriod,
     timestampField: options.timestampField,
+    maxPageSearchSize: options.maxPageSearchSize,
   };
 
   const defaults = {
@@ -73,6 +77,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
       })
     ),
     dynamic: description.dynamic || false,
+    capabilities: ENABLED_CAPABILITIES,
   };
 
   const updatedDescription: EntityEngineInstallationDescriptor = {

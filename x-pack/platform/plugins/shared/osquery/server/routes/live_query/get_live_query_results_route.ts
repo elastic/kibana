@@ -7,15 +7,16 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
-import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
@@ -30,8 +31,14 @@ import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
-export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const getLiveQueryResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -62,6 +69,49 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
+          let integrationNamespaces: Record<string, string[]> = {};
+          let spaceAwareIndexPatterns: string[] = [];
+
+          const logger = osqueryContext.logFactory.get('get_live_query_results');
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+
+            logger.debug(
+              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+            );
+
+            const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
+
+            spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
+              const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+
+              if (osqueryNamespaces && osqueryNamespaces.length > 0) {
+                return osqueryNamespaces.map((namespace) =>
+                  buildIndexNameWithNamespace(pattern, namespace)
+                );
+              }
+
+              return [pattern];
+            });
+
+            logger.debug(
+              `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
+            );
+          }
+
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
@@ -69,27 +119,41 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                 actionId: request.params.id,
                 kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
           );
 
+          if (!actionDetails) {
+            return response.notFound({ body: { message: 'Action not found' } });
+          }
+
           const queries = actionDetails?._source?.queries;
+
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
           await lastValueFrom(
             zip(
               ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+                getActionResponses(
+                  search,
+                  query.action_id,
+                  query.agents?.length ?? 0,
+                  namespacesOrUndefined
+                )
               )
             )
           );
-
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
@@ -100,6 +164,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
+                integrationNamespaces: namespacesOrUndefined,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

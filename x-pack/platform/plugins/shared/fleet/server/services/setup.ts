@@ -22,7 +22,7 @@ import { MessageSigningError } from '../../common/errors';
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
-
+import { scheduleSetupTask } from '../tasks/setup/schedule';
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
 
 import { appContextService } from './app_context';
@@ -66,10 +66,7 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
-import {
-  createCCSIndexPatterns,
-  createOrUpdateFleetSyncedIntegrationsIndex,
-} from './setup/fleet_synced_integrations';
+import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 
@@ -168,14 +165,12 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Setting up Fleet outputs');
-  await Promise.all([
-    ensurePreconfiguredOutputs(
-      soClient,
-      esClient,
-      getPreconfiguredOutputFromConfig(appContextService.getConfig())
-    ),
-    settingsService.settingsSetup(soClient),
-  ]);
+  await settingsService.settingsSetup(soClient);
+  await ensurePreconfiguredOutputs(
+    soClient,
+    esClient,
+    getPreconfiguredOutputFromConfig(appContextService.getConfig())
+  );
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
@@ -262,8 +257,13 @@ async function createSetupSideEffects(
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
-  logger.debug('Backfilling package policy supports_agentless field');
-  await backfillPackagePolicySupportsAgentless(esClient);
+  let backfillPackagePolicySupportsAgentlessError;
+  try {
+    logger.debug('Backfilling package policy supports_agentless field');
+    await backfillPackagePolicySupportsAgentless(esClient);
+  } catch (error) {
+    backfillPackagePolicySupportsAgentlessError = { error };
+  }
 
   let ensureCorrectAgentlessSettingsIdsError;
   try {
@@ -276,9 +276,6 @@ async function createSetupSideEffects(
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
-  logger.debug('Create or update fleet-synced-integrations index');
-  await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
-
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
@@ -286,8 +283,14 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(backfillPackagePolicySupportsAgentlessError
+      ? [backfillPackagePolicySupportsAgentlessError]
+      : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
+
+  logger.info('Scheduling async setup tasks');
+  await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

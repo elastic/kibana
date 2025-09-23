@@ -16,6 +16,7 @@ export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';
 export const EVENT_OUTCOME_FIELD = 'event.outcome';
 export const INDEX_FIELD = '_index';
+export const EVENT_CATEGORY_FIELD = 'event.category';
 
 // Trace fields
 export const TRACE_ID_FIELD = 'trace.id';
@@ -32,11 +33,22 @@ export const SPAN_TYPE_FIELD = 'span.type';
 export const SPAN_SUBTYPE_FIELD = 'span.subtype';
 export const SPAN_DESTINATION_SERVICE_RESOURCE_FIELD = 'span.destination.service.resource';
 export const PROCESSOR_EVENT_FIELD = 'processor.event';
+export const OTEL_SPAN_KIND = 'kind';
+export const OTEL_DURATION = 'duration';
+export const OTEL_STATUS_CODE = 'status.code';
+export const OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
+  'resource.attributes.telemetry.sdk.language';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
 export const DATASTREAM_DATASET_FIELD = 'data_stream.dataset';
 export const DATASTREAM_TYPE_FIELD = 'data_stream.type';
+
+export const OTEL_LINKS_TRACE_ID = 'links.trace_id';
+export const OTEL_LINKS_SPAN_ID = 'links.span_id';
+
+export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
+export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
 // Resource Fields
 export const AGENT_NAME_FIELD = 'agent.name';

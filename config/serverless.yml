@@ -10,6 +10,9 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.4'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -158,10 +161,11 @@ management.deeplinks.navLinkStatus: visible
 
 # Onboarding team UI configurations
 xpack.cloud_integrations.data_migration.enabled: false
-guided_onboarding.enabled: false
+
 
 # Other disabled plugins
 xpack.canvas.enabled: false
+xpack.reindex_service.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
@@ -171,6 +175,24 @@ xpack.security.showInsecureClusterWarning: false
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
+
+xpack.ml.nlp:
+  enabled: false
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        maxThreads: 2
+      medium:
+        min: 0
+        max: 32
+        maxThreads: 4
+      high:
+        min: 0
+        max: 512
+        maxThreads: 8
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
@@ -251,6 +273,7 @@ xpack.reporting.csv.maxConcurrentShardRequests: 0
 # Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
+monitoring_collection.enabled: false
 
 ## Enable uiSettings validations
 data.enableUiSettingsValidations: true
@@ -263,3 +286,12 @@ xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: true
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'
+
+# Gen AI Settings plugin
+xpack.genAiSettings:
+  showAiBreadcrumb: false
+  showSpacesIntegration: false

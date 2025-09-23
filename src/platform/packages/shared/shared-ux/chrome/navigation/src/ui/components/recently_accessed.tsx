@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCollapsibleNavItem, type EuiCollapsibleNavItemProps } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
@@ -16,6 +17,7 @@ import type { Observable } from 'rxjs';
 import { useNavigation as useServices } from '../../services';
 
 import { getI18nStrings } from '../i18n_strings';
+import { isSpecialClick } from '../../utils';
 
 const MAX_RECENTLY_ACCESS_ITEMS = 5;
 
@@ -51,7 +53,11 @@ export const RecentlyAccessed: FC<Props> = ({
           title: label,
           href,
           'data-test-subj': `nav-recentlyAccessed-item nav-recentlyAccessed-item-${id}`,
-          onClick: (e: React.MouseEvent) => {
+          onClick: (e: React.MouseEvent<HTMLElement>) => {
+            if (isSpecialClick(e)) {
+              return;
+            }
+
             e.preventDefault();
             navigateToUrl(href);
           },

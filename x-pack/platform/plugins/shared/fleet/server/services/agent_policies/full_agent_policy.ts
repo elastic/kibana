@@ -40,7 +40,9 @@ import {
   dataTypes,
   DEFAULT_OUTPUT,
   kafkaCompressionType,
+  OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
@@ -60,6 +62,7 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { generateOtelcolConfig } from './otel_collector';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -77,18 +80,31 @@ export async function getFullAgentPolicy(
   id: string,
   options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
+  const logger = appContextService.getLogger().get('getFullAgentPolicy');
+
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
+  logger.debug(
+    `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   const standalone = options?.standalone ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
+    logger.debug(`agent policy [${id}] was provided via options.agentPolicy - no need to fetch it`);
     agentPolicy = options.agentPolicy;
   } else {
+    logger.debug(`Fetching agent policy doc for [${id}]`);
     agentPolicy = await fetchAgentPolicy(soClient, id);
   }
 
   if (!agentPolicy) {
+    logger.debug(`Agent policy [${id}] was not found. Exiting.`);
     return null;
   }
+
+  logger.debug(`fetching related saved objects for agent policy [${id}]`);
 
   const {
     outputs,
@@ -99,6 +115,7 @@ export async function getFullAgentPolicy(
     downloadSource,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
+
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -111,6 +128,10 @@ export async function getFullAgentPolicy(
     // info concurrently below
     packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
   }
+
+  logger.debug(
+    () => `fetching info for packages:${JSON.stringify(Array.from(packageInfoCache.keys()))}`
+  );
 
   // Fetch all package info concurrently
   await Promise.all(
@@ -128,34 +149,45 @@ export async function getFullAgentPolicy(
   );
   const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
-  const inputs = (
-    await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput),
-      agentPolicy.namespace,
-      agentPolicy.global_data_tags
-    )
-  ).map((input) => {
-    // fix output id for default output
-    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
-    if (output) {
-      input.use_output = getOutputIdForAgentPolicy(output);
-    }
-    if (input.type === 'fleet-server' && fleetServerHost) {
-      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-      if (sslInputConfig) {
-        input = {
-          ...input,
-          ...sslInputConfig,
-          ...(bootstrapOutputConfig
-            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-            : {}),
-        };
+  logger.debug(() => `Fetching agent inputs for policy [${id}]`);
+
+  const agentInputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
+  );
+
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelIntegrations) {
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
+  }
+
+  const inputs = agentInputs
+    // filter out the otelcol inputs, they will be added at the root of the policy
+    .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
+    .map((input) => {
+      // fix output id for default output
+      const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+      if (output) {
+        input.use_output = getOutputIdForAgentPolicy(output);
       }
-    }
-    return input;
-  });
+      if (input.type === 'fleet-server' && fleetServerHost) {
+        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+        if (sslInputConfig) {
+          input = {
+            ...input,
+            ...sslInputConfig,
+            ...(bootstrapOutputConfig
+              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+              : {}),
+          };
+        }
+      }
+      return input;
+    });
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -186,6 +218,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
+    ...(otelcolConfig ? otelcolConfig : {}),
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
@@ -241,7 +274,7 @@ export async function getFullAgentPolicy(
     {}
   );
   for (const [outputId, packagePolicies] of Object.entries(packagePoliciesByOutputId)) {
-    const dataPermissions = await storedPackagePoliciesToAgentPermissions(
+    const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
       packagePolicies
@@ -288,6 +321,22 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
       }
 
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+      if (originalOutput?.write_to_logs_streams) {
+        const streamsPermissions = {
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
+      }
+
       outputPermissions[outputId] = permissions;
     }
     return outputPermissions;
@@ -309,10 +358,13 @@ export async function getFullAgentPolicy(
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
   if (options?.standalone !== true && messageSigningService && fullAgentPolicy.agent) {
+    logger.debug(`Retrieving message signing service and signing policy data`);
+
     const publicKey = await messageSigningService.getPublicKey();
     const tokenHash =
       (await appContextService
         .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
         ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
 
     fullAgentPolicy.agent.protection = {
@@ -340,6 +392,8 @@ export async function getFullAgentPolicy(
       data: signedData.toString('base64'),
       signature,
     };
+
+    logger.debug(`Policy [${fullAgentPolicy.id}] was signed`);
   }
 
   if (agentPolicy.overrides) {
@@ -349,6 +403,8 @@ export async function getFullAgentPolicy(
     delete fullAgentPolicy.agent?.protection;
     delete fullAgentPolicy.signed;
   }
+
+  logger.debug(`Building of full agent policy for [${id}] done.`);
 
   return fullAgentPolicy;
 }
@@ -581,10 +637,10 @@ export function transformOutputToFullPolicyOutput(
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
     ...(secrets ? { secrets } : {}),
   };
-  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+  if (ssl) {
     newOutput.ssl = {
-      ...newOutput.ssl,
-      ...ssl,
+      ...ssl, // ssl coming from preconfig
+      ...newOutput.ssl, // ssl coming from config_yaml
     };
   }
 

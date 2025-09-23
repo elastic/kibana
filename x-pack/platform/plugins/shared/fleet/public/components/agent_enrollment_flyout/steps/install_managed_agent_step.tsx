@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { EuiSwitchProps } from '@elastic/eui';
-
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import { InstallSection } from '../../enrollment_instructions/install_section';
@@ -32,8 +30,7 @@ export const InstallManagedAgentStep = ({
   fullCopyButton,
   onCopy,
   rootIntegrations,
-  showCompleteAgentInstructions,
-  onChangeShowCompleteAgentInstructions,
+  nonFipsIntegrations,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
@@ -46,8 +43,7 @@ export const InstallManagedAgentStep = ({
   fullCopyButton?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  showCompleteAgentInstructions: boolean;
-  onChangeShowCompleteAgentInstructions: EuiSwitchProps['onChange'];
+  nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -67,8 +63,7 @@ export const InstallManagedAgentStep = ({
           fullCopyButton={fullCopyButton}
           fleetServerHost={fleetServerHost}
           rootIntegrations={rootIntegrations}
-          showCompleteAgentInstructions={showCompleteAgentInstructions}
-          onChangeShowCompleteAgentInstructions={onChangeShowCompleteAgentInstructions}
+          nonFipsIntegrations={nonFipsIntegrations}
         />
       ) : (
         <React.Fragment />

@@ -17,7 +17,8 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
-import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
+import type { AdditionalContext } from '../utils';
+import { CONTAINER_ID, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -141,20 +142,21 @@ export const getData = async (
         const bucketHits = additionalContext?.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+        const flattenGrouping: Record<string, string> = {};
+        const groups: string[] = typeof groupBy === 'string' ? [groupBy] : groupBy ?? [];
+        groups.map((group: string, groupIndex) => {
+          flattenGrouping[group] = bucket.key[`groupBy${groupIndex}`];
+        });
 
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
             value: null,
             bucketKey: bucket.key,
+            flattenGrouping,
           };
         } else {
           const value = aggregatedValue ? aggregatedValue.value : null;
-          const flattenGrouping: Record<string, string> = {};
-          const groups: string[] = typeof groupBy === 'string' ? [groupBy] : groupBy ?? [];
-          groups.map((group: string, groupIndex) => {
-            flattenGrouping[group] = bucket.key[`groupBy${groupIndex}`];
-          });
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,

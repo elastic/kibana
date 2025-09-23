@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewSpec } from '../../../common/types';
-import { DataViewsService } from '../../../common/data_views';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewSpec } from '../../../common/types';
+import type { DataViewsService } from '../../../common/data_views';
 import { handleErrors } from './util/handle_errors';
 import { dataViewSpecSchema } from '../schema';
 import type {
@@ -26,7 +26,8 @@ import {
   INITIAL_REST_VERSION,
   CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
-import { DataViewSpecRestResponse } from '../route_types';
+import type { DataViewSpecRestResponse } from '../route_types';
+import { toApiSpec } from './util/to_api_spec';
 
 interface CreateDataViewArgs {
   dataViewsService: DataViewsService;
@@ -122,7 +123,7 @@ const registerCreateDataViewRouteFactory =
 
             const responseBody: Record<string, DataViewSpecRestResponse> = {
               [serviceKey]: {
-                ...(await dataView.toSpec(toSpecParams)),
+                ...toApiSpec(await dataView.toSpec(toSpecParams)),
                 namespaces: dataView.namespaces,
               },
             };

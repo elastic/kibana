@@ -15,81 +15,88 @@ import { GetRemoteSyncedIntegrationsStatusResponseSchema } from '../../types/mod
 
 import { GetRemoteSyncedIntegrationsInfoRequestSchema } from '../../types';
 
-import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
-
 import {
   getRemoteSyncedIntegrationsStatusHandler,
   getRemoteSyncedIntegrationsInfoHandler,
 } from './handler';
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
-  if (canEnableSyncIntegrations()) {
-    router.versioned
-      .get({
-        path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_API_PRIVILEGES.SETTINGS.READ,
-              FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
-            ],
-          },
-        },
-        summary: `Get CCR Remote synced integrations status`,
-        options: {
-          tags: ['oas-tag:CCR Remote synced integrations'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: {},
-            response: {
-              200: {
-                body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
-            },
-          },
-        },
-        getRemoteSyncedIntegrationsStatusHandler
-      );
-
-    router.versioned
-      .get({
-        path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_API_PRIVILEGES.SETTINGS.READ,
-              FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
-            ],
-          },
-        },
-        summary: `Get CCR Remote synced integrations status by outputId`,
-        options: {
-          tags: ['oas-tag:CCR Remote synced integrations'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: GetRemoteSyncedIntegrationsInfoRequestSchema,
-            response: {
-              200: {
-                body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
-            },
-          },
-        },
-        getRemoteSyncedIntegrationsInfoHandler
-      );
+export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean) => {
+  if (isServerless) {
+    return;
   }
+  router.versioned
+    .get({
+      path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
+      },
+      summary: `Get remote synced integrations status`,
+      options: {
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getRemoteSyncedIntegrationsStatusHandler
+    );
+
+  router.versioned
+    .get({
+      path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+          ],
+        },
+      },
+      summary: `Get remote synced integrations status by outputId`,
+      options: {
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetRemoteSyncedIntegrationsInfoRequestSchema,
+          response: {
+            200: {
+              body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getRemoteSyncedIntegrationsInfoHandler
+    );
 };

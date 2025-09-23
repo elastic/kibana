@@ -29,7 +29,6 @@ jest.mock('../app_context', () => {
   };
 });
 jest.mock('../audit_logging');
-
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
@@ -39,6 +38,9 @@ jest.mock('../agent_policy', () => {
     },
   };
 });
+jest.mock('../secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
 
 const mockRunAsync = jest.fn().mockResolvedValue({});
 jest.mock('./update_agent_tags_action_runner', () => ({
@@ -440,7 +442,7 @@ describe('update_agent_tags', () => {
         expect.objectContaining({
           batchSize: 10000,
           kuery:
-            '(namespaces:(default) or not namespaces:*) AND (status:healthy OR status:offline) AND (tags:remove)',
+            '((namespaces:"default" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),

@@ -9,8 +9,12 @@
 
 import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import type { TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
+import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -28,8 +32,18 @@ type CreateInternalStateAsyncThunk = ReturnType<
   }>
 >;
 
-export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
-  createAsyncThunk.withTypes();
+export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
+  ...[typePrefix, payloadCreator, options]: Parameters<CreateInternalStateAsyncThunk>
+) => {
+  return createAsyncThunk(typePrefix, payloadCreator, {
+    ...options,
+    serializeError: (error) => {
+      return error instanceof SavedObjectNotFound
+        ? error
+        : options?.serializeError?.(error) ?? miniSerializeError(error);
+    },
+  });
+}) as CreateInternalStateAsyncThunk;
 
 type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
 type VoidIfEmpty<T> = keyof T extends never ? void : T;
@@ -44,15 +58,64 @@ export const createTabActionInjector =
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
-  defaultMessage: 'Untitled session',
+  defaultMessage: 'Untitled',
 });
-const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
-  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
-  const label =
-    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+  const baseLabel = DEFAULT_TAB_LABEL;
+
+  const nextNumber = getNextTabNumber(allTabs, baseLabel);
+  const label = nextNumber ? `${baseLabel} ${nextNumber}` : baseLabel;
 
   return { id, label };
+};
+
+/**
+ * Parses a JSON string into a ControlPanelsState object.
+ * If the JSON is invalid or null, it returns an empty object.
+ *
+ * @param jsonString - The JSON string to parse.
+ * @returns A ControlPanelsState object or an empty object if parsing fails.
+ */
+
+export const parseControlGroupJson = (
+  jsonString?: string | null
+): ControlPanelsState<ESQLControlState> => {
+  try {
+    return jsonString ? JSON.parse(jsonString) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+/**
+ * @param panels - The control panels state, which may be null.
+ * @description Extracts ESQL variables from the control panels state.
+ * Each ESQL control panel is expected to have a `variableName`, `variableType`, and `selectedOptions`.
+ * Returns an array of `ESQLControlVariable` objects.
+ * If `panels` is null or empty, it returns an empty array.
+ * @returns An array of ESQLControlVariable objects.
+ */
+export const extractEsqlVariables = (
+  panels: ControlPanelsState<ESQLControlState> | null
+): ESQLControlVariable[] => {
+  if (!panels || Object.keys(panels).length === 0) {
+    return [];
+  }
+  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
+    if (panel.type === ESQL_CONTROL) {
+      acc.push({
+        key: panel.variableName,
+        type: panel.variableType,
+        // If the selected option is not a number, keep it as a string
+        value: isNaN(Number(panel.selectedOptions?.[0]))
+          ? panel.selectedOptions?.[0]
+          : Number(panel.selectedOptions?.[0]),
+      });
+    }
+    return acc;
+  }, []);
+
+  return variables;
 };

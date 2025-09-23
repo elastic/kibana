@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useStateSelector } from '../../state_utils';
-import { PreviewState } from './types';
+import type { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 

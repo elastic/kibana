@@ -29,6 +29,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -42,13 +43,13 @@ import {
   ListsSearchBar,
 } from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
 
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
@@ -133,7 +134,9 @@ export const SharedLists = React.memo(() => {
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
-    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+    ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -623,7 +626,7 @@ export const SharedLists = React.memo(() => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
             <EuiFlexGroup alignItems="flexEnd">
               <EuiFlexItem>
                 <EuiPagination

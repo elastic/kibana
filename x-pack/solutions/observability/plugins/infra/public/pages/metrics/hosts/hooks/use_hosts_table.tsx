@@ -29,9 +29,9 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
 import type {
-  InfraAssetMetadataType,
-  InfraAssetMetricsItem,
-  InfraAssetMetricType,
+  InfraEntityMetadataType,
+  InfraEntityMetricsItem,
+  InfraEntityMetricType,
 } from '../../../../../common/http_api';
 import type { Sorting } from './use_hosts_table_url_state';
 import { useHostsTableUrlState } from './use_hosts_table_url_state';
@@ -42,11 +42,12 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
  */
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
+type HostMetrics = Record<InfraEntityMetricType, number | null>;
 
 interface HostMetadata {
   os?: string | null;
@@ -65,14 +66,14 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
+const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
   const defaultValue = value ?? 0;
   return createInventoryMetricFormatter({ type })(defaultValue);
 };
 
 const buildMetricCell = (
   value: number | null,
-  formatType: InfraAssetMetricType,
+  formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
   if (!hasSystemMetrics && value === null) {
@@ -82,14 +83,14 @@ const buildMetricCell = (
   return formatMetric(formatType, value);
 };
 
-const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+const buildItemsList = (nodes: InfraEntityMetricsItem[]): HostNodeRow[] => {
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
         [curr.name]: curr.value,
       }),
-      {} as Record<InfraAssetMetadataType, string | null>
+      {} as Record<InfraEntityMetadataType, string | null>
     );
 
     return {
@@ -153,11 +154,18 @@ export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
 
-  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+  const { value: formulas } = useAsync(
+    () =>
+      inventoryModel.metrics.getFormulas({
+        schema: searchCriteria.preferredSchema ?? 'ecs',
+      }),
+    [inventoryModel.metrics, searchCriteria.preferredSchema]
+  );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
@@ -233,7 +241,20 @@ export const useHostsTable = () => {
     return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
   }, [items, pagination, sorting]);
 
-  const metricColumnsWidth = displayAlerts ? '12%' : '16%';
+  const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
+  const metricColumnsWidth = useMemo(() => {
+    if (displayAlerts) {
+      return showNetworkColumns ? '12%' : '16%';
+    }
+    return showNetworkColumns ? '16%' : '20%';
+  }, [displayAlerts, showNetworkColumns]);
+
+  const titleColumnWidth = useMemo(() => {
+    if (displayAlerts) {
+      return showNetworkColumns ? '15%' : '20%';
+    }
+    return showNetworkColumns ? '20%' : '25%';
+  }, [displayAlerts, showNetworkColumns]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -266,7 +287,7 @@ export const useHostsTable = () => {
                   showDocumentationLink={false}
                 />
               ),
-              width: '95px',
+              width: '80px',
               field: 'alertsCount',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-alertsCount',
@@ -311,7 +332,7 @@ export const useHostsTable = () => {
                 }
                 return (
                   <Popover
-                    icon="questionInCircle"
+                    icon="question"
                     data-test-subj="hostsView-tableRow-hasSystemMetrics-popover"
                   >
                     <EuiText size="xs">
@@ -363,14 +384,14 @@ export const useHostsTable = () => {
         render: (title: HostNodeRow['title']) => (
           <EntryTitle title={title} onClick={() => reportHostEntryClick(title)} />
         ),
-        width: displayAlerts ? '15%' : '20%',
+        width: titleColumnWidth,
       },
       {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={formulas?.cpuUsage.value}
+            formula={formulas?.get('cpuUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -386,7 +407,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={formulas?.normalizedLoad1m.value}
+            formula={formulas?.get('normalizedLoad1m').value}
           />
         ),
         width: metricColumnsWidth,
@@ -402,7 +423,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={formulas?.memoryUsage.value}
+            formula={formulas?.get('memoryUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -418,7 +439,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={formulas?.memoryFree.value}
+            formula={formulas?.get('memoryFree').value}
           />
         ),
         width: metricColumnsWidth,
@@ -434,7 +455,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskUsage}
-            formula={formulas?.diskUsage.value}
+            formula={formulas?.get('diskUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -445,68 +466,68 @@ export const useHostsTable = () => {
           buildMetricCell(max, 'diskSpaceUsage', hasSystemMetrics),
         align: 'right',
       },
-      {
-        name: (
-          <>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel', {
-                  defaultMessage: 'Network Inbound',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <ColumnHeader
-              label={TABLE_COLUMN_LABEL.rx}
-              toolTip={METRICS_TOOLTIP.rx}
-              formula={formulas?.rx.value}
-            />
-          </>
-        ),
-        width: '12%',
-        field: 'rxV2',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-rx',
-        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
-          buildMetricCell(avg, 'rx', hasSystemMetrics),
-        align: 'right',
-      },
-      {
-        name: (
-          <>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.infra.hostsViewPage.table.tx.screenReaderOnlyLabel', {
-                  defaultMessage: 'Network Outbound',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <ColumnHeader
-              label={TABLE_COLUMN_LABEL.tx}
-              toolTip={METRICS_TOOLTIP.tx}
-              formula={formulas?.tx.value}
-            />
-          </>
-        ),
-        width: '12%',
-        field: 'txV2',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-tx',
-        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
-          buildMetricCell(avg, 'tx', hasSystemMetrics),
-        align: 'right',
-      },
+      ...((searchCriteria.preferredSchema !== 'semconv'
+        ? [
+            {
+              name: (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel', {
+                        defaultMessage: 'Network Inbound',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <ColumnHeader
+                    label={TABLE_COLUMN_LABEL.rx}
+                    toolTip={METRICS_TOOLTIP.rx}
+                    formula={formulas?.get('rx').value}
+                  />
+                </>
+              ),
+              width: '12%',
+              field: 'rxV2',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-rx',
+              render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+                buildMetricCell(avg, 'rx', hasSystemMetrics),
+              align: 'right',
+            },
+            {
+              name: (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.infra.hostsViewPage.table.tx.screenReaderOnlyLabel', {
+                        defaultMessage: 'Network Outbound',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <ColumnHeader
+                    label={TABLE_COLUMN_LABEL.tx}
+                    toolTip={METRICS_TOOLTIP.tx}
+                    formula={formulas?.get('tx').value}
+                  />
+                </>
+              ),
+              width: '12%',
+              field: 'txV2',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-tx',
+              render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+                buildMetricCell(avg, 'tx', hasSystemMetrics),
+              align: 'right',
+            },
+          ]
+        : []) as EuiBasicTableColumn<HostNodeRow>[]),
     ],
     [
       displayAlerts,
       showApmHostTroubleshooting,
-      formulas?.cpuUsage.value,
-      formulas?.normalizedLoad1m.value,
-      formulas?.memoryUsage.value,
-      formulas?.memoryFree.value,
-      formulas?.diskUsage.value,
-      formulas?.rx.value,
-      formulas?.tx.value,
+      formulas,
       metricColumnsWidth,
+      titleColumnWidth,
+      searchCriteria.preferredSchema,
       detailsItemId,
       setProperties,
       reportHostEntryClick,

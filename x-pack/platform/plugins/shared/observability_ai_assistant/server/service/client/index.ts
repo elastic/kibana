@@ -11,6 +11,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   defer,
@@ -19,7 +20,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -28,22 +28,29 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { withInferenceSpan, type InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
-import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import type {
+  ChatCompleteResponse,
+  FunctionCallingMode,
+  InferenceClient,
+} from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
+} from '../../../common/conversation_complete';
+import {
   createConversationNotFoundError,
   StreamingChatResponseEventType,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema } from '../../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type Instruction,
   type Conversation,
@@ -54,9 +61,8 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -66,12 +72,11 @@ import { convertInferenceEventsToStreamingEvents } from './operators/convert_inf
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
-import { waitForKbModel, warmupModel } from '../inference_endpoint';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
+import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
-import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { addAnonymizationData } from './operators/add_anonymization_data';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -194,22 +199,15 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return withInferenceSpan('run_tools', () => {
+    return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${
-            kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-          }.`
+          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
         );
       }
 
@@ -227,27 +225,28 @@ export class ObservabilityAIAssistantClient {
           : getGeneratedTitle({
               messages: initialMessages,
               logger: this.dependencies.logger,
+              scopes: this.dependencies.scopes,
               chat: (name, chatParams) =>
-                withInferenceSpan('get_title', () =>
-                  this.chat(name, {
-                    ...chatParams,
-                    simulateFunctionCalling,
-                    connectorId,
-                    signal,
-                    stream: false,
-                  })
-                ),
+                this.chat(name, {
+                  ...chatParams,
+                  simulateFunctionCalling,
+                  connectorId,
+                  signal,
+                  stream: false,
+                }),
             }).pipe(shareReplay());
 
       const systemMessage$ = kbUserInstructions$.pipe(
-        map((kbUserInstructions) => {
-          return getSystemMessageFromInstructions({
+        map((kbUserInstructions) =>
+          getSystemMessageFromInstructions({
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-          });
-        }),
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
+          })
+        ),
         shareReplay()
       );
 
@@ -260,7 +259,7 @@ export class ObservabilityAIAssistantClient {
             ? getContextFunctionRequestIfNeeded(initialMessages)
             : undefined;
 
-          return withInferenceSpan('run_tools', () =>
+          return withActiveInferenceSpan('ContinueConversation', () =>
             mergeOperator(
               // if we have added a context function request, also emit
               // the messageAdd event for it, so we can notify the consumer
@@ -328,71 +327,74 @@ export class ObservabilityAIAssistantClient {
               systemMessage$,
             ]).pipe(
               switchMap(([addedMessages, title, systemMessage]) => {
-                const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+                return nextEvents$.pipe(
+                  addAnonymizationData(initialMessages.concat(addedMessages)),
+                  switchMap((deanonymizedMessages) => {
+                    const lastMessage = last(deanonymizedMessages);
 
-                const lastMessage = last(initialMessagesWithAddedMessages);
+                    // if a function request is at the very end, close the stream to consumer
+                    // without persisting or updating the conversation. we need to wait
+                    // on the function response to have a valid conversation
+                    const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                // if a function request is at the very end, close the stream to consumer
-                // without persisting or updating the conversation. we need to wait
-                // on the function response to have a valid conversation
-                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+                    if (!persist || isFunctionRequest) {
+                      return of();
+                    }
 
-                if (!persist || isFunctionRequest) {
-                  return of();
-                }
+                    if (isConversationUpdate && conversation) {
+                      return from(
+                        this.update(
+                          conversationId,
 
-                if (isConversationUpdate && conversation) {
-                  return from(
-                    this.update(
-                      conversationId,
+                          merge(
+                            {},
 
-                      merge(
-                        {},
+                            // base conversation without messages
+                            omit(conversation._source, 'messages'),
 
-                        // base conversation without messages
-                        omit(conversation._source, 'messages'),
+                            // update messages and system message
+                            { messages: deanonymizedMessages, systemMessage },
 
-                        // update messages and system message
-                        { messages: initialMessagesWithAddedMessages, systemMessage },
+                            // update title
+                            {
+                              conversation: {
+                                title: title || conversation._source?.conversation.title,
+                              },
+                            }
+                          )
+                        )
+                      ).pipe(
+                        map((conversationUpdated): ConversationUpdateEvent => {
+                          return {
+                            conversation: conversationUpdated.conversation,
+                            type: StreamingChatResponseEventType.ConversationUpdate,
+                          };
+                        })
+                      );
+                    }
 
-                        // update title
-                        {
-                          conversation: {
-                            title: title || conversation._source?.conversation.title,
-                          },
-                        }
-                      )
-                    )
-                  ).pipe(
-                    map((conversationUpdated): ConversationUpdateEvent => {
-                      return {
-                        conversation: conversationUpdated.conversation,
-                        type: StreamingChatResponseEventType.ConversationUpdate,
-                      };
-                    })
-                  );
-                }
-
-                return from(
-                  this.create({
-                    '@timestamp': new Date().toISOString(),
-                    conversation: {
-                      title,
-                      id: conversationId,
-                    },
-                    public: !!isPublic,
-                    labels: {},
-                    numeric_labels: {},
-                    systemMessage,
-                    messages: initialMessagesWithAddedMessages,
-                    archived: false,
-                  })
-                ).pipe(
-                  map((conversationCreated): ConversationCreateEvent => {
-                    return {
-                      conversation: conversationCreated.conversation,
-                      type: StreamingChatResponseEventType.ConversationCreate,
-                    };
+                    return from(
+                      this.create({
+                        '@timestamp': new Date().toISOString(),
+                        conversation: {
+                          title,
+                          id: conversationId,
+                        },
+                        public: !!isPublic,
+                        labels: {},
+                        numeric_labels: {},
+                        systemMessage,
+                        messages: deanonymizedMessages,
+                        archived: false,
+                      })
+                    ).pipe(
+                      map((conversationCreated): ConversationCreateEvent => {
+                        return {
+                          conversation: conversationCreated.conversation,
+                          type: StreamingChatResponseEventType.ConversationCreate,
+                        };
+                      })
+                    );
                   })
                 );
               })
@@ -413,13 +415,11 @@ export class ObservabilityAIAssistantClient {
                 () => `Added message: ${JSON.stringify(event.message)}`
               );
               break;
-
             case StreamingChatResponseEventType.ConversationCreate:
               this.dependencies.logger.debug(
                 () => `Created conversation: ${JSON.stringify(event.conversation)}`
               );
               break;
-
             case StreamingChatResponseEventType.ConversationUpdate:
               this.dependencies.logger.debug(
                 () => `Updated conversation: ${JSON.stringify(event.conversation)}`
@@ -482,6 +482,8 @@ export class ObservabilityAIAssistantClient {
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      temperature: 0.25,
+      maxRetries: 1,
       metadata: {
         connectorTelemetry: {
           pluginId: 'observability_ai_assistant',
@@ -490,7 +492,10 @@ export class ObservabilityAIAssistantClient {
     };
 
     this.dependencies.logger.debug(
-      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
+      () =>
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify(
+          options
+        )}`
     );
 
     if (stream) {
@@ -504,7 +509,9 @@ export class ObservabilityAIAssistantClient {
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
-            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+            this.dependencies.logger.trace(
+              () => `Received chunk: ${JSON.stringify(event.message)}`
+            );
           }
         }),
         shareReplay()
@@ -514,6 +521,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
+        messages: convertMessagesForInference(messages, this.dependencies.logger),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
@@ -662,72 +670,11 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getModelStatus();
   };
 
-  setupKnowledgeBase = async (
-    nextInferenceId: string,
-    waitUntilComplete: boolean = false
-  ): Promise<{
-    reindex: boolean;
-    currentInferenceId: string | undefined;
-    nextInferenceId: string;
-  }> => {
-    const { esClient, core, logger } = this.dependencies;
-
-    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
-
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
-    if (currentInferenceId === nextInferenceId) {
-      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
-      if (waitUntilComplete) {
-        logger.debug('Waiting for warmup to complete...');
-        await warmupModelPromise;
-        logger.debug('Warmup completed.');
-      }
-      return { reindex: false, currentInferenceId, nextInferenceId };
-    }
-
-    await createOrUpdateKnowledgeBaseIndexAssets({
-      core: this.dependencies.core,
-      logger: this.dependencies.logger,
-      inferenceId: nextInferenceId,
-    });
-
-    const kbSetupPromise = waitForKbModel({
-      core: this.dependencies.core,
-      esClient,
-      logger,
-      config: this.dependencies.config,
-      inferenceId: nextInferenceId,
-    })
-      .then(async () => {
-        logger.info(
-          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
-        );
-
-        await reIndexKnowledgeBaseWithLock({
-          core,
-          logger,
-          esClient,
-        });
-      })
-      .catch((e) => {
-        if (isLockAcquisitionError(e)) {
-          logger.info(e.message);
-        } else {
-          logger.error(
-            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
-          );
-          logger.debug(e);
-        }
-      });
-
-    if (waitUntilComplete) {
-      logger.debug('Waiting for knowledge base setup to complete...');
-      await kbSetupPromise;
-      logger.debug('Knowledge base setup completed.');
-    }
-
-    return { reindex: true, currentInferenceId, nextInferenceId };
+  setupKnowledgeBase = async (nextInferenceId: string, waitUntilComplete: boolean = false) => {
+    return this.dependencies.knowledgeBaseService.setupKnowledgeBase(
+      nextInferenceId,
+      waitUntilComplete
+    );
   };
 
   warmupKbModel = (inferenceId: string) => {
@@ -757,10 +704,7 @@ export class ObservabilityAIAssistantClient {
   addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<
-      KnowledgeBaseEntry,
-      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
-    >;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type' | 'role'>;
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
@@ -787,8 +731,6 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry: {
         ...entry,
-        confidence: 'high',
-        is_correction: false,
         type: KnowledgeBaseType.UserInstruction,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
@@ -808,6 +750,21 @@ export class ObservabilityAIAssistantClient {
         ...entry,
         type: KnowledgeBaseType.Contextual,
       },
+    });
+  };
+
+  addKnowledgeBaseBulkEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addBulkEntries({
+      entries: entries.map((entry) => ({
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      })),
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
     });
   };
 

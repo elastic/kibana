@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { FC } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  SaveModalDashboardProps,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;
@@ -27,7 +28,7 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
 > & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: DashboardSaveProps) => void;
+  onSave: (props: DashboardSaveProps) => Promise<void>;
   getOriginatingPath?: (dashboardId: string) => string;
 };
 
@@ -52,9 +53,9 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<
 
   const tagEnhancedOptions = <>{tagSelectorOption}</>;
 
-  const tagEnhancedOnSave: SaveModalDashboardProps['onSave'] = useCallback(
-    (saveOptions) => {
-      onSave({
+  const tagEnhancedOnSave = useCallback<SaveModalDashboardProps['onSave']>(
+    async (saveOptions) => {
+      await onSave({
         ...saveOptions,
         returnToOrigin: false,
         newTags: selectedTags,

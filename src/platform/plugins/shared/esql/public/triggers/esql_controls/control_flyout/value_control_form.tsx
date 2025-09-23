@@ -11,15 +11,10 @@ import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiCallOut,
-  type EuiSwitchEvent,
-  EuiPanel,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiCallOut, type EuiSwitchEvent, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -46,9 +41,17 @@ interface ValueControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
+  timeRange?: TimeRange;
+  currentApp?: string;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
+const INITIAL_EMPTY_STATE_QUERY = `/** Example
+To get the agent field values use: 
+FROM logs-* 
+|  WHERE @timestamp <=?_tend and @timestamp >?_tstart
+| STATS BY agent
+*/`;
 
 export function ValueControlForm({
   variableType,
@@ -59,6 +62,8 @@ export function ValueControlForm({
   search,
   setControlState,
   valuesRetrieval,
+  timeRange,
+  currentApp,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -75,7 +80,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -87,7 +92,9 @@ export function ValueControlForm({
   );
 
   const [valuesQuery, setValuesQuery] = useState<string>(
-    variableType === ESQLVariableType.VALUES ? initialState?.esqlQuery ?? '' : ''
+    variableType === ESQLVariableType.VALUES
+      ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
+      : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
   const [queryColumns, setQueryColumns] = useState<string[]>(
@@ -151,6 +158,7 @@ export function ValueControlForm({
           signal: undefined,
           filter: undefined,
           dropNullColumns: true,
+          timeRange,
         }).then((results) => {
           if (!isMounted()) {
             return;
@@ -179,7 +187,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search]
+    [isMounted, search, timeRange]
   );
 
   useEffect(() => {
@@ -247,31 +255,28 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
-          <EuiFormRow
-            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+          <ESQLLangEditor
+            query={{ esql: valuesQuery }}
+            onTextLangQueryChange={(q) => {
+              setValuesQuery(q.esql);
+            }}
+            hideTimeFilterInfo={true}
+            disableAutoFocus={true}
+            errors={esqlQueryErrors}
+            editorIsInline
+            hideRunQueryText
+            onTextLangQuerySubmit={async (q, a) => {
+              if (q) {
+                await onValuesQuerySubmit(q.esql);
+              }
+            }}
+            isDisabled={false}
+            isLoading={false}
+            hasOutline
+            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
-            fullWidth
-          >
-            <ESQLLangEditor
-              query={{ esql: valuesQuery }}
-              onTextLangQueryChange={(q) => {
-                setValuesQuery(q.esql);
-              }}
-              hideTimeFilterInfo={true}
-              disableAutoFocus={true}
-              errors={esqlQueryErrors}
-              editorIsInline
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                if (q) {
-                  await onValuesQuerySubmit(q.esql);
-                }
-              }}
-              isDisabled={false}
-              isLoading={false}
-            />
-          </EuiFormRow>
+          />
           {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
@@ -361,6 +366,9 @@ export function ValueControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
       />
     </>
   );

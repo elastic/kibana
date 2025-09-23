@@ -18,7 +18,7 @@ import type {
 } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
-import { CustomOptionsComponentProps } from '../../types';
+import type { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -87,8 +87,8 @@ export const OptionsListEditorOptions = ({
   );
 
   const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(field.type),
-    [field.type]
+    () => getCompatibleSearchTechniques(field?.type),
+    [field?.type]
   );
 
   const searchOptions = useMemo(() => {
@@ -139,6 +139,7 @@ export const OptionsListEditorOptions = ({
             setSingleSelect(newSingleSelect);
             updateState({ singleSelect: newSingleSelect });
           }}
+          name="selectionType"
         />
       </EuiFormRow>
       {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
@@ -155,6 +156,7 @@ export const OptionsListEditorOptions = ({
               setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
+            name="searchTechnique"
           />
         </EuiFormRow>
       )}

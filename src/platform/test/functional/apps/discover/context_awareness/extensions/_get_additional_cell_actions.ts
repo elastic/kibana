@@ -9,7 +9,7 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
-import { Alert } from 'selenium-webdriver';
+import type { Alert } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -56,6 +56,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
         await checkAlert('Another example data source action executed');
+      });
+
+      it('should render additional cell actions for computed columns', async () => {
+        const state = kbnRison.encode({
+          dataSource: { type: 'esql' },
+          query: {
+            esql: 'from my-example-logs | sort @timestamp desc | eval foo = "bar"',
+          },
+          columns: ['foo'],
+        });
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataGrid.clickCellExpandButton(0, { columnName: 'foo' });
+        await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
+        await checkAlert('Example data source action executed');
       });
 
       it('should not render incompatible cell action for message column', async () => {

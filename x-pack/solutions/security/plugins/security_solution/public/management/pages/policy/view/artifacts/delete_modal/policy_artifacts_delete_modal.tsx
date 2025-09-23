@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -64,17 +64,21 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
       }
     }, [isUpdateArtifactLoading, onClose]);
 
+    const modalTitleId = useGeneratedHtmlId();
+
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        title={labels.deleteModalTitle}
+        titleProps={{ id: modalTitleId }}
         onCancel={handleOnClose}
         onConfirm={handleModalConfirm}
-        title={labels.deleteModalTitle}
         cancelButtonText={labels.deleteModalCancelButtonTitle}
         confirmButtonText={labels.deleteModalSubmitButtonTitle}
         isLoading={isUpdateArtifactLoading}
         data-test-subj={'remove-from-policy-dialog'}
       >
-        <EuiCallOut color="warning" iconType="help">
+        <EuiCallOut color="warning" iconType="question">
           <p>{labels.deleteModalImpactInfo}</p>
         </EuiCallOut>
 

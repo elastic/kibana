@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISessionService, SessionService } from './session_service';
+import type { ISessionService } from './session_service';
+import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
-import { CoreStart } from '@kbn/core/public';
-import { SearchUsageCollector } from '../..';
+import type { CoreStart } from '@kbn/core/public';
+import type { SearchUsageCollector } from '../..';
 import { createSearchUsageCollectorMock } from '../collectors/mocks';
 
 const mockSavedObject: SearchSessionSavedObject = {
@@ -459,6 +460,32 @@ describe('Session service', () => {
     await sessionService.save();
 
     expect(onSavingSession).toHaveBeenCalledTimes(1);
+  });
+
+  test('save() return a search session', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+      appendSessionStartTimeToName: false,
+    });
+    sessionsClient.create.mockResolvedValue(mockSavedObject);
+
+    sessionService.start();
+    const abort = jest.fn();
+    const poll = jest.fn(() => Promise.resolve());
+    const onSavingSession = jest.fn(() => Promise.resolve());
+
+    sessionService.trackSearch({ poll, abort, onSavingSession });
+
+    expect(onSavingSession).toHaveBeenCalledTimes(0);
+
+    const searchSession = await sessionService.save();
+
+    expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
   });
 
   describe("user doesn't have access to search session", () => {

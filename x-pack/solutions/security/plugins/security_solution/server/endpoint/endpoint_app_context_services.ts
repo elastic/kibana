@@ -28,6 +28,8 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { ReferenceDataClientInterface } from './lib/reference_data';
+import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -160,10 +162,9 @@ export class EndpointAppContextService {
       alerting,
       licenseService,
       telemetryConfigProvider,
-      exceptionListsClient,
       productFeaturesService,
+      experimentalFeatures,
     } = this.startDependencies;
-    const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
     registerFleetCallback(
@@ -187,7 +188,8 @@ export class EndpointAppContextService {
         licenseService,
         this.setupDependencies.cloud,
         productFeaturesService,
-        telemetryConfigProvider
+        telemetryConfigProvider,
+        experimentalFeatures
       )
     );
 
@@ -195,15 +197,17 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
+      getPackagePolicyUpdateCallback(
+        this,
+        this.setupDependencies.cloud,
+        productFeaturesService,
+        experimentalFeatures
+      )
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
-    registerFleetCallback(
-      'packagePolicyPostDelete',
-      getPackagePolicyDeleteCallback(exceptionListsClient, soClient)
-    );
+    registerFleetCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(this));
   }
 
   /**
@@ -288,14 +292,19 @@ export class EndpointAppContextService {
   /**
    * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
    * @param spaceId
+   * @param unscoped
    */
-  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
+  public getInternalFleetServices(
+    spaceId?: string,
+    unscoped: boolean = false
+  ): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
+      unscoped
     );
   }
 
@@ -432,5 +441,16 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
+  }
+
+  public getReferenceDataClient(): ReferenceDataClientInterface {
+    if (!this.startDependencies?.savedObjectsServiceStart) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return new ReferenceDataClient(
+      this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.createLogger('ReferenceDataClient')
+    );
   }
 }

@@ -36,6 +36,8 @@ import { ExperimentalFeaturesService } from '../common/experimental_features_ser
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
+import { getXSOARConnectorType } from './xsoar';
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -67,6 +69,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
+  connectorTypeRegistry.register(getJiraServiceManagementConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());
@@ -75,6 +78,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
+  connectorTypeRegistry.register(getXSOARConnectorType());
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());

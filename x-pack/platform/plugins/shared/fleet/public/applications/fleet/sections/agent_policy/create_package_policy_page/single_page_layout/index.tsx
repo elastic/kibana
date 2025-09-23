@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,10 +35,10 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
-  splitPkgKey,
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
@@ -52,6 +50,7 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -63,7 +62,7 @@ import {
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
-import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
+import type { CreatePackagePolicyParams } from '../types';
 
 import {
   IntegrationBreadcrumb,
@@ -77,13 +76,18 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
-import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
+import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
+
+import {
+  AddIntegrationFlyoutConfigureHeader,
+  CreatePackagePolicySinglePageLayout,
+  PostInstallAddAgentModal,
+} from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { SetupTechnologySelector } from './components/setup_technology_selector';
 import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -106,14 +110,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
   prerelease,
+  pkgName,
+  pkgVersion,
+  integration,
+  pkgLabel,
+  addIntegrationFlyoutProps,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
-  const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
+  const isServerless = !!cloud?.isServerlessEnabled;
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -139,13 +148,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
   );
 
-  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { full: true, prerelease });
+  } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { full: true, prerelease },
+    { enabled: !!pkgName }
+  );
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
@@ -154,9 +167,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
-  const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(
-    params.integration
-  );
+  const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(integration);
   const integrationInfo = useMemo(() => {
     return integrationToEnable
       ? packageInfo?.policy_templates?.find(
@@ -165,11 +176,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       : undefined;
   }, [integrationToEnable, packageInfo?.policy_templates]);
 
+  const fipsCompatibleIntegration = useMemo(() => {
+    return checkIntegrationFipsLooseCompatibility(pkgName, packageInfo);
+  }, [packageInfo, pkgName]);
+
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
     packageInfo &&
     packageHasAtLeastOneSecret({ packageInfo });
 
+  const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
   const {
     onSubmit,
@@ -202,7 +218,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
+    isAddIntegrationFlyout,
   });
+
+  if (addIntegrationFlyoutProps?.agentPolicy) {
+    updateAgentPolicies([addIntegrationFlyoutProps?.agentPolicy]);
+  }
 
   const setPolicyValidation = useCallback(
     (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
@@ -247,7 +268,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
-    pkgkey: params.pkgkey,
+    pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     agentPolicyId: agentPolicyIds[0],
   });
   useEffect(() => {
@@ -270,7 +291,47 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
+
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
+
+  const fipsAgentsCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
+  }, [agentPolicyData?.items]);
+
+  useEffect(() => {
+    if (
+      (integration || integrationToEnable) &&
+      integrationToEnable !== integration &&
+      addIntegrationFlyoutProps
+    ) {
+      setIntegrationToEnable(integration);
+    }
+  }, [integration, integrationToEnable, addIntegrationFlyoutProps]);
+
+  useEffect(() => {
+    if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
+      setFormState('LOADING');
+      onSubmit({ skipConfirmModal: true })
+        .then(() => {
+          addIntegrationFlyoutProps?.onSubmitCompleted();
+        })
+        .catch(() => {
+          addIntegrationFlyoutProps?.onSubmitCompleted();
+        })
+        .finally(() => {
+          addIntegrationFlyoutProps?.onSubmitCompleted();
+        });
+    }
+  }, [addIntegrationFlyoutProps, onSubmit, setFormState, formState]);
+
+  useEffect(() => {
+    addIntegrationFlyoutProps?.updateHasErrors(
+      Boolean(packageInfo && (formState === 'INVALID' || hasAgentPolicyError))
+    );
+  }, [packageInfo, formState, hasAgentPolicyError, addIntegrationFlyoutProps]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -278,12 +339,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
       setIsFleetExtensionLoaded(isExtensionLoaded);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
@@ -384,7 +443,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -411,18 +470,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
           />
 
-          {/* TODO move SetupTechnologySelector out of extensionView */}
-          {!extensionView && isAgentlessIntegration(packageInfo) && (
+          {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
+          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
-              onSetupTechnologyChange={(value) => {
+              onSetupTechnologyChange={(value: SetupTechnology) => {
                 handleSetupTechnologyChange(value);
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={isAgentlessDefault}
             />
           )}
 
@@ -471,19 +531,37 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
+      isAddIntegrationFlyout,
+      isServerless,
     ]
   );
 
   const steps: EuiStepProps[] = [
+    ...(addIntegrationFlyoutProps?.selectIntegrationStep
+      ? [addIntegrationFlyoutProps?.selectIntegrationStep]
+      : []),
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      children: pkgName && (
+        <>
+          {addIntegrationFlyoutProps && (
+            <AddIntegrationFlyoutConfigureHeader
+              pkgLabel={pkgLabel}
+              pkgName={pkgName}
+              pkgVersion={packageInfo?.version}
+              integration={integration}
+            />
+          )}
+          {replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy}
+        </>
+      ),
       headingElement: 'h2',
+      status: !pkgName ? 'disabled' : undefined,
     },
-    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS
+    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {
             title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
@@ -513,7 +591,89 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
-  return (
+  const children = (
+    <>
+      {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+        <>
+          <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      {numTransformAssets > 0 ? (
+        <>
+          <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
+          <EuiSpacer size="xl" />
+        </>
+      ) : null}
+      {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
+                defaultMessage="This integration is not FIPS compatible"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+              values={{
+                guideLink: (
+                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                      defaultMessage="Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {showSecretsDisabledCallout && (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                defaultMessage="Policy secrets are disabled"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+              defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+              values={{
+                policySecretsLink: (
+                  <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                      defaultMessage="policy secrets"
+                    />
+                  </EuiLink>
+                ),
+                minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
+              }}
+            />
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <StepsWithLessPadding steps={steps} />
+    </>
+  );
+
+  return !addIntegrationFlyoutProps ? (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
@@ -566,60 +726,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && (
+            {packageInfo && !addIntegrationFlyoutProps && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}
                 integration={integrationInfo?.name}
               />
             )}
-            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
-              <>
-                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-            {numTransformAssets > 0 ? (
-              <>
-                <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
-                <EuiSpacer size="xl" />
-              </>
-            ) : null}
-            {showSecretsDisabledCallout && (
-              <>
-                <EuiCallOut
-                  size="m"
-                  color="warning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
-                      defaultMessage="Policy secrets are disabled"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-                    defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
-                    values={{
-                      policySecretsLink: (
-                        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
-                            defaultMessage="policy secrets"
-                          />
-                        </EuiLink>
-                      ),
-                      minimumSecretsVersion: (
-                        <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>
-                      ),
-                    }}
-                  />
-                </EuiCallOut>
-
-                <EuiSpacer size="m" />
-              </>
-            )}
-            <StepsWithLessPadding steps={steps} />
+            {children}
             {formState === 'LOADING' ? (
               <EuiOverlayMask headerZindexLocation="below">
                 <Loading />
@@ -693,5 +807,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         </PliAuthBlockWrapper>
       </Suspense>
     </CreatePackagePolicySinglePageLayout>
+  ) : (
+    children
   );
 };

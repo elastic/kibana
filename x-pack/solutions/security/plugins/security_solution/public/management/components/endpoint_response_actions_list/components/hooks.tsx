@@ -344,7 +344,14 @@ export const useActionsLogFilter = ({
             return false;
           }
 
-          if (commandName === 'runscript' && !featureFlags.crowdstrikeRunScriptEnabled) {
+          if (
+            commandName === 'runscript' &&
+            !featureFlags.microsoftDefenderEndpointRunScriptEnabled &&
+            !featureFlags.crowdstrikeRunScriptEnabled
+          ) {
+            return false;
+          }
+          if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
             return false;
           }
 

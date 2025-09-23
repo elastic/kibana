@@ -181,13 +181,17 @@ export class CasesService {
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseTransformedAttributes>>());
 
-    const commentTotals = await this.attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
       caseIds: Array.from(casesMap.keys()),
     });
 
     const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
 
       casesWithComments.set(
         id,
@@ -195,6 +199,7 @@ export class CasesService {
           savedObject: caseInfo,
           totalComment: userComments,
           totalAlerts: alerts,
+          totalEvents: events,
         })
       );
     }
@@ -594,8 +599,8 @@ export class CasesService {
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
-      transformedAttributes.attributes.total_alerts = -1;
-      transformedAttributes.attributes.total_comments = -1;
+      transformedAttributes.attributes.total_alerts = 0;
+      transformedAttributes.attributes.total_comments = 0;
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -626,8 +631,8 @@ export class CasesService {
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
 
-        transformedAttributes.total_alerts = -1;
-        transformedAttributes.total_comments = -1;
+        transformedAttributes.total_alerts = 0;
+        transformedAttributes.total_comments = 0;
 
         return {
           type: CASE_SAVED_OBJECT,

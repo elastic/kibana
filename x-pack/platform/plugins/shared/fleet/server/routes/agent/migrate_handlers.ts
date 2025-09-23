@@ -7,7 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { FleetRequestHandler, MigrateSingleAgentRequestSchema } from '../../types';
+import type {
+  FleetRequestHandler,
+  MigrateSingleAgentRequestSchema,
+  BulkMigrateAgentsRequestSchema,
+} from '../../types';
 import * as AgentService from '../../services/agents';
 
 export const migrateSingleAgentHandler: FleetRequestHandler<
@@ -19,6 +23,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
+
   // First validate the agent exists
   const agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
   // Using the agent id, get the agent policy
@@ -30,6 +35,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
 
   const body = await AgentService.migrateSingleAgent(
     esClient,
+    soClient,
     request.params.agentId,
     agentPolicy,
     agent,
@@ -38,5 +44,24 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
       policyId: agentPolicy?.id,
     }
   );
+  return response.ok({ body });
+};
+export const bulkMigrateAgentsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkMigrateAgentsRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const { agents, ...options } = request.body;
+
+  const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+
+  const body = await AgentService.bulkMigrateAgents(esClient, soClient, {
+    ...options,
+    ...agentOptions,
+  });
+
   return response.ok({ body });
 };

@@ -533,7 +533,7 @@
             "label": "db",
             "description": [],
             "signature": [
-              "({ name, duration, type, statement, timestamp, }: { name: string; duration: number; type: \"elasticsearch\" | \"sqlite\" | \"redis\"; statement?: string | undefined; timestamp?: number | undefined; }) => void"
+              "({ name, duration, type, statement, timestamp, }: { name: string; duration: number; type: \"elasticsearch\" | \"redis\" | \"sqlite\"; statement?: string | undefined; timestamp?: number | undefined; }) => void"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
@@ -580,7 +580,7 @@
                     "label": "type",
                     "description": [],
                     "signature": [
-                      "\"elasticsearch\" | \"sqlite\" | \"redis\""
+                      "\"elasticsearch\" | \"redis\" | \"sqlite\""
                     ],
                     "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
@@ -1703,7 +1703,7 @@
                 "section": "def-common.SpanKind",
                 "text": "SpanKind"
               },
-              "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; \"attributes.event.name\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }> & { kind: \"Internal\" | \"Server\"; }) => ",
+              "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.event.name\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }> & { kind: \"Internal\" | \"Server\"; }) => ",
               "OtelSpan"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
@@ -1726,7 +1726,7 @@
                     "section": "def-common.SpanKind",
                     "text": "SpanKind"
                   },
-                  "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; \"attributes.event.name\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }> & { kind: \"Internal\" | \"Server\"; }"
+                  "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.event.name\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }> & { kind: \"Internal\" | \"Server\"; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
                 "deprecated": false,
@@ -3551,7 +3551,7 @@
         "label": "ApmOtelAttributes",
         "description": [],
         "signature": [
-          "{ \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; \"attributes.event.name\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; }"
+          "{ \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.event.name\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; }"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/apm_otel_fields.ts",
         "deprecated": false,
@@ -3574,7 +3574,7 @@
             "section": "def-common.SpanKind",
             "text": "SpanKind"
           },
-          "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; \"attributes.event.name\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }>"
+          "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.event.name\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/apm_otel_fields.ts",
         "deprecated": false,
@@ -3598,21 +3598,6 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/types/apm_synthtrace_pipelines.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-synthtrace-client",
-        "id": "def-common.EntityFields",
-        "type": "Type",
-        "tags": [],
-        "label": "EntityFields",
-        "description": [],
-        "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ [key: string]: any; 'agent.name': string[]; 'source_data_stream.type': string | string[]; 'source_data_stream.dataset': string | string[]; 'event.ingested': string; source_index: string; 'entity.last_seen_timestamp': string; 'entity.schema_version': string; 'entity.definition_version': string; 'entity.display_name': string; 'entity.identity_fields': string | string[]; 'entity.id': string; 'entity.type': string; 'entity.definition_id': string; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3696,7 +3681,7 @@
         "label": "LogDocument",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'event.ingested': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'client.ip'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception'?: unknown; 'error.log'?: unknown; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; 'event.category'?: string | undefined; 'event.type'?: string | undefined; 'event.outcome'?: string | undefined; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; 'http.response.status_code'?: number | undefined; 'http.response.bytes'?: number | undefined; 'http.request.method'?: string | undefined; 'http.request.referrer'?: string | undefined; 'http.version'?: string | undefined; 'url.path'?: string | undefined; 'process.name'?: string | undefined; 'kubernetes.namespace'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; 'kubernetes.container.name'?: string | undefined; 'orchestrator.resource.name'?: string | undefined; tags?: string | string[] | undefined; 'user_agent.name'?: string | undefined; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'service.version'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'event.ingested': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'client.ip'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception'?: unknown; 'error.log'?: unknown; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; 'event.category'?: string | undefined; 'event.type'?: string | undefined; 'event.outcome'?: string | undefined; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; 'http.response.status_code'?: number | undefined; 'http.response.bytes'?: number | undefined; 'http.request.method'?: string | undefined; 'http.request.referrer'?: string | undefined; 'http.version'?: string | undefined; 'url.path'?: string | undefined; 'process.name'?: string | undefined; 'kubernetes.namespace'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; 'kubernetes.container.name'?: string | undefined; 'orchestrator.resource.name'?: string | undefined; tags?: string | string[] | undefined; 'user_agent.name'?: string | undefined; 'orchestrator.type'?: string | undefined; 'orchestrator.resource.type'?: string | undefined; 'container.image.name'?: string | undefined; 'container.image.tag'?: string | undefined; 'container.runtime'?: string | undefined; 'host.os.platform'?: string | undefined; 'host.os.name'?: string | undefined; 'host.os.version'?: string | undefined; 'host.architecture'?: string | undefined; 'cloud.instance.name'?: string | undefined; 'kubernetes.container.image'?: string | undefined; 'kubernetes.container.image_id'?: string | undefined; 'kubernetes.node.name'?: string | undefined; 'kubernetes.node.uid'?: string | undefined; 'kubernetes.labels.app'?: string | undefined; 'kubernetes.labels.version'?: string | undefined; 'kubernetes.labels.tier'?: string | undefined; 'kubernetes.annotations.deployment'?: string | undefined; 'process.pid'?: number | undefined; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
         "deprecated": false,
@@ -3743,7 +3728,7 @@
         "label": "OtelLogDocument",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; trace_id?: string | undefined; attributes?: Record<string, unknown> | undefined; severity_text?: string | undefined; resource?: { attributes?: Record<string, unknown> | undefined; } | undefined; body?: { text?: string | undefined; structured?: Record<string, unknown> | undefined; } | undefined; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; trace_id?: string | undefined; span_id?: string | undefined; attributes?: Record<string, unknown> | undefined; severity_text?: string | undefined; resource?: { attributes?: Record<string, unknown> | undefined; } | undefined; body?: { text?: string | undefined; structured?: Record<string, unknown> | undefined; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
         "deprecated": false,
@@ -3860,7 +3845,7 @@
             "signature": [
               "{ (name: string, environment: string, agentName: string): ",
               "Service",
-              "; (options: { name: string; environment: string; } & ({ agentName: string; } | { agentName: \"opentelemetry\" | \"otlp\" | \"opentelemetry/java\" | \"otlp/java\" | \"opentelemetry/webjs\" | \"otlp/webjs\" | \"opentelemetry/android\" | \"otlp/android\" | \"opentelemetry/swift\" | \"otlp/swift\" | \"opentelemetry/java/elastic\" | \"opentelemetry/dotnet/elastic\" | \"opentelemetry/nodejs/elastic\" | \"opentelemetry/php/elastic\" | \"opentelemetry/python/elastic\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\"; })): ",
+              "; (options: { name: string; environment: string; agentVersion?: string | undefined; } & ({ agentName: string; } | { agentName: \"opentelemetry\" | \"otlp\" | \"opentelemetry/java\" | \"otlp/java\" | \"opentelemetry/webjs\" | \"otlp/webjs\" | \"opentelemetry/android\" | \"otlp/android\" | \"opentelemetry/swift\" | \"otlp/swift\" | \"opentelemetry/java/elastic\" | \"opentelemetry/dotnet/elastic\" | \"opentelemetry/nodejs/elastic\" | \"opentelemetry/php/elastic\" | \"opentelemetry/python/elastic\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"otlp/cpp\" | \"otlp/dotnet\" | \"otlp/erlang\" | \"otlp/go\" | \"otlp/nodejs\" | \"otlp/php\" | \"otlp/python\" | \"otlp/ruby\" | \"otlp/rust\"; })): ",
               "Service",
               "; }"
             ],
@@ -4045,534 +4030,6 @@
                 "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/service.ts",
                 "deprecated": false,
                 "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-synthtrace-client",
-        "id": "def-common.entities",
-        "type": "Object",
-        "tags": [],
-        "label": "entities",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.entities.serviceEntity",
-            "type": "Function",
-            "tags": [],
-            "label": "serviceEntity",
-            "description": [],
-            "signature": [
-              "({ agentName, dataStreamType, serviceName, environment, entityId, }: { agentName: string[]; serviceName: string; dataStreamType: ",
-              "EntityDataStreamType",
-              "[]; environment?: string | undefined; entityId: string; }) => ServiceEntity"
-            ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.serviceEntity.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ agentName: string[]; serviceName: string; dataStreamType: ",
-                  "EntityDataStreamType",
-                  "[]; environment?: string | undefined; entityId: string; }"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/service_entity.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.entities.hostEntity",
-            "type": "Function",
-            "tags": [],
-            "label": "hostEntity",
-            "description": [],
-            "signature": [
-              "({ agentName, dataStreamType, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
-              "EntityDataStreamType",
-              "[]; hostName: string; entityId: string; }) => HostEntity"
-            ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.hostEntity.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ agentName: string[]; dataStreamType: ",
-                  "EntityDataStreamType",
-                  "[]; hostName: string; entityId: string; }"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/host_entity.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.entities.containerEntity",
-            "type": "Function",
-            "tags": [],
-            "label": "containerEntity",
-            "description": [],
-            "signature": [
-              "({ agentName, dataStreamType, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
-              "EntityDataStreamType",
-              "[]; containerId: string; entityId: string; }) => ContainerEntity"
-            ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.containerEntity.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ agentName: string[]; dataStreamType: ",
-                  "EntityDataStreamType",
-                  "[]; containerId: string; entityId: string; }"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/container_entity.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.entities.k8s",
-            "type": "Object",
-            "tags": [],
-            "label": "k8s",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sClusterJobEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sClusterJobEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sClusterJobEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/cluster_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sCronJobEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sCronJobEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sCronJobEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/cron_job_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sDaemonSetEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sDaemonSetEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sDaemonSetEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/daemon_set_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sDeploymentEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sDeploymentEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sDeploymentEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/deployment_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sJobEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sJobEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sJobEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/job_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sNodeEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sNodeEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sNodeEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/node_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sPodEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sPodEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sPodEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/pod_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sReplicaSetEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sReplicaSetEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sReplicaSetEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/replica_set.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sStatefulSetEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sStatefulSetEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sStatefulSetEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/stateful_set.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sServiceEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sServiceEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sServiceEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/service.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.entities.k8s.k8sContainerEntity",
-                "type": "Function",
-                "tags": [],
-                "label": "k8sContainerEntity",
-                "description": [],
-                "signature": [
-                  "({ schema, id, entityId, ...others }: { [key: string]: any; schema: ",
-                  "Schema",
-                  "; id: string; entityId: string; }) => ",
-                  "K8sEntity"
-                ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/apm-synthtrace-client",
-                    "id": "def-common.entities.k8s.k8sContainerEntity.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ [key: string]: any; schema: ",
-                      "Schema",
-                      "; id: string; entityId: string; }"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/container_entity.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
               }
             ]
           }

@@ -12,7 +12,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { SavedObjectsClient } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
-import {
+import type {
   ProductDocBaseSetupContract,
   ProductDocBaseStartContract,
   ProductDocBaseSetupDependencies,
@@ -76,7 +76,10 @@ export class ProductDocBasePlugin
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
-    const productDocClient = new ProductDocInstallClient({ soClient });
+    const productDocClient = new ProductDocInstallClient({
+      soClient,
+      log: this.logger,
+    });
 
     const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
@@ -110,14 +113,14 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    documentationManager.update().catch((err) => {
-      this.logger.error(`Error scheduling product documentation update task: ${err.message}`);
+    documentationManager.updateAll().catch((err) => {
+      this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
     });
-
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
         update: documentationManager.update.bind(documentationManager),
+        updateAll: documentationManager.updateAll.bind(documentationManager),
         uninstall: documentationManager.uninstall.bind(documentationManager),
         getStatus: documentationManager.getStatus.bind(documentationManager),
       },

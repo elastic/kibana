@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { deepFreeze } from '@kbn/std';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
@@ -34,6 +35,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'upload',
   'scan',
   'runscript',
+  'cancel',
 ] as const;
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
@@ -61,6 +63,7 @@ export const ENDPOINT_CAPABILITIES = [
   'upload_file',
   'scan',
   'runscript',
+  'cancel',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -80,6 +83,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'upload',
   'scan',
   'runscript',
+  'cancel',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
@@ -94,9 +98,10 @@ export type ResponseConsoleRbacControls =
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console
+ * Note: 'cancel' command is excluded as it uses dynamic permission checking via utility functions
  */
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
-  ConsoleResponseActionCommands,
+  Exclude<ConsoleResponseActionCommands, 'cancel'>,
   ResponseConsoleRbacControls
 > = Object.freeze({
   isolate: 'writeHostIsolation',
@@ -124,6 +129,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   upload: 'upload',
   scan: 'scan',
   runscript: 'runscript',
+  cancel: 'cancel',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -139,6 +145,7 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   upload: 'upload',
   scan: 'scan',
   runscript: 'runscript',
+  cancel: 'cancel',
 });
 
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
@@ -154,6 +161,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   upload: 'upload_file',
   scan: 'scan',
   runscript: 'runscript',
+  cancel: 'cancel',
 });
 
 /**
@@ -172,6 +180,27 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
+  cancel: 'canCancelAction', // Cancel uses specific cancel permission
+});
+
+/**
+ * The list of actions that can be cancelled, mapped to their required authorization.
+ * Used to calculate if a user has permission to cancel any response actions.
+ */
+export const CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
+  Record<ConsoleResponseActionCommands, EndpointAuthzKeyList[number]>
+>({
+  isolate: 'canIsolateHost',
+  release: 'canUnIsolateHost',
+  execute: 'canWriteExecuteOperations',
+  'get-file': 'canWriteFileOperations',
+  upload: 'canWriteFileOperations',
+  processes: 'canGetRunningProcesses',
+  'kill-process': 'canKillProcess',
+  'suspend-process': 'canSuspendProcess',
+  scan: 'canWriteScanOperations',
+  runscript: 'canWriteExecuteOperations',
+  cancel: 'canCancelAction',
 });
 
 // 4 hrs in seconds
@@ -223,3 +252,17 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
 export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
 ).flat();
+
+/**
+ * A map of agent types to associated list of Fleet packages (integration type) that it supports.
+ * The value (Array of strings) is the name of the package, normally found in integration policies
+ * under `policy.package.name`
+ */
+export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
+  Record<ResponseActionAgentType, Readonly<string[]>>
+> = deepFreeze({
+  endpoint: ['endpoint'],
+  sentinel_one: ['sentinel_one'],
+  crowdstrike: ['crowdstrike'],
+  microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
+});

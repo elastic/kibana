@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyAssets } from '../../helpers/empty_assets';
 import { WiredStream } from './wired';
 
 describe('WiredStream', () => {
@@ -14,10 +15,9 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -34,10 +34,9 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: null,
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -48,6 +47,7 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
+          settings: {},
           wired: {
             fields: {},
             routing: [],
@@ -58,11 +58,10 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: [],
-          unwired: {},
+          lifecycle: { inherit: {} },
+          settings: {},
+          processing: { steps: [] },
+          classic: {},
           wired: {
             fields: {},
             routing: [],
@@ -70,7 +69,7 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid %s', (val) => {
-      expect(WiredStream.Definition.is(val as any)).toBe(false);
+      expect(() => WiredStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -81,10 +80,9 @@ describe('WiredStream', () => {
           name: 'wired-stream',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -97,14 +95,15 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
+        effective_settings: {},
         inherited_fields: {},
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
@@ -116,10 +115,9 @@ describe('WiredStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
@@ -127,9 +125,10 @@ describe('WiredStream', () => {
           },
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
+        effective_settings: {},
         inherited_fields: {},
         privileges: {
           lifecycle: true,
@@ -149,21 +148,19 @@ describe('WiredStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],
             },
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(WiredStream.UpsertRequest.is(val)).toBe(true);
@@ -178,10 +175,9 @@ describe('WiredStream', () => {
           name: 'my-name',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: [],
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [],

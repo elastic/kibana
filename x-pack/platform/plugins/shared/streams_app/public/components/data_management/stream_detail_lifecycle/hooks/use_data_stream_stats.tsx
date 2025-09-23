@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
-import { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
+import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
@@ -45,7 +45,8 @@ export const useDataStreamStats = ({
 
       return {
         ...dsStats,
-        bytesPerDay: dsStats.sizeBytes ? dsStats.sizeBytes / daysSinceCreation : 0,
+        bytesPerDay:
+          dsStats.sizeBytes && dsStats.totalDocs !== 0 ? dsStats.sizeBytes / daysSinceCreation : 0,
         bytesPerDoc:
           dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
       };

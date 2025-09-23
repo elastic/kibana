@@ -27,11 +27,36 @@
       "type": "Interface",
       "tags": [],
       "label": "OnechatPluginStart",
-      "description": [],
+      "description": [
+        "\nPublic start contract for the browser-side onechat plugin."
+      ],
       "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTool service contract, can be used to list or execute tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/onechat-browser",
+              "scope": "common",
+              "docId": "kibKbnOnechatBrowserPluginApi",
+              "section": "def-common.ToolServiceStartContract",
+              "text": "ToolServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -40,159 +65,6 @@
     "classes": [],
     "functions": [],
     "interfaces": [
-      {
-        "parentPluginId": "onechat",
-        "id": "def-server.ScopedPublicToolRegistry",
-        "type": "Interface",
-        "tags": [],
-        "label": "ScopedPublicToolRegistry",
-        "description": [
-          "\nPublic tool registry exposed from the plugin's contract,\nand pre-bound to a given request."
-        ],
-        "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "onechat",
-            "id": "def-server.ScopedPublicToolRegistry.has",
-            "type": "Function",
-            "tags": [],
-            "label": "has",
-            "description": [],
-            "signature": [
-              "(toolId: ",
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              },
-              ") => Promise<boolean>"
-            ],
-            "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "onechat",
-                "id": "def-server.ScopedPublicToolRegistry.has.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toolId",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/onechat-common",
-                    "scope": "common",
-                    "docId": "kibKbnOnechatCommonPluginApi",
-                    "section": "def-common.ToolIdentifier",
-                    "text": "ToolIdentifier"
-                  }
-                ],
-                "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "onechat",
-            "id": "def-server.ScopedPublicToolRegistry.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              "(toolId: ",
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/onechat-server",
-                "scope": "common",
-                "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.ExecutableTool",
-                "text": "ExecutableTool"
-              },
-              "<Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>, unknown>>"
-            ],
-            "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "onechat",
-                "id": "def-server.ScopedPublicToolRegistry.get.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "toolId",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/onechat-common",
-                    "scope": "common",
-                    "docId": "kibKbnOnechatCommonPluginApi",
-                    "section": "def-common.ToolIdentifier",
-                    "text": "ToolIdentifier"
-                  }
-                ],
-                "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "onechat",
-            "id": "def-server.ScopedPublicToolRegistry.list",
-            "type": "Function",
-            "tags": [],
-            "label": "list",
-            "description": [],
-            "signature": [
-              "(options?: {} | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/onechat-server",
-                "scope": "common",
-                "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.ExecutableTool",
-                "text": "ExecutableTool"
-              },
-              "<Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>, unknown>[]>"
-            ],
-            "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "onechat",
-                "id": "def-server.ScopedPublicToolRegistry.list.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": []
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "onechat",
         "id": "def-server.ToolsSetup",
@@ -213,18 +85,18 @@
             "tags": [],
             "label": "register",
             "description": [
-              "\nRegister a built-in tool to be available in onechat.\n\nRefer to {@link ToolRegistration}"
+              "\nRegister a built-in tool to be available in onechat."
             ],
             "signature": [
-              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>, RunOutput = unknown>(tool: ",
+              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
                 "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.RegisteredTool",
-                "text": "RegisteredTool"
+                "section": "def-common.BuiltinToolDefinition",
+                "text": "BuiltinToolDefinition"
               },
-              "<RunInput, RunOutput>) => void"
+              "<RunInput>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
             "deprecated": false,
@@ -243,10 +115,10 @@
                     "pluginId": "@kbn/onechat-server",
                     "scope": "common",
                     "docId": "kibKbnOnechatServerPluginApi",
-                    "section": "def-common.RegisteredTool",
-                    "text": "RegisteredTool"
+                    "section": "def-common.BuiltinToolDefinition",
+                    "text": "BuiltinToolDefinition"
                   },
-                  "<RunInput, RunOutput>"
+                  "<RunInput>"
                 ],
                 "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
                 "deprecated": false,
@@ -272,28 +144,6 @@
         "children": [
           {
             "parentPluginId": "onechat",
-            "id": "def-server.ToolsStart.registry",
-            "type": "Object",
-            "tags": [],
-            "label": "registry",
-            "description": [
-              "\nAccess the tool registry's APIs."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-server",
-                "scope": "common",
-                "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.ToolProvider",
-                "text": "ToolProvider"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "onechat",
             "id": "def-server.ToolsStart.execute",
             "type": "Function",
             "tags": [],
@@ -302,7 +152,7 @@
               "\nExecute a tool."
             ],
             "signature": [
-              "<TParams = Record<string, unknown>, TResult = unknown>(params: ",
+              "<TParams = Record<string, unknown>>(params: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -318,7 +168,7 @@
                 "section": "def-common.RunToolReturn",
                 "text": "RunToolReturn"
               },
-              "<TResult>>"
+              ">"
             ],
             "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
             "deprecated": false,
@@ -350,18 +200,19 @@
           },
           {
             "parentPluginId": "onechat",
-            "id": "def-server.ToolsStart.asScoped",
+            "id": "def-server.ToolsStart.getRegistry",
             "type": "Function",
             "tags": [],
-            "label": "asScoped",
+            "label": "getRegistry",
             "description": [
-              "\nReturn a version of the tool APIs scoped to the provided request."
+              "\nReturn the global tool registry scoped to the current user."
             ],
             "signature": [
               "(opts: { request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>; }) => ",
-              "ScopedToolsStart"
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              "ToolRegistry",
+              ">"
             ],
             "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
             "deprecated": false,
@@ -369,7 +220,7 @@
             "children": [
               {
                 "parentPluginId": "onechat",
-                "id": "def-server.ToolsStart.asScoped.$1",
+                "id": "def-server.ToolsStart.getRegistry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -380,7 +231,7 @@
                 "children": [
                   {
                     "parentPluginId": "onechat",
-                    "id": "def-server.ToolsStart.asScoped.$1.request",
+                    "id": "def-server.ToolsStart.getRegistry.$1.request",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -403,51 +254,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "onechat",
-        "id": "def-server.ScopedPublicToolRegistryFactoryFn",
-        "type": "Type",
-        "tags": [],
-        "label": "ScopedPublicToolRegistryFactoryFn",
-        "description": [],
-        "signature": [
-          "(opts: { request: ",
-          "KibanaRequest",
-          "<unknown, unknown, unknown, any>; }) => ",
-          {
-            "pluginId": "onechat",
-            "scope": "server",
-            "docId": "kibOnechatPluginApi",
-            "section": "def-server.ScopedPublicToolRegistry",
-            "text": "ScopedPublicToolRegistry"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "onechat",
-            "id": "def-server.ScopedPublicToolRegistryFactoryFn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "opts",
-            "description": [],
-            "signature": [
-              "{ request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/onechat/server/services/tools/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "onechat",
@@ -514,6 +321,20 @@
               "section": "def-server.ToolsStart",
               "text": "ToolsStart"
             }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-server.OnechatPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [],
+          "signature": [
+            "AgentsStart"
           ],
           "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
           "deprecated": false,

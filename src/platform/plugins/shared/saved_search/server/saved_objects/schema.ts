@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
@@ -136,3 +137,53 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
     schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
   ),
 });
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  title: undefined,
+  description: undefined,
+});
+
+const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
+  id: schema.string(),
+  label: schema.string(),
+  // Remove `title` and `description` from the tab schema as they exist at the top level of the saved object
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
+});
+
+const { columns, grid, hideChart, isTextBasedQuery, kibanaSavedObjectMeta, rowHeight, sort } =
+  SCHEMA_SEARCH_MODEL_VERSION_6.getPropSchemas();
+
+// Mark top-level attributes (except title and description) optional, and mark tabs as required
+export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
+  columns: schema.maybe(columns),
+  grid: schema.maybe(grid),
+  hideChart: schema.maybe(hideChart),
+  isTextBasedQuery: schema.maybe(isTextBasedQuery),
+  kibanaSavedObjectMeta: schema.maybe(kibanaSavedObjectMeta),
+  rowHeight: schema.maybe(rowHeight),
+  sort: schema.maybe(sort),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
+});
+
+const CONTROL_GROUP_JSON_SCHEMA = {
+  controlGroupJson: schema.maybe(schema.string()),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES.extends(CONTROL_GROUP_JSON_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  ...CONTROL_GROUP_JSON_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;

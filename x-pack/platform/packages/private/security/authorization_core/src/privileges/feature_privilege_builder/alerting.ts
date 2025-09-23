@@ -20,6 +20,7 @@ enum AlertingEntity {
 const readOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'get',
+    'bulkGet',
     'getRuleState',
     'getAlertSummary',
     'getExecutionLog',
@@ -29,6 +30,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getBackfill',
     'findBackfill',
     'findGaps',
+    'bulkEditParams',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };

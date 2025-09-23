@@ -24,12 +24,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { CloudProviderIcon, type CloudProvider } from '@kbn/custom-icons';
+import { LoadingGroup, NullGroup, firstNonNullValue } from '@kbn/cloud-security-posture';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../../constants';
-import { firstNonNullValue } from './first_non_null_value';
-import { NullGroup } from './null_group';
-import { LoadingGroup } from './loading_group';
 import type { AssetsGroupingAggregation } from '../use_fetch_grouped_data';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from '../translations';
 
@@ -69,6 +67,13 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
 
   switch (selectedGroup) {
     case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
+      const rawCriticalityLevel = firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key) as
+        | CriticalityLevelWithUnassigned
+        | 'deleted';
+
+      const criticalityLevel =
+        rawCriticalityLevel === 'deleted' ? 'unassigned' : rawCriticalityLevel;
+
       return nullGroupMessage ? (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -84,13 +89,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <AssetCriticalityBadge
-                  criticalityLevel={
-                    firstNonNullValue(
-                      bucket.assetCriticality?.buckets?.[0]?.key
-                    ) as CriticalityLevelWithUnassigned
-                  }
-                />
+                <AssetCriticalityBadge criticalityLevel={criticalityLevel} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

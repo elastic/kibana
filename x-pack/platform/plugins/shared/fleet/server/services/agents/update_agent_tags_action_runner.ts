@@ -157,7 +157,7 @@ export async function updateTagsBatch(
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
   // this ensures that the action status count will be accurate
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
@@ -196,7 +196,7 @@ export async function updateTagsBatch(
         agentId: failure.id,
         actionId,
         namespace: spaceId,
-        error: failure.cause.reason,
+        error: failure.cause.reason ?? undefined, // reason can be null and we want to replace it with undefined
       }))
     );
     appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);

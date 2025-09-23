@@ -32,7 +32,7 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
@@ -78,7 +78,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
-    graphEventId,
     savedObjectId,
     timelineType,
     description,
@@ -88,7 +87,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       [
         'indexNames',
         'dataViewId',
-        'graphEventId',
         'savedObjectId',
         'timelineType',
         'description',
@@ -104,12 +102,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
 
   const selectedDataViewId = useMemo(
-    () =>
-      newDataViewPickerEnabled ? experimentalDataViewSpec?.id ?? '' : selectedDataViewIdSourcerer,
-    [experimentalDataViewSpec?.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
+    [experimentalDataView.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
   );
 
   const selectedPatterns = useMemo(
@@ -164,9 +161,14 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   ]);
 
   useEffect(() => {
+    // NOTE: dont dispatch sourcerer events until the status is ready - for the new picker
+    if (newDataViewPickerEnabled && status !== 'ready') {
+      return;
+    }
+
     onSourcererChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewId, selectedPatterns]);
+  }, [selectedDataViewId, selectedPatterns, newDataViewPickerEnabled, status]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
@@ -230,7 +232,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           </HideShowContainer>
 
           <TabsContent
-            graphEventId={graphEventId}
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}

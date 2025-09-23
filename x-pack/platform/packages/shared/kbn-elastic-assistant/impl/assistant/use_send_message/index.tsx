@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
-import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
+import type { FetchConnectorExecuteResponse } from '../api';
+import { fetchConnectorExecuteAction } from '../api';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;
@@ -31,7 +32,7 @@ interface UseSendMessage {
 }
 
 export const useSendMessage = (): UseSendMessage => {
-  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
+  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions, toasts } =
     useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
@@ -54,12 +55,19 @@ export const useSendMessage = (): UseSendMessage => {
           screenContext: {
             timeZone: moment.tz.guess(),
           },
+          toasts,
         });
       } finally {
         setIsLoading(false);
       }
     },
-    [alertsIndexPattern, assistantStreamingEnabled, knowledgeBase.latestAlerts, traceOptions]
+    [
+      alertsIndexPattern,
+      assistantStreamingEnabled,
+      knowledgeBase.latestAlerts,
+      toasts,
+      traceOptions,
+    ]
   );
 
   const cancelRequest = useCallback(() => {

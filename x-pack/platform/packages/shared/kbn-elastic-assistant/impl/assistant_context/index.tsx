@@ -7,14 +7,20 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
+import type { User, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type {
+  ChromeStart,
+  UnmountCallback,
+  ApplicationStart,
+  UserProfileService,
+} from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
@@ -22,17 +28,16 @@ import type {
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
+  PromptContextTemplate,
 } from '../assistant/prompt_context/types';
-import {
+import type {
   AssistantAvailability,
   AssistantTelemetry,
   Conversation,
   GetAssistantMessages,
 } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
-import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
-import { PromptContextTemplate } from '../assistant/prompt_context/types';
-import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
+import type { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -43,8 +48,7 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { ModalSettingsTabs } from '../assistant/settings/types';
-import { AssistantNavLink } from './assistant_nav_link';
+import type { ModalSettingsTabs } from '../assistant/settings/types';
 
 export type SelectedConversation = { id: string } | { title: string };
 
@@ -60,24 +64,29 @@ type ShowAssistantOverlay = ({
   promptContextId,
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
+
+type GetUrlForApp = ApplicationStart['getUrlForApp'];
+
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (
-    currentConversation: Conversation,
-    showAnonymizedValues: boolean
-  ) => CodeBlockDetails[][];
+  augmentMessageCodeBlocks: {
+    mount: (args: {
+      currentConversation: Conversation;
+      showAnonymizedValues: boolean;
+    }) => UnmountCallback;
+  };
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  docLinks: Omit<DocLinksStart, 'links'>;
-  children: React.ReactNode;
+  docLinks: DocLinksStart;
+  getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
@@ -99,19 +108,22 @@ export interface UseAssistantContext {
   assistantFeatures: Partial<AssistantFeatures>;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (
-    currentConversation: Conversation,
-    showAnonymizedValues: boolean
-  ) => CodeBlockDetails[][];
-  docLinks: Omit<DocLinksStart, 'links'>;
+  augmentMessageCodeBlocks: {
+    mount: (args: {
+      currentConversation: Conversation;
+      showAnonymizedValues: boolean;
+    }) => UnmountCallback;
+  };
+  docLinks: DocLinksStart;
   basePath: string;
-  currentUserAvatar?: UserAvatar;
+  currentUser?: User;
   getComments: GetAssistantMessages;
+  getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   promptContexts: Record<string, PromptContext>;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: ModalSettingsTabs | null;
@@ -143,36 +155,46 @@ export interface UseAssistantContext {
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
 
-export const AssistantProvider: React.FC<AssistantProviderProps> = ({
-  actionTypeRegistry,
-  alertsIndexPattern,
-  assistantAvailability,
-  assistantTelemetry,
-  augmentMessageCodeBlocks,
-  docLinks,
-  basePath,
-  basePromptContexts = [],
-  children,
-  getComments,
-  http,
-  inferenceEnabled = false,
-  navigateToApp,
-  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  productDocBase,
-  title = DEFAULT_ASSISTANT_TITLE,
-  toasts,
-  currentAppId,
-  userProfileService,
-  chrome,
-}) => {
-  /**
-   * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
-   */
+export const useAssistantContext = () => {
+  const context = React.useContext(AssistantContext);
+
+  if (context == null) {
+    throw new Error('useAssistantContext must be used within a AssistantProvider');
+  }
+
+  return context;
+};
+
+export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
+  const {
+    actionTypeRegistry,
+    alertsIndexPattern,
+    assistantAvailability,
+    assistantTelemetry,
+    augmentMessageCodeBlocks,
+    docLinks,
+    basePath,
+    basePromptContexts = [],
+    getComments,
+    getUrlForApp,
+    http,
+    inferenceEnabled = false,
+    navigateToApp,
+    nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+    productDocBase,
+    title = DEFAULT_ASSISTANT_TITLE,
+    toasts,
+    currentAppId,
+    userProfileService,
+    chrome,
+  } = props;
+
   const defaultTraceOptions: TraceOptions = {
     apmUrl: `${http.basePath.serverBasePath}/app/apm`,
     langSmithProject: '',
     langSmithApiKey: '',
   };
+
   const [sessionStorageTraceOptions = defaultTraceOptions, setSessionStorageTraceOptions] =
     useSessionStorage<TraceOptions>(
       `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
@@ -255,14 +277,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Current User Avatar
    */
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: async () =>
-      userProfileService.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => userProfileService.getCurrent(),
     select: (data) => {
-      return data.data.avatar;
+      return {
+        id: data.uid,
+        name: data.user.username,
+      };
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -291,9 +313,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       knowledgeBase: {
@@ -340,9 +363,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       localStorageKnowledgeBase,
@@ -372,20 +396,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     ]
   );
 
-  return (
-    <AssistantContext.Provider value={value}>
-      <AssistantNavLink />
-      {children}
-    </AssistantContext.Provider>
-  );
+  return value;
 };
 
-export const useAssistantContext = () => {
-  const context = React.useContext(AssistantContext);
-
-  if (context == null) {
-    throw new Error('useAssistantContext must be used within a AssistantProvider');
-  }
-
-  return context;
+export const AssistantProvider: React.FC<{
+  children: React.ReactNode;
+  value: ReturnType<typeof useAssistantContextValue>;
+}> = ({ children, value }) => {
+  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
 };

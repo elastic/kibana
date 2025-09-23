@@ -48,6 +48,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.jira-service-management",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.microsoft_defender_endpoint",
   },
   Object {
@@ -121,6 +125,10 @@ Array [
   Object {
     "cost": 1,
     "taskType": "actions:.xmatters",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.xsoar",
   },
   Object {
     "cost": 10,

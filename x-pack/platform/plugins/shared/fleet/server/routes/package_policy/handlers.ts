@@ -43,7 +43,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -56,12 +60,8 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type {
-  SimplifiedInputs,
-  SimplifiedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
-import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -263,6 +263,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
@@ -291,7 +292,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,
@@ -308,6 +309,29 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+      // Agentless deployments have 1:1 agent to integration policies
+      // We delete the associated agent policy previously created.
+      const agentPolicyId = newPolicy.policy_ids?.[0];
+
+      if (agentPolicyId) {
+        appContextService
+          .getLogger()
+          .info(
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+          );
+
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+            );
+        });
+      }
+      throw error;
     }
 
     if (error.statusCode) {
@@ -369,10 +393,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
-      validateAgentlessInputs(
-        body?.inputs as SimplifiedInputs,
-        body?.supports_agentless || newData.supports_agentless
-      );
     } else {
       // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
@@ -396,16 +416,15 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
-    validateAgentlessInputs(
-      newData.inputs,
-      newData.supports_agentless || packagePolicy.supports_agentless
-    );
+
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (

@@ -15,7 +15,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
-import { FieldSelection } from '../../../../common/components/field_selection';
+import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
@@ -41,6 +41,10 @@ interface AlertsCountPanelProps {
   title?: React.ReactNode;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
+  /**
+   * Indices to use when fetching the chart data
+   */
+  signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
 
@@ -64,6 +68,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     title = i18n.COUNT_TABLE_TITLE,
     isExpanded,
     setIsExpanded,
+    signalIndexName,
   }) => {
     const { to, from } = useGlobalTime();
     // create a unique, but stable (across re-renders) query id
@@ -114,6 +119,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           </HeaderSection>
           {isExpanded && (
             <VisualizationEmbeddable
+              signalIndexName={signalIndexName}
               data-test-subj="embeddable-alerts-count"
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}

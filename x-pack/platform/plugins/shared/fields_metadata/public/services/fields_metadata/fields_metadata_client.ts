@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { HashedCache } from '../../../common/hashed_cache';
-import {
+import type {
   FindFieldsMetadataRequestQuery,
-  findFieldsMetadataRequestQueryRT,
   FindFieldsMetadataResponsePayload,
+} from '../../../common/latest';
+import {
+  findFieldsMetadataRequestQueryRT,
   findFieldsMetadataResponsePayloadRT,
 } from '../../../common/latest';
+import type { FieldName } from '../../../common/fields_metadata';
 import {
   DecodeFieldsMetadataError,
   FetchFieldsMetadataError,
-  FieldName,
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { IFieldsMetadataClient } from './types';
+import type { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private cache: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;
@@ -37,7 +39,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       return this.cache.get(params) as FindFieldsMetadataResponsePayload;
     }
 
-    const query = findFieldsMetadataRequestQueryRT.encode(params);
+    // Convert FieldName[] to string[] for the encoder
+    // - TypeScript interface allows FieldName[] (which can include numbers)
+    // - Runtime encoder expects string[] only
+    const encodableParams = {
+      ...params,
+      fieldNames: params.fieldNames?.map((name) => String(name)),
+    };
+    const query = findFieldsMetadataRequestQueryRT.encode(encodableParams);
 
     const response = await this.http
       .get(FIND_FIELDS_METADATA_URL, { query, version: '1' })

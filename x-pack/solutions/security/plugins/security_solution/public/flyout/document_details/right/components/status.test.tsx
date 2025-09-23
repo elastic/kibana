@@ -37,6 +37,7 @@ const actionItem = {
 
 (useAlertsActions as jest.Mock).mockReturnValue({
   actionItems: [actionItem],
+  panels: [],
 });
 
 describe('<DocumentStatus />', () => {
@@ -76,7 +77,7 @@ describe('<DocumentStatus />', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
-      isPreview: true,
+      isRulePreview: true,
     } as unknown as DocumentDetailsContext;
 
     const { container } = renderStatus(contextValue);

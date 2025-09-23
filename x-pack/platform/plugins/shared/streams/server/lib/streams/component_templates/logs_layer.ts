@@ -5,13 +5,34 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  Streams,
-  namespacePrefixes,
-} from '@kbn/streams-schema';
+import { EcsFlat } from '@elastic/ecs';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
+import { namespacePrefixes } from '@kbn/streams-schema';
+import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+
+// This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
+export const otelEquivalentLookupMap = Object.fromEntries(
+  Object.entries(EcsFlat).flatMap(([fieldName, field]) => {
+    if (!('otel' in field) || !field.otel) {
+      return [];
+    }
+    const otelEquivalentProperty = field.otel.find(
+      (otelProperty) => otelProperty.relation === 'equivalent'
+    );
+    if (
+      !otelEquivalentProperty ||
+      !('attribute' in otelEquivalentProperty) ||
+      !(typeof otelEquivalentProperty.attribute === 'string')
+    ) {
+      return [];
+    }
+
+    return [[otelEquivalentProperty.attribute, fieldName]];
+  })
+);
 
 export const logsSettings: IndicesIndexSettings = {
   index: {
@@ -37,29 +58,8 @@ export const baseFields: FieldDefinition = {
   'stream.name': {
     type: 'system',
   },
-  'scope.dropped_attributes_count': {
-    type: 'long',
-  },
-  dropped_attributes_count: {
-    type: 'long',
-  },
-  'resource.dropped_attributes_count': {
-    type: 'long',
-  },
-  'resource.schema_url': {
-    type: 'keyword',
-  },
   'scope.name': {
     type: 'keyword',
-  },
-  'scope.schema_url': {
-    type: 'keyword',
-  },
-  'scope.version': {
-    type: 'keyword',
-  },
-  observed_timestamp: {
-    type: 'date',
   },
   trace_id: {
     type: 'keyword',
@@ -82,17 +82,18 @@ export const baseFields: FieldDefinition = {
   'resource.attributes.host.name': {
     type: 'keyword',
   },
+  'resource.attributes.service.name': {
+    type: 'keyword',
+  },
 };
 
-export const baseMappings: Record<string, MappingProperty> = {
+export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {
       structured: {
-        type: 'flattened',
-      },
-      text: {
-        type: 'match_only_text',
+        type: 'object',
+        subobjects: false,
       },
     },
   },
@@ -103,13 +104,6 @@ export const baseMappings: Record<string, MappingProperty> = {
   resource: {
     type: 'object',
     properties: {
-      dropped_attributes_count: {
-        type: 'long',
-      },
-      schema_url: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
       attributes: {
         type: 'object',
         subobjects: false,
@@ -189,6 +183,23 @@ const createAliasesForNamespacedFields = (
         from,
         alias_for: key,
       };
+    }
+  });
+  // check whether the field has an otel equivalent. If yes, set the ECS equivalent as an alias
+  // This needs to be done after the initial properties are set, so the ECS equivalent aliases win out
+  getSortedFields(fields).forEach(([key, fieldDef]) => {
+    if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
+      const aliasKey = key.replace(allNamespacesRegex, '');
+      const from = typeof fromSource === 'function' ? fromSource(key) : fromSource;
+
+      const otelEquivalent = otelEquivalentLookupMap[aliasKey];
+      if (otelEquivalent) {
+        targetCollection[otelEquivalent] = {
+          ...fieldDef,
+          from,
+          alias_for: key,
+        };
+      }
     }
   });
 };

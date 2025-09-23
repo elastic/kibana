@@ -7,24 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
-import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import React, { type PropsWithChildren, useEffect, useRef, useMemo } from 'react';
+import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
+import type {
+  ChartSectionConfiguration,
+  UnifiedHistogramPartialLayoutProps,
+} from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
+import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
+import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
-  useInternalStateSelector,
-  type RuntimeStateManager,
-  selectTabRuntimeState,
-  useRuntimeState,
   CurrentTabProvider,
+  type RuntimeStateManager,
   RuntimeStateProvider,
-  useCurrentTabSelector,
+  selectTabRuntimeState,
+  useInternalStateSelector,
+  useRuntimeState,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDiscoverHistogram } from './use_discover_histogram';
+import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
+import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
+import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -84,6 +91,10 @@ const UnifiedHistogramGuard = ({
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentScopedProfilesManager = useRuntimeState(
+    currentTabRuntimeState.scopedProfilesManager$
+  );
+  const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
@@ -92,8 +103,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentStateContainer ||
-    !currentDataView ||
-    !currentTabRuntimeState
+    !currentDataView
   ) {
     return null;
   }
@@ -105,10 +115,12 @@ const UnifiedHistogramGuard = ({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <UnifiedHistogramChartWrapper
-              stateContainer={currentStateContainer}
-              panelsToggle={panelsToggle}
-            />
+            <ScopedServicesProvider
+              scopedProfilesManager={currentScopedProfilesManager}
+              scopedEBTManager={currentScopedEbtManager}
+            >
+              <ChartsWrapper stateContainer={currentStateContainer} panelsToggle={panelsToggle} />
+            </ScopedServicesProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>
@@ -120,11 +132,45 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
   stateContainer: DiscoverStateContainer;
 };
 
-const UnifiedHistogramChartWrapper = ({
-  stateContainer,
-  panelsToggle,
-}: UnifiedHistogramChartProps) => {
-  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(stateContainer);
+const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const chartSectionConfig = useMemo(
+    () =>
+      getChartConfigAccessor(() => ({
+        replaceDefaultChart: false,
+      }))(),
+    [getChartConfigAccessor]
+  );
+
+  useEffect(() => {
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      localStorageKeyPrefix: chartSectionConfig.replaceDefaultChart
+        ? chartSectionConfig.localStorageKeyPrefix
+        : undefined,
+    });
+  }, [chartSectionConfig, stateContainer]);
+
+  return chartSectionConfig.replaceDefaultChart ? (
+    <CustomChartSectionWrapper
+      stateContainer={stateContainer}
+      panelsToggle={panelsToggle}
+      chartSectionConfig={chartSectionConfig}
+    />
+  ) : (
+    <UnifiedHistogramWrapper stateContainer={stateContainer} panelsToggle={panelsToggle} />
+  );
+};
+
+const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+
+  const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
@@ -133,30 +179,14 @@ const UnifiedHistogramChartWrapper = ({
     }
   }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
 
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+    currentTabId,
+    layoutProps: unifiedHistogram.layoutProps,
+    stateContainer,
+    panelsToggle,
+  });
 
-  useEffect(() => {
-    if (unifiedHistogram.layoutProps) {
-      const currentTabRuntimeState = selectTabRuntimeState(
-        stateContainer.runtimeStateManager,
-        currentTabId
-      );
-      currentTabRuntimeState.unifiedHistogramLayoutProps$.next(unifiedHistogram.layoutProps);
-    }
-  }, [currentTabId, stateContainer.runtimeStateManager, unifiedHistogram.layoutProps]);
-
-  const isEsqlMode = useIsEsqlMode();
-  const renderCustomChartToggleActions = useCallback(
-    () =>
-      React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
-        : panelsToggle,
-    [panelsToggle]
-  );
-
-  // Initialized when the first search has been requested or
-  // when in ES|QL mode since search sessions are not supported
-  if (!unifiedHistogram.isInitialized || (!unifiedHistogramProps.searchSessionId && !isEsqlMode)) {
+  if (!unifiedHistogram.isInitialized || (!restProps.searchSessionId && !isEsqlMode)) {
     return null;
   }
 
@@ -164,6 +194,81 @@ const UnifiedHistogramChartWrapper = ({
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
+    />
+  );
+};
+
+const CustomChartSectionWrapper = ({
+  stateContainer,
+  panelsToggle,
+  chartSectionConfig,
+}: UnifiedHistogramChartProps & {
+  chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
+}) => {
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
+    stateContainer,
+    chartSectionConfig.localStorageKeyPrefix
+  );
+  const localStorageKeyPrefix =
+    chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
+
+  const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
+  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
+    ...restProps,
+    initialState: unifiedHistogramProps.initialState,
+    localStorageKeyPrefix,
+  });
+
+  useEffect(() => {
+    if (api) {
+      setUnifiedHistogramApi(api);
+    }
+  }, [api, setUnifiedHistogramApi]);
+
+  const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
+    () => ({
+      onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
+      isChartAvailable: true,
+      chart: stateProps.chart,
+      topPanelHeight: stateProps.topPanelHeight,
+      defaultTopPanelHeight: chartSectionConfig.defaultTopPanelHeight,
+    }),
+    [
+      chartSectionConfig.defaultTopPanelHeight,
+      stateProps.chart,
+      stateProps.onTopPanelHeightChange,
+      stateProps.topPanelHeight,
+    ]
+  );
+
+  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+    currentTabId,
+    layoutProps,
+    stateContainer,
+    panelsToggle,
+    localStorageKeyPrefix,
+  });
+
+  const { chartToolbarCss, histogramCss } = useChartStyles(
+    !!layoutProps.chart && !layoutProps.chart.hidden
+  );
+
+  const hasValidSession = !!unifiedHistogramProps.searchSessionId || isEsqlMode;
+  const isComponentVisible =
+    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
+
+  if (!isComponentVisible || !hasValidSession) {
+    return null;
+  }
+
+  return (
+    <chartSectionConfig.Component
+      histogramCss={histogramCss}
+      chartToolbarCss={chartToolbarCss}
+      renderToggleActions={renderCustomChartToggleActions}
+      input$={input$}
+      requestParams={requestParams}
+      {...unifiedHistogramProps}
     />
   );
 };

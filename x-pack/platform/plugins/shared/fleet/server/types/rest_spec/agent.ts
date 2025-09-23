@@ -33,6 +33,7 @@ export const GetAgentsRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({ defaultValue: true }),
       showInactive: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
@@ -100,6 +101,20 @@ export const MigrateOptionsSchema = {
   staging: schema.maybe(schema.boolean()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   replace_token: schema.maybe(schema.boolean()),
+};
+export const BulkMigrateOptionsSchema = {
+  ca_sha256: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.string()),
+  elastic_agent_cert: schema.maybe(schema.string()),
+  elastic_agent_cert_key: schema.maybe(schema.string()),
+  elastic_agent_cert_key_passphrase: schema.maybe(schema.string()),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  insecure: schema.maybe(schema.boolean()),
+  proxy_disabled: schema.maybe(schema.boolean()),
+  proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  proxy_url: schema.maybe(schema.string()),
+  staging: schema.maybe(schema.boolean()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
 };
 export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STARTING'),
@@ -169,6 +184,7 @@ export const AgentResponseSchema = schema.object({
     )
   ),
   status: schema.maybe(AgentStatusSchema),
+  last_known_status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string()),
   sort: schema.maybe(schema.arrayOf(schema.any())), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
@@ -551,6 +567,19 @@ export const MigrateSingleAgentResponseSchema = schema.object({
   actionId: schema.string(),
 });
 
+export const BulkMigrateAgentsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    uri: schema.uri(),
+    enrollment_token: schema.string(),
+    settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
+    batchSize: schema.maybe(schema.number()),
+  }),
+};
+export const BulkMigrateAgentsResponseSchema = schema.object({
+  actionId: schema.string(),
+});
+
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
@@ -685,6 +714,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('POLICY_CHANGE'),
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
+        schema.literal('PRIVILEGE_LEVEL_CHANGE'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -752,4 +782,24 @@ export const GetActionStatusResponseSchema = schema.object({
 
 export const GetAvailableAgentVersionsResponseSchema = schema.object({
   items: schema.arrayOf(schema.string()),
+});
+
+export const ChangeAgentPrivilegeLevelRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      user_info: schema.maybe(
+        schema.object({
+          username: schema.maybe(schema.string()),
+          groupname: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        })
+      ),
+    })
+  ),
+};
+export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
+  actionId: schema.string(),
 });

@@ -151,6 +151,13 @@ export const schema = Joi.object()
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
+        // Currently supporting beforeAll and afterAll.
+        rootHooks: Joi.object()
+          .keys({
+            beforeAll: Joi.function().optional(),
+            afterAll: Joi.function().optional(),
+          })
+          .optional(),
       })
       .default(),
 
@@ -259,6 +266,7 @@ export const schema = Joi.object()
           .default(),
         env: Joi.object().unknown().default(),
         delayShutdown: Joi.number(),
+        startRemoteKibana: Joi.boolean().default(false),
       })
       .default(),
 

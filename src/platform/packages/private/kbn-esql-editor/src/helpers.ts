@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { ILicense } from '@kbn/licensing-types';
+import { monaco } from '@kbn/monaco';
+import type { MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
-import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { MapCache } from 'lodash';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
-  EDITOR_MIN_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  EDITOR_MIN_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
 } from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
-
-export type MonacoMessage = monaco.editor.IMarkerData;
 
 interface IntegrationsResponse {
   items: Array<{
@@ -118,6 +119,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
           endColumn: startColumn + errorLength - 1,
           endLineNumber: startLineNumber,
           severity: monaco.MarkerSeverity.Warning,
+          code: 'warningFromES',
         };
       });
     }
@@ -131,6 +133,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       endColumn: 10,
       endLineNumber: 1,
       severity: monaco.MarkerSeverity.Warning,
+      code: 'unknown',
     },
   ];
 };
@@ -157,6 +160,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
+        code: 'errorFromES',
       };
     } else if (error.message.includes('expression was aborted')) {
       return {
@@ -168,6 +172,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: 10,
         endLineNumber: 1,
         severity: monaco.MarkerSeverity.Warning,
+        code: 'abortedRequest',
       };
     } else {
       // unknown error message
@@ -178,6 +183,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: 10,
         endLineNumber: 1,
         severity: monaco.MarkerSeverity.Error,
+        code: 'unknownError',
       };
     }
   });
@@ -231,7 +237,7 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-const getIntegrations = async (core: CoreStart) => {
+const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
   const fleetCapabilities = core.application.capabilities.fleet;
   if (!fleetCapabilities?.read) {
     return [];
@@ -263,9 +269,12 @@ const getIntegrations = async (core: CoreStart) => {
 
 export const getESQLSources = async (
   dataViews: DataViewsPublicPluginStart,
-  core: CoreStart,
-  areRemoteIndicesAvailable: boolean
+  core: Pick<CoreStart, 'application' | 'http'>,
+  getLicense: (() => Promise<ILicense | undefined>) | undefined
 ) => {
+  const ls = await getLicense?.();
+  const ccrFeature = ls?.getFeature('ccr');
+  const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
   const [remoteIndices, localIndices, integrations] = await Promise.all([
     getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),
@@ -371,4 +380,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
   `;
+};
+
+export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
+  return errors.filter((error) => {
+    return !['unknownIndex', 'unknownColumn'].includes(error.code);
+  });
 };

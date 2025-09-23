@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
+  const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
   const ebtUIHelper = getService('kibana_ebt_ui');
   const retry = getService('retry');
@@ -264,6 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(event2.properties).to.eql({
           eventName: 'dataTableSelection',
+          fieldName: '<non-ecs>',
         });
       });
 
@@ -424,6 +426,85 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'example-root-profile',
           'example-data-source-profile',
         ]);
+      });
+    });
+
+    describe('trackSubmittingQuery telemetry', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await ebtUIHelper.setOptIn(true);
+      });
+
+      it('should track field usage for KQL queries', async () => {
+        await queryBar.setQuery('agent.name: "java" and log.level : "debug"');
+        await queryBar.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'kqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track field usage for ES|QL queries', async () => {
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(
+          'from my-example-* | where agent.name == "java" and log.level == "debug"'
+        );
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'esqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track field usage for KQL queries embedded in ES|QL queries', async () => {
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(
+          'from my-example-* | where agent.name == "java" and KQL("""log.level:"debug" """)'
+        );
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'esqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track free text search as __FREE_TEXT__ placeholder', async () => {
+        await queryBar.setQuery('error occurred');
+        await queryBar.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'kqlQuery',
+          fieldNames: ['__FREE_TEXT__'],
+        });
       });
     });
   });

@@ -8,10 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  DataStreamMigrationStatus,
-  DataStreamResolutionType,
-} from '../../../../../../../common/types';
+import type { DataStreamResolutionType } from '../../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../../common/types';
 
 export const getPrimaryButtonLabel = (
   status?: DataStreamMigrationStatus,
@@ -30,7 +28,7 @@ export const getPrimaryButtonLabel = (
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.reindexingLabel"
-          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migrating}}…"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migrating}}…"
           values={{ resolutionType }}
         />
       );
@@ -38,7 +36,7 @@ export const getPrimaryButtonLabel = (
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.restartLabel"
-          defaultMessage="{resolutionType, select, reindex {Restart reindexing} readonly {Restart marking as read-only} other {Restart migration}}"
+          defaultMessage="{resolutionType, select, reindex {Restart reindexing} readonly {Restart setting to read-only} other {Restart migration}}"
           values={{ resolutionType }}
         />
       );
@@ -46,7 +44,7 @@ export const getPrimaryButtonLabel = (
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.runReindexLabel"
-          defaultMessage="{resolutionType, select, reindex {Start reindexing} readonly {Start marking as read-only} other {Start migration}}"
+          defaultMessage="{resolutionType, select, reindex {Start reindexing} readonly {Start setting to read-only} other {Start migration}}"
           values={{ resolutionType }}
         />
       );

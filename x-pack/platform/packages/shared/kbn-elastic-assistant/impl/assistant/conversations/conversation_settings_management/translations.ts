@@ -49,6 +49,13 @@ export const CONVERSATIONS_TABLE_COLUMN_CONNECTOR = i18n.translate(
   }
 );
 
+export const CONVERSATIONS_TABLE_COLUMN_SHARING = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.column.sharing',
+  {
+    defaultMessage: 'Sharing',
+  }
+);
+
 export const CONVERSATIONS_TABLE_COLUMN_UPDATED_AT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.updatedAt',
   {
@@ -75,3 +82,39 @@ export const DELETE_CONVERSATION_CONFIRMATION_TITLE = (conversationTitle: string
     values: { conversationTitle },
     defaultMessage: 'Delete "{conversationTitle}"?',
   });
+
+export const DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE = (count: number) =>
+  i18n.translate(
+    'xpack.elasticAssistant.assistant.conversationSettings.deleteConfirmation.multipleTitle',
+    {
+      values: { count },
+      defaultMessage: 'Delete {count} conversations?',
+    }
+  );
+
+export const SELECTED_CONVERSATIONS = (selected: number) =>
+  i18n.translate('xpack.elasticAssistant.assistant.conversationSettings.selectedConversations', {
+    values: { selected },
+    defaultMessage: 'Selected {selected} conversation{selected, plural, one {} other {s}}',
+  });
+
+export const SELECT_ALL_CONVERSATIONS = (conversations: number) =>
+  i18n.translate('xpack.elasticAssistant.assistant.conversationSettings.selectAllConversations', {
+    values: { conversations },
+    defaultMessage:
+      'Select all {conversations} conversation{conversations, plural, one {} other {s}}',
+  });
+
+export const UNSELECT_ALL_CONVERSATIONS = (conversations: number) =>
+  i18n.translate('xpack.elasticAssistant.assistant.conversationSettings.unselectAllConversations', {
+    values: { conversations },
+    defaultMessage:
+      'Unselect all {conversations} conversation{conversations, plural, one {} other {s}}',
+  });
+
+export const DELETE_SELECTED_CONVERSATIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.deleteSelectedConversations',
+  {
+    defaultMessage: 'Delete',
+  }
+);

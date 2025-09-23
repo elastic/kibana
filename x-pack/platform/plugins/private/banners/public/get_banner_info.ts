@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { BannerInfoResponse } from '../common';
+import type { HttpStart } from '@kbn/core/public';
+import type { BannerInfoResponse } from '../common';
 
 export const getBannerInfo = async (http: HttpStart): Promise<BannerInfoResponse> => {
   return await http.get<BannerInfoResponse>('/api/banners/info');

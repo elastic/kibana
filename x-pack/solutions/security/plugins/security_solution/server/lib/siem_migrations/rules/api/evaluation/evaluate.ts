@@ -9,22 +9,19 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
 import { z } from '@kbn/zod';
-import {
-  ConnectorId,
-  LangSmithEvaluationSettings,
-} from '../../../../../../common/siem_migrations/model/common.gen';
+import { RuleMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
-import { createTracersCallbacks } from '../util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../util/authz';
-import { withLicense } from '../util/with_license';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 const requestBodyValidation = buildRouteValidationWithZod(
   z.object({
-    connector_id: ConnectorId,
-    langsmith_settings: LangSmithEvaluationSettings,
+    settings: RuleMigrationTaskExecutionSettings,
+    langsmith_options: LangSmithEvaluationOptions,
   })
 );
 
@@ -47,7 +44,10 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
       { version: '1', validate: { request: { body: requestBodyValidation } } },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<EvaluateRuleMigrationResponse>> => {
-          const { connector_id: connectorId, langsmith_settings: langsmithSettings } = req.body;
+          const {
+            settings: { connector_id: connectorId },
+            langsmith_options: langsmithOptions,
+          } = req.body;
 
           try {
             const evaluationId = uuidV4();
@@ -55,18 +55,13 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
             req.events.aborted$.subscribe(() => abortController.abort());
 
             const securitySolutionContext = await context.securitySolution;
-            const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
-
-            const invocationConfig = {
-              callbacks: createTracersCallbacks(langsmithSettings, logger),
-            };
+            const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
             await ruleMigrationsClient.task.evaluate({
               evaluationId,
               connectorId,
-              langsmithSettings,
+              langsmithOptions,
               abortController,
-              invocationConfig,
             });
 
             return res.ok({ body: { evaluationId } });

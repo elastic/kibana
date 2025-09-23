@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
   NodeShape,
-  Color as NodeColor,
+  NodeColor,
+  NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
@@ -46,10 +47,14 @@ export interface GroupNodeViewModel
     GroupNodeDataModel,
     BaseNodeDataViewModel {}
 
+export type NodeDocumentDataViewModel = NodeDocumentDataModel;
+
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
     BaseNodeDataViewModel {
+  eventsCount?: number;
+  alertsCount?: number;
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }

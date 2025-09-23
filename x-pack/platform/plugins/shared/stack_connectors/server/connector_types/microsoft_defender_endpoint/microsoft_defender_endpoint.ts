@@ -10,6 +10,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Stream } from 'stream';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -20,6 +21,11 @@ import {
   GetActionsParamsSchema,
   AgentDetailsParamsSchema,
   AgentListParamsSchema,
+  RunScriptParamsSchema,
+  MicrosoftDefenderEndpointEmptyParamsSchema,
+  GetActionResultsParamsSchema,
+  DownloadActionResultsResponseSchema,
+  CancelParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -36,6 +42,10 @@ import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointAgentListParams,
   MicrosoftDefenderEndpointAgentListResponse,
+  MicrosoftDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
+  MicrosoftDefenderEndpointGetActionResultsResponse,
+  MicrosoftDefenderEndpointCancelParams,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -47,6 +57,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   private readonly urls: {
     machines: string;
     machineActions: string;
+    libraryFiles: string;
   };
 
   constructor(
@@ -62,6 +73,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       machines: `${this.config.apiUrl}/api/machines`,
       // API docs: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machineactions-collection
       machineActions: `${this.config.apiUrl}/api/machineactions`,
+      libraryFiles: `${this.config.apiUrl}/api/libraryfiles`,
     };
 
     this.registerSubActions();
@@ -101,6 +113,28 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
       method: 'getActions',
       schema: GetActionsParamsSchema,
+    });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+      method: 'getLibraryFiles',
+      schema: MicrosoftDefenderEndpointEmptyParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+      method: 'runScript',
+      schema: RunScriptParamsSchema,
+    });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+      method: 'cancelAction',
+      schema: CancelParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+      method: 'getActionResults',
+      schema: GetActionResultsParamsSchema,
     });
   }
 
@@ -153,7 +187,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return response.data;
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{ error: { code: string; message: string; target: string } }>
+  ): string {
     const appendResponseBody = (message: string): string => {
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
@@ -166,6 +202,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     if (!error.response?.status) {
       return appendResponseBody(error.message ?? 'Unknown API Error');
+    }
+    const mdeError = error.response.data?.error;
+    if (mdeError.code === 'ActiveRequestAlreadyExists') {
+      return `${mdeError.message}. Please wait or force clear with 'cancel' response action`;
     }
 
     if (error.response.status === 401) {
@@ -270,6 +310,19 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         results.push('API call to Machine Actions was successful');
       });
 
+    await this.runScript(
+      {
+        id: 'elastic-connector-test',
+        comment: 'connector test',
+        parameters: { scriptName: 'test' },
+      },
+      connectorUsageCollector
+    )
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machine RunScript was successful');
+      });
+
     return { results };
   }
 
@@ -346,6 +399,57 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     );
   }
 
+  public async runScript(
+    payload: MicrosoftDefenderEndpointRunScriptParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machines}/${payload.id}/runliveresponse`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment,
+          Commands: [
+            {
+              type: 'RunScript',
+              params: [
+                {
+                  key: 'ScriptName',
+                  value: payload.parameters.scriptName,
+                },
+                {
+                  key: 'Args',
+                  value: payload.parameters.args || '--noargs',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
+  public async cancelAction(
+    payload: MicrosoftDefenderEndpointCancelParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/cancel-machine-action
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machineActions}/${payload.actionId}/cancel`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment,
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
   public async getActions(
     {
       page = 1,
@@ -374,6 +478,56 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       pageSize,
       total: response['@odata.count'] ?? -1,
     };
+  }
+
+  public async getActionResults(
+    { id }: MicrosoftDefenderEndpointGetActionsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<Stream> {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
+
+    const resultDownloadLink =
+      await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
+        {
+          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+          method: 'GET',
+        },
+        connectorUsageCollector
+      );
+    this.logger.debug(
+      () => `script results for machineId [${id}]:\n${JSON.stringify(resultDownloadLink)}`
+    );
+
+    const fileUrl = resultDownloadLink.value;
+
+    if (!fileUrl) {
+      throw new Error(`Download URL for script results of machineId [${id}] not found`);
+    }
+    const downloadConnection = await this.request(
+      {
+        url: fileUrl,
+        method: 'get',
+        responseType: 'stream',
+        responseSchema: DownloadActionResultsResponseSchema,
+      },
+      connectorUsageCollector
+    );
+    return downloadConnection.data;
+  }
+
+  public async getLibraryFiles(
+    payload: {},
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderGetLibraryFilesResponse> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/list-library-files
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderGetLibraryFilesResponse>(
+      {
+        url: `${this.urls.libraryFiles}`,
+        method: 'GET',
+      },
+      connectorUsageCollector
+    );
   }
 }
 

@@ -10,9 +10,9 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { getTikaDisplayType } from '../../../../../common/utils/tika_utils';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
+import { getTikaDisplayType } from '@kbn/file-upload/file_upload_manager/tika_utils';
 
 interface Props {
   results: FindFileStructureResponse;

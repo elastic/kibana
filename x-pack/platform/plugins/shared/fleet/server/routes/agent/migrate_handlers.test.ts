@@ -20,7 +20,7 @@ import * as AgentService from '../../services/agents';
 
 import { AgentNotFoundError, FleetUnauthorizedError } from '../../errors';
 
-import { migrateSingleAgentHandler } from './migrate_handlers';
+import { migrateSingleAgentHandler, bulkMigrateAgentsHandler } from './migrate_handlers';
 
 // Mock the agent service functions
 jest.mock('../../services/agents', () => {
@@ -28,6 +28,9 @@ jest.mock('../../services/agents', () => {
     getAgentById: jest.fn(),
     getAgentPolicyForAgent: jest.fn(),
     migrateSingleAgent: jest.fn(),
+    getByIds: jest.fn(),
+    getAgentPolicyForAgents: jest.fn(),
+    bulkMigrateAgents: jest.fn(),
   };
 });
 
@@ -107,6 +110,7 @@ describe('Migrate handlers', () => {
 
       expect(AgentService.migrateSingleAgent).toHaveBeenCalledWith(
         mockElasticsearchClient,
+        mockSavedObjectsClient,
         agentId,
         mockAgentPolicy,
         mockAgent,
@@ -158,6 +162,97 @@ describe('Migrate handlers', () => {
       await expect(
         migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
       ).rejects.toThrow(agentError.message);
+    });
+  });
+
+  // Bulk migrate
+  describe('migrateBulkAgentsHandler', () => {
+    let mockResponse: jest.Mocked<KibanaResponseFactory>;
+
+    let mockRequest: any;
+    let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+    let mockContext: any;
+
+    const agentIds = ['agent-id-1', 'agent-id-2'];
+    const mockSettings = {
+      enrollment_token: 'token123',
+      uri: 'https://example.com',
+      agents: agentIds,
+    };
+    const mockActionResponse = { id: 'action-id' };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockResponse = httpServerMock.createResponseFactory();
+      mockSavedObjectsClient = savedObjectsClientMock.create();
+      mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Setup the context with correct structure
+      mockContext = {
+        core: {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockElasticsearchClient,
+            },
+          },
+          savedObjects: {
+            client: mockSavedObjectsClient,
+          },
+        },
+        fleet: {},
+      };
+
+      (AgentService.bulkMigrateAgents as jest.Mock).mockResolvedValue({
+        actionId: mockActionResponse.id,
+      });
+    });
+
+    it('calls bulkMigrateAgents with correct parameters and returns success', async () => {
+      mockRequest = {
+        body: mockSettings,
+      };
+
+      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
+
+      expect(AgentService.bulkMigrateAgents).toHaveBeenCalledWith(
+        mockElasticsearchClient,
+        mockSavedObjectsClient,
+        {
+          agentIds,
+          enrollment_token: 'token123',
+          uri: 'https://example.com',
+        }
+      );
+
+      // Verify response was returned correctly
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { actionId: mockActionResponse.id },
+      });
+    });
+
+    it('calls bulkMigrateAgents with correct query parameters and returns success', async () => {
+      mockRequest = {
+        body: { ...mockSettings, agents: 'status: online' },
+      };
+
+      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
+
+      expect(AgentService.bulkMigrateAgents).toHaveBeenCalledWith(
+        mockElasticsearchClient,
+        mockSavedObjectsClient,
+        {
+          kuery: 'status: online',
+          enrollment_token: 'token123',
+          uri: 'https://example.com',
+        }
+      );
+
+      // Verify response was returned correctly
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { actionId: mockActionResponse.id },
+      });
     });
   });
 });

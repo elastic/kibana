@@ -5,20 +5,35 @@
  * 2.0.
  */
 
-import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiPageHeader,
+  useEuiTheme,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import {
+  ClassicStreamBadge,
+  DiscoverBadgeButton,
+  LifecycleBadge,
+  WiredStreamBadge,
+} from '../../stream_badges';
+import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode;
   }
 >;
 
@@ -33,6 +48,9 @@ export function Wrapper({
 }) {
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
+  const {
+    features: { groupStreams },
+  } = useStreamsPrivileges();
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -49,31 +67,62 @@ export function Wrapper({
     })
   );
 
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      <EuiPageHeader
+        paddingSize="l"
         bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
             })}
-            <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton definition={definition} />
+                  )}
+                  {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                <GroupStreamControls />
+              )}
+            </EuiFlexGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          return {
-            label,
-            href,
-            isSelected: tab === tabKey,
-          };
-        })}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+          label,
+          href,
+          isSelected: tab === tabKey,
+        }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {tabs[tab]?.content}
+      </StreamsAppPageTemplate.Body>
     </>
   );
 }

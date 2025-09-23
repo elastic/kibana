@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates APM data with a defined spike in latency and failures for testing ML anomaly detection.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
 import { range as _range } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const spikeStart = new Date('2024-09-03T00:00:00.000Z').getTime();

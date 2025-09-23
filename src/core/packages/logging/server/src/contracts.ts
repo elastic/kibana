@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { LoggerConfigType } from './logger';
 import type { AppenderConfigType } from './appenders';
 
@@ -20,7 +20,7 @@ export interface LoggingServiceSetup {
    * Customizes the logging config for the plugin's context.
    *
    * @remarks
-   * Assumes that that the `context` property of the individual `logger` items emitted by `config$`
+   * Assumes that the `context` property of the individual `logger` items emitted by `config$`
    * are relative to the plugin's logging context (defaults to `plugins.<plugin_id>`).
    *
    * @example

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
+import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -26,31 +26,34 @@ import {
   useEuiFontSize,
   euiTextTruncate,
 } from '@elastic/eui';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import {
+import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import chroma from 'chroma-js';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
-import {
+import type {
   Datasource,
   Visualization,
   FramePublicAPI,
   DatasourceMap,
   VisualizationMap,
   UserMessagesGetter,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import { getMissingIndexPattern } from './state_helpers';
+import type { DatasourceStates } from '../../state_management';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -59,7 +62,6 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
-  DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
@@ -130,7 +132,7 @@ const PreviewRenderer = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -707,6 +709,30 @@ function getPreviewExpression(
     datasourceLayers: { ...frame.datasourceLayers },
   };
   try {
+    // use current frame api and patch apis for changed datasource layers
+    if (
+      visualizableState.keptLayerIds &&
+      visualizableState.datasourceId &&
+      visualizableState.datasourceState
+    ) {
+      const datasource = datasources[visualizableState.datasourceId];
+      const datasourceState = visualizableState.datasourceState;
+      const updatedLayerApis: DatasourceLayers = pick(
+        frame.datasourceLayers,
+        visualizableState.keptLayerIds
+      );
+      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+      changedLayers.forEach((layerId) => {
+        if (updatedLayerApis[layerId]) {
+          updatedLayerApis[layerId] = datasource.getPublicAPI({
+            layerId,
+            state: datasourceState,
+            indexPatterns: frame.dataViews.indexPatterns,
+          });
+        }
+        suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];
+      });
+    }
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,

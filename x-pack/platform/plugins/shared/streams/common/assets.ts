@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { ValuesType } from 'utility-types';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 export const ASSET_TYPES = {
   Dashboard: 'dashboard' as const,
@@ -31,6 +31,10 @@ export type QueryLink = AssetLinkBase<'query'> & {
 };
 
 export type AssetLink = DashboardLink | SloLink | RuleLink | QueryLink;
+
+export function isQueryLink(item: AssetLink): item is QueryLink {
+  return item['asset.type'] === 'query';
+}
 
 type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
 

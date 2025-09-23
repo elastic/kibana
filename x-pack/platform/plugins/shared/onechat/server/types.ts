@@ -6,22 +6,22 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn, ScopedRunToolFn, ToolProvider } from '@kbn/onechat-server';
-import type {
-  PluginStartContract as ActionsPluginStart,
-  PluginSetupContract as ActionsPluginSetup,
-} from '@kbn/actions-plugin/server';
+import type { RunToolFn } from '@kbn/onechat-server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup, ScopedPublicToolRegistry } from './services/tools';
+import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 
 export interface OnechatSetupDependencies {
-  actions: ActionsPluginSetup;
   inference: InferenceServerSetup;
+  cloud?: CloudSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface OnechatStartDependencies {
-  actions: ActionsPluginStart;
   inference: InferenceServerStart;
+  cloud?: CloudStart;
 }
 
 /**
@@ -30,8 +30,6 @@ export interface OnechatStartDependencies {
 export interface ToolsSetup {
   /**
    * Register a built-in tool to be available in onechat.
-   *
-   * Refer to {@link ToolRegistration}
    */
   register: ToolsServiceSetup['register'];
 }
@@ -41,37 +39,33 @@ export interface ToolsSetup {
  */
 export interface ToolsStart {
   /**
-   * Access the tool registry's APIs.
-   */
-  registry: ToolProvider;
-  /**
    * Execute a tool.
    */
   execute: RunToolFn;
   /**
-   * Return a version of the tool APIs scoped to the provided request.
+   * Return a tool registry scoped to the current user and context.
    */
-  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart;
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
 }
 
-/**
- * Scoped tools APIs.
- */
-export interface ScopedToolsStart {
+export interface AgentsSetup {
   /**
-   * scoped tools registry
+   * Register a built-in agent to be available in onechat.
    */
-  registry: ScopedPublicToolRegistry;
-  /**
-   * Scoped tool runner
-   */
-  execute: ScopedRunToolFn;
+  register: (definition: BuiltInAgentDefinition) => void;
 }
 
 /**
  * Setup contract of the onechat plugin.
  */
 export interface OnechatPluginSetup {
+  /**
+   * Agents setup contract, can be used to register built-in agents.
+   */
+  agents: AgentsSetup;
+  /**
+   * Tools setup contract, can be used to register built-in tools.
+   */
   tools: ToolsSetup;
 }
 
@@ -79,5 +73,8 @@ export interface OnechatPluginSetup {
  * Start contract of the onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Tools service, to manage or execute tools.
+   */
   tools: ToolsStart;
 }

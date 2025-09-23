@@ -5,6 +5,22 @@
  * 2.0.
  */
 
-export const ONECHAT_FRAMEWORK_FEATURE_ID = 'onechat_framework';
-export const ONECHAT_FRAMEWORK_FEATURE_NAME = 'onechat_framework';
-export const ONECHAT_FRAMEWORK_APP_ID = 'onechat_framework';
+import { i18n } from '@kbn/i18n';
+
+export const ONECHAT_FEATURE_ID = 'agentBuilder';
+export const ONECHAT_FEATURE_NAME = 'Agent Builder';
+export const ONECHAT_APP_ID = 'agent_builder';
+export const ONECHAT_PATH = '/app/agent_builder';
+export const ONECHAT_TITLE = i18n.translate('xpack.onechat.app.mainTitle', {
+  defaultMessage: 'Agent Builder',
+});
+
+export const uiPrivileges = {
+  show: 'show',
+  showManagement: 'showManagement',
+};
+
+export const apiPrivileges = {
+  readOnechat: 'read_onechat',
+  manageOnechat: 'manage_onechat',
+};

@@ -6,62 +6,71 @@
  */
 
 import type {
-  OnechatRunEvent,
-  InternalRunEvent,
+  AgentEventEmitter,
+  RunAgentOnEventFn,
   RunContext,
-  OnechatRunEventMeta,
-  RunEventHandlerFn,
-  RunEventEmitter,
+  ToolEventEmitter,
+  ToolEventHandlerFn,
 } from '@kbn/onechat-server';
+import type { InternalToolProgressEvent } from '@kbn/onechat-server/src/events';
+import { ChatEventType } from '@kbn/onechat-common';
 
 /**
  * Creates a run event emitter sending events to the provided event handler.
  */
-export const createEventEmitter = ({
+export const createAgentEventEmitter = ({
   eventHandler,
   context,
 }: {
-  eventHandler: RunEventHandlerFn;
+  eventHandler: RunAgentOnEventFn | undefined;
   context: RunContext;
-}): RunEventEmitter => {
+}): AgentEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopEventEmitter();
+  }
+
   return {
     emit: (internalEvent) => {
-      const event = convertInternalEvent({ event: internalEvent, context });
+      eventHandler(internalEvent);
+    },
+  };
+};
+
+/**
+ * Creates a run event emitter sending events to the provided event handler.
+ */
+export const createToolEventEmitter = ({
+  eventHandler,
+  context,
+}: {
+  eventHandler: ToolEventHandlerFn | undefined;
+  context: RunContext;
+}): ToolEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopToolEventEmitter();
+  }
+
+  return {
+    reportProgress: (progressMessage) => {
+      const event: InternalToolProgressEvent = {
+        type: ChatEventType.toolProgress,
+        data: {
+          message: progressMessage,
+        },
+      };
       eventHandler(event);
     },
   };
 };
 
-/**
- * Creates a run event emitter sending events to the provided event handler.
- */
-export const createNoopEventEmitter = (): RunEventEmitter => {
+const createNoopToolEventEmitter = () => {
   return {
-    emit: () => {},
+    reportProgress: () => {},
   };
 };
 
-/**
- * Convert an internal onechat run event to its public-facing format.
- */
-export const convertInternalEvent = <
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends Record<string, any> = Record<string, any>
->({
-  event: { type, data, meta },
-  context,
-}: {
-  event: InternalRunEvent<TEventType, TData, TMeta>;
-  context: RunContext;
-}): OnechatRunEvent<TEventType, TData, TMeta & OnechatRunEventMeta> => {
+const createNoopEventEmitter = () => {
   return {
-    type,
-    data,
-    meta: {
-      ...((meta ?? {}) as TMeta),
-      runId: context.runId,
-      stack: context.stack,
-    },
+    emit: () => {},
   };
 };

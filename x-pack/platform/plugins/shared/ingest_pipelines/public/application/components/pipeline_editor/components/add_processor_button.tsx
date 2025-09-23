@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { usePipelineProcessorsContext } from '../context';
 
 export interface Props {
@@ -21,6 +24,12 @@ const addProcessorButtonLabel = i18n.translate(
     defaultMessage: 'Add a processor',
   }
 );
+
+const styles = {
+  button: css`
+    width: fit-content;
+  `,
+};
 
 export const AddProcessorButton: FunctionComponent<Props> = (props) => {
   const { onClick, renderButtonAsLink } = props;
@@ -45,7 +54,7 @@ export const AddProcessorButton: FunctionComponent<Props> = (props) => {
   return (
     <EuiButton
       data-test-subj="addProcessorButton"
-      className="pipelineProcessorsEditor__tree__addProcessorButton"
+      css={styles.button}
       disabled={editor.mode.id !== 'idle'}
       onClick={onClick}
     >

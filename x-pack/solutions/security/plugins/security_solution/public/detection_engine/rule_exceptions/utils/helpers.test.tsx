@@ -2454,6 +2454,10 @@ describe('Exception helpers', () => {
     describe('getAlertHighlightedFields', () => {
       const baseGeneratedAlertHighlightedFields = [
         {
+          id: 'kibana.alert.ancestors.id',
+          overrideField: 'Source event',
+        },
+        {
           id: 'host.name',
         },
         // Fields used in support of Response Actions

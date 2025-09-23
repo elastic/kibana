@@ -21,6 +21,12 @@ jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <>CODE EDITOR</>,
 }));
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiIconTip: () => '',
+  useGeneratedHtmlId: () => 'mocked-id',
+}));
+
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
   FleetStatusProvider: (props: any) => {
     return props.children;

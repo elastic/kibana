@@ -32,6 +32,7 @@ import {
   useUIExtension,
   useAuthz,
   useFleetStatus,
+  useConfig,
 } from '../../../../../hooks';
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
@@ -51,6 +52,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgkey = `${name}-${version}`;
   const { docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
+  const config = useConfig();
 
   const { useSpaceAwareness } = ExperimentalFeaturesService.get();
 
@@ -93,10 +95,12 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
-        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
-          acc[asset.type] = [];
+        if (displayedAssetTypes.includes(asset.type)) {
+          if (!acc[asset.type]) {
+            acc[asset.type] = [];
+          }
+          acc[asset.type].push(asset);
         }
-        acc[asset.type].push(asset);
         return acc;
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
@@ -265,6 +269,11 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
       // List all assets by order of `displayedAssetTypes`
       ...displayedAssetTypes.map((assetType) => {
+        if (config?.hideDashboards && assetType === 'dashboard') {
+          // If hideDashboards is set, filter out dashboards from displayed assets
+          return null;
+        }
+
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};
         const finalAssets = assets.map((asset) => {

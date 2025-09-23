@@ -21,6 +21,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -32,7 +33,7 @@ import { createArtifactsClientMock } from '../services/artifacts/mocks';
 import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
-import type { AgentPolicyServiceInterface } from '../services';
+import type { AgentPolicyServiceInterface, CloudConnectorServiceInterface } from '../services';
 import type { FleetAppContext, FleetStartContract } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
@@ -58,6 +59,45 @@ export * from '../services/files/mocks';
 export * from '../services/actions/mocks';
 
 export * from './package_policy.mocks';
+
+export const createSavedObjectClientMock = () => {
+  const soClientMock = savedObjectsClientMock.create();
+
+  // The SO client mock does not return promises for async methods, so we mock those here in order
+  // to avoid basic errors in tests (those where the methods are called, but the return value is
+  // never used/checked
+  [
+    'create',
+    'bulkCreate',
+    'checkConflicts',
+    'bulkUpdate',
+    'delete',
+    'bulkDelete',
+    'bulkGet',
+    'find',
+    'get',
+    'closePointInTime',
+    'createPointInTimeFinder',
+    'bulkResolve',
+    'resolve',
+    'update',
+  ].forEach((methodName) => {
+    let response: any;
+
+    switch (methodName) {
+      case 'find':
+      case 'bulkGet':
+        response = { saved_objects: [] };
+        break;
+    }
+
+    (soClientMock[methodName as keyof typeof soClientMock] as jest.Mock).mockReturnValue(
+      Promise.resolve(response)
+    );
+  });
+
+  return soClientMock;
+};
 
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
@@ -90,9 +130,10 @@ export const createAppContextStartContractMock = (
 
   const mockedSavedObject = savedObjectsServiceMock.createStartContract();
 
-  const internalSoClient = soClients.internal ?? savedObjectsClientMock.create();
+  const internalSoClient = soClients.internal ?? createSavedObjectClientMock();
+
   const internalSoClientWithoutSpaceExtension =
-    soClients.withoutSpaceExtensions ?? savedObjectsClientMock.create();
+    soClients.withoutSpaceExtensions ?? createSavedObjectClientMock();
 
   mockedSavedObject.getScopedClient.mockImplementation((request, options) => {
     if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
@@ -103,6 +144,7 @@ export const createAppContextStartContractMock = (
   });
 
   return {
+    taskManagerStart: taskManagerMock.createStart(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
@@ -143,6 +185,7 @@ export const createAppContextStartContractMock = (
     updateAgentlessDeploymentsTask: {} as any,
     syncIntegrationsTask: {} as any,
     automaticAgentUpgradeTask: {} as any,
+    autoInstallContentPackagesTask: {} as any,
   };
 };
 
@@ -163,7 +206,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
     uninstallTokenService: {
       asCurrentUser: createUninstallTokenServiceMock(),
     },
-    internalSoClient: savedObjectsClientMock.create(),
+    internalSoClient: createSavedObjectClientMock(),
     spaceId: 'default',
     limitedToPackages: undefined,
   };
@@ -219,6 +262,11 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getPackagePolicySavedObjects: jest.fn(),
+    rollback: jest.fn(),
+    restoreRollback: jest.fn(),
+    cleanupRollbackSavedObjects: jest.fn(),
+    bumpAgentPolicyRevisionAfterRollback: jest.fn(),
   };
 };
 
@@ -228,6 +276,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
     create: jest.fn().mockReturnValue(Promise.resolve()),
+    createWithPackagePolicies: jest.fn().mockReturnValue(Promise.resolve()),
     get: jest.fn().mockReturnValue(Promise.resolve()),
     list: jest.fn().mockReturnValue(Promise.resolve()),
     delete: jest.fn().mockReturnValue(Promise.resolve()),
@@ -236,6 +285,17 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
+    deployPolicy: jest.fn().mockRejectedValue(Promise.resolve()),
+  };
+};
+
+/**
+ * Create mock CloudConnectorService
+ */
+export const createMockCloudConnectorService = (): jest.Mocked<CloudConnectorServiceInterface> => {
+  return {
+    create: jest.fn().mockReturnValue(Promise.resolve()),
+    getList: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -299,6 +359,10 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     agentService: createMockAgentService(),
     packagePolicyService: createPackagePolicyServiceMock(),
     agentPolicyService: createMockAgentPolicyService(),
+    cloudConnectorService: {
+      create: jest.fn().mockReturnValue(Promise.resolve()),
+      getList: jest.fn().mockReturnValue(Promise.resolve()),
+    },
     registerExternalCallback: jest.fn(),
     createArtifactsClient: jest.fn((_) => fleetArtifactsClient),
     createFilesClient: createFleetFilesClientFactoryMock(),

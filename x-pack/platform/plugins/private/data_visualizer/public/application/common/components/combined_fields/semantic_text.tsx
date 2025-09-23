@@ -7,10 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-} from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -170,6 +167,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           error={[fieldError]}
         >
           <EuiFieldText
+            isInvalid={fieldError !== undefined}
             placeholder={i18n.translate(
               'xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel.placeholder',
               {

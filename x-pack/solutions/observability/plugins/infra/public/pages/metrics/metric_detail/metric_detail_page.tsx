@@ -24,7 +24,7 @@ import { useMetricsTimeContext } from './hooks/use_metrics_time';
 export const MetricDetailPage = () => {
   const {
     params: { type: nodeType, node: nodeId },
-  } = useRouteMatch<{ type: InventoryItemType; node: string }>();
+  } = useRouteMatch<{ type: Exclude<InventoryItemType, 'host' | 'container'>; node: string }>();
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
@@ -46,9 +46,9 @@ export const MetricDetailPage = () => {
     cloudId,
     metadata,
   } = useMetadata({
-    assetId: nodeId,
-    assetType: nodeType,
-    requiredMetrics: inventoryModel.requiredMetrics,
+    entityId: nodeId,
+    entityType: nodeType,
+    requiredTsvb: inventoryModel.metrics.requiredTsvb,
     sourceId,
     timeRange: parsedTimeRange,
   });
@@ -94,7 +94,7 @@ export const MetricDetailPage = () => {
       {metadata ? (
         <NodeDetailsPage
           name={name}
-          requiredMetrics={filteredRequiredMetrics}
+          requiredTsvb={filteredRequiredMetrics}
           sourceId={sourceId}
           timeRange={timeRange}
           nodeType={nodeType}

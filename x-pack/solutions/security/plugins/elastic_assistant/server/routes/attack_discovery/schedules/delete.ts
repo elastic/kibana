@@ -16,9 +16,8 @@ import {
   DeleteAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
-import { isFeatureAvailable } from './utils/is_feature_available';
 
 export const deleteAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -29,7 +28,10 @@ export const deleteAttackDiscoverySchedulesRoute = (
       path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: [
+            'elasticAssistant',
+            'securitySolution-updateAttackDiscoverySchedule',
+          ],
         },
       },
     })
@@ -58,11 +60,6 @@ export const deleteAttackDiscoverySchedulesRoute = (
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
-
-        // Check if scheduling feature available
-        if (!(await isFeatureAvailable(ctx))) {
-          return response.notFound();
-        }
 
         // Perform license and authenticated user
         const checkResponse = await performChecks({

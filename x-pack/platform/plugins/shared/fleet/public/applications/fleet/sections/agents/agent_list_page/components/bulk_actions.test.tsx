@@ -49,7 +49,9 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      enableAgentMigrations: true,
+    } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
@@ -93,6 +95,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -135,6 +138,7 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Migrate 10 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show the available actions for all agents except managed agents', async () => {
@@ -158,6 +162,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Migrate 8 agents').closest('button')!).toBeEnabled();
     });
 
     it('should generate a correct kuery to select agents when no managed agents are listed', async () => {
@@ -209,6 +214,20 @@ describe('AgentBulkActions', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('should not show the migrate button when agent migrations flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
+      });
+
+      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
+      expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
 });

@@ -17,9 +17,10 @@ import type {
 } from '../../../../common/search_strategy';
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
+import { ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -92,7 +93,8 @@ interface HostIdRendererTypes {
   host: HostEcs;
   ipFilter?: string;
   noLink?: boolean;
-  scopeId: string | undefined;
+  scopeId: string;
+  isFlyoutOpen: boolean;
 }
 
 export const hostIdRenderer = ({
@@ -101,6 +103,7 @@ export const hostIdRenderer = ({
   ipFilter,
   noLink,
   scopeId,
+  isFlyoutOpen,
 }: HostIdRendererTypes): React.ReactElement =>
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
@@ -118,7 +121,14 @@ export const hostIdRenderer = ({
           {noLink ? (
             <>{host.id}</>
           ) : (
-            <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
+            <FlyoutLink
+              field={'host.name'}
+              value={host.name[0]}
+              scopeId={scopeId}
+              isFlyoutOpen={isFlyoutOpen}
+            >
+              {host.id}
+            </FlyoutLink>
           )}
         </DefaultDraggable>
       ) : (
@@ -129,17 +139,21 @@ export const hostIdRenderer = ({
     getEmptyTagValue()
   );
 
-export const hostNameRenderer = (
-  scopeId: SourcererScopeName,
-  host?: HostEcs,
-  ipFilter?: string,
-  contextID?: string
-): React.ReactElement =>
-  host &&
-  host.name &&
-  host.name[0] &&
-  host.ip &&
-  (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
+interface HostNameRendererTypes {
+  scopeId: SourcererScopeName;
+  host: HostEcs;
+  ipFilter?: string;
+  contextID?: string;
+  isFlyoutOpen: boolean;
+}
+export const hostNameRenderer = ({
+  scopeId,
+  host,
+  ipFilter,
+  contextID,
+  isFlyoutOpen,
+}: HostNameRendererTypes): React.ReactElement =>
+  host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <DefaultDraggable
       id={`host-name-renderer-default-draggable-${IpOverviewId}-${
         contextID ? `${contextID}-` : ''
@@ -150,9 +164,12 @@ export const hostNameRenderer = (
       fieldType={'keyword'}
       scopeId={scopeId}
     >
-      <HostDetailsLink hostName={host.name[0]}>
-        {host.name ? host.name : getEmptyTagValue()}
-      </HostDetailsLink>
+      <FlyoutLink
+        field={'host.name'}
+        value={host.name[0]}
+        scopeId={scopeId}
+        isFlyoutOpen={isFlyoutOpen}
+      />
     </DefaultDraggable>
   ) : (
     getEmptyTagValue()

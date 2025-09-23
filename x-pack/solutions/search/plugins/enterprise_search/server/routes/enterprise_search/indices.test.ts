@@ -93,7 +93,7 @@ import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment
 import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
 import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
-import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
 

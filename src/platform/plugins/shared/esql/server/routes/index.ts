@@ -8,13 +8,24 @@
  */
 
 import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
+import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
+import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
+import { registerLookupIndexRoutes } from './lookup_index';
 
-export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
+export const registerRoutes = (
+  setup: CoreSetup,
+  extensionsRegistry: ESQLExtensionsRegistry,
+  initContext: PluginInitializerContext
+) => {
   const router = setup.http.createRouter();
 
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
+  registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
+  registerGetInferenceEndpointsRoute(router, initContext);
+  registerLookupIndexRoutes(router, initContext);
 };

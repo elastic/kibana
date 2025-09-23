@@ -16,11 +16,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensRootStore } from '../../../state_management';
+import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
   makeConfigureStore,
-  LensRootStore,
   loadInitial,
   initExisting,
   initEmpty,
@@ -30,7 +31,7 @@ import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { SavedObjectIndexStore, type LensDocument } from '../../../persistence';
+import { LensDocumentService, type LensDocument } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
@@ -79,6 +80,9 @@ export const updatingMiddleware =
       if (initExisting.match(action) || initEmpty.match(action)) {
         return;
       }
+      // The user is updating the Visualization parameters,
+      // this means he is choosing this chart
+      saveUserChartTypeToSessionStorage(visualization.activeId);
 
       updater(
         datasourceStates[activeDatasourceId].state,
@@ -116,7 +120,7 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+        clip-path: none; // need to override the eui-flyout clip-path for dnd outside of the flyout
       `}
     >
       {children}
@@ -134,7 +138,7 @@ export async function getEditLensConfiguration(
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
-    getLensAttributeService(coreStart, startDependencies)
+    getLensAttributeService(coreStart.http)
   );
 
   return ({
@@ -172,8 +176,8 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: LensDocument) => {
-        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
-        await savedObjectStore.save({
+        const lensDocumentService = new LensDocumentService(lensServices.http);
+        await lensDocumentService.save({
           ...attrs,
           savedObjectId,
           type: DOC_TYPE,

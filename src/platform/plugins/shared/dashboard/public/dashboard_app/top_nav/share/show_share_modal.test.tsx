@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
-import { DashboardLocatorParams } from '../../../../common/types';
+import type { Capabilities } from '@kbn/core/public';
+import type { DashboardLocatorParams } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
@@ -122,13 +121,9 @@ describe('ShowShareModal', () => {
         locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
-    const rawDashboardState = {
-      ...unsavedDashboardState,
-      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
-    };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
+        (unsavedDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
       );
     });
   });

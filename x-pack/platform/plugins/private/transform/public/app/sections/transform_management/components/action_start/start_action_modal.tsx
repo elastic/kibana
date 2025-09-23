@@ -6,12 +6,14 @@
  */
 
 import React, { type FC } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import type { StartAction } from './use_start_action';
 
 export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndCloseModal }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const isBulkAction = items.length > 1;
 
   const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {
@@ -26,7 +28,9 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
   return (
     <EuiConfirmModal
       data-test-subj="transformStartModal"
+      aria-labelledby={modalTitleId}
       title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
       onConfirm={startAndCloseModal}
       cancelButtonText={i18n.translate('xpack.transform.transformList.startModalCancelButton', {

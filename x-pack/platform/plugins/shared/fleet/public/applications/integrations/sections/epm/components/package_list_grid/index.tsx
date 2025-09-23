@@ -44,7 +44,10 @@ import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: 120px;
+  top: calc(
+    var(--kbn-application--sticky-headers-offset, 96px) +
+      ${(props) => props.theme.eui.euiSizeL /* 24px */}
+  );
 `;
 
 export interface PackageListGridProps {
@@ -76,6 +79,7 @@ export interface PackageListGridProps {
   spacer?: boolean;
   // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
+  onlyAgentlessFilter?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -95,6 +99,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   setUrlandReplaceHistory,
   setUrlandPushHistory,
   showMissingIntegrationMessage = false,
+  onlyAgentlessFilter = false,
   sortByFeaturedIntegrations = true,
   callout,
   calloutTopSpacerSize = 'l', // Default EUI spacer size
@@ -121,7 +126,12 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
 
   const resetQuery = () => {
     setSearchTerm('');
-    setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
+    setUrlandReplaceHistory({
+      searchString: '',
+      categoryId: '',
+      subCategoryId: '',
+      onlyAgentless: onlyAgentlessFilter,
+    });
   };
 
   const onSubCategoryClick = useCallback(
@@ -130,12 +140,13 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       setUrlandPushHistory({
         categoryId: selectedCategory,
         subCategoryId: subCategory,
+        onlyAgentless: onlyAgentlessFilter,
       });
     },
-    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
   );
 
-  const filteredPromotedList = useMemo(() => {
+  const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
     if (isLoading) return [];
 
     const searchResults =
@@ -219,6 +230,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
               setSelectedSubCategory={setSelectedSubCategory}
               selectedSubCategory={selectedSubCategory}
               setUrlandReplaceHistory={setUrlandReplaceHistory}
+              onlyAgentlessFilter={onlyAgentlessFilter}
             />
           </EuiFlexItem>
         )}
@@ -288,7 +300,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        {spacer && <EuiSpacer size="s" />}
+        {spacer && <EuiSpacer size="m" />}
         <EuiFlexItem>
           <GridColumn
             emptyStateStyles={emptyStateStyles}

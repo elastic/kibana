@@ -6,11 +6,16 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
-import { Streams } from '@kbn/streams-schema';
+import type { IStorageClient, StorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
+import type { AssetClient } from './assets/asset_client';
+import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import { AssetClient } from './assets/asset_client';
+import { migrateOnRead } from './helpers/migrate_on_read';
+import type { SystemClient } from './system/system_client';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -37,27 +42,37 @@ export class StreamsService {
   async getClientWithRequest({
     request,
     assetClient,
+    queryClient,
+    systemClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
+    queryClient: QueryClient;
+    systemClient: SystemClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
-    const storageAdapter = new StorageIndexAdapter<
-      StreamsStorageSettings,
-      Streams.all.Definition & { _id: string }
-    >(scopedClusterClient.asInternalUser, logger, streamsStorageSettings);
+    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, Streams.all.Definition>(
+      scopedClusterClient.asInternalUser,
+      logger,
+      streamsStorageSettings,
+      {
+        migrateSource: migrateOnRead,
+      }
+    );
 
     return new StreamsClient({
       assetClient,
+      queryClient,
+      systemClient,
       logger,
       scopedClusterClient,
+      lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: storageAdapter.getClient(),
       request,
       isServerless,

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiPortal, EuiProgress } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useControls } from './hooks/use_controls';
-import { SchemaEditorProps } from './types';
+import type { SchemaEditorProps } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
@@ -18,13 +19,14 @@ export function SchemaEditor({
   defaultColumns = SUPPORTED_TABLE_COLUMN_NAMES,
   fields,
   isLoading,
-  onFieldUnmap,
   onFieldUpdate,
+  onAddField,
   onRefreshData,
   stream,
   withControls = false,
   withFieldSimulation = false,
   withTableActions = false,
+  withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
@@ -32,24 +34,40 @@ export function SchemaEditor({
     <SchemaEditorContextProvider
       fields={fields}
       isLoading={isLoading}
-      onFieldUnmap={onFieldUnmap}
       onFieldUpdate={onFieldUpdate}
       stream={stream}
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}
       withTableActions={withTableActions}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        className={css`
+          min-height: 0;
+
+          & .euiDataGrid__focusWrap {
+            min-height: 0;
+          }
+        `}
+      >
         {isLoading ? (
           <EuiPortal>
             <EuiProgress size="xs" color="accent" position="fixed" />
           </EuiPortal>
         ) : null}
         {withControls && (
-          <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
+          <Controls
+            controls={controls}
+            onAddField={onAddField}
+            onChange={updateControls}
+            onRefreshData={onRefreshData}
+          />
         )}
         <FieldsTable
+          isLoading={isLoading ?? false}
           controls={controls}
+          withToolbar={withToolbar}
           defaultColumns={defaultColumns}
           fields={fields}
           stream={stream}

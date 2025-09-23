@@ -18,7 +18,6 @@ import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
-
 export interface EntityAnalyticsRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
@@ -111,6 +110,28 @@ export interface CalculateAndPersistScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard?: number;
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
   returnScores?: boolean;
   refresh?: 'wait_for';
+}
+
+export interface RiskScoreCompositeBuckets {
+  user: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  host: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  service: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+}
+
+export interface RiskScoreCompositeBucket {
+  key: { [identifierField: string]: string };
+  doc_count: number;
 }

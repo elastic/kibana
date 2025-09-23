@@ -6,8 +6,12 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type Logger,
+  type AnalyticsServiceSetup,
+  type AuditLogger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -44,6 +48,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
   entityStoreConfig,
   experimentalFeatures,
   kibanaVersion,
+  isServerless,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
@@ -54,6 +59,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
   entityStoreConfig: EntityStoreConfig;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
+  isServerless: boolean;
 }): void => {
   if (!taskManager) {
     logger.info(
@@ -109,6 +115,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
       security,
       request,
       uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
+      isServerless,
     });
 
     const { errors } = await entityStoreClient.applyDataViewIndices();

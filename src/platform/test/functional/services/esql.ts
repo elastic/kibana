@@ -8,13 +8,18 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly log = this.ctx.getService('log');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
   public async expectEsqlStatement(statement: string) {
@@ -28,6 +33,29 @@ export class ESQLService extends FtrService {
     });
 
     expect(queryAdded).to.be(true);
+  }
+
+  public async isHistoryPanelOpen() {
+    return await this.testSubjects.exists('ESQLEditor-history-container');
+  }
+
+  public async toggleHistoryPanel() {
+    const isHistoryOpen = await this.isHistoryPanelOpen();
+    await this.testSubjects.click('ESQLEditor-toggle-query-history-button');
+    await this.retry.waitFor('history queries to toggle', async () => {
+      const isHistoryOpenAfterToggle = await this.isHistoryPanelOpen();
+      return isHistoryOpen !== isHistoryOpenAfterToggle;
+    });
+  }
+
+  public async getEditorHeight() {
+    const editor = await this.testSubjects.find('ESQLEditor');
+    return (await editor.getSize()).height;
+  }
+
+  public async resizeEditorBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('ESQLEditor-resize');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
   }
 
   public async getHistoryItems(): Promise<string[][]> {
@@ -112,11 +140,13 @@ export class ESQLService extends FtrService {
     });
   }
 
-  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor') {
-    await this.monacoEditor.waitCodeEditorReady(editorSubjId);
+  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor'): Promise<WebElementWrapper> {
+    this.log.debug('waitESQLEditorLoaded: ', editorSubjId);
+    return await this.monacoEditor.waitCodeEditorReady(editorSubjId);
   }
 
   public async getEsqlEditorQuery() {
+    await this.waitESQLEditorLoaded();
     return await this.monacoEditor.getCodeEditorValue();
   }
 
@@ -127,5 +157,78 @@ export class ESQLService extends FtrService {
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
+  }
+
+  public async createEsqlControl(query: string) {
+    await this.waitESQLEditorLoaded();
+    await this.retry.waitFor('control flyout to open', async () => {
+      await this.typeEsqlEditorQuery(query);
+      // Wait until suggestions are loaded
+      await this.common.sleep(1000);
+      // Create control is the first suggestion
+      await this.browser.pressKeys(this.browser.keys.ENTER);
+
+      return await this.testSubjects.exists('create_esql_control_flyout');
+    });
+
+    // create the control
+    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.waitESQLEditorLoaded();
+  }
+
+  public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
+    const editor = await this.testSubjects.find(editorSubjId);
+    const textarea = await editor.findByCssSelector('textarea');
+    await textarea.type([Key.CONTROL, Key.SPACE]);
+  }
+
+  public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
+    await this.retry.try(async () => {
+      await this.triggerSuggestions(editorSubjId);
+
+      const suggestions = await this.findService.allByCssSelector(
+        '.monaco-editor .suggest-widget .monaco-list-row'
+      );
+
+      let suggestionToSelect;
+      for (const suggestion of suggestions) {
+        if ((await suggestion.getVisibleText()).includes(label)) {
+          suggestionToSelect = suggestion;
+          break;
+        }
+      }
+
+      if (!suggestionToSelect) {
+        throw new Error(`Suggestion with label "${label}" not found.`);
+      }
+
+      await suggestionToSelect.click();
+
+      await this.testSubjects.waitForDeleted(suggestionToSelect);
+    });
+  }
+
+  public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
+    await this.retry.try(async () => {
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      let optionToSelect;
+      for (const option of options) {
+        if ((await option.getVisibleText()).includes(optionText)) {
+          optionToSelect = option;
+          break;
+        }
+      }
+
+      if (!optionToSelect) {
+        throw new Error(`Option with text "${optionText}" not found in badge hover.`);
+      }
+
+      await optionToSelect.click();
+      return true;
+    });
   }
 }

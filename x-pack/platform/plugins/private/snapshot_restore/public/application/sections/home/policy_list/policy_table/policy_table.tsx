@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SlmPolicy } from '../../../../../../common/types';
-import { UseRequestResponse } from '../../../../../shared_imports';
+import type { SlmPolicy } from '../../../../../../common/types';
+import type { UseRequestResponse } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -118,7 +118,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   position="top"
                   content={i18n.translate(
                     'xpack.snapshotRestore.policyList.table.lastSnapshotFailedTooltip',
@@ -126,9 +126,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       defaultMessage: 'Last snapshot failed',
                     }
                   )}
-                >
-                  <EuiIcon type="warning" color="danger" />
-                </EuiToolTip>
+                  type="warning"
+                  color="danger"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <EuiText size="s">{snapshotName}</EuiText>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { get } from 'lodash';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
@@ -21,7 +21,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   const kibanaConfig = readKibanaConfig();

@@ -11,22 +11,22 @@ import React from 'react';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { OutPortal } from 'react-reverse-portal';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useCurrentChartPortalNode, useCurrentTabRuntimeState } from '../../state_management/redux';
-
-export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  container: HTMLElement | null;
-}
+import {
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
+  useCurrentChartPortalNode,
+  useCurrentTabRuntimeState,
+} from '../../state_management/redux';
 
 export const DiscoverHistogramLayout = ({
-  container,
   panelsToggle,
   ...mainContentProps
-}: DiscoverHistogramLayoutProps) => {
+}: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
-  const layoutProps = useCurrentTabRuntimeState(
+  const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
     mainContentProps.stateContainer.runtimeStateManager,
-    (tab) => tab.unifiedHistogramLayoutProps$
+    (tab) => tab.unifiedHistogramConfig$
   );
+  const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
 
   if (!layoutProps) {
     return null;
@@ -34,7 +34,6 @@ export const DiscoverHistogramLayout = ({
 
   return (
     <UnifiedHistogramLayout
-      container={container}
       unifiedHistogramChart={
         chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }

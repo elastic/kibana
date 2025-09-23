@@ -8,17 +8,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
-import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 
 jest.mock('./table', () => ({
   Table: () => <div />,
 }));
-jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
+jest.mock('../../../detections/hooks/alert_summary/use_create_data_view');
 
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
@@ -32,43 +30,12 @@ describe('<AiForSOCAlertsTab />', () => {
       installedPackages: [],
       isLoading: false,
     });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-    });
-  });
-
-  it('should render a loading skeleton while creating the dataView', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          dataViews: {
-            create: jest.fn(),
-            clearInstanceCache: jest.fn(),
-          },
-        },
-        http: { basePath: { prepend: jest.fn() } },
-      },
-    });
-
-    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-    });
   });
 
   it('should render a loading skeleton while fetching packages (integrations)', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          dataViews: {
-            create: jest.fn(),
-            clearInstanceCache: jest.fn(),
-          },
-        },
-        http: { basePath: { prepend: jest.fn() } },
-      },
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: false,
     });
     (useFetchIntegrations as jest.Mock).mockReturnValue({
       installedPackages: [],
@@ -80,16 +47,23 @@ describe('<AiForSOCAlertsTab />', () => {
     expect(await screen.findByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
   });
 
+  it('should render a loading skeleton while creating the dataView', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: true,
+    });
+
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
   it('should render an error if the dataView fail to be created correctly', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          dataViews: {
-            create: jest.fn().mockReturnValue(undefined),
-            clearInstanceCache: jest.fn(),
-          },
-        },
-      },
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: false,
     });
 
     jest.mock('react', () => ({
@@ -105,18 +79,9 @@ describe('<AiForSOCAlertsTab />', () => {
   });
 
   it('should render the content', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          dataViews: {
-            create: jest
-              .fn()
-              .mockReturnValue({ getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() }),
-            clearInstanceCache: jest.fn(),
-          },
-          query: { filterManager: { getFilters: jest.fn() } },
-        },
-      },
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
+      loading: false,
     });
 
     jest.mock('react', () => ({

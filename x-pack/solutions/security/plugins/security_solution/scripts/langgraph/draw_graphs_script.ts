@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { DashboardMigrationsRetriever } from '../../server/lib/siem_migrations/dashboards/task/retrievers';
+import { getDashboardMigrationAgent } from '../../server/lib/siem_migrations/dashboards/task/agent';
+import type { DashboardMigrationTelemetryClient } from '../../server/lib/siem_migrations/dashboards/task/dashboard_migrations_telemetry_client';
+import type { ChatModel } from '../../server/lib/siem_migrations/common/task/util/actions_client_chat';
 import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
-import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
-import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/task/util/esql_knowledge_base';
+import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -30,18 +30,19 @@ interface Drawable {
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
+const dashboardMigrationsRetriever = {} as DashboardMigrationsRetriever;
 
 const createLlmInstance = () => {
   return mockLlm;
 };
 
-async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
-  const model = createLlmInstance();
-  const telemetryClient = {} as SiemMigrationTelemetryClient;
+async function getSiemRuleMigrationGraph(logger: Logger): Promise<Drawable> {
+  const model = createLlmInstance() as ChatModel;
+  const telemetryClient = {} as RuleMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase,
@@ -52,18 +53,29 @@ async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   return graph.getGraphAsync({ xray: true });
 }
 
+async function getSiemDashboardMigrationGraph(logger: Logger): Promise<Drawable> {
+  const model = { bindTools: () => null } as unknown as ChatModel;
+  const telemetryClient = {} as DashboardMigrationTelemetryClient;
+  const esScopedClient = {} as IScopedClusterClient;
+  const graph = getDashboardMigrationAgent({
+    model,
+    esScopedClient,
+    esqlKnowledgeBase,
+    dashboardMigrationsRetriever,
+    logger,
+    telemetryClient,
+  });
+  return graph.getGraphAsync({ xray: true });
+}
+
 async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
-  const graph = getGenerateEsqlAgent({
+  const graph = await getGenerateEsqlAgent({
     esClient: {} as unknown as ElasticsearchClient,
     connectorId: 'test-connector-id',
     inference: {} as unknown as InferenceServerStart,
     logger,
     request: {} as unknown as KibanaRequest,
-    createLlmInstance: () =>
-      ({ bindTools: () => null } as unknown as
-        | ActionsClientChatBedrockConverse
-        | ActionsClientChatVertexAI
-        | ActionsClientChatOpenAI),
+    createLlmInstance: (() => ({ bindTools: () => null })) as unknown as CreateLlmInstance,
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -95,7 +107,11 @@ export const draw = async () => {
     outputFilename: '../../docs/generate_esql/img/generate_esql_graph.png',
   });
   await drawGraph({
-    getGraphAsync: getSiemMigrationGraph,
-    outputFilename: '../../docs/siem_migration/img/agent_graph.png',
+    getGraphAsync: getSiemRuleMigrationGraph,
+    outputFilename: '../../docs/siem_migration/img/rule_migration_agent_graph.png',
+  });
+  await drawGraph({
+    getGraphAsync: getSiemDashboardMigrationGraph,
+    outputFilename: '../../docs/siem_migration/img/dashboard_migration_agent_graph.png',
   });
 };

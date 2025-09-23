@@ -23,9 +23,13 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
+  SSLSettings,
 } from './types';
 
-export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
+export type {
+  ConnectorWithExtraFindData as FindActionResult,
+  Connector,
+} from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
@@ -49,7 +53,9 @@ export type { ServiceParams } from './sub_action_framework/types';
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    email: { domain_allowlist: true },
+    // recipient_allowlist is not exposed because it may contain sensitive information
+    email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
+    webhook: { ssl: { pfx: { enabled: true } } },
   },
 };
 

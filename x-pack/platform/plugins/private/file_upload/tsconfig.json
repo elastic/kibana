@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -16,6 +16,8 @@
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/datemath",
+    "@kbn/file-upload-common",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

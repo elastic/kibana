@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export function onechat() {
-  return 'You know...';
-}
+export { formatOnechatErrorMessage } from './base/errors';
+export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';

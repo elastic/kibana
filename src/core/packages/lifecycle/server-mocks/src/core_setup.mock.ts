@@ -31,6 +31,10 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -44,18 +48,18 @@ export function createCoreSetupMock({
   pluginStartDeps?: object;
   pluginStartContract?: any;
 } = {}) {
-  const httpMock: jest.Mocked<CoreSetup['http']> = {
+  const httpMock: jest.Mocked<CoreSetup['http']> = lazyObject({
     ...httpServiceMock.createSetupContract<RequestHandlerContext>(),
     resources: httpResourcesMock.createRegistrar(),
-  };
+  });
 
-  const uiSettingsMock = {
+  const uiSettingsMock = lazyObject({
     register: uiSettingsServiceMock.createSetupContract().register,
     registerGlobal: uiSettingsServiceMock.createSetupContract().registerGlobal,
     setAllowlist: uiSettingsServiceMock.createSetupContract().setAllowlist,
-  };
+  });
 
-  const mock: CoreSetupMockType = {
+  const mock: CoreSetupMockType = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
@@ -74,19 +78,22 @@ export function createCoreSetupMock({
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createSetup(),
     userProfile: userProfileServiceMock.createSetup(),
-    coreUsageData: {
+    coreUsageData: lazyObject({
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
       registerDeprecatedUsageFetch:
         coreUsageDataServiceMock.createSetupContract().registerDeprecatedUsageFetch,
-    },
-    plugins: {
+    }),
+    plugins: lazyObject({
       onSetup: jest.fn(),
       onStart: jest.fn(),
-    },
+    }),
+    pricing: pricingServiceMock.createSetupContract(),
+    injection: injectionServiceMock.createSetupContract(),
+    dataStreams: dataStreamServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
-  };
+  });
 
   return mock;
 }

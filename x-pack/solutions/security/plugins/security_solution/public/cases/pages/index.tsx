@@ -11,8 +11,9 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
-import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';
+import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
@@ -36,6 +37,7 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
+import { EventsTableForCases } from '../components/case_events/table';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -96,7 +98,7 @@ const CaseContainerComponent: React.FC = () => {
       if (AIForSOC) {
         return <AiForSOCAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
       } else {
-        return <DetectionEngineAlertsTable {...props} />;
+        return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
       }
     },
     [AIForSOC]
@@ -151,6 +153,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            events: { enabled: true },
           },
           refreshRef,
           actionsNavigation: {
@@ -188,6 +191,7 @@ const CaseContainerComponent: React.FC = () => {
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
           renderAlertsTable,
+          renderEventsTable: EventsTableForCases,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

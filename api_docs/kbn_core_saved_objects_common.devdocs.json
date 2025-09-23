@@ -1201,14 +1201,6 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
@@ -1296,12 +1288,20 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
+          },
+          {
+            "plugin": "reindexService",
+            "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -1314,6 +1314,22 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-xpack-platform",
+            "path": "x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
           },
           {
             "plugin": "lists",
@@ -1454,14 +1470,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
@@ -1543,14 +1551,6 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
           },
           {
@@ -1564,22 +1564,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1707,260 +1691,12 @@
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/platform/plugins/private/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/platform/plugins/private/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/platform/plugins/private/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/loader.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/loader.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/loader.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/loader.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/loader.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/utils.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/utils.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/utils.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/utils.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/persistence.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/persistence.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/persistence.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/persistence.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/visualization.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/visualization.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/save_modal_container.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/save_modal_container.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
           },
           {
             "plugin": "maps",
@@ -1977,46 +1713,6 @@
           {
             "plugin": "streamsApp",
             "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/types/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/types/persistence.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -2107,6 +1803,26 @@
             "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
           },
           {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/inject.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/inject.ts"
+          },
+          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
@@ -2121,26 +1837,6 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
           },
           {
             "plugin": "uiActionsEnhanced",
@@ -2171,30 +1867,6 @@
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/controls_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/controls_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/controls_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
@@ -2203,34 +1875,6 @@
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/helper.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/helper.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
@@ -2309,6 +1953,14 @@
           {
             "plugin": "controls",
             "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "canvas",
@@ -2401,26 +2053,6 @@
           {
             "plugin": "expressions",
             "path": "src/platform/plugins/shared/expressions/common/executor/executor.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/locator/locator.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/locator/locator.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/common/locator/locator.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/share_action.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/share_action.ts"
           }
         ],
         "initialIsOpen": false

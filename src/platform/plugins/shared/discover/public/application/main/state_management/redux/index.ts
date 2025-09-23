@@ -8,11 +8,11 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
 import {
   loadDataViewList,
   appendAdHocDataViews,
-  initializeSession,
+  initializeSingleTab,
   replaceAdHocDataViewWithId,
   setAdHocDataViews,
   setDataView,
@@ -20,13 +20,22 @@ import {
   setTabs,
   updateTabs,
   disconnectTab,
-  updateTabAppStateAndGlobalState,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
+  saveDiscoverSession,
+  resetDiscoverSession,
 } from './actions';
 
-export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type InternalStateDataRequestParams,
+} from './types';
+
+export { DEFAULT_TAB_STATE } from './constants';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
@@ -46,11 +55,14 @@ export const internalStateActions = {
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
-  initializeSession,
-  updateTabAppStateAndGlobalState,
+  initializeSingleTab,
+  syncLocallyPersistedTabState,
   restoreTab,
+  openInNewTab,
   clearAllTabs,
   initializeTabs,
+  saveDiscoverSession,
+  resetDiscoverSession,
 };
 
 export {
@@ -64,17 +76,40 @@ export {
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
+} from './selectors';
 
 export {
   type RuntimeStateManager,
+  type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
+
+export {
+  fromSavedObjectTabToTabState,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
+} from './tab_mapping_utils';

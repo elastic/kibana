@@ -9,20 +9,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiListGroupItemProps, RenderCellValue } from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly,
-  EuiListGroupItemProps,
+  type EuiDataGridControlColumn,
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import type { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -40,7 +41,9 @@ import {
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
-import { UnifiedDataTableProps } from './data_table';
+import type { UnifiedDataTableProps } from './data_table';
+import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
+import { isSortable } from '../hooks/use_sorting';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -63,24 +66,12 @@ export const getColumnDisplayName = (
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
+const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
+
+const EMPTY_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
-
-const openDetails = {
-  id: OPEN_DETAILS,
-  width: DEFAULT_CONTROL_COLUMN_WIDTH,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.controlColumnHeader', {
-          defaultMessage: 'Control column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
-  rowCellRender: ExpandButton,
-};
 
 const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
@@ -95,11 +86,14 @@ export function getLeadControlColumns({
 }: {
   rows: DataTableRecord[];
   canSetExpandedDoc: boolean;
-}) {
-  if (!canSetExpandedDoc) {
-    return [getSelect(rows)];
-  }
-  return [openDetails, getSelect(rows)];
+}): {
+  leadColumns: EuiDataGridControlColumn[];
+  leadColumnsExtraContent: RenderCellValue[];
+} {
+  return {
+    leadColumns: [getSelect(rows)],
+    leadColumnsExtraContent: canSetExpandedDoc ? [ExpandButton] : [],
+  };
 }
 
 function buildEuiGridColumn({
@@ -126,6 +120,7 @@ function buildEuiGridColumn({
   columnDisplay,
   onResize,
   sortedColumns,
+  disableCellActions = false,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -150,6 +145,7 @@ function buildEuiGridColumn({
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  disableCellActions?: boolean;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -191,33 +187,37 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (columnCellActions?.length && cellActionsHandling === 'replace') {
-    cellActions = columnCellActions;
+  if (disableCellActions) {
+    cellActions = EMPTY_CELL_ACTIONS;
   } else {
-    cellActions = dataViewField
-      ? buildCellActions(
-          dataViewField,
-          isPlainRecord,
-          toastNotifications,
-          valueToStringConverter,
-          onFilter
-        )
-      : [];
+    if (columnCellActions?.length && cellActionsHandling === 'replace') {
+      cellActions = columnCellActions;
+    } else {
+      cellActions = dataViewField
+        ? buildCellActions(
+            dataViewField,
+            isPlainRecord,
+            toastNotifications,
+            valueToStringConverter,
+            onFilter
+          )
+        : EMPTY_CELL_ACTIONS;
 
-    if (columnCellActions?.length && cellActionsHandling === 'append') {
-      cellActions.push(...columnCellActions);
+      if (columnCellActions?.length && cellActionsHandling === 'append') {
+        cellActions.push(...columnCellActions);
+      }
     }
   }
 
   const columnType = dataViewField?.type;
+  const columnSchema = getSchemaByKbnType(columnType);
 
+  // EUI columns
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(columnType),
+    schema: columnSchema,
     isSortable:
-      isSortEnabled &&
-      // TODO: would be great to have something like `sortable` flag for text based columns too
-      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
+      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
@@ -267,6 +267,15 @@ function buildEuiGridColumn({
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
+  if (column.id === SOURCE_COLUMN) {
+    column.display = (
+      <DataTableSummaryColumnHeaderMemoized
+        columnDisplayName={columnDisplayName}
+        headerRowHeight={headerRowHeight}
+      />
+    );
+  }
+
   if (column.id === dataView.timeFieldName) {
     column.display = (
       <DataTableTimeColumnHeaderMemoized
@@ -302,6 +311,11 @@ function buildEuiGridColumn({
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
+
+  if (disableCellActions) {
+    column.isExpandable = false;
+  }
+
   return column;
 }
 
@@ -322,6 +336,7 @@ export function getEuiGridColumns({
   dataView,
   defaultColumns,
   isSortEnabled,
+  disableCellActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -345,6 +360,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
+  disableCellActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -390,6 +406,7 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
+      disableCellActions,
     })
   );
 }

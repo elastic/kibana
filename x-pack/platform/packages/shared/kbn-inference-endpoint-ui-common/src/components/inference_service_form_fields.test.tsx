@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { InferenceServiceFormFields } from './inference_service_form_fields';
+import {
+  InferenceServiceFormFields,
+  isProviderForSolutions,
+} from './inference_service_form_fields';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
+import type { InferenceProvider } from '../types/types';
 
 jest.mock('../hooks/use_providers', () => ({
   useProviders: jest.fn(() => ({
@@ -38,7 +42,7 @@ describe('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -48,7 +52,7 @@ describe('Inference Services', () => {
   it('renders Selectable', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -59,7 +63,7 @@ describe('Inference Services', () => {
   it('renders Elastic at top', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -71,7 +75,7 @@ describe('Inference Services', () => {
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -91,7 +95,7 @@ describe('Inference Services', () => {
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -110,5 +114,20 @@ describe('Inference Services', () => {
     expect(screen.queryByTestId('inference-endpoint-input-field')).toHaveDisplayValue(
       /anthropic-completion/
     );
+  });
+
+  describe('isProviderForSolutions', () => {
+    it('should return true for provider with supported filter type', () => {
+      const provider = { service: 'amazonbedrock', name: 'Amazon Bedrock' } as InferenceProvider;
+      expect(isProviderForSolutions('security', provider)).toBe(true);
+    });
+
+    it('should return false for provider without supported filter type', () => {
+      const provider = {
+        service: 'amazon_sagemaker',
+        name: 'Amazon SageMaker',
+      } as InferenceProvider;
+      expect(isProviderForSolutions('security', provider)).toBe(false);
+    });
   });
 });

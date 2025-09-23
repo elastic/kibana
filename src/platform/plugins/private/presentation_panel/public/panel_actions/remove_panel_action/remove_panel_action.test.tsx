@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { RemovePanelAction, RemovePanelActionApi } from './remove_panel_action';
+import type { RemovePanelActionApi } from './remove_panel_action';
+import { RemovePanelAction } from './remove_panel_action';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 
 describe('Remove panel action', () => {
@@ -27,24 +28,43 @@ describe('Remove panel action', () => {
     };
   });
 
-  it('is compatible when api meets all conditions', async () => {
-    expect(await action.isCompatible(context)).toBe(true);
+  describe('isCompatible', () => {
+    it('is compatible when api meets all conditions', async () => {
+      expect(await action.isCompatible(context)).toBe(true);
+    });
+
+    it('is incompatible when context lacks necessary functions', async () => {
+      const emptyContext = {
+        embeddable: {},
+      };
+      expect(await action.isCompatible(emptyContext)).toBe(false);
+    });
+
+    it('is incompatible when view mode is view', async () => {
+      context.embeddable.viewMode$ = new BehaviorSubject<ViewMode>('view');
+      expect(await action.isCompatible(context)).toBe(false);
+    });
+
+    it('is incompatible when parent disables remove panels', async () => {
+      context.embeddable.viewMode$ = new BehaviorSubject<ViewMode>('view');
+      expect(
+        await action.isCompatible({
+          embeddable: {
+            ...context.embeddable,
+            parentApi: {
+              ...context.embeddable.parentApi,
+              canRemovePanels: () => false,
+            },
+          },
+        })
+      ).toBe(false);
+    });
   });
 
-  it('is incompatible when context lacks necessary functions', async () => {
-    const emptyContext = {
-      embeddable: {},
-    };
-    expect(await action.isCompatible(emptyContext)).toBe(false);
-  });
-
-  it('is incompatible when view mode is view', async () => {
-    context.embeddable.viewMode$ = new BehaviorSubject<ViewMode>('view');
-    expect(await action.isCompatible(context)).toBe(false);
-  });
-
-  it('calls the parent removePanel method on execute', async () => {
-    action.execute(context);
-    expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
+  describe('execute', () => {
+    it('calls the parent removePanel method on execute', async () => {
+      action.execute(context);
+      expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
+    });
   });
 });

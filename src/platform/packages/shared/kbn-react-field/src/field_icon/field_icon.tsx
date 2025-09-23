@@ -9,10 +9,11 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiToken, EuiTokenProps } from '@elastic/eui';
+import type { EuiTokenProps } from '@elastic/eui';
+import { EuiToken } from '@elastic/eui';
 
 // defaultIcon => a unknown datatype
-const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
+const defaultIcon = { iconType: 'question', color: 'gray' };
 
 export const typeToEuiIconMap = {
   binary: { iconType: 'tokenBinary' },

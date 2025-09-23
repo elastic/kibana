@@ -21,16 +21,18 @@ import type { CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
+import { type GetAttachments } from './use_cases_add_to_existing_case_modal';
 
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatuses[];
   onRowClick?: (theCase?: CaseUI) => void;
   onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
   onCreateCaseClicked?: () => void;
+  getAttachments?: GetAttachments;
 }
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ hiddenStatuses, onRowClick, onClose }) => {
+  ({ hiddenStatuses, onRowClick, onClose, getAttachments }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const { euiTheme } = useEuiTheme();
     const closeModal = useCallback(() => {
@@ -52,6 +54,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
       <>
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiModal
+          aria-labelledby="all-cases-modal-title"
           onClose={closeModal}
           data-test-subj="all-cases-modal"
           css={css`
@@ -60,13 +63,16 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
           `}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id="all-cases-modal-title">
+              {i18n.SELECT_CASE_TITLE}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <AllCasesList
               hiddenStatuses={hiddenStatuses}
               isSelectorView={true}
               onRowClick={onClick}
+              getAttachments={getAttachments}
             />
           </EuiModalBody>
           <EuiModalFooter>

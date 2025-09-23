@@ -20,13 +20,15 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSkeletonText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 
+import { useMonitorMWs } from '../../../hooks/use_monitor_mws';
 import { MetricErrorIcon } from './metric_error_icon';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { isTestRunning, manualTestRunSelector } from '../../../../../state/manual_test_runs';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../../state';
 import { useErrorDetailsLink } from '../../../../common/links/error_details_link';
@@ -61,6 +63,7 @@ export const MetricItemIcon = ({
   });
 
   const dispatch = useDispatch();
+  const { activeMWs } = useMonitorMWs(monitor);
 
   const inProgress = isTestRunning(testNowRun);
 
@@ -79,6 +82,26 @@ export const MetricItemIcon = ({
         <EuiToolTip position="top" content={TEST_IN_PROGRESS}>
           <EuiLoadingSpinner />
         </EuiToolTip>
+      </Container>
+    );
+  }
+
+  if (activeMWs.length) {
+    return (
+      <Container>
+        <EuiIconTip
+          content={i18n.translate(
+            'xpack.synthetics.metricItemIcon.euiButtonIcon.maintenanceWindowActive',
+            {
+              defaultMessage: 'Monitor is stopped while maintenance windows are running.',
+            }
+          )}
+          type="pause"
+          color="warning"
+          iconProps={{
+            'data-test-subj': 'syntheticsMetricItemIconButton',
+          }}
+        />
       </Container>
     );
   }

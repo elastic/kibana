@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { Condition, RoutingDefinition, Streams } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromPromise } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { IToasts } from '@kbn/core/public';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { Condition } from '@kbn/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
-import { StreamRoutingServiceDependencies } from './types';
+import type { StreamRoutingServiceDependencies } from './types';
 
 /**
  * Upsert stream actor factory
@@ -55,14 +58,17 @@ export function createUpsertStreamActor({
 export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2023-10-31'>;
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
-  if: Condition;
+  where: Condition;
+  status: RoutingStatus;
   destination: string;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
   forkSuccessNofitier,
+  telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
   forkSuccessNofitier: (streamName: string) => void;
+  telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
     const response = await streamsRepositoryClient.fetch(
@@ -74,7 +80,8 @@ export function createForkStreamActor({
             name: input.definition.stream.name,
           },
           body: {
-            if: input.if,
+            where: input.where,
+            status: input.status,
             stream: {
               name: input.destination,
             },
@@ -84,6 +91,9 @@ export function createForkStreamActor({
     );
 
     forkSuccessNofitier(input.destination);
+    telemetryClient.trackChildStreamCreated({
+      name: input.destination,
+    });
 
     return response;
   });
@@ -132,11 +142,12 @@ export const createStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate('xpack.streams.failedToSave', {
         defaultMessage: 'Failed to save',
       }),
-      toastMessage: getFormattedError(event.error).message,
+      toastMessage: formattedError.message,
       toastLifeTimeMs: 5000,
     });
   };

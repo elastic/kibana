@@ -128,7 +128,8 @@ export const PacksComboBoxField = ({
       describedByIds={idAria ? [idAria] : undefined}
       {...rest}
     >
-      <EuiComboBox<PackOption>
+      <EuiComboBox
+        isInvalid={!!error}
         placeholder={i18n.translate('xpack.osquery.packs.dropdown.searchFieldPlaceholder', {
           defaultMessage: `Search for a pack to run`,
         })}

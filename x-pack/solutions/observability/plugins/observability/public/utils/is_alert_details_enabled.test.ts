@@ -24,7 +24,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 
-import { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin';
 import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
 import type { TopAlert } from '../typings/alerts';
 
@@ -33,6 +33,7 @@ const defaultConfig: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
+    managedOtlpServiceUrl: '',
   },
 };
 describe('isAlertDetailsEnabled', () => {
@@ -67,6 +68,7 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: false },
           },
+          managedOtlpServiceUrl: '',
         },
       };
       expect(isAlertDetailsEnabledPerApp(logsAlert, updatedConfig)).toBeTruthy();
@@ -107,6 +109,7 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: false },
           },
+          managedOtlpServiceUrl: '',
         },
       };
       const apmTransactionDurationAlert = {
@@ -181,6 +184,7 @@ describe('isAlertDetailsEnabled', () => {
             metrics: { enabled: false },
             uptime: { enabled: true },
           },
+          managedOtlpServiceUrl: '',
         },
       } as ConfigSchema;
       expect(isAlertDetailsEnabledPerApp(uptimeAlert, updatedConfig)).toBeTruthy();
@@ -221,6 +225,7 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: true },
           },
+          managedOtlpServiceUrl: '',
         },
       };
       expect(isAlertDetailsEnabledPerApp(null, updatedConfig)).toBeFalsy();
@@ -231,6 +236,7 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: true },
           },
+          managedOtlpServiceUrl: '',
         },
       };
       const noneListedRuleType = {

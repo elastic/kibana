@@ -16,9 +16,7 @@ import { getTranslationResultNode } from './nodes/translation_result';
 import { getValidationNode } from './nodes/validation';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
-
-// How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
-const MAX_VALIDATION_ITERATIONS = 3;
+import { migrateRuleConfigSchema } from '../../state';
 
 export function getTranslateRuleGraph({
   model,
@@ -42,7 +40,7 @@ export function getTranslateRuleGraph({
   });
   const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
 
-  const translateRuleGraph = new StateGraph(translateRuleState)
+  const translateRuleGraph = new StateGraph(translateRuleState, migrateRuleConfigSchema)
     // Nodes
     .addNode('inlineQuery', inlineQueryNode)
     .addNode('retrieveIntegrations', retrieveIntegrationsNode)
@@ -81,10 +79,7 @@ const translatableRouter = (state: TranslateRuleState) => {
 };
 
 const validationRouter = (state: TranslateRuleState) => {
-  if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    !isEmpty(state.validation_errors?.esql_errors)
-  ) {
+  if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
   if (!state.includes_ecs_mapping) {

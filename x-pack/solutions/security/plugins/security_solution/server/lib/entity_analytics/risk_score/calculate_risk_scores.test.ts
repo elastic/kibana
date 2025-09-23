@@ -13,8 +13,8 @@ import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { mockGlobalState } from '../../../../public/common/mock';
 import { EntityType } from '../../../../common/search_strategy';
+import { allowedExperimentalValues } from '../../../../common';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -33,7 +33,7 @@ describe('calculateRiskScores()', () => {
       pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
       runtimeMappings: {},
-      experimentalFeatures: mockGlobalState.app.enableExperimental,
+      experimentalFeatures: allowedExperimentalValues,
     };
   });
 
@@ -170,6 +170,7 @@ describe('calculateRiskScores()', () => {
       });
 
       it('should add the filter when excludeAlertStatuses is not empty', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         esClient.search as jest.Mock;
         params = { ...params, excludeAlertStatuses: ['closed'] };
         await calculateRiskScores(params);

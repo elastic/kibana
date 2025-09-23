@@ -18,7 +18,7 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
-import { DataViewPickerProps } from './data_view_picker';
+import type { DataViewPickerProps } from './data_view_picker';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -78,6 +78,7 @@ describe('DataView component', () => {
   }
   let props: DataViewPickerProps;
   beforeEach(() => {
+    jest.clearAllMocks();
     props = {
       currentDataViewId: 'dataview-1',
       trigger: {
@@ -120,16 +121,13 @@ describe('DataView component', () => {
   });
 
   it('should render the add dataview menu if onDataViewCreated is given', async () => {
-    const addDataViewSpy = jest.fn();
     const component = mount(
-      wrapDataViewComponentInContext({ ...props, onDataViewCreated: addDataViewSpy }, false)
+      wrapDataViewComponentInContext({ ...props, onDataViewCreated: jest.fn() }, false)
     );
     findTestSubject(component, 'dataview-trigger').simulate('click');
     expect(component.find('[data-test-subj="dataview-create-new"]').at(0).text()).toContain(
       'Create a data view'
     );
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
-    expect(addDataViewSpy).toHaveBeenCalled();
   });
 
   it('should properly handle ad hoc data views', async () => {
@@ -161,6 +159,7 @@ describe('DataView component', () => {
         name: 'the-data-view',
         type: 'default',
         isAdhoc: true,
+        managed: undefined,
       },
     ]);
   });
@@ -194,6 +193,7 @@ describe('DataView component', () => {
         name: 'the-data-view-esql',
         type: 'esql',
         isAdhoc: true,
+        managed: undefined,
       },
     ]);
   });
@@ -209,8 +209,14 @@ describe('DataView component', () => {
               id: 'dataview-1',
               title: 'dataview-1',
             },
+            {
+              id: 'the-data-view-id',
+              title: 'the-data-view-title',
+              name: 'the-data-view',
+              type: 'default',
+              managed: true,
+            },
           ],
-          managedDataViews: [dataViewMock],
         },
         false
       )
@@ -226,7 +232,7 @@ describe('DataView component', () => {
         title: 'the-data-view-title',
         name: 'the-data-view',
         type: 'default',
-        isManaged: true,
+        managed: true,
       },
     ]);
   });

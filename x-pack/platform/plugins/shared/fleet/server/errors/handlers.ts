@@ -15,7 +15,10 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { UninstallTokenError } from '../../common/errors';
+import {
+  AgentlessAgentCreateFleetUnreachableError,
+  UninstallTokenError,
+} from '../../common/errors';
 
 import { appContextService } from '../services';
 
@@ -47,8 +50,11 @@ import {
   AgentlessPolicyExistsRequestError,
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
   OutputInvalidError,
   AgentlessAgentCreateOverProvisionnedError,
+  FleetErrorWithStatusCode,
+  PackageRollbackError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -92,6 +98,12 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyContentPackageError) {
+    return 400;
+  }
+  if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+    return 400;
+  }
+  if (error instanceof PackageRollbackError) {
     return 400;
   }
   // Unauthorized
@@ -153,6 +165,10 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 502;
   }
 
+  if (error instanceof FleetErrorWithStatusCode && error.statusCode) {
+    return error.statusCode;
+  }
+
   return 400; // Bad Request
 };
 
@@ -160,6 +176,8 @@ function shouldRespondWithErrorType(error: FleetError) {
   if (error instanceof OutputInvalidError) {
     return true;
   } else if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return true;
+  } else if (error instanceof AgentlessAgentCreateFleetUnreachableError) {
     return true;
   }
   return false;

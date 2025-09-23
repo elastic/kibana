@@ -9,10 +9,11 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
-import { Interpolation, Theme, css } from '@emotion/react';
-import {
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
+import type {
   DatasourceMap,
   FramePublicAPI,
   UserMessagesGetter,
@@ -21,17 +22,17 @@ import {
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
+import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   updateVisualizationState,
-  DatasourceStates,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
   selectVisualizationState,
 } from '../../../state_management';
-import { LensInspector } from '../../../lens_inspector_service';
+import type { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
@@ -271,6 +272,7 @@ export function WorkspacePanelWrapper({
           alignItems="center"
           justifyContent="center"
           direction="column"
+          className="lnsWorkspacePanelWrapper__contentFlexGroup"
           css={css`
             height: 100%;
           `}

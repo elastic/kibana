@@ -43,6 +43,7 @@ export type {
   BulkEditOperation,
   BulkEditFields,
 } from '../application/rule/methods/bulk_edit/types';
+export type { BulkEditParamsOperation } from '../application/rule/methods/bulk_edit_params/types';
 export type { FindResult } from '../application/rule/methods/find/find_rules';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
 export type {
@@ -168,7 +169,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
+export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET';
 
 export interface RuleBulkOperationAggregation {
   alertTypeId: {

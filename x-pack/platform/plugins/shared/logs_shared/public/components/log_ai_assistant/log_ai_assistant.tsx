@@ -11,7 +11,7 @@ import type {
   Message,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { LogEntryField } from '../../../common';
+import type { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
 
 export interface LogAIAssistantDocument {
@@ -90,6 +90,7 @@ export const LogAIAssistant = ({
             title={similarLogMessagesTitle}
             messages={similarLogMessageMessages}
             dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
+            showElasticLlmCallout={false}
           />
         </EuiFlexItem>
       ) : null}

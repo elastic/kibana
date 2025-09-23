@@ -7,6 +7,7 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
@@ -32,6 +33,7 @@ import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
+import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
@@ -76,6 +78,16 @@ export type {
   OpsgenieCreateAlertParams,
 } from './opsgenie';
 
+export type {
+  JiraServiceManagementActionConfig,
+  JiraServiceManagementActionSecrets,
+  JiraServiceManagementActionParams,
+  JiraServiceManagementCloseAlertSubActionParams,
+  JiraServiceManagementCreateAlertSubActionParams,
+  JiraServiceManagementCloseAlertParams,
+  JiraServiceManagementCreateAlertParams,
+} from './jira-service-management';
+
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -107,6 +119,7 @@ export function registerConnectorTypes({
   actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
+  actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
@@ -114,6 +127,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
+  actions.registerSubActionConnectorType(getXSOARConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
@@ -124,7 +138,5 @@ export function registerConnectorTypes({
   if (!experimentalFeatures.inferenceConnectorOff) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
-  if (experimentalFeatures.microsoftDefenderEndpointOn) {
-    actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
-  }
+  actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
 }

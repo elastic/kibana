@@ -23,57 +23,92 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.string(),
-  label: schema.maybe(schema.string()),
-  order: schema.number(),
+  id: schema.string({ meta: { description: 'The unique ID of the link' } }),
+  label: schema.maybe(
+    schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
+  ),
+  order: schema.number({
+    meta: { description: 'The position this link should appear in the order of the list' },
+  }),
 };
 
-const dashboardLinkSchema = schema.object({
+export const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
-  destinationRefName: schema.string(),
+  destination: schema.string({
+    meta: { description: 'Linked dashboard saved object id' },
+  }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.boolean(),
-        useCurrentFilters: schema.boolean(),
-        useCurrentDateRange: schema.boolean(),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        useCurrentFilters: schema.boolean({
+          meta: {
+            description: 'Whether to use the filters and query from the origin dashboard',
+          },
+        }),
+        useCurrentDateRange: schema.boolean({
+          meta: {
+            description: 'Whether to use the date range from the origin dashboard',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )
   ),
 });
 
-const externalLinkSchema = schema.object({
+export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string(),
+  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.boolean(),
-        encodeUrl: schema.boolean(),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        encodeUrl: schema.boolean({
+          meta: {
+            description: 'Whether to escape the URL with percent encoding',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )
   ),
 });
 
-const linksAttributesSchema = schema.object(
+export const linksSchema = schema.object(
   {
-    title: schema.string(),
-    description: schema.maybe(schema.string()),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
+    title: schema.string({ meta: { description: 'A human-readable title' } }),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
+    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
+      meta: { description: 'The list of links to display' },
+    }),
     layout: schema.maybe(
-      schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)])
+      schema.oneOf(
+        [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
+        {
+          meta: {
+            description: 'Denote whether to display the links in a horizontal or vertical layout',
+          },
+        }
+      )
     ),
   },
   { unknowns: 'forbid' }
 );
 
-const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
+const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
-const searchOptionsSchema = schema.maybe(
+export const linksSearchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -82,14 +117,19 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const linksCreateOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
+export const linksCreateOptionsSchema = schema.object({
   overwrite: createOptionsSchemas.overwrite,
 });
 
-const linksUpdateOptionsSchema = schema.object({
+// update references needed because visualize listing table uses content management
+// to update title/description/tags and tags passes references in this use case
+// TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
+export const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
+
+export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
+export const linksCreateResultSchema = createResultSchema(linksSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -97,7 +137,7 @@ export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(linksSavedObjectSchema),
+        schema: linksGetResultSchema,
       },
     },
   },
@@ -107,29 +147,29 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
     out: {
       result: {
-        schema: createResultSchema(linksSavedObjectSchema),
+        schema: linksCreateResultSchema,
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: linksUpdateOptionsSchema, // same schema as "create"
+        schema: linksUpdateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
   },
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: linksSearchOptionsSchema,
       },
     },
   },

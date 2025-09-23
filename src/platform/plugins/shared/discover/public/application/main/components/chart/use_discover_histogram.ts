@@ -39,6 +39,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -58,13 +59,19 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
+  type InitialUnifiedHistogramLayoutProps,
 } from '../../state_management/redux';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
+export interface UseUnifiedHistogramOptions {
+  initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
+}
+
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer
+  stateContainer: DiscoverStateContainer,
+  options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
   const {
@@ -353,9 +360,18 @@ export const useDiscoverHistogram = (
     [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
+  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
+  const getModifiedVisAttributes = useCallback<
+    NonNullable<UseUnifiedHistogramProps['getModifiedVisAttributes']>
+  >(
+    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
+    [getModifiedVisAttributesAccessor]
+  );
+
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
@@ -377,6 +393,7 @@ export const useDiscoverHistogram = (
     initialState: {
       chartHidden,
       timeInterval,
+      topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
       totalHitsStatus: UnifiedHistogramFetchStatus.loading,
       totalHitsResult: undefined,
     },
@@ -399,8 +416,10 @@ export const useDiscoverHistogram = (
         : undefined,
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
+    esqlVariables,
     onBreakdownFieldChange,
     searchSessionId,
+    getModifiedVisAttributes,
   };
 };
 

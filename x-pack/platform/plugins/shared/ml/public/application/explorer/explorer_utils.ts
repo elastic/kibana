@@ -20,7 +20,6 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getEntityFieldList,
   type MlEntityField,
-  type MlInfluencer,
   type MlRecordForInfluencer,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
@@ -43,19 +42,14 @@ import {
 import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';
-import {
-  MAX_CATEGORY_EXAMPLES,
-  MAX_INFLUENCER_FIELD_VALUES,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+import { MAX_CATEGORY_EXAMPLES, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
+import type { TableSeverityState } from '../components/controls/select_severity';
 
 export interface ExplorerJob {
   id: string;
@@ -170,78 +164,6 @@ export function getDefaultSwimlaneData(): SwimlaneData {
     points: [],
     interval: 3600,
   };
-}
-
-export async function loadFilteredTopInfluencers(
-  mlResultsService: MlResultsService,
-  jobIds: string[],
-  earliestMs: number,
-  latestMs: number,
-  records: any[],
-  influencers: any[],
-  noInfluencersConfigured: boolean,
-  influencersFilterQuery: InfluencersFilterQuery
-): Promise<any[]> {
-  // Filter the Top Influencers list to show just the influencers from
-  // the records in the selected time range.
-  const recordInfluencersByName: Record<string, any[]> = {};
-
-  // Add the specified influencer(s) to ensure they are used in the filter
-  // even if their influencer score for the selected time range is zero.
-  influencers.forEach((influencer) => {
-    const fieldName = influencer.fieldName;
-    if (recordInfluencersByName[influencer.fieldName] === undefined) {
-      recordInfluencersByName[influencer.fieldName] = [];
-    }
-    recordInfluencersByName[fieldName].push(influencer.fieldValue);
-  });
-
-  // Add the influencers from the top scoring anomalies.
-  records.forEach((record) => {
-    const influencersByName: MlInfluencer[] = record.influencers || [];
-    influencersByName.forEach((influencer) => {
-      const fieldName = influencer.influencer_field_name;
-      const fieldValues = influencer.influencer_field_values;
-      if (recordInfluencersByName[fieldName] === undefined) {
-        recordInfluencersByName[fieldName] = [];
-      }
-      recordInfluencersByName[fieldName].push(...fieldValues);
-    });
-  });
-
-  const uniqValuesByName: Record<string, any[]> = {};
-  Object.keys(recordInfluencersByName).forEach((fieldName) => {
-    const fieldValues = recordInfluencersByName[fieldName];
-    uniqValuesByName[fieldName] = uniq(fieldValues);
-  });
-
-  const filterInfluencers: MlEntityField[] = [];
-  Object.keys(uniqValuesByName).forEach((fieldName) => {
-    // Find record influencers with the same field name as the clicked on cell(s).
-    const matchingFieldName = influencers.find((influencer) => {
-      return influencer.fieldName === fieldName;
-    });
-
-    if (matchingFieldName !== undefined) {
-      // Filter for the value(s) of the clicked on cell(s).
-      filterInfluencers.push(...influencers);
-    } else {
-      // For other field names, add values from all records.
-      uniqValuesByName[fieldName].forEach((fieldValue) => {
-        filterInfluencers.push({ fieldName, fieldValue });
-      });
-    }
-  });
-
-  return (await loadTopInfluencers(
-    mlResultsService,
-    jobIds,
-    earliestMs,
-    latestMs,
-    filterInfluencers,
-    noInfluencersConfigured,
-    influencersFilterQuery
-  )) as any[];
 }
 
 export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]): string[] {
@@ -365,61 +287,6 @@ export function getSelectionJobIds(
   return selectedJobs.map((d) => d.id);
 }
 
-export function loadOverallAnnotations(
-  mlApi: MlApi,
-  selectedJobs: ExplorerJob[],
-  bounds: TimeRangeBounds
-): Promise<AnnotationsTable> {
-  const jobIds = selectedJobs.map((d) => d.id);
-  const timeRange = getSelectionTimeRange(undefined, bounds);
-
-  return new Promise((resolve) => {
-    lastValueFrom(
-      mlApi.annotations.getAnnotations$({
-        jobIds,
-        earliestMs: timeRange.earliestMs,
-        latestMs: timeRange.latestMs,
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-      })
-    )
-      .then((resp) => {
-        if (resp.error !== undefined || resp.annotations === undefined) {
-          const errorMessage = extractErrorMessage(resp.error);
-          return resolve({
-            annotationsData: [],
-            error: errorMessage !== '' ? errorMessage : undefined,
-          });
-        }
-
-        const annotationsData: Annotations = [];
-        jobIds.forEach((jobId) => {
-          const jobAnnotations = resp.annotations[jobId];
-          if (jobAnnotations !== undefined) {
-            annotationsData.push(...jobAnnotations);
-          }
-        });
-
-        return resolve({
-          annotationsData: annotationsData
-            .sort((a, b) => {
-              return a.timestamp - b.timestamp;
-            })
-            .map((d, i) => {
-              d.key = (i + 1).toString();
-              return d;
-            }),
-        });
-      })
-      .catch((resp) => {
-        const errorMessage = extractErrorMessage(resp);
-        return resolve({
-          annotationsData: [],
-          error: errorMessage !== '' ? errorMessage : undefined,
-        });
-      });
-  });
-}
-
 export function loadAnnotationsTableData(
   mlApi: MlApi,
   selectedCells: AppStateSelectedCells | undefined | null,
@@ -488,7 +355,7 @@ export async function loadAnomaliesTableData(
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
-  tableSeverity: number,
+  tableSeverity: TableSeverityState,
   influencersFilterQuery?: InfluencersFilterQuery
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -503,7 +370,7 @@ export async function loadAnomaliesTableData(
         [],
         influencers,
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         timeRange.earliestMs,
         timeRange.latestMs,
         dateFormatTz,
@@ -577,38 +444,6 @@ export async function loadAnomaliesTableData(
         console.log('Explorer - error loading data for anomalies table:', resp);
         reject();
       });
-  });
-}
-
-export async function loadTopInfluencers(
-  mlResultsService: MlResultsService,
-  selectedJobIds: string[],
-  earliestMs: number,
-  latestMs: number,
-  influencers: any[],
-  noInfluencersConfigured?: boolean,
-  influencersFilterQuery?: InfluencersFilterQuery
-) {
-  return new Promise((resolve) => {
-    if (noInfluencersConfigured !== true) {
-      mlResultsService
-        .getTopInfluencers(
-          selectedJobIds,
-          earliestMs,
-          latestMs,
-          MAX_INFLUENCER_FIELD_VALUES,
-          10,
-          1,
-          influencers,
-          influencersFilterQuery
-        )
-        .then((resp) => {
-          // TODO - sort the influencers keys so that the partition field(s) are first.
-          resolve(resp.influencers);
-        });
-    } else {
-      resolve({});
-    }
   });
 }
 
