@@ -15,10 +15,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLoadingElastic,
 } from '@elastic/eui';
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -80,8 +80,21 @@ export const StreamSystemsFlyout = ({
           />
         ) : (
           <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
+            <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
+              <EuiLoadingElastic size="xxl" />
+              <EuiSpacer size="m" />
+              <EuiText>
+                <p>
+                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.analyzingDataWithGenLabel', {
+                    defaultMessage: 'Analyzing data with Gen AI …',
+                  })}
+                </p>
+                <p>
+                  {i18n.translate('xpack.streams.streamSystemsFlyout.p.pleaseWaitWhileWeLabel', {
+                    defaultMessage: 'Please wait while we identify systems.',
+                  })}
+                </p>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
