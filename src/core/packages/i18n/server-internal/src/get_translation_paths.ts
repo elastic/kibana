@@ -9,6 +9,7 @@
 
 import { resolve, dirname } from 'path';
 import { readFile, glob } from 'fs/promises';
+import normalizePath from 'normalize-path';
 
 interface I18NRCFileStructure {
   translations?: string[];
@@ -21,7 +22,7 @@ export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested
   const translationPaths: string[] = [];
 
   for await (const entry of glob(globPattern, { cwd })) {
-    const entryFullPath = resolve(cwd, entry);
+    const entryFullPath = resolve(cwd, normalizePath(entry));
     const pluginBasePath = dirname(entryFullPath);
     try {
       const content = await readFile(entryFullPath, 'utf8');
