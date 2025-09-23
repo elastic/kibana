@@ -87,7 +87,7 @@ describe('buildContextOverride', () => {
         steps: {
           first_step: {
             output: {
-              result: undefined,
+              result: 'replace with your data',
             },
           },
         },
@@ -135,12 +135,12 @@ describe('buildContextOverride', () => {
               data: {
                 rows: {
                   '0': {
-                    name: undefined,
+                    name: 'replace with your data',
                   },
                 },
               },
               meta: {
-                total: undefined,
+                total: 'replace with your data',
               },
             },
           },
@@ -218,9 +218,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         foreach: {
           item: {
-            name: undefined,
+            name: 'replace with your data',
           },
-          index: undefined,
+          index: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -255,9 +255,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         execution: {
           workflow: {
-            id: undefined,
+            id: 'replace with your data',
           },
-          id: undefined,
+          id: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -295,7 +295,7 @@ describe('buildContextOverride', () => {
         steps: {
           previous_step: {
             output: {
-              data: undefined,
+              data: 'replace with your data',
             },
           },
         },
@@ -305,12 +305,12 @@ describe('buildContextOverride', () => {
         event: {
           payload: {
             user: {
-              id: undefined,
+              id: 'replace with your data',
             },
           },
         },
         inputs: {
-          userInput: undefined,
+          userInput: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -379,7 +379,7 @@ describe('buildContextOverride', () => {
             output: {
               items: {
                 '0': {
-                  name: undefined,
+                  name: 'replace with your data',
                 },
               },
             },
@@ -441,8 +441,8 @@ describe('buildContextOverride', () => {
         steps: {
           source: {
             output: {
-              data: undefined,
-              meta: undefined,
+              data: 'replace with your data',
+              meta: 'replace with your data',
             },
           },
         },
@@ -483,7 +483,7 @@ describe('buildContextOverride', () => {
                   user: {
                     profile: {
                       settings: {
-                        theme: undefined,
+                        theme: 'replace with your data',
                       },
                     },
                   },
@@ -528,13 +528,13 @@ describe('buildContextOverride', () => {
               matrix: {
                 '0': {
                   '1': {
-                    value: undefined,
+                    value: 'replace with your data',
                   },
                 },
               },
               list: {
                 '5': {
-                  name: undefined,
+                  name: 'replace with your data',
                 },
               },
             },
@@ -576,7 +576,7 @@ describe('buildContextOverride', () => {
                 'user-info': {
                   '0': {
                     profile: {
-                      name: undefined,
+                      name: 'replace with your data',
                     },
                   },
                 },
