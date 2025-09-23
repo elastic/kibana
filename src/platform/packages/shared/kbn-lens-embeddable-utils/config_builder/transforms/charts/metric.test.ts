@@ -12,21 +12,88 @@ import {
   fromLensStateToAPI,
   LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
 } from './metric';
+import { lensApiStateSchema } from '../../schema';
 import type { MetricState } from '../../schema';
-import { merge } from 'lodash';
+import { has, merge } from 'lodash';
 
-// ts-expect-error
-function mergeDefaultsToNewCopy(originalObject, filledDefaults) {
-  return merge(structuredClone(originalObject), filledDefaults);
+type InputTypeMetricChart = Omit<MetricState, 'sampling' | 'ignore_global_filters' | 'metric'> & {
+  ignore_global_filters?: MetricState['ignore_global_filters'];
+  sampling?: MetricState['sampling'];
+  metric: Omit<MetricState['metric'], 'fit' | 'alignments'> &
+    Partial<Pick<MetricState['metric'], 'fit' | 'alignments'>>;
+};
+
+const defaultValues = [
+  {
+    path: 'metric',
+    value: {
+      metric: {
+        fit: false,
+        alignments: {
+          labels: 'left',
+          value: 'left',
+        },
+      },
+    } as const,
+  },
+  {
+    path: 'breakdown_by',
+    value: {
+      breakdown_by: {
+        // defaults for terms breakdown by
+        excludes: {
+          as_regex: false,
+          values: [],
+        },
+        includes: {
+          as_regex: false,
+          values: [],
+        },
+        increase_accuracy: false,
+        other_bucket: { include_documents_without_field: false },
+        rank_by: { direction: 'asc', type: 'alphabetical' },
+      },
+    } as const,
+  },
+  {
+    path: 'secondary_metric.compare',
+    value: {
+      secondary_metric: {
+        compare: {
+          palette: LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+        },
+      } as const,
+    },
+  },
+];
+
+function validateAndApiToApiTransforms(originalObject: InputTypeMetricChart) {
+  return fromLensStateToAPI(fromAPItoLensState(lensApiStateSchema.validate(originalObject)));
+}
+
+function mergeWithDefaults(originalObject: InputTypeMetricChart) {
+  const defaults = [
+    {
+      sampling: 1,
+      ignore_global_filters: false,
+    },
+  ];
+  for (const { path, value } of defaultValues) {
+    if (has(originalObject, path)) {
+      // @ts-expect-error - Need to figure out how to type this better
+      defaults.push(value);
+    }
+  }
+  // @ts-expect-error - Need to figure out how to type this better
+  return merge(...structuredClone(defaults), structuredClone(originalObject));
 }
 
 describe('metric chart transformations', () => {
   describe('roundtrip conversion', () => {
     it('basic metric chart with ad hoc dataView', () => {
-      const basicMetricConfig: MetricState = {
+      const basicMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test Metric',
-        description: 'A test metric chart',
         dataset: {
           type: 'index',
           index: 'test-index',
@@ -35,24 +102,17 @@ describe('metric chart transformations', () => {
         metric: {
           operation: 'count',
           label: 'Count of documents',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
-          fit: false,
+          // @ts-expect-error - Need to figure out how get the right input type
           empty_as_null: false,
         },
-        sampling: 1,
-        ignore_global_filters: false,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(basicMetricConfig));
-      const filledDefaults = { metric: { fit: false } };
-      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(basicMetricConfig, filledDefaults));
+      const finalAPIState = validateAndApiToApiTransforms(basicMetricConfig);
+      expect(finalAPIState).toEqual(mergeWithDefaults(basicMetricConfig));
     });
 
     it('basic metric chart with dataView', () => {
-      const basicMetricConfig: MetricState = {
+      const basicMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test Metric',
         description: 'A test metric chart',
@@ -63,24 +123,17 @@ describe('metric chart transformations', () => {
         metric: {
           operation: 'count',
           label: 'Count of documents',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
-          fit: false,
+          // @ts-expect-error - Need to figure out how get the right input type
           empty_as_null: false,
         },
-        sampling: 1,
-        ignore_global_filters: false,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(basicMetricConfig));
-      const filledDefaults = { metric: { fit: false } };
-      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(basicMetricConfig, filledDefaults));
+      const finalAPIState = validateAndApiToApiTransforms(basicMetricConfig);
+      expect(mergeWithDefaults(basicMetricConfig)).toEqual(finalAPIState);
     });
 
     it('chart with secondary metric', () => {
-      const metricWithSecondaryConfig: MetricState = {
+      const metricWithSecondaryConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test Metric with Secondary',
         dataset: {
@@ -89,18 +142,16 @@ describe('metric chart transformations', () => {
           time_field: '@timestamp',
         },
         metric: {
-          operation: 'average',
+          operation: 'unique_count',
+          // @ts-expect-error - Need to figure out how get the right input type
           field: 'price',
-          label: 'Average Price',
-          alignments: {
-            labels: 'center',
-            value: 'right',
-          },
+          label: 'Count of Prices',
           fit: true,
           color: {
             type: 'static',
             color: '#FF0000',
           },
+          empty_as_null: false,
         },
         secondary_metric: {
           operation: 'sum',
@@ -109,26 +160,14 @@ describe('metric chart transformations', () => {
           prefix: 'Total: ',
           empty_as_null: false,
         },
-        sampling: 0.5,
-        ignore_global_filters: true,
       };
 
-      // Convert API config to Lens state
-      const lensState = fromAPItoLensState(metricWithSecondaryConfig);
-
-      // Convert back from Lens state to API config
-      const convertedConfig = fromLensStateToAPI(lensState);
-
-      // Verify the result has the same type as the input
-      expect(convertedConfig.type).toBe(metricWithSecondaryConfig.type);
-      expect(convertedConfig).toHaveProperty('metric');
-      expect(convertedConfig).toHaveProperty('secondary_metric');
-      expect(convertedConfig).toHaveProperty('dataset');
-      expect(convertedConfig).toHaveProperty('title');
+      const finalAPIState = validateAndApiToApiTransforms(metricWithSecondaryConfig);
+      expect(mergeWithDefaults(metricWithSecondaryConfig)).toEqual(finalAPIState);
     });
 
     it('metric chart with breakdown', () => {
-      const metricWithBreakdownConfig: MetricState = {
+      const metricWithBreakdownConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test Metric with Breakdown',
         dataset: {
@@ -138,13 +177,9 @@ describe('metric chart transformations', () => {
         },
         metric: {
           operation: 'sum',
+          // @ts-expect-error - Need to figure out how get the right input type
           field: 'revenue',
           label: 'Total Revenue',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
-          fit: false,
           icon: {
             name: 'dollar',
             align: 'left',
@@ -158,33 +193,14 @@ describe('metric chart transformations', () => {
           size: 5,
           collapse_by: 'sum',
         },
-        sampling: 1,
-        ignore_global_filters: false,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(metricWithBreakdownConfig));
-      const filledDefaults = {
-        breakdown_by: {
-          excludes: {
-            as_regex: false,
-            values: [],
-          },
-          includes: {
-            as_regex: false,
-            values: [],
-          },
-          increase_accuracy: false,
-          other_bucket: { include_documents_without_field: false },
-          rank_by: { direction: 'asc', type: 'alphabetical' },
-        },
-      };
-      expect(finalAPIState).toEqual(
-        mergeDefaultsToNewCopy(metricWithBreakdownConfig, filledDefaults)
-      );
+      const finalAPIState = validateAndApiToApiTransforms(metricWithBreakdownConfig);
+      expect(mergeWithDefaults(metricWithBreakdownConfig)).toEqual(finalAPIState);
     });
 
     it('metric chart with background chart (bar)', () => {
-      const metricWithBarConfig: MetricState = {
+      const metricWithBarConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test Metric with Bar Background',
         dataset: {
@@ -195,11 +211,8 @@ describe('metric chart transformations', () => {
         metric: {
           operation: 'count',
           label: 'Document Count',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
-          fit: false,
+          // @ts-expect-error - Need to figure out how get the right input type
+          empty_as_null: false,
           background_chart: {
             type: 'bar',
             direction: 'horizontal',
@@ -208,19 +221,15 @@ describe('metric chart transformations', () => {
               field: 'max_value',
             },
           },
-          empty_as_null: false,
         },
-        sampling: 1,
-        ignore_global_filters: false,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(metricWithBarConfig));
-      const filledDefaults = {};
-      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(metricWithBarConfig, filledDefaults));
+      const finalAPIState = validateAndApiToApiTransforms(metricWithBarConfig);
+      expect(mergeWithDefaults(metricWithBarConfig)).toEqual(finalAPIState);
     });
 
     it('ESQL-based metric chart', () => {
-      const esqlMetricConfig: MetricState = {
+      const esqlMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test ESQL Metric',
         description: 'A test metric chart using ESQL',
@@ -230,24 +239,18 @@ describe('metric chart transformations', () => {
         },
         metric: {
           operation: 'value',
+          // @ts-expect-error - Need to figure out how get the right input type
           column: 'count',
-          alignments: {
-            labels: 'left',
-            value: 'left',
-          },
           fit: true,
         },
-        sampling: 1,
-        ignore_global_filters: true,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(esqlMetricConfig));
-      const filledDefaults = {};
-      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(esqlMetricConfig, filledDefaults));
+      const finalAPIState = validateAndApiToApiTransforms(esqlMetricConfig);
+      expect(mergeWithDefaults(esqlMetricConfig)).toEqual(finalAPIState);
     });
 
     it('comprehensive metric chart with ad hoc data view', () => {
-      const comprehensiveMetricConfig: MetricState = {
+      const comprehensiveMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Comprehensive Test Metric',
         description: 'A comprehensive metric chart with all features',
@@ -257,14 +260,11 @@ describe('metric chart transformations', () => {
           time_field: '@timestamp',
         },
         metric: {
-          operation: 'average',
+          operation: 'sum',
+          // @ts-expect-error - Need to figure out how get the right input type
           field: 'response_time',
-          label: 'Avg Response Time',
+          label: 'Sum Response Time',
           sub_label: 'milliseconds',
-          alignments: {
-            labels: 'center',
-            value: 'right',
-          },
           fit: true,
           icon: {
             name: 'clock',
@@ -277,17 +277,18 @@ describe('metric chart transformations', () => {
           background_chart: {
             type: 'trend',
           },
+          empty_as_null: false,
         },
         secondary_metric: {
           operation: 'count',
           label: 'Request Count',
           prefix: 'Requests: ',
-          empty_as_null: false,
           compare: {
             to: 'primary',
             icon: false,
             value: true,
           },
+          empty_as_null: false,
         },
         breakdown_by: {
           operation: 'terms',
@@ -295,38 +296,14 @@ describe('metric chart transformations', () => {
           columns: 5,
           size: 10,
         },
-        sampling: 0.8,
-        ignore_global_filters: true,
       };
 
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(comprehensiveMetricConfig));
-      const filledDefaults = {
-        secondary_metric: {
-          compare: {
-            palette: LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
-          },
-        },
-        breakdown_by: {
-          excludes: {
-            as_regex: false,
-            values: [],
-          },
-          includes: {
-            as_regex: false,
-            values: [],
-          },
-          increase_accuracy: false,
-          other_bucket: { include_documents_without_field: false },
-          rank_by: { direction: 'asc', type: 'alphabetical' },
-        },
-      };
-      expect(finalAPIState).toEqual(
-        mergeDefaultsToNewCopy(comprehensiveMetricConfig, filledDefaults)
-      );
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);
+      expect(mergeWithDefaults(comprehensiveMetricConfig)).toEqual(finalAPIState);
     });
 
     it('comprehensive metric chart with data view', () => {
-      const comprehensiveMetricConfig: MetricState = {
+      const comprehensiveMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Comprehensive Test Metric',
         description: 'A comprehensive metric chart with all features',
@@ -336,6 +313,7 @@ describe('metric chart transformations', () => {
         },
         metric: {
           operation: 'average',
+          // @ts-expect-error - Need to figure out how get the right input type
           field: 'response_time',
           label: 'Avg Response Time',
           sub_label: 'milliseconds',
@@ -372,32 +350,13 @@ describe('metric chart transformations', () => {
           columns: 5,
           size: 10,
         },
-        sampling: 0.8,
-        ignore_global_filters: true,
       };
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(comprehensiveMetricConfig));
-      const filledDefaults = {
-        breakdown_by: {
-          excludes: {
-            as_regex: false,
-            values: [],
-          },
-          includes: {
-            as_regex: false,
-            values: [],
-          },
-          increase_accuracy: false,
-          other_bucket: { include_documents_without_field: false },
-          rank_by: { direction: 'asc', type: 'alphabetical' },
-        },
-      };
-      expect(finalAPIState).toEqual(
-        mergeDefaultsToNewCopy(comprehensiveMetricConfig, filledDefaults)
-      );
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);
+      expect(mergeWithDefaults(comprehensiveMetricConfig)).toEqual(finalAPIState);
     });
 
-    it('comprehensive ESQL-based metric chart with comapre to feature', () => {
-      const esqlMetricConfig: MetricState = {
+    it('comprehensive ESQL-based metric chart with compare to feature', () => {
+      const esqlMetricConfig: InputTypeMetricChart = {
         type: 'metric',
         title: 'Test ESQL Metric',
         description: 'A test metric chart using ESQL',
@@ -408,6 +367,7 @@ describe('metric chart transformations', () => {
         },
         metric: {
           operation: 'value',
+          // @ts-expect-error - Need to figure out how get the right input type
           column: 'countA',
           alignments: {
             labels: 'left',
@@ -424,15 +384,11 @@ describe('metric chart transformations', () => {
             value: false,
           },
         },
-        sampling: 1,
-        ignore_global_filters: true,
       };
 
       // Convert API config to Lens state and back
-      const finalAPIState = fromLensStateToAPI(fromAPItoLensState(esqlMetricConfig));
-
-      const filledDefaults = { secondary_metric: { compare: { palette: 'compare_to' } } };
-      expect(finalAPIState).toEqual(mergeDefaultsToNewCopy(esqlMetricConfig, filledDefaults));
+      const finalAPIState = validateAndApiToApiTransforms(esqlMetricConfig);
+      expect(mergeWithDefaults(esqlMetricConfig)).toEqual(finalAPIState);
     });
   });
 });
