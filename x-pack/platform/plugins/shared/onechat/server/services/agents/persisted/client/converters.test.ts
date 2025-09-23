@@ -6,7 +6,7 @@
  */
 
 import { AgentType } from '@kbn/onechat-common';
-import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
+import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
 import { createRequestToEs, fromEs, updateRequestToEs } from './converters';
