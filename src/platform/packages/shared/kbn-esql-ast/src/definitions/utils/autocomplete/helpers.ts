@@ -24,7 +24,7 @@ import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../type
 import { Walker } from '../../../walker';
 import { logicalOperators } from '../../all_operators';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition, Signature } from '../../types';
+import type { FunctionDefinition, FunctionParameterType, Signature } from '../../types';
 import { isParameterType, type SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
 import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
@@ -289,6 +289,7 @@ export const getExpressionPosition = (
 
 interface FunctionParameterContext {
   paramDefinitions: Signature['params'];
+  functionsToIgnore: string[];
 }
 
 /**
@@ -337,19 +338,25 @@ export async function suggestForExpression({
       const fn = expressionRoot as ESQLFunction;
       const fnDefinition = getFunctionDefinition(fn.name);
 
-      if (!fnDefinition) {
+      if (!fnDefinition || !context) {
         break;
       }
 
       const newFunctionParameterContext: FunctionParameterContext = {
-        paramDefinitions: getValidSignaturesAndTypesToSuggestNext(fn, context!, fnDefinition)
+        paramDefinitions: getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition)
           .compatibleParamDefs,
+        functionsToIgnore: [fn.name],
       };
 
       const lastArg = (expressionRoot as ESQLFunction).args.slice(-1)[0] as ESQLAstItem;
 
+      const startingNewParameterExpression = /,\s*$/.test(innerText);
+      const newExpressionRoot = startingNewParameterExpression
+        ? undefined
+        : ((Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem);
+
       return suggestForExpression({
-        expressionRoot: (Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem,
+        expressionRoot: newExpressionRoot,
         innerText,
         getColumnsByType,
         location,
@@ -470,7 +477,7 @@ export async function suggestForExpression({
 
       if (functionParameterContext) {
         const { paramDefinitions } = functionParameterContext;
-        acceptedTypes = paramDefinitions.map((p) => p.type);
+        acceptedTypes = ensureKeywordAndText(paramDefinitions.map((p) => p.type));
       }
 
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
@@ -555,6 +562,17 @@ export function getControlSuggestion(
       : []),
   ];
 }
+
+// Helper to ensure both keyword and text types are present
+const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+  if (types.includes('keyword') && !types.includes('text')) {
+    types.push('text');
+  }
+  if (types.includes('text') && !types.includes('keyword')) {
+    types.push('keyword');
+  }
+  return types;
+};
 
 const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS

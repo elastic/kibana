@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 import {
   getExpressionPosition,
@@ -33,9 +34,15 @@ export async function autocomplete(
     return [];
   }
   const innerText = query.substring(0, cursorPosition);
-  let expressionRoot = /,\s*$/.test(innerText)
-    ? undefined
-    : (command.args[command.args.length - 1] as ESQLSingleAstItem | undefined);
+  const lastArg = command.args[command.args.length - 1] as ESQLSingleAstItem | undefined;
+  const startingNewExpression =
+    // ends with a comma
+    /,\s*$/.test(innerText) &&
+    lastArg &&
+    // and we aren't within a function
+    !(isFunctionExpression(lastArg) && within(innerText.length, lastArg));
+
+  let expressionRoot = startingNewExpression ? undefined : lastArg;
 
   let insideAssignment = false;
   if (expressionRoot && isAssignment(expressionRoot)) {

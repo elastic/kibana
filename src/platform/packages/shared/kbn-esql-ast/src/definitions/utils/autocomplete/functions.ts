@@ -322,19 +322,15 @@ const analyzeParameterLocation = (
     columns: columnMap,
   };
   // Extract argument index, types to suggest, etc.
-  const {
-    typesToSuggestNext: compatibleParamDefs,
-    hasMoreMandatoryArgs,
-    enrichedArgs,
-    argIndex,
-  } = getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
+  const { compatibleParamDefs, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
+    getValidSignaturesAndTypesToSuggestNext(functionNode, references, filteredFnDefinition);
 
   // The specific argument at the cursor
   const currentArg = enrichedArgs[argIndex];
 
   // Special Function Handling
   // Whether to add a comma after the suggestion
-  // TODO - re-enable
+  // TODO - maybe re-enable
   // const isCursorFollowedByComma = fullText
   //   ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
   //   : false;
