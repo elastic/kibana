@@ -32,6 +32,7 @@ describe('usePaginatedFields', () => {
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
+        searchTerm: '',
         dimensions,
         pageSize: 2,
         currentPage: 0,
@@ -46,6 +47,34 @@ describe('usePaginatedFields', () => {
     expect(result.current?.totalPages).toBe(2);
   });
 
+  it('returns correct search results with searchTerm provided', async () => {
+    const fields = [
+      createField('field1'),
+      createField('field2'),
+      createField('field3'),
+      createField('field4'),
+      createField('field44'),
+    ];
+    const dimensions: string[] = [];
+
+    const { result } = renderHook(() =>
+      usePaginatedFields({
+        fields,
+        searchTerm: '4',
+        dimensions,
+        pageSize: 2,
+        currentPage: 0,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current?.allFields).toHaveLength(5);
+    });
+
+    expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field4', 'field44']);
+    expect(result.current?.totalPages).toBe(1);
+  });
+
   it('returns correct pagination for second page', async () => {
     const fields = [
       createField('field1'),
@@ -58,6 +87,7 @@ describe('usePaginatedFields', () => {
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
+        searchTerm: '',
         dimensions,
         pageSize: 2,
         currentPage: 1,
@@ -80,10 +110,10 @@ describe('usePaginatedFields', () => {
       createField('field4', []),
     ];
     const dimensions: string[] = ['foo'];
-
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
+        searchTerm: '',
         dimensions,
         pageSize: 10,
         currentPage: 0,
@@ -108,6 +138,7 @@ describe('usePaginatedFields', () => {
         dimensions,
         pageSize: 10,
         currentPage: 0,
+        searchTerm: '',
       })
     );
 
