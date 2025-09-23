@@ -211,6 +211,9 @@ const createProfileProviderServicesMock = () => {
       pricing: pricingServiceMock.createStartContract() as ReturnType<
         typeof pricingServiceMock.createStartContract
       >,
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(true),
+      },
     },
   } as unknown as ProfileProviderServices;
 };

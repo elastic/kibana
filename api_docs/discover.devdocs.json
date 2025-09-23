@@ -2423,7 +2423,19 @@
               "ActionCreatorWithPayload",
               "<{ tabId: string; }, string>; restoreTab: ",
               "InternalStateThunkActionCreator",
-              "<[{ restoreTabId: string; }], void>; clearAllTabs: ",
+              "<[{ restoreTabId: string; }], void>; openInNewTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ tabLabel?: string | undefined; appState?: ",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverAppState",
+                "text": "DiscoverAppState"
+              },
+              " | undefined; globalState?: ",
+              "TabStateGlobalState",
+              " | undefined; searchSessionId?: string | undefined; }], void>; clearAllTabs: ",
               "InternalStateThunkActionCreator",
               "<[], void>; initializeTabs: ",
               "AsyncThunk",
@@ -2507,7 +2519,9 @@
                 "section": "def-common.DataTableRecord",
                 "text": "DataTableRecord"
               },
-              " | undefined; initialDocViewerTabId?: string | undefined; }, \"internalState/setExpandedDoc\">; setDataRequestParams: ",
+              " | undefined; initialDocViewerTabId?: string | undefined; }, \"internalState/setExpandedDoc\">; discardFlyoutsOnTabChange: ",
+              "ActionCreatorWithoutPayload",
+              "<\"internalState/discardFlyoutsOnTabChange\">; setDataRequestParams: ",
               "ActionCreatorWithPayload",
               "<",
               "TabActionPayload",
@@ -5000,6 +5014,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.tab",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tab",
+            "description": [
+              "\nOptionally set Discover tab state.\nUse `new` as value for `id` to indicate that a new tab should be created.\nOnce created, the new tab will have a unique id which can be referenced too if necessary."
+            ],
+            "signature": [
+              "{ id: \"new\"; label?: string | undefined; } | { id: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
