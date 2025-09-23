@@ -77,7 +77,9 @@ export function IlmField({
       if (phases.frozen) {
         desc.push({
           description: i18n.translate('xpack.streams.phases.frozen', {
-            defaultMessage: `Frozen${previosStartAge ? ` till ${previosStartAge}` : ` forever`}`,
+            defaultMessage:
+              'Frozen {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+            values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.frozen,
         });
@@ -86,7 +88,9 @@ export function IlmField({
       if (phases.cold) {
         desc.push({
           description: i18n.translate('xpack.streams.phases.cold', {
-            defaultMessage: `Cold${previosStartAge ? ` till ${previosStartAge}` : ` forever`}`,
+            defaultMessage:
+              'Cold {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+            values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.cold,
         });
@@ -95,7 +99,9 @@ export function IlmField({
       if (phases.warm) {
         desc.push({
           description: i18n.translate('xpack.streams.phases.warm', {
-            defaultMessage: `Warm${previosStartAge ? ` till ${previosStartAge}` : ` forever`}`,
+            defaultMessage:
+              'Warm {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+            values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.warm,
         });
@@ -104,7 +110,9 @@ export function IlmField({
       if (phases.hot) {
         desc.push({
           description: i18n.translate('xpack.streams.phases.hot', {
-            defaultMessage: `Hot${previosStartAge ? ` till ${previosStartAge}` : ` forever`}`,
+            defaultMessage:
+              'Hot {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+            values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.hot,
         });
