@@ -103,8 +103,13 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
   return (
     <>
       {additionalIngestionPanel}
-      {panels.map(({ title, description, links }, uid) => (
-        <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s" key={uid}>
+      {panels.map(({ title, description, links }, panelIndex) => (
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="spaceEvenly"
+          gutterSize="s"
+          key={panelIndex}
+        >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h6>{title}</h6>
