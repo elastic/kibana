@@ -113,10 +113,7 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    *     is required.
    * @param moreSources Additional sources to include in the `FROM` command.
    */
-  from: (
-    source: ComposerSourceShorthand,
-    ...moreSources: ComposerSourceShorthand[]
-  ) => ComposerQuery;
+  from: FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter;
 
   /**
    * Creates a new {@linkcode ComposerQuery} instance with a `TS` command with
@@ -133,7 +130,7 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    *     is required.
    * @param moreSources Additional sources to include in the `TS` command.
    */
-  ts: (source: ComposerSourceShorthand, ...moreSources: ComposerSourceShorthand[]) => ComposerQuery;
+  ts: FromSourcesQueryStarter;
 
   /**
    * An AST no-op command that can be used in the query, for example in
@@ -154,6 +151,16 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    */
   nop: ESQLCommand;
 }
+
+export type FromSourcesQueryStarter = (
+  source: ComposerSourceShorthand,
+  ...moreSources: ComposerSourceShorthand[]
+) => ComposerQuery;
+
+export type FromSourcesAndMetadataQueryStarter = (
+  sources: ComposerSourceShorthand[],
+  metadataFields?: ComposerColumnShorthand[]
+) => ComposerQuery;
 
 export type ComposerSourceShorthand = string | ESQLSource;
 

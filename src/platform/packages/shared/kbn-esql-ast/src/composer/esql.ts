@@ -12,15 +12,19 @@ import { ComposerQuery } from './composer_query';
 import { DoubleParameterHole, ParameterHole } from './parameter_hole';
 import { processTemplateHoles, removeNopCommands, validateParamName } from './util';
 import type {
+  ComposerColumnShorthand,
   ComposerQueryGenerator,
   ComposerQueryTag,
   ComposerQueryTagHole,
   ComposerQueryTagMethods,
   ComposerSourceShorthand,
+  FromSourcesAndMetadataQueryStarter,
+  FromSourcesQueryStarter,
   ParametrizedComposerQueryTag,
 } from './types';
 import type { ESQLSource } from '../types';
 import { isSource } from '../ast/is';
+import { Builder } from '../builder';
 
 const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQueryTagHole[]) => {
   const tagOrGeneratorWithParams = (initialParamValues?: Record<string, unknown>) =>
@@ -113,21 +117,23 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
  * Constructs a new {@linkcode ComposerQuery} instance using a `FROM` or `TS`
  * command with the specified list of sources.
  */
-const fromLikeSourceCommandStarter = (cmd: 'FROM' | 'TS', sources: ComposerSourceShorthand[]) => {
-  const nodes: ESQLSource[] = [];
+const createFromSourceCommandStarter =
+  (cmd: 'FROM' | 'TS'): FromSourcesQueryStarter =>
+  (...sources: ComposerSourceShorthand[]) => {
+    const nodes: ESQLSource[] = [];
 
-  for (const source of sources) {
-    if (typeof source === 'string') {
-      nodes.push(synth.src(source));
-    } else if (isSource(source)) {
-      nodes.push(source);
-    } else {
-      throw new Error(`Invalid source: ${source}`);
+    for (const source of sources) {
+      if (typeof source === 'string') {
+        nodes.push(synth.src(source));
+      } else if (isSource(source)) {
+        nodes.push(source);
+      } else {
+        throw new Error(`Invalid source: ${source}`);
+      }
     }
-  }
 
-  return esql`${synth.kwd(cmd)} ${nodes}`;
-};
+    return esql`${synth.kwd(cmd)} ${nodes}`;
+  };
 
 /**
  * ESQL query composer tag function.
@@ -177,13 +183,38 @@ export const esql: ComposerQueryTag &
 
     dpar: (value: unknown, name?: string) => new DoubleParameterHole(value, name),
 
-    from: (...sources: ComposerSourceShorthand[]) => {
-      return fromLikeSourceCommandStarter('FROM', sources);
-    },
+    from: ((
+      firstArg: ComposerSourceShorthand | ComposerSourceShorthand[],
+      ...remainingArgs: unknown[]
+    ) => {
+      if (Array.isArray(firstArg)) {
+        const sources = firstArg as ComposerSourceShorthand[];
+        const metadataFields = (remainingArgs[0] as ComposerColumnShorthand[]) || [];
+        const sourceNodes = sources.map((source) => {
+          if (typeof source === 'string') {
+            return synth.src(source);
+          } else if (isSource(source)) {
+            return source;
+          } else {
+            throw new Error(`Invalid source: ${source}`);
+          }
+        });
+        const metadataFieldsNodes = metadataFields.map((field) => {
+          return Builder.expression.column(field);
+        });
 
-    ts: (...sources: ComposerSourceShorthand[]) => {
-      return fromLikeSourceCommandStarter('TS', sources);
-    },
+        return metadataFieldsNodes.length
+          ? esql`FROM ${sourceNodes} METADATA ${metadataFieldsNodes}`
+          : esql`FROM ${sourceNodes}`;
+      } else {
+        return createFromSourceCommandStarter('FROM')(
+          firstArg,
+          ...(remainingArgs as ComposerSourceShorthand[])
+        );
+      }
+    }) as FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter,
+
+    ts: createFromSourceCommandStarter('TS'),
 
     get nop() {
       return synth.cmd`WHERE TRUE`;

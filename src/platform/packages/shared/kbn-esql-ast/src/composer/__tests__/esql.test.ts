@@ -154,6 +154,19 @@ describe('query.from()', () => {
       ],
     });
   });
+
+  test('can create with METADATA fields', () => {
+    const query0 = esql.from(['index'], []);
+    const query1 = esql.from(['index'], ['_id']);
+    const query2 = esql.from(
+      ['index', 'index2', esql.src('index', 'cluster1')],
+      ['_id', '_source', 'more']
+    );
+
+    expect(query0.print()).toBe('FROM index');
+    expect(query1.print()).toBe('FROM index METADATA _id');
+    expect(query2.print()).toBe('FROM index, index2, cluster1:index METADATA _id, _source, more');
+  });
 });
 
 describe('query.ts()', () => {
