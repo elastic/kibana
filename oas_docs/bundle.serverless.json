@@ -46702,7 +46702,6 @@
                                         }
                                       },
                                       "required": [
-                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -50351,7 +50350,6 @@
                                         }
                                       },
                                       "required": [
-                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -53557,7 +53555,6 @@
                                         }
                                       },
                                       "required": [
-                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -56902,7 +56899,6 @@
                                         }
                                       },
                                       "required": [
-                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -60110,7 +60106,6 @@
                                     }
                                   },
                                   "required": [
-                                    "system",
                                     "kql"
                                   ],
                                   "type": "object"
@@ -67715,7 +67710,6 @@
                                     }
                                   },
                                   "required": [
-                                    "system",
                                     "kql"
                                   ],
                                   "type": "object"
@@ -68179,7 +68173,6 @@
                 },
                 "required": [
                   "title",
-                  "system",
                   "kql"
                 ],
                 "type": "object"
@@ -68876,7 +68869,6 @@
                       }
                     },
                     "required": [
-                      "system",
                       "kql"
                     ],
                     "type": "object"
