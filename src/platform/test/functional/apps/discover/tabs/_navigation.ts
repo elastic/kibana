@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'context',
   ]);
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
+  const esql = getService('esql');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
@@ -100,6 +102,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect((await unifiedTabs.getSelectedTab())?.label).to.be('testing');
         await testSubjects.existOrFail('breadcrumb first last');
+      });
+    });
+
+    it('should restore the latest tabs when returning via chrome link', async () => {
+      const queryKql = 'response:200';
+      await unifiedTabs.editTabLabel(0, 'kql');
+      await queryBar.setQuery(queryKql);
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('12,891');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['kql']);
+      });
+
+      const queryEsql = 'FROM logstash-* | LIMIT 11';
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, 'esql');
+      await esql.setEsqlEditorQuery(queryEsql);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('11');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['kql', 'esql']);
+      });
+
+      await header.clickDashboard();
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardLandingPage');
+
+      await header.clickDiscover();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('11');
+        expect(await unifiedTabs.getTabLabels()).to.eql(['kql', 'esql']);
+        expect((await unifiedTabs.getSelectedTab())?.label).to.be('esql');
+        expect(await esql.getEsqlEditorQuery()).to.be(queryEsql);
+      });
+
+      await unifiedTabs.selectTab(0);
+      await discover.waitUntilTabIsLoaded();
+      await retry.try(async () => {
+        expect(await discover.getHitCount()).to.be('12,891');
+        expect((await unifiedTabs.getSelectedTab())?.label).to.be('kql');
+        expect(await queryBar.getQueryString()).to.be(queryKql);
       });
     });
   });
