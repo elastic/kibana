@@ -25,14 +25,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { contextOverrideData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 export function TestStepModal({
   initialcontextOverride,
   onClose,
   onSubmit,
 }: {
-  initialcontextOverride: contextOverrideData;
+  initialcontextOverride: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {

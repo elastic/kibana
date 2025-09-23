@@ -18,7 +18,7 @@ import type { StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
-export interface contextOverrideData {
+export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodTypeAny;
 }
@@ -41,7 +41,7 @@ function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
   return z.any();
 }
 
-export function buildcontextOverride(workflowGraph: WorkflowGraph): contextOverrideData {
+export function buildContextOverride(workflowGraph: WorkflowGraph): ContextOverrideData {
   const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
   const allInputs = Object.values(inputsInGraph).flat();

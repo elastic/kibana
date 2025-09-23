@@ -8,7 +8,7 @@
  */
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { buildcontextOverride } from './build_step_context_mock';
+import { buildcontextOverride } from './build_step_context_override';
 
 describe('buildcontextOverride', () => {
   describe('with simple workflow', () => {

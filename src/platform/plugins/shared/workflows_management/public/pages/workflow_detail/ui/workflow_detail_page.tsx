@@ -19,7 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { contextOverrideData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -32,7 +32,7 @@ import { WorkflowExecutionList } from '../../../features/workflow_execution_list
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
-import { buildcontextOverrideForStep } from './build_step_context_mock_for_step';
+import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -130,7 +130,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [contextOverride, setcontextOverride] = useState<contextOverrideData | null>(null);
+  const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
   const [testSingleStepExecutionId, setTestSingleStepExecutionId] = useState<string | null>(null);
 
   const handleRunClick = () => {
@@ -231,7 +231,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (params.actionType === 'run') {
-      const contextOverrideData = buildcontextOverrideForStep(workflowYaml, params.stepId);
+      const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
 
       if (!Object.keys(contextOverrideData.stepContext).length) {
         submitStepRun(params.stepId, {});

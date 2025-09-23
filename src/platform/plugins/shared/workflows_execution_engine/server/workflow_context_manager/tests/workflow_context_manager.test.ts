@@ -103,7 +103,7 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
-          stepContextMock: {
+          contextOverride: {
             consts: {
               CONST_2: 900,
               NEW_CONST: 'new const',
@@ -160,7 +160,7 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
-          stepContextMock: {
+          contextOverride: {
             event: {
               alert: {
                 name: 'Vulnerability',
@@ -228,7 +228,7 @@ describe('WorkflowContextManager', () => {
             remainingKey: 'some string',
             overridenKey: true,
           },
-          stepContextMock: {
+          contextOverride: {
             inputs: {
               overridenKey: false,
               newKey: 123,
@@ -307,7 +307,7 @@ describe('WorkflowContextManager', () => {
         spaceId: 'fake-space-id',
         scopeStack: [] as StackFrame[],
         context: {
-          stepContextMock: {
+          contextOverride: {
             workflow: {
               id: 'mocked-workflow-id',
               name: 'Mocked Workflow Name',
@@ -392,7 +392,7 @@ describe('WorkflowContextManager', () => {
           scopeStack: [] as StackFrame[],
           startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
           context: {
-            stepContextMock: {
+            contextOverride: {
               execution: {
                 id: 'mocked-execution-id',
                 isTestRun: true,
@@ -645,7 +645,7 @@ describe('WorkflowContextManager', () => {
         workflowDefinition: workflow,
         scopeStack: [] as StackFrame[],
         context: {
-          stepContextMock: {
+          contextOverride: {
             steps: {
               fourthLogStep: {
                 state: 'fourth',

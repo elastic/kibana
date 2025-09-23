@@ -10,10 +10,13 @@
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import type { contextOverrideData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
-import { buildcontextOverride } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import { buildContextOverride } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
-export function buildcontextOverrideForStep(workflowYaml: string, stepId: string): contextOverrideData {
+export function buildContextOverrideForStep(
+  workflowYaml: string,
+  stepId: string
+): ContextOverrideData {
   const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
 
   if (!parsingResult.success) {
@@ -23,5 +26,5 @@ export function buildcontextOverrideForStep(workflowYaml: string, stepId: string
   const stepSubGraph = WorkflowGraph.fromWorkflowDefinition(parsingResult.data).getStepGraph(
     stepId
   );
-  return buildcontextOverride(stepSubGraph);
+  return buildContextOverride(stepSubGraph);
 }
