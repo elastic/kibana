@@ -126,6 +126,10 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
+   * Disables ESQL-based risk scoring
+   */
+  disableESQLRiskScoring: true,
+  /**
    * Enables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolEnabled: false,
@@ -241,11 +245,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
   serviceEntityStoreEnabled: true,
-
   /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
 
   /**
    * Enables Integrations Sync for Privileged User Monitoring
@@ -256,11 +256,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
-
-  /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
