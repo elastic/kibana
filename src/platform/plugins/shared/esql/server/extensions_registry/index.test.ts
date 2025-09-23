@@ -225,6 +225,16 @@ describe('ESQLExtensionsRegistry', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should return all existing recommended queries if from * is used', () => {
+      const result = registry.getRecommendedQueries('FROM *', availableDatasources, 'oblt');
+
+      expect(result).toEqual([
+        { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
+        { name: 'Metrics Query', query: 'FROM metrics | STATS max(bytes)' },
+        { name: 'Wildcard Logs Query', query: 'FROM logs-* | LIMIT 5' },
+      ]);
+    });
   });
 
   // --- unsetRecommendedQueries tests ---
