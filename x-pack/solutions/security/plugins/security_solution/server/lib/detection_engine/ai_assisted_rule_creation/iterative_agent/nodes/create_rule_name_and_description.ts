@@ -7,23 +7,30 @@
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { CREATE_ESQL_RULE_PROMPT } from './prompts';
-import type { RuleCreationAnnotation } from '../iterative_agent/state';
+import { CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT } from './prompts';
+import type { RuleCreationAnnotation } from '../state';
 
-interface CreateEsqlRuleNodeParams {
+interface CreateRuleNameAndDescriptionNodeParams {
   model: InferenceChatModel;
 }
 
-export const createEsqlRuleNode = ({ model }: CreateEsqlRuleNodeParams) => {
+export const createRuleNameAndDescriptionNode = ({
+  model,
+}: CreateRuleNameAndDescriptionNodeParams) => {
   const jsonParser = new JsonOutputParser();
-  const ruleCreationChain = CREATE_ESQL_RULE_PROMPT.pipe(model).pipe(jsonParser);
+  const ruleCreationChain =
+    CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT.pipe(model).pipe(jsonParser);
   return async (state: typeof RuleCreationAnnotation.State) => {
     try {
+      console.log('state createRuleNameAndDescriptionNode', JSON.stringify(state, null, 2));
       const baseRuleParams = await ruleCreationChain.invoke({
         user_request: state.userQuery,
+        esql_query: state.rule.query,
       });
-      console.log('state createEsqlRuleNode', state);
-      return { rule: { ...baseRuleParams, language: 'esql', type: 'esql' } };
+      return {
+        ...state,
+        rule: { ...state.rule, ...baseRuleParams },
+      };
     } catch (e) {
       return { error: e.message };
     }

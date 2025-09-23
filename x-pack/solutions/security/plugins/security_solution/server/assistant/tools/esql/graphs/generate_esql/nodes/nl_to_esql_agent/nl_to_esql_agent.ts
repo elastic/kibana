@@ -34,8 +34,10 @@ export const getNlToEsqlAgent = ({
 }) => {
   return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { messages: stateMessages } = state;
+    console.log('stateMessages', JSON.stringify(stateMessages, null, 2));
 
     const inferenceMessages = messagesToInference(stateMessages);
+    console.log('inferenceMessages', JSON.stringify(inferenceMessages, null, 2));
 
     const result = (await lastValueFrom(
       naturalLanguageToEsql({

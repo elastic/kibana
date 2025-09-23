@@ -25,6 +25,10 @@ export const addDefaultFieldsToRulesNode = ({ model }: { model: InferenceChatMod
         author: [],
         setup: '',
         max_signals: 100,
+        tags: ['mock'], // TODO: remove
+        interval: '5m',
+        risk_score: 47,
+        severity: 'medium',
       },
     };
   };

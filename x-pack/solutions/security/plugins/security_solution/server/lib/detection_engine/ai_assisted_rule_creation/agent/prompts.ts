@@ -38,7 +38,7 @@ Analyze the user request and create an Elastic Detection(SIEM) rule of ES|QL typ
 - Always reply with a JSON object that includes all the fields mentioned above: name, description, query, language, interval, risk_score, severity, tags.
 - Generate query using ES|QL(The Elasticsearch Query Language). Make sure query is valid and using source indices that exist in the cluster
 - If query does not have any aggregations(using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
-
+- Use available tools
 </guidelines>
 
 <example_response>

@@ -15,6 +15,8 @@ import { DETECTION_ENGINE_AI_ASSISTED_CREATE_RULE_URL } from '../../../../../com
 import { buildSiemResponse } from '../utils';
 
 import { getRuleCreationAgent } from '../../ai_assisted_rule_creation/agent';
+import { getIterativeRuleCreationAgent } from '../../ai_assisted_rule_creation/iterative_agent';
+import { getToolAgent } from '../../ai_assisted_rule_creation/agent/with_tools';
 import type { StartPlugins } from '../../../../plugin';
 import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 import type { AIAssistedCreateRuleResponse } from '../../../../../common/api/detection_engine/ai_assisted/index.gen';
@@ -53,30 +55,83 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
         const ctx = await context.resolve(['securitySolution']);
         const inferenceService = ctx.securitySolution.getInferenceService();
 
+        const core = await context.core;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+
         const abortController = new AbortController();
 
         request.events.completed$.subscribe(() => abortController.abort());
 
         try {
-          const model = await inferenceService.getChatModel({
-            request,
+          const createLlmInstance = async () => {
+            if (!inferenceService || !connectorId) {
+              throw new Error('Inference service or connector ID is not available');
+            }
+            return inferenceService.getChatModel({
+              request,
+              connectorId,
+              chatModelOptions: {
+                // not passing specific `model`, we'll always use the connector default model
+                // temperature may need to be parametrized in the future
+                temperature: 0.05,
+                // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+                maxRetries: 1,
+                // Disable streaming explicitly
+                disableStreaming: true,
+                // Set a hard limit of 50 concurrent requests
+                maxConcurrency: 50,
+                signal: abortController.signal,
+              },
+            });
+          };
+
+          // const model = await inferenceService.getChatModel({
+          //   request,
+          //   connectorId,
+          //   chatModelOptions: {
+          //     // not passing specific `model`, we'll always use the connector default model
+          //     // temperature may need to be parametrized in the future
+          //     temperature: 0.05,
+          //     // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+          //     maxRetries: 1,
+          //     // Disable streaming explicitly
+          //     disableStreaming: true,
+          //     // Set a hard limit of 50 concurrent requests
+          //     maxConcurrency: 50,
+          //     signal: abortController.signal,
+          //   },
+          // });
+          if (userQuery.startsWith('AAA')) {
+            const model = await createLlmInstance();
+
+            const ruleCreationAgent = getRuleCreationAgent({ model, logger });
+            const result = await ruleCreationAgent.invoke({ userQuery: userQuery.slice(3) });
+
+            if (result.error) {
+              throw new Error(result.error);
+            }
+
+            return response.ok({
+              body: {
+                rule: result.rule,
+              },
+            });
+          }
+
+          const model = await createLlmInstance();
+          const iterativeAgent = await getIterativeRuleCreationAgent({
+            model,
+            logger,
+            inference: inferenceService,
+            createLlmInstance,
             connectorId,
-            chatModelOptions: {
-              // not passing specific `model`, we'll always use the connector default model
-              // temperature may need to be parametrized in the future
-              temperature: 0.05,
-              // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
-              maxRetries: 1,
-              // Disable streaming explicitly
-              disableStreaming: true,
-              // Set a hard limit of 50 concurrent requests
-              maxConcurrency: 50,
-              signal: abortController.signal,
-            },
+            request,
+            esClient,
           });
 
-          const ruleCreationAgent = getRuleCreationAgent({ model, logger });
-          const result = await ruleCreationAgent.invoke({ userQuery });
+          const result = await iterativeAgent.invoke({ userQuery });
+
+          //  console.log('toolAgentResult result', JSON.stringify(result, null, 2));
 
           if (result.error) {
             throw new Error(result.error);

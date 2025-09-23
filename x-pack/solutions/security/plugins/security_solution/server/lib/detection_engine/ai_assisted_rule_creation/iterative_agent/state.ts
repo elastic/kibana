@@ -10,8 +10,15 @@ import { Annotation } from '@langchain/langgraph';
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
   answer: Annotation<string>(),
-  rule: Annotation<any>(), 
-  error: Annotation<string>(), 
+  rule: Annotation<any>(),
+  error: Annotation<string>(),
+  indices: Annotation<{
+    shortlistedIndexPatterns: string[];
+    indexPatternAnalysis: Record<
+      string,
+      { indexPattern: string; containsRequiredData: boolean; context: string }
+    >;
+  }>(),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

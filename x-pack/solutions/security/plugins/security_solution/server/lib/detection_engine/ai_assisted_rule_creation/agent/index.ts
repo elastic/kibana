@@ -8,10 +8,14 @@
 import type { IKibanaResponse, StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { tool } from '@langchain/core/tools';
+import { z } from '@kbn/zod';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { RuleCreationAnnotation, RuleCreationState } from './state';
-import { createEsqlRuleNode }  from './create_esql_rule';
-import {addDefaultFieldsToRulesNode}  from './add_default_fields_to_rule';
+import type { RuleCreationState } from '../iterative_agent/state';
+import { RuleCreationAnnotation } from '../iterative_agent/state';
+import { createEsqlRuleNode } from './create_esql_rule';
+import { addDefaultFieldsToRulesNode } from './add_default_fields_to_rule';
 
 export interface GetRuleCreationAgentParams {
   //  esqlKnowledgeBase: EsqlKnowledgeBase;
@@ -19,14 +23,51 @@ export interface GetRuleCreationAgentParams {
   logger: Logger;
 }
 
+const generateESQL = tool(
+  async ({ query }: { query: string }): Promise<string> => {
+    /**
+     * Multiply a and b.
+     *
+     * @param a - first number
+     * @param b - second number
+     * @returns The product of a and b
+     */
+    console.log('inside tool', query);
+    return 'FROM nothing | limit 9';
+  },
+  {
+    name: 'generateESQL',
+    description: `
+    Use this tool when asked to generate any ES|QL(The Elasticsearch Query Language)
+
+    ALWAYS use this tool to generate ES|QL queries and never generate ES|QL any other way`,
+    schema: z.object({
+      query: z.string(),
+    }),
+  }
+);
+
 export const getRuleCreationAgent = ({ model, logger }: GetRuleCreationAgentParams) => {
+  //  const model = withoutTools.bindTools([generateESQL]);
+  const tools = [generateESQL];
+  const toolNode = new ToolNode(tools);
+  console.log('test');
+  model.bindTools(tools);
   const createEsqlRule = createEsqlRuleNode({ model });
   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
+    .addNode('tools', toolNode)
     .addNode('createEsqlRule', createEsqlRule)
-    .addNode('addDefaultFieldsToRules', addDefaultFieldsToRulesNode({ model}))
+    .addNode('addDefaultFieldsToRules', addDefaultFieldsToRulesNode({ model }))
+    // .addEdge(START, 'tools')
+    // .addEdge('tools', 'createEsqlRule')
     .addEdge(START, 'createEsqlRule')
-    .addConditionalEdges('createEsqlRule', shouldAddDefaultFieldsToRule, ['addDefaultFieldsToRules', END])
-    .addEdge('addDefaultFieldsToRules', END)
+    .addEdge('tools', 'createEsqlRule')
+    .addConditionalEdges('createEsqlRule', shouldAddDefaultFieldsToRule, [
+      'addDefaultFieldsToRules',
+      'tools',
+      END,
+    ])
+    .addEdge('addDefaultFieldsToRules', END);
 
   const graph = ruleCreationAgentGraph.compile();
   graph.name = 'Rule Creation Graph';
@@ -34,6 +75,7 @@ export const getRuleCreationAgent = ({ model, logger }: GetRuleCreationAgentPara
 };
 
 const shouldAddDefaultFieldsToRule = (state: RuleCreationState) => {
+  console.log('weer', state);
   if (state.rule) {
     return 'addDefaultFieldsToRules';
   }

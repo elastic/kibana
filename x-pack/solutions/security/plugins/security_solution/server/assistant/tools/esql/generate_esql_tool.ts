@@ -65,6 +65,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
 
     return tool(
       async ({ question }) => {
+        console.log('invoking GenerateEsqlTool with question:', question);
         const result = await selfHealingGraph.invoke(
           {
             messages: [new HumanMessage({ content: question })],
@@ -75,6 +76,9 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
 
         const { messages } = result;
         const lastMessage = messages[messages.length - 1];
+
+        console.log('result of GenerateEsqlTool with question:', lastMessage.content);
+
         return lastMessage.content;
       },
       {
