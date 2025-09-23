@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TelemetrySchemaObject } from '../../schema_ftr_validations/schema_to_config_schema';
 import type { TelemetryRC } from '../config';
 import { ErrorReporter } from './error_reporter';
 import type { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
   parsedCollections?: ParsedUsageCollection[];
-  mapping?: any;
+  mapping?: TelemetrySchemaObject;
+  upstreamMapping?: TelemetrySchemaObject;
   esMappingDiffs?: string[];
 }
 
