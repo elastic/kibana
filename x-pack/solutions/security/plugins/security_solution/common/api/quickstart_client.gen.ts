@@ -127,6 +127,10 @@ import type {
   EndpointGetActionsListResponse,
 } from './endpoint/actions/list/list.gen';
 import type {
+  CancelActionRequestBodyInput,
+  CancelActionResponse,
+} from './endpoint/actions/response_actions/cancel/cancel.gen';
+import type {
   EndpointExecuteActionRequestBodyInput,
   EndpointExecuteActionResponse,
 } from './endpoint/actions/response_actions/execute/execute.gen';
@@ -566,6 +570,22 @@ If asset criticality records already exist for the specified entities, those rec
     return this.kbnClient
       .request<BulkUpsertAssetCriticalityRecordsResponse>({
         path: '/api/asset_criticality/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cancel a running or pending response action (Applies only to some agent types).
+   */
+  async cancelAction(props: CancelActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CancelAction`);
+    return this.kbnClient
+      .request<CancelActionResponse>({
+        path: '/api/endpoint/action/cancel',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3112,6 +3132,9 @@ export interface AlertsMigrationCleanupProps {
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
