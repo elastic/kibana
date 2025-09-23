@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 import type {
   IndicesAlias,
@@ -587,7 +588,22 @@ export const reindexServiceFactory = (
     }) {
       const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
-        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(
+          i18n.translate('xpack.reindexService.error.indexNotFound', {
+            defaultMessage: 'Index {indexName} does not exist in this cluster.',
+            values: { indexName },
+          })
+        );
+      }
+
+      const newIndexExists = await esClient.indices.exists({ index: newIndexName });
+      if (newIndexExists) {
+        throw error.indexAlreadyExists(
+          i18n.translate('xpack.reindexService.error.indexAlreadyExists', {
+            defaultMessage: 'The index {newIndexName} already exists. Please try again.',
+            values: { newIndexName },
+          })
+        );
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);

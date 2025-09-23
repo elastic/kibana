@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk, intersection } from 'lodash';
+import { chunk, cloneDeep, intersection } from 'lodash';
 import moment from 'moment';
 import type {
   IndicesIndexSettings,
@@ -259,7 +259,9 @@ export abstract class Importer implements IImporter {
     ingestPipeline: IngestPipeline,
     limit = 20
   ): Promise<IngestSimulateResponse> {
-    await this.read(data);
+    this.read(data);
+    const pipeline = cloneDeep(ingestPipeline);
+    updatePipelineTimezone(pipeline);
 
     return await getHttp().fetch<IngestSimulateResponse>({
       path: `/internal/file_upload/preview_docs`,
@@ -268,7 +270,7 @@ export abstract class Importer implements IImporter {
       body: JSON.stringify({
         // first doc is the header
         docs: this._docArray.slice(1, limit + 1),
-        pipeline: ingestPipeline,
+        pipeline,
       }),
     });
   }

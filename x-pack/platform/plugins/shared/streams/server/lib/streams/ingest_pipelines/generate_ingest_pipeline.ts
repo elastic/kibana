@@ -14,18 +14,13 @@ import { getProcessingPipelineName } from './name';
 
 export function generateIngestPipeline(
   name: string,
-  definition: Streams.all.Definition,
-  {
-    isServerless,
-  }: {
-    isServerless: boolean;
-  }
+  definition: Streams.all.Definition
 ): IngestPutPipelineRequest {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   return {
     id: getProcessingPipelineName(name),
     processors: [
-      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors(isServerless) : []),
+      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors() : []),
       ...(!isRoot(definition.name) && isWiredStream
         ? [
             {

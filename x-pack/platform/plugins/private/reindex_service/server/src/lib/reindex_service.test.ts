@@ -153,7 +153,9 @@ describe('reindexService', () => {
 
   describe('createReindexOperation', () => {
     it('creates new reindex operation', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({ total: 0 });
       actions.createReindexOp.mockResolvedValueOnce();
 
@@ -171,7 +173,19 @@ describe('reindexService', () => {
     });
 
     it('fails if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(false);
+      clusterClient.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+      await expect(
+        service.createReindexOperation({
+          indexName: 'myIndex',
+          newIndexName: 'reindexed-myIndex',
+        })
+      ).rejects.toThrow();
+      expect(actions.createReindexOp).not.toHaveBeenCalled();
+    });
+
+    it('fails if new index already exists', async () => {
+      clusterClient.asCurrentUser.indices.exists.mockResolvedValue(true);
       await expect(
         service.createReindexOperation({
           indexName: 'myIndex',
@@ -182,7 +196,9 @@ describe('reindexService', () => {
     });
 
     it('deletes existing operation if it failed', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.failed } }],
         total: 1,
@@ -201,7 +217,9 @@ describe('reindexService', () => {
     });
 
     it('deletes existing operation if it was cancelled', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.cancelled } }],
         total: 1,
