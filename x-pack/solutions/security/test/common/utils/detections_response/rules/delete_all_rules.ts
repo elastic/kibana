@@ -20,7 +20,8 @@ import { countDownTest } from '../count_down_test';
  */
 export const deleteAllRules = async (
   supertest: SuperTest.Agent,
-  log: ToolingLog
+  log: ToolingLog,
+  spaceId?: string
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -31,7 +32,11 @@ export const deleteAllRules = async (
         .set('elastic-api-version', '2023-10-31');
 
       const { body: finalCheck } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .get(
+          spaceId
+            ? `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_find`
+            : `${DETECTION_ENGINE_RULES_URL}/_find`
+        )
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .send();

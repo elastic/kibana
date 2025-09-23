@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { withSpaceUrl } from '../../../../config/services/detections_response';
 
 export interface CreateConnectorBody {
   readonly name: string;
@@ -17,10 +18,11 @@ export interface CreateConnectorBody {
 export async function createConnector(
   supertest: SuperTest.Agent,
   connector: CreateConnectorBody,
-  id = ''
+  id = '',
+  spaceId?: string
 ): Promise<string> {
   const { body } = await supertest
-    .post(`/api/actions/connector/${id}`)
+    .post(withSpaceUrl(`/api/actions/connector/${id}`, spaceId))
     .set('kbn-xsrf', 'foo')
     .send(connector)
     .expect(200);

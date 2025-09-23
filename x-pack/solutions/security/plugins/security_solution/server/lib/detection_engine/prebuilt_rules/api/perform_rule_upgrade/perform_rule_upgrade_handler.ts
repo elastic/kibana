@@ -8,6 +8,7 @@
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
+  FullRuleDiff,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
@@ -38,10 +39,11 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
+import type { RuleUpgradeContext } from './update_rule_telemetry';
+import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -59,6 +61,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
+    const analytics = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -79,6 +82,7 @@ export const performRuleUpgradeHandler = async (
     const updatedRules: RuleResponse[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
+    const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
 
     const ruleUpgradeQueue: Array<{
       rule_id: RuleSignatureId;
@@ -165,13 +169,21 @@ export const performRuleUpgradeHandler = async (
               ? request.body.rules.find((x) => x.rule_id === targetRule.rule_id)
               : undefined;
 
-          const conflict = getRuleUpgradeConflictState(ruleVersions, ruleUpgradeSpecifier);
+          const { ruleDiff } = calculateRuleDiff(ruleVersions);
+          const conflict = getRuleUpgradeConflictState(ruleDiff, ruleUpgradeSpecifier);
 
           if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
               conflict,
+            });
+
+            ruleUpgradeContextsMap.set(targetRule.rule_id, {
+              ruleId: targetRule.rule_id,
+              ruleName: currentVersion.name,
+              hasBaseVersion: !!baseVersion,
+              fieldsDiff: ruleDiff.fields,
             });
             return;
           }
@@ -185,12 +197,17 @@ export const performRuleUpgradeHandler = async (
         });
       });
 
-      const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets({
-        upgradeableRules,
-        requestBody: request.body,
-        defaultPickVersion,
-      });
+      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpgradeContexts } =
+        createModifiedPrebuiltRuleAssets({
+          upgradeableRules,
+          requestBody: request.body,
+          defaultPickVersion,
+        });
       ruleErrors.push(...processingErrors);
+
+      ruleUpgradeContexts.forEach((ruleUpgradeContext) => {
+        ruleUpgradeContextsMap.set(ruleUpgradeContext.ruleId, ruleUpgradeContext);
+      });
 
       if (isDryRun) {
         updatedRules.push(
@@ -220,6 +237,14 @@ export const performRuleUpgradeHandler = async (
           rules: [],
         });
       }
+
+      sendRuleUpdateTelemetryEvents(
+        analytics,
+        ruleUpgradeContextsMap,
+        updatedRules,
+        ruleErrors,
+        skippedRules
+      );
     }
 
     const body: PerformRuleUpgradeResponseBody = {
@@ -247,11 +272,9 @@ export const performRuleUpgradeHandler = async (
 };
 
 function getRuleUpgradeConflictState(
-  ruleVersions: RuleVersions,
+  ruleDiff: FullRuleDiff,
   ruleUpgradeSpecifier?: RuleUpgradeSpecifier
 ): ThreeWayDiffConflict {
-  const { ruleDiff } = calculateRuleDiff(ruleVersions);
-
   if (ruleDiff.num_fields_with_conflicts === 0) {
     return ThreeWayDiffConflict.NONE;
   }

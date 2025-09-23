@@ -6,6 +6,7 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
   IRouter,
@@ -45,6 +46,7 @@ export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getConfig: () => ConfigType;

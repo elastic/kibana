@@ -33,7 +33,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import { countDownTest } from '../../config/services/detections_response';
+import { countDownTest, withSpaceUrl } from '../../config/services/detections_response';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -206,10 +206,11 @@ export const binaryToString = (res: any, callback: any): void => {
  */
 export const deleteAllExceptions = async (
   supertest: SuperTest.Agent,
-  log: ToolingLog
+  log: ToolingLog,
+  spaceId?: string
 ): Promise<void> => {
-  await deleteAllExceptionsByType(supertest, log, 'single');
-  await deleteAllExceptionsByType(supertest, log, 'agnostic');
+  await deleteAllExceptionsByType(supertest, log, 'single', spaceId);
+  await deleteAllExceptionsByType(supertest, log, 'agnostic', spaceId);
 };
 
 /**
@@ -220,12 +221,15 @@ export const deleteAllExceptions = async (
 export const deleteAllExceptionsByType = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  type: NamespaceType
+  type: NamespaceType,
+  spaceId?: string
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const { body } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999&namespace_type=${type}`)
+        .get(
+          withSpaceUrl(`${EXCEPTION_LIST_URL}/_find?per_page=9999&namespace_type=${type}`, spaceId)
+        )
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
@@ -233,14 +237,14 @@ export const deleteAllExceptionsByType = async (
       const promises = ids.map((id) =>
         limiter(() =>
           supertest
-            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .delete(withSpaceUrl(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`, spaceId))
             .set('kbn-xsrf', 'true')
             .send()
         )
       );
       await Promise.all(promises);
       const { body: finalCheck } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
+        .get(withSpaceUrl(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`, spaceId))
         .set('kbn-xsrf', 'true')
         .send();
       return {

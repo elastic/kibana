@@ -9,7 +9,6 @@ import type { AlertingServerSetup } from '@kbn/alerting-plugin/server/plugin';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin, PluginInitializer } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import { initRoutes } from './init_routes';
@@ -66,7 +65,6 @@ function case1FeatureRename(deps: PluginSetupDependencies) {
       all: { savedObject: { all: ['one'], read: [] }, ui: ['ui_all'] },
       read: { savedObject: { all: [], read: ['one'] }, ui: ['ui_read'] },
     },
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
   };
 
   // Step 2: mark feature A as deprecated and provide proper replacements for all feature and
@@ -101,9 +99,6 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
   // sub-feature privileges.
   deps.features.registerKibanaFeature({
     deprecated: { notice: 'Case #2 is deprecated.' },
-
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     app: ['app_one', 'app_two'],
     catalogue: ['cat_one', 'cat_two'],
     management: { kibana: ['management_one', 'management_two'] },
@@ -168,8 +163,6 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
 
   // Step 2: define new features
   deps.features.registerKibanaFeature({
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_2_feature_b',
     name: 'Case #2 feature B',
@@ -240,8 +233,6 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     },
   });
   deps.features.registerKibanaFeature({
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_2_feature_c',
     name: 'Case #2 feature C',
@@ -338,9 +329,6 @@ function case3FeatureSplitSubFeature(deps: PluginSetupDependencies) {
   // sub-feature privileges.
   deps.features.registerKibanaFeature({
     deprecated: { notice: 'Case #3 is deprecated.' },
-
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_3_feature_a',
     name: 'Case #3 feature A (DEPRECATED)',
@@ -367,8 +355,6 @@ function case3FeatureSplitSubFeature(deps: PluginSetupDependencies) {
 
   // Step 2: Create a new feature with the desired privileges structure.
   deps.features.registerKibanaFeature({
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_3_feature_a_v2',
     name: 'Case #3 feature A',
@@ -420,9 +406,6 @@ function case4FeatureExtract(deps: PluginSetupDependencies) {
         notice: 'Case #4 is deprecated.',
         ...(suffix === 'B' ? { replacedBy: [`case_4_feature_${suffix.toLowerCase()}_v2`] } : {}),
       },
-
-      scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: `case_4_feature_${suffix.toLowerCase()}`,
       name: `Case #4 feature ${suffix} (DEPRECATED)`,
@@ -449,8 +432,6 @@ function case4FeatureExtract(deps: PluginSetupDependencies) {
 
     // Step 2: introduce new features (v2) with privileges that don't grant access to `ab`.
     deps.features.registerKibanaFeature({
-      scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: `case_4_feature_${suffix.toLowerCase()}_v2`,
       name: `Case #4 feature ${suffix}`,
@@ -464,8 +445,6 @@ function case4FeatureExtract(deps: PluginSetupDependencies) {
 
   // Step 3: introduce new feature C that only grants access to `ab`.
   deps.features.registerKibanaFeature({
-    scope: [KibanaFeatureScope.Security, KibanaFeatureScope.Spaces],
-
     category: DEFAULT_APP_CATEGORIES.kibana,
     id: 'case_4_feature_c',
     name: 'Case #4 feature C',
