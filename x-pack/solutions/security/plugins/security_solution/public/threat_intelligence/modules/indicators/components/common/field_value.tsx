@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../constants/common';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
@@ -30,9 +31,25 @@ export interface IndicatorFieldValueProps {
  * Takes an indicator object, a field and a field => type object to returns the correct value to display.
  * @returns If the type is a 'date', returns the {@link DateFormatter} component, else returns the value or {@link EMPTY_VALUE}.
  */
+
+const getMultipleFieldValues = (indicator: Indicator, fieldId: RawIndicatorFieldId) => {
+  if (!indicator) {
+    return null;
+  }
+
+  const fieldValues = indicator.fields?.[fieldId] as string[];
+
+  if (!Array.isArray(fieldValues)) {
+    return null;
+  }
+
+  return fieldValues.map((value, idx) => <span key={`${value}-${idx}`}>{value}</span>);
+};
+
 export const IndicatorFieldValue: FC<IndicatorFieldValueProps> = ({ indicator, field }) => {
   const fieldType = useFieldTypes()[field];
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);
+  const multipleFieldValues = getMultipleFieldValues(indicator, field as RawIndicatorFieldId);
 
   if (field === RawIndicatorFieldId.MarkingTLP) {
     return <TLPBadge value={value} />;
@@ -41,7 +58,14 @@ export const IndicatorFieldValue: FC<IndicatorFieldValueProps> = ({ indicator, f
   return fieldType === 'date' ? (
     <DateFormatter date={value as string} />
   ) : value ? (
-    <>{value}</>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+      `}
+    >
+      {multipleFieldValues}
+    </div>
   ) : (
     <>{EMPTY_VALUE}</>
   );
