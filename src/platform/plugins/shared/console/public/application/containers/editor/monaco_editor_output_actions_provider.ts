@@ -106,12 +106,11 @@ export class MonacoEditorOutputActionsProvider {
       this.updateEditorActions(selectionStartLineNumber); // highlight the lines from the 1st line of the first selected request
       // to the last line of the last selected request
       const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
-      const model = this.editor.getModel();
       const selectedRange = new monaco.Range(
         selectionStartLineNumber,
         1,
         selectionEndLineNumber,
-        model?.getLineMaxColumn(selectionEndLineNumber) ?? 1
+        this.editor.getModel()?.getLineMaxColumn(selectionEndLineNumber) ?? 1
       );
       this.highlightedLines.set([
         {

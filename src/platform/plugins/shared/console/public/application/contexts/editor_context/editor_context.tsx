@@ -19,7 +19,6 @@ const EditorActionContext = createContext<Dispatch<editor.Action>>(() => {});
 export interface EditorContextArgs {
   children: JSX.Element;
   settings: DevToolsSettings;
-  // NEW: Optional custom parser provider for packaging environments
   customParsedRequestsProvider?: (model: any) => any;
 }
 

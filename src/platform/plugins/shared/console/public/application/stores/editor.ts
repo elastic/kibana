@@ -23,7 +23,6 @@ export interface Store {
   currentView: string;
   restoreRequestFromHistory: RequestToRestore | null;
   fileToImport: string | null;
-  // NEW: Optional custom parser provider for packaging environments
   customParsedRequestsProvider?: (model: any) => any;
 }
 

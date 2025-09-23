@@ -61,7 +61,6 @@ export class MonacoEditorActionsProvider {
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
-    // NEW: Optional custom parser provider for packaging environments
     customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
     // Use custom provider if provided, otherwise fallback to default
@@ -184,6 +183,7 @@ export class MonacoEditorActionsProvider {
 
   private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
+
     if (!model) {
       return [];
     }

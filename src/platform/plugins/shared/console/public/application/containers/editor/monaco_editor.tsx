@@ -12,8 +12,10 @@ import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-// Import CodeEditor directly to avoid lazy loading
+// TODO: Here we import CodeEditor directly to avoid lazy loading
+// used to be: import { CodeEditor } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
+
 import type { ESQLCallbacks, monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 
@@ -44,7 +46,6 @@ export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
-  // NEW: Optional custom parser provider for packaging environments
   customParsedRequestsProvider?: (model: any) => any;
 }
 
