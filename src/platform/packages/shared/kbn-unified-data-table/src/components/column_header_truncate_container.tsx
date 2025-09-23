@@ -23,7 +23,6 @@ const ColumnHeaderTruncateContainer = ({
   const headerCss = css`
     overflow-wrap: anywhere;
     white-space: normal;
-    word-break: break-all;
     line-height: ${euiTheme.size.base};
     text-align: left;
     .euiDataGridHeaderCell--numeric & {
