@@ -72,12 +72,15 @@ const stubSecurityDataView = createStubDataView({
   },
 });
 
-const defaultIndexPatterns = [
-  stubSecurityDataView.getIndexPattern(),
-  '.asset-criticality.asset-criticality-default',
-  'risk-score.risk-score-latest-default',
-  '.entities.v1.reset.security_user_default',
-];
+const getDefaultIndexes = (type: string) => {
+  return [
+    stubSecurityDataView.getIndexPattern(),
+    '.asset-criticality.asset-criticality-default',
+    'risk-score.risk-score-latest-default',
+    `.entities.v1.reset.security_${type}_default`,
+    `.entities.v1.updates.security_${type}_default*`,
+  ];
+};
 
 const dataviewService = {
   ...dataViewPluginMocks.createStartContract(),
@@ -519,12 +522,11 @@ describe('EntityStoreDataClient', () => {
       });
 
       const response = await dataClient.applyDataViewIndices();
-
       expect(mockUpdateEntityDefinition).toHaveBeenCalled();
       expect(response.errors.length).toBe(0);
       expect(response.successes.length).toBe(1);
       expect(response.successes[0].changes).toEqual({
-        indexPatterns: [...defaultIndexPatterns, 'testIndex'],
+        indexPatterns: [...getDefaultIndexes(response.successes[0].type), 'testIndex'],
       });
     });
 
@@ -565,7 +567,7 @@ describe('EntityStoreDataClient', () => {
       mockGetEntityDefinition.mockResolvedValueOnce({
         definitions: [
           {
-            indexPatterns: defaultIndexPatterns,
+            indexPatterns: getDefaultIndexes(engine.type),
           },
         ],
       });
