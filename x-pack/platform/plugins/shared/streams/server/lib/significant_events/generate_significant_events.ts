@@ -182,7 +182,6 @@ ${JSON.stringify(
       title: query.title,
       kql: query.kql,
       count: query.count,
-      system: { name: 'Always', filter: { always: {} } }, // TODO: Replace with real system
     };
   });
 

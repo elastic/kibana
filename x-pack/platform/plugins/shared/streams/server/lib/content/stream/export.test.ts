@@ -18,14 +18,7 @@ const streams = [
       { destination: 'logs.foo', where: { always: {} }, status: 'enabled' },
       { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
     ],
-    queries: [
-      {
-        id: 'logs-query',
-        title: 'logs-query',
-        kql: { query: 'logs' },
-        system: { name: 'logs', filter: { always: {} } },
-      },
-    ],
+    queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
   }),
   testContentPackEntry({
     name: 'logs.foo',
@@ -34,14 +27,7 @@ const streams = [
   testContentPackEntry({ name: 'logs.foo.bar' }),
   testContentPackEntry({
     name: 'logs.hello',
-    queries: [
-      {
-        id: 'hello-query',
-        title: 'hello-query',
-        kql: { query: 'hello' },
-        system: { name: 'hello', filter: { always: {} } },
-      },
-    ],
+    queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
   }),
 ];
 
@@ -65,14 +51,7 @@ describe('content pack export', () => {
           { destination: 'foo', where: { always: {} }, status: 'enabled' },
           { destination: 'hello', where: { always: {} }, status: 'enabled' },
         ],
-        queries: [
-          {
-            id: 'logs-query',
-            title: 'logs-query',
-            kql: { query: 'logs' },
-            system: { name: 'logs', filter: { always: {} } },
-          },
-        ],
+        queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
       }),
       testContentPackEntry({
         name: 'foo',
@@ -81,14 +60,7 @@ describe('content pack export', () => {
       testContentPackEntry({ name: 'foo.bar' }),
       testContentPackEntry({
         name: 'hello',
-        queries: [
-          {
-            id: 'hello-query',
-            title: 'hello-query',
-            kql: { query: 'hello' },
-            system: { name: 'hello', filter: { always: {} } },
-          },
-        ],
+        queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
       }),
     ]);
   });
@@ -121,14 +93,7 @@ describe('content pack export', () => {
       }),
       testContentPackEntry({
         name: 'hello',
-        queries: [
-          {
-            id: 'hello-query',
-            title: 'hello-query',
-            kql: { query: 'hello' },
-            system: { name: 'hello', filter: { always: {} } },
-          },
-        ],
+        queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
       }),
     ]);
   });

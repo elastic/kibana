@@ -53,14 +53,7 @@ describe('content pack tree helpers', () => {
       const child2 = testContentPackEntry({ name: 'root.child2' });
       const child1Nested = testContentPackEntry({
         name: 'root.child1.nested',
-        queries: [
-          {
-            id: 'keep',
-            title: 'keep query',
-            kql: { query: 'keep' },
-            system: { name: 'keep', filter: { always: {} } },
-          },
-        ],
+        queries: [{ id: 'keep', title: 'keep query', kql: { query: 'keep' } }],
       });
 
       const tree = asTree({
@@ -93,18 +86,8 @@ describe('content pack tree helpers', () => {
       const root = testContentPackEntry({
         name: 'root',
         queries: [
-          {
-            id: 'keep',
-            title: 'keep query',
-            kql: { query: 'keep' },
-            system: { name: 'keep', filter: { always: {} } },
-          },
-          {
-            id: 'drop',
-            title: 'drop query',
-            kql: { query: 'drop' },
-            system: { name: 'drop', filter: { always: {} } },
-          },
+          { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
+          { id: 'drop', title: 'drop query', kql: { query: 'drop' } },
         ],
       });
 
@@ -253,14 +236,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            queries: [
-              {
-                id: 'one',
-                title: 'title',
-                kql: { query: 'qty: one' },
-                system: { name: 'one', filter: { always: {} } },
-              },
-            ],
+            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: one' } }],
           }),
         ],
         include: { objects: { all: {} } },
@@ -270,14 +246,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            queries: [
-              {
-                id: 'one',
-                title: 'title',
-                kql: { query: 'qty: two' },
-                system: { name: 'two', filter: { always: {} } },
-              },
-            ],
+            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: two' } }],
           }),
         ],
         include: { objects: { all: {} } },
