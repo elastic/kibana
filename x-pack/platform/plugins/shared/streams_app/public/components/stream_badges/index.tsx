@@ -23,6 +23,9 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
+import iconStreamClassic from '../../assets/icon_stream_classic.svg';
+import iconStreamWired from '../../assets/icon_stream_wired.svg';
+
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
     position="top"
@@ -59,12 +62,22 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" iconType={iconStreamClassic} iconSide="left" tabIndex={0}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
       </EuiBadge>
     </EuiToolTip>
+  );
+}
+
+export function WiredStreamBadge() {
+  return (
+    <EuiBadge color="hollow" iconType={iconStreamWired} iconSide="left">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      })}
+    </EuiBadge>
   );
 }
 
@@ -80,7 +93,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
 
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
@@ -108,11 +121,11 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isDslLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
-          defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention || '∞' },
-        })}
+      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
+        {lifecycle.dsl.data_retention ??
+          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
+            defaultMessage: 'Forever',
+          })}
       </EuiBadge>
     );
   } else {
