@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { EventsTableForCases } from './table';
 import { TestProviders } from '../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
@@ -47,7 +47,7 @@ describe('EventsTableForCases', () => {
     ]);
   });
 
-  it('renders the table', () => {
+  it('renders the table', async () => {
     render(
       <EventsTableForCases
         events={[
@@ -61,5 +61,30 @@ describe('EventsTableForCases', () => {
     );
 
     expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+
+    // Check if value cells are displayed at all
+    await waitFor(() => screen.getAllByTestId('dataGridRowCell'));
+    expect(screen.getAllByTestId('dataGridRowCell').length).toBeGreaterThan(2);
+  });
+
+  it('calls the search events function', () => {
+    render(
+      <EventsTableForCases
+        events={[
+          {
+            eventId: 'mock-event-id',
+            index: 'test-index',
+          },
+        ]}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(jest.mocked(searchEvents)).toHaveBeenCalled();
+    expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(DataView),
+      expect.objectContaining({ eventIds: expect.arrayContaining(['mock-event-id']) })
+    );
   });
 });
