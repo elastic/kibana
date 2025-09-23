@@ -33,8 +33,6 @@ describe('savedObjectToItem', () => {
     };
   };
 
-  const getTagNamesFromReferences = jest.fn();
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -98,51 +96,6 @@ describe('savedObjectToItem', () => {
         kibanaSavedObjectMeta: {
           searchSource: { query: { query: 'test', language: 'KQL' } },
         },
-      },
-    });
-  });
-
-  it('should pass references to getTagNamesFromReferences', () => {
-    getTagNamesFromReferences.mockReturnValue(['tag1', 'tag2']);
-    const input = {
-      ...getSavedObjectForAttributes({
-        title: 'dashboard with tags',
-        description: 'I have some tags!',
-        timeRestore: true,
-        kibanaSavedObjectMeta: {},
-        panelsJSON: JSON.stringify([]),
-      }),
-      references: [
-        {
-          type: 'tag',
-          id: 'tag1',
-          name: 'tag-ref-tag1',
-        },
-        {
-          type: 'tag',
-          id: 'tag2',
-          name: 'tag-ref-tag2',
-        },
-        {
-          type: 'index-pattern',
-          id: 'index-pattern1',
-          name: 'index-pattern-ref-index-pattern1',
-        },
-      ],
-    };
-    const { item, error } = savedObjectToItem(input, false, { getTagNamesFromReferences });
-    expect(getTagNamesFromReferences).toHaveBeenCalledWith(input.references);
-    expect(error).toBeNull();
-    expect(item).toEqual({
-      ...commonSavedObject,
-      references: [...input.references],
-      attributes: {
-        title: 'dashboard with tags',
-        description: 'I have some tags!',
-        panels: [],
-        timeRestore: true,
-        kibanaSavedObjectMeta: {},
-        tags: ['tag1', 'tag2'],
       },
     });
   });

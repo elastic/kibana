@@ -36,7 +36,6 @@ export function savedObjectToItem(
   {
     allowedAttributes,
     allowedReferences,
-    getTagNamesFromReferences,
     isAccessControlEnabled,
   }: {
     /**
@@ -47,7 +46,6 @@ export function savedObjectToItem(
      * references to include in the output item
      */
     allowedReferences?: string[];
-    getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
     isAccessControlEnabled?: boolean;
   } = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
@@ -66,11 +64,8 @@ export function savedObjectToItem(
     accessControl: originalAccessControl,
   } = savedObject;
   try {
-    const dashboardState = transformDashboardOut(
-      attributes,
-      savedObject.references,
-      getTagNamesFromReferences
-    );
+    const dashboardState = transformDashboardOut(attributes, savedObject.references);
+
     const references = transformReferencesOut(savedObject.references ?? []);
 
     return {
