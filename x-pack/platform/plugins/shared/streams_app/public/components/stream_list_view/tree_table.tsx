@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   useEuiTheme,
   EuiHighlight,
+  EuiIconTip,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -45,14 +46,17 @@ import {
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
+  FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
 
 export function StreamsTreeTable({
   loading,
   streams = [],
+  canReadFailureStore = false,
 }: {
   streams?: ListStreamDetail[];
+  canReadFailureStore?: boolean;
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
@@ -164,6 +168,7 @@ export function StreamsTreeTable({
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     numDataPoints,
+    canReadFailureStore,
   });
 
   const sorting = {
@@ -286,7 +291,18 @@ export function StreamsTreeTable({
         },
         {
           field: 'documentsCount',
-          name: DOCUMENTS_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
+                  type="warning"
+                  color="warning"
+                />
+              )}
+              {DOCUMENTS_COLUMN_HEADER}
+            </EuiFlexGroup>
+          ),
           width: '180px',
           sortable: false,
           align: 'right',
@@ -303,7 +319,18 @@ export function StreamsTreeTable({
         },
         {
           field: 'dataQuality',
-          name: DATA_QUALITY_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
+                  type="warning"
+                  color="warning"
+                />
+              )}
+              {DATA_QUALITY_COLUMN_HEADER}
+            </EuiFlexGroup>
+          ),
           width: '150px',
           sortable: false,
           dataType: 'number',

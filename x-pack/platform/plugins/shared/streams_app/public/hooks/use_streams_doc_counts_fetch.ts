@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useEffect, useRef } from 'react';
 import { useKibana } from './use_kibana';
@@ -18,13 +19,17 @@ export interface StreamDocCountsFetch {
 
 const DEFAULT_NUM_DATA_POINTS = 25;
 
+interface UseDocCountFetchProps {
+  groupTotalCountByTimestamp: boolean;
+  numDataPoints?: number;
+  canReadFailureStore: boolean;
+}
+
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp,
   numDataPoints = DEFAULT_NUM_DATA_POINTS,
-}: {
-  groupTotalCountByTimestamp: boolean;
-  numDataPoints?: number;
-}): {
+  canReadFailureStore,
+}: UseDocCountFetchProps): {
   getStreamDocCounts(streamName: string): StreamDocCountsFetch;
 } {
   const { timeState, timeState$ } = useTimefilter();
@@ -35,6 +40,12 @@ export function useStreamDocCountsFetch({
   if (!abortControllerRef.current) {
     abortControllerRef.current = new AbortController();
   }
+
+  useUpdateEffect(() => {
+    promiseCache.current = {};
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+  }, [canReadFailureStore]);
 
   useEffect(() => {
     return () => {
@@ -73,11 +84,13 @@ export function useStreamDocCountsFetch({
 
       const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
+      const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
+
       const countPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
-            query: `FROM ${streamName},${streamName}::failures | STATS doc_count = COUNT(*)${
+            query: `FROM ${source} | STATS doc_count = COUNT(*)${
               groupTotalCountByTimestamp
                 ? ` BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`
                 : ''
@@ -89,17 +102,19 @@ export function useStreamDocCountsFetch({
         signal: abortController.signal,
       });
 
-      const failedCountPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_failed_doc_count_for_stream',
-            query: `FROM ${streamName}::failures | STATS failed_doc_count = count(*)`,
-            start: timeState.start,
-            end: timeState.end,
-          },
-        },
-        signal: abortController.signal,
-      });
+      const failedCountPromise = canReadFailureStore
+        ? streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+            params: {
+              body: {
+                operationName: 'get_failed_doc_count_for_stream',
+                query: `FROM ${streamName}::failures | STATS failed_doc_count = count(*)`,
+                start: timeState.start,
+                end: timeState.end,
+              },
+            },
+            signal: abortController.signal,
+          })
+        : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
       const degradedCountPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
