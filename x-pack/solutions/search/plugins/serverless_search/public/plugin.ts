@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
@@ -128,7 +127,7 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security } = services;
+    const { serverless, management, security } = services;
     serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
@@ -163,9 +162,6 @@ export class ServerlessSearchPlugin
       extendCardNavDefinitions,
     });
 
-    indexManagement?.extensionsService.setIndexOverviewContent(
-      createIndexOverviewContent(core, services)
-    );
     return {};
   }
 
