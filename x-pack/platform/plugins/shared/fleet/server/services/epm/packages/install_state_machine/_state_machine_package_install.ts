@@ -60,7 +60,7 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
-import { stepInstallElasticAgentRules } from './steps/step_install_elastic_agent_rules';
+import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -98,11 +98,6 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   install_kibana_assets: {
     onPreTransition: cleanUpKibanaAssetsStep,
     onTransition: stepInstallKibanaAssets,
-    nextState: INSTALL_STATES.INSTALL_ELASTIC_AGENT_RULES,
-    onPostTransition: updateLatestExecutedState,
-  },
-  install_elastic_agent_rules: {
-    onTransition: stepInstallElasticAgentRules,
     nextState: INSTALL_STATES.INSTALL_ILM_POLICIES,
     onPostTransition: updateLatestExecutedState,
   },
@@ -160,6 +155,11 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_alerting_rules: {
+    onTransition: stepCreateAlertingRules,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

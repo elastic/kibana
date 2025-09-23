@@ -18,25 +18,25 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
-import type {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-  GetLimitedPackagesResponse,
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
-  GetStatsResponse,
-  UpdatePackageResponse,
-  GetVerificationKeyIdResponse,
-  GetBulkAssetsResponse,
-  GetInstalledPackagesResponse,
-  GetEpmDataStreamsResponse,
-  RollbackPackageResponse,
-  AssetSOObject,
-  PackageSpecCategory,
+import {
+  type GetInfoResponse,
+  type InstallPackageResponse,
+  type DeletePackageResponse,
+  type GetCategoriesResponse,
+  type GetPackagesResponse,
+  type GetLimitedPackagesResponse,
+  type BulkInstallPackageInfo,
+  type BulkInstallPackagesResponse,
+  type IBulkInstallPackageHTTPError,
+  type GetStatsResponse,
+  type UpdatePackageResponse,
+  type GetVerificationKeyIdResponse,
+  type GetBulkAssetsResponse,
+  type GetInstalledPackagesResponse,
+  type GetEpmDataStreamsResponse,
+  type RollbackPackageResponse,
+  type AssetSOObject,
+  type PackageSpecCategory,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -261,7 +261,7 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
-    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate, KibanaSavedObjectType.alert],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(

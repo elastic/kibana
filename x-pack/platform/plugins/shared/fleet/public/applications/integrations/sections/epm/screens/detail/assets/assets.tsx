@@ -105,6 +105,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
