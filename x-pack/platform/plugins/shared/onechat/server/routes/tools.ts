@@ -40,9 +40,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'List tools',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -77,9 +78,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Get a tool by id',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -121,9 +123,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Create a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -191,9 +194,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Update a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -262,9 +266,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Delete a tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -304,9 +309,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'Execute a Tool',
       options: {
-        tags: ['tools'],
+        tags: ['tools','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })

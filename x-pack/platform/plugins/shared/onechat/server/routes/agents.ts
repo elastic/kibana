@@ -54,9 +54,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       summary: 'List agents',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['agent'],
+        tags: ['agent','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -87,9 +88,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Get an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['agent'],
+        tags: ['agent','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -129,9 +131,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Create an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['agent'],
+        tags: ['agent','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -213,9 +216,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Update an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['agent'],
+        tags: ['agent','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -304,9 +308,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       summary: 'Delete an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['agent'],
+        tags: ['agent','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })

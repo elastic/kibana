@@ -35,10 +35,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       summary: 'MCP server',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['mcp'],
+        tags: ['mcp','oas-tag:agent-builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -150,9 +151,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       summary: 'MCP server',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['mcp'],
+        tags: ['mcp','oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
@@ -187,10 +189,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       summary: 'MCP server',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['mcp'],
+        tags: ['mcp','oas-tag:agent-builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0'
         },
       },
     })
