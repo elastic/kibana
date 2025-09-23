@@ -11,16 +11,33 @@ import { createMockModel } from '../../../../../common/mocks/monaco_model';
 import { parseDocument } from 'yaml';
 import { insertStepSnippet } from './insert_step_snippet';
 import { monaco } from '@kbn/monaco';
-import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
+import * as generateBuiltInStepSnippetModule from './generate_builtin_step_snippet';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
 describe('insertStepSnippet', () => {
+  let generateBuiltInStepSnippetSpy: jest.SpyInstance;
+  beforeEach(() => {
+    generateBuiltInStepSnippetSpy = jest.spyOn(
+      generateBuiltInStepSnippetModule,
+      'generateBuiltInStepSnippet'
+    );
+    jest.clearAllMocks();
+  });
+
   it('should insert the "steps:" section if it does not exist', () => {
     const inputYaml = `name: one_step_workflow`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', { full: true, withStepsSection: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: true,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: true,
+    });
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
@@ -42,8 +59,16 @@ steps:
       url: https://google.com`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: false,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: false,
+    });
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
@@ -56,7 +81,7 @@ steps:
       expect.any(Function)
     );
   });
-  it('should insert a step snippet after the last step in a nested step when cursor is at the beginning of the last step line', () => {
+  it('should insert a step snippet after the step at which cursor is', () => {
     const inputYaml = `name: nested_step_workflow
 steps:
   - name: loop
@@ -66,11 +91,19 @@ steps:
       - name: get_google
         type: http
         with:
-          url: https://google.com # cursor is here`;
+          url: https://google.com # <- cursor is here`;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: false,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: false,
+    });
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
@@ -93,7 +126,7 @@ steps:
       - name: get_google
         type: http
         with:
-          url: https://google.com # cursor is here
+          url: https://google.com # <- cursor is here
       - name: log_result
         type: console
         with:
@@ -101,13 +134,21 @@ steps:
 `;
     const model = createMockModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    const snippetText = generateBuiltInStepSnippet('http', { full: true });
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
       'http',
       new monaco.Position(10, 33)
     );
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: false,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: false,
+    });
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
