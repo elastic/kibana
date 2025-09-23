@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
-import { getPosition } from './utils';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
@@ -25,48 +24,55 @@ export async function autocomplete(
     return [];
   }
 
-  const { position, isTyping } = getPosition(query, command);
+  const innerText = query.substring(0, cursorPosition);
+  const commandText = innerText.slice(command.location.min);
 
-  // Handle multi-token recognition for "INLINE STATS"
-  switch (position) {
-    case 'type':
-      if (isTyping) {
-        return [
-          {
-            label: 'INLINE STATS',
-            text: 'INLINE STATS ',
-            kind: 'Keyword',
-            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.inlineStats.commandSuggestion', {
-              defaultMessage: 'INLINE STATS command',
-            }),
-            sortText: 'A',
-            command: TRIGGER_SUGGESTION_COMMAND,
-          },
-        ];
-      }
+  const currentInput = commandText.toUpperCase();
+  const afterInlineMatch = currentInput.match(/^INLINE\s+(.*)$/);
 
-      return [];
+  // If user typed "INLINE " + partial STATS, suggest STATS (check this first)
+  if (afterInlineMatch) {
+    const afterInline = afterInlineMatch[1];
 
-    case 'after_type':
-    case 'mnemonic':
-      if (isTyping) {
-        return [
-          {
-            label: 'STATS',
-            text: 'STATS ',
-            kind: 'Keyword',
-            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.inlineStats.statsKeyword', {
-              defaultMessage: 'STATS keyword',
-            }),
-            sortText: 'A',
-            command: TRIGGER_SUGGESTION_COMMAND,
-          },
-        ];
-      }
-
-      return [];
-
-    default:
-      return statsAutocomplete(query, command, callbacks, context, cursorPosition);
+    if ('STATS'.startsWith(afterInline) && afterInline.length <= 'INLINE'.length) {
+      return [
+        {
+          label: 'STATS',
+          text: 'STATS ',
+          kind: 'Keyword',
+          detail: i18n.translate('kbn-esql-ast.esql.autocomplete.inlineStats.statsKeyword', {
+            defaultMessage: 'STATS keyword',
+          }),
+          sortText: 'A',
+          command: TRIGGER_SUGGESTION_COMMAND,
+        },
+      ];
+    }
   }
+
+  // If user typed something that could become INLINE, suggest INLINE STATS
+  const trimmedInput = currentInput.trim();
+
+  if ('INLINE'.startsWith(trimmedInput) && trimmedInput.length <= 'INLINE'.length) {
+    return [
+      {
+        label: 'INLINE STATS',
+        text: 'INLINE STATS ',
+        kind: 'Keyword',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.inlineStats.commandSuggestion', {
+          defaultMessage: 'INLINE STATS command',
+        }),
+        sortText: 'A',
+        command: TRIGGER_SUGGESTION_COMMAND,
+      },
+    ];
+  }
+
+  // case "INLINE STATS" or "INLINE (...more spaces) STATS "
+  const hasCompleteInlineStats = /^INLINE\s+STATS(\s|$)/.test(currentInput);
+  if (hasCompleteInlineStats) {
+    return statsAutocomplete(query, command, callbacks, context, cursorPosition);
+  }
+
+  return [];
 }

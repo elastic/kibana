@@ -23,7 +23,8 @@ export const inlineStatsCommand = {
   name: 'inline stats',
   methods: inlineStatsCommandMethods,
   metadata: {
-    hidden: true,
+    hidden: false,
+    preview: true,
     description: i18n.translate('kbn-esql-ast.esql.definitions.inlineStatsDoc', {
       defaultMessage:
         'Unlike STATS, INLINE STATS preserves all columns from the previous pipe and returns them together with the new aggregate columns.',
