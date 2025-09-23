@@ -54,7 +54,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   async function expandMoreIfNeeded() {
     if (!(await isV2())) return;
 
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
       const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
       const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
       if (isExpanded === 'false') {
@@ -107,6 +107,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           | { text: string }
           | { panelNavLinkId: string }
       ) {
+        log.debug('SolutionNavigation.sidenav.expectLinkExists', JSON.stringify(by));
+
         await expandMoreIfNeeded();
 
         if ('deepLinkId' in by) {
