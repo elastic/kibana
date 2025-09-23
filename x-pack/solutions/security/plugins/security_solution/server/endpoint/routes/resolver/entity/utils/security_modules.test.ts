@@ -25,10 +25,7 @@ describe('security_modules', () => {
     });
 
     it('should have MICROSOFT_DEFENDER_MODULES with expected modules', () => {
-      expect(MICROSOFT_DEFENDER_MODULES).toEqual([
-        'microsoft_defender_endpoint',
-        'm365_defender',
-      ]);
+      expect(MICROSOFT_DEFENDER_MODULES).toEqual(['microsoft_defender_endpoint', 'm365_defender']);
     });
 
     it('should have SECURITY_MODULE_DATASETS with correct mappings', () => {
@@ -99,20 +96,13 @@ describe('security_modules', () => {
       it('should return datasets for a single core module', () => {
         const result = getSecurityModuleDatasets(['crowdstrike']);
 
-        expect(result).toEqual([
-          'crowdstrike.alert',
-          'crowdstrike.falcon',
-          'crowdstrike.fdr',
-        ]);
+        expect(result).toEqual(['crowdstrike.alert', 'crowdstrike.falcon', 'crowdstrike.fdr']);
       });
 
       it('should return datasets for a single Microsoft Defender module', () => {
         const result = getSecurityModuleDatasets(['m365_defender']);
 
-        expect(result).toEqual([
-          'm365_defender.alert',
-          'm365_defender.incident',
-        ]);
+        expect(result).toEqual(['m365_defender.alert', 'm365_defender.incident']);
       });
 
       it('should return datasets for multiple modules', () => {
@@ -233,11 +223,7 @@ describe('security_modules', () => {
         const readonlyArray = ['crowdstrike'] as const;
         const result = getSecurityModuleDatasets(readonlyArray);
 
-        expect(result).toEqual([
-          'crowdstrike.alert',
-          'crowdstrike.falcon',
-          'crowdstrike.fdr',
-        ]);
+        expect(result).toEqual(['crowdstrike.alert', 'crowdstrike.falcon', 'crowdstrike.fdr']);
       });
 
       it('should return a mutable array even with readonly input', () => {
