@@ -49,6 +49,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const { euiTheme } = useEuiTheme();
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const isEditMode = routingSnapshot.matches({ ready: 'editingRule' });
 
   const { currentRuleId, definition, routing } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
@@ -80,6 +81,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
         >
           <EuiToolTip
+            position="bottom"
             content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
           >
             <EuiButton
@@ -161,6 +163,8 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                               })}
                               onEditIconClick={editRule}
                               routingRule={routingRule}
+                              totalRoutingRules={routing.length}
+                              isEditMode={isEditMode}
                             />
                           )}
                         </NestedView>
