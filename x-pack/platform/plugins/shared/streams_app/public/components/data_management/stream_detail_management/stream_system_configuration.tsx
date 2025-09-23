@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { useStreamSystems } from './stream_systems/hooks/use_stream_systems';
 import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
 import { StreamSystemsFlyout } from './stream_systems/stream_systems_flyout';
@@ -32,6 +33,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
   const { identifySystemsQuery } = useStreamSystemsApi(definition);
   const aiFeatures = useAIFeatures();
   const [systems, setSystems] = useState<System[]>([]);
+  const { systems: existingSystems, refresh, loading } = useStreamSystems(definition);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,13 +87,21 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <StreamSystemsAccordion definition={definition} />
+        <StreamSystemsAccordion
+          definition={definition}
+          systems={existingSystems}
+          loading={loading}
+          refresh={refresh}
+        />
         {isFlyoutVisible && (
           <StreamSystemsFlyout
             definition={definition}
             systems={systems}
             isLoading={isLoading}
-            closeFlyout={() => setIsFlyoutVisible(false)}
+            closeFlyout={() => {
+              refresh();
+              setIsFlyoutVisible(false);
+            }}
           />
         )}
       </EuiFlexGroup>
