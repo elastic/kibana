@@ -1332,7 +1332,7 @@
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.1.0",
     "puppeteer": "24.17.0",
-    "query-string": "^6.13.2",
+    "query-string": "^9.3.0",
     "rbush": "^4.0.1",
     "re2js": "0.4.3",
     "react": "~18.2.0",
