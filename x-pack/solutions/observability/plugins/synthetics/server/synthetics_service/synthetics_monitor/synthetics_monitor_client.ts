@@ -72,10 +72,6 @@ export class SyntheticsMonitorClient {
       }
     }
 
-    this.server.logger.debug(
-      `[addMonitors] Adding monitors with ${privateConfigs.length} private and ${publicConfigs.length} public`
-    );
-
     const newPolicies = this.privateLocationAPI.createPackagePolicies(
       privateConfigs,
       allPrivateLocations,
