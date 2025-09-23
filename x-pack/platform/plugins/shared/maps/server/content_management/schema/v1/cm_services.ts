@@ -9,9 +9,8 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
-  createOptionsSchemas,
   createResultSchema,
-  updateOptionsSchema,
+  referencesSchema,
 } from '@kbn/content-management-utils';
 
 export const mapAttributesSchema = schema.object(
@@ -47,13 +46,13 @@ export const mapsSearchOptionsSchema = schema.maybe(
 
 export const mapsCreateOptionsSchema = schema.maybe(
   schema.object({
-    references: createOptionsSchemas.references,
+    references: schema.maybe(referencesSchema),
   })
 );
 
 export const mapsUpdateOptionsSchema = schema.maybe(
   schema.object({
-    references: updateOptionsSchema.references,
+    references: schema.maybe(referencesSchema),
   })
 );
 
