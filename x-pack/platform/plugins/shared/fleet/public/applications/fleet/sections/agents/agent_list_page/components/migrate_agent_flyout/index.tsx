@@ -53,7 +53,7 @@ interface Props {
   agentCount: number;
   onClose: () => void;
   onSave: () => void;
-  protectedAndFleetAgents: Agent[];
+  unsupportedMigrateAgents: Agent[];
 }
 
 export const AgentMigrateFlyout: React.FC<Props> = ({
@@ -61,7 +61,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
   agentCount,
   onClose,
   onSave,
-  protectedAndFleetAgents,
+  unsupportedMigrateAgents,
 }) => {
   const { notifications } = useStartServices();
   const migrateAgent = sendMigrateSingleAgent;
@@ -83,9 +83,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
   const filteredAgents = useMemo(
     () =>
       Array.isArray(agents)
-        ? agents.filter((agent) => !protectedAndFleetAgents.some((a) => a.id === agent.id))
+        ? agents.filter((agent) => !unsupportedMigrateAgents.some((a) => a.id === agent.id))
         : agents,
-    [agents, protectedAndFleetAgents]
+    [agents, unsupportedMigrateAgents]
   );
   const filteredAgentCount = useMemo(
     () => (Array.isArray(filteredAgents) ? filteredAgents.length : agentCount),
@@ -199,17 +199,17 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             />
           </EuiText>
 
-          {Array.isArray(agents) && protectedAndFleetAgents.length > 0 && (
+          {Array.isArray(agents) && unsupportedMigrateAgents.length > 0 && (
             <>
               <EuiSpacer />
               <EuiPanel color="warning" data-test-subj="migrateAgentFlyoutAlertPanel">
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet Server agents."
+                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet Server agents or unsupported version."
                     values={{
                       icon: <EuiIcon type="warning" />,
-                      x: protectedAndFleetAgents.length,
+                      x: unsupportedMigrateAgents.length,
                       y: agentCount,
                     }}
                   />
@@ -230,7 +230,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                   <EuiSpacer size="s" />
                   <EuiText>
                     <ul>
-                      {protectedAndFleetAgents.map((agent) => (
+                      {unsupportedMigrateAgents.map((agent) => (
                         <li key={agent.id}>{agent.local_metadata?.host?.hostname}</li>
                       ))}
                     </ul>

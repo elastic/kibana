@@ -115,3 +115,23 @@ export interface CalculateAndPersistScoresParams {
   returnScores?: boolean;
   refresh?: 'wait_for';
 }
+
+export interface RiskScoreCompositeBuckets {
+  user: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  host: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+  service: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreCompositeBucket[];
+  };
+}
+
+export interface RiskScoreCompositeBucket {
+  key: { [identifierField: string]: string };
+  doc_count: number;
+}

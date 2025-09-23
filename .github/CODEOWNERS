@@ -866,6 +866,7 @@ x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/packages/private/security/authorization_core @elastic/kibana-security
 x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
+x-pack/platform/packages/private/security/kbn_uiam_dev_cli @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
@@ -983,7 +984,7 @@ x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
-x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
+x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
@@ -1064,20 +1065,11 @@ x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_pl
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
-x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
@@ -1212,6 +1204,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/unmapped_fields @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L26
 /src/platform/test/functional/fixtures/es_archiver/message_with_newline @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L24
 /src/platform/test/functional/fixtures/es_archiver/hamlet @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L30
@@ -1287,6 +1280,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/metrics_data_source_profile @elastic/obs-ux-infra_services-team
@@ -1490,6 +1484,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/infra @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
+/src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic @elastic/obs-ux-infra_services-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-ux-infra_services-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework @elastic/obs-ux-infra_services-team
 /src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-ux-infra_services-team
@@ -2103,7 +2098,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
-# security
+/scripts/uiam_dev.js
+
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/spaces @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/security @elastic/kibana-security
@@ -2399,7 +2395,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
-/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/integration-experience
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-solution @elastic/security-threat-hunting-investigations
 
@@ -2809,7 +2805,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/exp
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 ## Security Solution sub teams - Automatic Import
-x-pack/platform/test/automatic_import_api_integration @elastic/security-scalability
+x-pack/platform/test/automatic_import_api_integration @elastic/integration-experience
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
