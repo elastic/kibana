@@ -5,92 +5,47 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import useToggle from 'react-use/lib/useToggle';
-import type { EuiSelectOption } from '@elastic/eui';
 import {
-  EuiCodeBlock,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSelect,
-  EuiSwitch,
-} from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/code-editor';
-import type { Condition, FilterCondition, OperatorKeys } from '@kbn/streamlang';
-import {
+  Condition,
+  type FilterCondition,
   getDefaultFormValueForOperator,
   getFilterOperator,
   getFilterValue,
   isCondition,
   isFilterConditionObject,
+  type OperatorKeys,
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
-import { isPlainObject } from 'lodash';
-import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
-import { isRoutingEnabled } from '@kbn/streams-schema';
-
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
-import { FieldSelector, type FieldSuggestion } from '../shared/field_selector';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import {
-  useEnrichmentFieldSuggestions,
-  useRoutingFieldSuggestions,
-} from '../../../hooks/use_field_suggestions';
+  FieldSelector,
+  FieldSuggestion,
+} from '@kbn/streams-app-plugin/public/components/data_management/shared/field_selector';
+import {
+  alwaysToEmptyEquals,
+  emptyEqualsToAlways,
+} from '@kbn/streams-app-plugin/public/util/condition';
+import { isPlainObject } from 'lodash';
+import useToggle from 'react-use/lib/useToggle';
+import {
+  EuiCodeBlock,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  type EuiSelectOption,
+  EuiSwitch,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
+import React, { useMemo } from 'react';
 
-type RoutingConditionChangeParams = Omit<RoutingDefinition, 'destination'>;
-
-export type RoutingConditionEditorProps = Omit<ConditionEditorProps, 'fieldSuggestions'> & {
-  onStatusChange: (params: RoutingConditionChangeParams['status']) => void;
-};
-
-export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
-  const isEnabled = isRoutingEnabled(props.status);
-  const fieldSuggestions = useRoutingFieldSuggestions();
-
-  return (
-    <EuiForm fullWidth>
-      <EuiFormRow
-        label={
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            {i18n.translate('xpack.streams.conditionEditor.title', {
-              defaultMessage: 'Status',
-            })}
-            <EuiIconTip
-              content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
-                defaultMessage:
-                  'When disabled, the routing rule stops sending documents to this stream. It does not remove existing data.',
-              })}
-            />
-          </EuiFlexGroup>
-        }
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.streams.conditionEditor.switch', {
-            defaultMessage: 'Enabled',
-          })}
-          compressed
-          checked={isEnabled}
-          onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
-        />
-      </EuiFormRow>
-      <ConditionEditor {...props} fieldSuggestions={fieldSuggestions} />
-    </EuiForm>
-  );
-}
-
-export type ProcessorConditionEditorProps = Omit<
-  ConditionEditorProps,
-  'status' | 'fieldSuggestions'
->;
-
-export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
-  const fieldSuggestions = useEnrichmentFieldSuggestions();
-  return <ConditionEditor status="enabled" {...props} fieldSuggestions={fieldSuggestions} />;
+export interface ConditionEditorProps {
+  condition: Condition;
+  status: RoutingStatus;
+  onConditionChange: (condition: Condition) => void;
+  fieldSuggestions?: FieldSuggestion[];
 }
 
 const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
@@ -99,13 +54,6 @@ const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadabl
     text,
   })
 );
-
-interface ConditionEditorProps {
-  condition: Condition;
-  status: RoutingStatus;
-  onConditionChange: (condition: Condition) => void;
-  fieldSuggestions?: FieldSuggestion[];
-}
 
 export function ConditionEditor(props: ConditionEditorProps) {
   const { status, onConditionChange, fieldSuggestions = [] } = props;

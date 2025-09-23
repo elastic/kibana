@@ -7,7 +7,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import { EuiPanel, EuiFlexGroup } from '@elastic/eui';
-import { RoutingConditionEditor } from '../condition_editor';
 import { AddRoutingRuleControls } from './control_bars';
 import { StreamNameFormRow } from './stream_name_form_row';
 import {
@@ -15,6 +14,7 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { selectCurrentRule } from './state_management/stream_routing_state_machine';
+import { RoutingConditionEditor } from './routing_condition_editor';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
