@@ -165,7 +165,7 @@ const routeSecuritySchema = schema.object({
 export const validRouteSecurity = (
   routeSecurity?: DeepPartial<RouteSecurity>,
   options?: DeepPartial<RouteConfigOptions<any>>
-) => {
+): RouteSecurity | undefined => {
   if (!routeSecurity) {
     return routeSecurity;
   }
@@ -174,5 +174,6 @@ export const validRouteSecurity = (
     throw new Error('Cannot specify both security.authc and options.authRequired');
   }
 
+  // @ts-expect-error - this appears to have been a suppressed type error in main.
   return routeSecuritySchema.validate(routeSecurity);
 };
