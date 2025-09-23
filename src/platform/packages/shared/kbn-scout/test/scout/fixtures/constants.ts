@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CasePostRequest } from '../../src/playwright/fixtures/scope/worker/apis/cases/types';
+import type { CasePostRequest } from '../../../src/playwright/fixtures/scope/worker/apis/cases/types';
 
 export const createAlertRuleParams = {
   aggType: 'count',
