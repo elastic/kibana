@@ -85,3 +85,17 @@ export const ExitFallbackPathNodeSchema = GraphNodeSchema.extend({
   enterNodeId: z.string(),
 });
 export type ExitFallbackPathNode = z.infer<typeof ExitFallbackPathNodeSchema>;
+
+// Timeout handling nodes - stack-based timeout management
+export const EnterTimeoutZoneNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('enter-timeout-zone'),
+  timeout: z.string(),
+});
+export type EnterTimeoutZoneNode = z.infer<typeof EnterTimeoutZoneNodeSchema>;
+
+export const ExitTimeoutZoneNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('exit-timeout-zone'),
+});
+export type ExitTimeoutZoneNode = z.infer<typeof ExitTimeoutZoneNodeSchema>;
