@@ -9,7 +9,7 @@ import { createServerlessTestConfig } from '../../api_integration_deployment_agn
 import { oneChatServices } from './ftr_provider_context';
 
 export default createServerlessTestConfig({
-  serverlessProject: 'chat',
+  serverlessProject: 'es',
   services: oneChatServices,
   testFiles: [require.resolve('../apis')],
   junit: {
