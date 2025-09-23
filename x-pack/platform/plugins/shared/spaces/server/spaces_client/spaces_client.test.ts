@@ -7,8 +7,7 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { SpacesClient } from './spaces_client';
@@ -489,60 +488,6 @@ describe('#create', () => {
     );
   });
 
-  test(`throws bad request when creating space with disabled features`, async () => {
-    const maxSpaces = 5;
-    const mockDebugLogger = createMockDebugLogger();
-    const mockConfig = createMockConfig();
-    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
-    mockCallWithRequestRepository.find.mockResolvedValue({
-      total: maxSpaces - 1,
-    } as any);
-    const featuresMock = featuresStart;
-
-    featuresMock.getKibanaFeatures.mockReturnValue([
-      new KibanaFeature({
-        id: 'feature-1',
-        name: 'KibanaFeature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
-        privileges: {
-          all: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-          read: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-        },
-        subFeatures: [],
-      }),
-    ]);
-
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      mockCallWithRequestRepository,
-      [],
-      'traditional',
-      featuresMock
-    );
-
-    await expect(
-      client.create({ ...spaceToCreate, disabledFeatures: ['feature-1'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to create Space, one or more disabledFeatures do not have the required space scope"`
-    );
-  });
-
   test(`throws bad request when we are at the maximum number of spaces`, async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
@@ -655,7 +600,11 @@ describe('#create', () => {
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
 
-    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'es' });
+    expect(actualSpace).toEqual({
+      ...expectedReturnedSpace,
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es',
+      solution: 'es',
+    });
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
@@ -857,56 +806,6 @@ describe('#update', () => {
       solution: 'es',
     });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
-  });
-
-  test(`throws bad request when creating space with disabled features`, async () => {
-    const mockDebugLogger = createMockDebugLogger();
-    const mockConfig = createMockConfig();
-    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
-    const featuresMock = featuresStart;
-
-    featuresMock.getKibanaFeatures.mockReturnValue([
-      new KibanaFeature({
-        id: 'feature-1',
-        name: 'KibanaFeature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
-        privileges: {
-          all: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-          read: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-        },
-        subFeatures: [],
-      }),
-    ]);
-
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      mockCallWithRequestRepository,
-      [],
-      'traditional',
-      featuresMock
-    );
-
-    await expect(
-      client.create({ ...spaceToUpdate, disabledFeatures: ['feature-1'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot destructure property 'total' of '(intermediate value)' as it is undefined."`
-    );
   });
 
   test('throws bad request when solution property is provided in serverless build', async () => {

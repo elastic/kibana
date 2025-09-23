@@ -10,73 +10,70 @@ import type { AlertsByStatusResponse, AlertsByStatusAgg, ParsedAlertsData } from
 export const from = '2022-04-05T12:00:00.000Z';
 export const to = '2022-04-08T12:00:00.000Z';
 
-interface MockAlertsDataParams {
-  includeRelatedIntegrationPackage?: boolean;
-}
-
-export function mockAlertsData(
-  params: MockAlertsDataParams = {}
-): AlertsByStatusResponse<[], AlertsByStatusAgg> {
-  const { includeRelatedIntegrationPackage = false } = params;
-
-  return {
-    took: 4,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
+export const mockAlertsData: AlertsByStatusResponse<[], AlertsByStatusAgg> = {
+  took: 4,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 10000,
+      relation: 'gte',
     },
-    hits: {
-      total: {
-        value: 10000,
-        relation: 'gte',
-      },
-      hits: [],
-    },
-    aggregations: {
-      alertsByStatus: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [
-          {
-            key: 'open',
-            doc_count: 28149,
-            statusBySeverity: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                { key: 'low', doc_count: 22717 },
-                { key: 'high', doc_count: 5027 },
-                { key: 'medium', doc_count: 405 },
-              ],
-            },
+    hits: [],
+  },
+  aggregations: {
+    alertsByStatus: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'open',
+          doc_count: 28149,
+          statusBySeverity: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'low',
+                doc_count: 22717,
+              },
+              {
+                key: 'high',
+                doc_count: 5027,
+              },
+              {
+                key: 'medium',
+                doc_count: 405,
+              },
+            ],
           },
-          {
-            key: 'closed',
-            doc_count: 4,
-            statusBySeverity: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                { key: 'high', doc_count: 4 },
-                { key: 'low', doc_count: 0 },
-              ],
-            },
-          },
-        ],
-      },
-      ...(includeRelatedIntegrationPackage && {
-        relatedIntegrationPackage: {
-          buckets: [
-            { key: 'endpoint', doc_count: 4 },
-            { key: 'not_endpoint', doc_count: 0 },
-          ],
         },
-      }),
+        {
+          key: 'closed',
+          doc_count: 4,
+          statusBySeverity: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'high',
+                doc_count: 4,
+              },
+              {
+                key: 'low',
+                doc_count: 0,
+              },
+            ],
+          },
+        },
+      ],
     },
-  };
-}
+  },
+};
 
 export const parsedMockAlertsData: ParsedAlertsData = {
   open: {

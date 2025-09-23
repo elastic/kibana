@@ -15,6 +15,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { WiredAdvancedView } from './wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 
 const wiredStreamManagementSubTabs = [
@@ -22,6 +23,7 @@ const wiredStreamManagementSubTabs = [
   'processing',
   'schema',
   'retention',
+  'advanced',
   'significantEvents',
   'dataQuality',
   'references',
@@ -50,7 +52,7 @@ export function WiredStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const { processing, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -97,8 +99,8 @@ export function WiredStreamDetailManagement({
       content: <StreamDetailDataQuality definition={definition} />,
       label: (
         <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-            defaultMessage: 'View details about this classic stream’s data quality',
+          content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
+            defaultMessage: 'View details about this stream’s data quality',
           })}
         >
           <span>
@@ -110,6 +112,18 @@ export function WiredStreamDetailManagement({
       ),
     },
     ...otherTabs,
+    ...(definition.privileges.manage
+      ? {
+          advanced: {
+            content: (
+              <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            }),
+          },
+        }
+      : {}),
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -122,11 +136,13 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
-    );
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  if (isLoading) {
+    return null;
+  }
+
+  <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />;
 }

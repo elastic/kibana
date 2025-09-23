@@ -86,10 +86,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
         const suggestions = await suggest(fullText, offset, callbacks);
-        return {
-          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
-          suggestions: wrapAsMonacoSuggestions(suggestions, fullText),
-        };
+        return wrapAsMonacoSuggestions(suggestions, fullText);
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!callbacks?.getFieldsMetadata) return item;
