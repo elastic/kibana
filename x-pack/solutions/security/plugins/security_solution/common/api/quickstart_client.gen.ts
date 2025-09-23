@@ -255,6 +255,12 @@ import type {
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
 import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+  UpsertEntityResponse,
+} from './entity_analytics/entity_store/entities/upsert_entity.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
@@ -3061,6 +3067,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+
+    */
+  async upsertEntity(props: UpsertEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
+    return this.kbnClient
+      .request<UpsertEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -3475,6 +3501,11 @@ export interface UploadAssetCriticalityRecordsProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;
