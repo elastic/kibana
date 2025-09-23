@@ -88,7 +88,7 @@ streamlangApiTest.describe(
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // The field should be set since `attributes.status` doesn't exist where attributes.should_exist exists
-      expect(esqlResult.documents[1]).toEqual(
+      expect(esqlResult.documentsOrdered[1]).toEqual(
         expect.objectContaining({
           'attributes.size': 4096,
           'attributes.should_exist': 'YES',
@@ -97,7 +97,7 @@ streamlangApiTest.describe(
       );
 
       // The field should not be set since `attributes.should_exist` doesn't exist
-      expect(esqlResult.documents[2]).toEqual(
+      expect(esqlResult.documentsOrdered[2]).toEqual(
         expect.objectContaining({
           'attributes.size': 2048,
           'attributes.status': null,
@@ -155,13 +155,13 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents[0]).toEqual(
+        expect(esqlResult.documentsOrdered[0]).toEqual(
           expect.objectContaining({
             'attributes.status': 'active', // Should not be overridden
           })
         );
 
-        expect(esqlResult.documents[1]).toEqual(
+        expect(esqlResult.documentsOrdered[1]).toEqual(
           expect.objectContaining({
             'attributes.status': 'inactive', // Should be set
           })

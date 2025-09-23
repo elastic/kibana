@@ -52,7 +52,7 @@ streamlangApiTest.describe(
         const docs = [mappingDoc, { message: 'message' }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
-        expect(esqlResult.documents[1].tags).toEqual(['tag01', 'tag02']);
+        expect(esqlResult.documentsOrdered[1].tags).toEqual(['tag01', 'tag02']);
       }
     );
 
@@ -124,8 +124,8 @@ streamlangApiTest.describe(
         ];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
-        expect(esqlResult.documents[0].tags).toEqual(['existing_tag', 'new_tag']);
-        expect(esqlResult.documents[1].tags).toEqual(['existing_tag_01', 'existing_tag_02']);
+        expect(esqlResult.documentsOrdered[0].tags).toEqual(['existing_tag', 'new_tag']);
+        expect(esqlResult.documentsOrdered[1].tags).toEqual(['existing_tag_01', 'existing_tag_02']);
       }
     );
 
@@ -177,8 +177,8 @@ streamlangApiTest.describe(
       ];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0].tags).toEqual('existing_tag');
-      expect(esqlResult.documents[1].tags).toEqual([
+      expect(esqlResult.documentsOrdered[0].tags).toEqual('existing_tag');
+      expect(esqlResult.documentsOrdered[1].tags).toEqual([
         'existing_tag_01',
         'existing_tag_02',
         'new_tag',
