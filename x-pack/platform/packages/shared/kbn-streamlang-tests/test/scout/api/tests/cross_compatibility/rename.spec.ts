@@ -34,18 +34,18 @@ streamlangApiTest.describe(
 
           const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
           await testBed.ingest('ingest-rename-override', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-rename-override');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-rename-override');
 
           await testBed.ingest('esql-rename-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-rename-override', query);
 
           expect(ingestResult[0]['host.renamed']).toEqual('test-host');
-          expect(esqlResult.documents[0]).toEqual(
+          expect(esqlResult.documentsOrdered[0]).toEqual(
             expect.objectContaining({ 'host.renamed': 'test-host' })
           );
 
           // Both results should be same
-          expect(ingestResult).toEqual(esqlResult.documentsWithoutKeywords);
+          expect(ingestResult).toEqual(esqlResult.documentsWithoutKeywordsOrdered);
         }
       );
 
@@ -69,7 +69,7 @@ streamlangApiTest.describe(
           const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
 
           await testBed.ingest('ingest-rename-no-override', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-rename-no-override');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-rename-no-override');
 
           await testBed.ingest('esql-rename-no-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-rename-no-override', query);
@@ -135,7 +135,7 @@ streamlangApiTest.describe(
 
           const { errors } = await testBed.ingest('ingest-rename-fail', docs, processors);
           expect(errors[0].type).toEqual('illegal_argument_exception');
-          const ingestResult = await testBed.getFlattenedDocs('ingest-rename-fail');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-rename-fail');
 
           const mappingDoc = { host: { original: '', renamed: '' } };
           await testBed.ingest('esql-rename-fail', [mappingDoc, ...docs]);

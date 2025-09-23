@@ -13,6 +13,7 @@ export interface TestBedFixture {
   testBed: {
     /**
      * Ingests documents into an index with an optional ingest pipeline.
+     * An `order_id` field is automatically added to each document to allow for deterministic sorting.
      * @param indexName The name of the index.
      * @param documents An array of documents to ingest.
      * @param processors An optional array of ingest processors to create a pipeline.
@@ -24,18 +25,28 @@ export interface TestBedFixture {
       processors?: IngestProcessorContainer[]
     ) => Promise<{ errors: ErrorCause[]; docs: number }>;
     /**
-     * Gets all documents from an index.
+     * Gets all documents from an index in their natural, non-deterministic order.
      * @param indexName The name of the index.
      * @returns An array of documents.
      */
     getDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
-
+    /**
+     * Gets all documents from an index, sorted deterministically by the internal `order_id`.
+     * @param indexName The name of the index.
+     * @returns A sorted array of documents.
+     */
+    getDocsOrdered: (indexName: string) => Promise<Array<Record<string, any>>>;
     /**
      * Serializes documents with each nested field represented in dot notation.
-     * Helpful to compare documents returned by ES|QL queries.
+     * Helpful to compare documents returned by ES|QL queries. Returns in non-deterministic order.
      * @param indexName
      */
     getFlattenedDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
+    /**
+     * Serializes documents with each nested field represented in dot notation, sorted deterministically by `order_id`.
+     * @param indexName
+     */
+    getFlattenedDocsOrdered: (indexName: string) => Promise<Array<Record<string, any>>>;
     /**
      * Deletes an index.
      * @param indexName The name of the index to delete.
@@ -77,7 +88,9 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
           return { docs: 0, errors: [] };
         }
 
-        const body = documents.flatMap((doc) => [{ index: { _index: indexName } }, doc]);
+        const body = documents
+          .map((doc, idx) => ({ ...doc, order_id: idx })) // Add order_id for deterministic sorting
+          .flatMap((doc) => [{ index: { _index: indexName } }, doc]);
 
         const bulkRequest: Record<string, any> = {
           refresh: true,
@@ -112,6 +125,11 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         return response.hits.hits.map((hit) => hit._source as Record<string, any>);
       };
 
+      const getDocsOrdered = async (indexName: string) => {
+        const docs = await getDocs(indexName);
+        return docs.sort((a, b) => a.order_id - b.order_id);
+      };
+
       const getFlattenedDocs = async (indexName: string) => {
         const docs = await getDocs(indexName);
 
@@ -136,6 +154,11 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         return docsWithDottedNames;
       };
 
+      const getFlattenedDocsOrdered = async (indexName: string) => {
+        const docs = await getFlattenedDocs(indexName);
+        return docs.sort((a, b) => a.order_id - b.order_id);
+      };
+
       const clean = async (indexName: string) => {
         if (await esClient.indices.exists({ index: indexName })) {
           await esClient.indices.delete({
@@ -147,7 +170,14 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       };
 
       // Test execution phase
-      await use({ ingest, getDocs, getFlattenedDocs, clean });
+      await use({
+        ingest,
+        getDocs,
+        getDocsOrdered,
+        getFlattenedDocs,
+        getFlattenedDocsOrdered,
+        clean,
+      });
 
       // Cleanup phase
       await Promise.all([...createdIndexes].map((indexName) => clean(indexName)));

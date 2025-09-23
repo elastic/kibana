@@ -37,7 +37,7 @@ streamlangApiTest.describe(
             { message: '55.3.244.1 GET /index.html 15824 0.043', client: { ip: null } },
           ]; // Pre-map the field, ES|QL requires it
           await testBed.ingest('ingest-grok', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok');
 
           await testBed.ingest('esql-grok', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok', query);
@@ -71,7 +71,7 @@ streamlangApiTest.describe(
             { case: 'missing', attributes: { size: 2048 }, message: '127.0.0.1' }, // should be filtered out
           ];
           await testBed.ingest('ingest-grok-where', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-where');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-where');
 
           const mappingDoc = { client: { ip: '' } };
           await testBed.ingest('esql-grok-where', [mappingDoc, ...docs]);
@@ -148,7 +148,7 @@ streamlangApiTest.describe(
             },
           ];
           await testBed.ingest('ingest-grok-oniguruma', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-oniguruma');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-oniguruma');
           await testBed.ingest('esql-grok-oniguruma', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-oniguruma', query);
 
@@ -189,7 +189,7 @@ streamlangApiTest.describe(
           const { query } = transpileEsql(streamlangDSL);
           const docs = [{ message: '1.2.3.4 5.6.7.8' }];
           await testBed.ingest('ingest-grok-multi', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-multi');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-multi');
           await testBed.ingest('esql-grok-multi', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-multi', query);
 
@@ -218,7 +218,7 @@ streamlangApiTest.describe(
           const { query } = transpileEsql(streamlangDSL);
           const docs = [{ message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK' }];
           await testBed.ingest('ingest-grok-special', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-special');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-special');
           await testBed.ingest('esql-grok-special', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-special', query);
 
@@ -252,7 +252,7 @@ streamlangApiTest.describe(
           const { query } = transpileEsql(streamlangDSL);
           const docs = [{ message: '1.2.3.4', untouched: 'preserved' }];
           await testBed.ingest('ingest-grok-source', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-source');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-source');
           await testBed.ingest('esql-grok-source', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-source', query);
 
@@ -288,7 +288,7 @@ streamlangApiTest.describe(
           ];
 
           await testBed.ingest('ingest-grok-override', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-override');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-override');
 
           await testBed.ingest('esql-grok-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-override', query);
@@ -335,12 +335,10 @@ streamlangApiTest.describe(
           };
           const docs = [{ message: '123 456 90.12 34.56' }]; // GROK extracts all as float
 
-          await testBed.ingest('ingest-grok-coerce', [mappingDoc]); // Ensure mapping
           await testBed.ingest('ingest-grok-coerce', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-coerce');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-coerce');
 
-          await testBed.ingest('esql-grok-coerce', [mappingDoc]); // Ensure mapping
-          await testBed.ingest('esql-grok-coerce', docs);
+          await testBed.ingest('esql-grok-coerce', [mappingDoc, ...docs]); // Ensure mapping
           const esqlResult = await esql.queryOnIndex('esql-grok-coerce', query);
 
           const expectedExtractDoc = {
@@ -355,11 +353,14 @@ streamlangApiTest.describe(
           // Whereas ES|QL returns full precision as a double
           for (const [key, value] of Object.entries(expectedExtractDoc)) {
             if (typeof value === 'number' && !Number.isInteger(value)) {
-              expect(ingestResult[1][key]).toBeCloseTo(value as number, 3);
-              expect(esqlResult.documentsWithoutKeywords[1][key]).toBeCloseTo(value as number, 3);
+              expect(ingestResult[0][key]).toBeCloseTo(value as number, 3);
+              expect(esqlResult.documentsWithoutKeywordsOrdered[1][key]).toBeCloseTo(
+                value as number,
+                3
+              );
             } else {
-              expect(ingestResult[1][key]).toEqual(value);
-              expect(esqlResult.documentsWithoutKeywords[1][key]).toEqual(value);
+              expect(ingestResult[0][key]).toEqual(value);
+              expect(esqlResult.documentsWithoutKeywordsOrdered[1][key]).toEqual(value);
             }
           }
         }
@@ -371,6 +372,11 @@ streamlangApiTest.describe(
           // This test ensures that ES|QL preserves document order
           // as certain ES|QL commands (e.g. FORK) may change output order
           // Simulate with a where clause and ignore_missing
+
+          // Note that ES cannot guarantee order without a sort, so the fixture now adds an
+          // implicit order_id and `getFlattenedDocsOrdered` and `documentsOrdered` accessors sort by it.
+          // The key aspect being tested is that both results have the same order.
+
           const streamlangDSL: StreamlangDSL = {
             steps: [
               {
@@ -391,14 +397,14 @@ streamlangApiTest.describe(
             { id: 4, message: '127.0.0.1' },
           ];
           await testBed.ingest('ingest-grok-conditional', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-grok-conditional');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-conditional');
 
           const mappingDoc = { ip: '' };
           await testBed.ingest('esql-grok-conditional', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-grok-conditional', query);
 
           expect(ingestResult.filter((doc) => doc.id).map(({ id }) => id)).toEqual([1, 2, 3, 4]);
-          expect(esqlResult.documents.filter((doc) => doc.id).map(({ id }) => id)).toEqual([
+          expect(esqlResult.documentsOrdered.filter((doc) => doc.id).map(({ id }) => id)).toEqual([
             1, 2, 3, 4,
           ]);
         }
@@ -460,7 +466,7 @@ streamlangApiTest.describe(
           // Ingest: fails the entire GROK operation if pattern doesn't fully match and skips document ingestion (ignore_failure: false)
           // ES|QL: groked fields are returned as null
           const { errors } = await testBed.ingest('ingest-grok-partial', docs, processors);
-          await testBed.getFlattenedDocs('ingest-grok-partial');
+          await testBed.getFlattenedDocsOrdered('ingest-grok-partial');
 
           await testBed.ingest('esql-grok-partial', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-partial', query);
@@ -495,7 +501,7 @@ streamlangApiTest.describe(
           const docs = [{ message: 'no match here at all' }];
 
           const { errors } = await testBed.ingest('ingest-grok-nomatch', docs, processors);
-          await testBed.getFlattenedDocs('ingest-grok-nomatch');
+          await testBed.getFlattenedDocsOrdered('ingest-grok-nomatch');
 
           await testBed.ingest('esql-grok-nomatch', docs);
           const esqlResult = await esql.queryOnIndex('esql-grok-nomatch', query);
@@ -505,9 +511,11 @@ streamlangApiTest.describe(
           expect(errors[0].reason).toContain('Provided Grok expressions do not match field value');
 
           // ES|QL: groked fields are returned as null
-          expect(esqlResult.documentsWithoutKeywords[0].ip).toBeNull();
-          expect(esqlResult.documentsWithoutKeywords[0].method).toBeNull();
-          expect(esqlResult.documentsWithoutKeywords[0].message).toEqual('no match here at all');
+          expect(esqlResult.documentsWithoutKeywordsOrdered[0].ip).toBeNull();
+          expect(esqlResult.documentsWithoutKeywordsOrdered[0].method).toBeNull();
+          expect(esqlResult.documentsWithoutKeywordsOrdered[0].message).toEqual(
+            'no match here at all'
+          );
         }
       );
     });

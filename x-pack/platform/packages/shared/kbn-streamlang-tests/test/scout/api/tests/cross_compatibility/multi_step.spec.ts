@@ -304,7 +304,7 @@ streamlangApiTest.describe(
           };
 
           await testBed.ingest('ingest-multi-step', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-multi-step');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-multi-step');
 
           await testBed.ingest('esql-multi-step', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-multi-step', query);
@@ -314,12 +314,12 @@ streamlangApiTest.describe(
           expect(ingestResult).toHaveLength(8);
 
           // Both transpilers should return same number of valid documents
-          expect(esqlResult.documents.length).toEqual(7); // 7 documents with log_type='access'
+          expect(esqlResult.documentsOrdered.length).toEqual(7); // 7 documents with log_type='access'
 
           // Helper to find docs in results
           const findIngestDoc = (ip: string) => ingestResult.find((doc) => doc['source.ip'] === ip);
           const findEsqlDoc = (ip: string) =>
-            esqlResult.documents.find((doc) => doc['source.ip'] === ip);
+            esqlResult.documentsOrdered.find((doc) => doc['source.ip'] === ip);
 
           // Test Document 1: Fast successful request (192.168.1.100)
           const doc1Ingest = findIngestDoc('192.168.1.100');

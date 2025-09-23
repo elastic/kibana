@@ -31,13 +31,13 @@ streamlangApiTest.describe(
 
         const docs = [{ tags: ['existing_tag'] }];
         await testBed.ingest('ingest-append', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-append');
+        const ingestResult = await testBed.getDocsOrdered('ingest-append');
 
         await testBed.ingest('esql-append', docs);
         const esqlResult = await esql.queryOnIndex('esql-append', query);
 
         expect(ingestResult[0].tags).toEqual(['existing_tag', 'new_tag']);
-        expect(esqlResult.documents[0].tags).toEqual(['existing_tag', 'new_tag']);
+        expect(esqlResult.documentsOrdered[0].tags).toEqual(['existing_tag', 'new_tag']);
       });
 
       streamlangApiTest(
@@ -58,15 +58,14 @@ streamlangApiTest.describe(
 
           const docs = [{ message: 'a' }];
           await testBed.ingest('ingest-append-non-existent', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-append-non-existent');
+          const ingestResult = await testBed.getDocsOrdered('ingest-append-non-existent');
 
           // ES|QL requires the field to be pre-mapped, so we ingest a doc with the field first
-          await testBed.ingest('esql-append-non-existent', [{ tags: ['initial_tag'] }]);
-          await testBed.ingest('esql-append-non-existent', docs);
+          await testBed.ingest('esql-append-non-existent', [{ tags: ['initial_tag'] }, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-append-non-existent', query);
 
           expect(ingestResult[0].tags).toEqual(['tag1', 'tag2']);
-          expect(esqlResult.documents[1].tags).toEqual(['tag1', 'tag2']);
+          expect(esqlResult.documentsOrdered[1].tags).toEqual(['tag1', 'tag2']);
         }
       );
 
@@ -123,15 +122,14 @@ streamlangApiTest.describe(
 
           const docs = [{ message: 'a' }];
           await testBed.ingest('ingest-append-scalar', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-append-scalar');
+          const ingestResult = await testBed.getDocsOrdered('ingest-append-scalar');
 
           // ES|QL requires the field to be pre-mapped, so we ingest a doc with the field first
-          await testBed.ingest('esql-append-scalar', [{ tags: ['initial_tag'] }]);
-          await testBed.ingest('esql-append-scalar', docs);
+          await testBed.ingest('esql-append-scalar', [{ tags: ['initial_tag'] }, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-append-scalar', query);
 
           expect(ingestResult[0].tags).toEqual(['new_tag']); // Ingest creates an array
-          expect(esqlResult.documents[1].tags).toEqual('new_tag'); // ES|QL creates a scalar
+          expect(esqlResult.documentsOrdered[1].tags).toEqual('new_tag'); // ES|QL creates a scalar
         }
       );
 
@@ -154,13 +152,13 @@ streamlangApiTest.describe(
 
           const docs = [{ tags: ['existing_tag'] }];
           await testBed.ingest('ingest-append-dedupe', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-append-dedupe');
+          const ingestResult = await testBed.getDocsOrdered('ingest-append-dedupe');
 
           await testBed.ingest('esql-append-dedupe', docs);
           const esqlResult = await esql.queryOnIndex('esql-append-dedupe', query);
 
           expect(ingestResult[0].tags).toEqual(['existing_tag']); // Ingest results in an array
-          expect(esqlResult.documents[0].tags).toEqual('existing_tag'); // ES|QL results in a scalar
+          expect(esqlResult.documentsOrdered[0].tags).toEqual('existing_tag'); // ES|QL results in a scalar
         }
       );
     });

@@ -38,7 +38,7 @@ streamlangApiTest.describe(
             },
           ];
           await testBed.ingest('ingest-dissect', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-dissect');
 
           await testBed.ingest('esql-dissect', docs);
           const esqlResult = await esql.queryOnIndex('esql-dissect', query);
@@ -66,7 +66,7 @@ streamlangApiTest.describe(
 
           const docs = [{ message: 'value1-value2' }];
           await testBed.ingest('ingest-dissect-append', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-append');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-dissect-append');
 
           await testBed.ingest('esql-dissect-append', docs);
           const esqlResult = await esql.queryOnIndex('esql-dissect-append', query);
@@ -139,7 +139,7 @@ streamlangApiTest.describe(
           ];
 
           await testBed.ingest('ingest-dissect-source', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-source');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-dissect-source');
 
           // For ES|QL, create mapping document to establish field types
           const mappingDoc = {
@@ -153,9 +153,15 @@ streamlangApiTest.describe(
           const esqlResult = await esql.queryOnIndex('esql-dissect-source', query);
 
           expect(ingestResult[0]).toHaveProperty('message', docs[0].message);
-          expect(esqlResult.documentsWithoutKeywords[1]).toHaveProperty('message', docs[0].message);
+          expect(esqlResult.documentsWithoutKeywordsOrdered[1]).toHaveProperty(
+            'message',
+            docs[0].message
+          );
 
-          expect(ingestResult[0]).toEqual(esqlResult.documentsWithoutKeywords[1]);
+          const { order_id: ingestOrderId, ...ingestDoc } = ingestResult[0];
+          const { order_id: esqlOrderId, ...esqlDoc } =
+            esqlResult.documentsWithoutKeywordsOrdered[1];
+          expect(ingestDoc).toEqual(esqlDoc);
         }
       );
 
@@ -183,7 +189,7 @@ streamlangApiTest.describe(
           ];
 
           await testBed.ingest('ingest-dissect-override', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-override');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-dissect-override');
 
           // For ES|QL, create mapping document to establish field types
           const mappingDoc = {
@@ -266,7 +272,7 @@ streamlangApiTest.describe(
             { case: 'missing', attributes: { size: 2048 }, message: '[warn]' },
           ];
           await testBed.ingest('ingest-dissect-where', docs, processors);
-          const ingestResult = await testBed.getFlattenedDocs('ingest-dissect-where');
+          const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-dissect-where');
 
           const mappingDoc = { log: { level: '' } };
           await testBed.ingest('esql-dissect-where', [mappingDoc, ...docs]);
@@ -326,7 +332,7 @@ streamlangApiTest.describe(
           const esqlResult = await esql.queryOnIndex('esql-dissect-partial', query);
 
           // ES|QL: Also fails to extract any fields when pattern doesn't fully match
-          const esqlDoc = esqlResult.documentsWithoutKeywords.find(
+          const esqlDoc = esqlResult.documentsWithoutKeywordsOrdered.find(
             (doc) => doc.existing_field === 'should_retain'
           );
 
@@ -426,7 +432,7 @@ streamlangApiTest.describe(
           ];
 
           await testBed.ingest('ingest-dissect-null', docs, processors);
-          await testBed.getFlattenedDocs('ingest-dissect-null');
+          await testBed.getFlattenedDocsOrdered('ingest-dissect-null');
 
           // NOTE: BEHAVIORAL DIFFERENCE - Null source field handling
           // Ingest Pipeline: throws error when source field is explicitly null

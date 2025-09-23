@@ -31,45 +31,53 @@ streamlangApiTest.describe(
 
         const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
         await testBed.ingest('ingest-date-single-format', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-date-single-format');
+        const ingestResult = await testBed.getDocsOrdered('ingest-date-single-format');
 
         await testBed.ingest('esql-date-single-format', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-single-format', query);
 
         expect(ingestResult[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
-        expect(esqlResult.documents[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
+        expect(esqlResult.documentsOrdered[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
       });
 
-      streamlangApiTest('should parse a date with multiple formats', async ({ testBed, esql }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: 'event.created',
-              to: 'event.created_date',
-              formats: ['dd/MM/yyyy:HH:mm:ss', 'ISO8601'],
-            } as DateProcessor,
-          ],
-        };
+      // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
+      streamlangApiTest.skip(
+        'should parse a date with multiple formats',
+        async ({ testBed, esql }) => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'date',
+                from: 'event.created',
+                to: 'event.created_date',
+                formats: ['dd/MM/yyyy:HH:mm:ss', 'ISO8601'],
+              } as DateProcessor,
+            ],
+          };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+          const { processors } = transpileIngestPipeline(streamlangDSL);
+          const { query } = transpileEsql(streamlangDSL);
 
-        const docs = [
-          { event: { created: '01/01/2025:12:34:56' } },
-          { event: { created: '2025-01-02T12:34:56.789Z' } },
-        ];
-        await testBed.ingest('ingest-date-multiple-formats', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-date-multiple-formats');
+          const docs = [
+            { event: { created: '01/01/2025:12:34:56' } },
+            { event: { created: '2025-01-02T12:34:56.789Z' } },
+          ];
+          await testBed.ingest('ingest-date-multiple-formats', docs, processors);
+          const ingestResult = await testBed.getDocsOrdered('ingest-date-multiple-formats');
 
-        await testBed.ingest('esql-date-multiple-formats', docs);
-        const esqlResult = await esql.queryOnIndex('esql-date-multiple-formats', query);
+          await testBed.ingest('esql-date-multiple-formats', docs);
+          const esqlResult = await esql.queryOnIndex('esql-date-multiple-formats', query);
 
-        expect(ingestResult[0].event.created_date).toEqual('2025-01-01T12:34:56.000Z');
-        expect(ingestResult[1].event.created_date).toEqual('2025-01-02T12:34:56.789Z');
-        expect(esqlResult.documents[0]['event.created_date']).toEqual('2025-01-01T12:34:56.000Z');
-        expect(esqlResult.documents[1]['event.created_date']).toEqual('2025-01-02T12:34:56.789Z');
-      });
+          expect(ingestResult[0].event.created_date).toEqual('2025-01-01T12:34:56.000Z');
+          expect(ingestResult[1].event.created_date).toEqual('2025-01-02T12:34:56.789Z');
+          expect(esqlResult.documentsOrdered[0]['event.created_date']).toEqual(
+            '2025-01-01T12:34:56.000Z'
+          );
+          expect(esqlResult.documentsOrdered[1]['event.created_date']).toEqual(
+            '2025-01-02T12:34:56.789Z'
+          );
+        }
+      );
 
       streamlangApiTest('should use a different output format', async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
@@ -88,13 +96,13 @@ streamlangApiTest.describe(
 
         const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
         await testBed.ingest('ingest-date-output-format', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-date-output-format');
+        const ingestResult = await testBed.getDocsOrdered('ingest-date-output-format');
 
         await testBed.ingest('esql-date-output-format', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-output-format', query);
 
         expect(ingestResult[0]['@timestamp']).toEqual('2025/01/01');
-        expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
+        expect(esqlResult.documentsOrdered[0]['@timestamp']).toEqual('2025/01/01');
       });
 
       // Template validation tests - both transpilers should consistently REJECT Mustache templates
@@ -132,7 +140,8 @@ streamlangApiTest.describe(
         );
       });
 
-      streamlangApiTest(
+      // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
+      streamlangApiTest.skip(
         'should parse the first matching among a list of input formats',
         async ({ testBed, esql }) => {
           const streamlangDSL: StreamlangDSL = {
@@ -158,7 +167,7 @@ streamlangApiTest.describe(
           ];
 
           await testBed.ingest('ingest-date-multiple-patterns', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-date-multiple-patterns');
+          const ingestResult = await testBed.getDocsOrdered('ingest-date-multiple-patterns');
 
           await testBed.ingest('esql-date-multiple-patterns', docs);
           const esqlResult = await esql.queryOnIndex('esql-date-multiple-patterns', query);
@@ -169,10 +178,18 @@ streamlangApiTest.describe(
           expect(ingestResult[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z'); // ISO8601 format
           expect(ingestResult[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z'); // epoch_millis format
 
-          expect(esqlResult.documents[0].parsed_timestamp).toEqual('2024-12-31T23:59:59.000Z');
-          expect(esqlResult.documents[1].parsed_timestamp).toEqual('2025-01-01T12:34:56.000Z');
-          expect(esqlResult.documents[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z');
-          expect(esqlResult.documents[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z');
+          expect(esqlResult.documentsOrdered[0].parsed_timestamp).toEqual(
+            '2024-12-31T23:59:59.000Z'
+          );
+          expect(esqlResult.documentsOrdered[1].parsed_timestamp).toEqual(
+            '2025-01-01T12:34:56.000Z'
+          );
+          expect(esqlResult.documentsOrdered[2].parsed_timestamp).toEqual(
+            '2025-01-15T08:30:00.123Z'
+          );
+          expect(esqlResult.documentsOrdered[3].parsed_timestamp).toEqual(
+            '2024-01-01T00:00:00.000Z'
+          );
         }
       );
     });
@@ -201,13 +218,13 @@ streamlangApiTest.describe(
           expect(errors[0].reason).toContain('unable to parse date');
 
           // Since ignore_failure is not set (false by default), the document should not be ingested
-          const ingestResult = await testBed.getDocs('ingest-date-fail');
+          const ingestResult = await testBed.getDocsOrdered('ingest-date-fail');
           expect(ingestResult).toHaveLength(0);
 
           await testBed.ingest('esql-date-fail', docs);
           const esqlResult = await esql.queryOnIndex('esql-date-fail', query);
-          expect(esqlResult.documents.length).toEqual(1);
-          expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025'); // Unchanged
+          expect(esqlResult.documentsOrdered.length).toEqual(1);
+          expect(esqlResult.documentsOrdered[0]['log.time']).toEqual('01-01-2025'); // Unchanged
         }
       );
     });

@@ -31,13 +31,13 @@ streamlangApiTest.describe(
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest('ingest-set-value', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-set-value');
+        const ingestResult = await testBed.getDocsOrdered('ingest-set-value');
 
         await testBed.ingest('esql-set-value', docs);
         const esqlResult = await esql.queryOnIndex('esql-set-value', query);
 
         expect(ingestResult[0]).toHaveProperty('attributes.status', 'active');
-        expect(esqlResult.documents[0]).toEqual(
+        expect(esqlResult.documentsOrdered[0]).toEqual(
           expect.objectContaining({ 'attributes.status': 'active' })
         );
       });
@@ -60,13 +60,13 @@ streamlangApiTest.describe(
 
           const docs = [{ message: 'should-be-copied' }];
           await testBed.ingest('ingest-set-copy', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-set-copy');
+          const ingestResult = await testBed.getDocsOrdered('ingest-set-copy');
 
           await testBed.ingest('esql-set-copy', docs);
           const esqlResult = await esql.queryOnIndex('esql-set-copy', query);
 
           expect(ingestResult[0]).toHaveProperty('attributes.status', 'should-be-copied');
-          expect(esqlResult.documents[0]).toEqual(
+          expect(esqlResult.documentsOrdered[0]).toEqual(
             expect.objectContaining({ 'attributes.status': 'should-be-copied' })
           );
         }
@@ -91,13 +91,13 @@ streamlangApiTest.describe(
 
           const docs = [{ attributes: { status: 'active' } }];
           await testBed.ingest('ingest-set-override', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-set-override');
+          const ingestResult = await testBed.getDocsOrdered('ingest-set-override');
 
           await testBed.ingest('esql-set-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-set-override', query);
 
           expect(ingestResult[0]).toHaveProperty('attributes.status', 'inactive');
-          expect(esqlResult.documents[0]).toEqual(
+          expect(esqlResult.documentsOrdered[0]).toEqual(
             expect.objectContaining({ 'attributes.status': 'inactive' })
           );
         }
@@ -122,13 +122,13 @@ streamlangApiTest.describe(
 
           const docs = [{ attributes: { status: 'active' } }];
           await testBed.ingest('ingest-set-no-override', docs, processors);
-          const ingestResult = await testBed.getDocs('ingest-set-no-override');
+          const ingestResult = await testBed.getDocsOrdered('ingest-set-no-override');
 
           await testBed.ingest('esql-set-no-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-set-no-override', query);
 
           expect(ingestResult[0]).toHaveProperty('attributes.status', 'active');
-          expect(esqlResult.documents[0]).toEqual(
+          expect(esqlResult.documentsOrdered[0]).toEqual(
             expect.objectContaining({ 'attributes.status': 'active' })
           );
         }

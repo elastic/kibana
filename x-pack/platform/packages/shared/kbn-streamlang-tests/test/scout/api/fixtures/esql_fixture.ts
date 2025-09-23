@@ -26,14 +26,26 @@ export interface EsqlResponse {
 
   /**
    * Represents documents returned by the ES|QL query, with each column mapped to its corresponding value.
+   * The order is non-deterministic.
    */
   documents: Record<string, unknown>[];
 
   /**
+   * Represents documents returned by the ES|QL query, sorted deterministically by the internal `order_id`.
+   */
+  documentsOrdered: Record<string, unknown>[];
+
+  /**
    * ES|QL returns an explicit accompanying `.keyword` field. This collection drops those fields
-   * for easier comparison with ingest pipeline results.
+   * for easier comparison with ingest pipeline results. The order is non-deterministic.
    */
   documentsWithoutKeywords: Record<string, unknown>[];
+
+  /**
+   * ES|QL returns an explicit accompanying `.keyword` field. This collection drops those fields
+   * for easier comparison with ingest pipeline results. The documents are sorted deterministically by `order_id`.
+   */
+  documentsWithoutKeywordsOrdered: Record<string, unknown>[];
 }
 
 export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>({
@@ -70,12 +82,21 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           return doc;
         });
 
+        // Sort the results by the implicitly added order_id for deterministic testing
+        const sortById = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+          (a.order_id as number) - (b.order_id as number);
+
+        const documentsOrdered = [...documents].sort(sortById);
+        const documentsWithoutKeywordsOrdered = [...documentsWithoutKeywords].sort(sortById);
+
         return {
           columns: response.columns,
           columnNames: response.columns.map((col) => col.name),
           values: response.values,
           documents,
+          documentsOrdered,
           documentsWithoutKeywords,
+          documentsWithoutKeywordsOrdered,
         };
       };
 
