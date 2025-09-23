@@ -39,15 +39,20 @@ const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator) 
 const FilterBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   context,
+  onCreate,
   onFilter,
   mode,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   context: FlattenRecord[];
+  onCreate: () => void;
   onFilter: RoutingFilterFn;
   mode: BtnMode;
 }) => {
-  const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const isRuleActive = routingSnapshot.matches({ ready: { creatingNewRule: 'changing' } });
+
+  const currentRule = isRuleActive ? selectCurrentRule(routingSnapshot.context) : {};
 
   const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
   const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);
@@ -63,6 +68,9 @@ const FilterBtn = ({
   return (
     <Component
       onClick={() => {
+        if (!isRuleActive) {
+          onCreate();
+        }
         onFilter({
           ...currentRule,
           where: {
@@ -79,12 +87,17 @@ const FilterBtn = ({
   );
 };
 
-export function buildCellActions(context: FlattenRecord[], onFilter: RoutingFilterFn) {
+export function buildCellActions(
+  context: FlattenRecord[],
+  onCreate: () => void,
+  onFilter: RoutingFilterFn
+) {
   return [
     (cellActionProps: EuiDataGridColumnCellActionProps) =>
       FilterBtn({
         cellActionProps,
         context,
+        onCreate,
         onFilter,
         mode: '+',
       }),
@@ -92,6 +105,7 @@ export function buildCellActions(context: FlattenRecord[], onFilter: RoutingFilt
       FilterBtn({
         cellActionProps,
         context,
+        onCreate,
         onFilter,
         mode: '-',
       }),

@@ -10,28 +10,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiProgress,
   EuiLoadingElastic,
+  EuiProgress,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import React, { useState, useMemo } from 'react';
 import { isCondition } from '@kbn/streamlang';
+import { isEmpty } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { MemoPreviewTable, PreviewFlyout } from '../shared';
+import { buildCellActions } from './cell_actions';
+import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
   selectPreviewDocuments,
   useStreamRoutingEvents,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
-import { MemoPreviewTable, PreviewFlyout } from '../shared';
-import { buildCellActions } from './cell_actions';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -46,7 +46,7 @@ export function PreviewPanel() {
   ) {
     content = <EditingPanel />;
   } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <SamplePreviewPanel enableActions />;
+    content = <SamplePreviewPanel />;
   }
 
   return (
@@ -101,9 +101,9 @@ const EditingPanel = () => (
   />
 );
 
-const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
+const SamplePreviewPanel = () => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
-  const { setDocumentMatchFilter, changeRule } = useStreamRoutingEvents();
+  const { setDocumentMatchFilter, changeRule, createNewRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
@@ -121,9 +121,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
 
-  const cellActions = useMemo(() => {
-    return enableActions ? buildCellActions(documents, changeRule) : undefined;
-  }, [changeRule, documents, enableActions]);
+  const cellActions = buildCellActions(documents, createNewRule, changeRule);
 
   const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
     ? Number.NaN
