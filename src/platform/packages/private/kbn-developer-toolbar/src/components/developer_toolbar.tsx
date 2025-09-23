@@ -40,9 +40,9 @@ const HEIGHT = 32;
 
 const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
   position: fixed;
-  bottom: 4px;
-  right: 4px;
-  z-index: 9999;
+  bottom: ${euiTheme.size.xs};
+  right: ${euiTheme.size.xs}
+  z-index: ${euiTheme.levels.toast};
 `;
 
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
@@ -147,11 +147,33 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              // Make sure the list of right-aligned items can scroll if necessary
+              min-width: 0;
+            `}
+          >
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {state.enabledItems.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    // Make sure the list of right-aligned items can scroll if necessary
+                    min-width: 0;
+                  `}
+                >
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    css={css`
+                      // make these items scrollable if they overflow the container
+                      overflow-x: auto;
+                      // prevent scrollbar from taking up space
+                      scrollbar-width: none;
+                    `}
+                  >
                     {state.enabledItems.map((item) => (
                       <EuiFlexItem key={item.id} grow={false}>
                         {item.children}
