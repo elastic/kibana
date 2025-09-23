@@ -19,6 +19,7 @@ mapped_pages:
 | --- | --- |
 | [advancedSettings](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/advanced_settings/README.md) | This plugin registers the management settings application allowing users to configure their advanced settings, also known as uiSettings within the code. |
 | [aiAssistantManagementSelection](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/ai_assistant_management/selection/README.md) | The aiAssistantManagementSelection plugin manages the Ai Assistant management section. |
+| [alwaysOnline](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/always_online/README.md) | A Kibana plugin that overrides window.navigator.onLine to trick browsers into thinking they are always online (useful for some air-gapped customers). |
 | [charts](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/charts/README.md) | The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations. |
 | [console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md) | Console provides the user with tools for storing and executing requests against Elasticsearch. |
 | [contentManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/content_management/README.md) | The content management plugin provides functionality to manage content in Kibana. |
