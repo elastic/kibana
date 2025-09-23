@@ -63,6 +63,11 @@ import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
+import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
@@ -613,6 +618,26 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+
+      */
+    upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
   };
 }
 
@@ -706,4 +731,9 @@ export interface UpdateEntitySourceProps {
 export interface UpdatePrivMonUserProps {
   params: UpdatePrivMonUserRequestParamsInput;
   body: UpdatePrivMonUserRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }

@@ -20,6 +20,7 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
 import type {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
@@ -58,6 +59,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * Cancel a running or pending response action (Applies only to some agent types).
+     */
+    cancelAction(props: CancelActionProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/api/endpoint/action/cancel', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     createUpdateProtectionUpdatesNote(
       props: CreateUpdateProtectionUpdatesNoteProps,
       kibanaSpace: string = 'default'
@@ -357,6 +369,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   };
 }
 
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
+}
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
