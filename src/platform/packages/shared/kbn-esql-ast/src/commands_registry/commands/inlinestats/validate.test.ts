@@ -26,21 +26,19 @@ describe('INLINESTATS Validation', () => {
   });
 
   describe('INLINESTATS <aggregates> [ BY <grouping> ]', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField * 3.281', [
-      {
-        name: 'doubleField * 3.281',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg_doubleField', [
-      {
-        name: 'avg_doubleField',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField * 3.281', {
+      name: 'doubleField * 3.281',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg_doubleField', {
+      name: 'avg_doubleField',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
 
     describe('... <aggregates> ...', () => {
       test('no errors on correct usage', () => {
@@ -73,23 +71,23 @@ describe('INLINESTATS Validation', () => {
 
       test('errors when input is not an aggregate function', () => {
         inlinestatsExpectErrors('from a_index | inlinestats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by col0 = wrongField + 1',
-          ['Unknown column [wrongField]']
+          ['Unknown column "wrongField"']
         );
         inlinestatsExpectErrors('from a_index | inlinestats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
+          'Unknown function FN',
         ]);
       });
 
@@ -124,11 +122,11 @@ describe('INLINESTATS Validation', () => {
       test('various errors', () => {
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by percentile(doubleField, 90)',
-          ['Function [percentile] not allowed in [by]']
+          ['Function PERCENTILE not allowed in BY']
         );
         inlinestatsExpectErrors(
           'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
-          ['Function [percentile] not allowed in [by]']
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 

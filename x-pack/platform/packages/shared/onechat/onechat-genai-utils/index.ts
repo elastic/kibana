@@ -7,21 +7,24 @@
 
 export {
   esqlResponseToJson,
-  flattenMappings,
+  flattenMapping,
   cleanupMapping,
+  getIndexMappings,
+  executeEsql,
   type MappingField,
 } from './tools/utils';
 export {
   getDocumentById,
   type GetDocumentByIdResult,
-  getIndexMappings,
-  type GetIndexMappingEntry,
-  type GetIndexMappingsResult,
-  executeEsql,
-  type EsqlResponse,
   listIndices,
   type ListIndexDetailInfo,
   type ListIndexBasicInfo,
+  listSearchSources,
+  type AliasSearchSource,
+  type IndexSearchSource,
+  type DataStreamSearchSource,
+  type EsSearchSource,
+  type ListSourcesResponse,
 } from './tools/steps';
 export {
   indexExplorer,

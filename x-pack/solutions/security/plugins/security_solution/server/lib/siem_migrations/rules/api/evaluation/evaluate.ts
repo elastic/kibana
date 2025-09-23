@@ -12,11 +12,9 @@ import { z } from '@kbn/zod';
 import { RuleMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
-import { createTracersCallbacks } from '../util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/utils/authz';
-import { withLicense } from '../../../common/utils/with_license';
-import type { MigrateRuleGraphConfig } from '../../task/agent/types';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
@@ -47,10 +45,7 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<EvaluateRuleMigrationResponse>> => {
           const {
-            settings: {
-              connector_id: connectorId,
-              skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
-            },
+            settings: { connector_id: connectorId },
             langsmith_options: langsmithOptions,
           } = req.body;
 
@@ -62,19 +57,11 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
             const securitySolutionContext = await context.securitySolution;
             const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
-            const invocationConfig: MigrateRuleGraphConfig = {
-              callbacks: createTracersCallbacks(langsmithOptions, logger),
-              configurable: {
-                skipPrebuiltRulesMatching,
-              },
-            };
-
             await ruleMigrationsClient.task.evaluate({
               evaluationId,
               connectorId,
               langsmithOptions,
               abortController,
-              invocationConfig,
             });
 
             return res.ok({ body: { evaluationId } });

@@ -86,7 +86,10 @@ export const dataTypes = [
   'null',
   'time_duration',
   'date_period',
-  'param', // Defines a named param such as ?value or ??field
+  'param', // Defines a named param such as ?value or ??field,
+  'geohash',
+  'geohex',
+  'geotile',
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -341,6 +344,33 @@ export interface ValidationErrors {
       signatureDescription: string;
       requiredLicense: string;
     };
+  };
+  changePointWrongFieldType: {
+    message: string;
+    type: {
+      columnName: string;
+      givenType: string;
+    };
+  };
+  dropTimestampWarning: {
+    message: string;
+    type: {};
+  };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  forkTooFewBranches: {
+    message: string;
+    type: {};
   };
 }
 

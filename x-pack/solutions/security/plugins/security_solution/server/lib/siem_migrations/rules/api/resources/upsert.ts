@@ -16,11 +16,11 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
-import { authz } from '../../../common/utils/authz';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { authz } from '../../../common/api/util/authz';
 import { processLookups } from '../util/lookups';
-import { withLicense } from '../../../common/utils/with_license';
+import { withLicense } from '../../../common/api/util/with_license';
+import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -62,14 +62,17 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
             // Check if the migration exists
-            const { data } = await ruleMigrationsClient.data.rules.get(migrationId, { size: 1 });
+            const { data } = await ruleMigrationsClient.data.items.get(migrationId, { size: 1 });
             const [rule] = data;
             if (!rule) {
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
             const [lookups, macros] = partition(resources, { type: 'lookup' });
-            const processedLookups = await processLookups(lookups, ruleMigrationsClient);
+            const processedLookups = await processLookups(
+              lookups,
+              ruleMigrationsClient.data.lookups
+            );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
               ...resource,
               migration_id: migrationId,
@@ -82,7 +85,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
             const resourcesToCreate = resourceIdentifier
               .fromResources(resources)
-              .map<CreateRuleMigrationResourceInput>((resource) => ({
+              .map<CreateSiemMigrationResourceInput>((resource) => ({
                 ...resource,
                 migration_id: migrationId,
               }));

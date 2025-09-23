@@ -17,7 +17,13 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '../../types';
-import type { ErrorTypes, ErrorValues, FunctionDefinition, Signature } from '../types';
+import type {
+  ErrorTypes,
+  ErrorValues,
+  FunctionDefinition,
+  Signature,
+  SupportedDataType,
+} from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -33,22 +39,22 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownColumn':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownColumn', {
-          defaultMessage: 'Unknown column [{name}]',
+          defaultMessage: 'Unknown column "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownIndex', {
-          defaultMessage: 'Unknown index [{name}]',
+          defaultMessage: 'Unknown index "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownFunction':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
-          defaultMessage: 'Unknown function [{name}]',
-          values: { name: out.name },
+          defaultMessage: 'Unknown function {name}',
+          values: { name: out.name.toUpperCase() },
         }),
       };
     case 'noMatchingCallSignature':
@@ -57,14 +63,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         .join('\n  ');
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
-          defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
+          defaultMessage: `Invalid input types for {functionName}.
 
 Received ({argTypes}).
 
 Expected one of:
   {validSignatures}`,
           values: {
-            functionName: out.functionName,
+            functionName: out.functionName.toUpperCase(),
             argTypes: out.argTypes,
             validSignatures: signatureList,
           },
@@ -73,9 +79,9 @@ Expected one of:
     case 'wrongNumberArgsVariadic':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
-          defaultMessage: '[{fn}] expected {validArgCounts} arguments, but got {actual}.',
+          defaultMessage: '{fn} expected {validArgCounts} arguments, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             validArgCounts: i18n.formatList(
               'disjunction',
               Array.from(out.validArgCounts).map(String)
@@ -88,9 +94,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsExact', {
           defaultMessage:
-            '[{fn}] expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
+            '{fn} expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             expected: out.expected,
             actual: out.actual,
           },
@@ -100,9 +106,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsAtLeast', {
           defaultMessage:
-            '[{fn}] expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
+            '{fn} expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
           values: {
-            fn: out.fn,
+            fn: out.fn.toUpperCase(),
             minArgs: out.minArgs,
             actual: out.actual,
           },
@@ -112,9 +118,9 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand', {
           defaultMessage:
-            '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
+            '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
           values: {
-            command: out.command,
+            command: out.command.toUpperCase(),
             type: out.type,
             column: out.column,
             givenType: out.givenType,
@@ -133,10 +139,10 @@ Expected one of:
     case 'functionNotAllowedHere':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
-          defaultMessage: 'Function [{name}] not allowed in [{locationName}]',
+          defaultMessage: 'Function {name} not allowed in {locationName}',
           values: {
-            locationName: out.locationName,
-            name: out.name,
+            locationName: out.locationName.toUpperCase(),
+            name: out.name.toUpperCase(),
           },
         }),
       };
@@ -152,7 +158,7 @@ Expected one of:
     case 'unknownPolicy':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownPolicy', {
-          defaultMessage: 'Unknown policy [{name}]',
+          defaultMessage: 'Unknown policy "{name}"',
           values: {
             name: out.name,
           },
@@ -172,7 +178,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknowAggregateFunction', {
           defaultMessage:
-            'Expected an aggregate function or group but got [{value}] of type [{type}]',
+            'Expected an aggregate function or group but got "{value}" of type {type}',
           values: {
             type: out.type,
             value: out.value,
@@ -183,7 +189,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedFieldType', {
           defaultMessage:
-            'Field [{field}] cannot be retrieved, it is unsupported or not indexed; returning null',
+            'Field "{field}" cannot be retrieved, it is unsupported or not indexed; returning null',
           values: {
             field: out.field,
           },
@@ -194,11 +200,11 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedSettingValue', {
           defaultMessage:
-            'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
+            'Unrecognized value "{value}" for {command}, mode needs to be one of [{expected}]',
           values: {
             expected: out.expected,
             value: out.value,
-            command: out.command,
+            command: out.command.toUpperCase(),
           },
         }),
         type: 'error',
@@ -214,7 +220,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongMetadataArgumentType', {
           defaultMessage:
-            'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
+            'Metadata field "{value}" is not available. Available metadata fields are: [{availableFields}]',
           values: {
             value: out.value,
             availableFields: out.availableFields,
@@ -237,8 +243,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.invalidJoinIndex', {
           defaultMessage:
-            '[{identifier}] index is not a valid JOIN index.' +
-            ' Please use a "lookup" mode index JOIN commands.',
+            '"{identifier}" is not a valid JOIN index. Please use a "lookup" mode index.',
           values: { identifier: out.identifier },
         }),
       };
@@ -264,11 +269,62 @@ Expected one of:
           defaultMessage:
             '{name} with {signatureDescription} requires a {requiredLicense} license.',
           values: {
-            name: out.name,
+            name: out.name.toUpperCase(),
             signatureDescription: out.signatureDescription,
             requiredLicense: out.requiredLicense.toUpperCase(),
           },
         }),
+      };
+    case 'changePointWrongFieldType':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.changePointWrongFieldType', {
+          defaultMessage:
+            'CHANGE_POINT only supports numeric values, found "{columnName}" of type {givenType}',
+          values: {
+            columnName: out.columnName,
+            givenType: out.givenType,
+          },
+        }),
+        type: 'error',
+      };
+    case 'dropTimestampWarning':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.dropTimestampWarning', {
+          defaultMessage: 'Dropping "@timestamp" prevents the time range from being applied.',
+        }),
+        type: 'warning',
+      };
+
+    case 'inferenceIdRequired':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inferenceIdRequired', {
+          defaultMessage: '"inference_id" parameter is required for {command}.',
+          values: { command: out.command.toUpperCase() },
+        }),
+        type: 'error',
+      };
+
+    case 'unsupportedQueryType':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedQueryType', {
+          defaultMessage: '{command} query must be of type text. Found {expressionType}',
+          values: { command: out.command.toUpperCase(), expressionType: out.expressionType },
+        }),
+        type: 'error',
+      };
+    case 'forkTooManyBranches':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkTooManyBranches', {
+          defaultMessage: '[FORK] Supports a maximum of 8 branches.',
+        }),
+        type: 'error',
+      };
+    case 'forkTooFewBranches':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
+          defaultMessage: '[FORK] Must include at least two branches.',
+        }),
+        type: 'error',
       };
   }
   return { message: '' };
@@ -433,6 +489,24 @@ export const errors = {
       });
     }
   },
+
+  changePointWrongFieldType: (
+    { location, name }: ESQLColumn,
+    type: SupportedDataType | 'unknown'
+  ): ESQLMessage =>
+    errors.byId('changePointWrongFieldType', location, {
+      columnName: name,
+      givenType: type,
+    }),
+
+  dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
+    errors.byId('dropTimestampWarning', location, {}),
+
+  forkTooManyBranches: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('forkTooManyBranches', command.location, {}),
+
+  forkTooFewBranches: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('forkTooFewBranches', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

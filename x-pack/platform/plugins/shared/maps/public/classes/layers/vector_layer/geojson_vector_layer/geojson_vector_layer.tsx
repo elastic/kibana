@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import type { Feature, FeatureCollection } from 'geojson';
 import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
+import type { Writable } from '@kbn/utility-types';
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -47,7 +48,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {

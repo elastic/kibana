@@ -20,9 +20,10 @@
       "ruleRegistry",
       "security",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

@@ -23,6 +23,7 @@ export enum ReadOperations {
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
   FindGaps = 'findGaps',
+  BulkEditParams = 'bulkEditParams', // special operation for bulk editing rule params
 }
 
 export enum WriteOperations {

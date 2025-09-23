@@ -21,7 +21,6 @@ jest.mock('../../../common/hooks/use_add_integrations_url');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_create_data_view');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 describe('<AlertSummaryPage />', () => {
   beforeEach(() => {

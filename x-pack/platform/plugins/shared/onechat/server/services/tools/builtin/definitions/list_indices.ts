@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { listIndices } from '@kbn/onechat-genai-utils';
+import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const listIndicesSchema = z.object({
@@ -16,36 +16,35 @@ const listIndicesSchema = z.object({
     .string()
     .default('*')
     .describe(
-      `Index pattern to match Elasticsearch index names.
+      `Index pattern to match Elasticsearch indices, aliases and datastream names.
       - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
       - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
       - Defaults to '*' to match all indices.`
-    ),
-  showDetails: z
-    .boolean()
-    .default(false)
-    .describe(
-      'If true, returns extra details like health, status, and shard counts. Defaults to false.'
     ),
 });
 
 export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchema> => {
   return {
-    id: builtinToolIds.listIndices,
-    description: `List the indices in the Elasticsearch cluster the current user has access to.
+    id: platformCoreTools.listIndices,
+    description: `List the indices, aliases and datastreams from the Elasticsearch cluster.
 
-    The 'pattern' optional parameter is an index pattern which can be used to filter indices.
-    This parameter should only be used when you already know of a specific pattern to filter on,
-    e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
+The 'pattern' optional parameter is an index pattern which can be used to filter resources.
+This parameter should only be used when you already know of a specific pattern to filter on,
+e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern, showDetails }, { esClient }) => {
-      const result = await listIndices({
+    handler: async ({ pattern }, { esClient, logger }) => {
+      logger.debug(`list indices tool called with pattern: ${pattern}`);
+      const {
+        indices,
+        data_streams: dataStreams,
+        aliases,
+        warnings,
+      } = await listSearchSources({
         pattern,
-        showDetails,
         includeHidden: false,
         includeKibanaIndices: false,
-        // LLM is stupid with index patterns, this works around it
-        listAllIfNoResults: true,
+        excludeIndicesRepresentedAsAlias: false,
+        excludeIndicesRepresentedAsDatastream: true,
         esClient: esClient.asCurrentUser,
       });
 
@@ -54,12 +53,15 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
           {
             type: ToolResultType.other,
             data: {
-              indices: result,
+              indices: indices.map((index) => ({ name: index.name })),
+              aliases: aliases.map((alias) => ({ name: alias.name, indices: alias.indices })),
+              data_streams: dataStreams.map((ds) => ({ name: ds.name, indices: ds.indices })),
+              warnings,
             },
           },
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

@@ -189,6 +189,52 @@ describe('getTimelineItemsFromConversation', () => {
       expect(container.textContent).toBe('executed the function context');
     });
   });
+
+  describe("with assistant function suggestion content set to '[TOOL_CALLS]'", () => {
+    beforeEach(() => {
+      items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
+        chatService: mockChatService,
+        hasConnector: true,
+        chatState: ChatState.Ready,
+        messages: [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '[TOOL_CALLS]',
+              function_call: {
+                name: 'my_function',
+                arguments: JSON.stringify({}),
+                trigger: MessageRole.Assistant,
+              },
+            },
+          },
+        ],
+        onActionClick: jest.fn(),
+        isArchived: false,
+      });
+    });
+
+    it('renders the function call preview and collapses the item, allowing copy', () => {
+      // items[0] is the conversation start, items[1] is user message, items[2] is assistant suggestion
+      const assistantSuggestion = items[2];
+      expect(assistantSuggestion.role).toBe(MessageRole.Assistant);
+      expect(assistantSuggestion.content).toBe(
+        `\`\`\`\n{\n  "name": "my_function",\n  "args": {}\n}\n\`\`\``
+      );
+      expect(assistantSuggestion.display.collapsed).toBe(true);
+      expect(assistantSuggestion.actions.canCopy).toBe(true);
+    });
+  });
+
   describe('with a render function', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => true);

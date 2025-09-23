@@ -298,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete data view';
+        const expectedAlertText = 'Delete Data View';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });

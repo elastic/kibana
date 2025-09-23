@@ -15,6 +15,7 @@ import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
 import type { VisualizationState, DatasourceStates } from '.';
 import type { LensDocument } from '../persistence';
 import type { DatasourceMap, VisualizationMap, Datasource } from '../types';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -34,7 +35,7 @@ export function mergeToNewDoc(
     visualizationMap: VisualizationMap;
     extractFilterReferences: FilterManager['extract'];
   }
-) {
+): LensDocument | undefined {
   const activeVisualization =
     visualization.state && visualization.activeId ? visualizationMap[visualization.activeId] : null;
   const activeDatasource =
@@ -125,7 +126,8 @@ export function mergeToNewDoc(
       internalReferences,
       adHocDataViews: persistableAdHocDataViews,
     },
-  };
+    version: LENS_ITEM_LATEST_VERSION,
+  } satisfies LensDocument;
 }
 
 export function getActiveDataFromDatatable(

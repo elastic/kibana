@@ -73,7 +73,6 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
-  hideDataGridHeader?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -101,9 +100,8 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
-  hideDataGridHeader = false,
 }: TableGridProps) {
-  const styles = useMemoCss(componentStyles({ hideDataGridHeader }));
+  const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
 
   const onToggleColumn = useMemo(() => {
@@ -252,71 +250,63 @@ export function TableGrid({
   );
 }
 
-const componentStyles = ({ hideDataGridHeader }: { hideDataGridHeader: boolean }) => {
-  return {
-    fieldsGrid: (themeContext: UseEuiTheme) => {
-      const { euiTheme } = themeContext;
-      const { fontSize } = euiFontSize(themeContext, 's');
+const componentStyles = {
+  fieldsGrid: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
 
-      return css({
-        '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
-          borderTop: 'none',
+    return css({
+      '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+        borderTop: 'none',
+      },
+
+      '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+        borderBottom: euiTheme.border.thin,
+      },
+
+      '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+
+      '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
+        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
+      },
+
+      '.kbnDocViewer__fieldName': {
+        padding: euiTheme.size.xs,
+        paddingLeft: 0,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+
+        '.euiDataGridRowCell__popover &': {
+          fontSize,
         },
+      },
 
-        '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
-          borderBottom: euiTheme.border.thin,
-        },
+      '.kbnDocViewer__fieldName_icon': {
+        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
 
-        '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
-          paddingTop: 0,
-          paddingBottom: 0,
-        },
+      '.kbnDocViewer__fieldName_multiFieldBadge': {
+        margin: `${euiTheme.size.xs} 0`,
+        fontWeight: euiTheme.font.weight.regular,
+        fontFamily: euiTheme.font.family,
+      },
 
-        '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
-          padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
-        },
+      '.kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 0,
+      },
 
-        '.kbnDocViewer__fieldName': {
-          padding: euiTheme.size.xs,
-          paddingLeft: 0,
-          lineHeight: euiTheme.font.lineHeightMultiplier,
-
-          '.euiDataGridRowCell__popover &': {
-            fontSize,
-          },
-        },
-
-        '.kbnDocViewer__fieldName_icon': {
-          paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
-          lineHeight: euiTheme.font.lineHeightMultiplier,
-        },
-
-        '.kbnDocViewer__fieldName_multiFieldBadge': {
-          margin: `${euiTheme.size.xs} 0`,
-          fontWeight: euiTheme.font.weight.regular,
-          fontFamily: euiTheme.font.family,
-        },
-
+      '& [data-gridcell-column-id="pin_field"]:focus-within': {
         '.kbnDocViewer__fieldsGrid__pinAction': {
-          opacity: 0,
-        },
-
-        '& [data-gridcell-column-id="pin_field"]:focus-within': {
-          '.kbnDocViewer__fieldsGrid__pinAction': {
-            opacity: 1,
-          },
-        },
-
-        '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
           opacity: 1,
         },
-        ...(hideDataGridHeader
-          ? {
-              '.euiDataGridHeader': { height: '20px' }, // use euiTheme variable
-              '.euiDataGridHeaderCell': { display: 'none' },
-            }
-          : {}),
-      });
-    },
-  };
+      },
+
+      '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 1,
+      },
+    });
+  },
 };
