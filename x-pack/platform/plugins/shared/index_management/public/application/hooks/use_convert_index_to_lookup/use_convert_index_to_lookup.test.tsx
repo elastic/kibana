@@ -170,6 +170,36 @@ describe('useConvertIndexToLookup', () => {
       expect(result.current.errorMessage).toBe(errorMessage);
       expect(result.current.isConverting).toBe(false);
     });
+
+    it('should handle a thrown error from startReindex', async () => {
+      const thrownError = new Error('Failure during startReindex');
+      mockedStartReindex.mockRejectedValue(thrownError);
+
+      const { result } = renderHook(() => useConvertIndexToLookup(defaultHookArgs));
+
+      await act(async () => {
+        await result.current.convert('lookup-my-index');
+      });
+
+      expect(result.current.errorMessage).toBe('An unexpected error occurred.');
+      expect(result.current.isConverting).toBe(false);
+      expect(mockedGetReindexStatus).not.toHaveBeenCalled();
+    });
+
+    it('should handle a thrown error from getReindexStatus', async () => {
+      const thrownError = new Error('Failure during getReindexStatus');
+      mockedStartReindex.mockResolvedValue({ data: {}, error: null });
+      mockedGetReindexStatus.mockRejectedValue(thrownError);
+
+      const { result } = renderHook(() => useConvertIndexToLookup(defaultHookArgs));
+
+      await act(async () => {
+        await result.current.convert('lookup-my-index');
+      });
+
+      expect(result.current.errorMessage).toBe('An unexpected error occurred.');
+      expect(result.current.isConverting).toBe(false);
+    });
   });
 
   describe('cleanup logic', () => {

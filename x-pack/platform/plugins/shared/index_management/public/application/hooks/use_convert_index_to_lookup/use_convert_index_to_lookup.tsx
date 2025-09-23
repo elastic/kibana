@@ -48,38 +48,47 @@ export const useConvertIndexToLookup = ({
   const updateStatus = useCallback(async () => {
     clearPollInterval();
 
-    const { data, error } = await getReindexStatus(sourceIndexName);
+    try {
+      const { data, error } = await getReindexStatus(sourceIndexName);
 
-    if (error) {
-      setErrorMessage(error.message);
-      setIsConverting(false);
-      return;
-    }
+      if (error) {
+        setErrorMessage(error.message);
+        setIsConverting(false);
+        return;
+      }
 
-    if (data?.reindexOp?.status === ReindexStatus.inProgress) {
-      pollIntervalIdRef.current = window.setTimeout(updateStatus, POLL_INTERVAL);
-    } else if (
-      data?.reindexOp?.status === ReindexStatus.failed ||
-      data?.reindexOp?.status === ReindexStatus.cancelled
-    ) {
+      if (data?.reindexOp?.status === ReindexStatus.inProgress) {
+        pollIntervalIdRef.current = window.setTimeout(updateStatus, POLL_INTERVAL);
+      } else if (
+        data?.reindexOp?.status === ReindexStatus.failed ||
+        data?.reindexOp?.status === ReindexStatus.cancelled
+      ) {
+        setErrorMessage(
+          data?.reindexOp?.errorMessage ??
+            i18n.translate(
+              'xpack.idxMgmt.convertToLookupIndexAction.reindexFailedOrCancelledErrorMessage',
+              {
+                defaultMessage: 'Reindex did not complete successfully due to unknown error.',
+              }
+            )
+        );
+        setIsConverting(false);
+        return;
+      } else {
+        setIsConverting(false);
+        onCloseRef.current();
+
+        if (data?.reindexOp?.newIndexName) {
+          onSuccessRef.current(data.reindexOp.newIndexName);
+        }
+      }
+    } catch {
       setErrorMessage(
-        data?.reindexOp?.errorMessage ??
-          i18n.translate(
-            'xpack.idxMgmt.convertToLookupIndexAction.reindexFailedOrCancelledErrorMessage',
-            {
-              defaultMessage: 'Reindex did not complete successfully due to unknown error.',
-            }
-          )
+        i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.unexpectedErrorMessage', {
+          defaultMessage: 'An unexpected error occurred.',
+        })
       );
       setIsConverting(false);
-      return;
-    } else {
-      setIsConverting(false);
-      onCloseRef.current();
-
-      if (data?.reindexOp?.newIndexName) {
-        onSuccessRef.current(data.reindexOp.newIndexName);
-      }
     }
   }, [clearPollInterval, sourceIndexName]);
 
@@ -87,15 +96,24 @@ export const useConvertIndexToLookup = ({
     setIsConverting(true);
     setErrorMessage('');
 
-    const { error } = await startReindex(sourceIndexName, lookupIndexName);
+    try {
+      const { error } = await startReindex(sourceIndexName, lookupIndexName);
 
-    if (error) {
-      setErrorMessage(error.message);
+      if (error) {
+        setErrorMessage(error.message);
+        setIsConverting(false);
+        return;
+      }
+
+      await updateStatus();
+    } catch {
+      setErrorMessage(
+        i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.unexpectedErrorMessage', {
+          defaultMessage: 'An unexpected error occurred.',
+        })
+      );
       setIsConverting(false);
-      return;
     }
-
-    await updateStatus();
   };
 
   useEffect(() => {
