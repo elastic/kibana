@@ -25,7 +25,6 @@ import { getCustomAgents } from './get_custom_agents';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import { httpResponseUserErrorCodes } from './create_and_throw_user_error';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { ClientRequest } from 'http';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
@@ -122,14 +121,9 @@ describe('request', () => {
   test('adds request body bytes from request header on a failed', async () => {
     const contentLength = 12;
     axiosMock.mockRejectedValue(
-      new AxiosError(
-        'failed',
-        '500',
-        undefined,
-        new ClientRequest({
-          headers: { 'Content-Length': contentLength },
-        })
-      )
+      new AxiosError('failed', '500', undefined, {
+        getHeader: () => contentLength,
+      })
     );
     const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
