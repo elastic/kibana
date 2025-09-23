@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { BehaviorSubject } from 'rxjs';
 import { CreateESQLControlAction } from './esql_control_action';
 
 // Mock external dependencies
@@ -30,6 +31,7 @@ describe('CreateESQLControlAction', () => {
   const timefilterMock = dataMock.query.timefilter.timefilter;
   let action: CreateESQLControlAction;
   let mockCore: ReturnType<typeof coreMock.createStart>;
+  let currentAppId$: BehaviorSubject<string>;
   const searchMock = dataMock.search.search;
 
   const mockContext = {
@@ -43,6 +45,8 @@ describe('CreateESQLControlAction', () => {
   beforeEach(() => {
     mockCore = coreMock.createStart();
     mockCore.uiSettings.get.mockReturnValue(true); // Enable ESQL
+    currentAppId$ = new BehaviorSubject('discover');
+    mockCore.application.currentAppId$ = currentAppId$;
 
     action = new CreateESQLControlAction(mockCore, searchMock, timefilterMock);
 
@@ -50,7 +54,9 @@ describe('CreateESQLControlAction', () => {
   });
 
   describe('execute', () => {
-    it('should dismiss all flyouts except esqlControls before opening control flyout', async () => {
+    it('should dismiss all flyouts except esqlControls before opening control flyout when in Discover app', async () => {
+      currentAppId$.next('discover');
+
       await action.execute(mockContext);
 
       expect(mockDismissAllFlyoutsExceptFor).toHaveBeenCalledWith(DiscoverFlyouts.esqlControls);
@@ -58,7 +64,17 @@ describe('CreateESQLControlAction', () => {
       expect(mockOpenLazyFlyout).toHaveBeenCalledTimes(1);
     });
 
-    it('should continue opening flyout even if dismissAllFlyoutsExceptFor throws an error', async () => {
+    it('should not dismiss flyouts when not in Discover app', async () => {
+      currentAppId$.next('dashboard');
+
+      await action.execute(mockContext);
+
+      expect(mockDismissAllFlyoutsExceptFor).not.toHaveBeenCalled();
+      expect(mockOpenLazyFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    it('should continue opening flyout even if dismissAllFlyoutsExceptFor throws an error in Discover', async () => {
+      currentAppId$.next('discover');
       mockDismissAllFlyoutsExceptFor.mockImplementation(() => {
         throw new Error('Failed to dismiss flyouts');
       });
@@ -69,7 +85,7 @@ describe('CreateESQLControlAction', () => {
       expect(mockOpenLazyFlyout).toHaveBeenCalledTimes(1);
     });
 
-    it('should open lazy flyout with correct configuration after dismissing flyouts', async () => {
+    it('should open lazy flyout with correct configuration after conditionally dismissing flyouts', async () => {
       await action.execute(mockContext);
 
       expect(mockOpenLazyFlyout).toHaveBeenCalledWith({

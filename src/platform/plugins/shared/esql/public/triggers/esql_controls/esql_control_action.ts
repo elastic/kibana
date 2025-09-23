@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -74,10 +75,13 @@ export class CreateESQLControlAction implements Action<Context> {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
     }
+    const currentApp = await firstValueFrom(this.core.application.currentAppId$ ?? of(undefined));
 
     // Close all existing flyouts before opening the control flyout
     try {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlControls);
+      if (currentApp === 'discover') {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlControls);
+      }
     } catch (error) {
       // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
     }
