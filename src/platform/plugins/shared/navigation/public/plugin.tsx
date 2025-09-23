@@ -132,7 +132,7 @@ export class NavigationPublicPlugin
         const tourManager = new SolutionNavigationTourManager({
           navigationTourManager: project.navigationTourManager,
           spacesSolutionViewTourManager: spaces.solutionViewTourManager,
-          userProfiles: core.userProfile,
+          userProfile: core.userProfile,
           capabilities: core.application.capabilities,
           featureFlags: core.featureFlags,
         });

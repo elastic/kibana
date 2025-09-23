@@ -19,7 +19,9 @@ const newNavBlogPost = 'https://ela.st/new-kibana-navigation';
 export const tourSteps: TourStep[] = [
   {
     id: 'sidenav-home',
-    title: 'Improved navigation menu',
+    title: i18n.translate('core.chrome.navigationTour.sidenavHomeTitle', {
+      defaultMessage: 'Improved navigation menu',
+    }),
     content: (
       <EuiText size={'s'}>
         <p>
@@ -45,7 +47,9 @@ export const tourSteps: TourStep[] = [
   },
   {
     id: 'sidenav-manage-data',
-    title: 'Data management now has its own menu',
+    title: i18n.translate('core.chrome.navigationTour.sidenavManageDataTitle', {
+      defaultMessage: 'Data management now has its own menu',
+    }),
     content: (
       <EuiText size={'s'}>
         <p>

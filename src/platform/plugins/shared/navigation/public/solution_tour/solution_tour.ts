@@ -23,7 +23,7 @@ export class SolutionNavigationTourManager {
     private deps: {
       navigationTourManager: NavigationTourManager;
       spacesSolutionViewTourManager: SpacesSolutionViewTourManager;
-      userProfiles: UserProfileServiceStart;
+      userProfile: UserProfileServiceStart;
       capabilities: ApplicationStart['capabilities'];
       featureFlags: FeatureFlagsStart;
     }
@@ -38,7 +38,7 @@ export class SolutionNavigationTourManager {
 
     // when completes, maybe start the navigation tour (if applicable)
     if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
-    const hasCompletedTour = await checkTourCompletion(this.deps.userProfiles);
+    const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
     if (hasCompletedTour) return;
 
     const canShowDataManagement = hasAccessToDataManagement(this.deps.capabilities);
@@ -47,7 +47,7 @@ export class SolutionNavigationTourManager {
     );
     await this.deps.navigationTourManager.waitForTourEnd();
 
-    await preserveTourCompletion(this.deps.userProfiles);
+    await preserveTourCompletion(this.deps.userProfile);
   }
 }
 
@@ -65,21 +65,21 @@ const hasAccessToDataManagement = (capabilities: ApplicationStart['capabilities'
 
 const SOLUTION_NAVIGATION_TOUR_KEY = 'solutionNavigationTour:completed';
 
-async function preserveTourCompletion(userProfiles: UserProfileServiceStart): Promise<void> {
+async function preserveTourCompletion(userProfile: UserProfileServiceStart): Promise<void> {
   try {
     localStorage.setItem(SOLUTION_NAVIGATION_TOUR_KEY, 'true');
-    return await userProfiles.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
+    return await userProfile.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
   } catch (e) {
     // ignore
   }
 }
 
-async function checkTourCompletion(userProfiles: UserProfileServiceStart): Promise<boolean> {
+async function checkTourCompletion(userProfile: UserProfileServiceStart): Promise<boolean> {
   try {
     const localValue = localStorage.getItem(SOLUTION_NAVIGATION_TOUR_KEY) === 'true';
     if (localValue) return true;
 
-    const profile = await userProfiles.getCurrent({
+    const profile = await userProfile.getCurrent({
       dataPath: SOLUTION_NAVIGATION_TOUR_KEY,
     });
 
