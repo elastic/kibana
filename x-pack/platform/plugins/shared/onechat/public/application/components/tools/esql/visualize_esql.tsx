@@ -85,9 +85,6 @@ export function VisualizeESQL({
 
   const isLoading = !lensInput;
 
-  console.log('isLoading', isLoading);
-  console.log('lensInput', lensInput);
-
   return (
     <>
       <EditVisualization
