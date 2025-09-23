@@ -47,7 +47,11 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
-    "@kbn/core-i18n-browser-mocks"
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/field-types",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin"
   ],
   "exclude": ["target/**/*"]
 }
