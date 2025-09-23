@@ -46,7 +46,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -153,7 +153,6 @@ import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operati
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
 import { registerSetupTasks } from './tasks/setup';
-import { AlertingPluginsStart, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;

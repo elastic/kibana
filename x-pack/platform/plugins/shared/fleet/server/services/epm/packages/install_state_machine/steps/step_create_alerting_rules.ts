@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
 import { createKibanaRequestFromAuth } from '../../../../request_utils';
 import { appContextService } from '../../../../app_context';
@@ -30,64 +31,74 @@ function getRuleId({
 }
 
 export async function createAlertingRuleFromTemplate(
-  deps: { rulesClient?: RulesClientApi },
+  deps: { rulesClient?: RulesClientApi; logger: InstallContext['logger'] },
   params: {
     alertTemplateArchiveAsset: ArchiveAsset;
     spaceId?: string;
     pkgName: string;
   }
 ): Promise<KibanaAssetReference> {
-  const { rulesClient } = deps;
+  const { rulesClient, logger } = deps;
   const { pkgName, alertTemplateArchiveAsset, spaceId } = params;
   const ruleId = getRuleId({ pkgName, templateId: alertTemplateArchiveAsset.id, spaceId });
-  const template = await rulesClient
-    ?.getTemplate({ id: alertTemplateArchiveAsset.id })
-    .catch((err) => {
+  try {
+    if (!rulesClient) {
+      throw new FleetError('Rules client is not available');
+    }
+
+    const template = await rulesClient
+      .getTemplate({ id: alertTemplateArchiveAsset.id })
+      .catch((err) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return undefined;
+        }
+        throw err;
+      });
+    if (!template) {
+      throw new FleetError(`Rule template ${alertTemplateArchiveAsset.id} not found`);
+    }
+
+    const rule = await rulesClient.get({ id: ruleId }).catch((err) => {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return undefined;
       }
       throw err;
     });
-  if (!template) {
+    // Already created
+    if (rule) {
+      return {
+        id: ruleId,
+        type: KibanaSavedObjectType.alert,
+      };
+    }
+
+    const { ruleTypeId, id: _id, ...rest } = template;
+
+    logger.debug(`Creating rule: ${ruleId} for package ${pkgName}`);
+    await rulesClient.create({
+      data: {
+        alertTypeId: ruleTypeId,
+        ...rest,
+        enabled: true,
+        actions: [],
+        consumer: 'alerts',
+      }, // what value for consumer will make sense?
+      options: { id: ruleId },
+    });
+
+    return {
+      id: ruleId,
+      type: KibanaSavedObjectType.alert,
+    };
+  } catch (e) {
+    logger.error(`Error creating rule: ${ruleId} for package ${pkgName}`, { error: e });
+
     return {
       id: ruleId,
       type: KibanaSavedObjectType.alert,
       deferred: true,
     };
   }
-
-  const rule = await rulesClient?.get({ id: ruleId }).catch((err) => {
-    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return undefined;
-    }
-    throw err;
-  });
-  // Already created
-  if (rule) {
-    return {
-      id: ruleId,
-      type: KibanaSavedObjectType.alert,
-    };
-  }
-
-  const { ruleTypeId, ...rest } = template;
-
-  await rulesClient?.create({
-    data: {
-      alertTypeId: ruleTypeId,
-      ...rest,
-      enabled: true,
-      actions: [],
-      consumer: 'alerts',
-    }, // what value for consumer will make sense?
-    options: { id: ruleId },
-  });
-  // Todo catch error
-
-  return {
-    id: ruleId,
-    type: KibanaSavedObjectType.alert,
-  };
 }
 
 export async function stepCreateAlertingRules(context: InstallContext) {
@@ -123,7 +134,7 @@ export async function stepCreateAlertingRules(context: InstallContext) {
         const alertTemplate = JSON.parse(entry.buffer.toString('utf8')) as ArchiveAsset;
 
         const ref = await createAlertingRuleFromTemplate(
-          { rulesClient },
+          { rulesClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
         assetRefs.push(ref);
