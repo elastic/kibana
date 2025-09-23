@@ -58,6 +58,7 @@ const getDataViewsRouteFactory =
           type: schema.maybe(schema.string()),
           typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           name: schema.maybe(schema.string()),
+          timeFieldName: schema.maybe(schema.string()),
         })
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
