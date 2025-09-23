@@ -110,7 +110,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const partitionStateSchemaNoESQL = schema.object({
+export const mosaicStateSchemaNoESQL = schema.object({
   type: schema.literal('mosaic'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -162,7 +162,7 @@ export const partitionStateSchemaNoESQL = schema.object({
   ),
 });
 
-const partitionStateSchemaESQL = schema.object({
+const mosaicStateSchemaESQL = schema.object({
   type: schema.literal('mosaic'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -182,11 +182,11 @@ const partitionStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const partitionStateSchema = schema.oneOf([
-  partitionStateSchemaNoESQL,
-  partitionStateSchemaESQL,
+export const mosaicStateSchema = schema.oneOf([
+  mosaicStateSchemaNoESQL,
+  mosaicStateSchemaESQL,
 ]);
 
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL = TypeOf<typeof partitionStateSchemaNoESQL>;
-export type PartitionStateESQL = TypeOf<typeof partitionStateSchemaESQL>;
+export type MosaicState = TypeOf<typeof mosaicStateSchema>;
+export type MosaicStateNoESQL = TypeOf<typeof mosaicStateSchemaNoESQL>;
+export type MosaicStateESQL = TypeOf<typeof mosaicStateSchemaESQL>;

@@ -108,7 +108,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const partitionStateSchemaNoESQL = schema.object({
+export const waffleStateSchemaNoESQL = schema.object({
   type: schema.literal('waffle'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -160,7 +160,7 @@ export const partitionStateSchemaNoESQL = schema.object({
   ),
 });
 
-const partitionStateSchemaESQL = schema.object({
+const waffleStateSchemaESQL = schema.object({
   type: schema.literal('waffle'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -180,11 +180,11 @@ const partitionStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const partitionStateSchema = schema.oneOf([
-  partitionStateSchemaNoESQL,
-  partitionStateSchemaESQL,
+export const waffleStateSchema = schema.oneOf([
+  waffleStateSchemaNoESQL,
+  waffleStateSchemaESQL,
 ]);
 
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL = TypeOf<typeof partitionStateSchemaNoESQL>;
-export type PartitionStateESQL = TypeOf<typeof partitionStateSchemaESQL>;
+export type WaffleState = TypeOf<typeof waffleStateSchema>;
+export type WaffleStateNoESQL = TypeOf<typeof waffleStateSchemaNoESQL>;
+export type WaffleStateESQL = TypeOf<typeof waffleStateSchemaESQL>;

@@ -127,7 +127,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const partitionStateSchemaNoESQL = schema.object({
+export const pieStateSchemaNoESQL = schema.object({
   type: schema.oneOf([schema.literal('pie'), schema.literal('donut')]),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -179,7 +179,7 @@ export const partitionStateSchemaNoESQL = schema.object({
   ),
 });
 
-const partitionStateSchemaESQL = schema.object({
+const pieStateSchemaESQL = schema.object({
   type: schema.oneOf([schema.literal('pie'), schema.literal('donut')]),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -199,11 +199,11 @@ const partitionStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const partitionStateSchema = schema.oneOf([
-  partitionStateSchemaNoESQL,
-  partitionStateSchemaESQL,
+export const pieStateSchema = schema.oneOf([
+  pieStateSchemaNoESQL,
+  pieStateSchemaESQL,
 ]);
 
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL = TypeOf<typeof partitionStateSchemaNoESQL>;
-export type PartitionStateESQL = TypeOf<typeof partitionStateSchemaESQL>;
+export type PieState = TypeOf<typeof pieStateSchema>;
+export type PieStateNoESQL = TypeOf<typeof pieStateSchemaNoESQL>;
+export type PieStateESQL = TypeOf<typeof pieStateSchemaESQL>;

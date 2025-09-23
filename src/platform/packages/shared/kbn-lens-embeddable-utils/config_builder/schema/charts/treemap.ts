@@ -114,7 +114,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const partitionStateSchemaNoESQL = schema.object({
+export const treemapStateSchemaNoESQL = schema.object({
   type: schema.literal('treemap'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -166,7 +166,7 @@ export const partitionStateSchemaNoESQL = schema.object({
   ),
 });
 
-const partitionStateSchemaESQL = schema.object({
+const treemapStateSchemaESQL = schema.object({
   type: schema.literal('treemap'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -186,11 +186,11 @@ const partitionStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const partitionStateSchema = schema.oneOf([
-  partitionStateSchemaNoESQL,
-  partitionStateSchemaESQL,
+export const treemapStateSchema = schema.oneOf([
+  treemapStateSchemaNoESQL,
+  treemapStateSchemaESQL,
 ]);
 
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL = TypeOf<typeof partitionStateSchemaNoESQL>;
-export type PartitionStateESQL = TypeOf<typeof partitionStateSchemaESQL>;
+export type TreemapState = TypeOf<typeof treemapStateSchema>;
+export type TreemapStateNoESQL = TypeOf<typeof treemapStateSchemaNoESQL>;
+export type TreemapStateESQL = TypeOf<typeof treemapStateSchemaESQL>;
