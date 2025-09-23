@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render field tokens correctly for ES|QL', async function () {
       await discover.selectTextBaseLang();
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('1,000');
       await unifiedFieldList.clickFieldListItemAdd('@timestamp');
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await unifiedFieldList.clickFieldListItemAdd('extension');

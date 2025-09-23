@@ -31,7 +31,6 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -45,8 +44,7 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
-import { CoreInjectionService } from '@kbn/core-di-internal';
-import { application as applicationModule } from '@kbn/core-di-browser-internal';
+import { CoreInjectionService } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -97,7 +95,6 @@ export class CoreSystem {
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly httpRateLimiter: HttpRateLimiterService;
-  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
@@ -159,7 +156,6 @@ export class CoreSystem {
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.httpRateLimiter = new HttpRateLimiterService();
-    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
     this.overlay = new OverlayService();
@@ -295,9 +291,6 @@ export class CoreSystem {
         userProfile,
       };
 
-      const container = injection.getContainer();
-      container.loadSync(applicationModule);
-
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
 
@@ -328,7 +321,6 @@ export class CoreSystem {
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
-      const savedObjects = await this.savedObjects.start({ http });
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
@@ -417,7 +409,6 @@ export class CoreSystem {
         featureFlags,
         http,
         theme,
-        savedObjects,
         i18n,
         injectedMetadata,
         injection,

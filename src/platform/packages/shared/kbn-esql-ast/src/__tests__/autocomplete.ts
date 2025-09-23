@@ -15,13 +15,11 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
   Location,
+  ESQLColumnData,
 } from '../commands_registry/types';
-import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
@@ -50,8 +48,7 @@ export const suggest = (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -80,8 +77,7 @@ export const expectSuggestions = async (
     arg1: ESQLCommand,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -91,6 +87,11 @@ export const expectSuggestions = async (
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
+    if (containsSnippet(suggestion.text) && !suggestion.asSnippet) {
+      throw new Error(
+        `Suggestion with snippet placeholder must be marked as a snippet. -> ${suggestion.text}`
+      );
+    }
     suggestions.push(suggestion.text);
   });
   expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
@@ -100,12 +101,10 @@ export function getFieldNamesByType(
   _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
-  const fieldsMap = mockContext.fields;
-  const userDefinedColumnsMap = mockContext.userDefinedColumns;
-  const fields = Array.from(fieldsMap.values());
-  const userDefinedColumns = Array.from(userDefinedColumnsMap.values()).flat();
+  const columnMap = mockContext.columns;
+  const columns = Array.from(columnMap.values());
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  const finalArray = excludeUserDefined ? fields : [...fields, ...userDefinedColumns];
+  const finalArray = excludeUserDefined ? columns.filter((col) => !col.userDefined) : columns;
   return finalArray
     .filter(
       ({ type }) =>
@@ -210,11 +209,7 @@ export function getFunctionSignaturesByReturnType(
         if (ignoreAsSuggestion) {
           return false;
         }
-        if (
-          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-            (loc) => locationsAvailable.includes(loc)
-          )
-        ) {
+        if (!locations.some((loc) => locationsAvailable.includes(loc))) {
           return false;
         }
         const filteredByReturnType = signatures.filter(
@@ -269,3 +264,10 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   }
   return [];
 }
+
+export const containsSnippet = (text: string): boolean => {
+  // Matches most common monaco snippets
+  // $0, $1, etc. and ${1:placeholder}, ${2:another}
+  const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
+  return snippetRegex.test(text);
+};

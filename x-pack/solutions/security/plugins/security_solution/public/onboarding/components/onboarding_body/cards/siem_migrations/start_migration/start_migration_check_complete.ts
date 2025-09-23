@@ -29,7 +29,7 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   let migrationsCount = 0;
 
   if (siemMigrations.rules.isAvailable()) {
-    const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
+    const migrationsStats = await siemMigrations.rules.getMigrationsStats();
     isComplete = migrationsStats.some(
       (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
     );

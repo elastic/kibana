@@ -55,12 +55,7 @@ const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string
  */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
->;
-
-export type IndexPatternListSavedObjectAttrs = Pick<
-  DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
+  'title' | 'type' | 'typeMeta' | 'name' | 'timeFieldName'
 >;
 
 /**
@@ -87,7 +82,18 @@ export interface DataViewListItem {
    * Data view type meta
    */
   typeMeta?: TypeMeta;
+  /**
+   * Human-readable name
+   */
   name?: string;
+  /**
+   * Time field name if applicable
+   */
+  timeFieldName?: string;
+  /**
+   * Whether the data view is managed by the application.
+   */
+  managed?: boolean;
 }
 
 /**
@@ -404,7 +410,7 @@ export class DataViewsService {
    */
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -494,6 +500,8 @@ export class DataViewsService {
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
       name: obj?.attributes?.name,
+      timeFieldName: obj?.attributes?.timeFieldName,
+      managed: obj?.managed,
     }));
   };
 
@@ -824,6 +832,7 @@ export class DataViewsService {
         name,
         allowHidden,
       },
+      managed,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -861,6 +870,7 @@ export class DataViewsService {
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
       allowHidden,
+      managed,
     };
   };
 
@@ -1259,17 +1269,17 @@ export class DataViewsService {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
-
     const body = dataView.getAsSavedObjectBody();
 
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
       overwrite,
+      managed: dataView.managed,
     })) as SavedObject<DataViewAttributes>;
 
     if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      this.savedObjectsCache.push(response);
     }
     dataView.version = response.version;
     dataView.namespaces = response.namespaces || [];

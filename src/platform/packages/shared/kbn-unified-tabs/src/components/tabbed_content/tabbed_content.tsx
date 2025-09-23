@@ -26,8 +26,9 @@ import {
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
+import { MAX_ITEMS_COUNT } from '../../constants';
 
-export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
+export interface TabbedContentProps extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount'> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: TabItem[];
@@ -49,7 +50,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   items: managedItems,
   selectedItemId: managedSelectedItemId,
   recentlyClosedItems,
-  maxItemsCount,
+  unsavedItemIds,
+  maxItemsCount = MAX_ITEMS_COUNT,
   services,
   hideTabsBar = false,
   renderContent,
@@ -179,6 +181,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             items={items}
             selectedItem={selectedItem}
             recentlyClosedItems={recentlyClosedItems}
+            unsavedItemIds={unsavedItemIds}
             maxItemsCount={maxItemsCount}
             tabContentId={tabContentId}
             getTabMenuItems={getTabMenuItems}

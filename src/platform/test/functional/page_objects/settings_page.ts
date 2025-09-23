@@ -191,6 +191,14 @@ export class SettingsPageObject extends FtrService {
     await field.type(dataViewName);
   }
 
+  async expectDisabledDataViewEditor() {
+    const nameField = await this.getNameField();
+    expect(await nameField.getAttribute('disabled')).to.equal('true');
+
+    const titleField = await this.getIndexPatternField();
+    expect(await titleField.getAttribute('disabled')).to.equal('true');
+  }
+
   async getSaveIndexPatternButton() {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -221,6 +229,10 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
+  }
+
+  async getManagedTag() {
+    return await this.testSubjects.getVisibleText('managed-tag');
   }
 
   async getTableHeader() {
@@ -708,11 +720,11 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
-      alertText = await this.testSubjects.getVisibleText('confirmModalTitleText');
+      alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
-      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
@@ -884,6 +896,11 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async expectDisabledFieldEditor() {
+    expect(await this.testSubjects.getAttribute('input', 'disabled')).to.eql('true');
+    expect(await this.testSubjects.getAttribute('typeField', 'disabled')).to.eql('true');
   }
 
   async setFieldName(name: string) {

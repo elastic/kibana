@@ -70,7 +70,7 @@ describe('AssistantProvider', () => {
         }),
         assistantFeatures: expect.objectContaining({
           assistantModelEvaluation: expect.any(Boolean),
-          defendInsights: expect.any(Boolean),
+          defendInsightsPolicyResponseFailure: expect.any(Boolean),
         }),
         assistantStreamingEnabled: expect.any(Boolean),
         assistantTelemetry: expect.any(Object),

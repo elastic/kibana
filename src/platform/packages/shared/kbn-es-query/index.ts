@@ -116,6 +116,8 @@ export {
   BooleanRelation,
 } from './src/filters';
 
+export { indexPatternToCcs } from './src/indices';
+
 export {
   KQLSyntaxError,
   fromKueryExpression,
@@ -127,6 +129,8 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  getIsKqlFreeText,
+  getIsKqlFreeTextExpression,
 } from './src/kuery';
 
 export {

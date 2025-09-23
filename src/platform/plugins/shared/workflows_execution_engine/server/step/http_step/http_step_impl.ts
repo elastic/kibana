@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
 import { parseDuration } from '../../utils/parse-duration/parse-duration';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { BaseStep, RunStepResult } from '../step_base';
-import { StepBase } from '../step_base';
+import type { BaseStep, RunStepResult } from '../node_implementation';
+import { BaseAtomicNodeImplementation } from '../node_implementation';
 
 type HttpHeaders = Record<string, string | number | boolean>;
 
@@ -30,7 +30,7 @@ export interface HttpStep extends BaseStep {
   };
 }
 
-export class HttpStepImpl extends StepBase<HttpStep> {
+export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   constructor(
     node: HttpGraphNode,
     contextManager: WorkflowContextManager,
@@ -172,7 +172,7 @@ export class HttpStepImpl extends StepBase<HttpStep> {
     const errorMessage = axios.isAxiosError(error)
       ? error.response
         ? `HTTP Error: ${error.response.status} ${error.response.statusText}`
-        : `HTTP Error: ${error.message}`
+        : `HTTP Error: ${error.message ? error.message : error.name}`
       : error instanceof Error
       ? error.message
       : String(error);

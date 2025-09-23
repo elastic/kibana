@@ -7,16 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { ExecutionStatus, ExecutionType, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  InvalidYamlSchemaError,
+  InvalidYamlSyntaxError,
+  isWorkflowValidationError,
+} from '../../common/lib/errors';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
+import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
 
 export function defineRoutes(
   router: IRouter,
@@ -207,6 +217,11 @@ export function defineRoutes(
         const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
@@ -250,6 +265,11 @@ export function defineRoutes(
           body: updated,
         });
       } catch (error) {
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
@@ -366,8 +386,42 @@ export function defineRoutes(
         if (!workflow) {
           return response.notFound();
         }
+        if (!workflow.valid) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is not valid.`,
+            },
+          });
+        }
+        if (!workflow.definition) {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Workflow definition is missing.`,
+            },
+          });
+        }
+        if (!workflow.enabled) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is disabled. Enable it to run it.`,
+            },
+          });
+        }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowExecutionId = await api.runWorkflow(workflow, spaceId, inputs);
+        const workflowForExecution: WorkflowExecutionEngineModel = {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          definition: workflow.definition,
+          yaml: workflow.yaml,
+        };
+        const workflowExecutionId = await api.runWorkflow(
+          workflowForExecution,
+          spaceId,
+          inputs,
+          request
+        );
         return response.ok({
           body: {
             workflowExecutionId,
@@ -449,7 +503,8 @@ export function defineRoutes(
         const workflowExecutionId = await api.testWorkflow(
           request.body.workflowYaml,
           request.body.inputs,
-          spaceId
+          spaceId,
+          request
         );
 
         return response.ok({
@@ -458,6 +513,18 @@ export function defineRoutes(
           },
         });
       } catch (error) {
+        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
+          return response.badRequest({
+            body: {
+              message: `Invalid workflow yaml: ${error.message}`,
+            },
+          });
+        }
+        if (isWorkflowValidationError(error)) {
+          return response.badRequest({
+            body: error.toJSON(),
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
@@ -483,17 +550,64 @@ export function defineRoutes(
         },
       },
       validate: {
+        // todo use shared params schema based on SearchWorkflowExecutionsParams type
         query: schema.object({
           workflowId: schema.string(),
+          statuses: schema.maybe(
+            schema.oneOf(
+              [
+                schema.oneOf(
+                  ExecutionStatusValues.map((type) => schema.literal(type)) as [
+                    Type<ExecutionStatus>
+                  ]
+                ),
+                schema.arrayOf(
+                  schema.oneOf(
+                    ExecutionStatusValues.map((type) => schema.literal(type)) as [
+                      Type<ExecutionStatus>
+                    ]
+                  )
+                ),
+              ],
+              {
+                defaultValue: [],
+              }
+            )
+          ),
+          executionTypes: schema.maybe(
+            schema.oneOf(
+              [
+                schema.oneOf(
+                  ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
+                ),
+                schema.arrayOf(
+                  schema.oneOf(
+                    ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
+                  )
+                ),
+              ],
+              {
+                defaultValue: [],
+              }
+            )
+          ),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { workflowId } = request.query as { workflowId: string };
         const spaceId = spaces.getSpaceId(request);
+        const params: SearchWorkflowExecutionsParams = {
+          workflowId: request.query.workflowId,
+          statuses:
+            request.query.statuses && typeof request.query.statuses === 'string'
+              ? [request.query.statuses]
+              : request.query.statuses,
+          // Execution type filter is not supported yet
+          // executionTypes: parseExecutionTypes(request.query.executionTypes),
+        };
         return response.ok({
-          body: await api.getWorkflowExecutions(workflowId, spaceId),
+          body: await api.getWorkflowExecutions(params, spaceId),
         });
       } catch (error) {
         return response.customError({
@@ -548,6 +662,49 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: '/api/workflowExecutions/{workflowExecutionId}/cancel',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_execution_cancel'],
+            },
+          ],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const spaceId = spaces.getSpaceId(request);
+
+        await api.cancelWorkflowExecution(workflowExecutionId, spaceId);
+        return response.ok();
+      } catch (error) {
+        if (error instanceof WorkflowExecutionNotFoundError) {
+          return response.notFound();
+        }
+
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
@@ -564,7 +721,7 @@ export function defineRoutes(
           workflowExecutionId: schema.string(),
         }),
         query: schema.object({
-          stepId: schema.maybe(schema.string()),
+          stepExecutionId: schema.maybe(schema.string()),
           limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
           offset: schema.maybe(schema.number({ min: 0 })),
           sortField: schema.maybe(schema.string()),
@@ -575,7 +732,7 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const { limit, offset, sortField, sortOrder, stepId } = request.query;
+        const { limit, offset, sortField, sortOrder, stepExecutionId } = request.query;
         const spaceId = spaces.getSpaceId(request);
 
         const logs = await api.getWorkflowExecutionLogs(
@@ -585,7 +742,7 @@ export function defineRoutes(
             offset,
             sortField,
             sortOrder,
-            stepId,
+            stepExecutionId,
           },
           spaceId
         );
@@ -605,7 +762,7 @@ export function defineRoutes(
   );
   router.get(
     {
-      path: '/api/workflowExecutions/{executionId}/steps/{stepId}',
+      path: '/api/workflowExecutions/{executionId}/steps/{id}',
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -614,15 +771,15 @@ export function defineRoutes(
       validate: {
         params: schema.object({
           executionId: schema.string(),
-          stepId: schema.string(),
+          id: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { executionId, stepId } = request.params;
+        const { executionId, id } = request.params;
         const stepExecution = await api.getStepExecution(
-          { executionId, stepId },
+          { executionId, id },
           spaces.getSpaceId(request)
         );
         if (!stepExecution) {

@@ -9,12 +9,10 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { credentialStoreFactory } from './credential_store';
-import {
-  ReindexStep,
-  ReindexStatus,
-  type ReindexSavedObject,
-} from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStep } from '../../../common';
+import type { ReindexSavedObject } from './types';
 
 const basicAuthHeader = 'Basic abc';
 

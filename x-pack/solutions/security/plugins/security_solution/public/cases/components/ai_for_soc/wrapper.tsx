@@ -9,11 +9,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
-import React, { memo, useMemo } from 'react';
-import { RUNTIME_FIELD_MAP } from '../../../detections/components/alert_summary/wrapper';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
+import React, { memo } from 'react';
+import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { Table } from './table';
 
@@ -49,18 +46,8 @@ interface AiForSOCAlertsTableProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
-  const spaceId = useSpaceId();
-  const dataViewSpec = useMemo(
-    () => ({
-      title: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-      runtimeFieldMap: RUNTIME_FIELD_MAP,
-    }),
-    [spaceId]
-  );
+  const { dataView, loading: dataViewLoading } = useCreateEaseAlertsDataView();
 
-  const { dataView, loading: dataViewLoading } = useCreateDataView({ dataViewSpec });
-
-  // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
 
   return (
@@ -71,7 +58,7 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
       width="100%"
     >
       <>
-        {!dataView || !dataView.id ? (
+        {!dataView ? (
           <EuiEmptyPrompt
             color="danger"
             data-test-subj={ERROR_TEST_ID}

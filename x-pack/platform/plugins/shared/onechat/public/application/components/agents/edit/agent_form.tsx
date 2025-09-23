@@ -5,52 +5,100 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiButtonProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiForm,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiContextMenu,
-  EuiCallOut,
+  EuiForm,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiPopover,
+  EuiSpacer,
   EuiTabbedContent,
-  EuiButtonIcon,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { useForm, FormProvider } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/onechat-common';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { filterToolsBySelection, type AgentDefinition } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { defer } from 'lodash';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
+import { isValidAgentAvatarColor } from '../../../utils/color';
+import { labels } from '../../../utils/i18n';
+import { zodResolver } from '../../../utils/zod_resolver';
+import { AgentAvatar } from '../agent_avatar';
+import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
-import { labels } from '../../../utils/i18n';
-import { AgentAvatar } from '../agent_avatar';
-import { isValidAgentAvatarColor } from '../../../utils/color';
 
-export interface AgentFormProps {
-  agentId?: string;
+const BUTTON_IDS = {
+  SAVE: 'save',
+  SAVE_AND_CHAT: 'saveAndChat',
+} as const;
+
+// We can't use useDeleteAgent here because DeleteAgentContext is not available for create mode
+// so pass onDelete as prop for edit mode.
+interface EditingAgentFormProps {
+  editingAgentId: string;
+  onDelete: () => void;
 }
 
-export type AgentFormData = Omit<AgentDefinition, 'type'>;
+interface CreateAgentFormProps {
+  editingAgentId?: never;
+  onDelete?: never;
+}
 
-export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
+type AgentFormProps = EditingAgentFormProps | CreateAgentFormProps;
+
+export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
+
+export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
+  const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
+  const { services } = useKibana();
   const {
-    services: { notifications },
-  } = useKibana();
+    notifications,
+    http,
+    overlays: { openConfirm },
+    application: { navigateToUrl },
+    appParams: { history },
+  } = services;
+  const agentFormId = useGeneratedHtmlId({
+    prefix: 'agentForm',
+  });
 
-  const isCreateMode = !agentId;
+  const isCreateMode = !editingAgentId;
 
-  const onSaveSuccess = (agent: AgentDefinition) => {
+  const onSaveSuccess = () => {
     notifications.toasts.addSuccess(
       isCreateMode
         ? i18n.translate('xpack.onechat.agents.createSuccessMessage', {
@@ -60,8 +108,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             defaultMessage: 'Agent updated successfully',
           })
     );
-
-    navigateToOnechatUrl(appPaths.agents.list);
   };
 
   const onSaveError = (err: Error) => {
@@ -78,26 +124,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
       text: formatOnechatErrorMessage(err),
     });
   };
-
-  const { deleteAgent, isDeleting } = useAgentDelete({
-    onSuccess: () => {
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
-          defaultMessage: 'Agent deleted successfully',
-        })
-      );
-      navigateToOnechatUrl(appPaths.agents.list);
-    },
-    onError: (err: Error) => {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
-          defaultMessage: 'Failed to delete agent',
-        }),
-        text: formatOnechatErrorMessage(err),
-      });
-    },
-  });
-
   const {
     state: agentState,
     isLoading,
@@ -106,16 +132,21 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     tools,
     error,
   } = useAgentEdit({
-    agentId,
+    editingAgentId,
     onSaveSuccess,
     onSaveError,
   });
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
-    mode: 'onChange',
+    mode: 'onBlur',
+    resolver: zodResolver(agentFormSchema),
   });
   const { control, handleSubmit, reset, formState, watch } = formMethods;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
+  const hasErrors = Object.keys(errors).length > 0;
+
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (agentState && !isLoading) {
@@ -123,15 +154,66 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     }
   }, [agentState, isLoading, reset]);
 
-  const onSubmit = (data: AgentFormData) => {
-    submit(data);
-  };
+  const handleCancel = useCallback(() => {
+    setIsCancelling(true);
+    defer(() => navigateToOnechatUrl(appPaths.agents.list));
+  }, [navigateToOnechatUrl]);
 
-  const isFormDisabled = isLoading || isSubmitting || isDeleting;
+  const handleSave = useCallback(
+    async (
+      data: AgentFormData,
+      {
+        navigateToListView = true,
+        buttonId = BUTTON_IDS.SAVE,
+      }: { navigateToListView?: boolean; buttonId?: string } = {}
+    ) => {
+      setSubmittingButtonId(buttonId);
+      try {
+        await submit(data);
+      } finally {
+        setSubmittingButtonId(undefined);
+      }
+      if (navigateToListView) {
+        deferNavigateToOnechatUrl(appPaths.agents.list);
+      }
+    },
+    [submit, deferNavigateToOnechatUrl]
+  );
 
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const handleSaveAndChat = useCallback(
+    async (data: AgentFormData) => {
+      await handleSave(data, {
+        buttonId: BUTTON_IDS.SAVE_AND_CHAT,
+        navigateToListView: false,
+      });
+      deferNavigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+    },
+    [deferNavigateToOnechatUrl, handleSave]
+  );
 
-  const tabs = useMemo(
+  const isFormDisabled = isLoading || isSubmitting;
+  const isSaveDisabled = isFormDisabled || hasErrors || (!isCreateMode && !isDirty);
+
+  const [isContextMenuOpen, setContextMenuOpen] = useState(false);
+  const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);
+
+  const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+    shouldPromptOnReplace: false,
+  });
+
+  const agentTools = watch('configuration.tools');
+  const activeToolsCount = useMemo(() => {
+    return filterToolsBySelection(tools, agentTools).length;
+  }, [tools, agentTools]);
+
+  const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
         id: 'settings',
@@ -160,9 +242,98 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             isFormDisabled={isFormDisabled}
           />
         ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activeToolsCount}
+          </EuiNotificationBadge>
+        ),
       },
     ],
-    [control, formState, isCreateMode, isFormDisabled, tools, isLoading]
+    [control, formState, isCreateMode, isFormDisabled, tools, isLoading, euiTheme, activeToolsCount]
+  );
+
+  const renderSaveButton = useCallback(
+    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+      const saveButton = (
+        <EuiButton
+          form={agentFormId}
+          size={size}
+          type="submit"
+          minWidth="112px"
+          fill
+          iconType="save"
+          isLoading={submittingButtonId === BUTTON_IDS.SAVE}
+          isDisabled={isSaveDisabled}
+        >
+          {i18n.translate('xpack.onechat.agents.form.saveButton', {
+            defaultMessage: 'Save',
+          })}
+        </EuiButton>
+      );
+      return hasErrors ? (
+        <EuiToolTip
+          display="block"
+          content={i18n.translate('xpack.onechat.agents.form.saveButtonTooltip', {
+            defaultMessage: 'Resolve all form errors to save.',
+          })}
+        >
+          {saveButton}
+        </EuiToolTip>
+      ) : (
+        saveButton
+      );
+    },
+    [agentFormId, submittingButtonId, isSaveDisabled, hasErrors]
+  );
+
+  const renderChatButton = useCallback(
+    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+      const commonProps: EuiButtonProps = {
+        size,
+        iconType: 'comment',
+        isDisabled: isFormDisabled || hasErrors,
+        minWidth: '112px',
+      };
+      return !isCreateMode ? (
+        <EuiButton
+          {...commonProps}
+          onClick={() =>
+            navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
+          }
+        >
+          {i18n.translate('xpack.onechat.agents.form.chatButton', {
+            defaultMessage: 'Chat',
+          })}
+        </EuiButton>
+      ) : (
+        <EuiButton
+          {...commonProps}
+          isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_CHAT}
+          onClick={handleSubmit(handleSaveAndChat)}
+        >
+          {i18n.translate('xpack.onechat.agents.form.saveAndChatButton', {
+            defaultMessage: 'Save and chat',
+          })}
+        </EuiButton>
+      );
+    },
+    [
+      navigateToOnechatUrl,
+      isFormDisabled,
+      hasErrors,
+      editingAgentId,
+      isCreateMode,
+      handleSubmit,
+      handleSaveAndChat,
+      submittingButtonId,
+    ]
   );
 
   if (isLoading) {
@@ -178,6 +349,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.onechat.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
@@ -219,7 +391,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             {!isCreateMode && (
               <EuiFlexItem grow={false}>
                 <AgentAvatar
-                  size="xl"
+                  size="l"
                   agent={{
                     name: agentName,
                     avatar_symbol: agentAvatarSymbol,
@@ -232,13 +404,79 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           </EuiFlexGroup>
         }
         description={
-          isCreateMode
-            ? i18n.translate('xpack.onechat.createAgent.description', {
-                defaultMessage: 'Create an AI agent, select tools and provide custom instructions.',
-              })
-            : agentDescription
+          isCreateMode ? (
+            <FormattedMessage
+              id="xpack.onechat.createAgent.description"
+              defaultMessage="Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={docLinks.agentBuilderAgents}
+                    target="_blank"
+                    aria-label={i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                      {
+                        defaultMessage: 'Learn more about agents in the documentation',
+                      }
+                    )}
+                  >
+                    {i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMore',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            agentDescription
+          )
         }
         rightSideItems={[
+          ...(!isCreateMode
+            ? [
+                <EuiFlexGroup gutterSize="xs">
+                  {renderSaveButton({ size: 'm' })}
+                  <EuiPopover
+                    panelPaddingSize="xs"
+                    isOpen={isAdditionalActionsMenuOpen}
+                    closePopover={() => setAdditionalActionsMenuOpen(false)}
+                    zIndex={Number(euiTheme.levels.header) - 1}
+                    button={
+                      <EuiButtonIcon
+                        aria-label={i18n.translate('xpack.onechat.agents.form.openMenuLabel', {
+                          defaultMessage: 'Open menu',
+                        })}
+                        size="m"
+                        isDisabled={isSaveDisabled}
+                        display="fill"
+                        iconType="arrowDown"
+                        onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
+                      />
+                    }
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          icon="comment"
+                          size="s"
+                          disabled={isSaveDisabled}
+                          onClick={handleSubmit(handleSaveAndChat)}
+                        >
+                          {i18n.translate('xpack.onechat.agents.form.saveAndChatButton', {
+                            defaultMessage: 'Save and chat',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexGroup>,
+              ]
+            : [renderSaveButton({ size: 'm' })]),
+          renderChatButton({ size: 'm' }),
           ...(!isCreateMode
             ? [
                 <EuiPopover
@@ -249,73 +487,94 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                         defaultMessage: 'Open menu',
                       })}
                       iconType="boxesVertical"
-                      onClick={() => setPopoverOpen(!isPopoverOpen)}
+                      onClick={() => setContextMenuOpen(!isContextMenuOpen)}
                     />
                   }
-                  isOpen={isPopoverOpen}
-                  closePopover={() => setPopoverOpen(false)}
+                  isOpen={isContextMenuOpen}
+                  closePopover={() => setContextMenuOpen(false)}
                   anchorPosition="downLeft"
-                  panelPaddingSize="none"
+                  panelPaddingSize="xs"
+                  zIndex={Number(euiTheme.levels.header) - 1}
                 >
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={[
-                      {
-                        id: 0,
-                        items: [
-                          {
-                            name: i18n.translate('xpack.onechat.agents.form.deleteButton', {
-                              defaultMessage: 'Delete agent',
-                            }),
-                            icon: 'trash',
-                            onClick: () => {
-                              deleteAgent(agentId!);
-                            },
-                          },
-                        ],
-                      },
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={[
+                      <EuiContextMenuItem
+                        icon="copy"
+                        size="s"
+                        onClick={() => {
+                          setContextMenuOpen(false);
+                          navigateToOnechatUrl(appPaths.agents.new, {
+                            [searchParamNames.sourceId]: editingAgentId,
+                          });
+                        }}
+                      >
+                        {i18n.translate('xpack.onechat.agents.form.cloneButton', {
+                          defaultMessage: 'Clone',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        icon="trash"
+                        size="s"
+                        css={css`
+                          color: ${euiTheme.colors.textDanger};
+                        `}
+                        onClick={() => {
+                          setContextMenuOpen(false);
+                          onDelete?.();
+                        }}
+                      >
+                        {i18n.translate('xpack.onechat.agents.form.deleteButton', {
+                          defaultMessage: 'Delete',
+                        })}
+                      </EuiContextMenuItem>,
                     ]}
                   />
                 </EuiPopover>,
               ]
             : []),
-          <EuiButton
-            type="submit"
-            onClick={handleSubmit(onSubmit)}
-            fill
-            iconType="save"
-            isLoading={isSubmitting}
-            disabled={isFormDisabled || !formState.isValid}
-          >
-            {i18n.translate('xpack.onechat.agents.form.saveButton', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>,
-          ...(!isCreateMode
-            ? [
-                <EuiButton
-                  onClick={() =>
-                    navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: agentId! }))
-                  }
-                  iconType="comment"
-                  isLoading={isSubmitting}
-                  disabled={isFormDisabled || !formState.isValid}
-                >
-                  {i18n.translate('xpack.onechat.agents.form.chatButton', {
-                    defaultMessage: 'Chat',
-                  })}
-                </EuiButton>,
-              ]
-            : []),
         ]}
+        rightSideGroupProps={{ gutterSize: 's' }}
       />
       <KibanaPageTemplate.Section>
         <FormProvider {...formMethods}>
-          <EuiForm component="form" onSubmit={handleSubmit(onSubmit)} fullWidth>
+          <EuiForm
+            id={agentFormId}
+            component="form"
+            onSubmit={handleSubmit((data) => handleSave(data))}
+            fullWidth
+          >
             <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
           </EuiForm>
         </FormProvider>
+        <EuiSpacer
+          css={css`
+            height: ${!isMobile ? euiTheme.size.xxxxl : '144px'};
+          `}
+        />
       </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.BottomBar
+        paddingSize="m"
+        restrictWidth={false}
+        position="fixed"
+        usePortal
+      >
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={labels.agents.settings.cancelButtonLabel}
+              size="s"
+              iconType="cross"
+              color="text"
+              onClick={handleCancel}
+            >
+              {labels.agents.settings.cancelButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaPageTemplate.BottomBar>
     </KibanaPageTemplate>
   );
 };

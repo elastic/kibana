@@ -209,6 +209,29 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       });
     }
 
+    // Ingestion method details
+    const ingestionMethods = new Set<string>();
+    packageInfo.data_streams?.forEach((dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        if (stream.ingestion_method) {
+          ingestionMethods.add(stream.ingestion_method);
+        }
+      });
+    });
+    if (ingestionMethods.size > 0) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.epm.ingestionMethodsLabel"
+              defaultMessage="Ingestion methods"
+            />
+          </EuiTextColor>
+        ),
+        description: Array.from(ingestionMethods).join(', '),
+      });
+    }
+
     // Subscription details
     items.push({
       title: (
