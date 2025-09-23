@@ -166,7 +166,7 @@ export const FullScreenWaterfall = ({
             activeSection={activeSection}
           />
         ) : (
-          <LogsFlyout onCloseFlyout={handleCloseFlyout} errorDocId={docId} dataView={dataView} />
+          <LogsFlyout onCloseFlyout={handleCloseFlyout} docId={docId} dataView={dataView} />
         )
       ) : null}
     </>

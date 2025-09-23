@@ -15,7 +15,7 @@ import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface Props {
-  errorDocId: string;
+  docId: string;
 }
 
 interface GetTransactionParams {
@@ -53,7 +53,7 @@ async function fetchLogDocument({ docId, indexPattern, data, signal }: GetTransa
   );
 }
 
-export function useFetchLog({ errorDocId }: Props) {
+export function useFetchLog({ docId }: Props) {
   const { indexes } = useDataSourcesContext();
   const { data, core } = getUnifiedDocViewerServices();
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ export function useFetchLog({ errorDocId }: Props) {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await fetchLogDocument({ docId: errorDocId, indexPattern, data, signal })
+          ? await fetchLogDocument({ docId, indexPattern, data, signal })
           : undefined;
         setIndex(result?.rawResponse.hits.hits[0]?._index ?? null);
         setLogDoc(result?.rawResponse.hits.hits[0]?.fields ?? null);
@@ -94,7 +94,7 @@ export function useFetchLog({ errorDocId }: Props) {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, errorDocId, indexPattern]);
+  }, [core.notifications.toasts, data, docId, indexPattern]);
 
   return { loading, logDoc, index };
 }

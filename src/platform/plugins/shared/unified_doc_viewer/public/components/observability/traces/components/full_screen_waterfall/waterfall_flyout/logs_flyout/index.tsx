@@ -24,7 +24,7 @@ export const logsFlyoutId = 'logsFlyout' as const;
 
 export interface SpanFlyoutProps {
   onCloseFlyout: () => void;
-  errorDocId: string;
+  docId: string;
   dataView: DocViewRenderProps['dataView'];
 }
 
@@ -35,8 +35,8 @@ const errorMessage = i18n.translate(
   }
 );
 
-export function LogsFlyout({ onCloseFlyout, errorDocId, dataView }: SpanFlyoutProps) {
-  const { loading, logDoc, index } = useFetchLog({ errorDocId });
+export function LogsFlyout({ onCloseFlyout, docId, dataView }: SpanFlyoutProps) {
+  const { loading, logDoc, index } = useFetchLog({ docId });
   const { indexes } = useDataSourcesContext();
   const [loadingDataView, setLoadingDataView] = useState(false);
   const { dataViews, core } = getUnifiedDocViewerServices();
@@ -44,18 +44,18 @@ export function LogsFlyout({ onCloseFlyout, errorDocId, dataView }: SpanFlyoutPr
   const [error, setError] = useState<string | null>(null);
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!logDoc || !errorDocId || !index) return null;
+    if (!logDoc || !docId || !index) return null;
 
     return {
-      id: errorDocId,
+      id: docId,
       raw: {
         _index: index,
-        _id: errorDocId,
+        _id: docId,
         _source: logDoc,
       },
       flattened: flattenObject(logDoc),
     };
-  }, [errorDocId, logDoc, index]);
+  }, [docId, logDoc, index]);
 
   useEffect(() => {
     async function createAdhocDataView() {
