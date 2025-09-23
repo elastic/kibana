@@ -13,9 +13,18 @@ test.describe(
   'Stream data retention - updating failure store',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
       await apiServices.streams.enable();
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
+      await esClient.indices.putDataStreamOptions(
+        {
+          name: 'logs-generic-default',
+          failure_store: {
+            enabled: true,
+          },
+        },
+        { meta: true }
+      );
     });
 
     test.beforeEach(async ({ apiServices, browserAuth }) => {
@@ -90,11 +99,48 @@ test.describe(
       await pageObjects.streams.closeToasts();
     });
 
-    test('should not allow edit failure store for wired streams', async ({ page, pageObjects }) => {
+    test('should not allow edit failure store for wired streams', async ({
+      page,
+      pageObjects,
+      esClient,
+    }) => {
+      // Enable failure store for the forked stream first
+      await esClient.indices.putDataStreamOptions(
+        {
+          name: 'logs.nginx',
+          failure_store: {
+            enabled: true,
+          },
+        },
+        { meta: true }
+      );
+
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
-      // Verify ¡the retention card is present but the edit button is not shown
+      // Verify the retention card is present but the edit button is not shown
       await expect(page.getByTestId('failureStoreRetention-metric')).toBeVisible();
       await expect(page.getByTestId('streamFailureStoreEditRetention')).toBeHidden();
+    });
+
+    test('should not allow enabling failure store for wired streams', async ({
+      page,
+      pageObjects,
+      esClient,
+    }) => {
+      // Enable failure store for the forked stream first
+      await esClient.indices.putDataStreamOptions(
+        {
+          name: 'logs.nginx',
+          failure_store: {
+            enabled: false,
+          },
+        },
+        { meta: true }
+      );
+
+      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      // Verify the retention no failure store panel is present but the enable button is not shown
+      await expect(page.getByTestId('disabledFailureStorePanel')).toBeVisible();
+      await expect(page.getByTestId('streamsAppFailureStoreEnableButton')).toBeHidden();
     });
   }
 );
