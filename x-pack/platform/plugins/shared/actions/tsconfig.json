@@ -52,6 +52,7 @@
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
     "@kbn/core-analytics-server-mocks",
     "@kbn/core-security-server-mocks",
   ],

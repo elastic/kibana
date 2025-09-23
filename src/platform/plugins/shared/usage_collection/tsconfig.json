@@ -27,6 +27,7 @@
     "@kbn/es-query",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/lazy-object",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",

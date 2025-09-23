@@ -39,6 +39,7 @@
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
     "@kbn/config-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-server-mocks",

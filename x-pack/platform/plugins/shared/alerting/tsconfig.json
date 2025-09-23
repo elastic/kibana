@@ -79,6 +79,7 @@
     "@kbn/response-ops-recurring-schedule-form",
     "@kbn/licensing-types",
     "@kbn/es-types",
+    "@kbn/lazy-object",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-status-server-mocks"
