@@ -110,7 +110,7 @@ export function WorkflowYAMLValidationErrors({
           <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
             {buttonContent}
           </EuiFlexItem>
-          <EuiFlexItem grow={false} justifySelf="flexEnd">
+          <EuiFlexItem css={styles.buttonContentRightSide} grow={false}>
             {rightSide}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -201,6 +201,9 @@ const componentStyles = {
       ...euiFontSize(euiThemeContext, 'xs'),
       whiteSpace: 'nowrap',
     }),
+  buttonContentRightSide: css({
+    justifySelf: 'flex-end',
+  }),
   accordionContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: '200px',

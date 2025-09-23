@@ -45,7 +45,7 @@ export function generateBuiltInStepSnippet(
       break;
     case 'if':
       parameters = {
-        condition: '{{ context.condition }}',
+        condition: 'steps.step_1.output: "value"',
         steps: [{ name: 'then-step', type: '# Add step type here' }],
       };
       break;
