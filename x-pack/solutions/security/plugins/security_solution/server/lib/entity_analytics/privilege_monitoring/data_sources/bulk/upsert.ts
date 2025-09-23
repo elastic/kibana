@@ -133,19 +133,18 @@ export const bulkUpsertOperationsFactoryShared =
 
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  const integrationOperations = (usersChunk: PrivMonIntegrationsUser[]) =>
+  return (usersChunk: PrivMonIntegrationsUser[]) =>
     buildOps(usersChunk, 'entity_analytics_integration', UPDATE_SCRIPT_SOURCE, {
       buildUpdateParams: (user) => ({
         new_privileged_status: user.isPrivileged,
         labels: user.labels,
       }),
-      buildCreateDoc: (user, sourceLabel) => ({
+      buildCreateDoc: (user) => ({
         user: { name: user.username, is_privileged: user.isPrivileged },
-        labels: { sources: [sourceLabel] },
+        labels: user.labels,
       }),
       shouldCreate: (user) => user.isPrivileged,
     });
-  return integrationOperations;
 };
 
 export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {

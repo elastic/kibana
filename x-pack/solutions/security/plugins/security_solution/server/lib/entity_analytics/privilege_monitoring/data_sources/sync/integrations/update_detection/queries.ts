@@ -85,7 +85,7 @@ if (params.new_privileged_status == false) {
     if (ctx._source.labels.sources == null) {
       ctx._source.labels.sources = [];
     }
-    ctx._source.labels.sources.removeIf(s -> java.util.Objects.equals(s, params.sourceLabel));
+    ctx._source.labels.sources.removeIf(s -> java.util.Objects.equals(s, params.labels.sources));
     if (ctx._source.labels.sources.size() == 0) {
       ctx._source.user.is_privileged = false;
     }
@@ -99,8 +99,8 @@ if (params.new_privileged_status == false) {
     ctx._source.user.is_privileged = true;
   }
 
-  if (!ctx._source.labels.sources.contains(params.sourceLabel)) {
-    ctx._source.labels.sources.add(params.sourceLabel);
+  if (!ctx._source.labels.sources.contains(params.labels.sources)) {
+    ctx._source.labels.sources.add(params.labels.sources);
   }
 }
 `;
