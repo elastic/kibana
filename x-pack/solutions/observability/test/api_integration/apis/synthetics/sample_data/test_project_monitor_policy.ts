@@ -14,7 +14,7 @@ export const commonVars = {
     type: 'integer',
     value: 2,
   },
-    maintenance_windows: {
+  maintenance_windows: {
     type: 'yaml',
     value: [],
   },
