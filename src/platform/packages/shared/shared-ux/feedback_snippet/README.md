@@ -21,3 +21,8 @@ The component has two main states:
 - **Prompt:** The panel shows a custom `promptViewMessage` to gather feedback from the user.
 - **Positive:** The panel shows a thank you message and then automatically dismisses itself.
 - **Negative:** The panel updates to show a custom `surveyUrl` call-to-action button. The panel remains visible until the user explicitly dismisses it or navigates to the survey (which opens in a new tab).
+
+## Running tests
+You can run tests with:
+
+`node scripts/jest --config=src/platform/packages/shared/shared-ux/feedback_snippet/jest.config.js`

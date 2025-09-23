@@ -6,7 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
+import type {
+  FieldName,
+  FieldMetadata,
+  FieldsMetadataDictionary,
+  FieldSource,
+} from '../../../common';
 import type {
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
@@ -27,11 +32,18 @@ export interface FieldsMetadataServiceStart {
   getClient(request: KibanaRequest): Promise<IFieldsMetadataClient>;
 }
 
-export interface FindFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {
+export interface GetFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {
+  source?: FieldSource | FieldSource[];
+}
+
+export interface FindFieldsMetadataOptions extends GetFieldsMetadataOptions {
   fieldNames?: FieldName[];
 }
 
 export interface IFieldsMetadataClient {
-  getByName(fieldName: FieldName): Promise<FieldMetadata | undefined>;
+  getByName(
+    fieldName: FieldName,
+    params?: GetFieldsMetadataOptions
+  ): Promise<FieldMetadata | undefined>;
   find(params: FindFieldsMetadataOptions): Promise<FieldsMetadataDictionary>;
 }
