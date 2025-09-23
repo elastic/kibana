@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
@@ -52,6 +52,7 @@ export const Chart: React.FC<ChartProps> = ({
   filters = [],
 }) => {
   const { euiTheme } = useEuiTheme();
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const { getTimeRange } = requestParams;
 
@@ -80,6 +81,7 @@ export const Chart: React.FC<ChartProps> = ({
     discoverFetch$,
     abortController,
     getTimeRange,
+    chartRef,
   });
 
   return (
@@ -92,6 +94,7 @@ export const Chart: React.FC<ChartProps> = ({
           display: none;
         }
       `}
+      ref={chartRef}
     >
       {lensProps && (
         <LensWrapperMemo

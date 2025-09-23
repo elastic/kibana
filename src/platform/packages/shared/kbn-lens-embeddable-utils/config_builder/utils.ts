@@ -135,6 +135,7 @@ export async function getDataView(
     dataView = await dataViewsAPI.get(index, false);
   } catch {
     dataView = await dataViewsAPI.create({
+      id: index,
       title: index,
       timeFieldName: timeField || '@timestamp',
     });
