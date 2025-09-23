@@ -49,7 +49,19 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
           fill: ${colors.vis.euiColorVis4};
         }
         .echMetricText {
-          padding: 8px 20px 60px;
+          padding: 8px 16px 60px;
+        }
+        .echMetricText {
+          display: grid !important;
+          grid-template-columns: auto auto 1fr !important;
+          gap: 8px !important;
+          align-items: center !important;
+        }
+        .echMetricText__titlesBlock--left {
+          grid-column: 1 !important;
+        }
+        .echMetricText__icon--right {
+          grid-column: 2 !important;
         }
         .euiPanel,
         .embPanel,

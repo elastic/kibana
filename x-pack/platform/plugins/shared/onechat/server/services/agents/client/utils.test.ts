@@ -24,7 +24,6 @@ const generateMockTool = (id: string, type: ToolType) => ({
 describe('validateToolSelection (unit)', () => {
   const toolA = generateMockTool('toolA', ToolType.builtin);
   const toolB = generateMockTool('toolB', ToolType.esql);
-  const toolC = generateMockTool('toolC', ToolType.builtin);
 
   const makeRegistry = (tools: any[]) => ({
     list: jest.fn().mockResolvedValue(tools),
@@ -43,57 +42,7 @@ describe('validateToolSelection (unit)', () => {
     expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
   });
 
-  it('returns error if tool type does not exist for wildcard selection', async () => {
-    const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ type: 'nonexistent' as ToolType, tool_ids: ['*'] }],
-    });
-    expect(errors.join(' ')).toMatch(/Tool type 'nonexistent' does not exist/);
-  });
-
-  it('returns error if tool exists but belongs to different type', async () => {
-    const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ type: ToolType.esql, tool_ids: ['toolA'] }],
-    });
-    expect(errors.join(' ')).toMatch(/Tool id 'toolA' belongs to type 'builtin', not 'esql'/);
-  });
-
-  it('returns error if tool does not exist for specified type', async () => {
-    const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ type: ToolType.builtin, tool_ids: ['nonexistent'] }],
-    });
-    expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
-  });
-
-  it('passes for valid tool id with correct type', async () => {
-    const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ type: ToolType.builtin, tool_ids: ['toolA'] }],
-    });
-    expect(errors).toHaveLength(0);
-  });
-
-  it('passes for valid tool id without type specification', async () => {
-    const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ tool_ids: ['toolA'] }],
-    });
-    expect(errors).toHaveLength(0);
-  });
-
-  it('passes for wildcard tool selection (all tools)', async () => {
+  it('passes for wildcard tool selection', async () => {
     const registry = makeRegistry([toolA, toolB]);
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
@@ -103,61 +52,44 @@ describe('validateToolSelection (unit)', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('passes for wildcard tool selection for existing tool type', async () => {
+  it('passes for valid tool id', async () => {
     const registry = makeRegistry([toolA, toolB]);
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: ToolType.builtin, tool_ids: ['*'] }],
+      toolSelection: [{ tool_ids: ['toolA'] }],
     });
     expect(errors).toHaveLength(0);
   });
 
-  it('passes for wildcard tool selection for builtin type', async () => {
-    const builtInTool = generateMockTool('foo', ToolType.builtin);
-    const registry = makeRegistry([builtInTool]);
-    const errors = await validateToolSelection({
-      toolRegistry: registry as any,
-      request: mockRequest,
-      toolSelection: [{ type: ToolType.builtin, tool_ids: ['*'] }],
-    });
-    expect(errors).toHaveLength(0);
-  });
-
-  it('accumulates multiple errors', async () => {
+  it('passes for multiple valid tool ids', async () => {
     const registry = makeRegistry([toolA, toolB]);
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [
-        { tool_ids: ['toolA', 'nonexistent'] },
-        { type: 'nonexistent' as ToolType, tool_ids: ['toolA'] },
-      ],
+      toolSelection: [{ tool_ids: ['toolA', 'toolB'] }],
     });
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(/Tool id 'nonexistent' does not exist/),
-        expect.stringMatching(/Tool type 'nonexistent' does not exist/),
-      ])
-    );
+    expect(errors).toHaveLength(0);
   });
 
-  it('handles mixed valid and invalid selections', async () => {
-    const registry = makeRegistry([toolA, toolB, toolC]);
+  it('returns error for mix of valid and invalid tool ids', async () => {
+    const registry = makeRegistry([toolA, toolB]);
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [
-        { type: ToolType.builtin, tool_ids: ['toolA', 'nonexistent'] },
-        { tool_ids: ['toolB'] },
-        { type: ToolType.esql, tool_ids: ['toolA'] }, // toolA belongs to builtin, not esql
-      ],
+      toolSelection: [{ tool_ids: ['toolA', 'nonexistent'] }],
     });
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(/Tool id 'nonexistent' does not exist/),
-        expect.stringMatching(/Tool id 'toolA' belongs to type 'builtin', not 'esql'/),
-      ])
-    );
+    expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
+    expect(errors).toHaveLength(1);
+  });
+
+  it('handles empty tool_ids array', async () => {
+    const registry = makeRegistry([toolA, toolB]);
+    const errors = await validateToolSelection({
+      toolRegistry: registry as any,
+      request: mockRequest,
+      toolSelection: [{ tool_ids: [] }],
+    });
+    expect(errors).toHaveLength(0);
   });
 });

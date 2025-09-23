@@ -11,6 +11,13 @@ import type {
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAssetClickEventProps,
   StreamsAssetCountProps,
+  StreamsChildStreamCreatedProps,
+  StreamsProcessingSavedProps,
+  StreamsRetentionChangedProps,
+  StreamsSchemaUpdatedProps,
+  StreamsSignificantEventsCreatedProps,
+  StreamsSignificantEventsSuggestionsGeneratedEventProps,
+  WiredStreamsStatusChangedProps,
 } from './types';
 
 const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
@@ -143,9 +150,112 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const wiredStreamsStatusChangedSchema: RootSchema<WiredStreamsStatusChangedProps> = {
+  is_enabled: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether wired streams was enabled or disabled',
+    },
+  },
+};
+
+const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
+  processors_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of processors configured on the stream',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+};
+
+const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
+  lifecycle_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of lifecycle: dsl, ilm, inherit',
+    },
+  },
+  lifecycle_value: {
+    type: 'keyword',
+    _meta: {
+      description: 'The lifecycle value, if applicable',
+      optional: true,
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+};
+
+const streamsChildStreamCreatedSchema: RootSchema<StreamsChildStreamCreatedProps> = {
+  name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the child stream',
+    },
+  },
+};
+
+const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+};
+
+const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'The time (in milliseconds) it took to generate significant events suggestions',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+  };
+
+const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEventsCreatedProps> = {
+  count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of significant events created',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+};
+
 export {
   streamsAssetCountSchema,
   streamsAssetClickEventSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
+  streamsRetentionChangedSchema,
+  streamsProcessingSavedSchema,
+  streamsChildStreamCreatedSchema,
+  streamsSchemaUpdatedSchema,
+  streamsSignificantEventsSuggestionsGeneratedSchema,
+  streamsSignificantEventsCreatedSchema,
+  wiredStreamsStatusChangedSchema,
 };
