@@ -19,11 +19,6 @@ describe('classicNavigationFactory', function () {
       title: 'Home',
     },
     {
-      id: 'enterpriseSearchContent:connectors',
-      title: 'Connectors',
-      url: '/app/elasticsearch/content/connectors',
-    },
-    {
       id: 'enterpriseSearchContent:webCrawlers',
       title: 'Web Crawlers',
       url: '/app/elasticsearch/content/crawlers',
@@ -106,9 +101,9 @@ describe('classicNavigationFactory', function () {
         name: 'Content',
         items: [
           {
-            id: 'searchConnectors',
+            id: 'searchWebCrawlers',
             deepLink: {
-              link: 'enterpriseSearchContent:connectors',
+              link: 'enterpriseSearchContent:webCrawlers',
             },
           },
         ],
@@ -121,10 +116,10 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/elasticsearch/content/connectors',
-            id: 'searchConnectors',
+            href: '/app/elasticsearch/content/crawlers',
+            id: 'searchWebCrawlers',
             isSelected: false,
-            name: 'Connectors',
+            name: 'Web Crawlers',
             onClick: expect.any(Function),
           },
         ],
@@ -135,20 +130,20 @@ describe('classicNavigationFactory', function () {
   it('returns name if provided over the deeplink title', () => {
     const items: ClassicNavItem[] = [
       {
-        id: 'searchConnectors',
+        id: 'searchWebCrawlers',
         deepLink: {
-          link: 'enterpriseSearchContent:connectors',
+          link: 'enterpriseSearchContent:webCrawlers',
         },
-        name: 'Date connectors',
+        name: 'Date Crawlers',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/content/connectors',
-        id: 'searchConnectors',
+        href: '/app/elasticsearch/content/crawlers',
+        id: 'searchWebCrawlers',
         isSelected: false,
-        name: 'Date connectors',
+        name: 'Date Crawlers',
         onClick: expect.any(Function),
       },
     ]);

@@ -30,11 +30,6 @@ describe('generateSideNavItems', () => {
       title: 'Indices',
       url: '/app/elasticsearch/content/search_indices',
     },
-    'enterpriseSearchContent:connectors': {
-      id: 'enterpriseSearchContent:connectors',
-      title: 'Connectors',
-      url: '/app/elasticsearch/content/connectors',
-    },
     'enterpriseSearchContent:webCrawlers': {
       id: 'enterpriseSearchContent:webCrawlers',
       title: 'Web Crawlers',
