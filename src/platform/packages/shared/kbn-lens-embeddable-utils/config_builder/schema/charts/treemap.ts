@@ -186,10 +186,7 @@ const treemapStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const treemapStateSchema = schema.oneOf([
-  treemapStateSchemaNoESQL,
-  treemapStateSchemaESQL,
-]);
+export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL]);
 
 export type TreemapState = TypeOf<typeof treemapStateSchema>;
 export type TreemapStateNoESQL = TypeOf<typeof treemapStateSchemaNoESQL>;

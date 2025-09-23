@@ -182,10 +182,7 @@ const mosaicStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const mosaicStateSchema = schema.oneOf([
-  mosaicStateSchemaNoESQL,
-  mosaicStateSchemaESQL,
-]);
+export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL]);
 
 export type MosaicState = TypeOf<typeof mosaicStateSchema>;
 export type MosaicStateNoESQL = TypeOf<typeof mosaicStateSchemaNoESQL>;

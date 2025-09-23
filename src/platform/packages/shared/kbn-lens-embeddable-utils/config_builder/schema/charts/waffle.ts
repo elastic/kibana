@@ -180,10 +180,7 @@ const waffleStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const waffleStateSchema = schema.oneOf([
-  waffleStateSchemaNoESQL,
-  waffleStateSchemaESQL,
-]);
+export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL]);
 
 export type WaffleState = TypeOf<typeof waffleStateSchema>;
 export type WaffleStateNoESQL = TypeOf<typeof waffleStateSchemaNoESQL>;

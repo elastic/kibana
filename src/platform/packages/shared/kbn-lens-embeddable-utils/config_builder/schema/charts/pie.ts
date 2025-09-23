@@ -199,10 +199,7 @@ const pieStateSchemaESQL = schema.object({
   group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const pieStateSchema = schema.oneOf([
-  pieStateSchemaNoESQL,
-  pieStateSchemaESQL,
-]);
+export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL]);
 
 export type PieState = TypeOf<typeof pieStateSchema>;
 export type PieStateNoESQL = TypeOf<typeof pieStateSchemaNoESQL>;
