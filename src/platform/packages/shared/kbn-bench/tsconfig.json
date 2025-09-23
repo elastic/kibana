@@ -22,6 +22,6 @@
     "@kbn/zod",
     "@kbn/profiler",
     "@kbn/workspaces",
-    "@kbn/std",
+    "@kbn/utility-types",
   ]
 }
