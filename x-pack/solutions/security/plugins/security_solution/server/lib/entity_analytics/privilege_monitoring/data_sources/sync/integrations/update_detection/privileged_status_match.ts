@@ -11,6 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_clie
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
 import type { PrivMonIntegrationsUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
+import type { Matcher } from '../../..';
 
 export type AfterKey = Record<string, string> | undefined;
 
@@ -90,7 +91,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
         // process current page
         if (buckets.length && aggregations) {
-          const privMonUsers = await extractPrivMonUsers(aggregations);
+          const privMonUsers = await extractPrivMonUsers(aggregations, source.matchers[0]);
           users.push(...privMonUsers);
         }
 
@@ -108,7 +109,8 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   };
 
   const extractPrivMonUsers = async (
-    aggregation: PrivMatchersAggregation
+    aggregation: PrivMatchersAggregation,
+    matchers: Matcher
   ): Promise<PrivMonIntegrationsUser[]> => {
     const buckets: PrivBucket[] | undefined =
       aggregation.privileged_user_status_since_last_run?.buckets;
@@ -121,21 +123,25 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
     const usersProcessed = buckets.map((bucket) => {
       const topHit: PrivTopHit | undefined = bucket.latest_doc_for_user?.hits?.hits?.[0];
-
       const isPriv =
         topHit?.fields?.['user.is_privileged']?.[0] ??
         topHit?._source?.user?.is_privileged ??
         false;
-
       return {
-        id: topHit?._source?.user?.id ?? 'unknown',
         username: bucket.key.username,
-        sourceId: 'from_matcher',
         existingUserId: existingUserMap.get(bucket.key.username),
         isPrivileged: Boolean(isPriv),
+        latestDocForUser: topHit,
+        labels: generateLabels(matchers, topHit),
       };
     });
     return usersProcessed;
   };
+
+  function generateLabels(matchers: Matcher, topHit: PrivTopHit): Record<string, unknown> {
+    // Implement label generation logic based on matchers and topHit (latest document for user)
+    dataClient.log('info', `Generating labels for user ${JSON.stringify(topHit, null, 2)}`);
+    return { sourceLabel: 'entity_analytics_integration', roles: ['exampleRole'] }; // Placeholder implementation
+  }
   return { findPrivilegedUsersFromMatchers };
 };
