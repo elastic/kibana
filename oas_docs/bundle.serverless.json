@@ -44383,6 +44383,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "action_secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
                         "delete_unenrolled_agents": {
                           "additionalProperties": false,
                           "properties": {
@@ -44579,6 +44582,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "action_secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
                         "delete_unenrolled_agents": {
                           "additionalProperties": false,
                           "properties": {
@@ -68449,16 +68455,16 @@
           },
           {
             "in": "query",
-            "name": "shortLookback",
-            "required": false,
+            "name": "from",
+            "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "longLookback",
-            "required": false,
+            "name": "to",
+            "required": true,
             "schema": {
               "type": "string"
             }
