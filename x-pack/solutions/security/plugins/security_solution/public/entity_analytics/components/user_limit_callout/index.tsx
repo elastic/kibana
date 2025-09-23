@@ -43,7 +43,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.exceeded.title"
-            defaultMessage="Maximum user limit exceeded"
+            defaultMessage="User limit exceeded"
           />
         }
         color="danger"

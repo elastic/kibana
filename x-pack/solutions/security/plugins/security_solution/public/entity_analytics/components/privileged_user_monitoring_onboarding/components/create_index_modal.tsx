@@ -27,7 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { UserLimitCallOut } from './user_limit_callout';
+import { useKibana } from '../../../../common/lib/kibana';
 
 enum IndexMode {
   STANDARD = 'standard',
@@ -77,6 +77,9 @@ export const CreateIndexModal = ({
   const [indexMode, setIndexMode] = useState<IndexMode>(IndexMode.STANDARD);
   const [error, setError] = useState<string | null>(null);
   const { createPrivMonImportIndex } = useEntityAnalyticsRoutes();
+  const { services } = useKibana();
+  const maxUsersAllowed =
+    services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
   const handleCreate = useCallback(async () => {
     setError(null);
@@ -122,15 +125,14 @@ export const CreateIndexModal = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.description"
-              defaultMessage="Create an index to store your privileged users. After creating it, make sure to index documents with the {nameField} field using your preferred method."
+              defaultMessage="Create an index to store your privileged users (maximum number allowed: {maxUsersAllowed}). After creating it, make sure to index documents with the {nameField} field using your preferred method."
               values={{
                 nameField: <EuiCode>{'user.name'}</EuiCode>,
+                maxUsersAllowed: <EuiCode>{maxUsersAllowed}</EuiCode>,
               }}
             />
           </p>
         </EuiText>
-        <EuiSpacer size="m" />
-        <UserLimitCallOut />
         <EuiSpacer size="m" />
         <EuiFormRow
           label={INDEX_NAME_LABEL}
