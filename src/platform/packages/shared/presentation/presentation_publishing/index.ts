@@ -92,6 +92,7 @@ export {
 export {
   apiHasType,
   apiIsOfType,
+  apiIsOneOfType,
   type HasType,
   type HasTypeDisplayName,
 } from './interfaces/has_type';

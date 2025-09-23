@@ -10,6 +10,7 @@
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { HasPanelCapabilities } from '@kbn/presentation-containers';
 import type {
   AppliesFilters,
   HasEditCapabilities,
@@ -35,7 +36,8 @@ export type DataControlApi = StateManager<DataControlState>['api'] &
   PublishesField &
   Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesDataLoading &
-  AppliesFilters & {
+  AppliesFilters &
+  HasPanelCapabilities & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

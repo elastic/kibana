@@ -206,6 +206,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
       defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
+      isExpandable: false,
+      isCustomizable: false,
+      isDuplicable: true,
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();

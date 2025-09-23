@@ -26,8 +26,10 @@ import {
   apiPublishesTitle,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
+
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { apiCanBeCustomized } from '@kbn/presentation-containers';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
 
@@ -43,7 +45,9 @@ export type CustomizePanelActionApi = CanAccessViewMode &
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesTitle(api));
+  apiCanBeCustomized(api) &&
+  apiCanAccessViewMode(api) &&
+  (apiPublishesDataViews(api) || apiPublishesTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;

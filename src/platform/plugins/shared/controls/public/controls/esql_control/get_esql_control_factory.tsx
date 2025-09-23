@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -82,6 +81,16 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         ...unsavedChangesApi,
         ...defaultControlManager.api,
         ...selections.api,
+        isExpandable: false,
+        isCustomizable: false,
+        /**
+         * TODO: Remove isDuplicable: false once duplicating ES|QL controls has been implemented
+         * ES|QL controls can only output unique variable names, so in order to duplicate the control,
+         * we would need to add a number or other uniquifying character to the end of the variable name.
+         * The problem with this is that the user cannot edit variable names after the control is created.
+         * Once we come up with a good UX solution to this, we can remove this
+         */
+        isDuplicable: false,
         defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
         getTypeDisplayName: () => displayName,
@@ -149,17 +158,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       };
 
       return {
-        api: {
-          ...api,
-          /**
-           * TODO: Remove this once duplicating ES|QL controls has been implemented
-           * ES|QL controls can only output unique variable names, so in order to duplicate the control,
-           * we would need to add a number or other uniquifying character to the end of the variable name.
-           * The problem with this is that the user cannot edit variable names after the control is created.
-           * Once we come up with a good UX solution to this, we can return duplicatePanel to the parentApi
-           */
-          parentApi: omit(api.parentApi, ['duplicatePanel', 'expandPanel']),
-        },
+        api,
         Component: () => (
           <OptionsListControlContext.Provider
             value={{
