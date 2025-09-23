@@ -9,7 +9,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { SelectableEntry } from './toolbar_selector';
 import { ToolbarSelector } from './toolbar_selector';
 
@@ -119,6 +119,67 @@ describe('ToolbarSelector', () => {
     expect(getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
+  it('renders with searchable enabled and multi selection and preserves previously selected options', async () => {
+    const onChange = jest.fn();
+
+    // Start with pre-selected options to test preservation
+    const optionsWithPreselected: SelectableEntry[] = [
+      { label: 'A', value: 'a', checked: 'on' },
+      { label: 'B', value: 'b', checked: 'on' },
+      { label: 'C', value: 'c' },
+    ];
+
+    const { getByTestId, getByText, queryByText } = render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorSearchBasic"
+        buttonLabel="Search Test"
+        options={optionsWithPreselected}
+        searchable={true}
+        singleSelection={false}
+        onChange={onChange}
+        optionMatcher={({ option, normalizedSearchValue }) =>
+          option.label.toLowerCase().includes(normalizedSearchValue.toLowerCase())
+        }
+      />
+    );
+
+    // Open the selector
+    fireEvent.click(getByTestId('toolbarSelectorSearchBasicButton'));
+
+    // Verify all options are initially visible
+    expect(getByText('A')).toBeInTheDocument();
+    expect(getByText('B')).toBeInTheDocument();
+    expect(getByText('C')).toBeInTheDocument();
+
+    // Search for "C" which should only show C
+    const searchInput = getByTestId('toolbarSelectorSearchBasicSelectorSearch');
+    fireEvent.change(searchInput, { target: { value: 'C' } });
+
+    // Wait for debounced search
+    await waitFor(
+      () => {
+        // C should be visible
+        expect(getByText('C')).toBeInTheDocument();
+        // A and B should be hidden
+        expect(queryByText('A')).not.toBeInTheDocument();
+        expect(queryByText('B')).not.toBeInTheDocument();
+      },
+      { timeout: 500 }
+    );
+
+    // Select C
+    fireEvent.click(getByText('C'));
+
+    // The onChange should preserve A and B (hidden but selected) + add C
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        { label: 'C', value: 'c', checked: 'on' },
+        { label: 'A', value: 'a', checked: 'on' },
+        { label: 'B', value: 'b', checked: 'on' },
+      ])
+    );
+  });
+
   it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', () => {
     const { getByTestId, getAllByLabelText, getByText } = render(
       <ToolbarSelector
@@ -128,12 +189,12 @@ describe('ToolbarSelector', () => {
         searchable={true}
         singleSelection={true}
         popoverTitle="My Popover Title"
-        popoverContentBelowSearch={<span>Custom Section</span>}
+        popoverContentBelowSearch={<span>Maximum selection limit reached</span>}
         hasArrow={false}
       />
     );
     fireEvent.click(getByTestId('toolbarSelectorOptionalPropsButton'));
-    expect(getByText('Custom Section')).toBeInTheDocument();
+    expect(getByText('Maximum selection limit reached')).toBeInTheDocument();
     expect(getAllByLabelText('My Popover Title')).toHaveLength(3);
   });
 });
