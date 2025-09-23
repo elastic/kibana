@@ -417,6 +417,7 @@ export interface DocLinks {
     uptimeDurationAnomaly: string;
     monitorLogs: string;
     logsStreams: string;
+    wiredStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;

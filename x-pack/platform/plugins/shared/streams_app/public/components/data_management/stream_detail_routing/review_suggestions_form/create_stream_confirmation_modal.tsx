@@ -24,7 +24,7 @@ import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
 import { useForkStream } from './use_fork_stream';
-import { ConditionPanel } from './condition_panel';
+import { ConditionPanel } from '../../shared';
 
 export function CreateStreamConfirmationModal({
   definition,

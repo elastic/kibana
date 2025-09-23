@@ -25,9 +25,9 @@ import { CreateStreamConfirmationModal } from './create_stream_confirmation_moda
 import { getPercentageFormatter } from '../../../../util/formatters';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useMatchRate } from './use_match_rate';
-import { ConditionPanel } from './condition_panel';
 import { useStreamSamplesSelector } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
+import { ConditionPanel } from '../../shared';
 
 const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
