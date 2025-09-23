@@ -206,6 +206,8 @@ export interface EventsOptions {
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
+  pitId: string;
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface EventDoc {

@@ -21,11 +21,13 @@ export const getPreviewAlerts = async ({
   previewId,
   size,
   sort,
+  includeSource = true,
 }: {
   es: Client;
   previewId: string;
   size?: number;
   sort?: string[];
+  includeSource?: boolean;
 }) => {
   const index = '.preview.alerts-security.alerts-*';
   await refreshIndex(es, index);
@@ -43,6 +45,7 @@ export const getPreviewAlerts = async ({
     size,
     query,
     sort,
+    _source: includeSource,
   });
   return result.hits.hits;
 };

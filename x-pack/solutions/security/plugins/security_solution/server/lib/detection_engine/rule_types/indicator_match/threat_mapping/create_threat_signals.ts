@@ -140,6 +140,17 @@ export const createThreatSignals = async ({
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
 
+  let sourcePitId: OpenPointInTimeResponse['id'] = (
+    await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: inputIndex,
+      keep_alive: THREAT_PIT_KEEP_ALIVE,
+      allow_partial_search_results: true,
+    })
+  ).id;
+  const reassignSourcePitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
+    if (newPitId) sourcePitId = newPitId;
+  };
+
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
@@ -333,6 +344,8 @@ export const createThreatSignals = async ({
           eventListConfig,
           indexFields: inputIndexFields,
           sortOrder,
+          pitId: sourcePitId,
+          reassignPitId: reassignSourcePitId,
         }),
 
       createSignal: (slicedChunk) =>
