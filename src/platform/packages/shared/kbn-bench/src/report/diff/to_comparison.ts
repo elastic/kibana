@@ -62,8 +62,8 @@ export function toBenchmarkDiff({
     metrics: metricKeys.map((metricName) => {
       const metricConfig = metricConfigs[metricName];
 
-      const leftSummary = left?.metrics[metricName].summary ?? null;
-      const rightSummary = right?.metrics[metricName].summary ?? null;
+      const leftSummary = left?.metrics[metricName]?.summary ?? null;
+      const rightSummary = right?.metrics[metricName]?.summary ?? null;
 
       const leftVal = leftSummary?.avg ?? null;
       const rightVal = rightSummary?.avg ?? null;
