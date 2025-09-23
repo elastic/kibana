@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
 import { schema } from '../..';
 import { offeringBasedSchema } from './offering_based_schema';
 
@@ -74,32 +75,32 @@ describe('Helper: offeringBasedSchema()', () => {
   describe('Example: Fixed setting on Traditional, configurable on Serverless', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: true }),
-        options: { defaultValue: false },
+        serverless: schema.string({ defaultValue: 'serverless' }),
+        options: { defaultValue: 'top-default' },
       }),
     });
 
     test('it uses the non-serverless validation when the context is not present', () => {
-      expect(validation.validate({})).toEqual({ myProp: false });
+      expect(validation.validate({})).toEqual({ myProp: 'top-default' });
     });
 
     test('it uses the non-serverless validation when context claims "not in serverless"', () => {
-      expect(validation.validate({}, { serverless: false })).toEqual({ myProp: false });
+      expect(validation.validate({}, { serverless: false })).toEqual({ myProp: 'top-default' });
     });
 
     test('it uses serverless validation when context claims "in serverless"', () => {
-      expect(validation.validate({}, { serverless: true })).toEqual({ myProp: true });
+      expect(validation.validate({}, { serverless: true })).toEqual({ myProp: 'serverless' });
     });
 
     test('it does not allow changing the flag when context claims "not in serverless"', () => {
       expect(() =>
-        validation.validate({ myProp: true }, { serverless: false })
+        validation.validate({ myProp: 'serverless' }, { serverless: false })
       ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: a value wasn't expected to be present"`);
     });
 
     test('it allows changing the flag when context claims "in serverless"', () => {
-      expect(validation.validate({ myProp: false }, { serverless: true })).toEqual({
-        myProp: false,
+      expect(validation.validate({ myProp: 'top-default' }, { serverless: true })).toEqual({
+        myProp: 'top-default',
       });
     });
   });
@@ -203,6 +204,20 @@ describe('Helper: offeringBasedSchema()', () => {
         myProp: false,
       });
     });
+  });
+
+  test('TS resolves correct type with nested conditional', () => {
+    const testSchema = offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: true }),
+      traditional: schema.conditional(
+        schema.contextRef('dev'),
+        false,
+        schema.boolean({ defaultValue: true }),
+        schema.boolean({ defaultValue: false })
+      ),
+    });
+    expectType<boolean>(testSchema._output);
+    expectType<boolean | undefined>(testSchema._input);
   });
 
   test('TS enforces the same types on both entries', () => {

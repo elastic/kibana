@@ -68,14 +68,15 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * @param opts.options Any options to pass down in the types.
  */
 export function offeringBasedSchema<
-  T,
-  SLD extends DefaultValue<T> = never,
-  TRD extends DefaultValue<T> = never,
-  DV extends DefaultValue<T> = never
+  Output,
+  Input = Output,
+  SLD extends DefaultValue<Input> = never,
+  TRD extends DefaultValue<Input> = never,
+  DV extends DefaultValue<Input> = never
 >(opts: {
-  serverless?: Type<T, T, SLD>;
-  traditional?: Type<T, T, TRD>;
-  options?: TypeOptions<T, T, DV>;
+  serverless?: Type<Output, Input, SLD>;
+  traditional?: Type<Output, Input, TRD>;
+  options?: TypeOptions<Output, Input, DV>;
 }) {
   const { serverless = schema.never(), traditional = schema.never(), options } = opts;
   return schema.conditional(
