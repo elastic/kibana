@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
-import type { ReactWrapper } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type {
   AdditionalContext,
@@ -102,60 +101,43 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
 });
 
 describe('DefaultAlertsFlyout', () => {
-  let wrapper: ReactWrapper;
-  beforeAll(async () => {
-    wrapper = mount(
+  const renderFlyout = () =>
+    render(
       <AlertsTableContextProvider value={context}>
         <DefaultAlertsFlyoutBody
-          {...createPartialObjectMock<FlyoutSectionProps>({
-            alert,
-            isLoading: false,
-            columns,
-          })}
+          {...createPartialObjectMock<FlyoutSectionProps>({ alert, isLoading: false, columns })}
         />
       </AlertsTableContextProvider>
-    ) as ReactWrapper;
-    await waitFor(() => wrapper.update());
-  });
+    );
 
   describe('tabs', () => {
-    tabsData.forEach(({ name: tab }) => {
-      test(`should render the ${tab} tab`, () => {
-        expect(
-          wrapper
-            .find('[data-test-subj="defaultAlertFlyoutTabs"]')
-            .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
-        ).toBeTruthy();
+    test('renders all tabs', () => {
+      renderFlyout();
+      tabsData.forEach(({ name }) => {
+        expect(screen.getByRole('tab', { name })).toBeInTheDocument();
       });
     });
 
-    test('the Overview tab should be selected by default', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="defaultAlertFlyoutTabs"]')
-          .find('.euiTab-isSelected')
-          .first()
-          .text()
-      ).toEqual('Overview');
+    test('Overview tab selected by default', () => {
+      renderFlyout();
+
+      const overview = screen.getByRole('tab', { name: 'Overview' });
+
+      expect(overview).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('overviewTabPanel')).toBeInTheDocument();
     });
 
-    tabsData.forEach(({ subj, name }) => {
-      test(`should render the ${name} tab panel`, () => {
-        wrapper
-          .find('[data-test-subj="defaultAlertFlyoutTabs"]')
-          .find('[role="tablist"]')
-          .find(`[data-test-subj="${subj}"]`)
-          .first()
-          .simulate('click');
-        expect(
-          wrapper
-            .find('[data-test-subj="defaultAlertFlyoutTabs"]')
-            .find('[role="tabpanel"]')
-            .find(`[data-test-subj="${subj}Panel"]`)
-            .exists()
-        ).toBeTruthy();
-      });
+    test.each(tabsData)(`activates %s tab panel on click`, async ({ name, subj }) => {
+      const user = userEvent.setup();
+
+      renderFlyout();
+
+      const tab = screen.getByRole('tab', { name });
+
+      await user.click(tab);
+
+      expect(screen.getByTestId(`${subj}Panel`)).toBeInTheDocument();
+      expect(tab).toHaveAttribute('aria-selected', 'true');
     });
   });
 });
