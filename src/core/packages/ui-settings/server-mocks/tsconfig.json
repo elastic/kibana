@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-ui-settings-server-internal"
+    "@kbn/core-ui-settings-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",
