@@ -28,6 +28,8 @@ export const SystemEventsSparkline = ({
         id: 'system-events-sparkline',
         title: system.name,
       }}
+      hideXAxis={true}
+      height={100}
     />
   );
 };

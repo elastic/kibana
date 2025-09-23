@@ -46,7 +46,7 @@ export function StreamSystemsTable({
         defaultMessage: 'Description',
       }),
       truncateText: {
-        lines: 3,
+        lines: 4,
       },
     },
     {

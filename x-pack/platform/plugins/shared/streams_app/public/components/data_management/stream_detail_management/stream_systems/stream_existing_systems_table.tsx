@@ -33,7 +33,7 @@ export function StreamExistingSystemsTable({
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const columns: Array<EuiBasicTableColumn<System>> = [
     {
-      field: 'title',
+      field: 'name',
       name: TITLE_LABEL,
       sortable: true,
       truncateText: true,
@@ -41,7 +41,9 @@ export function StreamExistingSystemsTable({
     {
       field: 'description',
       name: DESCRIPTION_LABEL,
-      truncateText: true,
+      truncateText: {
+        lines: 4,
+      },
     },
     {
       field: 'filter',
@@ -58,6 +60,7 @@ export function StreamExistingSystemsTable({
     },
     {
       name: ACTIONS_COLUMN_HEADER_LABEL,
+      width: '120px',
       actions: [
         {
           name: GENERATE_SIGNIFICANT_EVENTS,
