@@ -8,12 +8,13 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { NodesFactory } from './step/nodes_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import type { StepErrorCatcher } from './step/node_implementation';
 import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
+import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
 
 /**
  * Executes a workflow by continuously processing its steps until completion.
@@ -69,13 +70,58 @@ async function runStep(
   const nodeImplementation = nodesFactory.create(currentNode as any);
 
   try {
-    await nodeImplementation.run();
+    await monitor(workflowRuntime, nodesFactory, workflowGraph, (abortController) =>
+      nodeImplementation.run()
+    );
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
     await workflowRuntime.failStep(error);
   } finally {
     await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
     await workflowRuntime.saveState(); // Ensure state is updated after each step
+  }
+}
+
+async function monitor(
+  workflowRuntime: WorkflowExecutionRuntimeManager,
+  nodesFactory: NodesFactory,
+  workflowGraph: WorkflowGraph,
+  runStepCallback: (abortController: AbortController) => Promise<void>
+): Promise<void> {
+  const stepAbortController = new AbortController();
+  const monitorAbortController = new AbortController();
+
+  // capture current node stack as it might be changed
+  const nodeStackFrames = workflowRuntime.getCurrentNodeScope();
+
+  async function continuous(): Promise<void> {
+    while (!monitorAbortController.signal.aborted) {
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 500);
+        monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
+      });
+
+      let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
+
+      while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
+        const scopeData = nodeStack.getCurrentScope()!;
+        const node = workflowGraph.getNode(scopeData.nodeId);
+        const nodeImplementation = nodesFactory.create(node as UnionExecutionGraphNode);
+        if (typeof (nodeImplementation as any).ping === 'function') {
+          await (nodeImplementation as any).ping(nodeStack);
+        }
+        nodeStack = nodeStack.exitScope();
+      }
+    }
+  }
+
+  try {
+    await Promise.race([continuous(), runStepCallback(stepAbortController)]);
+  } catch (err) {
+    stepAbortController.abort();
+    throw err;
+  } finally {
+    monitorAbortController.abort();
   }
 }
 

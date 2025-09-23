@@ -46,6 +46,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
+    await new Promise((resolve) => setTimeout(resolve, 7000));
     try {
       const step = this.step;
 
