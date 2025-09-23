@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiPanel,
-  EuiIcon,
   EuiSuperSelect,
   useEuiTheme,
   EuiFormRow,
@@ -29,6 +28,7 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { css } from '@emotion/react';
 import * as i18n from './translations';
+import { headerTypeOptions } from './header_type_options';
 
 const { emptyField } = fieldValidators;
 
@@ -36,37 +36,6 @@ interface Props {
   readOnly: boolean;
   maxHeaders: number;
 }
-
-const headerTypeOptions = [
-  {
-    value: 'config',
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="controls" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span>{i18n.CONFIG_OPTION}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    'data-test-subj': 'option-config',
-  },
-  {
-    value: 'secret',
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="lock" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span>{i18n.SECRET_OPTION}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    'data-test-subj': 'option-secret',
-  },
-];
 
 export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
   const { euiTheme } = useEuiTheme();
