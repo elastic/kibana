@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useMetricsGridState } from '../../../hooks';
@@ -34,11 +32,25 @@ export const useToolbarActions = ({
     onValuesChange,
     onClearValues,
     onClearAllDimensions,
+    onClearSearchTerm,
+    isFullscreen,
+    onToggleFullscreen,
   } = useMetricsGridState();
+
+  const [showSearchInput, setShowSearchInput] = useState(false);
+
+  const onShowSearch = useCallback(() => {
+    setShowSearchInput(true);
+  }, []);
+
+  const onClearSearch = useCallback(() => {
+    setShowSearchInput(false);
+    onClearSearchTerm();
+  }, [onClearSearchTerm]);
 
   const leftSideActions = useMemo(
     () => [
-      renderToggleActions(),
+      isFullscreen ? null : renderToggleActions(),
       <DimensionsSelector
         fields={fields}
         onChange={onDimensionsChange}
@@ -68,29 +80,16 @@ export const useToolbarActions = ({
       renderToggleActions,
       requestParams,
       valueFilters,
+      isFullscreen,
     ]
   );
 
-  const rightSideActions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-    },
-  ];
-
-  return { leftSideActions, rightSideActions };
+  return {
+    leftSideActions,
+    onClearSearch,
+    showSearchInput,
+    isFullscreen,
+    onToggleFullscreen,
+    onShowSearch,
+  };
 };

@@ -13,6 +13,7 @@ import type {
   ConversationRoundStep,
 } from '@kbn/onechat-common';
 import React from 'react';
+import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
 
@@ -45,7 +46,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} steps={steps} />
+        {isLoading ? (
+          <StreamingText content={message} steps={steps} />
+        ) : (
+          <ChatMessageText content={message} steps={steps} />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
