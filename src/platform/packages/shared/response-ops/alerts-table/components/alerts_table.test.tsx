@@ -922,6 +922,7 @@ describe('AlertsTable', () => {
 
   describe('error state', () => {
     beforeEach(() => {
+      mockStorageGet.mockClear();
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
         oldAlertsData: [],
@@ -968,7 +969,7 @@ describe('AlertsTable', () => {
       ).toBeInTheDocument();
     });
 
-    it('should not show reset button if sorting error does not have field name', async () => {
+    it('should render reset button on error', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
         oldAlertsData: [],
@@ -980,25 +981,12 @@ describe('AlertsTable', () => {
 
       render(<TestComponent {...tableProps} />);
 
-      expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
+      const resetButton = await screen.findByTestId('resetButton');
+      expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset');
     });
 
-    it('should not show reset button if it is not a sorting error', async () => {
-      mockSearchAlerts.mockResolvedValue({
-        alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
-        total: 0,
-        querySnapshot: { request: [], response: [] },
-        error: new Error('Error while fetching alerts with field [kibana.alert.time_range]'),
-      });
-
-      render(<TestComponent {...tableProps} />);
-
-      expect(screen.queryByTestId('resetToPreviousStateButton')).not.toBeInTheDocument();
-    });
-
-    it('should go back to previous state when reset button is clicked', async () => {
+    it('should go back to previous state when reset sort button is clicked', async () => {
       const storageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
@@ -1030,14 +1018,130 @@ describe('AlertsTable', () => {
         })
       );
 
-      const resetButton = await screen.findByTestId('resetSortToPreviousStateButton');
+      const resetButton = await screen.findByTestId('resetButton');
       expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset sort');
 
       await userEvent.click(resetButton);
 
       expect(storageSetSpy).toHaveBeenCalledWith(
         'test-alerts-table',
-        expect.stringContaining('"sort":[]')
+        JSON.stringify({
+          columns: [
+            {
+              id: AlertsField.uuid,
+              isSortable: false,
+            },
+            {
+              id: AlertsField.reason,
+              displayAsText: 'Reason',
+              isSortable: false,
+            },
+            {
+              id: ALERT_CASE_IDS,
+              displayAsText: 'Cases',
+              isSortable: false,
+              schema: 'string',
+            },
+            {
+              id: ALERT_MAINTENANCE_WINDOW_IDS,
+              displayAsText: 'Maintenance Windows',
+              isSortable: false,
+              schema: 'string',
+            },
+            {
+              id: ALERT_TIME_RANGE,
+              displayAsText: 'Time Range',
+              isSortable: false,
+              schema: 'string',
+            },
+          ],
+          sort: [],
+          visibleColumns: [
+            'kibana.alert.reason',
+            'kibana.alert.rule.uuid',
+            'kibana.alert.case_ids',
+            'kibana.alert.maintenance_window_ids',
+            'kibana.alert.time_range',
+          ],
+        })
+      );
+    });
+
+    it('should go back to default state when reset button is clicked', async () => {
+      const storageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Something went wrong'),
+      });
+
+      render(<TestComponent {...tableProps} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [],
+        })
+      );
+
+      const resetButton = await screen.findByTestId('resetButton');
+      expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset');
+
+      await userEvent.click(resetButton);
+
+      expect(storageSetSpy).toHaveBeenNthCalledWith(
+        1,
+        'test-alerts-table',
+        JSON.stringify({ columns: [], sort: [], visibleColumns: [] })
+      );
+
+      expect(storageSetSpy).toHaveBeenNthCalledWith(
+        2,
+        'test-alerts-table',
+        JSON.stringify({
+          columns: [
+            {
+              id: AlertsField.name,
+              displayAsText: 'Name',
+              isSortable: false,
+            },
+            {
+              id: AlertsField.reason,
+              displayAsText: 'Reason',
+              isSortable: false,
+            },
+            {
+              id: ALERT_CASE_IDS,
+              displayAsText: 'Cases',
+              isSortable: false,
+              schema: 'string',
+            },
+            {
+              id: ALERT_MAINTENANCE_WINDOW_IDS,
+              displayAsText: 'Maintenance Windows',
+              isSortable: false,
+              schema: 'string',
+            },
+            {
+              id: ALERT_TIME_RANGE,
+              displayAsText: 'Time Range',
+              isSortable: false,
+              schema: 'string',
+            },
+          ],
+          sort: [],
+          visibleColumns: [
+            'kibana.alert.rule.name',
+            'kibana.alert.reason',
+            'kibana.alert.case_ids',
+            'kibana.alert.maintenance_window_ids',
+            'kibana.alert.time_range',
+          ],
+        })
       );
     });
   });

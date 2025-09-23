@@ -12,6 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EmptyState } from './empty_state';
 import userEvent from '@testing-library/user-event';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 
 describe('EmptyState', () => {
   it('renders the empty state with default props', async () => {
@@ -59,18 +60,49 @@ describe('EmptyState', () => {
     expect(screen.queryByText('There are currently no alerts to display.')).not.toBeInTheDocument();
   });
 
-  it('renders the reset button when onResetSortToPreviousState is provided', async () => {
+  it('renders the reset button with Reset text when error has no field name', async () => {
     const mockReset = jest.fn();
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
-        <EmptyState error={error} onResetSortToPreviousState={mockReset} />
+        <EmptyState error={error} onReset={mockReset} />
+      </IntlProvider>
+    );
+
+    const resetButton = await screen.findByTestId('resetButton');
+    expect(resetButton).toBeInTheDocument();
+    expect(resetButton).toHaveTextContent('Reset');
+  });
+
+  it('renders the reset button with Reset Sort text when error has field name', async () => {
+    const fieldWithError: SortCombinations = {
+      ['kibana.alert.title']: { order: 'asc' },
+    };
+    const mockReset = jest.fn();
+    const error = new Error('Test error message on field kibana.alert.title');
+    render(
+      <IntlProvider locale="en">
+        <EmptyState error={error} onReset={mockReset} fieldWithSortingError={fieldWithError} />
+      </IntlProvider>
+    );
+
+    const resetButton = await screen.findByTestId('resetButton');
+    expect(resetButton).toBeInTheDocument();
+    expect(resetButton).toHaveTextContent('Reset sort');
+  });
+
+  it('calls onReset correctly', async () => {
+    const mockReset = jest.fn();
+    const error = new Error('Test error message');
+    render(
+      <IntlProvider locale="en">
+        <EmptyState error={error} onReset={mockReset} />
       </IntlProvider>
     );
 
     expect(await screen.findByText('Test error message')).toBeInTheDocument();
 
-    const resetButton = await screen.findByTestId('resetSortToPreviousStateButton');
+    const resetButton = await screen.findByTestId('resetButton');
     expect(resetButton).toBeInTheDocument();
 
     userEvent.click(resetButton);
@@ -84,15 +116,15 @@ describe('EmptyState', () => {
         <EmptyState
           messageTitle="No Alerts"
           messageBody="There are currently no alerts to display."
-          onResetSortToPreviousState={mockReset}
+          onReset={mockReset}
         />
       </IntlProvider>
     );
 
-    expect(screen.queryByTestId('resetSortToPreviousStateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('resetButton')).not.toBeInTheDocument();
   });
 
-  it('does not render the reset button when onResetSortToPreviousState is not provided', async () => {
+  it('does not render the reset button when onReset is not provided', async () => {
     const error = new Error('Test error message');
     render(
       <IntlProvider locale="en">
@@ -100,6 +132,6 @@ describe('EmptyState', () => {
       </IntlProvider>
     );
 
-    expect(screen.queryByTestId('resetSortToPreviousStateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('resetButton')).not.toBeInTheDocument();
   });
 });

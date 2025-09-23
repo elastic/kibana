@@ -449,8 +449,8 @@ const AlertsTableContent = typedForwardRef(
       [id, visibleColumns]
     );
 
-    // allow to reset to previous sort state in case of sorting error
-    const handleResetSortToPreviousState = useCallback(() => {
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
       if (fieldWithSortingError) {
         const newSort = queryParams.sort.filter(
           (sortField) => !deepEqual(sortField, fieldWithSortingError)
@@ -462,8 +462,18 @@ const AlertsTableContent = typedForwardRef(
 
         storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        storageAlertsTable.current = {
+          columns: DEFAULT_COLUMNS,
+          sort: DEFAULT_SORT,
+          visibleColumns: DEFAULT_COLUMNS.map((c) => c.id),
+        };
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(DEFAULT_SORT);
+        onResetColumns();
       }
-    }, [setSort, storageRef, queryParams, id, fieldWithSortingError]);
+    }, [setSort, storageRef, queryParams, id, fieldWithSortingError, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -656,9 +666,8 @@ const AlertsTableContent = typedForwardRef(
               height={emptyState?.height}
               variant={emptyState?.variant}
               error={alertsError}
-              onResetSortToPreviousState={
-                fieldWithSortingError ? handleResetSortToPreviousState : undefined
-              }
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}

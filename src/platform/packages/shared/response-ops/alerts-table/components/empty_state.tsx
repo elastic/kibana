@@ -22,6 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import { css } from '@emotion/react';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import { ALERTS_TABLE_TITLE } from '../translations';
@@ -51,7 +52,8 @@ export const EmptyState: React.FC<
     alertsQuerySnapshot?: EsQuerySnapshot;
     showInspectButton?: boolean;
     error?: Error;
-    onResetSortToPreviousState?: () => void;
+    fieldWithSortingError?: SortCombinations;
+    onReset?: () => void;
   } & EmptyStateMessage
 > = ({
   height = 'tall',
@@ -62,7 +64,8 @@ export const EmptyState: React.FC<
   alertsQuerySnapshot,
   showInspectButton,
   error,
-  onResetSortToPreviousState,
+  fieldWithSortingError,
+  onReset,
 }) => {
   const renderErrorState = () => (
     <EuiFlexItem>
@@ -71,17 +74,13 @@ export const EmptyState: React.FC<
       </EuiText>
       <EuiSpacer size="m" />
 
-      {onResetSortToPreviousState ? (
+      {onReset ? (
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onResetSortToPreviousState}
-              size="m"
-              data-test-subj="resetSortToPreviousStateButton"
-            >
+            <EuiButton onClick={onReset} size="m" data-test-subj="resetButton">
               <FormattedMessage
                 id="xpack.triggersActionsUI.empty.resetButton"
-                defaultMessage={'Reset sort'}
+                defaultMessage={fieldWithSortingError ? 'Reset sort' : 'Reset'}
               />
             </EuiButton>
           </EuiFlexItem>
