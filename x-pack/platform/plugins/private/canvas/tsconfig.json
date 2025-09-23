@@ -20,7 +20,6 @@
     "i18n/**/*",
     "public/**/*",
     "server/**/*",
-    "shareable_runtime/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
     "types/**/*"

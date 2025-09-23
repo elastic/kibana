@@ -34,10 +34,6 @@ const strings = {
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareMenuButtonLabel', {
       defaultMessage: 'Share',
     }),
-  getShareWebsiteTitle: () =>
-    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
-      defaultMessage: 'Share on a website',
-    }),
   getShareWorkpadMessage: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
       defaultMessage: 'Share this workpad',
@@ -91,14 +87,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
             'data-test-subj': 'sharePanel-PDFReports',
           }
         : false,
-      {
-        name: strings.getShareWebsiteTitle(),
-        icon: <EuiIcon type="globe" size="m" />,
-        onClick: () => {
-          setShowFlyout(true);
-          closePopover();
-        },
-      },
     ].filter(Boolean),
   });
 
