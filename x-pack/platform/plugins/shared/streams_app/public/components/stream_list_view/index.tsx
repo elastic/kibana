@@ -15,7 +15,7 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingElastic,
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -61,12 +61,10 @@ export function StreamListView() {
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
+    async ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /internal/streams', {
         signal,
-      });
-      return streams;
-    },
+      }),
     // time state change is used to trigger a refresh of the listed
     // streams metadata but we operate on stale data if we don't
     // also refresh the streams
@@ -91,7 +89,7 @@ export function StreamListView() {
         <StreamsAppContextProvider context={context}>
           <GroupStreamModificationFlyout
             client={streamsRepositoryClient}
-            streamsList={streamsListFetch.value}
+            streamsList={streamsListFetch.value?.streams}
             refresh={() => {
               streamsListFetch.refresh();
               overlayRef.current?.close();
@@ -172,7 +170,7 @@ export function StreamListView() {
       <StreamsAppPageTemplate.Body grow>
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
-            icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+            icon={<EuiLoadingElastic size="xl" />}
             title={
               <h2>
                 {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
@@ -185,11 +183,15 @@ export function StreamListView() {
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <>
-            <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
+            <StreamsTreeTable
+              loading={streamsListFetch.loading}
+              streams={streamsListFetch.value?.streams}
+              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
+            />
             {groupStreams?.enabled && (
               <>
                 <EuiSpacer size="l" />
-                <GroupStreamsCards streams={streamsListFetch.value} />
+                <GroupStreamsCards streams={streamsListFetch.value?.streams} />
               </>
             )}
           </>
