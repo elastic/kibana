@@ -247,7 +247,7 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-  /**
+   /**
    * Enables Integrations Sync for Privileged User Monitoring
    */
   integrationsSyncEnabled: false,
@@ -327,7 +327,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
-  microsoftDefenderEndpointCancelEnabled: false,
+  microsoftDefenderEndpointCancelEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
