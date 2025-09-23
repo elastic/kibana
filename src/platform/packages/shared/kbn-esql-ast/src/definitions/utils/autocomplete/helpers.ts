@@ -24,10 +24,10 @@ import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../type
 import { Walker } from '../../../walker';
 import { logicalOperators } from '../../all_operators';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition } from '../../types';
+import type { FunctionDefinition, Signature } from '../../types';
 import { isParameterType, type SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
-import { getFunctionSuggestions } from '../functions';
+import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import {
   getOperatorSuggestion,
@@ -287,6 +287,10 @@ export const getExpressionPosition = (
   return 'empty_expression';
 };
 
+interface FunctionParameterContext {
+  paramDefinitions: Signature['params'];
+}
+
 /**
  * Creates suggestion within an expression.
  *
@@ -307,6 +311,7 @@ export async function suggestForExpression({
   hasMinimumLicenseRequired,
   activeProduct,
   ignoredColumnsForEmptyExpression = [],
+  functionParameterContext,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -320,6 +325,7 @@ export async function suggestForExpression({
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
+  functionParameterContext?: FunctionParameterContext;
 }): Promise<ISuggestionItem[]> {
   const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
 
@@ -328,6 +334,18 @@ export async function suggestForExpression({
   const position = getExpressionPosition(innerText, expressionRoot);
   switch (position) {
     case 'in_function': {
+      const fn = expressionRoot as ESQLFunction;
+      const fnDefinition = getFunctionDefinition(fn.name);
+
+      if (!fnDefinition) {
+        break;
+      }
+
+      const newFunctionParameterContext: FunctionParameterContext = {
+        paramDefinitions: getValidSignaturesAndTypesToSuggestNext(fn, context!, fnDefinition)
+          .compatibleParamDefs,
+      };
+
       const lastArg = (expressionRoot as ESQLFunction).args.slice(-1)[0] as ESQLAstItem;
 
       return suggestForExpression({
@@ -341,6 +359,7 @@ export async function suggestForExpression({
         hasMinimumLicenseRequired,
         activeProduct,
         ignoredColumnsForEmptyExpression,
+        functionParameterContext: newFunctionParameterContext,
       });
     }
     /**
@@ -447,8 +466,15 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
+      let acceptedTypes: string[] = ['any'];
+
+      if (functionParameterContext) {
+        const { paramDefinitions } = functionParameterContext;
+        acceptedTypes = paramDefinitions.map((p) => p.type);
+      }
+
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
-        'any',
+        acceptedTypes,
         ignoredColumnsForEmptyExpression,
         {
           advanceCursor: advanceCursorAfterInitialColumn,
@@ -457,7 +483,11 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
+        ...getFunctionSuggestions(
+          { location, returnTypes: acceptedTypes },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -586,7 +616,7 @@ function getValidFunctionSignaturesForPreviousArgs(
  * @param argIndex: the index of the argument to suggest for
  * @returns
  */
-function getCompatibleTypesToSuggestNext(
+function getCompatibleParamDefs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
@@ -652,7 +682,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex
   );
   // Retrieve unique of types that are compatiable for the current arg
-  const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
+  const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);
   const hasMoreMandatoryArgs = !validSignatures
     // Types available to suggest next after this argument is completed
     .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
@@ -662,7 +692,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
     .some((p) => p === null || p?.optional === true);
 
   return {
-    typesToSuggestNext,
+    compatibleParamDefs,
     hasMoreMandatoryArgs,
     enrichedArgs,
     argIndex,
