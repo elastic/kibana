@@ -102,9 +102,13 @@ export const selectHasUnsavedChanges = (
     }
   }
 
-  addLog('[DiscoverSession] no difference between initial and changed version');
+  const hasUnsavedChanges = tabIdsChanged || unsavedTabIds.length > 0;
 
-  return { hasUnsavedChanges: tabIdsChanged || unsavedTabIds.length > 0, unsavedTabIds };
+  if (!hasUnsavedChanges) {
+    addLog('[DiscoverSession] no difference between initial and changed version');
+  }
+
+  return { hasUnsavedChanges, unsavedTabIds };
 };
 
 type FieldComparator<T> = (a: T, b: T) => boolean;
@@ -139,7 +143,7 @@ const fieldComparator = <K extends keyof DiscoverSessionTab>(
   defaultValue: DiscoverSessionTab[K]
 ) => defaultValueComparator(defaultValue);
 
-const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
+const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
   state: false, // We don't compare filter types (global vs appState).
 };
@@ -162,7 +166,7 @@ const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   return (
     // if a filter gets pinned and the order of filters does not change,
     // we don't show the unsaved changes badge
-    isEqualFilters(filtersA, filtersB, FILTERS_COMPARE_OPTIONS) &&
+    isEqualFilters(filtersA, filtersB, FILTER_COMPARE_OPTIONS) &&
     isEqual(searchSourceA.query, searchSourceB.query) &&
     getAdjustedDataViewId(searchSourceA) === getAdjustedDataViewId(searchSourceB)
   );
