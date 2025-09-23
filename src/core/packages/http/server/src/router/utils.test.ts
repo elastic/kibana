@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from './route_validator';
 import { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';
 
 type Validator = RouteValidator<unknown, unknown, unknown>;
 
+const mockSchema = schema.object({});
+
 describe('isFullValidatorContainer', () => {
   it('correctly identifies RouteValidatorRequestAndResponses', () => {
     const fullValidatorContainer: Validator = {
       request: {
-        body: {} as ObjectType,
+        body: mockSchema,
       },
       response: {},
     };
@@ -30,7 +32,7 @@ describe('isFullValidatorContainer', () => {
 describe('getRequestValidation', () => {
   it('correctly extracts validation config', () => {
     const validationDummy = {
-      body: {} as unknown as ObjectType,
+      body: mockSchema,
     };
     const fullValidatorContainer: Validator = {
       request: validationDummy,
@@ -46,7 +48,7 @@ describe('getRequestValidation', () => {
 describe('getResponseValidation', () => {
   it('extracts validation config', () => {
     const validationDummy = {
-      body: {} as unknown as ObjectType,
+      body: mockSchema,
     };
     const fullValidatorContainer: Validator = {
       request: {},
@@ -58,7 +60,7 @@ describe('getResponseValidation', () => {
 
   it('returns "undefined" when there is no response validation configured', () => {
     const validationDummy = {
-      body: {} as unknown as ObjectType,
+      body: mockSchema,
     };
     const fullValidatorContainer: Validator = {
       request: {},

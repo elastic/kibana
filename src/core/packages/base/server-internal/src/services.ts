@@ -9,19 +9,19 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { Type } from '@kbn/config-schema';
+import type { SchemaOf } from '@kbn/config-schema';
 
 /**
  * Descriptor of a core service configuration
  *
  * @internal
  */
-export interface ServiceConfigDescriptor<T = any> {
+export interface ServiceConfigDescriptor<T extends Record<string, any> = any> {
   path: string;
   /**
    * Schema to use to validate the configuration.
    */
-  schema: Type<T>;
+  schema: SchemaOf<T>;
   /**
    * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
    */

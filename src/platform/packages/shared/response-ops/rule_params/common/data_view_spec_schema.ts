@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { SchemaOf, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { RUNTIME_FIELD_TYPES } from './constants';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH, RUNTIME_FIELD_TYPES2 } from './constants';
@@ -78,7 +78,7 @@ const compositeRuntimeFieldSchemaShared = {
 };
 
 const compositeRuntimeFieldSchema = schema.object({
-  type: schema.literal('composite') as Type<RuntimeType>,
+  type: schema.literal('composite') satisfies SchemaOf<RuntimeType>,
   ...compositeRuntimeFieldSchemaShared,
 });
 

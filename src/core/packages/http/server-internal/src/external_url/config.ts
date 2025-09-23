@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { SchemaOf, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';
@@ -36,13 +36,13 @@ const policySchema = schema.object({
 });
 
 const externalUrlConfigSchema = schema.object({
-  policy: schema.arrayOf<IExternalUrlPolicy>(policySchema, {
+  policy: schema.arrayOf(policySchema, {
     defaultValue: [
       {
         allow: true,
       },
     ],
-  }),
+  }) satisfies SchemaOf<IExternalUrlPolicy[]>,
 });
 
 export const externalUrlConfig: ServiceConfigDescriptor<ExternalUrlConfigType> = {

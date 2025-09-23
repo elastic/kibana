@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { schema, type SchemaOf, type TypeOf } from '@kbn/config-schema';
 import { ProductLine, ProductTier } from './product';
 
 export const productLine = schema.oneOf([
@@ -30,9 +30,9 @@ export const productType = schema.object({
 });
 export type SecurityProductType = TypeOf<typeof productType>;
 
-export const productTypes = schema.arrayOf<SecurityProductType>(productType, {
+export const productTypes = schema.arrayOf(productType, {
   defaultValue: [],
-});
+}) satisfies SchemaOf<SecurityProductType[]>;
 export type SecurityProductTypes = TypeOf<typeof productTypes>;
 
 const commonConfigSchemaProps = {

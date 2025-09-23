@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Type } from '@kbn/config-schema';
+import type { SchemaOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { inferenceTracingExportConfigSchema } from '@kbn/inference-tracing-config';
 import type { TracingConfig } from './types';
@@ -14,11 +14,11 @@ import type { TracingConfig } from './types';
 /**
  * The tracing config schema that is exposed by the Telemetry plugin.
  */
-export const tracingConfigSchema: Type<TracingConfig> = schema.object({
+export const tracingConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
   exporters: schema.oneOf(
     [inferenceTracingExportConfigSchema, schema.arrayOf(inferenceTracingExportConfigSchema)],
     { defaultValue: [] }
   ),
-});
+}) satisfies SchemaOf<TracingConfig>;

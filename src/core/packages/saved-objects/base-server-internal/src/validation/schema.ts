@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Type } from '@kbn/config-schema';
+import { schema, type SchemaOf } from '@kbn/config-schema';
 import type {
   SavedObjectsValidationSpec,
   SavedObjectSanitizedDoc,
@@ -16,11 +16,9 @@ import type {
 // We convert `SavedObjectSanitizedDoc` to its validation schema representation
 // to ensure that we don't forget to keep the schema up-to-date. TS will complain
 // if we update `SavedObjectSanitizedDoc` without making changes below.
-type SavedObjectSanitizedDocSchema = {
-  [K in keyof Required<SavedObjectSanitizedDoc>]: Type<SavedObjectSanitizedDoc[K]>;
-};
+type SavedObjectSanitizedDocSchema = SchemaOf<SavedObjectSanitizedDoc>;
 
-const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
+const baseSchema = schema.object({
   id: schema.string({ minLength: 1 }),
   type: schema.string(),
   references: schema.arrayOf(
@@ -44,7 +42,7 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   originId: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
   attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),
-});
+}) satisfies SavedObjectSanitizedDocSchema;
 
 /**
  * Takes a {@link SavedObjectsValidationSpec} and returns a full schema representing

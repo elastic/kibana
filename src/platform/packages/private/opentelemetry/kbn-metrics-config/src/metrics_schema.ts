@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Type } from '@kbn/config-schema';
+import { schema, type SchemaOf } from '@kbn/config-schema';
 import type { MetricsExporterConfig, MetricsConfig } from './types';
 
 const metricsCommonExporterConfigSchema = schema.object({
@@ -17,7 +17,7 @@ const metricsCommonExporterConfigSchema = schema.object({
   }),
 });
 
-export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.oneOf([
+export const metricsExporterConfigSchema = schema.oneOf([
   // gRPC OTLP Exporter
   schema.object({
     grpc: metricsCommonExporterConfigSchema.extends({
@@ -33,16 +33,16 @@ export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.o
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     }),
   }),
-]);
+]) satisfies SchemaOf<MetricsExporterConfig>;
 
 /**
  * The metrics config schema that is exposed by the Telemetry plugin.
  */
-export const metricsConfigSchema: Type<MetricsConfig> = schema.object({
+export const metricsConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   interval: schema.duration({ defaultValue: '10s' }),
   exporters: schema.oneOf(
     [metricsExporterConfigSchema, schema.arrayOf(metricsExporterConfigSchema)],
     { defaultValue: [] }
   ),
-});
+}) satisfies SchemaOf<MetricsConfig>;

@@ -10,10 +10,10 @@
 import Fs from 'fs';
 
 import dedent from 'dedent';
-import type { Props, TypeOf } from '@kbn/config-schema';
+import type { ObjectProps, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-const partialObject = <P extends Props>(props: P) => {
+const partialObject = <P extends ObjectProps>(props: P) => {
   return schema.object(props, {
     unknowns: 'ignore',
   });
