@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUserLimitStatus } from '../../api/hooks/use_privileged_monitoring_health';
+import { useUserLimitStatus } from '../../hooks/use_privileged_monitoring_health';
 
 interface UserLimitCallOutProps {
   /** Variant to display - compact shows basic info, full shows detailed warnings */
@@ -28,7 +28,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
     return null;
   }
 
-  const { current_count: currentCount, max_allowed: maxAllowed } = userStats;
+  const { currentCount, maxAllowed } = userStats;
 
   // Determine when to show the callout
   const shouldShow =

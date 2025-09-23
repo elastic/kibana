@@ -37,7 +37,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
-import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged_monitoring_engine_status';
+import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
