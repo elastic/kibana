@@ -89,7 +89,7 @@ export function StreamSystemsTable({
           icon: 'copy',
           onClick: (system) => {
             // clone the system
-            setSelectedSystems(selectedSystems.concat({ ...system, name: `${system.name}-copy` }));
+            setSystems(systems.concat({ ...system, name: `${system.name}-copy` }));
           },
         },
         {
@@ -129,6 +129,7 @@ export function StreamSystemsTable({
           icon: 'trash',
           onClick: (system) => {
             // delete the system
+            setSystems(systems.filter((selectedSystem) => selectedSystem.name !== system.name));
             setSelectedSystems(
               selectedSystems.filter((selectedSystem) => selectedSystem.name !== system.name)
             );
