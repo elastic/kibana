@@ -90,17 +90,16 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     if (!fieldNames) {
       /**
        * The merge order is important here.
-       * The ECS fields repository has the highest priority,
-       * followed by the OpenTel fields repository,
-       * followed by the metadata fields repository.
+       * The metadata fields repository has the highest priority,
+       * followed by the ECS fields repository,
+       * followed by the OpenTel fields repository.
        *
-       * This is because the ECS fields repository is the
-       * most authoritative source of field metadata.
+       * This is because we want the ECS fields repository to be more authoritative than the OpenTel fields repository.
        */
       return FieldsMetadataDictionary.create({
-        ...(isSourceAllowed('metadata') && this.metadataFieldsRepository.find().getFields()),
         ...(isSourceAllowed('otel') && this.otelFieldsRepository.find().getFields()),
         ...(isSourceAllowed('ecs') && this.ecsFieldsRepository.find().getFields()),
+        ...(isSourceAllowed('metadata') && this.metadataFieldsRepository.find().getFields()),
       });
     }
 

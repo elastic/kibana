@@ -222,7 +222,7 @@ export const FieldNameSelector = () => {
         defaultMessage: 'Field name',
       })}
       helpText={i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldTypeHelpText', {
-        defaultMessage: 'We suggest general naming conventions like ECS or OTel.',
+        defaultMessage: 'We suggest naming conventions like ECS or OTel.',
       })}
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
