@@ -30,7 +30,7 @@ interface StreamConfigurationProps {
 export function StreamSystemConfiguration({ definition }: StreamConfigurationProps) {
   const { euiTheme } = useEuiTheme();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { identifySystemsQuery } = useStreamSystemsApi(definition);
+  const { identifySystems } = useStreamSystemsApi(definition);
   const aiFeatures = useAIFeatures();
   const [systems, setSystems] = useState<System[]>([]);
   const { systems: existingSystems, refresh, loading } = useStreamSystems(definition);
@@ -67,11 +67,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
               onClick={() => {
                 setIsLoading(true);
                 setIsFlyoutVisible(!isFlyoutVisible);
-                identifySystemsQuery(
-                  aiFeatures?.genAiConnectors.selectedConnector!,
-                  'now',
-                  'now-24h'
-                )
+                identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
                   .then((data) => {
                     setSystems(data.systems);
                   })

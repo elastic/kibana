@@ -16,7 +16,7 @@ interface StreamSystemsApi {
     systemName: string,
     request: Pick<System, 'filter' | 'description'>
   ) => Promise<void>;
-  identifySystemsQuery: (
+  identifySystems: (
     connectorId: string,
     to: string,
     from: string
@@ -37,7 +37,7 @@ export function useStreamSystemsApi(definition: Streams.all.Definition): StreamS
   const { signal } = useAbortController();
 
   return {
-    identifySystemsQuery: async (connectorId: string, to: string, from: string) => {
+    identifySystems: async (connectorId: string, to: string, from: string) => {
       return await streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/systems/_identify',
         {

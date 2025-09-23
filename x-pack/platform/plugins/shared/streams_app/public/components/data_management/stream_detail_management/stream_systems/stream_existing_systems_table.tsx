@@ -31,6 +31,9 @@ export function StreamExistingSystemsTable({
 }) {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
+  const { removeSystemsFromStream } = useStreamSystemsApi(definition);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const columns: Array<EuiBasicTableColumn<System>> = [
     {
       field: 'name',
@@ -74,20 +77,29 @@ export function StreamExistingSystemsTable({
           description: EDIT_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'pencil',
-          onClick: () => '',
+          onClick: (system) => {
+            setIsDetailFlyoutOpen(system);
+          },
         },
         {
           name: DELETE_ACTION_NAME_LABEL,
           description: DELETE_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'trash',
-          onClick: () => '',
+          onClick: (system) => {
+            setIsDeleting(true);
+            removeSystemsFromStream([system.name])
+              .then(() => {
+                refreshSystems();
+              })
+              .finally(() => {
+                setIsDeleting(false);
+              });
+          },
         },
       ],
     },
   ];
-  const { removeSystemsFromStream } = useStreamSystemsApi(definition);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const toggleDetails = (system: System) => {
     setIsDetailFlyoutOpen(system);
@@ -174,7 +186,11 @@ export function StreamExistingSystemsTable({
         items={systems}
         itemId="name"
         columns={columnsWithExpandingRowToggle}
-        selection={{ initialSelected: selectedSystems, onSelectionChange: setSelectedSystems }}
+        selection={{
+          initialSelected: selectedSystems,
+          onSelectionChange: setSelectedSystems,
+          selected: selectedSystems,
+        }}
       />
       {isDetailFlyoutOpen && (
         <StreamSystemDetailsFlyout

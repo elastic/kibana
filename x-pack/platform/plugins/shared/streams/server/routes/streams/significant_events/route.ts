@@ -14,6 +14,7 @@ import { z } from '@kbn/zod';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { conditionSchema } from '@kbn/streamlang';
+import { badRequest } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -70,10 +71,10 @@ const previewSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    // const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    // if (!isStreamEnabled) {
-    //   throw badRequest('Streams is not enabled');
-    // }
+    const isStreamEnabled = await streamsClient.isStreamsEnabled();
+    if (!isStreamEnabled) {
+      throw badRequest('Streams is not enabled');
+    }
 
     const {
       body: { query },
