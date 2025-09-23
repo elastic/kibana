@@ -44,10 +44,10 @@ export function registerA2ARoutes({
       summary: 'A2A Agent Card',
       description: 'Provides agent discovery metadata for A2A protocol',
       options: {
-        tags: ['a2a','oas-tag:agent-builder'],
+        tags: ['a2a', 'oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
-          since: '9.2.0'
+          since: '9.2.0',
         },
       },
     })
@@ -84,11 +84,11 @@ export function registerA2ARoutes({
       summary: 'A2A Task Endpoint',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['a2a','oas-tag:agent-builder'],
+        tags: ['a2a', 'oas-tag:agent-builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
-          since: '9.2.0'
+          since: '9.2.0',
         },
       },
     })

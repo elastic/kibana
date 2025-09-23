@@ -105,7 +105,7 @@ export function registerChatRoutes({
         tags: ['oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
-          since: '9.2.0'
+          since: '9.2.0',
         },
       },
     })
@@ -170,7 +170,7 @@ export function registerChatRoutes({
         tags: ['oas-tag:agent-builder'],
         availability: {
           stability: 'experimental',
-          since: '9.2.0'
+          since: '9.2.0',
         },
       },
     })
