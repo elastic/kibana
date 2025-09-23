@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../common/constants';
 import type { RuntimeType } from '../common';
@@ -27,11 +26,8 @@ export const RUNTIME_FIELD_TYPES2 = [
   'geo_point',
 ] as const;
 
-export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
-  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
-  ]
-);
+export const runtimeFieldNonCompositeFieldsSpecTypeSchema =
+  schema.enum<RuntimeType>(RUNTIME_FIELD_TYPES2);
 
 const primitiveRuntimeFieldSchemaShared = {
   script: schema.maybe(
@@ -92,12 +88,12 @@ const compositeRuntimeFieldSchemaShared = {
 };
 
 export const compositeRuntimeFieldSchema = schema.object({
-  type: schema.literal('composite') as Type<RuntimeType>,
+  type: schema.literal<RuntimeType>('composite'),
   ...compositeRuntimeFieldSchemaShared,
 });
 
 const compositeRuntimeFieldSchemaUpdate = schema.object({
-  type: schema.maybe(schema.literal('composite') as Type<RuntimeType>),
+  type: schema.maybe(schema.literal<RuntimeType>('composite')),
   ...compositeRuntimeFieldSchemaShared,
 });
 

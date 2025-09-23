@@ -9,12 +9,23 @@
 
 import { schema } from '../..';
 
+enum Status {
+  PENDING = 'pending',
+  WAITING = 'waiting',
+  COMPLETED = 'completed',
+}
+
 const myEnums = ['foo', 'bar', 'baz'] as const;
 
 describe('schema.enum', () => {
   test('returns enum string value when passed string', () => {
     const type = schema.enum(myEnums);
     expect(type.validate('foo')).toBe('foo');
+  });
+
+  test('returns enum string value when passed value from enum', () => {
+    const type = schema.enum<Status>(Status);
+    expect(type.validate(Status.PENDING)).toBe(Status.PENDING);
   });
 
   test('returns null if wrapped in nullable for undefined', () => {
@@ -38,6 +49,17 @@ describe('schema.enum', () => {
       - [0]: expected value to equal [foo]
       - [1]: expected value to equal [bar]
       - [2]: expected value to equal [baz]"
+    `);
+  });
+
+  test('validates enum type', () => {
+    const type = schema.enum(Status);
+
+    expect(() => type.validate('bad')).toThrowErrorMatchingInlineSnapshot(`
+      "types that failed validation:
+      - [0]: expected value to equal [pending]
+      - [1]: expected value to equal [waiting]
+      - [2]: expected value to equal [completed]"
     `);
   });
 

@@ -16,7 +16,7 @@ import type { SchemaOf } from '@kbn/config-schema';
  *
  * @internal
  */
-export interface ServiceConfigDescriptor<T extends Record<string, any> = any> {
+export interface ServiceConfigDescriptor<T = any> {
   path: string;
   /**
    * Schema to use to validate the configuration.

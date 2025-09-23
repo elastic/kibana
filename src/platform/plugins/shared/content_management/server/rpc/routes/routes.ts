@@ -52,9 +52,7 @@ export function initRpcRoutes(
       },
       validate: {
         params: schema.object({
-          // @ts-ignore We validate above that procedureNames has at least one item
-          // so we can ignore the "Target requires 1 element(s) but source may have fewer." TS error
-          name: schema.oneOf(procedureNames.map((fnName) => schema.literal(fnName))),
+          name: schema.enum<ProcedureName>(procedureNames),
         }),
         // Any object payload can be passed, we will validate the input when calling the rpc handler
         body: schema.maybe(schema.object({}, { unknowns: 'allow' })),

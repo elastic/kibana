@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { LogMeta } from '@kbn/core/server';
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { momentDateParser } from '../../common/utils';
 import { METRIC_TYPE_VALUES, type MetricTypes } from '../../common/rest_types';
@@ -212,9 +212,7 @@ export class AutoOpsAPIService {
   };
 }
 
-export const metricTypesSchema = schema.oneOf(
-  METRIC_TYPE_VALUES.map((metricType) => schema.literal(metricType)) as [Type<MetricTypes>] // Create a oneOf schema for the keys
-);
+export const metricTypesSchema = schema.enum<MetricTypes>(METRIC_TYPE_VALUES);
 
 const UsageMetricsAutoOpsResponseSchema = {
   body: () =>

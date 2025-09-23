@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Type, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { ExecutionStatus, ExecutionType, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
-  ExecutionStatusValues,
-  ExecutionTypeValues,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
@@ -556,18 +555,8 @@ export function defineRoutes(
           statuses: schema.maybe(
             schema.oneOf(
               [
-                schema.oneOf(
-                  ExecutionStatusValues.map((type) => schema.literal(type)) as [
-                    Type<ExecutionStatus>
-                  ]
-                ),
-                schema.arrayOf(
-                  schema.oneOf(
-                    ExecutionStatusValues.map((type) => schema.literal(type)) as [
-                      Type<ExecutionStatus>
-                    ]
-                  )
-                ),
+                schema.enum<ExecutionStatus>(ExecutionStatus),
+                schema.arrayOf(schema.enum<ExecutionStatus>(ExecutionStatus)),
               ],
               {
                 defaultValue: [],
@@ -577,14 +566,8 @@ export function defineRoutes(
           executionTypes: schema.maybe(
             schema.oneOf(
               [
-                schema.oneOf(
-                  ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
-                ),
-                schema.arrayOf(
-                  schema.oneOf(
-                    ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
-                  )
-                ),
+                schema.enum<ExecutionType>(ExecutionType),
+                schema.arrayOf(schema.enum<ExecutionType>(ExecutionType)),
               ],
               {
                 defaultValue: [],

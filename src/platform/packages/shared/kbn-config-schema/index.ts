@@ -126,11 +126,30 @@ function literal<T extends string | number | boolean | null>(value: T): LiteralT
  * const myEnums = ['foo', 'bar', 'baz'] as const;
  * const myEnumType = schema.enum(myEnums);
  * ```
+ * @example
+ * ```ts
+ * enum status {
+ *   PENDING = 'pending',
+ *   WAITING = 'waiting',
+ *   COMPLETED = 'completed',
+ * }
+ * const myEnumType = schema.enum(status);
+ * ```
  */
 function enumeration<U extends string, D extends DefaultValue<U> = never>(
-  values: [U, ...U[]] | readonly [U, ...U[]],
+  enumObj: Record<string, U>,
   options?: TypeOptions<U, U, D>
-): Type<U, U> {
+): Type<U, U, D>;
+function enumeration<U extends string, D extends DefaultValue<U> = never>(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  values: [U, ...U[]] | readonly [U, ...U[]] | U[] | readonly U[],
+  options?: TypeOptions<U, U, D>
+): Type<U, U, D>;
+function enumeration<U extends string, D extends DefaultValue<U> = never>(
+  enumObj: Record<string, U> | U[],
+  options?: TypeOptions<U, U, D>
+): Type<U, U, D> {
+  const values = Array.isArray(enumObj) ? enumObj : Object.values(enumObj);
   const literalTypes = values.map((value) => literal(value)) as any;
   return union(literalTypes, options);
 }
