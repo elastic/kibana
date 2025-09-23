@@ -126,6 +126,10 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
+   * Disables ESQL-based risk scoring
+   */
+  disableESQLRiskScoring: true,
+  /**
    * Enables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolEnabled: false,
@@ -294,7 +298,7 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -319,6 +323,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Readiness Dashboard feature
    */
   siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
