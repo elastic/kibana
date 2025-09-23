@@ -36,7 +36,8 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
-import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -91,6 +92,11 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
+  const { storedFields } = useSchemaFields({
+    definition,
+    refreshDefinition: () => {},
+  });
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
     history: appParams.history,
@@ -111,7 +117,7 @@ export function StreamDetailEnrichmentContentImpl() {
           <SchemaChangesReviewModal
             fields={detectedFields}
             definition={definition}
-            storedFields={[]}
+            storedFields={storedFields}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}
           />
@@ -162,7 +168,11 @@ export function StreamDetailEnrichmentContentImpl() {
       <EuiSplitPanel.Inner grow={false} color="subdued">
         <ManagementBottomBar
           onCancel={resetChanges}
-          onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
+          onConfirm={
+            detectedFields.length > 0 && getChanges(detectedFields, storedFields).length > 0
+              ? openConfirmationModal
+              : saveChanges
+          }
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}

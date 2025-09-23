@@ -59,19 +59,7 @@ export function SchemaChangesReviewModal({
   } = useKibana();
   const { signal } = useAbortController();
 
-  const changes = React.useMemo(() => {
-    const addedFields = fields.filter(
-      (field) =>
-        field.status === 'mapped' && !storedFields.some((stored) => stored.name === field.name)
-    );
-
-    const changedFields = fields.filter((field) => {
-      const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return stored && !isEqual(stored, field);
-    });
-
-    return [...addedFields, ...changedFields];
-  }, [fields, storedFields]);
+  const changes = React.useMemo(() => getChanges(fields, storedFields), [fields, storedFields]);
 
   const [{ loading }, handleSubmit] = useAsyncFn(async () => {
     await submitChanges();
@@ -240,4 +228,20 @@ export function SchemaChangesReviewModal({
       </EuiModalFooter>
     </EuiModal>
   );
+}
+
+export function getChanges(fields: SchemaField[], storedFields: SchemaField[]) {
+  const addedFields = fields.filter(
+    (field) =>
+      field.status === 'mapped' && !storedFields.some((stored) => stored.name === field.name)
+  );
+
+  const changedFields = fields.filter((field) => {
+    const stored = storedFields.find(
+      (storedField) => field.status !== 'inherited' && storedField.name === field.name
+    );
+    return stored && !isEqual(stored, field);
+  });
+
+  return [...addedFields, ...changedFields];
 }
