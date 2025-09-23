@@ -37,7 +37,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
         ),
         dataType: 'auto',
         truncateText: { lines: 2 },
-        render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+        render: (value: string) => <EuiText size="xs">{String(value)}</EuiText>,
       };
     });
   }, [mappings.properties, sampleDocs?.length]);
@@ -46,7 +46,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
     return (
       sampleDocs?.map((doc) => {
         return doc.flattened;
-      }) || []
+      }) ?? []
     );
   }, [sampleDocs]);
 
