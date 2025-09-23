@@ -114,6 +114,9 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
             border-left: none !important;
             border-top-left-radius: 0 !important;
             border-bottom-left-radius: 0 !important;
+            .euiIcon {
+              color: ${euiTheme.colors.text} !important;
+            }
           }
         `}
         popoverBreakpoints={props.popoverBreakpoints}

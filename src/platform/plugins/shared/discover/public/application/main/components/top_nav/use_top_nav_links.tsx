@@ -26,7 +26,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
-import { onSaveSearch } from './on_save_search';
+import { onSaveDiscoverSession } from './save_discover_session';
 import { runAppMenuPopoverAction } from './app_menu_actions/run_app_menu_action';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
@@ -47,7 +47,6 @@ import {
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { onSaveDiscoverSession } from './save_discover_session';
 
 /**
  * Helper function to build the top nav links
@@ -111,23 +110,23 @@ export const useTopNavLinks = ({
   const appMenuPrimaryAndSecondaryItems: Array<AppMenuItemPrimary | AppMenuItemSecondary> =
     useMemo(() => {
       const items: Array<AppMenuItemPrimary | AppMenuItemSecondary> = [];
-      if (!defaultMenu?.inspectItem?.disabled) {
-        const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-        items.push(inspectAppMenuItem);
-      }
+      // if (!defaultMenu?.inspectItem?.disabled) {
+      //   const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+      //   items.push(inspectAppMenuItem);
+      // }
 
-      if (
-        services.triggersActionsUi &&
-        !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.length
-      ) {
-        const alertsAppMenuItem = getAlertsAppMenuItem({
-          discoverParams,
-          services,
-          stateContainer: state,
-        });
-        items.push(alertsAppMenuItem);
-      }
+      // if (
+      //   services.triggersActionsUi &&
+      //   !defaultMenu?.alertsItem?.disabled &&
+      //   discoverParams.authorizedRuleTypeIds.length
+      // ) {
+      //   const alertsAppMenuItem = getAlertsAppMenuItem({
+      //     discoverParams,
+      //     services,
+      //     stateContainer: state,
+      //   });
+      //   items.push(alertsAppMenuItem);
+      // }
 
       if (!defaultMenu?.newItem?.disabled) {
         const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
@@ -331,7 +330,7 @@ export const useTopNavLinks = ({
                     testId: 'discoverSaveAsFromMore',
                     disableButton: !hasUnsavedChanges,
                     onClick: async ({ onFinishAction }) => {
-                      await onSaveSearch({
+                      await onSaveDiscoverSession({
                         initialCopyOnSave: true,
                         savedSearch: state.savedSearchState.getState(),
                         services,
@@ -360,7 +359,10 @@ export const useTopNavLinks = ({
             },
             anchorElement,
             services,
-            anchorPosition: 'leftUp',
+            anchorPosition: 'downRight',
+            hasArrow: false,
+            offset: 4,
+            buffer: 0,
           });
         },
       };

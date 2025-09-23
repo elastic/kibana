@@ -224,7 +224,7 @@ export const topNavStrings = {
   },
   share: {
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
-      defaultMessage: 'share',
+      defaultMessage: 'Share',
     }),
     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
       defaultMessage: 'Share Dashboard',

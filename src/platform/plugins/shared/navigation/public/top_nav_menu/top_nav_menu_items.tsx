@@ -20,7 +20,7 @@ import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
 const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
-const MAX_VISIBLE_ITEMS = 5;
+const MAX_VISIBLE_ITEMS = 3;
 
 interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;
@@ -108,6 +108,8 @@ export const TopNavMenuItems = ({
                   closePopover={() => setIsMorePopoverOpen(false)}
                   panelPaddingSize="none"
                   anchorPosition="downRight"
+                  offset={4}
+                  hasArrow={false}
                   ownFocus={false}
                 >
                   <EuiContextMenu

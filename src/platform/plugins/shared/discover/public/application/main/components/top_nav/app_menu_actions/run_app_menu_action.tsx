@@ -46,6 +46,9 @@ interface AppMenuActionsMenuPopoverProps {
   services: DiscoverServices;
   onClose: () => void;
   anchorPosition?: PopoverAnchorPosition;
+  hasArrow?: boolean;
+  offset?: number;
+  buffer?: number;
 }
 
 export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
@@ -53,6 +56,9 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
   anchorElement,
   onClose: originalOnClose,
   anchorPosition = 'downRight',
+  hasArrow = false,
+  offset = 4,
+  buffer = 0,
 }) => {
   const [nestedContent, setNestedContent] = useState<React.ReactNode>();
 
@@ -112,6 +118,9 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         isOpen={!nestedContent}
         panelPaddingSize="none"
         anchorPosition={anchorPosition}
+        hasArrow={hasArrow}
+        offset={offset}
+        buffer={buffer}
       >
         <EuiContextMenuPanel items={items} />
       </EuiWrappingPopover>
@@ -133,11 +142,17 @@ export function runAppMenuPopoverAction({
   anchorElement,
   services,
   anchorPosition,
+  hasArrow,
+  offset,
+  buffer,
 }: {
   appMenuItem: AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom;
   anchorElement: HTMLElement;
   services: DiscoverServices;
   anchorPosition?: PopoverAnchorPosition;
+  hasArrow?: boolean;
+  offset?: number;
+  buffer?: number;
 }) {
   if (isOpen) {
     cleanup();
@@ -156,6 +171,9 @@ export function runAppMenuPopoverAction({
           services={services}
           onClose={cleanup}
           anchorPosition={anchorPosition}
+          hasArrow={hasArrow}
+          offset={offset}
+          buffer={buffer}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
