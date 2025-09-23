@@ -137,17 +137,15 @@ export const getFullInputStreams = (
               const streamId = stream.id;
               const { data_stream: compiledDataStream, ...compiledStream } =
                 stream.compiled_stream ?? {};
+              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+              const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
                 data_stream: {
                   ...stream.data_stream,
                   ...compiledDataStream,
-                  ...(stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
-                    ? { type: stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value }
-                    : {}),
-                  ...(stream.vars?.[DATASET_VAR_NAME]?.value
-                    ? { dataset: stream.vars?.[DATASET_VAR_NAME]?.value }
-                    : {}),
+                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
+                  ...(datasetVar ? { dataset: datasetVar } : {}),
                 },
                 ...compiledStream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
