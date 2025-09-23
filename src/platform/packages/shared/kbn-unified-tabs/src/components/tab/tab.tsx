@@ -131,8 +131,11 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onEnterRenaming = useCallback(async () => {
     if (!isSelected) {
       await onSelect(item);
+      // Wait for the selection to propagate before enabling edit mode
+      setTimeout(() => onDoubleClick(), 0);
+    } else {
+      onDoubleClick();
     }
-    onDoubleClick();
   }, [item, isSelected, onDoubleClick, onSelect]);
 
   const onKeyDownEvent = useCallback(
