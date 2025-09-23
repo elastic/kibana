@@ -264,7 +264,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
+                    uid: '123',
                     config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
@@ -348,7 +348,7 @@ describe('RelatedDashboardsClient', () => {
               id: 'dashboard1',
               attributes: {
                 title: 'Dashboard 1',
-                panels: [{ config: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE }],
+                panels: [{ config: {}, uid: PANEL_INDEX, type: PANEL_TYPE }],
               },
               references: [{ name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID }],
             },
@@ -388,8 +388,8 @@ describe('RelatedDashboardsClient', () => {
               attributes: {
                 title: 'Dashboard 1',
                 panels: [
-                  { config: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE },
-                  { config: {}, panelIndex: OTHER_PANEL_INDEX, type: PANEL_TYPE },
+                  { config: {}, uid: PANEL_INDEX, type: PANEL_TYPE },
+                  { config: {}, uid: OTHER_PANEL_INDEX, type: PANEL_TYPE },
                 ],
               },
               references: [
@@ -487,7 +487,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelIndex: PANEL_INDEX,
+              uid: PANEL_INDEX,
               config: {},
             },
           ],
@@ -543,7 +543,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelIndex: PANEL_INDEX,
+              uid: PANEL_INDEX,
               config: {},
             },
           ],
@@ -792,7 +792,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
+                    uid: '123',
                     config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
@@ -815,7 +815,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
+                    uid: '123',
                     config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }],
