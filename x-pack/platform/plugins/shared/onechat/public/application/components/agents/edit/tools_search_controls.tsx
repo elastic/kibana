@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import type { ToolDefinition } from '@kbn/onechat-common';
 import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from '../../tools/table/tools_table_filter_option';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
 interface ToolsSearchControlsProps {
   displayTools: ToolDefinition[];
@@ -56,9 +56,10 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
           options: allTags.map((tag) => ({
             value: tag,
             name: tag,
-            view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+            view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
           })),
           searchThreshold: 1,
+          autoSortOptions: false,
         },
       ],
       onChange: ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {

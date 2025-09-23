@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../../../common/doc_links';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
 
@@ -61,7 +62,7 @@ export const McpConnectionButton = () => {
             )}
           </EuiCopy>,
 
-          <EuiContextMenuItem key="documentation" icon="popout" href="#">
+          <EuiContextMenuItem key="documentation" href={docLinks.mcpServer} target="_blank">
             {i18n.translate('xpack.onechat.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',
             })}

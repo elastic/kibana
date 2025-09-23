@@ -165,7 +165,8 @@ export class WorkflowsManagementApi {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    request: KibanaRequest
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
@@ -174,14 +175,19 @@ export class WorkflowsManagementApi {
       inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
     return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 
@@ -216,7 +222,8 @@ export class WorkflowsManagementApi {
         yaml: workflowYaml,
         isTestRun: true,
       },
-      context
+      context,
+      request
     );
     return executeResponse.workflowExecutionId;
   }

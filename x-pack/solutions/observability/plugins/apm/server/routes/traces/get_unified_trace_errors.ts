@@ -14,10 +14,12 @@ import {
   SPAN_ID,
   TRACE_ID,
   OTEL_EVENT_NAME,
+  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
@@ -28,19 +30,23 @@ export interface UnifiedTraceErrors {
 export async function getUnifiedTraceErrors({
   apmEventClient,
   logsClient,
-  end,
-  start,
   traceId,
+  docId,
+  start,
+  end,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
   traceId: string;
+  docId?: string;
   start: number;
   end: number;
 }): Promise<UnifiedTraceErrors> {
+  const commonParams = { traceId, docId, start, end };
+
   const [apmErrors, unprocessedOtelErrors] = await Promise.all([
-    getApmTraceError({ apmEventClient, traceId, start, end }),
-    getUnprocessedOtelErrors({ logsClient, traceId, start, end }),
+    getApmTraceError({ apmEventClient, ...commonParams }),
+    getUnprocessedOtelErrors({ logsClient, ...commonParams }),
   ]);
 
   return {
@@ -51,7 +57,11 @@ export async function getUnifiedTraceErrors({
 }
 
 export const requiredFields = asMutableArray([SPAN_ID] as const);
-export const optionalFields = asMutableArray([EXCEPTION_TYPE, EXCEPTION_MESSAGE] as const);
+export const optionalFields = asMutableArray([
+  EXCEPTION_TYPE,
+  EXCEPTION_MESSAGE,
+  TIMESTAMP_US,
+] as const);
 
 interface OtelError {
   span: {
@@ -61,23 +71,30 @@ interface OtelError {
     type: string;
     message: string;
   };
+  timestamp?: TimestampUs;
 }
 
 async function getUnprocessedOtelErrors({
   logsClient,
-  end,
-  start,
   traceId,
+  docId,
+  start,
+  end,
 }: {
   logsClient: LogsClient;
   traceId: string;
+  docId?: string;
   start: number;
   end: number;
 }) {
   const response = await logsClient.search({
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
+        filter: [
+          ...rangeQuery(start, end),
+          ...termQuery(TRACE_ID, traceId),
+          ...termQuery(SPAN_ID, docId),
+        ],
         should: [
           ...termQuery(OTEL_EVENT_NAME, 'exception'),
           ...existsQuery(EXCEPTION_TYPE),
@@ -98,6 +115,7 @@ async function getUnprocessedOtelErrors({
 
       return {
         id: event.span?.id,
+        timestamp: event?.timestamp,
         error: {
           exception: {
             type: event.exception?.type,
@@ -111,6 +129,7 @@ async function getUnprocessedOtelErrors({
         doc
       ): doc is {
         id: string;
+        timestamp: TimestampUs | undefined;
         error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );
