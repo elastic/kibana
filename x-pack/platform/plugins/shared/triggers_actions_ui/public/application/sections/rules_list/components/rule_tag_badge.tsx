@@ -40,8 +40,6 @@ export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T ext
 
 const containerStyle = {
   width: '300px',
-  display: 'flex',
-  gap: '4px',
 };
 
 const getTagItemDataTestSubj = (tag: string) => `ruleTagBadgeItem-${tag}`;
