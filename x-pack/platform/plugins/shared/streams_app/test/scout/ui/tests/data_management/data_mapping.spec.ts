@@ -246,8 +246,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await page.keyboard.press('Enter');
 
     // Select field type
-    await page.getByTestId('streamsAppFieldFormTypeSelect').click();
-    await page.getByTestId('option-type-keyword').click();
+    await pageObjects.streams.setFieldMappingType('keyword');
 
     // Click the "Add field" button in the flyout
     await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
