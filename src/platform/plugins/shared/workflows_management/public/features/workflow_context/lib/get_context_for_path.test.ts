@@ -8,12 +8,11 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextSchemaForPath } from './get_context_for_path';
 import { z } from '@kbn/zod';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
-import { EventSchema } from '../../../../common/schema';
-import { WorkflowExecutionContextSchema, WorkflowDataContextSchema } from '@kbn/workflows';
+import { StepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -77,23 +76,15 @@ describe('getContextSchemaForPath', () => {
     },
   } as WorkflowYaml;
 
-  const workflowGraph = getWorkflowGraph(definition);
+  const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
   it('should return the root context for the first step', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
-    expect(Object.keys(context.shape).sort()).toEqual(
-      ['execution', 'workflow', 'now', 'event', 'inputs', 'steps', 'consts'].sort()
-    );
     expectZodSchemaEqual(
       context,
-      z.object({
-        execution: WorkflowExecutionContextSchema,
-        workflow: WorkflowDataContextSchema,
-        now: z.date(),
-        event: EventSchema,
+      StepContextSchema.extend({
         inputs: z.object({}),
-        steps: z.object({}),
         consts: z.object({
           test: z.string(),
         }),
@@ -111,20 +102,79 @@ describe('getContextSchemaForPath', () => {
 
     expectZodSchemaEqual(
       context,
-      z.object({
-        execution: WorkflowExecutionContextSchema,
-        workflow: WorkflowDataContextSchema,
-        now: z.date(),
-        event: EventSchema,
+      StepContextSchema.extend({
         inputs: z.object({}),
         steps: z.object({
           'first-step': z.object({
-            output: z.string(),
+            output: z.string().optional(),
+            error: z.any().optional(),
           }),
         }),
         consts: z.object({
           test: z.string(),
         }),
+      })
+    );
+  });
+
+  it('should return foreach context for nested foreach step', () => {
+    const definitionWithForeach = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
+        },
+      ],
+      consts: {
+        items: [
+          {
+            name: 'Robert',
+            surname: 'Carmack',
+          },
+          {
+            name: 'Jane',
+            surname: 'Doe',
+          },
+        ],
+      },
+      steps: [
+        {
+          name: 'foreach-step',
+          type: 'foreach',
+          foreach: 'consts.items',
+          steps: [
+            {
+              name: 'foreach-step-1',
+              type: 'console',
+              with: {
+                message: 'Hello, {{foreach.item.name}} {{foreach.item.surname}}',
+              },
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithForeach = WorkflowGraph.fromWorkflowDefinition(definitionWithForeach);
+    const context = getContextSchemaForPath(definitionWithForeach, workflowGraphWithForeach, [
+      'steps',
+      0,
+      'steps',
+      0,
+      'with',
+      'message',
+    ]);
+    const itemSchema = z.object({
+      name: z.string(),
+      surname: z.string(),
+    });
+    expectZodSchemaEqual(
+      context.shape.foreach,
+      ForEachContextSchema.extend({
+        items: z.array(itemSchema),
+        item: itemSchema,
       })
     );
   });

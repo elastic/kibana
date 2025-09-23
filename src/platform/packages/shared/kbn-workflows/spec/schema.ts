@@ -404,6 +404,8 @@ const StepSchema = z.lazy(() =>
   ])
 );
 
+export type Step = z.infer<typeof StepSchema>;
+
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
   version: z.literal('1').default('1').describe('The version of the workflow schema'),
@@ -435,16 +437,60 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
+// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
+const AlertSchema = z.object({
+  _id: z.string(),
+  _index: z.string(),
+  kibana: z.object({
+    alert: z.any(),
+  }),
+  '@timestamp': z.string(),
+});
+
+const SummarizedAlertsChunkSchema = z.object({
+  count: z.number(),
+  data: z.array(z.union([AlertSchema, z.any()])),
+});
+
+const RuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tags: z.array(z.string()),
+  consumer: z.string(),
+  producer: z.string(),
+  ruleTypeId: z.string(),
+});
+
+export const EventSchema = z.object({
+  alerts: z.object({
+    new: SummarizedAlertsChunkSchema,
+    ongoing: SummarizedAlertsChunkSchema,
+    recovered: SummarizedAlertsChunkSchema,
+    all: SummarizedAlertsChunkSchema,
+  }),
+  rule: RuleSchema,
+  spaceId: z.string(),
+  params: z.any(),
+});
+
 export const WorkflowContextSchema = z.object({
-  event: z.any().optional(),
-  inputs: z.any().optional(),
+  event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  inputs: z.record(z.string(), z.any()).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
 
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const ForEachContextSchema = z.object({
+  items: z.array(z.any()),
+  index: z.number().int(),
+  item: z.any(),
+  total: z.number().int(),
+});
+export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(
@@ -454,13 +500,6 @@ export const StepContextSchema = WorkflowContextSchema.extend({
       error: z.any().optional(),
     })
   ),
-  foreach: z
-    .object({
-      items: z.array(z.any()),
-      index: z.number().int(),
-      item: z.any(),
-      total: z.number().int(),
-    })
-    .optional(),
+  foreach: ForEachContextSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;

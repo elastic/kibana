@@ -22,7 +22,7 @@ import {
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import { getAllConnectors } from '../../../../common/schema';
@@ -1222,7 +1222,7 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph = getWorkflowGraph(workflowData);
+        const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowData);
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;

@@ -40,6 +40,9 @@ export function getSchemaAtPath(
     let current = schema;
 
     for (const segment of segments) {
+      if (current instanceof z.ZodOptional) {
+        current = current.unwrap();
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -80,6 +83,10 @@ export function getSchemaAtPath(
       } else {
         return null;
       }
+    }
+
+    if (current instanceof z.ZodOptional) {
+      return current.unwrap();
     }
 
     return current;

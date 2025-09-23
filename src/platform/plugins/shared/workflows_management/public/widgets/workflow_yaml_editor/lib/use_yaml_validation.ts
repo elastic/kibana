@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   parseWorkflowYamlToJSON,
@@ -20,7 +21,6 @@ import {
 } from '../../../../common/lib/yaml_utils';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
@@ -168,7 +168,9 @@ export function useYamlValidation({
         // Parse the YAML to JSON to get the workflow definition
         const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
         const yamlDocument = parseDocument(text);
-        const workflowGraph = result.success ? getWorkflowGraph(result.data) : null;
+        const workflowGraph = result.success
+          ? WorkflowGraph.fromWorkflowDefinition(result.data)
+          : null;
 
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
