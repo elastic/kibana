@@ -11,15 +11,15 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { Parser } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-
-import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
-import type { DataSourceProfileProvider } from '../../../profiles';
-import { DataSourceCategory, SolutionType } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
+import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../common/constants';
+import type { DataSourceProfileProvider } from '../../profiles';
+import { DataSourceCategory, SolutionType } from '../../profiles';
+import type { ProfileProviderServices } from '../profile_provider_services';
 import { createChartSection } from './accessor/chart_section';
+
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
-const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
+export const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 // FIXME: could kbn-esql-ast provide a union type with existing commands?
 const SUPPORTED_ESQL_COMMANDS = new Set(['from', 'ts', 'limit', 'sort', 'where']);
 export const createMetricsDataSourceProfileProvider = (
@@ -66,7 +66,12 @@ function getTimeRange() {
 }
 
 function isSolutionValid(solutionType: SolutionType) {
-  return [SolutionType.Observability, SolutionType.Security].includes(solutionType);
+  return [
+    SolutionType.Observability,
+    SolutionType.Security,
+    SolutionType.Search,
+    SolutionType.Default,
+  ].includes(solutionType);
 }
 
 function isQuerySupported(query: AggregateQuery | Query | undefined): query is AggregateQuery {
