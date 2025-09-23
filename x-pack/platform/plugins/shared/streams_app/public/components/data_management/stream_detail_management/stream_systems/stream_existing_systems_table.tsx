@@ -13,88 +13,10 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { SystemEventsSparkline } from './system_events_sparkline';
 import { TableTitle } from './table_title';
-const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
-  'xpack.streams.streamSystemsTable.columns.actions.generate',
-  { defaultMessage: 'Generate significant events' }
-);
-
-const columns: Array<EuiBasicTableColumn<System>> = [
-  {
-    field: 'title',
-    name: i18n.translate('xpack.streams.streamSystemsTable.columns.title', {
-      defaultMessage: 'Title',
-    }),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'description',
-    name: i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
-      defaultMessage: 'Description',
-    }),
-    truncateText: true,
-  },
-  {
-    field: 'filter',
-    name: i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
-      defaultMessage: 'Filter',
-    }),
-    render: (filter: System['filter']) => {
-      return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
-    },
-  },
-  {
-    field: 'events',
-    name: i18n.translate('xpack.streams.streamSystemsTable.columns.eventsLast24Hours', {
-      defaultMessage: 'Events (last 24 hours)',
-    }),
-    render: (system: System) => {
-      return <SystemEventsSparkline system={system} />;
-    },
-    sortable: true,
-  },
-  {
-    name: i18n.translate('xpack.streams.streamSystemsTable.columns.actionsColumnHeader', {
-      defaultMessage: 'Actions',
-    }),
-    actions: [
-      {
-        name: GENERATE_SIGNIFICANT_EVENTS,
-        description: GENERATE_SIGNIFICANT_EVENTS,
-        type: 'icon',
-        icon: 'plusInSquare',
-        onClick: () => '',
-      },
-      {
-        name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.editActionName', {
-          defaultMessage: 'Edit',
-        }),
-        description: i18n.translate(
-          'xpack.streams.streamSystemsTable.columns.actions.editActionDescription',
-          { defaultMessage: 'Edit this system' }
-        ),
-        type: 'icon',
-        icon: 'pencil',
-        onClick: () => '',
-      },
-      {
-        name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.deleteActionName', {
-          defaultMessage: 'Delete',
-        }),
-        description: i18n.translate(
-          'xpack.streams.streamSystemsTable.columns.actions.deleteActionDescription',
-          { defaultMessage: 'Delete this system' }
-        ),
-        type: 'icon',
-        icon: 'trash',
-        onClick: () => '',
-      },
-    ],
-  },
-];
 
 export function StreamExistingSystemsTable({
   isLoading,
@@ -109,6 +31,60 @@ export function StreamExistingSystemsTable({
 }) {
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
+  const columns: Array<EuiBasicTableColumn<System>> = [
+    {
+      field: 'title',
+      name: TITLE_LABEL,
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'description',
+      name: DESCRIPTION_LABEL,
+      truncateText: true,
+    },
+    {
+      field: 'filter',
+      name: FILTER_LABEL,
+      render: (filter: System['filter']) => {
+        return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
+      },
+    },
+    {
+      name: EVENTS_LAST_24_HOURS_LABEL,
+      render: (system: System) => {
+        return <SystemEventsSparkline system={system} definition={definition} />;
+      },
+    },
+    {
+      name: ACTIONS_COLUMN_HEADER_LABEL,
+      actions: [
+        {
+          name: GENERATE_SIGNIFICANT_EVENTS,
+          description: GENERATE_SIGNIFICANT_EVENTS,
+          type: 'icon',
+          icon: 'plusInSquare',
+          onClick: () => '',
+        },
+        {
+          name: EDIT_ACTION_NAME_LABEL,
+          description: EDIT_ACTION_DESCRIPTION_LABEL,
+          type: 'icon',
+          icon: 'pencil',
+          onClick: () => '',
+        },
+        {
+          name: DELETE_ACTION_NAME_LABEL,
+          description: DELETE_ACTION_DESCRIPTION_LABEL,
+          type: 'icon',
+          icon: 'trash',
+          onClick: () => '',
+        },
+      ],
+    },
+  ];
+  const { removeSystemsFromStream } = useStreamSystemsApi(definition);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const toggleDetails = (system: System) => {
     setIsDetailFlyoutOpen(system);
@@ -121,26 +97,14 @@ export function StreamExistingSystemsTable({
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
-              defaultMessage: 'Open details',
-            })}
-          </span>
+          <span>{OPEN_DETAILS_LABEL}</span>
         </EuiScreenReaderOnly>
       ),
       render: (system: System) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(system)}
-            aria-label={
-              isDetailFlyoutOpen
-                ? i18n.translate('xpack.streams.streamSystemsTable.columns.collapseDetails', {
-                    defaultMessage: 'Collapse details',
-                  })
-                : i18n.translate('xpack.streams.streamSystemsTable.columns.expandDetails', {
-                    defaultMessage: 'Expand details',
-                  })
-            }
+            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
             iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
           />
         );
@@ -153,14 +117,7 @@ export function StreamExistingSystemsTable({
     <div css={{ padding: '16px' }}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <TableTitle
-            pageIndex={0}
-            pageSize={10}
-            total={systems.length}
-            label={i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
-              defaultMessage: 'Systems',
-            })}
-          />
+          <TableTitle pageIndex={0} pageSize={10} total={systems.length} label={SYSTEMS_LABEL} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -175,17 +132,34 @@ export function StreamExistingSystemsTable({
           <EuiButtonEmpty
             iconType="cross"
             aria-label={CLEAR_SELECTION}
-            isDisabled={selectedSystems.length === 0}
+            isDisabled={selectedSystems.length === 0 || isLoading}
+            onClick={() => {
+              setSelectedSystems([]);
+            }}
           >
             {CLEAR_SELECTION}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            isLoading={isDeleting}
             iconType="trash"
             color="danger"
             aria-label={DELETE_ALL}
-            isDisabled={selectedSystems.length === 0}
+            isDisabled={selectedSystems.length === 0 || isLoading}
+            onClick={() => {
+              setIsDeleting(true);
+              removeSystemsFromStream(selectedSystems.map((s) => s.name))
+                .then(() => {
+                  removeSystemsFromStream(selectedSystems.map((s) => s.name)).finally(() => {
+                    setSelectedSystems([]);
+                  });
+                })
+                .finally(() => {
+                  refreshSystems();
+                  setIsDeleting(false);
+                });
+            }}
           >
             {DELETE_ALL}
           </EuiButtonEmpty>
@@ -193,9 +167,7 @@ export function StreamExistingSystemsTable({
       </EuiFlexGroup>
       <EuiBasicTable
         loading={isLoading}
-        tableCaption={i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
-          defaultMessage: 'List of systems',
-        })}
+        tableCaption={TABLE_CAPTION_LABEL}
         items={systems}
         itemId="name"
         columns={columnsWithExpandingRowToggle}
@@ -220,6 +192,91 @@ const CLEAR_SELECTION = i18n.translate(
   { defaultMessage: 'Clear selection' }
 );
 
-const DELETE_ALL = i18n.translate('xpack.streams.streamSystemsTable.columns.actions.deleteAll', {
-  defaultMessage: 'Delete all',
+const DELETE_ALL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.deleteSelection',
+  {
+    defaultMessage: 'Delete selected',
+  }
+);
+
+const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.generate',
+  { defaultMessage: 'Generate significant events' }
+);
+
+// i18n labels moved to end of file
+const TITLE_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.title', {
+  defaultMessage: 'Title',
+});
+
+const DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
+  defaultMessage: 'Description',
+});
+
+const FILTER_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
+  defaultMessage: 'Filter',
+});
+
+const EVENTS_LAST_24_HOURS_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.eventsLast24Hours',
+  {
+    defaultMessage: 'Events (last 24 hours)',
+  }
+);
+
+const ACTIONS_COLUMN_HEADER_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actionsColumnHeader',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+const EDIT_ACTION_NAME_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.editActionName',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+const EDIT_ACTION_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.editActionDescription',
+  { defaultMessage: 'Edit this system' }
+);
+
+const DELETE_ACTION_NAME_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.deleteActionName',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const DELETE_ACTION_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.actions.deleteActionDescription',
+  { defaultMessage: 'Delete this system' }
+);
+
+const OPEN_DETAILS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
+  defaultMessage: 'Open details',
+});
+
+const COLLAPSE_DETAILS_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.collapseDetails',
+  {
+    defaultMessage: 'Collapse details',
+  }
+);
+
+const EXPAND_DETAILS_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.expandDetails',
+  {
+    defaultMessage: 'Expand details',
+  }
+);
+
+const SYSTEMS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
+  defaultMessage: 'Systems',
+});
+
+const TABLE_CAPTION_LABEL = i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
+  defaultMessage: 'List of systems',
 });

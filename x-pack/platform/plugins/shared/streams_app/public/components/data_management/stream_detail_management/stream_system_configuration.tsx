@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import {
   EuiCard,
   EuiPanel,
@@ -17,6 +17,8 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
 import { StreamSystemsFlyout } from './stream_systems/stream_systems_flyout';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
 
@@ -27,6 +29,11 @@ interface StreamConfigurationProps {
 export function StreamSystemConfiguration({ definition }: StreamConfigurationProps) {
   const { euiTheme } = useEuiTheme();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const { identifySystemsQuery } = useStreamSystemsApi(definition);
+  const aiFeatures = useAIFeatures();
+  const [systems, setSystems] = useState<System[]>([]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <EuiPanel paddingSize="none">
@@ -53,7 +60,24 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="sparkles" onClick={() => setIsFlyoutVisible(!isFlyoutVisible)}>
+            <EuiButton
+              iconType="sparkles"
+              onClick={() => {
+                setIsLoading(true);
+                setIsFlyoutVisible(!isFlyoutVisible);
+                identifySystemsQuery(
+                  aiFeatures?.genAiConnectors.selectedConnector!,
+                  'now',
+                  'now-24h'
+                )
+                  .then((data) => {
+                    setSystems(data.systems);
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              }}
+            >
               {i18n.translate('xpack.streams.streamDetailView.systemDetection', {
                 defaultMessage: 'System detection',
               })}
@@ -64,8 +88,9 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
         <StreamSystemsAccordion definition={definition} />
         {isFlyoutVisible && (
           <StreamSystemsFlyout
-            systems={[]}
-            isLoading={false}
+            definition={definition}
+            systems={systems}
+            isLoading={isLoading}
             closeFlyout={() => setIsFlyoutVisible(false)}
           />
         )}

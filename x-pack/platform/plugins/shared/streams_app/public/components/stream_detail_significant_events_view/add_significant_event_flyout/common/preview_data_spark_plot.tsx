@@ -6,41 +6,58 @@
  */
 
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import {
+  buildEsqlQuery,
+  getIndexPatternsForStream,
+  type StreamQueryKql,
+  type Streams,
+} from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
 import { useSignificantEventPreviewFetch } from '../manual_flow_form/use_significant_event_preview_fetch';
 import { useSparkplotDataFromSigEvents } from '../manual_flow_form/use_spark_plot_data_from_sig_events';
+import { AssetImage } from '../../../asset_image';
 
 export function PreviewDataSparkPlot({
   query,
   definition,
-  timeRange,
   isQueryValid,
+  showTitle = true,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
-  timeRange: TimeRange;
   isQueryValid: boolean;
+  showTitle?: boolean;
 }) {
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
+  const { timeState } = useTimefilter();
+  const { euiTheme } = useEuiTheme();
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
+    system: query.system,
     kqlQuery: query.kql.query,
-    timeRange,
+    timeState,
     isQueryValid,
   });
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([start, end]);
-  }, [start, end]);
+    return niceTimeFormatter([timeState.start, timeState.end]);
+  }, [timeState.start, timeState.end]);
 
   const sparkPlotData = useSparkplotDataFromSigEvents({
     previewFetch,
@@ -48,22 +65,116 @@ export function PreviewDataSparkPlot({
     xFormatter,
   });
 
-  return (
-    <EuiPanel hasBorder={true}>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiText size="xs">
-          <h4>
+  const noOccurrencesFound = sparkPlotData.timeseries.every((point) => point.y === 0);
+
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const useUrl = share.url.locators.useUrl;
+
+  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+    () => ({
+      id: DISCOVER_APP_LOCATOR,
+      params: {
+        query: {
+          esql: isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : '',
+        },
+      },
+    }),
+    [definition, query, isQueryValid]
+  );
+
+  function renderContent() {
+    if (isQueryValid === false) {
+      return (
+        <>
+          <AssetImage type="barChart" size="xs" />
+          <EuiText color="subdued" size="s" textAlign="center">
             {i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartTitle',
-              { defaultMessage: 'Occurrences' }
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartPrompt',
+              {
+                defaultMessage: 'Preview will appear here',
+              }
             )}
-          </h4>
-        </EuiText>
+          </EuiText>
+        </>
+      );
+    }
+
+    if (previewFetch.loading) {
+      return <EuiLoadingSpinner size="m" />;
+    }
+
+    if (previewFetch.error) {
+      return (
+        <>
+          <EuiIcon type="cross" color="danger" size="xl" />
+          <EuiText size="s" textAlign="center">
+            {i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartError',
+              {
+                defaultMessage: 'Failed to load preview data',
+              }
+            )}
+          </EuiText>
+        </>
+      );
+    }
+
+    if (noOccurrencesFound) {
+      return (
+        <>
+          <AssetImage type="barChart" size="xs" />
+          <EuiText color="subdued" size="s" textAlign="center">
+            {i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartNoData',
+              {
+                defaultMessage: 'No events found, make sure to review your query',
+              }
+            )}
+          </EuiText>
+        </>
+      );
+    }
+
+    const openInDiscoverLabel = i18n.translate(
+      'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartOpenInDiscover',
+      { defaultMessage: 'Open in Discover' }
+    );
+
+    return (
+      <>
+        {showTitle && (
+          <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }}>
+            <EuiFlexItem>
+              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                  {
+                    defaultMessage: 'Detected event occurrences',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={openInDiscoverLabel}
+              iconType="discoverApp"
+              href={discoverLink}
+              target="_blank"
+            >
+              {openInDiscoverLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>)}
         <SparkPlot
           id="query_preview"
           name={i18n.translate(
             'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartSeriesName',
-            { defaultMessage: 'Count' }
+            { defaultMessage: 'Occurrences' }
           )}
           type="bar"
           timeseries={sparkPlotData.timeseries}
@@ -71,6 +182,20 @@ export function PreviewDataSparkPlot({
           xFormatter={xFormatter}
           compressed={false}
         />
+      </>
+    );
+  }
+
+  return (
+    <EuiPanel hasBorder={true} css={{ height: '200px' }}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="center"
+        css={{ height: '100%' }}
+      >
+        {renderContent()}
       </EuiFlexGroup>
     </EuiPanel>
   );
