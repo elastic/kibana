@@ -8164,10 +8164,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-ai-cli@link:x-pack/platform/packages/shared/kbn-streams-ai-cli":
-  version "0.0.0"
-  uid ""
-
 "@kbn/streams-ai@link:x-pack/platform/packages/shared/kbn-streams-ai":
   version "0.0.0"
   uid ""
