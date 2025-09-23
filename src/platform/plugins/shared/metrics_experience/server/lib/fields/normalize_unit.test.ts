@@ -27,6 +27,11 @@ describe('normalizeUnit', () => {
         expect(result).toBe(expected);
       });
     });
+
+    it('should be case insensitive', () => {
+      const result = normalizeUnit({ fieldName: 'system.memory.usage', unit: 'NaNoS' });
+      expect(result).toBe('ns');
+    });
   });
 
   describe('already normalized units', () => {

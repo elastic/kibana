@@ -24,12 +24,12 @@ export interface MetricMetadata {
 }
 export type MetricMetadataMap = Map<string, MetricMetadata>;
 
-function isErrorResponseBase(subject: any): subject is ErrorResponseBase {
-  return subject.error != null;
+function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
+  return typeof subject === 'object' && subject !== null && 'error' in subject;
 }
 
 function generateMapKey(indexName: string, fieldName: string) {
-  return `${indexName}-${fieldName}`;
+  return `${indexName}>${fieldName}`;
 }
 
 function buildMetricMetadataMap(

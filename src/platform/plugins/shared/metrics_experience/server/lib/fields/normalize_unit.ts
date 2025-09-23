@@ -12,7 +12,7 @@ import type { MetricUnit } from '../../../common/fields/types';
 const RATIO_FIELD_NAME_SUFFIX = 'utilization';
 const normalizedUnitMap: Record<string, MetricUnit> = {
   // otel
-  By: 'bytes',
+  by: 'bytes',
   '%': 'percent',
   '1': 'count',
   // ecs
@@ -28,11 +28,11 @@ export function normalizeUnit({
   unit: string | undefined;
 }): MetricUnit | undefined {
   const isRatio = isRatioField(fieldName);
-  if ((!unit || unit?.trim() === '') && !isRatio) {
+  if (!unit?.trim() && !isRatio) {
     return;
   }
 
-  const normalizedUnit = unit ? normalizedUnitMap[unit] ?? unit : undefined;
+  const normalizedUnit = unit ? normalizedUnitMap[unit.toLowerCase()] ?? unit : undefined;
 
   if (isRatio && (!normalizedUnit || normalizedUnit === 'count')) {
     return 'percent';

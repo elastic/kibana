@@ -30,6 +30,7 @@ describe('enrichMetricFields', () => {
 
   const TEST_METRIC_NAME = 'system.cpu.utilization';
   const TEST_INDEX = 'metrics-*';
+  const NO_DATA_INDEX = 'metricbeat*';
   const TEST_HOST_FIELD = 'host.name';
   const TEST_HOST_VALUE = 'host-1';
 
@@ -49,7 +50,7 @@ describe('enrichMetricFields', () => {
     responses: [
       {
         hits: {
-          hits: totalHits > 0 ? [{ fields, _index: 'metrics-000001', _source: {} }] : [],
+          hits: totalHits > 0 ? [{ fields, _index: TEST_INDEX, _source: {} }] : [],
           total: { value: totalHits, relation: 'eq' as const },
         },
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
@@ -140,6 +141,50 @@ describe('enrichMetricFields', () => {
 
         expect(result[0]).toMatchObject(expectedResult);
       });
+    });
+
+    it('should return duplicate fields from different indices', async () => {
+      const metricFields = [
+        createMetricField(),
+        createMetricField(TEST_METRIC_NAME, 'metricbeat*'),
+      ];
+
+      msearchMock.mockResolvedValue(
+        createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      );
+
+      dataStreamFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      dataStreamFieldCapsMap.set(NO_DATA_INDEX, createFieldCaps());
+
+      const result = await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        dataStreamFieldCapsMap,
+        logger,
+      });
+
+      expect(result).toMatchObject([
+        {
+          dimensions: [
+            {
+              description: '',
+              name: TEST_HOST_FIELD,
+              type: 'keyword',
+            },
+          ],
+          index: TEST_INDEX,
+          name: 'system.cpu.utilization',
+          noData: false,
+          type: 'long',
+        },
+        {
+          dimensions: [],
+          index: NO_DATA_INDEX,
+          name: 'system.cpu.utilization',
+          noData: true,
+          type: 'long',
+        },
+      ]);
     });
   });
 
