@@ -56,7 +56,11 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaSpace: kibanaSpace1,
         });
 
-        checkIfScheduleDisabled({ getService, id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleDisabled({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
       });
     });
 

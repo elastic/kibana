@@ -134,6 +134,8 @@ export interface ICommandCallbacks {
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -249,6 +251,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
+  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,

@@ -12,7 +12,7 @@ import type { OpsgenieCreateAlertParams } from '../../../../server/connector_typ
 import * as i18n from './translations';
 import type { CreateAlertProps } from '.';
 import { decodeCreateAlert } from './schema';
-import { isDecodeError } from '../schema_utils';
+import { isDecodeError } from '../../lib/schema_utils';
 
 export type JsonEditorProps = Pick<
   CreateAlertProps,

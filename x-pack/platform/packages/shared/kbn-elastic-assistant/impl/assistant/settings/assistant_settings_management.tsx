@@ -62,6 +62,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       if (contextSettingsTab) {
         // contextSettingsTab can be selected from Conversations > System Prompts > Add System Prompt
         onTabChange?.(contextSettingsTab);
+        setSelectedSettingsTab(null);
       }
     }, [onTabChange, contextSettingsTab, setSelectedSettingsTab]);
 

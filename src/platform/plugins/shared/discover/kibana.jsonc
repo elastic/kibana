@@ -50,6 +50,7 @@
       "logsDataAccess",
       "embeddableEnhanced",
       "apmSourcesAccess",
+      "fileUpload",
       "metricsExperience"
     ],
     "requiredBundles": [
