@@ -25,214 +25,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { getAllConnectors } from '../../../../common/schema';
 import type { ActionOptionData } from '../types';
+import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
 }
 
-function getConnectorIconType(connectorType: string): string {
-  if (connectorType.includes('.')) {
-    const [base, _] = connectorType.split('.');
-    connectorType = base;
-  }
-  if (connectorType === 'slack') {
-    return 'logoSlack';
-  } else if (connectorType === 'console') {
-    return 'console';
-  } else if (connectorType === 'inference') {
-    return 'sparkles';
-  }
-  return 'globe';
-}
-
-function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
-  const connectors = getAllConnectors();
-  const triggersGroup: ActionOptionData = {
-    iconType: 'menuDown',
-    iconColor: euiTheme.colors.vis.euiColorVis6,
-    id: 'triggers',
-    label: i18n.translate('workflows.actionsMenu.triggers', {
-      defaultMessage: 'Triggers',
-    }),
-    description: i18n.translate('workflows.actionsMenu.triggersDescription', {
-      defaultMessage: 'Choose which event starts a workflow',
-    }),
-    options: [
-      {
-        id: 'manual',
-        label: i18n.translate('workflows.actionsMenu.manual', {
-          defaultMessage: 'Manual',
-        }),
-        description: i18n.translate('workflows.actionsMenu.manualDescription', {
-          defaultMessage: 'Manually start from the UI',
-        }),
-        iconType: 'play',
-        iconColor: 'success',
-      },
-      {
-        id: 'alert',
-        label: i18n.translate('workflows.actionsMenu.alert', {
-          defaultMessage: 'Alert',
-        }),
-        description: i18n.translate('workflows.actionsMenu.alertDescription', {
-          defaultMessage: 'When an alert from rule is created',
-        }),
-        iconType: 'bell',
-        iconColor: euiTheme.colors.vis.euiColorVis6,
-      },
-      {
-        id: 'scheduled',
-        label: i18n.translate('workflows.actionsMenu.schedule', {
-          defaultMessage: 'Schedule',
-        }),
-        description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-          defaultMessage: 'On a schedule (e.g. every 10 minutes)',
-        }),
-        iconType: 'clock',
-        iconColor: euiTheme.colors.textParagraph,
-      },
-    ],
-  };
-  const kibanaGroup: ActionOptionData = {
-    iconType: 'logoKibana',
-    id: 'kibana',
-    label: i18n.translate('workflows.actionsMenu.kibana', {
-      defaultMessage: 'Kibana',
-    }),
-    description: i18n.translate('workflows.actionsMenu.kibanaDescription', {
-      defaultMessage: 'Work with Kibana data and features directly from your workflow',
-    }),
-  };
-  const externalGroup: ActionOptionData = {
-    iconType: 'globe',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'external',
-    label: i18n.translate('workflows.actionsMenu.external', {
-      defaultMessage: 'External Systems & Apps',
-    }),
-    description: i18n.translate('workflows.actionsMenu.externalDescription', {
-      defaultMessage: 'Automate actions in external systems and apps.',
-    }),
-  };
-  const flowControlGroup: ActionOptionData = {
-    iconType: 'branch',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'flowControl',
-    label: i18n.translate('workflows.actionsMenu.aggregations', {
-      defaultMessage: 'Flow Control',
-    }),
-    description: i18n.translate('workflows.actionsMenu.flowControlDescription', {
-      defaultMessage: 'Control your workflow with logic, delays, looping, and more',
-    }),
-    options: [
-      {
-        id: 'if',
-        label: i18n.translate('workflows.actionsMenu.if', {
-          defaultMessage: 'If Condition',
-        }),
-        description: i18n.translate('workflows.actionsMenu.ifDescription', {
-          defaultMessage: 'Define condition with KQL to execute the action',
-        }),
-        iconType: 'branch',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
-      },
-      {
-        id: 'foreach',
-        label: i18n.translate('workflows.actionsMenu.foreach', {
-          defaultMessage: 'Loop',
-        }),
-        description: i18n.translate('workflows.actionsMenu.loopDescription', {
-          defaultMessage: 'Iterate the action over a specified list',
-        }),
-        iconType: 'refresh',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
-      },
-      {
-        id: 'wait',
-        label: i18n.translate('workflows.actionsMenu.wait', {
-          defaultMessage: 'Wait',
-        }),
-        description: i18n.translate('workflows.actionsMenu.waitDescription', {
-          defaultMessage: 'Pause for a specified amount of time before continuing',
-        }),
-        iconType: 'clock',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
-      },
-    ],
-  };
-  const elasticSearchGroup: ActionOptionData = {
-    iconType: 'logoElasticsearch',
-    id: 'elasticsearch',
-    label: i18n.translate('workflows.actionsMenu.elasticsearch', {
-      defaultMessage: 'Elasticsearch',
-    }),
-    description: i18n.translate('workflows.actionsMenu.elasticsearchDescription', {
-      defaultMessage: 'Work with Elastic data and features directly from your workflow',
-    }),
-  };
-
-  for (const connector of connectors) {
-    if (connector.type.startsWith('elasticsearch.')) {
-      if (!elasticSearchGroup.options) {
-        elasticSearchGroup.options = [];
-      }
-      elasticSearchGroup.options.push({
-        id: connector.type,
-        label: connector.description || connector.type,
-        description: connector.type,
-        iconType: 'logoElasticsearch',
-      });
-    } else if (connector.type.startsWith('kibana.')) {
-      if (!kibanaGroup.options) {
-        kibanaGroup.options = [];
-      }
-      kibanaGroup.options.push({
-        id: connector.type,
-        label: connector.summary || connector.description || connector.type,
-        description: connector.type,
-        iconType: 'logoKibana',
-      });
-    } else {
-      if (!externalGroup.options) {
-        externalGroup.options = [];
-      }
-      const [baseType, subtype] = connector.type.split('.');
-      let groupOption = externalGroup;
-      if (subtype) {
-        let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
-        // create a group for the basetype if not yet exists
-        if (!connectorGroup) {
-          connectorGroup = {
-            id: baseType,
-            label: baseType,
-            iconType: getConnectorIconType(baseType),
-            options: [],
-          };
-          externalGroup.options.push(connectorGroup);
-        }
-        groupOption = connectorGroup;
-      }
-      const iconType = getConnectorIconType(connector.type);
-      groupOption.options!.push({
-        id: connector.type,
-        label: connector.description || connector.type,
-        description: connector.type,
-        iconType,
-      });
-    }
-  }
-
-  return [triggersGroup, elasticSearchGroup, kibanaGroup, externalGroup, flowControlGroup];
-}
-
-function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {
-  return options.map((option) => [option, ...flattenOptions(option.options || [])]).flat();
-}
-
 export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
   const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
@@ -268,13 +70,10 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     );
   };
 
-  const handleChange = (
-    opts: Array<ActionOptionData>,
-    event: any,
-    selectedOption: ActionOptionData
-  ) => {
+  const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (selectedOption?.options) {
       setCurrentPath([...currentPath, selectedOption.id]);
+      setSearchTerm('');
       setOptions(selectedOption.options);
     } else {
       onActionSelected(selectedOption);
@@ -291,13 +90,30 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     setOptions(nextOptions);
   };
 
+  const optionMatcher = ({
+    option,
+    searchValue,
+    normalizedSearchValue,
+  }: {
+    option: ActionOptionData;
+    searchValue: string;
+    normalizedSearchValue: string;
+  }) => {
+    return (
+      option.id.toLowerCase().includes(normalizedSearchValue) ||
+      option.label.toLowerCase().includes(normalizedSearchValue) ||
+      !!option.description?.toLowerCase().includes(normalizedSearchValue)
+    );
+  };
+
   const handleSearchChange = (searchValue: string) => {
+    setSearchTerm(searchValue);
     if (searchValue.length > 0) {
-      setOptions(
-        flatOptions.filter((option) =>
-          option.label.toLowerCase().includes(searchValue.toLowerCase())
-        )
+      const term = searchValue.trim().toLowerCase();
+      const matches = flatOptions.filter((option) =>
+        optionMatcher({ option, searchValue, normalizedSearchValue: term })
       );
+      setOptions(matches);
     } else {
       setOptions(defaultOptions);
     }
@@ -309,9 +125,11 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
       searchable
       options={options as EuiSelectableOption<ActionOptionData>[]}
       onChange={handleChange}
+      optionMatcher={optionMatcher}
       searchProps={{
         id: 'actions-menu-search',
         name: 'actions-menu-search',
+        value: searchTerm,
         onChange: handleSearchChange,
       }}
       listProps={{

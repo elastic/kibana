@@ -12,14 +12,20 @@ import { parseDocument } from 'yaml';
 import { insertStepSnippet } from './insert_step_snippet';
 import { monaco } from '@kbn/monaco';
 import * as generateBuiltInStepSnippetModule from './generate_builtin_step_snippet';
+import * as generateConnectorSnippetModule from './generate_connector_snippet';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
 describe('insertStepSnippet', () => {
   let generateBuiltInStepSnippetSpy: jest.SpyInstance;
+  let generateConnectorSnippetSpy: jest.SpyInstance;
   beforeEach(() => {
     generateBuiltInStepSnippetSpy = jest.spyOn(
       generateBuiltInStepSnippetModule,
       'generateBuiltInStepSnippet'
+    );
+    generateConnectorSnippetSpy = jest.spyOn(
+      generateConnectorSnippetModule,
+      'generateConnectorSnippet'
     );
     jest.clearAllMocks();
   });
@@ -159,6 +165,26 @@ steps:
       ],
       expect.any(Function)
     );
+  });
+
+  it('should insert connector snippet if step type is not a built-in', () => {
+    const inputYaml = `name: one_step_workflow
+steps:
+  - name: get_google
+    type: http
+    with:
+      url: https://google.com`;
+    const model = createMockModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    insertStepSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'dynamic_connector'
+    );
+    expect(generateConnectorSnippetSpy).toHaveBeenCalledWith('dynamic_connector', {
+      full: true,
+      withStepsSection: false,
+    });
   });
 
   it('should call pushUndoStop when editor is provided', () => {
