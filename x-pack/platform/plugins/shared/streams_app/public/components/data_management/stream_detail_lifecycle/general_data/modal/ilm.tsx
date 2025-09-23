@@ -202,7 +202,7 @@ export function IlmField({
                 {option.phases?.map((phase: PhaseProps, idx: number) => (
                   <EuiFlexItem key={idx} grow={false}>
                     <EuiHealth textSize="xs" color={phase.color}>
-                      <EuiHighlight search={searchValue}>{phase.description}</EuiHighlight>
+                      {phase.description}
                     </EuiHealth>
                   </EuiFlexItem>
                 ))}
