@@ -28,6 +28,7 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-const
 import type { HasCustomPrepend } from '@kbn/controls-plugin/public/controls/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   apiPublishesTitle,
   useBatchedPublishingSubjects,
@@ -122,6 +123,14 @@ export const ControlPanel = ({
     [uuid, setNodeRef, setControlPanelRef]
   );
 
+  const onApiAvailable = useCallback(
+    (controlApi: DefaultEmbeddableApi) => {
+      setApi(controlApi);
+      parentApi.registerChildApi(controlApi);
+    },
+    [parentApi]
+  );
+
   const isEditable = viewMode === 'edit';
   return (
     <EuiFlexItem
@@ -152,7 +161,10 @@ export const ControlPanel = ({
           data-test-subj="control-frame-title"
           fullWidth
           id={`control-title-${uuid}`}
-          aria-label={`Control for ${panelTitle}`}
+          aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
+            defaultMessage: 'Control for ${controlTitle}',
+            values: { controlTitle: panelTitle },
+          })}
         >
           <EuiFormControlLayout
             fullWidth
@@ -190,10 +202,7 @@ export const ControlPanel = ({
               maybeId={uuid}
               type={type}
               getParentApi={() => parentApi}
-              onApiAvailable={(controlApi) => {
-                setApi(controlApi);
-                parentApi.registerChildApi(controlApi);
-              }}
+              onApiAvailable={onApiAvailable}
               hidePanelChrome
             />
           </EuiFormControlLayout>

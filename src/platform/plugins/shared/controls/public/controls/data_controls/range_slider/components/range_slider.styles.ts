@@ -104,7 +104,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
 
     editMode: css`
       & input:last-child {
-        padding-right: calc(${euiTheme.size.s} * 2); // 16px
+        padding-right: ${euiTheme.size.base};
       }
     `,
 

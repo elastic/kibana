@@ -82,6 +82,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
         const result = arrayMove([...controlsInOrder], oldIndex, newIndex);
         parentApi.layout$.next({
           ...parentApi.layout$.getValue(),
+          // based on the result of `arrayMove`, assign the order to each control
           controls: result.reduce((prev, control, index) => {
             const { id, ...rest } = control;
             return { ...prev, [id!]: { ...rest, order: index } };

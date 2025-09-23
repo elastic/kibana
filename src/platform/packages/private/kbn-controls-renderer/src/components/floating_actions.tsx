@@ -14,6 +14,7 @@ import { Subscription, switchMap } from 'rxjs';
 
 import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
@@ -42,13 +43,9 @@ const getFloatingActionItem = (
 ): FloatingActionItem => ({
   ...omit(action, 'MenuItem'),
   MenuItem: () => {
-    return action.MenuItem ? (
-      <>
-        {React.createElement(action.MenuItem, {
-          key: action.id,
-          context,
-        })}
-      </>
+    const MenuItem = action.MenuItem;
+    return MenuItem ? (
+      <MenuItem key={action.id} context={context} />
     ) : (
       <EuiToolTip
         key={`control-action-${uuid}-${action.id}`}
@@ -83,7 +80,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     let canceled = false;
     const context = {
       embeddable: api,
-      trigger: uiActions.getTrigger('CONTROL_HOVER_TRIGGER'), // we cannot import this constant from the controls plugin
+      trigger: uiActions.getTrigger(CONTROL_HOVER_TRIGGER_ID),
     };
 
     const sortByOrder = (a: FloatingActionItem, b: FloatingActionItem) => {
@@ -91,7 +88,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
-      return (await uiActions.getTriggerCompatibleActions('CONTROL_HOVER_TRIGGER', context))
+      return (await uiActions.getTriggerCompatibleActions(CONTROL_HOVER_TRIGGER_ID, context))
         .filter((action) => {
           return (disabledActions ?? []).indexOf(action.id) === -1;
         })
@@ -119,7 +116,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       if (canceled) return;
       setFloatingActions(actions);
       const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
-        'CONTROL_HOVER_TRIGGER',
+        CONTROL_HOVER_TRIGGER_ID,
         context
       );
       if (canceled) return;
