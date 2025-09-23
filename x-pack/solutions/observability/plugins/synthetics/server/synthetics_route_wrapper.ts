@@ -105,7 +105,6 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           },
         });
       } catch (e) {
-        server.logger.error(e);
         if (isKibanaResponse(e)) {
           return e;
         }
