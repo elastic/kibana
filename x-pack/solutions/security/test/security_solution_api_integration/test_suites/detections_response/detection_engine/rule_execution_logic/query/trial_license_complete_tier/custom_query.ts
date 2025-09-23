@@ -102,6 +102,11 @@ export default ({ getService }: FtrProviderContext) => {
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless @serverlessQA Query type rules', () => {
+    const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
+      es,
+      index: 'ecs_compliant',
+      log,
+    });
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load(
@@ -114,6 +119,9 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
       );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     afterEach(async () => {
@@ -124,6 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload(
         'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
       );
       await deleteAllAlerts(supertest, log, es, [
         '.preview.alerts-security.alerts-*',
@@ -172,6 +183,28 @@ export default ({ getService }: FtrProviderContext) => {
       // Search for 2x max_signals to make sure we aren't making more than max_signals
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
       expect(previewAlerts.length).toEqual(maxAlerts);
+    });
+
+    it('should create 200 alerts even when all source docs have the same timestamp', async () => {
+      const maxAlerts = 200;
+      const id = uuidv4();
+      const timestamp = '2020-10-28T06:00:00.000Z';
+      await indexGeneratedDocuments({
+        docsCount: maxAlerts,
+        seed: () => ({
+          id,
+          '@timestamp': timestamp,
+        }),
+      });
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForAlertTesting(['ecs_compliant']),
+        query: `*`,
+        max_signals: maxAlerts,
+      };
+      const { previewId } = await previewRule({ supertest, rule });
+      // Search for 2x max_signals to make sure we aren't making more than max_signals
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
+      expect(previewAlerts).toHaveLength(maxAlerts);
     });
 
     it('should have recorded the rule_id within the alert', async () => {
@@ -855,24 +888,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with a suppression time window', () => {
-        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
-          es,
-          index: 'ecs_compliant',
-          log,
-        });
-
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
-          );
-        });
-
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
-          );
-        });
-
         it('should update an alert using real rule executions', async () => {
           const id = uuidv4();
           const firstTimestamp = new Date().toISOString();
@@ -1502,12 +1517,6 @@ export default ({ getService }: FtrProviderContext) => {
       // when missing_fields_strategy set to "doNotSuppress", each document with missing grouped by field
       // will generate a separate alert
       describe('unsuppressed alerts', () => {
-        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
-          es,
-          index: 'ecs_compliant',
-          log,
-        });
-
         before(async () => {
           await esArchiver.load(
             'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -2400,12 +2409,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     // skipped on MKI since feature flags are not supported there
     describe('@skipInServerlessMKI manual rule run', () => {
-      const { indexListOfDocuments } = dataGeneratorFactory({
-        es,
-        index: 'ecs_compliant',
-        log,
-      });
-
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.load(

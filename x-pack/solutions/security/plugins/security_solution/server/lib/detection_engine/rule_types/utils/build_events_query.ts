@@ -9,11 +9,10 @@ import { isEmpty } from 'lodash';
 import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-interface BuildEventsSearchQuery<
+interface BuildEventsSearchQueryCoreParams<
   TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
 > {
   aggregations: TAggs;
-  index: string[];
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
@@ -27,6 +26,14 @@ interface BuildEventsSearchQuery<
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
 }
+
+type BuildEventsSearchQueryParams<
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+> = BuildEventsSearchQueryCoreParams<TAggs> & { index: string[] };
+
+type BuildEventsSearchQueryWithPitParams<
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+> = BuildEventsSearchQueryCoreParams<TAggs> & { pitId: string };
 
 export const buildTimeRangeFilter = ({
   to,
@@ -103,9 +110,33 @@ export const buildTimeRangeFilter = ({
 
 export const buildEventsSearchQuery = <
   TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+>(
+  params: BuildEventsSearchQueryParams<TAggs>
+): estypes.SearchRequest => {
+  return {
+    ...buildEventsSearchQueryCore(params),
+    index: params.index,
+    ignore_unavailable: true,
+  };
+};
+
+export const buildEventsSearchQueryWithPit = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+>(
+  params: BuildEventsSearchQueryWithPitParams<TAggs>
+): estypes.SearchRequest => {
+  return {
+    ...buildEventsSearchQueryCore(params),
+    pit: {
+      id: params.pitId,
+    },
+  };
+};
+
+const buildEventsSearchQueryCore = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
 >({
   aggregations,
-  index,
   from,
   to,
   filter,
@@ -118,7 +149,7 @@ export const buildEventsSearchQuery = <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-}: BuildEventsSearchQuery<TAggs>) => {
+}: BuildEventsSearchQueryCoreParams<TAggs>): estypes.SearchRequest => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -158,8 +189,6 @@ export const buildEventsSearchQuery = <
 
   const searchQuery = {
     allow_no_indices: true,
-    index,
-    ignore_unavailable: true,
     track_total_hits: trackTotalHits,
     size,
     query: {

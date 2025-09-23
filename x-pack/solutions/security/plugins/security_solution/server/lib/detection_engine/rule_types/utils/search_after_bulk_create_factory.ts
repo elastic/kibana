@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
-import { buildEventsSearchQuery } from './build_events_query';
+import { buildEventsSearchQueryWithPit } from './build_events_query';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -30,6 +30,8 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 
 import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import * as i18n from '../translations';
+
+const PIT_KEEP_ALIVE = '5m';
 
 const createLoggedRequestsConfig = (
   isLoggedRequestsEnabled: boolean | undefined,
@@ -93,6 +95,12 @@ export const searchAfterAndBulkCreateFactory = async ({
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    const pitResponse = await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: inputIndexPattern,
+      keep_alive: PIT_KEEP_ALIVE,
+      allow_partial_search_results: true,
+    });
+    let pitId = pitResponse.id;
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -103,9 +111,8 @@ export const searchAfterAndBulkCreateFactory = async ({
           } in index pattern "${inputIndexPattern}"`
         );
 
-        const searchAfterQuery = buildEventsSearchQuery({
+        const searchAfterQuery = buildEventsSearchQueryWithPit({
           aggregations: undefined,
-          index: inputIndexPattern,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           runtimeMappings,
@@ -117,6 +124,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          pitId,
         });
         const {
           searchResult,
@@ -133,6 +141,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             searchingIteration
           ),
         });
+        pitId = searchResult.pit_id ?? pitId;
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({
