@@ -9,21 +9,22 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
-import type {
-  BaseStep,
-  ForEachStep,
-  HttpStep,
-  IfStep,
-  WaitStep,
-  ElasticsearchStep,
-  KibanaStep,
-  WorkflowYaml,
-  WorkflowRetry,
-  StepWithOnFailure,
-  StepWithIfCondition,
-  StepWithForeach,
-  WorkflowSettings,
-  WorkflowOnFailure,
+import {
+  type BaseStep,
+  type ForEachStep,
+  type HttpStep,
+  type IfStep,
+  type WaitStep,
+  type ElasticsearchStep,
+  type KibanaStep,
+  type WorkflowYaml,
+  type WorkflowRetry,
+  type StepWithOnFailure,
+  type StepWithIfCondition,
+  type StepWithForeach,
+  type WorkflowSettings,
+  type WorkflowOnFailure,
+  type StepWithTimeout,
 } from '../../spec/schema';
 import type {
   GraphNode,
@@ -48,6 +49,8 @@ import type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
+  EnterTimeoutZoneNode,
+  ExitTimeoutZoneNode,
 } from '../types';
 
 const flowControlStepTypes = new Set(['if', 'foreach']);
@@ -71,7 +74,7 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
   // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
   const nodeId = (node as any).id || node.name;
-  const parts = [];
+  const parts: string[] = [];
 
   if (context.parentKey) {
     parts.push(context.parentKey);
@@ -83,6 +86,17 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
 }
 
 function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
+  if ((currentStep as StepWithTimeout).timeout) {
+    const step = currentStep as BaseStep & StepWithTimeout;
+    return handleStepTimeout(
+      getStepId(step, context),
+      step.type,
+      step.timeout!,
+      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
+      context
+    );
+  }
+
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -347,6 +361,35 @@ function visitOnFailure(
 
   context.stack.pop();
 
+  return graph;
+}
+
+function handleStepTimeout(
+  stepId: string,
+  stepType: string,
+  timeout: string,
+  innerGraph: graphlib.Graph,
+  context: GraphBuildContext
+): graphlib.Graph {
+  const enterTimeoutZone: EnterTimeoutZoneNode = {
+    id: `enterTimeoutZone_${stepId}`,
+    type: 'enter-timeout-zone',
+    stepId,
+    stepType,
+    timeout,
+  };
+  const exitTimeoutZone: ExitTimeoutZoneNode = {
+    id: `exitTimeoutZone_${stepId}`,
+    type: 'exit-timeout-zone',
+    stepId,
+    stepType,
+  };
+  const graph = new graphlib.Graph({ directed: true });
+  graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
+  graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
+  context.stack.push(enterTimeoutZone);
+  insertGraphBetweenNodes(graph, innerGraph, enterTimeoutZone.id, exitTimeoutZone.id);
+  context.stack.pop();
   return graph;
 }
 

@@ -56,6 +56,8 @@ export type {
   EnterFallbackPathNode,
   ExitFallbackPathNodeSchema,
   ExitFallbackPathNode,
+  EnterTimeoutZoneNode,
+  ExitTimeoutZoneNode,
 } from './nodes/on_failure_nodes';
 
 export type { UnionExecutionGraphNode } from './nodes/union';

@@ -9,6 +9,8 @@
 
 import { z } from '@kbn/zod';
 
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
   'max-attempts': z.number().int().min(1).optional(),
@@ -107,8 +109,8 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 /* --- Steps --- */
-const StepWithTimeoutSchema = z.object({
-  timeout: z.number().optional(),
+export const StepWithTimeoutSchema = z.object({
+  timeout: DurationSchema.optional(),
 });
 export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
 
@@ -142,7 +144,7 @@ export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+    duration: DurationSchema, // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
