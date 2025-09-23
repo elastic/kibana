@@ -80,7 +80,7 @@ class ToolClientImpl {
       throw createBadRequestError(`Tool with id '${id}' already exists.`);
     }
 
-    const attributes = createAttributes({ createRequest });
+    const attributes = createAttributes({ createRequest, space: this.space });
 
     await this.storage.getClient().index({
       document: attributes,
