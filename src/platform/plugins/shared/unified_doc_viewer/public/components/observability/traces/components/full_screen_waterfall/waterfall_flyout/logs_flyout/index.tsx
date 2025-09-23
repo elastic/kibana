@@ -39,7 +39,7 @@ export function LogsFlyout({ onCloseFlyout, docId, dataView }: SpanFlyoutProps) 
   const { loading, logDoc, index } = useFetchLog({ docId });
   const { indexes } = useDataSourcesContext();
   const [loadingDataView, setLoadingDataView] = useState(false);
-  const { dataViews, core } = getUnifiedDocViewerServices();
+  const { data, core } = getUnifiedDocViewerServices();
   const [logDataView, setLogDataView] = useState<DataView | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,7 +65,7 @@ export function LogsFlyout({ onCloseFlyout, docId, dataView }: SpanFlyoutProps) 
       setLoadingDataView(true);
       setError(null);
       try {
-        const _dataView = await dataViews.create(
+        const _dataView = await data.dataViews.create(
           { title: index, timeFieldName: '@timestamp' },
           undefined,
           false
@@ -83,7 +83,7 @@ export function LogsFlyout({ onCloseFlyout, docId, dataView }: SpanFlyoutProps) 
       }
     }
     createAdhocDataView();
-  }, [index, dataViews, core.notifications.toasts]);
+  }, [index, data.dataViews, core.notifications.toasts]);
 
   return (
     <WaterfallFlyout
