@@ -10,11 +10,11 @@ import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/esql';
 import { streamlangApiTest } from '../..';
 
-streamlangApiTest.describe(
-  'Streamlang to ES|QL - Date Processor',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
-    streamlangApiTest('should parse a date and set it to @timestamp', async ({ testBed, esql }) => {
+streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
+  streamlangApiTest(
+    'should parse a date and set it to @timestamp',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date';
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -30,41 +30,46 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
-    });
+    }
+  );
 
-    // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
-    streamlangApiTest.skip(
-      'should parse a date with multiple formats',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-date-multiple-formats';
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: 'event.created',
-              to: 'event.created_date',
-              formats: ['dd/MM/yyyy:HH:mm:ss', 'ISO8601'],
-            } as DateProcessor,
-          ],
-        };
-        const { query } = transpile(streamlangDSL);
-        const docs = [
-          { event: { created: '01/01/2025:12:34:56' } },
-          { event: { created: '2025-01-02T12:34:56.789Z' } },
-        ];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
+  // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
+  streamlangApiTest(
+    'should parse a date with multiple formats',
+    { tag: ['@ess'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-date-multiple-formats';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'event.created',
+            to: 'event.created_date',
+            formats: ['dd/MM/yyyy:HH:mm:ss', 'ISO8601'],
+          } as DateProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const docs = [
+        { event: { created: '01/01/2025:12:34:56' } },
+        { event: { created: '2025-01-02T12:34:56.789Z' } },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documentsOrdered[0]['event.created_date']).toEqual(
-          '2025-01-01T12:34:56.000Z'
-        );
-        expect(esqlResult.documentsOrdered[1]['event.created_date']).toEqual(
-          '2025-01-02T12:34:56.789Z'
-        );
-      }
-    );
+      expect(esqlResult.documentsOrdered[0]['event.created_date']).toEqual(
+        '2025-01-01T12:34:56.000Z'
+      );
+      expect(esqlResult.documentsOrdered[1]['event.created_date']).toEqual(
+        '2025-01-02T12:34:56.789Z'
+      );
+    }
+  );
 
-    streamlangApiTest('should use a different to field', async ({ testBed, esql }) => {
+  streamlangApiTest(
+    'should use a different to field',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-to-field';
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -81,9 +86,13 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['custom.time']).toEqual('2025-01-01T12:34:56.789Z');
-    });
+    }
+  );
 
-    streamlangApiTest('should use a different output format', async ({ testBed, esql }) => {
+  streamlangApiTest(
+    'should use a different output format',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-output-format';
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -100,9 +109,13 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
-    });
+    }
+  );
 
-    streamlangApiTest('should not parse a date when where is false', async ({ testBed, esql }) => {
+  streamlangApiTest(
+    'should not parse a date when where is false',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-where-false';
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -129,31 +142,36 @@ streamlangApiTest.describe(
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documentsOrdered[1]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
       expect(esqlResult.documentsOrdered[2]['@timestamp']).toBeNull();
-    });
+    }
+  );
 
-    streamlangApiTest(
-      'should leave source unchanged in case of error',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-date-fail';
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: 'log.time',
-              formats: ['yyyy/MM/dd'],
-            } as DateProcessor,
-          ],
-        };
-        const { query } = transpile(streamlangDSL);
-        const docs = [{ log: { time: '01-01-2025' } }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
-        expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025');
-        expect(esqlResult.documents[0]['@timestamp']).toBeNull();
-      }
-    );
+  streamlangApiTest(
+    'should leave source unchanged in case of error',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-date-fail';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'log.time',
+            formats: ['yyyy/MM/dd'],
+          } as DateProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const docs = [{ log: { time: '01-01-2025' } }];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+      expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025');
+      expect(esqlResult.documents[0]['@timestamp']).toBeNull();
+    }
+  );
 
-    streamlangApiTest('should reject Mustache template syntax {{ and {{{', async () => {
+  streamlangApiTest(
+    'should reject Mustache template syntax {{ and {{{',
+    { tag: ['@ess', '@svlOblt'] },
+    async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -167,6 +185,6 @@ streamlangApiTest.describe(
 
       // Should throw validation error for Mustache templates
       expect(() => transpile(streamlangDSL)).toThrow();
-    });
-  }
-);
+    }
+  );
+});
