@@ -23,7 +23,7 @@ import type { SchemaEditorProps, SchemaField } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
-import { SUPPORTED_TABLE_COLUMN_NAMES } from './constants';
+import { FIELD_TYPE_MAP, SUPPORTED_TABLE_COLUMN_NAMES } from './constants';
 
 export function SchemaEditor({
   defaultColumns = SUPPORTED_TABLE_COLUMN_NAMES,
@@ -66,6 +66,10 @@ export function SchemaEditor({
         Object.entries(response.fields).forEach(([key, value]) => {
           const originalField = fields.find(({ name }) => name === ecsToOriginalField[key])!;
           const type = value.type ?? originalField.type;
+          if (type && !FIELD_TYPE_MAP[type as keyof typeof FIELD_TYPE_MAP]) {
+            return;
+          }
+
           onFieldUpdate({
             ...originalField,
             type,

@@ -24,6 +24,7 @@ import {
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +37,7 @@ import { convertToFieldDefinitionConfig } from './utils';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
-  stream: string;
+  definition: Streams.ingest.all.GetResponse;
   fields: SchemaField[];
   storedFields: SchemaField[];
   submitChanges: () => Promise<void>;
@@ -44,7 +45,7 @@ interface SchemaChangesReviewModalProps {
 
 export function SchemaChangesReviewModal({
   fields,
-  stream,
+  definition,
   storedFields,
   submitChanges,
   onClose,
@@ -98,7 +99,7 @@ export function SchemaChangesReviewModal({
           {
             signal,
             params: {
-              path: { name: stream },
+              path: { name: definition.stream.name },
               body: {
                 field_definitions: mappedFields,
               },
@@ -119,7 +120,7 @@ export function SchemaChangesReviewModal({
     }
 
     simulate();
-  }, [changes, streamsRepositoryClient, signal, stream]);
+  }, [changes, streamsRepositoryClient, signal, definition.stream.name]);
 
   const confirmChangesTitle = i18n.translate(
     'xpack.streams.schemaEditor.confirmChangesModal.title',
@@ -134,15 +135,17 @@ export function SchemaChangesReviewModal({
         <EuiModalHeaderTitle>{confirmChangesTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
-            {
-              defaultMessage: 'Schema edits affect all dependent streams.',
-            }
-          )}
-          iconType="info"
-        />
+        {Streams.WiredStream.GetResponse.is(definition) ? (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
+              {
+                defaultMessage: 'Schema edits affect all dependent streams.',
+              }
+            )}
+            iconType="info"
+          />
+        ) : null}
         <EuiSpacer size="m" />
         <EuiText>
           {i18n.translate(

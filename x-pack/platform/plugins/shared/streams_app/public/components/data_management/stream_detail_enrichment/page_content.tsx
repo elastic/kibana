@@ -110,7 +110,7 @@ export function StreamDetailEnrichmentContentImpl() {
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={detectedFields}
-            stream={definition.stream.name}
+            definition={definition}
             storedFields={[]}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}
