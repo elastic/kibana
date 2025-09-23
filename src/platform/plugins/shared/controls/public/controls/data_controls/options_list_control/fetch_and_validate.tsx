@@ -21,6 +21,7 @@ import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import { getFetchContextFilters } from '../utils';
 
 export function fetchAndValidate$({
   api,
@@ -87,11 +88,7 @@ export function fetchAndValidate$({
 
         /** Fetch the suggestions list + perform validation */
         api.loadingSuggestions$.next(true);
-        if (!useGlobalFilters) {
-          fetchContext.filters = fetchContext.filters?.filter(
-            (currentFilter) => Boolean(currentFilter.meta.controlledBy) // filters without `controlledBy` are coming from unified search
-          );
-        }
+        fetchContext.filters = getFetchContextFilters(fetchContext, useGlobalFilters);
 
         const request = {
           sort,

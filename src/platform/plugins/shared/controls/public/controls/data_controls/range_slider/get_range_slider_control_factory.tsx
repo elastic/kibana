@@ -140,6 +140,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
+        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
           if (isLoading && dataControlManager.api.blockingError$.value) {
@@ -199,6 +200,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         rangeFilters$: dataControlManager.api.appliedFilters$,
+        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },

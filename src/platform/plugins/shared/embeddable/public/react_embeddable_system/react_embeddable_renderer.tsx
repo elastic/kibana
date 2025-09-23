@@ -11,7 +11,7 @@ import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel, PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
@@ -72,7 +72,14 @@ export const EmbeddableRenderer = <
             apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
           ) => {
             const hasLockedHoverActions$ = new BehaviorSubject(false);
+            const panelCapabilitiesDefaults: HasPanelCapabilities = {
+              isExpandable: true,
+              isDuplicable: true,
+              isCustomizable: true,
+            };
             return {
+              // Spread default panel capabilities first, allow apiRegistration to override them
+              ...panelCapabilitiesDefaults,
               ...apiRegistration,
               uuid,
               phase$: phaseTracker.current.getPhase$(),

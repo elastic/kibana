@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
+import { CustomOptionsAdditionalSettings } from '../../../components';
 
 export const RangeSliderEditorOptions = ({
   initialState,
@@ -21,20 +22,23 @@ export const RangeSliderEditorOptions = ({
   const [step, setStep] = useState(initialState.step ?? 1);
 
   return (
-    <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
-      <EuiFieldNumber
-        compressed
-        value={step}
-        onChange={(event) => {
-          const newStep = event.target.valueAsNumber;
-          setStep(newStep);
-          updateState({ step: newStep });
-          setControlEditorValid(newStep > 0);
-        }}
-        min={0}
-        isInvalid={step === undefined || step <= 0}
-        data-test-subj="rangeSliderControl__stepAdditionalSetting"
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
+        <EuiFieldNumber
+          compressed
+          value={step}
+          onChange={(event) => {
+            const newStep = event.target.valueAsNumber;
+            setStep(newStep);
+            updateState({ step: newStep });
+            setControlEditorValid(newStep > 0);
+          }}
+          min={0}
+          isInvalid={step === undefined || step <= 0}
+          data-test-subj="rangeSliderControl__stepAdditionalSetting"
+        />
+      </EuiFormRow>
+      <CustomOptionsAdditionalSettings initialState={initialState} updateState={updateState} />
+    </>
   );
 };
