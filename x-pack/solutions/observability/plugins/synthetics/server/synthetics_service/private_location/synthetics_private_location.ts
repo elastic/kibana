@@ -10,8 +10,6 @@ import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
@@ -43,10 +41,6 @@ export interface FailedPolicyUpdate {
   packagePolicy: NewPackagePolicyWithId;
   config?: HeartbeatConfig;
   error?: Error | SavedObjectError;
-}
-
-interface BulkOptions {
-  asyncDeploy?: boolean;
 }
 
 export class SyntheticsPrivateLocation {
@@ -345,34 +339,26 @@ export class SyntheticsPrivateLocation {
 
     const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
       this.createPolicyBulk(policiesToCreate, spaceId),
-      this.updatePolicyBulk(policiesToUpdate, spaceId),
+      this.updatePolicyBulk(policiesToUpdate),
       this.deletePolicyBulk(policiesToDelete),
     ]);
 
-    const failedUpdates = failedUpdatesRes?.map(
-      ({
-        packagePolicy,
-        error,
-      }: {
-        packagePolicy: NewPackagePolicyWithId;
-        error: Error | SavedObjectError;
-      }) => {
-        const policyConfig = configs.find(({ config }) => {
-          const { locations } = config;
+    const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
+      const policyConfig = configs.find(({ config }) => {
+        const { locations } = config;
 
-          const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-          for (const privateLocation of monitorPrivateLocations) {
-            const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-            return currId === packagePolicy.id;
-          }
-        });
-        return {
-          error,
-          packagePolicy,
-          config: policyConfig?.config,
-        };
-      }
-    );
+        const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+        for (const privateLocation of monitorPrivateLocations) {
+          const currId = this.getPolicyId(config, privateLocation.id, spaceId);
+          return currId === packagePolicy.id;
+        }
+      });
+      return {
+        error,
+        packagePolicy,
+        config: policyConfig?.config,
+      };
+    });
 
     return {
       failedUpdates,
@@ -401,28 +387,18 @@ export class SyntheticsPrivateLocation {
     );
   }
 
-  /**
-   * Shared logic for bulk policy operations across multiple spaces.
-   */
-  private async _bulkPolicyBySpace(
-    policies: NewPackagePolicyWithId[],
-    bulkFn: (
-      soClient: SavedObjectsClientContract,
-      esClient: ElasticsearchClient,
-      policies: NewPackagePolicyWithId[],
-      options: BulkOptions
-    ) => Promise<any>,
-    options: BulkOptions,
-    spaceId: string
-  ) {
+  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[], spaceId: string) {
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    const agentPolicyIds = Array.from(new Set(policies.map((policy) => policy.policy_id!)));
+    const agentPolicyIds = Array.from(new Set(newPolicies.map((policy) => policy.policy_id!)));
     if (agentPolicyIds.length > 1) {
-      const agentPolicies = await this.getAgentPoliciesByIds(agentPolicyIds);
+      console.log(agentPolicyIds);
+      const agentPolicies = await this.getAgentPoliciesByIds(Array.from(agentPolicyIds));
       const agentPolicySpaceIds = new Set(
         agentPolicies?.map((policy) => policy?.space_ids || []).flat() || []
       );
+      console.log(agentPolicySpaceIds);
       if (agentPolicySpaceIds.size > 1) {
+        // if more than one space id exists, then we have to call one by one grouped by policy id
         const results = [];
         for (const agentPolicyId of agentPolicyIds) {
           const agentPolicySpaceId =
@@ -431,65 +407,58 @@ export class SyntheticsPrivateLocation {
           const soClient = this.server.coreStart.savedObjects
             .getUnsafeInternalClient()
             .asScopedToNamespace(agentPolicySpaceId);
-          const agentPolicyPolicies = policies.filter(
+          const agentPolicyPolicies = newPolicies.filter(
             (policy) => policy.policy_id === agentPolicyId
           );
           if (agentPolicyPolicies.length > 0) {
-            const res = await bulkFn(soClient, esClient, agentPolicyPolicies, options);
+            const res = await this.server.fleet.packagePolicyService.bulkCreate(
+              soClient,
+              esClient,
+              agentPolicyPolicies,
+              {
+                asyncDeploy: true,
+              }
+            );
             results.push(res);
           }
         }
-        return results;
+        return {
+          created: results.map((r) => r.created).flat(),
+          failed: results.map((r) => r.failed).flat(),
+        };
       }
     }
-    // Default: single space
+
     const soClient = this.server.coreStart.savedObjects
       .getUnsafeInternalClient()
       .asScopedToNamespace(spaceId);
-    return await bulkFn(soClient, esClient, policies, options);
+    if (esClient && newPolicies.length > 0) {
+      return await this.server.fleet.packagePolicyService.bulkCreate(
+        soClient,
+        esClient,
+        newPolicies,
+        {
+          asyncDeploy: true,
+        }
+      );
+    }
   }
 
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[], spaceId: string) {
-    if (newPolicies.length === 0) return;
-    const options = { asyncDeploy: true };
-    const results = await this._bulkPolicyBySpace(
-      newPolicies,
-      this.server.fleet.packagePolicyService.bulkCreate,
-      options,
-      spaceId
-    );
-    // Flatten results for multi-space case
-    if (Array.isArray(results)) {
-      return {
-        created: results.map((r) => r.created).flat(),
-        failed: results.map((r) => r.failed).flat(),
-      };
+  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    if (policiesToUpdate.length > 0) {
+      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
+        soClient,
+        esClient,
+        policiesToUpdate,
+        {
+          force: true,
+          asyncDeploy: true,
+        }
+      );
+      return failedPolicies;
     }
-    return results;
-  }
-
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[], spaceId: string) {
-    if (policiesToUpdate.length === 0) return;
-    const options = { force: true, asyncDeploy: true };
-    const results = await this._bulkPolicyBySpace(
-      policiesToUpdate,
-      async (soClient, esClient, policies, opts) => {
-        const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-          soClient,
-          esClient,
-          policies,
-          opts
-        );
-        return failedPolicies;
-      },
-      options,
-      spaceId
-    );
-    // Flatten results for multi-space case
-    if (Array.isArray(results)) {
-      return results.flat();
-    }
-    return results?.failedPolicies ?? results;
   }
 
   async deletePolicyBulk(policyIdsToDelete: string[]) {
@@ -549,9 +518,7 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPoliciesByIds(ids: string[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    return this.server.fleet?.agentPolicyService.getByIds(soClient, ids, {
-      spaceId: ALL_SPACES_ID,
-    });
+    return this.server.fleet?.agentPolicyService.getByIds(soClient, ids);
   }
 
   async getAgentPolicies() {
