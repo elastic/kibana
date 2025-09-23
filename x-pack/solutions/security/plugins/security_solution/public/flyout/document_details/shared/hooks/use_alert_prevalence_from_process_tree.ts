@@ -12,7 +12,7 @@ import { useEnableExperimental } from '../../../../common/hooks/use_experimental
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { useHttp } from '../../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../../sourcerer/store';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 
 export interface StatsNode {
   /**

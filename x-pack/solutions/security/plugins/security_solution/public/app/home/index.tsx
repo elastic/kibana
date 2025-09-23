@@ -23,9 +23,11 @@ import { useUpgradeSecurityPackages } from '../../detection_engine/rule_manageme
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
-import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
-import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
-import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import {
+  useBrowserFields,
+  useInitDataViewManager,
+  useRestoreDataViewManagerStateFromURL,
+} from '../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { type BrowserFields } from '../../common/containers/source';
 

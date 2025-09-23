@@ -8,9 +8,9 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
+import { useSelectDataView } from '../../../data_view_manager';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
-import { updateProviders, setFilters, applyKqlFilterQuery } from '../../../timelines/store/actions';
+import { applyKqlFilterQuery, setFilters, updateProviders } from '../../../timelines/store/actions';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';

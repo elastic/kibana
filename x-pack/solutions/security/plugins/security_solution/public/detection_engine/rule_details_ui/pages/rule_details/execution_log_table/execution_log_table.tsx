@@ -10,23 +10,23 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
 import type {
-  OnTimeChangeProps,
-  OnRefreshProps,
-  OnRefreshChangeProps,
-  EuiSwitchEvent,
   CriteriaWithPagination,
+  EuiSwitchEvent,
+  OnRefreshChangeProps,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiSpacer,
-  EuiSwitch,
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -80,14 +80,14 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
-  getMessageColumn,
-  getExecutionLogMetricsColumns,
   expanderColumn,
+  getExecutionLogMetricsColumns,
+  getMessageColumn,
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 

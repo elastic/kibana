@@ -18,7 +18,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 
 export const useObservedHost = (

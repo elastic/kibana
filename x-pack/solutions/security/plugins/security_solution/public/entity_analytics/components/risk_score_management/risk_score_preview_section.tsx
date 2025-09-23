@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiCallOut,
   EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,8 +35,9 @@ import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missin
 import { userHasRiskEngineReadPermissions } from '../../common';
 import { EntityIconByType } from '../entity_store/helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
+
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -172,6 +173,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"

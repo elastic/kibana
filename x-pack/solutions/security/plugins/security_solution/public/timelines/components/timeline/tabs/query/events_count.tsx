@@ -12,7 +12,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';

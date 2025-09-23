@@ -6,15 +6,15 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -29,7 +29,7 @@ import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/teleme
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const { changeViewMode } = dataTableActions;

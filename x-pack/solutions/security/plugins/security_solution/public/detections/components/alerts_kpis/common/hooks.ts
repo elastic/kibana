@@ -19,7 +19,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields } from '../../../../data_view_manager';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
