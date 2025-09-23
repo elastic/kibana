@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFormRow, EuiIcon, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataMappingPopover } from './data_mapping_popover';
@@ -43,7 +43,7 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
             disabled={!props.supportsFieldMetaFromLocalData}
             compressed
           />{' '}
-          <EuiToolTip
+          <EuiIconTip
             content={
               <EuiText>
                 <p>
@@ -60,9 +60,9 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
                 </p>
               </EuiText>
             }
-          >
-            <EuiIcon type="question" color="subdued" />
-          </EuiToolTip>
+            type="question"
+            color="subdued"
+          />
         </>
       </EuiFormRow>
     </DataMappingPopover>
