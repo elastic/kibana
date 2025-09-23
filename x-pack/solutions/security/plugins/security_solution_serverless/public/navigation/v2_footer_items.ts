@@ -9,61 +9,37 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-export const createStackManagementNavigationTree = (
-  {
-    sideNavVersion,
-  }: {
-    sideNavVersion?: NodeDefinition['sideNavVersion'];
-  } = { sideNavVersion: 'v1' }
-): NodeDefinition => ({
+export const createV2footerItemsTree = (): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
   icon: 'gear',
   breadcrumbStatus: 'hidden',
   renderAs: 'accordion',
   spaceBefore: null,
-  sideNavVersion,
+  sideNavVersion: 'v2',
   children: [
     {
-      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-      title: i18nStrings.stackManagement.title,
+      id: 'ingest_and_manage_data',
+      iconV2: 'database',
+      title: i18nStrings.ingestAndManageData.title,
       renderAs: 'panelOpener',
       spaceBefore: null,
       children: [
         {
-          title: i18nStrings.stackManagement.data.title,
+          title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
           breadcrumbStatus: 'hidden',
           children: [
+            // TODO: verify visibility; not visible on v1 serverless footer items
             {
-              link: 'management:index_management',
               breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:transform',
-              breadcrumbStatus: 'hidden',
+              link: 'integrations',
             },
             {
               link: 'management:ingest_pipelines',
               breadcrumbStatus: 'hidden',
             },
             {
-              link: 'management:dataViews',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:jobsListLink',
-              breadcrumbStatus: 'hidden',
-            },
-            {
               link: 'management:pipelines',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:data_quality',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:data_usage',
               breadcrumbStatus: 'hidden',
             },
             {
@@ -72,6 +48,58 @@ export const createStackManagementNavigationTree = (
             },
           ],
         },
+        {
+          title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              // TODO : update Steams link
+              breadcrumbStatus: 'hidden',
+              link: 'streams:overview',
+            },
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:index_management',
+            },
+            // TODO: verify if we need to add these links
+            // as they are not visible in the footer items in v1 serverless
+
+            // {
+            //   breadcrumbStatus: 'hidden',
+            //   link: 'management:index_lifecycle_management',
+            // },
+            // {
+            //   breadcrumbStatus: 'hidden',
+            //   link: 'management:snapshot_restore',
+            // },
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:transform',
+            },
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:jobsListLink',
+            },
+            // {
+            //   breadcrumbStatus: 'hidden',
+            //   link: 'management:rollup_jobs',
+            // },
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:data_quality',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      title: i18nStrings.stackManagementV2.serverlessTitle,
+      iconV2: 'gear',
+      breadcrumbStatus: 'hidden',
+      renderAs: 'panelOpener',
+      spaceBefore: null,
+      sideNavVersion: 'v2',
+      children: [
         {
           title: i18nStrings.stackManagement.access.title,
           breadcrumbStatus: 'hidden',
@@ -84,6 +112,17 @@ export const createStackManagementNavigationTree = (
               link: 'management:roles',
               breadcrumbStatus: 'hidden',
             },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.organization.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            // TODO: verify visibility of Users and Roles link
+            {
+              cloudLink: 'billingAndSub',
+            },
+            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'userAndRoles',
               title: i18nStrings.stackManagement.access.usersAndRoles,
@@ -91,7 +130,7 @@ export const createStackManagementNavigationTree = (
           ],
         },
         {
-          title: i18nStrings.stackManagement.alertsAndInsights.title,
+          title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           breadcrumbStatus: 'hidden',
           children: [
             {
@@ -145,6 +184,10 @@ export const createStackManagementNavigationTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
+              link: 'management:dataViews',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'management:spaces',
               breadcrumbStatus: 'hidden',
             },
@@ -164,11 +207,17 @@ export const createStackManagementNavigationTree = (
               link: 'management:tags',
               breadcrumbStatus: 'hidden',
             },
+            { link: 'maps' },
+            { link: 'visualize' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.data.title,
+          breadcrumbStatus: 'hidden',
+          children: [
             {
-              link: 'maps',
-            },
-            {
-              link: 'visualize',
+              breadcrumbStatus: 'hidden',
+              link: 'management:data_usage',
             },
           ],
         },
@@ -177,19 +226,12 @@ export const createStackManagementNavigationTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:settings',
               breadcrumbStatus: 'hidden',
+              link: 'management:settings',
             },
           ],
         },
       ],
-    },
-    {
-      id: `external-integrations`,
-      link: securityLink(SecurityPageName.configurationsIntegrations),
-    },
-    {
-      cloudLink: 'billingAndSub',
     },
   ],
 });
