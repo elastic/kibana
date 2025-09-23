@@ -103,4 +103,6 @@ export const loginWithUser = (user: User): void => {
 
 export const logout = (): void => {
   cy.visit(LOGOUT_URL);
+  // Wait for logout to complete before proceeding
+  cy.url().should('not.include', '/logout');
 };

@@ -8,8 +8,9 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexStatusResponse, IndexWarning } from '@kbn/reindex-service-plugin/common';
-import { ReindexStatus, ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import type { ApiService } from '../../../../lib/api';
 import { generateNewIndexName } from './index_settings';

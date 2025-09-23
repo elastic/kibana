@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ValueReportSettings } from './value_report_settings';
 import {
   DEFAULT_VALUE_REPORT_MINUTES,
@@ -15,7 +16,7 @@ import {
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
-import { useValueMetrics } from './use_value_metrics';
+import { useValueMetrics } from '../../hooks/use_value_metrics';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface Props {
@@ -34,8 +35,10 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
     }),
     [uiSettings]
   );
-
-  const { isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+  const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
     minutesPerAlert,
@@ -51,36 +54,73 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
     setHasAttackDiscoveries(hasAttackDiscoveries);
   }, [hasAttackDiscoveries, setHasAttackDiscoveries]);
 
-  // TODO loading state UI
-  return isLoading ? null : (
-    <>
+  return (
+    <div
+      css={css`
+        background: ${colors.backgroundBaseSubdued};
+        width: 100%;
+        min-height: 100%;
+        border-radius: 8px;
+      `}
+    >
       <ExecutiveSummary
+        attackAlertIds={attackAlertIds}
         analystHourlyRate={analystHourlyRate}
         hasAttackDiscoveries={hasAttackDiscoveries}
         minutesPerAlert={minutesPerAlert}
+        isLoading={isLoading}
         from={from}
         to={to}
         valueMetrics={valueMetrics}
         valueMetricsCompare={valueMetricsCompare}
       />
-      <EuiSpacer size="l" />
-
-      {hasAttackDiscoveries && (
-        <EuiFlexGrid columns={2} gutterSize="l">
-          <AlertProcessing valueMetrics={valueMetrics} valueMetricsCompare={valueMetricsCompare} />
+      <div
+        css={css`
+          padding: 0 16px;
+        `}
+      >
+        <EuiHorizontalRule />
+      </div>
+      {(isLoading || hasAttackDiscoveries) && (
+        <>
+          <AlertProcessing
+            attackAlertIds={attackAlertIds}
+            isLoading={isLoading}
+            valueMetrics={valueMetrics}
+            from={from}
+            to={to}
+          />
+          <div
+            css={css`
+              padding: 0 16px;
+            `}
+          >
+            <EuiHorizontalRule />
+          </div>
+        </>
+      )}
+      {(isLoading || hasAttackDiscoveries) && (
+        <>
           <CostSavingsTrend
             analystHourlyRate={analystHourlyRate}
             minutesPerAlert={minutesPerAlert}
             from={from}
             to={to}
+            isLoading={isLoading}
           />
-        </EuiFlexGrid>
+          <div
+            css={css`
+              padding: 0 16px;
+            `}
+          >
+            <EuiHorizontalRule />
+          </div>
+        </>
       )}
-      <EuiSpacer size="m" />
       <ValueReportSettings
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
       />
-    </>
+    </div>
   );
 };

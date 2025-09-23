@@ -71,7 +71,8 @@ export type ManagementId =
   | 'upgrade_assistant'
   | 'users'
   | 'watcher'
-  | 'genAiSettings';
+  | 'genAiSettings'
+  | 'agentBuilder';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 

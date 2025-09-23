@@ -190,6 +190,9 @@ export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReport
 /** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
 export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
 
+/** This Kibana Advanced Setting sets a default title for the AI value report page */
+export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;

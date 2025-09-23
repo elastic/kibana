@@ -13,6 +13,8 @@ export type { OptionsListSearchTechnique } from './suggestions_searching';
 export type { OptionsListSortingType } from './suggestions_sorting';
 export type {
   OptionsListControlState,
+  OptionsListESQLControlState,
+  OptionsListDSLControlState,
   OptionsListDisplaySettings,
   OptionsListFailureResponse,
   OptionsListRequest,

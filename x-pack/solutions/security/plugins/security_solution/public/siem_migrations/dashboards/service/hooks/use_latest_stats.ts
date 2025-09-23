@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-// import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-// import { useLatestStats as useLatestStatsBase } from '../../../common/service';
-import type { DashboardMigrationStats } from '../../types';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useLatestStats as useLatestStatsBase } from '../../../common/service';
 
 export const useLatestStats = () => {
-  // TODO: implement this hoo once migration service is available
+  const { siemMigrations } = useKibana().services;
 
-  // const { siemMigrations } = useKibana().services;
+  const result = useLatestStatsBase(siemMigrations.dashboards);
 
-  // const result = useLatestStatsBase(siemMigrations.dashboards);
-
-  const data: DashboardMigrationStats[] = [];
-
-  return { data, isLoading: false, refreshStats: () => {} };
+  return result;
 };
