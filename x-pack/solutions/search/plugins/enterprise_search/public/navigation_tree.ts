@@ -20,6 +20,9 @@ import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 
+import playgroundIcon from './assets/images/playground.svg';
+import agentsIcon from './assets/images/robot.svg';
+
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
@@ -124,6 +127,11 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  iconV2: agentsIcon,
+                  link: 'agent_builder',
+                  title: AGENTS_TITLE,
+                },
+                {
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate(
@@ -137,17 +145,6 @@ export const getNavigationTreeDefinition = ({
                   badgeTypeV2: 'techPreview' as const,
                   link: 'workflows',
                   withBadge: true,
-                },
-                {
-                  link: 'agent_builder',
-                  sideNavVersion: 'v1',
-                  title: AGENTS_TITLE,
-                },
-                {
-                  iconV2: 'comment',
-                  link: 'agent_builder',
-                  sideNavVersion: 'v2',
-                  title: AGENTS_TITLE,
                 },
                 {
                   children: [
@@ -164,7 +161,7 @@ export const getNavigationTreeDefinition = ({
                     },
                     {
                       breadcrumbStatus: 'hidden',
-                      iconV2: 'broom' /* TODO: review icon */,
+                      iconV2: playgroundIcon,
                       link: 'searchPlayground',
                     },
                     {
