@@ -95,12 +95,15 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
+    "@kbn/cases-ai",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
-    "@kbn/cases-ai",
     "@kbn/core-security-server-mocks",
     "@kbn/core-saved-objects-server-mocks"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
