@@ -125,7 +125,7 @@
     "@elastic/ecs": "^9.0.0",
     "@elastic/elasticsearch": "9.1.1",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "106.6.0",
+    "@elastic/eui": "file:./elastic_eui_106.6.0_feat_flyout_system.tgz",
     "@elastic/eui-theme-borealis": "3.4.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",

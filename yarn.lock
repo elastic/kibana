@@ -2261,10 +2261,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.6.0":
+"@elastic/eui@file:./elastic_eui_106.6.0_feat_flyout_system.tgz":
   version "106.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.6.0.tgz#95612842ce1bece58e4fd8f74ca36e565a007191"
-  integrity sha512-4dQkpMl+pG5li+1DnCmb6Mc5ymLj/W63va25KfafFNS2Yp8/pLA0bdMveW9cFsUbVmBStUMo1RU/KNrceBmGoQ==
+  resolved "file:./elastic_eui_106.6.0_feat_flyout_system.tgz#30b1cd4b2262c3d44a0be57efecb66079317bba8"
   dependencies:
     "@elastic/eui-theme-common" "4.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
