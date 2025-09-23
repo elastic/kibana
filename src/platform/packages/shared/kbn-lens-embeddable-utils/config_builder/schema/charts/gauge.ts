@@ -31,7 +31,6 @@ import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
-
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
     schema.oneOf([
