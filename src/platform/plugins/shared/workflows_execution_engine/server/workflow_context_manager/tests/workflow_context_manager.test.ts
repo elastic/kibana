@@ -71,7 +71,7 @@ describe('WorkflowContextManager', () => {
     };
   }
 
-  it('should have consts from workflow', () => {
+  describe('consts', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -84,16 +84,44 @@ describe('WorkflowContextManager', () => {
       triggers: [],
       steps: [],
     };
-    const { underTest } = createTestContainer(workflow);
+    let testContainer: ReturnType<typeof createTestContainer>;
 
-    const stepContext = underTest.getContext();
-    expect(stepContext.consts).toEqual({
-      CONST_1: 'value1',
-      CONST_2: 42,
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+    });
+
+    it('should have consts from workflow', () => {
+      const stepContext = testContainer.underTest.getContext();
+      expect(stepContext.consts).toEqual({
+        CONST_1: 'value1',
+        CONST_2: 42,
+      });
+    });
+
+    it('should override consts with mocked data', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          stepContextMock: {
+            consts: {
+              CONST_2: 900,
+              NEW_CONST: 'new const',
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.consts).toEqual({
+        CONST_1: 'value1',
+        CONST_2: 900,
+        NEW_CONST: 'new const',
+      });
     });
   });
 
-  it('should have event from execution context', () => {
+  describe('event', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -103,26 +131,55 @@ describe('WorkflowContextManager', () => {
       triggers: [],
       steps: [],
     };
+    let testContainer: ReturnType<typeof createTestContainer>;
 
-    const { underTest, workflowExecutionState } = createTestContainer(workflow);
-    workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-      scopeStack: [] as StackFrame[],
-      workflowDefinition: workflow,
-      context: {
-        event: {
-          name: 'alert',
-          severity: 'high',
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+    });
+
+    it('should have event from execution context', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+        context: {
+          event: {
+            name: 'alert',
+            severity: 'high',
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+      const stepContext = testContainer.underTest.getContext();
+      expect(stepContext.event).toEqual({
+        name: 'alert',
+        severity: 'high',
+      });
+    });
+
+    it('should override event context with mocked data', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          stepContextMock: {
+            event: {
+              alert: {
+                name: 'Vulnerability',
+              },
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.event).toEqual({
+        alert: {
+          name: 'Vulnerability',
         },
-      } as Record<string, any>,
-    } as EsWorkflowExecution);
-    const stepContext = underTest.getContext();
-    expect(stepContext.event).toEqual({
-      name: 'alert',
-      severity: 'high',
+      });
     });
   });
 
-  it('should have inputs from execution context', () => {
+  describe('inputs', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -140,20 +197,52 @@ describe('WorkflowContextManager', () => {
         },
       ],
     };
+    let testContainer: ReturnType<typeof createTestContainer>;
 
-    const { underTest, workflowExecutionState } = createTestContainer(workflow);
-    workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-      scopeStack: [] as StackFrame[],
-      workflowDefinition: workflow,
-      context: {
-        inputs: {
-          name: 'test',
-        },
-      } as Record<string, any>,
-    } as EsWorkflowExecution);
-    const stepContext = underTest.getContext();
-    expect(stepContext.inputs).toEqual({
-      name: 'test',
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+    });
+
+    it('should have inputs from execution context', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+        context: {
+          inputs: {
+            name: 'test',
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+      const stepContext = testContainer.underTest.getContext();
+      expect(stepContext.inputs).toEqual({
+        name: 'test',
+      });
+    });
+
+    it('should override inputs from mock', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          inputs: {
+            remainingKey: 'some string',
+            overridenKey: true,
+          },
+          stepContextMock: {
+            inputs: {
+              overridenKey: false,
+              newKey: 123,
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.inputs).toEqual({
+        remainingKey: 'some string',
+        overridenKey: false,
+        newKey: 123,
+      });
     });
   });
 
@@ -211,7 +300,7 @@ describe('WorkflowContextManager', () => {
       });
     });
 
-    it('should enrich workflow context with mocked data', () => {
+    it('should override workflow context with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
         workflowId: 'fake-workflow-id',

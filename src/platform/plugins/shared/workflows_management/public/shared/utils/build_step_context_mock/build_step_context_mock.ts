@@ -18,7 +18,7 @@ import type { StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
-export interface StepContextMockData {
+export interface contextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodTypeAny;
 }
@@ -41,8 +41,8 @@ function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
   return z.any();
 }
 
-export function buildStepContextMock(workflowGraph: WorkflowGraph): StepContextMockData {
-  const stepContextMock = {} as Record<string, any>;
+export function buildcontextOverride(workflowGraph: WorkflowGraph): contextOverrideData {
+  const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
   const allInputs = Object.values(inputsInGraph).flat();
   const allInputsFiltered = allInputs.filter((input) =>
@@ -53,7 +53,7 @@ export function buildStepContextMock(workflowGraph: WorkflowGraph): StepContextM
   const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
 
   inputsParsed.forEach((pathParts) => {
-    let current = stepContextMock;
+    let current = contextOverride;
 
     for (let i = 0; i < pathParts.length; i++) {
       const part = pathParts[i];
@@ -72,10 +72,10 @@ export function buildStepContextMock(workflowGraph: WorkflowGraph): StepContextM
     }
   });
 
-  const schema = buildStepContextSchemaFromObject(stepContextMock);
+  const schema = buildStepContextSchemaFromObject(contextOverride);
 
   return {
-    stepContext: stepContextMock,
+    stepContext: contextOverride,
     schema,
   };
 }

@@ -548,7 +548,7 @@ export function defineRoutes(
       validate: {
         body: schema.object({
           stepId: schema.string(),
-          stepContextMock: schema.recordOf(schema.string(), schema.any()),
+          contextOverride: schema.recordOf(schema.string(), schema.any()),
           workflowYaml: schema.string(),
         }),
       },
@@ -560,7 +560,7 @@ export function defineRoutes(
         const workflowExecutionId = await api.testStep(
           request.body.workflowYaml,
           request.body.stepId,
-          request.body.stepContextMock,
+          request.body.contextOverride,
           spaceId
         );
 

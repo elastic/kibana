@@ -8,9 +8,9 @@
  */
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { buildStepContextMock } from './build_step_context_mock';
+import { buildcontextOverride } from './build_step_context_mock';
 
-describe('buildStepContextMock', () => {
+describe('buildcontextOverride', () => {
   describe('with simple workflow', () => {
     it('should return empty context when no inputs are found in graph', () => {
       const simpleWorkflow = {
@@ -35,7 +35,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(simpleWorkflow);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({});
       expect(result.schema).toBeDefined();
@@ -71,7 +71,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithStepReferences);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -116,7 +116,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithNestedReferences);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -171,7 +171,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeach);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       // The foreach workflow might not extract inputs as expected,
       // let's just check that it handles it gracefully
@@ -203,7 +203,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeachUsage);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         foreach: {
@@ -240,7 +240,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithExecutionRefs);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         execution: {
@@ -279,7 +279,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMixedRefs);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -332,7 +332,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       // The schema should successfully parse the mock data
       expect(() => result.schema.parse(result.stepContext)).not.toThrow();
@@ -361,7 +361,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -393,7 +393,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(emptyWorkflow);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({});
       expect(result.schema).toBeDefined();
@@ -425,7 +425,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithDuplicates);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -462,7 +462,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithDeepNesting);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -509,7 +509,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMultipleArrays);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {
@@ -556,7 +556,7 @@ describe('buildStepContextMock', () => {
       };
 
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithMixedNotation);
-      const result = buildStepContextMock(workflowGraph);
+      const result = buildcontextOverride(workflowGraph);
 
       expect(result.stepContext).toEqual({
         steps: {

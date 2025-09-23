@@ -233,7 +233,7 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  stepContextMock: z.record(z.any()).optional(),
+  contextOverride: z.record(z.any()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 

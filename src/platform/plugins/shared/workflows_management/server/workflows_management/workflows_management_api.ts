@@ -231,7 +231,7 @@ export class WorkflowsManagementApi {
   public async testStep(
     workflowYaml: string,
     stepId: string,
-    stepContextMock: Record<string, any>,
+    contextOverride: Record<string, any>,
     spaceId: string
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -253,7 +253,7 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      stepContextMock
+      contextOverride
     );
     return executeResponse.workflowExecutionId;
   }

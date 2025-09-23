@@ -35,7 +35,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflowStep(
     workflow: WorkflowExecutionEngineModel,
     stepId: string,
-    stepContextMock: Record<string, any>
+    contextOverride: Record<string, any>
   ): Promise<ExecuteWorkflowStepResponse>;
 
   cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;

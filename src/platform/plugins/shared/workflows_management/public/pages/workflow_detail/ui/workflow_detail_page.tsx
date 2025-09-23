@@ -19,7 +19,7 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import type { contextOverrideData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 import { SingleStepExecution } from '../../../features/workflow_execution_detail/ui/single_step_execution_detail';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -32,7 +32,7 @@ import { WorkflowExecutionList } from '../../../features/workflow_execution_list
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
-import { buildStepContextMockForStep } from './build_step_context_mock_for_step';
+import { buildcontextOverrideForStep } from './build_step_context_mock_for_step';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -130,7 +130,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [stepContextMock, setStepContextMock] = useState<StepContextMockData | null>(null);
+  const [contextOverride, setcontextOverride] = useState<contextOverrideData | null>(null);
   const [testSingleStepExecutionId, setTestSingleStepExecutionId] = useState<string | null>(null);
 
   const handleRunClick = () => {
@@ -231,14 +231,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (params.actionType === 'run') {
-      const stepContextMockData = buildStepContextMockForStep(workflowYaml, params.stepId);
+      const contextOverrideData = buildcontextOverrideForStep(workflowYaml, params.stepId);
 
-      if (!Object.keys(stepContextMockData.stepContext).length) {
+      if (!Object.keys(contextOverrideData.stepContext).length) {
         submitStepRun(params.stepId, {});
         return;
       }
 
-      setStepContextMock(stepContextMockData);
+      setcontextOverride(contextOverrideData);
       setTestStepId(params.stepId);
     }
   };
@@ -247,11 +247,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     const response = await runIndividualStep.mutateAsync({
       stepId,
       workflowYaml,
-      stepContextMock: mock,
+      contextOverride: mock,
     });
     setTestSingleStepExecutionId(response.workflowExecutionId);
     setTestStepId(null);
-    setStepContextMock(null);
+    setcontextOverride(null);
   };
 
   if (workflowError) {
@@ -363,13 +363,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
-      {testStepId && stepContextMock && (
+      {testStepId && contextOverride && (
         <TestStepModal
-          initialStepContextMock={stepContextMock}
+          initialcontextOverride={contextOverride}
           onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
           onClose={() => {
             setTestStepId(null);
-            setStepContextMock(null);
+            setcontextOverride(null);
           }}
         />
       )}

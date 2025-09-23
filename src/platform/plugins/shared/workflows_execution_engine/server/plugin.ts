@@ -285,7 +285,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflowStep = async (
       workflow: WorkflowExecutionEngineModel,
       stepId: string,
-      stepContextMock: Record<string, any>
+      contextOverride: Record<string, any>
     ): Promise<ExecuteWorkflowStepResponse> => {
       const workflowCreatedAt = new Date();
 
@@ -293,7 +293,7 @@ export class WorkflowsExecutionEnginePlugin
       const esClient = core.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const context: Record<string, any> = {
-        stepContextMock,
+        contextOverride,
       };
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'

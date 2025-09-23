@@ -141,25 +141,40 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
-    const stepContextMock: StepContext | undefined =
-      this.workflowExecutionState.getWorkflowExecution().context?.stepContextMock;
+    const contextOverride: StepContext | undefined =
+      this.workflowExecutionState.getWorkflowExecution().context?.contextOverride;
 
-    if (stepContextMock) {
+    if (contextOverride) {
+      stepContext.consts = {
+        ...stepContext.consts,
+        ...(contextOverride.consts || {}),
+      };
+
+      stepContext.inputs = {
+        ...stepContext.inputs,
+        ...(contextOverride.inputs || {}),
+      };
+
+      stepContext.event = {
+        ...stepContext.event,
+        ...(contextOverride.event || {}),
+      };
+
       stepContext.execution = {
         ...stepContext.execution,
-        ...(stepContextMock.execution || {}),
+        ...(contextOverride.execution || {}),
       };
 
       stepContext.workflow = {
         ...stepContext.workflow,
-        ...(stepContextMock.workflow || {}),
+        ...(contextOverride.workflow || {}),
       };
 
       if (!stepContext.foreach) {
-        stepContext.foreach = stepContextMock.foreach;
+        stepContext.foreach = contextOverride.foreach;
       }
 
-      Object.entries(stepContextMock.steps || {}).forEach(([stepId, stepData]) => {
+      Object.entries(contextOverride.steps || {}).forEach(([stepId, stepData]) => {
         if (!stepContext.steps[stepId]) {
           stepContext.steps[stepId] = stepData;
         }

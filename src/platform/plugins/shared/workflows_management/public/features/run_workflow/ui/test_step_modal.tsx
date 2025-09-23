@@ -25,31 +25,31 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { StepContextMockData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
+import type { contextOverrideData } from '../../../shared/utils/build_step_context_mock/build_step_context_mock';
 
 export function TestStepModal({
-  initialStepContextMock,
+  initialcontextOverride,
   onClose,
   onSubmit,
 }: {
-  initialStepContextMock: StepContextMockData;
+  initialcontextOverride: contextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
   const [overflowWidgetsDomNode, setOverflowWidgetsDomNode] = useState<HTMLDivElement | null>(null);
   const styles = useMemoCss(componentStyles);
   const [inputsJson, setInputsJson] = React.useState<string>(
-    JSON.stringify(initialStepContextMock.stepContext, null, 2)
+    JSON.stringify(initialcontextOverride.stepContext, null, 2)
   );
   const [isJsonValid, setIsJsonValid] = React.useState<boolean>(true);
   const modalTitleId = useGeneratedHtmlId();
   const id = 'json-editor-schema';
 
   const jsonSchema = useMemo(() => {
-    return zodToJsonSchema(initialStepContextMock.schema, {
+    return zodToJsonSchema(initialcontextOverride.schema, {
       $refStrategy: 'none',
     });
-  }, [initialStepContextMock.schema]);
+  }, [initialcontextOverride.schema]);
 
   const modelUri = useMemo(() => `inmemory://models/${id}.json`, [id]);
   const schemaUri = useMemo(() => `inmemory://schemas/${id}`, [id]);
@@ -92,7 +92,7 @@ export function TestStepModal({
 
         // Get current editor content
         const text =
-          editor.getValue() || JSON.stringify(initialStepContextMock.stepContext, null, 2);
+          editor.getValue() || JSON.stringify(initialcontextOverride.stepContext, null, 2);
 
         // Create model with the specific URI that matches our schema fileMatch
         const uri = monaco.Uri.parse(modelUri);
@@ -106,10 +106,10 @@ export function TestStepModal({
 
       // Optional: seed example if editor is empty
       if (!editor.getValue()?.trim()) {
-        editor.setValue(JSON.stringify(initialStepContextMock.stepContext, null, 2));
+        editor.setValue(JSON.stringify(initialcontextOverride.stepContext, null, 2));
       }
     },
-    [initialStepContextMock.stepContext, jsonSchema, modelUri, schemaUri]
+    [initialcontextOverride.stepContext, jsonSchema, modelUri, schemaUri]
   );
 
   useEffect(() => {
