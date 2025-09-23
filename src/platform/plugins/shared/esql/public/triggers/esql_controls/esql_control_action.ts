@@ -104,6 +104,7 @@ export class CreateESQLControlAction implements Action<Context> {
           cursorPosition,
           initialState,
           closeFlyout,
+          currentApp,
         });
       },
       flyoutProps: {
