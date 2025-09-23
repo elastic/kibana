@@ -83,5 +83,6 @@
     "@kbn/data-quality",
     "@kbn/core-notifications-browser",
     "@kbn/io-ts-utils",
+    "@kbn/storage-adapter",
   ]
 }
