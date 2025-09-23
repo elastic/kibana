@@ -10,9 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingLogo,
   EuiProgress,
-  EuiSpacer,
+  EuiLoadingElastic,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -52,8 +52,8 @@ export function PreviewPanel() {
   return (
     <>
       <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
-          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" wrap>
+          <EuiFlexGroup component="span" gutterSize="s">
             <EuiIcon type="inspect" />
             <strong>
               {i18n.translate('xpack.streams.streamDetail.preview.header', {
@@ -64,7 +64,6 @@ export function PreviewPanel() {
           <StreamsAppSearchBar showDatePicker />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer size="s" />
       <EuiFlexItem grow>{content}</EuiFlexItem>
     </>
   );
@@ -73,7 +72,7 @@ export function PreviewPanel() {
 const EditingPanel = () => (
   <EuiEmptyPrompt
     icon={<AssetImage />}
-    titleSize="s"
+    titleSize="xxs"
     title={
       <h2>
         {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
@@ -83,18 +82,20 @@ const EditingPanel = () => (
     }
     body={
       <>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
-            defaultMessage:
-              'Once you save your changes, the results of your conditions will appear here.',
-          })}
-        </p>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
-            defaultMessage:
-              'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
-          })}
-        </p>
+        <EuiText size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
+              defaultMessage:
+                'Once you save your changes, the results of your conditions will appear here.',
+            })}
+          </p>
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
+              defaultMessage:
+                'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
+            })}
+          </p>
+        </EuiText>
       </>
     }
   />
@@ -148,21 +149,9 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewTitle', {
-              defaultMessage: 'Loading routing preview',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewBody', {
-          defaultMessage:
-            'This may take a few moments depending on the complexity of the conditions and the amount of data',
-        })}
-      />
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingElastic size="xl" />
+      </EuiFlexGroup>
     );
   } else if (documentsError) {
     content = (
@@ -184,7 +173,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
-        titleSize="s"
+        titleSize="xxs"
         title={
           <h2>
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {
@@ -223,12 +212,14 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions?: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        <DocumentMatchFilterControls
-          initialFilter={samplesSnapshot.context.documentMatchFilter}
-          onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
-          isDisabled={!!documentsError || !condition}
-        />
+        {!isNaN(matchedDocumentPercentage) && (
+          <DocumentMatchFilterControls
+            initialFilter={samplesSnapshot.context.documentMatchFilter}
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
+            isDisabled={!!documentsError || !condition}
+          />
+        )}
         {content}
       </EuiFlexGroup>
     </>

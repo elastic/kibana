@@ -170,7 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('can resume after reindexing was stopped right after creating the new index', async () => {
+    // This test no longer works because the reindex api will error if you're trying to reindex into an existing index.
+    // Need to find another method of testing this.
+    it.skip('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // This new index is the new soon to be created reindexed index. We create it

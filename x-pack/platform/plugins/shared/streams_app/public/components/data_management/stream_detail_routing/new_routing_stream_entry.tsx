@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { RoutingConditionEditor } from '../condition_editor';
@@ -15,6 +15,7 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import { StreamNameFormRow } from './stream_name_form_row';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -32,21 +33,11 @@ export function NewRoutingStreamEntry() {
     <div ref={panelRef}>
       <EuiPanel hasShadow={false} hasBorder paddingSize="s">
         <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.streams.streamDetailRouting.name', {
-              defaultMessage: 'Stream name',
-            })}
-          >
-            <EuiFieldText
-              data-test-subj="streamsAppRoutingStreamEntryNameField"
-              value={currentRule.destination}
-              fullWidth
-              autoFocus
-              compressed
-              onChange={(e) => changeRule({ destination: e.target.value })}
-            />
-          </EuiFormRow>
+          <StreamNameFormRow
+            value={currentRule.destination}
+            onChange={(value) => changeRule({ destination: value })}
+            autoFocus
+          />
           <EuiFlexGroup gutterSize="s" direction="column">
             <RoutingConditionEditor
               condition={currentRule.where}
