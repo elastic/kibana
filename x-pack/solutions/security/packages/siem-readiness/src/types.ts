@@ -7,6 +7,6 @@
 
 export interface SiemReadinessTask {
   task_id: string;
-  status: 'complete' | 'incomplete';
-  meta: Record<string, unknown>;
+  status: 'completed' | 'incomplete';
+  meta?: Record<string, unknown>;
 }

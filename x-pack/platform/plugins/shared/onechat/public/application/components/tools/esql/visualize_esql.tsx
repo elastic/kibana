@@ -19,6 +19,8 @@ import useAsync from 'react-use/lib/useAsync';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 
+const VISUALIZATION_HEIGHT = 240;
+
 interface VisualizeESQLProps {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
@@ -104,16 +106,20 @@ export function VisualizeESQL({
     preferredChartType,
   ]);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
-    return <EuiLoadingSpinner />;
-  }
+  const isLoading = !lensHelpersAsync.value || !dataViewAsync.value || !lensInput;
 
   return (
-    <lens.EmbeddableComponent
-      {...lensInput}
-      style={{
-        height: 240,
-      }}
-    />
+    <div style={{ height: VISUALIZATION_HEIGHT }}>
+      {isLoading ? (
+        <EuiLoadingSpinner />
+      ) : (
+        <lens.EmbeddableComponent
+          {...lensInput}
+          style={{
+            height: VISUALIZATION_HEIGHT,
+          }}
+        />
+      )}
+    </div>
   );
 }

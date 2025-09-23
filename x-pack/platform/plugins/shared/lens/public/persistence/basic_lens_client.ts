@@ -59,5 +59,9 @@ export function getLensBasicClient<Attr extends SerializableAttributes = Seriali
         },
       } satisfies Awaited<ReturnType<BasicVisualizationClient<'lens', Attr>['update']>>;
     },
+
+    delete: async (id: string) => {
+      return lensClient.delete(id);
+    },
   };
 }

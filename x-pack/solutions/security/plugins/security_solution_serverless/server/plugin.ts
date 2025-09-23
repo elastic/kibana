@@ -102,29 +102,26 @@ export class SecuritySolutionServerlessPlugin
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(projectSettings);
 
-    // use metering check which verifies AI4SOC is enabled
-    if (ai4SocMeteringService.shouldMeter(this.config)) {
-      // Serverless Advanced Settings setup
-      coreSetup
-        .getStartServices()
-        .then(async ([_, depsStart]) => {
-          try {
-            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-              (connector: Connector) => isSupportedConnector(connector)
-            );
-            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
-            coreSetup.uiSettings.register({
-              ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
-              ...getDefaultValueReportSettings(),
-            });
-          } catch (error) {
-            this.logger.error(`Error registering default AI connector: ${error}`);
-          }
-        })
-        .catch(() => {}); // it shouldn't reject, but just in case
-    }
+    // Serverless Advanced Settings setup
+    coreSetup
+      .getStartServices()
+      .then(async ([_, depsStart]) => {
+        try {
+          const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
+          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
+          const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
+            (connector: Connector) => isSupportedConnector(connector)
+          );
+          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+          coreSetup.uiSettings.register({
+            ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
+            ...getDefaultValueReportSettings(),
+          });
+        } catch (error) {
+          this.logger.error(`Error registering default AI connector: ${error}`);
+        }
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
