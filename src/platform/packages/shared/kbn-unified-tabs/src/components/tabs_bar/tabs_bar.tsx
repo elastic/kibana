@@ -19,7 +19,6 @@ import React, {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
-import type { TabsEventPayload } from '@kbn/discover-plugin/public';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -33,7 +32,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices } from '../../types';
+import type { TabItem, TabsServices, TabsEBTPayload } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
@@ -63,7 +62,7 @@ export type TabsBarProps = Pick<
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
-  onEvent: (eventName: string, payload?: TabsEventPayload) => void;
+  onEvent: (eventName: string, payload?: TabsEBTPayload) => void;
 };
 
 export interface TabsBarApi {

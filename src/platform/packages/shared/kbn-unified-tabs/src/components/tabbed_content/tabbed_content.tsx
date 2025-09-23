@@ -11,7 +11,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { escapeRegExp, debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { TabsEventPayload } from '@kbn/discover-plugin/public';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
@@ -25,7 +24,7 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabsServices, TabPreviewData } from '../../types';
+import type { TabItem, TabsServices, TabPreviewData, TabsEBTPayload } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 
@@ -40,7 +39,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
-  onEvent: (eventName: string, payload?: TabsEventPayload) => void;
+  onEvent: (eventName: string, payload?: TabsEBTPayload) => void;
 }
 
 export interface TabbedContentState {
@@ -104,7 +103,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const debouncedTabSwitched = useMemo(
     () =>
       debounce(
-        (payload: TabsEventPayload) => onEvent('tabSwitched', payload),
+        (payload: TabsEBTPayload) => onEvent('tabSwitched', payload),
         TAB_SWITCH_DEBOUNCE_MS
       ),
     [onEvent]

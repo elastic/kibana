@@ -60,3 +60,5 @@ export interface TabsServices {
     chrome?: CoreStart['chrome'];
   };
 }
+
+export type TabsEBTPayload = Record<string, string | number>;
