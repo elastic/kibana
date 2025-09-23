@@ -51,7 +51,7 @@ export const MonitorSummary = () => {
       <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true} direction={isMediumDevice ? 'column' : 'row'}>
-        <EuiFlexItem grow={4} css={{ minWidth: 260 }}>
+        <EuiFlexItem grow={false} css={{ minWidth: 260 }}>
           <MonitorDetailsPanelContainer />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
