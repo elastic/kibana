@@ -11,7 +11,9 @@ import type {
   ElasticsearchServiceStart,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
+import { getCurrentSpace } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
 import {
@@ -29,6 +31,7 @@ export interface AgentsServiceSetupDeps {
 
 export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
+  spaces?: SpacesPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
   toolsService: ToolsServiceStart;
@@ -59,7 +62,7 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, toolsService } = startDeps;
+    const { getRunner, security, elasticsearch, spaces, toolsService } = startDeps;
 
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
@@ -70,10 +73,12 @@ export class AgentsService {
     });
 
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+      const space = getCurrentSpace({ request, spaces });
       return createAgentRegistry({
         request,
-        builtinProvider: await builtinProviderFn({ request }),
-        persistedProvider: await persistedProviderFn({ request }),
+        space,
+        builtinProvider: await builtinProviderFn({ request, space }),
+        persistedProvider: await persistedProviderFn({ request, space }),
       });
     };
 
