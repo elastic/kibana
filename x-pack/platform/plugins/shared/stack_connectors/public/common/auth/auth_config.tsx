@@ -86,10 +86,14 @@ export const AuthConfig: FunctionComponent<Props> = ({
 
     const formData = getFormData();
 
+    const defaultConfigHeader = [{ key: '', value: '', type: 'config' }];
+
     const currentHeaders: Array<InternalHeader> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
 
-    const mergedHeaders = [...configHeaders, ...secretHeaders];
+    const mergedHeaders = hasHeaders
+      ? [...(configHeaders.length > 0 ? configHeaders : defaultConfigHeader), ...secretHeaders]
+      : [];
 
     if (!isEqual(currentHeaders, mergedHeaders)) {
       updateFieldValues(
@@ -103,7 +107,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         { runDeserializer: false }
       );
     }
-  }, [connectorId, getFormData, secretHeaders, updateFieldValues]);
+  }, [connectorId, getFormData, secretHeaders, updateFieldValues, hasHeaders]);
 
   const options = [
     {

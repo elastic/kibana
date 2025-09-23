@@ -16,7 +16,7 @@ import type {
 export interface InternalHeader {
   key: string;
   value: string;
-  type: 'config' | 'secret';
+  type: string;
 }
 export type HasAuth = TypeOf<typeof hasAuthSchema>;
 export type AuthTypeName = TypeOf<typeof authTypeSchema>;
