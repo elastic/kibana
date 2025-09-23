@@ -111,6 +111,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelect = useCallback(
     async (item: TabItem) => {
+      tabsBarApi.current?.moveFocusToNextSelectedItem(item);
       changeState((prevState) => {
         const prevItems = prevState.items;
         const nextState = selectTab(prevState, item);

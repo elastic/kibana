@@ -264,4 +264,120 @@ describe('TabbedContent', () => {
       expect(tab).toHaveFocus();
     });
   });
+
+  it('can switch to a different tab and sends tabSwitched event', async () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const secondTab = initialItems[1];
+    const onChanged = jest.fn();
+    const onEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        onChanged={onChanged}
+        onEvent={onEvent}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
+    await waitFor(() => {
+      expect(onEvent).toHaveBeenCalledWith('tabSwitched', {
+        tabId: secondTab.id,
+        fromIndex: 0,
+        toIndex: 1,
+        totalTabsOpen: 2,
+      });
+      const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`);
+      expect(tab.getAttribute('aria-selected')).toBe('true');
+      expect(tab).toHaveFocus();
+    });
+  });
+
+  it('can close other tabs and sends tabClosedOthers event', async () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+      { id: 'tab3', label: 'Tab 3' },
+    ];
+    const firstTab = initialItems[0];
+    const onChanged = jest.fn();
+    const onEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={firstTab.id}
+        onChanged={onChanged}
+        onEvent={onEvent}
+      />
+    );
+
+    expect(screen.getByText(`Content for tab: ${firstTab.label}`)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`unifiedTabs_selectTabBtn_${firstTab.id}`).getAttribute('aria-selected')
+    ).toBe('true');
+
+    await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`));
+    await waitFor(() => {
+      expect(screen.getByTestId('unifiedTabs_tabMenuItem_closeOtherTabs')).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_closeOtherTabs'));
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [firstTab],
+        selectedItem: firstTab,
+      });
+      expect(onEvent).toHaveBeenCalledWith('tabClosedOthers', {
+        tabId: firstTab.id,
+        totalTabsOpen: 3,
+        closedTabsCount: 2,
+      });
+    });
+  });
+
+  it('can close tabs to the right and sends tabClosedToTheRight event', async () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+      { id: 'tab3', label: 'Tab 3' },
+      { id: 'tab4', label: 'Tab 4' },
+    ];
+    const firstTab = initialItems[0];
+    const secondTab = initialItems[1];
+    const onChanged = jest.fn();
+    const onEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={secondTab.id}
+        onChanged={onChanged}
+        onEvent={onEvent}
+      />
+    );
+
+    await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${secondTab.id}`));
+    await waitFor(() => {
+      expect(screen.getByTestId('unifiedTabs_tabMenuItem_closeTabsToTheRight')).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_closeTabsToTheRight'));
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [firstTab, secondTab],
+        selectedItem: secondTab,
+      });
+      expect(onEvent).toHaveBeenCalledWith('tabClosedToTheRight', {
+        tabId: secondTab.id,
+        totalTabsOpen: 4,
+        closedTabsCount: 2,
+        remainingTabsCount: 2,
+      });
+    });
+  });
 });
