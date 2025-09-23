@@ -2252,9 +2252,9 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@file:./package-3.3.2-20250916-204800.tgz":
+"@elastic/eui-theme-borealis@file:./package-3.3.2-20250917-134132.tgz":
   version "3.3.2"
-  resolved "file:./package-3.3.2-20250916-204800.tgz#1ed4a54d397811a6cacc85e415361358648b48f8"
+  resolved "file:./package-3.3.2-20250917-134132.tgz#767ffecea03d04b5242ccfeeca131ae7e1c656a3"
 
 "@elastic/eui-theme-common@4.0.0":
   version "4.0.0"
@@ -2265,17 +2265,17 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui-theme-common@file:./package-4.0.0-20250916-204800.tgz":
+"@elastic/eui-theme-common@file:./package-4.0.0-20250917-134132.tgz":
   version "4.0.0"
-  resolved "file:./package-4.0.0-20250916-204800.tgz#733d568d72c7900673e3ce4bcd3a3967bb0c3c60"
+  resolved "file:./package-4.0.0-20250917-134132.tgz#0aa646749f9ac3f6dd74eabbe60d7d1d245d8c2c"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./package-106.5.0-20250916-204800.tgz":
+"@elastic/eui@file:./package-106.5.0-20250917-134132.tgz":
   version "106.5.0"
-  resolved "file:./package-106.5.0-20250916-204800.tgz#585d93e155eb64355af9c233066013d16aaf68a2"
+  resolved "file:./package-106.5.0-20250917-134132.tgz#fa2d5ca6606fc60cb0c27bd6c2579b541710309f"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
