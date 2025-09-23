@@ -30,6 +30,7 @@ import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
+  GenericMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import {
@@ -412,15 +413,6 @@ export const WorkflowYAMLEditor = ({
         try {
           const value = model.getValue();
           const parsedDocument = YAML.parseDocument(value ?? '');
-
-          if (isTypingChange) {
-            // If it's because of typing - skip clearing decorations entirely
-            // Let the decoration hooks handle updates naturally
-          } else {
-            // If not typing - continue with the original logic (always clear)
-            clearAllDecorations();
-          }
-
           setYamlDocument(parsedDocument);
           yamlDocumentRef.current = parsedDocument;
         } catch (error) {
@@ -520,6 +512,9 @@ export const WorkflowYAMLEditor = ({
         kibanaHost: kibanaHost || window.location.origin,
       });
       registerMonacoConnectorHandler(kibanaHandler);
+
+      const genericHandler = new GenericMonacoConnectorHandler();
+      registerMonacoConnectorHandler(genericHandler);
 
       // Create unified providers
       const providerConfig = {
