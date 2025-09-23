@@ -18,32 +18,36 @@ import type {
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
+import { getFetchContextFilters } from '../utils';
 
 export function minMax$({
   controlFetch$,
   dataViews$,
   fieldName$,
+  useGlobalFilters$,
   setIsLoading,
 }: {
   controlFetch$: Observable<FetchContext>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
+  useGlobalFilters$: PublishingSubject<boolean | undefined>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
+  return combineLatest([controlFetch$, dataViews$, fieldName$, useGlobalFilters$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, dataViews, fieldName]) => {
+    switchMap(async ([controlFetchContext, dataViews, fieldName, useGlobalFilters]) => {
       const dataView = dataViews?.[0];
       const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
       if (!dataView || !dataViewField) {
         return { max: undefined, min: undefined };
       }
+      controlFetchContext.filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);
 
       try {
         setIsLoading(true);

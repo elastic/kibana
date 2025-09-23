@@ -29,7 +29,7 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ...titleComparators,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
-  useGlobalFilters: (a, b) => a ?? true === b ?? true,
+  useGlobalFilters: (a, b) => (a ?? true) === (b ?? true),
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {

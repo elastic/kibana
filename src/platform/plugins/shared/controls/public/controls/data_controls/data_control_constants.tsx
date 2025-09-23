@@ -108,5 +108,13 @@ export const DataControlEditorStrings = {
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
+      }),
+    getUseGlobalFiltersTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.useGlobalFilters', {
+        defaultMessage: 'Use global filters',
+      }),
   },
 };

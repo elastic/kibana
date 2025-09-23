@@ -9,14 +9,15 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFormRow, EuiRadioGroup, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import type { OptionsListControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
+import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
+import { CustomOptionsAdditionalSettings } from '../../components';
 
 const selectionOptions = [
   {
@@ -68,7 +69,7 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-}: CustomOptionsComponentProps<OptionsListControlState>) => {
+}: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   // const allowExpensiveQueries = useStateFromPublishingSubject(
   //   controlGroupApi.allowExpensiveQueries$
   // );
@@ -77,9 +78,7 @@ export const OptionsListEditorOptions = ({
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.runPastTimeout ?? false
   );
-  const [useGlobalFilters, setUseGlobalFilters] = useState<boolean>(
-    initialState.useGlobalFilters ?? true
-  );
+
   const [searchTechnique, setSearchTechnique] = useState<OptionsListSearchTechnique>(
     initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
   );
@@ -159,38 +158,24 @@ export const OptionsListEditorOptions = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
-        <>
-          <EuiSwitch
-            compressed
-            label={OptionsListStrings.editor.getUseGlobalFiltersTitle()}
-            checked={useGlobalFilters}
-            onChange={() => {
-              const newUseGlobalFilters = !useGlobalFilters;
-              setUseGlobalFilters(newUseGlobalFilters);
-              updateState({ useGlobalFilters: newUseGlobalFilters });
-            }}
-            data-test-subj={'optionsListControl__useGlobalFiltersAdditionalSetting'}
-          />
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
-            label={
-              <ControlSettingTooltipLabel
-                label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-                tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-              />
-            }
-            checked={runPastTimeout}
-            onChange={() => {
-              const newRunPastTimeout = !runPastTimeout;
-              setRunPastTimeout(newRunPastTimeout);
-              updateState({ runPastTimeout: newRunPastTimeout });
-            }}
-            data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
-          />
-        </>
-      </EuiFormRow>
+      <CustomOptionsAdditionalSettings initialState={initialState} updateState={updateState}>
+        <EuiSwitch
+          compressed
+          label={
+            <ControlSettingTooltipLabel
+              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+              tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+            />
+          }
+          checked={runPastTimeout}
+          onChange={() => {
+            const newRunPastTimeout = !runPastTimeout;
+            setRunPastTimeout(newRunPastTimeout);
+            updateState({ runPastTimeout: newRunPastTimeout });
+          }}
+          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
+        />
+      </CustomOptionsAdditionalSettings>
     </>
   );
 };
