@@ -120,7 +120,6 @@ export function Wrapper({
           isSelected: tab === tabKey,
         }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {tabs[tab]?.content}
       </StreamsAppPageTemplate.Body>
