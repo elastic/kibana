@@ -8,6 +8,7 @@
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ToolTypeInfo } from '../../../common/tools';
 import {
   createBuiltinToolRegistry,
   registerBuiltinTools,
@@ -62,8 +63,20 @@ export class ToolsService {
       });
     };
 
+    const getToolTypeInfo = () => {
+      return [
+        ...persistedToolSource.toolTypes.map<ToolTypeInfo>((typeDef) => {
+          return { type: typeDef, create: true };
+        }),
+        ...builtInToolSource.toolTypes.map<ToolTypeInfo>((typeDef) => {
+          return { type: typeDef, create: false };
+        }),
+      ];
+    };
+
     return {
       getRegistry,
+      getToolTypeInfo,
     };
   }
 }

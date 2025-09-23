@@ -11,6 +11,7 @@ import type {
   SerializedOnechatError,
 } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolTypeInfo } from '../tools';
 
 export interface ListToolsResponse {
   results: ToolDefinition[];
@@ -84,4 +85,8 @@ export interface GetWorkflowResponse {
 
 export interface ListWorkflowsResponse {
   results: WorkflowItem[];
+}
+
+export interface GetToolTypeInfoResponse {
+  toolTypes: ToolTypeInfo[];
 }

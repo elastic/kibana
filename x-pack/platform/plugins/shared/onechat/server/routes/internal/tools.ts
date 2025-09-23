@@ -15,6 +15,7 @@ import type {
   ResolveSearchSourcesResponse,
   ListWorkflowsResponse,
   GetWorkflowResponse,
+  GetToolTypeInfoResponse,
 } from '../../../common/http_api/tools';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
@@ -118,6 +119,29 @@ export function registerInternalToolsRoutes({
     })
   );
 
+  // list available tool types (internal)
+  router.get(
+    {
+      path: `${internalApiPath}/tools/_types_info`,
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools } = getInternalServices();
+
+      const toolTypes = tools.getToolTypeInfo();
+
+      return response.ok<GetToolTypeInfoResponse>({
+        body: {
+          toolTypes,
+        },
+      });
+    })
+  );
+
   // list workflows (internal)
   router.get(
     {
@@ -163,6 +187,8 @@ export function registerInternalToolsRoutes({
       });
     })
   );
+
+  // get workflow (internal)
   router.get(
     {
       path: `${internalApiPath}/tools/_get_workflow/{id}`,
