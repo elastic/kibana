@@ -88,7 +88,8 @@ describe('UploadSpecStep', () => {
             target: { files: [new File(['...'], 'test.json', { type: 'application/json' })] },
           });
         });
-        await waitFor(() => expect(filepicker).toHaveAttribute('data-loading', 'false'));
+        // Wait for the file to be fully processed and button to become enabled
+        await waitFor(() => expect(result.queryByTestId('analyzeApiButton')).toBeEnabled());
       });
 
       it('analyze button re-enabled', () => {
