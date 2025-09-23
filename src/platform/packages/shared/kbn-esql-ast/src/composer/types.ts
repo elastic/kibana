@@ -109,6 +109,16 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    * // FROM kibana_ecommerce_index, kibana_logs_index
    * ```
    *
+   * or with metadata fields:
+   *
+   * ```typescript
+   * const query = esql.from(
+   *   ['kibana_ecommerce_index', 'kibana_logs_index'],
+   *   ['_id', '_index']
+   * );
+   * // FROM kibana_ecommerce_index, kibana_logs_index WITH METADATA _id, _index
+   * ```
+   *
    * @param source The source to use in the `FROM` command, at least one source
    *     is required.
    * @param moreSources Additional sources to include in the `FROM` command.
@@ -124,6 +134,16 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    * ```typescript
    * const query = esql.ts('kibana_ecommerce_index', 'kibana_logs_index');
    * // TS kibana_ecommerce_index, kibana_logs_index
+   * ```
+   *
+   * or with metadata fields:
+   *
+   * ```typescript
+   * const query = esql.from(
+   *   ['kibana_ecommerce_index', 'kibana_logs_index'],
+   *   ['_id', '_index']
+   * );
+   * // FROM kibana_ecommerce_index, kibana_logs_index WITH METADATA _id, _index
    * ```
    *
    * @param source The source to use in the `TS` command, at least one source
