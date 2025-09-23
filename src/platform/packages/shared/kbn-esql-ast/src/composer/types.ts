@@ -130,7 +130,7 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    *     is required.
    * @param moreSources Additional sources to include in the `TS` command.
    */
-  ts: FromSourcesQueryStarter;
+  ts: FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter;
 
   /**
    * An AST no-op command that can be used in the query, for example in

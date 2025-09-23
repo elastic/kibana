@@ -114,9 +114,27 @@ const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQuer
 }) as ComposerQueryTag & ParametrizedComposerQueryTag & ComposerQueryGenerator;
 
 /**
- * Constructs a new {@linkcode ComposerQuery} instance using a `FROM` or `TS`
- * command with the specified list of sources.
+ * Creates a new {@linkcode ComposerQuery} constructor function for `FROM` or `TS`
+ * command, which allows to start a new query form a list of sources and
+ * optionally metadata fields.
  */
+const createFromLikeStarter = (
+  cmd: 'FROM' | 'TS'
+): FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter =>
+  ((first: unknown, ...remaining: unknown[]) => {
+    if (Array.isArray(first)) {
+      return createFromSourceAndMetadataCommandStarter(cmd)(
+        first as ComposerSourceShorthand[],
+        remaining[0] as ComposerColumnShorthand[] | undefined
+      );
+    } else {
+      return createFromSourceCommandStarter(cmd)(
+        first as ComposerSourceShorthand,
+        ...(remaining as ComposerSourceShorthand[])
+      );
+    }
+  }) as FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter;
+
 const createFromSourceCommandStarter =
   (cmd: 'FROM' | 'TS'): FromSourcesQueryStarter =>
   (...sources: ComposerSourceShorthand[]) => {
@@ -133,6 +151,27 @@ const createFromSourceCommandStarter =
     }
 
     return esql`${synth.kwd(cmd)} ${nodes}`;
+  };
+
+const createFromSourceAndMetadataCommandStarter =
+  (cmd: 'FROM' | 'TS'): FromSourcesAndMetadataQueryStarter =>
+  (sources: ComposerSourceShorthand[], metadataFields: ComposerColumnShorthand[] = []) => {
+    const sourceNodes = sources.map((source) => {
+      if (typeof source === 'string') {
+        return synth.src(source);
+      } else if (isSource(source)) {
+        return source;
+      } else {
+        throw new Error(`Invalid source: ${source}`);
+      }
+    });
+    const metadataFieldsNodes = metadataFields.map((field) => {
+      return Builder.expression.column(field);
+    });
+
+    return metadataFieldsNodes.length
+      ? esql`${synth.kwd(cmd)} ${sourceNodes} METADATA ${metadataFieldsNodes}`
+      : esql`${synth.kwd(cmd)} ${sourceNodes}`;
   };
 
 /**
@@ -183,38 +222,9 @@ export const esql: ComposerQueryTag &
 
     dpar: (value: unknown, name?: string) => new DoubleParameterHole(value, name),
 
-    from: ((
-      firstArg: ComposerSourceShorthand | ComposerSourceShorthand[],
-      ...remainingArgs: unknown[]
-    ) => {
-      if (Array.isArray(firstArg)) {
-        const sources = firstArg as ComposerSourceShorthand[];
-        const metadataFields = (remainingArgs[0] as ComposerColumnShorthand[]) || [];
-        const sourceNodes = sources.map((source) => {
-          if (typeof source === 'string') {
-            return synth.src(source);
-          } else if (isSource(source)) {
-            return source;
-          } else {
-            throw new Error(`Invalid source: ${source}`);
-          }
-        });
-        const metadataFieldsNodes = metadataFields.map((field) => {
-          return Builder.expression.column(field);
-        });
+    from: createFromLikeStarter('FROM'),
 
-        return metadataFieldsNodes.length
-          ? esql`FROM ${sourceNodes} METADATA ${metadataFieldsNodes}`
-          : esql`FROM ${sourceNodes}`;
-      } else {
-        return createFromSourceCommandStarter('FROM')(
-          firstArg,
-          ...(remainingArgs as ComposerSourceShorthand[])
-        );
-      }
-    }) as FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter,
-
-    ts: createFromSourceCommandStarter('TS'),
+    ts: createFromLikeStarter('TS'),
 
     get nop() {
       return synth.cmd`WHERE TRUE`;

@@ -232,6 +232,19 @@ describe('query.ts()', () => {
       ],
     });
   });
+
+  test('can create with METADATA fields', () => {
+    const query0 = esql.ts(['index'], []);
+    const query1 = esql.ts(['index'], ['_id']);
+    const query2 = esql.ts(
+      ['index', 'index2', esql.src('index', 'cluster1')],
+      ['_id', '_source', 'more']
+    );
+
+    expect(query0.print()).toBe('TS index');
+    expect(query1.print()).toBe('TS index METADATA _id');
+    expect(query2.print()).toBe('TS index, index2, cluster1:index METADATA _id, _source, more');
+  });
 });
 
 describe('processing holes', () => {
