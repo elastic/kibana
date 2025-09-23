@@ -70,7 +70,7 @@ describe('getForeachStateSchema', () => {
     );
   });
 
-  it('should throw if infered type is not an array', () => {
+  it('should throw if inferred type is not an array', () => {
     const stepContext = StepContextSchema.extend({
       consts: z.object({
         items: z.object({ name: z.string(), surname: z.string() }),
