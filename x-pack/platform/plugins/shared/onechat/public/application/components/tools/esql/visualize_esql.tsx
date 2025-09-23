@@ -100,7 +100,6 @@ export function VisualizeESQL({
           size="xs"
           iconType="save"
           onClick={() => setIsSaveModalOpen(true)}
-          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
           aria-label={saveVisualizationLabel}
         />
       </EuiToolTip>
@@ -109,15 +108,13 @@ export function VisualizeESQL({
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
-          <div data-test-subj="observabilityAiAssistantLensESQLVisualization">
-            <lens.EmbeddableComponent
-              {...lensInput}
-              style={{
-                height: VISUALIZATION_HEIGHT,
-              }}
-              onLoad={onLoad}
-            />
-          </div>
+          <lens.EmbeddableComponent
+            {...lensInput}
+            style={{
+              height: VISUALIZATION_HEIGHT,
+            }}
+            onLoad={onLoad}
+          />
         )}
       </div>
 
@@ -175,7 +172,6 @@ function EditVisualization({
             uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
           }
         }}
-        data-test-subj="observabilityAiAssistantLensESQLEditButton"
         aria-label={editVisualizationLabel}
       />
     </EuiToolTip>
