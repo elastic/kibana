@@ -6,38 +6,193 @@
  */
 
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-
+import type {
+  InlineEditLensEmbeddableContext,
+  LensPublicStart,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 const VISUALIZATION_HEIGHT = 240;
 
-interface VisualizeESQLProps {
-  lens: LensPublicStart;
-  dataViews: DataViewsServicePublic;
-  esqlColumns: TabularDataResult['data']['columns'] | undefined;
-  esqlQuery: string;
-  preferredChartType?: ChartType;
-  errorMessages?: string[];
-}
+const editVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.edit', {
+  defaultMessage: 'Edit visualization',
+});
+
+const saveVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.save', {
+  defaultMessage: 'Save visualization',
+});
+
+const saveToDashboardLabel = i18n.translate(
+  'xpack.onechat.conversation.visualization.saveToDashboard',
+  { defaultMessage: 'Save to dashboard' }
+);
 
 export function VisualizeESQL({
   lens,
   dataViews,
+  uiActions,
   esqlColumns,
   esqlQuery,
   preferredChartType,
-}: VisualizeESQLProps) {
+}: {
+  lens: LensPublicStart;
+  dataViews: DataViewsServicePublic;
+  esqlColumns: TabularDataResult['data']['columns'] | undefined;
+  uiActions: UiActionsStart;
+  esqlQuery: string;
+  preferredChartType?: ChartType;
+  errorMessages?: string[];
+}) {
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+
+  const [lensLoadEvent, setLensLoadEvent] = useState<
+    InlineEditLensEmbeddableContext['lensEvent'] | null
+  >(null);
+
+  const { lensInput, setLensInput } = useLensInput({
+    lens,
+    dataViews,
+    esqlQuery,
+    esqlColumns,
+    preferredChartType,
+  });
+
+  const onLoad = useCallback(
+    (
+      _isLoading: boolean,
+      adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
+      dataLoading$?: InlineEditLensEmbeddableContext['lensEvent']['dataLoading$']
+    ) => {
+      const adapterTables = adapters?.tables?.tables;
+      if (adapterTables && !_isLoading) {
+        setLensLoadEvent({ adapters, dataLoading$ });
+      }
+    },
+    []
+  );
+
+  const isLoading = !lensInput;
+
+  return (
+    <>
+      <EditVisualization
+        uiActions={uiActions}
+        lensInput={lensInput}
+        lensLoadEvent={lensLoadEvent}
+        setLensInput={setLensInput}
+        onApply={() => setIsSaveModalOpen(true)}
+      />
+
+      <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          size="xs"
+          iconType="save"
+          onClick={() => setIsSaveModalOpen(true)}
+          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+          aria-label={saveVisualizationLabel}
+        />
+      </EuiToolTip>
+
+      <div style={{ height: VISUALIZATION_HEIGHT }}>
+        {isLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <lens.EmbeddableComponent
+            {...lensInput}
+            style={{
+              height: VISUALIZATION_HEIGHT,
+            }}
+            onLoad={onLoad}
+          />
+        )}
+      </div>
+
+      {isSaveModalOpen ? (
+        <lens.SaveModalComponent
+          initialInput={lensInput}
+          onClose={() => {
+            setIsSaveModalOpen(() => false);
+          }}
+          isSaveable={false}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function EditVisualization({
+  uiActions,
+  lensInput,
+  lensLoadEvent,
+  setLensInput,
+  onApply,
+}: {
+  uiActions: UiActionsStart;
+  lensInput: TypedLensByValueInput | undefined;
+  lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
+  setLensInput: (input: TypedLensByValueInput) => void;
+  onApply: () => void;
+}) {
+  const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
+    if (lensInput?.attributes) {
+      return {
+        applyButtonText: saveToDashboardLabel,
+        attributes: lensInput?.attributes,
+        lensEvent: lensLoadEvent ?? { adapters: {} },
+        onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
+          if (lensInput) {
+            setLensInput({ ...lensInput, attributes: newAttributes });
+          }
+        },
+        onApply,
+        onCancel: () => {},
+        container: null,
+      };
+    }
+  }, [lensInput, lensLoadEvent, onApply, setLensInput]);
+
+  return (
+    <EuiToolTip content={editVisualizationLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        size="xs"
+        iconType="pencil"
+        onClick={() => {
+          if (triggerOptions) {
+            uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+          }
+        }}
+        data-test-subj="observabilityAiAssistantLensESQLEditButton"
+        aria-label={editVisualizationLabel}
+      />
+    </EuiToolTip>
+  );
+}
+
+function useLensInput({
+  esqlQuery,
+  dataViews,
+  lens,
+  esqlColumns,
+  preferredChartType,
+}: {
+  esqlQuery: string;
+  dataViews: DataViewsServicePublic;
+  lens: LensPublicStart;
+  esqlColumns: TabularDataResult['data']['columns'] | undefined;
+  preferredChartType?: ChartType;
+}) {
   const columns = useMemo(
     () =>
       esqlColumns?.map((column) => {
@@ -50,15 +205,13 @@ export function VisualizeESQL({
     [esqlColumns]
   );
 
-  const lensHelpersAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
+  const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>();
+
+  const lensHelpersAsync = useAsync(() => lens.stateHelperApi(), [lens]);
 
   const dataViewAsync = useAsync(() => {
     return getESQLAdHocDataview(esqlQuery, dataViews);
   }, [esqlQuery, dataViews]);
-
-  const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>();
 
   useEffect(() => {
     if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
@@ -81,7 +234,7 @@ export function VisualizeESQL({
       if (chartSuggestions?.length) {
         const [suggestion] = chartSuggestions;
 
-        const attrs = getLensAttributesFromSuggestion({
+        const lensAttributes = getLensAttributesFromSuggestion({
           filters: [],
           query: {
             esql: esqlQuery,
@@ -90,12 +243,7 @@ export function VisualizeESQL({
           dataView: dataViewAsync.value,
         }) as TypedLensByValueInput['attributes'];
 
-        const lensEmbeddableInput = {
-          attributes: attrs,
-          id: uuidv4(),
-        };
-
-        setLensInput(lensEmbeddableInput);
+        setLensInput({ attributes: lensAttributes, id: uuidv4() });
       }
     }
   }, [
@@ -105,61 +253,8 @@ export function VisualizeESQL({
     lensInput,
     esqlQuery,
     preferredChartType,
+    setLensInput,
   ]);
 
-  const isLoading = !lensHelpersAsync.value || !dataViewAsync.value || !lensInput;
-
-  return (
-    <div style={{ height: VISUALIZATION_HEIGHT }}>
-      <SaveVisualization lens={lens} lensInput={lensInput} />
-
-      {isLoading ? (
-        <EuiLoadingSpinner />
-      ) : (
-        <lens.EmbeddableComponent
-          {...lensInput}
-          style={{
-            height: VISUALIZATION_HEIGHT,
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-function SaveVisualization({
-  lens,
-  lensInput,
-}: {
-  lens: LensPublicStart;
-  lensInput: TypedLensByValueInput | undefined;
-}) {
-  const saveVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.save', {
-    defaultMessage: 'Save visualization',
-  });
-
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  return (
-    <>
-      <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
-        <EuiButtonIcon
-          size="xs"
-          iconType="save"
-          onClick={() => setIsSaveModalOpen(true)}
-          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
-          aria-label={saveVisualizationLabel}
-        />
-      </EuiToolTip>
-
-      {isSaveModalOpen ? (
-        <lens.SaveModalComponent
-          initialInput={lensInput}
-          onClose={() => {
-            setIsSaveModalOpen(() => false);
-          }}
-          isSaveable={false} // prevent saving ESQL visualizations to the library
-        />
-      ) : null}
-    </>
-  );
+  return { lensInput, setLensInput };
 }

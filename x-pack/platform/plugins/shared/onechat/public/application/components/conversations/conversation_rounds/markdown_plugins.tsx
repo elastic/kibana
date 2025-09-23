@@ -10,6 +10,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import {
   visualizationElement,
+  type VisualizationElementAttributes,
   type TabularDataResult,
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
@@ -62,8 +63,8 @@ export function getVisualizationHandler({
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
-  return (props: { toolResultId?: string }) => {
-    const { toolResultId } = props;
+  return (chartAttributes: VisualizationElementAttributes) => {
+    const { toolResultId } = chartAttributes;
 
     if (!toolResultId) {
       return <p>Visualization requires a tool result ID.</p>;
@@ -92,6 +93,7 @@ export function getVisualizationHandler({
       <VisualizeESQL
         lens={startDependencies.lens}
         dataViews={startDependencies.dataViews}
+        uiActions={startDependencies.uiActions}
         esqlQuery={query}
         esqlColumns={columns}
       />

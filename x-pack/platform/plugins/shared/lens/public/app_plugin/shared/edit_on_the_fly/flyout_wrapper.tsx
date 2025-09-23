@@ -39,6 +39,7 @@ export const FlyoutWrapper = ({
   navigateToLensEditor,
   onApply,
   isReadOnly,
+  applyButtonText = 'Apply and close',
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -105,6 +106,7 @@ export const FlyoutWrapper = ({
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
@@ -172,7 +174,7 @@ export const FlyoutWrapper = ({
                 >
                   <FormattedMessage
                     id="xpack.lens.config.applyFlyoutLabel"
-                    defaultMessage="Apply and close"
+                    defaultMessage={applyButtonText}
                   />
                 </EuiButton>
               </EuiFlexItem>

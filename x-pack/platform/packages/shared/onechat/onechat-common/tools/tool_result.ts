@@ -67,6 +67,10 @@ export type ToolResult =
   | OtherResult
   | ErrorResult;
 
+export interface VisualizationElementAttributes {
+  toolResultId?: string;
+}
+
 export const visualizationElement = {
   tagName: 'visualization',
   attributes: {
