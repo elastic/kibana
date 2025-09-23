@@ -27,17 +27,22 @@ import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities
 import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
 import { ShowShareModal } from './share/show_share_modal';
+import { showSaveMenu } from './save_menu/show_save_menu';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
+  isResetting,
+  setIsResetting,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
+  isResetting: boolean;
+  setIsResetting: (isResetting: boolean) => void;
 }) => {
   const isMounted = useMountedState();
   const appId = useObservable(coreServices.application.currentAppId$);
@@ -55,6 +60,7 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isCreatingNewDashboard = viewMode === 'edit' && !lastSavedId;
 
   /**
    * Show the Dashboard app's share menu
@@ -92,7 +98,6 @@ export const useDashboardMenuItems = ({
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
-  const [isResetting, setIsResetting] = useState(false);
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboardApi.clearOverlays();
@@ -115,7 +120,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, setIsResetting, isMounted]
   );
 
   /**
@@ -167,16 +172,14 @@ export const useDashboardMenuItems = ({
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: isCreatingNewDashboard,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
-        label:
-          viewMode === 'view'
-            ? topNavStrings.viewModeInteractiveSave.label
-            : Boolean(lastSavedId)
-            ? topNavStrings.editModeInteractiveSave.label
-            : topNavStrings.quickSave.label,
+        label: isCreatingNewDashboard
+          ? topNavStrings.quickSave.label
+          : topNavStrings.viewModeInteractiveSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
@@ -248,22 +251,46 @@ export const useDashboardMenuItems = ({
         run: (anchorElement: HTMLElement) =>
           showAddMenu({ dashboardApi, anchorElement, coreServices }),
       },
+
+      saveMenu: {
+        ...topNavStrings.saveMenu,
+        id: 'save-menu',
+        iconType: 'arrowDown',
+        iconOnly: true,
+        emphasize: true,
+        testId: 'dashboardAddButton',
+        disableButton: disableTopNav,
+        run: (anchorElement: HTMLElement) =>
+          showSaveMenu({
+            dashboardApi,
+            anchorElement,
+            coreServices,
+            resetChanges,
+            isResetting,
+            setIsResetting,
+            isSaveInProgress,
+            setIsSaveInProgress,
+            dashboardInteractiveSave,
+          }),
+      },
     };
   }, [
     disableTopNav,
     isSaveInProgress,
     hasUnsavedChanges,
+    isCreatingNewDashboard,
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
+    isResetting,
     showShare,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
     quickSaveDashboard,
     resetChanges,
-    isResetting,
     appId,
+    setIsResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -386,9 +413,9 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
-    menuItems.quickSave,
     menuItems.add,
     menuItems.backgroundSearch,
+    menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
     showResetChange,

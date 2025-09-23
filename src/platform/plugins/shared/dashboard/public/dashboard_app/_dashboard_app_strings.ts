@@ -206,6 +206,14 @@ export const topNavStrings = {
       defaultMessage: 'Reset changes to dashboard',
     }),
   },
+  DiscardStarredQueryModal: {
+    label: i18n.translate('dashboard.topNave.discardChangesButtonAriaLabel', {
+      defaultMessage: 'Discard changes',
+    }),
+    description: i18n.translate('dashboard.topNave.discardChangesConfigDescription', {
+      defaultMessage: 'Discard unsaved changes on dashboard',
+    }),
+  },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'Exit edit',
@@ -260,6 +268,13 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
       defaultMessage: 'Open background searches',
+    })},
+  saveMenu: {
+    label: i18n.translate('dashboard.topNave.saveMenuButtonAriaLabel', {
+      defaultMessage: 'Save options',
+    }),
+    description: i18n.translate('dashboard.topNave.saveMenuDescription', {
+      defaultMessage: 'Additional save options',
     }),
   },
 };

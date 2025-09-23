@@ -54,6 +54,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { confirmDiscardOrSaveUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -78,7 +79,9 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
+  const { showWriteControls } = getDashboardCapabilities();
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -216,18 +219,17 @@ export function InternalDashboardTopNav({
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (dataService.query.filterManager.getFilters().length > 0 || !fullScreenMode);
 
-    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
+    const showDatePicker = Boolean(forceHideUnifiedSearch)
+      ? false
+      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
+    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryInput = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(
           Boolean(embedSettings?.forceShowQueryInput || viewMode === 'edit')
         );
-    const showDatePicker = Boolean(forceHideUnifiedSearch)
-      ? false
-      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
-    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar;
+    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
+    const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -258,6 +260,8 @@ export function InternalDashboardTopNav({
     setIsLabsShown,
     maybeRedirect,
     showResetChange,
+    isResetting,
+    setIsResetting,
   });
 
   UseUnmount(() => {
@@ -276,10 +280,22 @@ export function InternalDashboardTopNav({
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',
         } as EuiToolTipProps,
+        onClick: () => {
+          confirmDiscardOrSaveUnsavedChanges({
+            discardCallback: async () => {
+              setIsResetting(true);
+              await dashboardApi.asyncResetToLastSavedState();
+              setIsResetting(false);
+            },
+            saveCallback: async () => {
+              await dashboardApi.runQuickSave();
+            },
+          });
+        },
+        onClickAriaLabel: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
       });
     }
 
-    const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -326,7 +342,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [hasUnsavedChanges, viewMode, showWriteControls, dashboardApi, isPopoverOpen, maybeRedirect]);
 
   const setFavoriteButtonMountPoint = useCallback(
     (mountPoint: MountPoint<HTMLElement> | undefined) => {
