@@ -37,6 +37,7 @@ export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
       case ReindexAlreadyInProgress:
+        return kibanaResponseFactory.conflict({ body: e.message });
       case MultipleReindexJobsFound:
       case ReindexCannotBeCancelled:
         return kibanaResponseFactory.badRequest({ body: e.message });
