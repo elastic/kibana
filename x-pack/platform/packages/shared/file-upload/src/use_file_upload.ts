@@ -115,6 +115,9 @@ export function useFileUpload(
         setIndexName('');
         setIndexCreateMode(UPLOAD_TYPE.NEW);
       }
+
+      setImportResults(null);
+
       return () => {
         fileUploadManager.destroy();
       };

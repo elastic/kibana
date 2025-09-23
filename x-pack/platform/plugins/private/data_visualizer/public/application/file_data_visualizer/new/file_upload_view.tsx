@@ -31,7 +31,7 @@ interface Props {
   onClose?: () => void;
 }
 
-export const FileUploadView: FC<Props> = ({ reset }) => {
+export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
   const {
     fileUploadManager,
     filesStatus,
@@ -162,7 +162,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
             dataViewId={importResults.dataView?.id}
             timeFieldName={importResults.timeFieldName}
             createDataView={importResults.dataView?.id !== undefined}
-            getAdditionalLinks={[]}
+            getAdditionalLinks={getAdditionalLinks}
             resultLinks={undefined}
           />
         </>

@@ -357,6 +357,7 @@ export class FileUploadManager {
     this._existingIndexName$.next(name);
     if (name === null) {
       this.existingIndexMappings$.next(null);
+      this.autoCreateDataView = true;
     } else {
       this.loadExistingIndexMappings();
       this.autoCreateDataView = false;
