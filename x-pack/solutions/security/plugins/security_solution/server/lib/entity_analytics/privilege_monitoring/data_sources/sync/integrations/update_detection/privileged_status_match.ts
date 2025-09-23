@@ -141,7 +141,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   const generateLabels = (matchers: Matcher, topHit: PrivTopHit): Record<string, unknown> => {
     // Implement label generation logic based on matchers and topHit (latest document for user)
     dataClient.log('info', `Generating labels for user ${JSON.stringify(topHit, null, 2)}`);
-    return { sources: 'entity_analytics_integration' }; // Placeholder implementation
+    return { sources: ['entity_analytics_integration'] }; // Placeholder implementation
   };
   return { findPrivilegedUsersFromMatchers };
 };

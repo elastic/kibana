@@ -107,22 +107,23 @@ export const bulkUpsertOperationsFactoryShared =
   (dataClient: PrivilegeMonitoringDataClient) =>
   <T extends PrivMonBulkUser>(
     users: T[],
-    sourceLabel: Object, // do you need this now? This should be in generateLabels
     updateScriptSource: string,
     opts: {
       buildUpdateParams: ParamsBuilder<T>;
       buildCreateDoc: ParamsBuilder<T>;
       shouldCreate?: (user: T) => boolean;
-    }
+    },
+    sourceLabel?: Object // required for index ops
   ): object[] => {
     const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
     const ops: object[] = [];
     dataClient.log('info', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
+        dataClient.log(`info`, `UPDATING: ${JSON.stringify(user, null, 2)}`);
         ops.push(
           { update: { _index: dataClient.index, _id: user.existingUserId } },
-          { script: { source: updateScriptSource, params: buildUpdateParams(user) } } // user should have latestDoc and labels
+          { script: { source: updateScriptSource, params: buildUpdateParams(user, sourceLabel) } } // user should have latestDoc and labels
         );
       } else if (shouldCreate(user)) {
         ops.push({ index: { _index: dataClient.index } }, buildCreateDoc(user, sourceLabel));
@@ -133,8 +134,9 @@ export const bulkUpsertOperationsFactoryShared =
 
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
+
   return (usersChunk: PrivMonIntegrationsUser[]) =>
-    buildOps(usersChunk, 'entity_analytics_integration', UPDATE_SCRIPT_SOURCE, {
+    buildOps(usersChunk, UPDATE_SCRIPT_SOURCE, {
       buildUpdateParams: (user) => ({
         new_privileged_status: user.isPrivileged,
         labels: user.labels,
@@ -150,13 +152,18 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
 export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
   const indexOperations = (usersChunk: PrivMonBulkUser[]) =>
-    buildOps(usersChunk, 'index_sync', INDEX_SCRIPT, {
-      // make sure index_sync matches up everywhere. Right now index is used instead.
-      buildUpdateParams: (user) => ({ source_id: user.sourceId }),
-      buildCreateDoc: (user, sourceLabel) => ({
-        user: { name: user.username, is_privileged: true },
-        labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
-      }),
-    });
+    buildOps(
+      usersChunk,
+      INDEX_SCRIPT,
+      {
+        // make sure index_sync matches up everywhere. Right now index is used instead.
+        buildUpdateParams: (user) => ({ source_id: user.sourceId }),
+        buildCreateDoc: (user, sourceLabel) => ({
+          user: { name: user.username, is_privileged: true },
+          labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
+        }),
+      },
+      'index_sync'
+    );
   return indexOperations;
 };
