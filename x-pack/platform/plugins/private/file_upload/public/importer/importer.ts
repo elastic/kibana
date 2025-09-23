@@ -6,7 +6,6 @@
  */
 
 import { chunk, cloneDeep, intersection } from 'lodash';
-import moment from 'moment';
 import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
