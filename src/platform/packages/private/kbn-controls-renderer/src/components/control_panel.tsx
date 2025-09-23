@@ -186,7 +186,7 @@ export const ControlPanel = ({
                 ) : (
                   <EuiToolTip
                     content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ className: 'eui-textTruncate' }}
+                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
                   >
                     <EuiFormLabel className="controlPanel--label">
                       {panelTitle || defaultPanelTitle}
@@ -218,6 +218,9 @@ const controlPanelStyles = {
     visibility: 'hidden',
   }),
   controlWidthStyles,
+  tooltipStyles: {
+    height: '100%',
+  },
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiFormControlLayout__prepend': {
