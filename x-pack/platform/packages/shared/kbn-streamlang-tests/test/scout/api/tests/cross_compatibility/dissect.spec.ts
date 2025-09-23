@@ -207,7 +207,7 @@ streamlangApiTest.describe(
           };
 
           expect(ingestResult[0]).toEqual(expect.objectContaining(expectedExtractDoc));
-          expect(esqlResult.documentsWithoutKeywords[1]).toEqual(
+          expect(esqlResult.documentsWithoutKeywordsOrdered[1]).toEqual(
             expect.objectContaining(expectedExtractDoc)
           );
         }
