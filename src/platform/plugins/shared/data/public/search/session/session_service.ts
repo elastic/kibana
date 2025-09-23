@@ -185,6 +185,7 @@ export class SessionService {
   private toastService?: ToastService;
 
   private sessionSnapshots: Map<string, SessionSnapshot>;
+  private sessionSentToBackground: Set<string>;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -205,6 +206,7 @@ export class SessionService {
     this.sessionMeta$ = sessionMeta$;
 
     this.sessionSnapshots = new Map<string, SessionSnapshot>();
+    this.sessionSentToBackground = new Set<string>();
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -296,6 +298,7 @@ export class SessionService {
                   const searchesToKeepAlive = this.state.get().trackedSearches.filter(
                     (s) =>
                       !s.searchMeta.isStored &&
+                      !this.sessionSentToBackground.has(sessionId) &&
                       s.state === TrackedSearchState.Completed &&
                       s.searchMeta.lastPollingTime.getTime() < Date.now() - 5000 // don't poll if was very recently polled
                   );
@@ -392,10 +395,14 @@ export class SessionService {
         });
 
         return [
-          { isSearchStored: search?.searchMeta?.isStored ?? false },
+          { isSearchStored: (this.sessionSentToBackground.has(sessionId ?? '') || search?.searchMeta?.isStored) ?? false },
           ({ isSearchStored }) => {
+            if (sessionId && !this.sessionSentToBackground.has(sessionId)) {
+              this.sessionSentToBackground.add(sessionId);
+            }
+            const actualIsSearchStored = sessionId ? this.sessionSentToBackground.has(sessionId) : isSearchStored;
             state?.transitions.updateSearchMeta(searchDescriptor, {
-              isStored: isSearchStored,
+              isStored: actualIsSearchStored,
             });
           },
         ];
@@ -431,6 +438,7 @@ export class SessionService {
    * Is current session already saved as SO (send to background)
    */
   public isStored() {
+    console.log('isStored', this.state.get().isStored);
     return this.state.get().isStored;
   }
 
@@ -638,11 +646,11 @@ export class SessionService {
         this.toastService?.addError(e, {
           title: hasBackgroundSearchEnabled
             ? i18n.translate('data.searchSessions.sessionService.backgroundSearchEditNameError', {
-                defaultMessage: 'Failed to edit name of the background search',
-              })
+              defaultMessage: 'Failed to edit name of the background search',
+            })
             : i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
-                defaultMessage: 'Failed to edit name of the search session',
-              }),
+              defaultMessage: 'Failed to edit name of the search session',
+            }),
         });
       }
 
@@ -685,7 +693,7 @@ export class SessionService {
     return {
       sessionId,
       isRestore: isCurrentSession ? this.isRestore() : false,
-      isStored: isCurrentSession ? this.isStored() : false,
+      isStored: isCurrentSession ? this.isStored() : this.sessionSentToBackground.has(sessionId),
     };
   }
 
@@ -740,14 +748,14 @@ export class SessionService {
         this.toastService?.addError(e, {
           title: hasBackgroundSearchEnabled
             ? i18n.translate(
-                'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
-                {
-                  defaultMessage: 'Failed to fetch background search info',
-                }
-              )
+              'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
+              {
+                defaultMessage: 'Failed to fetch background search info',
+              }
+            )
             : i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
-                defaultMessage: 'Failed to fetch search session info',
-              }),
+              defaultMessage: 'Failed to fetch search session info',
+            }),
         });
       }
     }

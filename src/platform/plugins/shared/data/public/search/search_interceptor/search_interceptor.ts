@@ -302,6 +302,7 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
+      // console.log('test' + id, { isSearchStored, sessionId, options, getSearchOptions: this.deps.session.getSearchOptions(sessionId) });
       return this.runSearch(
         { id, ...request },
         {
