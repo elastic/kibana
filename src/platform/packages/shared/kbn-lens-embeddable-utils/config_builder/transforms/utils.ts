@@ -28,6 +28,10 @@ import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
 import { LENS_LAYER_SUFFIX, LENS_DEFAULT_TIME_FIELD, INDEX_PATTERN_ID } from './constants';
+import {
+  LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
+} from '../schema/constants';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -426,14 +430,14 @@ export const generateLayer = (
 export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBasedLayer) => {
   if (!('columnOrder' in options)) {
     return {
-      sampling: 1,
-      ignore_global_filters: true,
+      sampling: LENS_SAMPLING_DEFAULT_VALUE,
+      ignore_global_filters: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     };
   }
-
+  // mind this is already filled by schema validate
   return {
-    sampling: options.sampling,
-    ignore_global_filters: options.ignoreGlobalFilters,
+    sampling: options.sampling ?? LENS_SAMPLING_DEFAULT_VALUE,
+    ignore_global_filters: options.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   };
 };
 
