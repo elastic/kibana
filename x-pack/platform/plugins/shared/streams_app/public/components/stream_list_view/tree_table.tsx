@@ -242,9 +242,17 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate('xpack.streams.streamsTreeTable.', {
-                        defaultMessage: '',
-                      })}
+                      aria-label={i18n.translate(
+                        isCollapsed
+                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
+                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                        {
+                          defaultMessage: isCollapsed
+                            ? 'Collapsed node with {childCount} children'
+                            : 'Expanded node with {childCount} children',
+                          values: { childCount: item.children.length },
+                        }
+                      )}
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}

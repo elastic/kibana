@@ -241,7 +241,6 @@ export const EditIndexPattern = withRouter(
               <>
                 <EuiSpacer />
                 <EuiCallOut
-                  announceOnMount
                   title={mappingConflictHeader}
                   color="warning"
                   iconType="warning"

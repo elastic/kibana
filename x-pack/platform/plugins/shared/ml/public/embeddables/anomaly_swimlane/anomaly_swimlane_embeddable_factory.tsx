@@ -364,7 +364,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
-                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"

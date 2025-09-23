@@ -56,7 +56,6 @@ export const FormatField = ({ disabled }: Props) => {
             {isSubmitted && errors.length > 0 && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   title={errors.map((err) => err.message)}
                   color="danger"
                   iconType="cross"

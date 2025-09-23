@@ -337,7 +337,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           )}
           {isManaged && (
             <EuiCallOut
-              announceOnMount
               title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
                 defaultMessage:
                   "You can't edit managed data views. Instead, you can duplicate the data view and make changes to your newly created copy.",

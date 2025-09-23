@@ -71,7 +71,7 @@ export class StreamsApp {
       await expect(
         this.page.getByTestId(`streamsNameLink-${name}`),
         `Stream ${name} should not be present in the table`
-      ).toBeHidden();
+      ).not.toBeVisible();
     }
   }
 
