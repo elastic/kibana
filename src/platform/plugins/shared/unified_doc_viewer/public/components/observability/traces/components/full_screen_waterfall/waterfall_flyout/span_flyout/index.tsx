@@ -23,13 +23,20 @@ export const spanFlyoutId = 'spanDetailFlyout' as const;
 
 export interface SpanFlyoutProps {
   spanId: string;
+  traceId: string;
   dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
   activeSection?: TraceOverviewSections;
 }
 
-export const SpanFlyout = ({ spanId, dataView, onCloseFlyout, activeSection }: SpanFlyoutProps) => {
-  const { span, docId, loading } = useSpan({ spanId });
+export const SpanFlyout = ({
+  spanId,
+  traceId,
+  dataView,
+  onCloseFlyout,
+  activeSection,
+}: SpanFlyoutProps) => {
+  const { span, docId, loading } = useSpan({ spanId, traceId });
   const { indexes } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
 

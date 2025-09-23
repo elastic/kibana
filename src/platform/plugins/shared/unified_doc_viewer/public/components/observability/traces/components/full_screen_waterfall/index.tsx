@@ -159,6 +159,7 @@ export const FullScreenWaterfall = ({
       {docId && activeFlyoutId ? (
         activeFlyoutId === spanFlyoutId ? (
           <SpanFlyout
+            traceId={traceId}
             spanId={docId}
             dataView={dataView}
             onCloseFlyout={handleCloseFlyout}
