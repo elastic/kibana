@@ -44,15 +44,13 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     // First get the case to obtain its current version
     const currentCase = await apiServices.cases.get(caseId);
 
-    const { data: cases, status } = await apiServices.cases.update({
-      cases: [
-        {
-          id: caseId,
-          version: currentCase.data.version,
-          severity: 'medium',
-        },
-      ],
-    });
+    const { data: cases, status } = await apiServices.cases.update([
+      {
+        id: caseId,
+        version: currentCase.data.version,
+        severity: 'medium',
+      },
+    ]);
     expect(status).toBe(200);
     expect(cases.length).toBe(1);
     expect(cases[0].severity).toBe('medium');
@@ -60,20 +58,18 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
 
   apiTest('should add a new connector to a case', async ({ apiServices }) => {
     const currentCase = await apiServices.cases.get(caseId);
-    const { status } = await apiServices.cases.update({
-      cases: [
-        {
-          id: caseId,
-          version: currentCase.data.version,
-          connector: {
-            id: 'jira',
-            name: 'Jira',
-            type: '.jira',
-            fields: { issueType: 'Task', priority: null, parent: null },
-          },
+    const { status } = await apiServices.cases.update([
+      {
+        id: caseId,
+        version: currentCase.data.version,
+        connector: {
+          id: 'jira',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: null, parent: null },
         },
-      ],
-    });
+      },
+    ]);
 
     expect(status).toBe(200);
   });
@@ -137,7 +133,9 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     expect(updatedCase.comments).toHaveLength(1);
 
     // find comment by ID
-    const commentId = updatedCase.comments![0].id;
+    const commentId = updatedCase.comments?.[0]?.id;
+    if (!commentId) throw new Error('Comment not found');
+
     const { data: fetchedComment, status: fetchCommentStatus } =
       await apiServices.cases.comments.get(caseId, commentId);
 

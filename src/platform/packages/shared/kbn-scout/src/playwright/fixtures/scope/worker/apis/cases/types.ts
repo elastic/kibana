@@ -38,7 +38,7 @@ export interface CaseUserProfile {
   email?: string | null;
 }
 
-export interface CasePostRequest {
+export interface CaseCreateRequest {
   description: string;
   tags: string[];
   title: string;
@@ -55,7 +55,7 @@ export interface CasePostRequest {
   }>;
 }
 
-interface CasePatchRequest {
+export interface CaseUpdateRequest {
   id: string;
   version: string;
   description?: string;
@@ -75,67 +75,12 @@ interface CasePatchRequest {
   owner?: string;
 }
 
-export interface CasesPatchRequest {
-  cases: CasePatchRequest[];
+export interface CasesFindRequest {
+  [key: string]: any;
 }
 
 export interface CasesFindResponse {
-  cases: Array<{
-    id: string;
-    title: string;
-    description: string;
-    status: CaseStatus;
-    tags: string[];
-    owner: string;
-    connector: {
-      id: string;
-      name: string;
-      type: string;
-      fields: null | Record<string, any>;
-    };
-    severity: CaseSeverity;
-    category: string | null;
-    assignees: Array<{
-      uid: string;
-      username?: string;
-      fullName?: string | null;
-      email?: string | null;
-    }>;
-    settings: {
-      syncAlerts: boolean;
-    };
-    customFields?: Array<{
-      key: string;
-      type: string;
-      value: any | null;
-    }>;
-    duration: number | null;
-    closed_at: string | null;
-    closed_by: {
-      username: string;
-      fullName: string | null;
-      email: string | null;
-    } | null;
-    created_at: string;
-    created_by: {
-      username: string;
-      fullName: string | null;
-      email: string | null;
-    };
-    external_service: any | null;
-    updated_at: string | null;
-    updated_by: {
-      username: string;
-      fullName: string | null;
-      email: string | null;
-    } | null;
-    incremental_id?: number | null;
-    in_progress_at?: string | null;
-    totalComment: number;
-    totalAlerts: number;
-    version: string;
-    comments?: Array<any>;
-  }>;
+  cases: Case[];
   page: number;
   per_page: number;
   total: number;
@@ -144,12 +89,112 @@ export interface CasesFindResponse {
   count_closed_cases: number;
 }
 
+export interface CasesFindRequest {
+  // Filter parameters
+  tags?: string | string[];
+  status?: CaseStatus | CaseStatus[];
+  severity?: CaseSeverity | CaseSeverity[];
+  assignees?: string | string[];
+  reporters?: string | string[];
+  owner?: string | string[];
+  category?: string | string[];
+
+  // Search parameters
+  defaultSearchOperator?: 'AND' | 'OR';
+  search?: string;
+  searchFields?: Array<'description' | 'title'> | 'description' | 'title';
+
+  // Sort parameters
+  sortField?: 'title' | 'category' | 'createdAt' | 'updatedAt' | 'closedAt' | 'status' | 'severity';
+  sortOrder?: 'desc' | 'asc';
+
+  // Date filters
+  from?: string;
+  to?: string;
+
+  // Pagination parameters (defaults: page=1, perPage=20, max perPage=100)
+  page?: number;
+  perPage?: number;
+}
+
 export type AttachmentType =
   | 'user'
   | 'alert'
   | 'actions'
   | 'externalReference'
-  | 'persistableState';
+  | 'persistableState'
+  | 'event';
+
+export type AttachmentRequest =
+  | UserCommentAttachmentRequest
+  | AlertAttachmentRequest
+  | ActionsAttachmentRequest
+  | ExternalReferenceAttachmentRequest
+  | PersistableStateAttachmentRequest
+  | EventAttachmentRequest;
+
+export interface UserCommentAttachmentRequest {
+  comment: string;
+  type: 'user';
+  owner: string;
+}
+
+export interface AlertAttachmentRequest {
+  type: 'alert';
+  alertId: string | string[];
+  index: string | string[];
+  rule?: {
+    id: string | null;
+    name: string | null;
+  };
+  owner: string;
+}
+
+export interface ActionsAttachmentRequest {
+  type: 'actions';
+  comment: string;
+  actions: {
+    targets: Array<{
+      hostname: string;
+      endpointId: string;
+    }>;
+    type: string;
+  };
+  owner: string;
+}
+
+export interface ExternalReferenceAttachmentRequest {
+  type: 'externalReference';
+  externalReferenceId: string;
+  externalReferenceStorage?: {
+    type: 'savedObject' | 'elasticSearchDoc';
+    soType?: string;
+  };
+  externalReferenceAttachmentTypeId?: string;
+  externalReferenceMetadata?: Record<string, any> | null;
+  owner: string;
+}
+
+export interface PersistableStateAttachmentRequest {
+  type: 'persistableState';
+  persistableStateAttachmentTypeId: string;
+  persistableStateAttachmentState: Record<string, any>;
+  owner: string;
+}
+
+export interface EventAttachmentRequest {
+  type: 'event';
+  event: {
+    id: string;
+    relatedItems: Array<{
+      id: string;
+      type: string;
+      title?: string;
+      index?: string;
+    }>;
+  };
+  owner: string;
+}
 
 export interface Attachment {
   // Common properties for all attachment types
