@@ -139,8 +139,8 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string({
                 meta: { description: 'Unique identifier for the tool.' },
               }),
-              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
               type: schema.oneOf(
+                // @ts-expect-error TS2769: No overload matches this call
                 editableToolTypes.map((type) => schema.literal(type)),
                 {
                   meta: { description: 'The type of tool to create (e.g., esql, index_search).' },
