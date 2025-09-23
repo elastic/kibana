@@ -29,7 +29,7 @@ type Context<T extends Record<string, any> | undefined> = {
   module: { exports: {} };
   exports: {};
   lazyObject: typeof lazyObject;
-  require: (id: string) => typeof import('@kbn/lazy-object');
+  require: (id: string) => typeof import('../../index');
   globalThis: Context<T>;
 } & T;
 
