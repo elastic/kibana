@@ -85,10 +85,6 @@ export const FieldSelector = ({
     [handleSelectionChange]
   );
 
-  const defaultLabel = i18n.translate('xpack.streams.fieldSelector.defaultLabel', {
-    defaultMessage: 'Field',
-  });
-
   const defaultPlaceholder = i18n.translate('xpack.streams.fieldSelector.defaultPlaceholder', {
     defaultMessage: 'Select or type a field name...',
   });
@@ -96,7 +92,7 @@ export const FieldSelector = ({
   return (
     <>
       <EuiFormRow
-        label={label ?? defaultLabel}
+        label={label}
         helpText={helpText}
         isInvalid={isInvalid}
         error={error}

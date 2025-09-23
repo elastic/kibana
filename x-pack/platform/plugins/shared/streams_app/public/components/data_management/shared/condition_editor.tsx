@@ -171,12 +171,11 @@ function FilterForm(props: {
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexEnd" data-test-subj="streamsAppConditionEditor">
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
+      <EuiFlexItem grow={2}>
         <FieldSelector
           value={condition.field}
           onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
-          label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
           placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
             defaultMessage: 'Field',
           })}
@@ -187,7 +186,7 @@ function FilterForm(props: {
           autoFocus={true}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <EuiSelect
           aria-label={i18n.translate('xpack.streams.filter.operator', {
             defaultMessage: 'Operator',
@@ -200,7 +199,7 @@ function FilterForm(props: {
           disabled={disabled}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={2}>
         {typeof value === 'string' ? (
           <EuiFieldText
             aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
