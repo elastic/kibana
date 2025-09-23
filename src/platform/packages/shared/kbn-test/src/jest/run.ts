@@ -308,7 +308,7 @@ async function prepareJestExecution(
     ...argumentsWithoutConfig.slice(NODE_ARGV_SLICE_INDEX),
   ];
 
-  const originalArgv = process.argv.concat().slice(NODE_ARGV_SLICE_INDEX);
+  const originalArgv = process.argv.slice(NODE_ARGV_SLICE_INDEX);
 
   return {
     jestArgv,
