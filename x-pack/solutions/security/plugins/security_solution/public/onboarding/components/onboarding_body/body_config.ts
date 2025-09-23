@@ -68,7 +68,7 @@ export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
   },
   {
     title: i18n.translate('xpack.securitySolution.onboarding.migrate.title', {
-      defaultMessage: 'Migrate rules & add data',
+      defaultMessage: 'Migrate rules & dashboards',
     }),
     cards: [
       startRuleMigrationCardConfig,
