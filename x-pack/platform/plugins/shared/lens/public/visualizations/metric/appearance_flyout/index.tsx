@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiButtonGroup, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import type { VisualizationToolbarProps } from '../../../types';
-import { SettingsContent } from '../toolbar/appearance_popover';
+import { AppearanceSettings } from '../toolbar/appearance_settings';
 import type { MetricVisualizationState } from '../types';
 
 type Option = EuiButtonGroupOptionProps & { label: string };
@@ -26,18 +27,26 @@ const options: Option[] = [
   },
 ];
 
+const styles = {
+  flyoutChildStyle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.base,
+      height: '100%',
+    }),
+};
+
 export function SettingsPanelToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState('');
 
-  const { euiTheme } = useEuiTheme();
+  const flyoutChildStyle = useMemoCss(styles).flyoutChildStyle;
 
   const flyoutTitle = idSelected
     ? options.find((option) => option.id === idSelected)?.label || ''
     : '';
 
   const flyoutContentMap: Record<string, React.ReactNode> = {
-    appearance: <SettingsContent state={props.state} setState={props.setState} />,
+    appearance: <AppearanceSettings state={props.state} setState={props.setState} />,
   };
 
   const handleOptionChange = (id: string) => {
@@ -67,7 +76,7 @@ export function SettingsPanelToolbar(props: VisualizationToolbarProps<MetricVisu
           setFlyoutVisible(false);
         }}
       >
-        <div id={idSelected} css={css({ padding: euiTheme.size.base, height: '100%' })}>
+        <div id={idSelected} css={flyoutChildStyle}>
           {idSelected && flyoutContentMap[idSelected] !== undefined
             ? flyoutContentMap[idSelected]
             : null}
