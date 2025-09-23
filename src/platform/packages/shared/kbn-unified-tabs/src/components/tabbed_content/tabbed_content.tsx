@@ -91,6 +91,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
         onEvent('tabRenamed', {
           tabId: item.id,
+          totalTabsOpen: prevState.items.length,
         });
 
         return nextState;

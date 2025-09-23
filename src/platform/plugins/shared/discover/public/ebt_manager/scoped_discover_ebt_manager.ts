@@ -60,6 +60,7 @@ export enum TabsEventName {
   tabReordered = 'tabReordered',
   tabDuplicated = 'tabDuplicated',
   tabClosedOthers = 'tabClosedOthers',
+  tabClosedToTheRight = 'tabClosedToTheRight',
   tabRenamed = 'tabRenamed',
   tabsLimitReached = 'tabsLimitReached',
   tabsKeyboardShortcutsUsed = 'tabsKeyboardShortcutsUsed',
