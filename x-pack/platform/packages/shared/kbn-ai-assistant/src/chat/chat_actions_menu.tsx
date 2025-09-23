@@ -117,7 +117,7 @@ export function ChatActionsMenu({
                     </strong>
                   </div>
                 ),
-                panel: 1,
+                panel: !connectors.isConnectorSelectionRestricted ? 1 : undefined,
               },
             ],
           },
