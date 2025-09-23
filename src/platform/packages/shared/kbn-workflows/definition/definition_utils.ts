@@ -37,15 +37,17 @@ export function getStepByNameFromNestedSteps(
       }
     }
     if (step.type === 'if' && 'else' in step) {
-      const result = getStepByNameFromNestedSteps((step as IfStep).else, stepName);
+      const result = getStepByNameFromNestedSteps((step as IfStep).else!, stepName);
       if (result) {
         return result;
       }
     }
     if (step.type === 'parallel' && 'branches' in step) {
-      const result = getStepByNameFromNestedSteps((step as ParallelStep).branches, stepName);
-      if (result) {
-        return result;
+      for (const branch of (step as ParallelStep).branches!) {
+        const result = getStepByNameFromNestedSteps(branch.steps, stepName);
+        if (result) {
+          return result;
+        }
       }
     }
     if (step.type === 'merge' && 'steps' in step) {
