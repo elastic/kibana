@@ -62,6 +62,16 @@ Array [
 ]
 `;
 
+exports[`index table should not show "Convert to lookup index" option in the context menu when hidden index is selected 1`] = `
+Array [
+  "Show index overview",
+  "Show index settings",
+  "Show index mapping",
+  "Open index",
+  "Delete index",
+]
+`;
+
 exports[`index table should not show "Convert to lookup index" option in the context menu when lookup index is selected 1`] = `
 Array [
   "Show index overview",
