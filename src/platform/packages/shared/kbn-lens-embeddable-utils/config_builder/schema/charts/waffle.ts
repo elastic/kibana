@@ -40,10 +40,8 @@ import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '..
 const partitionStateSharedOptionsSchema = {
   legend: schema.maybe(
     schema.object({
-      nested: schema.maybe(
-        schema.boolean({
-          defaultValue: false,
-        })
+      values: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.literal('absolute')]), { minSize: 1, maxSize: 1 })
       ),
       truncate_after_lines: schema.maybe(
         schema.number({
@@ -53,11 +51,7 @@ const partitionStateSharedOptionsSchema = {
         })
       ),
       visible: schema.maybe(
-        schema.oneOf([
-          schema.literal('auto'),
-          schema.literal('show'),
-          schema.literal('hide'),
-        ])
+        schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')])
       ),
       size: schema.maybe(
         schema.oneOf([
@@ -85,23 +79,6 @@ const partitionStateSharedOptionsSchema = {
         })
       ),
     })
-  ),
-  /**
-   * Position of the labels, only for pie/donut charts
-   */
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('inside'), schema.literal('outside')])
-  ),
-  /**
-   * Size of the donut hole, only for pie/donut charts
-   */
-  donut_hole: schema.maybe(
-    schema.oneOf([
-      schema.literal('none'),
-      schema.literal('small'),
-      schema.literal('medium'),
-      schema.literal('large'),
-    ])
   ),
 };
 
@@ -132,12 +109,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
 });
 
 export const partitionStateSchemaNoESQL = schema.object({
-  type: schema.oneOf([
-    schema.literal('pie'),
-    schema.literal('treemap'),
-    schema.literal('waffle'),
-    schema.literal('mosaic'),
-  ]),
+  type: schema.literal('waffle'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
@@ -189,12 +161,7 @@ export const partitionStateSchemaNoESQL = schema.object({
 });
 
 const partitionStateSchemaESQL = schema.object({
-  type: schema.oneOf([
-    schema.literal('pie'),
-    schema.literal('treemap'),
-    schema.literal('waffle'),
-    schema.literal('mosaic'),
-  ]),
+  type: schema.literal('waffle'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
