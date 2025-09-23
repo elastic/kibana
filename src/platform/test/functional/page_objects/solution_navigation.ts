@@ -60,6 +60,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
       const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
       const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+      log.debug('SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible', isExpanded);
       if (isExpanded === 'false') {
         await moreMenuItem.click();
       }
@@ -74,6 +75,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
       const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
       const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+      log.debug(
+        'SolutionNavigation.sidenav.collapseMoreIfNeeded - More Popover Visible',
+        isExpanded
+      );
       if (isExpanded === 'true') {
         await moreMenuItem.click();
       }
@@ -182,7 +187,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
-        await this.expectLinkExists(by);
+        await expandMoreIfNeeded();
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
           await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
@@ -242,13 +247,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           );
         }
       },
-      async clickPanelLink(deepLinkId: string) {
+      async clickPanelLink(navId: string) {
         if (await isV2()) {
           await collapseMoreIfNeeded();
           await this.feedbackCallout.dismiss();
-          await this.clickLink({ navId: deepLinkId });
+          await testSubjects.click(`~nav-item-id-${navId}`);
         } else {
-          await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+          await testSubjects.click(`~panelNavItem-id-${navId}`);
         }
       },
       /**
