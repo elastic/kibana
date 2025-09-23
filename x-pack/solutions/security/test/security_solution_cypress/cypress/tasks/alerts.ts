@@ -127,7 +127,7 @@ export const closeFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
-   selectAndConfirmClosingReason();
+  selectAndConfirmClosingReason();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
 

@@ -207,7 +207,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN).within(() => {
       selectAndConfirmClosingReason();
     });
-    
+
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
