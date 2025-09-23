@@ -6,6 +6,8 @@
  */
 
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
+import {} from 'react';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
@@ -18,7 +20,7 @@ import { TableTitle } from './table_title';
 
 export function StreamSystemsTable({
   definition,
-  systems,
+  systems: initialSystems,
   selectedSystems,
   setSelectedSystems,
 }: {
@@ -30,6 +32,12 @@ export function StreamSystemsTable({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+
+  const [systems, setSystems] = useState<System[]>(initialSystems);
+
+  useEffect(() => {
+    setSystems(initialSystems);
+  }, [initialSystems]);
 
   const columns: Array<EuiBasicTableColumn<System>> = [
     {
@@ -79,7 +87,10 @@ export function StreamSystemsTable({
           ),
           type: 'icon',
           icon: 'copy',
-          onClick: () => '',
+          onClick: (system) => {
+            // clone the system
+            setSelectedSystems(selectedSystems.concat({ ...system, name: `${system.name}-copy` }));
+          },
         },
         {
           name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.editActionName', {
@@ -91,7 +102,17 @@ export function StreamSystemsTable({
           ),
           type: 'icon',
           icon: 'pencil',
-          onClick: () => '',
+          onClick: (system) => {
+            // open expanded row
+            setItemIdToExpandedRowMap(
+              Object.keys(itemIdToExpandedRowMap).includes(system.name)
+                ? itemIdToExpandedRowMap
+                : {
+                    ...itemIdToExpandedRowMap,
+                    [system.name]: <SystemDetailExpanded system={system} />,
+                  }
+            );
+          },
         },
         {
           name: i18n.translate(
@@ -106,7 +127,17 @@ export function StreamSystemsTable({
           ),
           type: 'icon',
           icon: 'trash',
-          onClick: () => '',
+          onClick: (system) => {
+            // delete the system
+            setSelectedSystems(
+              selectedSystems.filter((selectedSystem) => selectedSystem.name !== system.name)
+            );
+            const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+            if (itemIdToExpandedRowMapValues[system.name]) {
+              delete itemIdToExpandedRowMapValues[system.name];
+              setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+            }
+          },
         },
       ],
     },
