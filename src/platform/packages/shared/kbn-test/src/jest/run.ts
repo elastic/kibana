@@ -296,7 +296,7 @@ async function prepareJestExecution(
     cacheDirectory,
   };
 
-  // Create temporary config file for Jest
+  // Create shared cache directory
   await fs.mkdir(cacheDirectory, { recursive: true });
 
   // Remove existing --config flags and provide the inline JSON config
