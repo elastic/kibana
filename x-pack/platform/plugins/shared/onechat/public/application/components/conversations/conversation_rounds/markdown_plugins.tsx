@@ -8,7 +8,6 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
-import { ChartType } from '@kbn/visualization-utils';
 import {
   visualizationElement,
   type TabularDataResult,
@@ -63,8 +62,8 @@ export function getVisualizationHandler({
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
-  return (props: any) => {
-    const { toolResultId, chartType } = props;
+  return (props: { toolResultId?: string }) => {
+    const { toolResultId } = props;
 
     if (!toolResultId) {
       return <p>Visualization requires a tool result ID.</p>;
@@ -95,7 +94,6 @@ export function getVisualizationHandler({
         dataViews={startDependencies.dataViews}
         esqlQuery={query}
         esqlColumns={columns}
-        preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
       />
     );
   };

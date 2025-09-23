@@ -35,12 +35,14 @@ describe('transformEsqlFormData', () => {
           type: 'text',
           description: 'A string parameter.',
           source: EsqlParamSource.Custom,
+          optional: false,
         },
         {
           name: 'param2',
           type: 'long',
           description: 'A number parameter.',
           source: EsqlParamSource.Custom,
+          optional: false,
         },
       ],
       labels: ['test', 'esql'],
@@ -57,10 +59,12 @@ describe('transformEsqlFormData', () => {
           param1: {
             type: 'text',
             description: 'A string parameter.',
+            optional: false,
           },
           param2: {
             type: 'long',
             description: 'A number parameter.',
+            optional: false,
           },
         },
       },
@@ -89,6 +93,7 @@ describe('transformEsqlFormData', () => {
         description: 'An unused parameter.',
         type: 'text',
         source: EsqlParamSource.Custom,
+        optional: false,
       });
 
       const expectedTool = { ...mockTool };
@@ -97,6 +102,7 @@ describe('transformEsqlFormData', () => {
         param1: {
           description: 'A string parameter.',
           type: 'text',
+          optional: false,
         },
       };
 
@@ -150,12 +156,14 @@ describe('transformEsqlFormData', () => {
             type: 'text',
             description: 'A string parameter.',
             source: EsqlParamSource.Custom,
+            optional: false,
           },
           {
             name: 'param2',
             type: 'long',
             description: 'A number parameter.',
             source: EsqlParamSource.Custom,
+            optional: false,
           },
         ],
         labels: ['test', 'esql'],
@@ -171,6 +179,7 @@ describe('transformEsqlFormData', () => {
             param1: {
               type: 'text',
               description: 'A string parameter.',
+              optional: false,
             },
           },
         },
