@@ -1797,6 +1797,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
 /.ci/.storybook @elastic/kibana-operations
+/src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/obs-ui-devex-team
 
 # QA - Appex QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
@@ -2620,6 +2621,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+/x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
 
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
