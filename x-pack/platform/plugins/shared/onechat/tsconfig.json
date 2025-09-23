@@ -76,5 +76,6 @@
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/doc-links",
+    "@kbn/ui-actions-plugin",
   ]
 }
