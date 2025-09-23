@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { WorkflowYaml, StepContext, ForEachStep, WorkflowContextSchema } from '@kbn/workflows';
+import type { WorkflowYaml, StepContext, ForEachStep } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
@@ -24,36 +24,43 @@ export function getContextSchemaForPath(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>
-) {
-  let stepContextSchema = StepContextSchema;
-  stepContextSchema = stepContextSchema.merge(getWorkflowContextSchema(definition));
+): z.ZodType<StepContext> {
+  // Build the schema step by step using Zod's built-in methods
+  let schema = StepContextSchema.merge(getWorkflowContextSchema(definition));
+
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return stepContextSchema;
+    return schema;
   }
   const nearestStep = _.get(definition, nearestStepPath);
   if (!nearestStep) {
-    return stepContextSchema;
+    return schema;
   }
+
   const stepsCollectionSchema = getStepsCollectionSchema(
-    stepContextSchema as typeof WorkflowContextSchema,
+    schema,
     workflowGraph,
     definition,
     nearestStep.name
   );
+
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    stepContextSchema = stepContextSchema.extend({
-      steps: stepsCollectionSchema,
-    });
+    // Use Zod's merge instead of extend for better type inference
+    schema = (schema as any).extend({ steps: stepsCollectionSchema });
   }
+
   const enrichments = getStepContextSchemaEnrichments(
-    stepContextSchema,
+    schema,
     workflowGraph,
     definition,
     nearestStep.name
   );
-  stepContextSchema = stepContextSchema.extend(enrichments);
-  return stepContextSchema satisfies z.ZodType<StepContext>;
+
+  if (Object.keys(enrichments).length > 0) {
+    schema = (schema as any).extend(enrichments);
+  }
+
+  return schema satisfies z.ZodType<StepContext>;
 }
 
 function getStepContextSchemaEnrichments(

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ForEachStep, WorkflowContextSchema } from '@kbn/workflows';
+import type { ForEachStep } from '@kbn/workflows';
 import { getStepId, type WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
@@ -16,7 +16,7 @@ import { getOutputSchemaForStepType } from '../../../../common/schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 
 export function getStepsCollectionSchema(
-  stepContextSchema: typeof WorkflowContextSchema,
+  stepContextSchema: z.ZodType,
   workflowExecutionGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   stepName: string
@@ -50,7 +50,7 @@ export function getStepsCollectionSchema(
         // if the step is a foreach, add the foreach schema to the step state schema
         stepsSchema = stepsSchema.extend({
           [node.stepId]: getForeachStateSchema(
-            stepContextSchema.extend({ steps: stepsSchema }),
+            (stepContextSchema as z.ZodObject<any>).merge(z.object({ steps: stepsSchema })),
             foreachStep as ForEachStep
           ),
         });
