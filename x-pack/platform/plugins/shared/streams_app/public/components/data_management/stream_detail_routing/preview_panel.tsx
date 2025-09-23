@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
@@ -121,7 +122,18 @@ const SamplePreviewPanel = () => {
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
 
-  const cellActions = buildCellActions(documents, createNewRule, changeRule);
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { definition } = routingSnapshot.context;
+  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+
+  const cellActions = useMemo(() => {
+    if (!canCreateRoutingRules || maxNestingLevel) {
+      return [];
+    }
+
+    return buildCellActions(documents, createNewRule, changeRule);
+  }, [canCreateRoutingRules, maxNestingLevel, documents, createNewRule, changeRule]);
 
   const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
     ? Number.NaN
