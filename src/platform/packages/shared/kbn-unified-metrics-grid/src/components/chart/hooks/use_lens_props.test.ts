@@ -28,8 +28,6 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
 };
 
 describe('useLensProps', () => {
-  let intersectionCallback: (entries: IntersectionObserverEntry[]) => void;
-
   const mockChartLayers: Array<LensSeriesLayer> = [
     {
       type: 'series',
@@ -47,62 +45,38 @@ describe('useLensProps', () => {
     return { current: div };
   };
 
-  function mockIntersectionObserver(
-    isIntersectingItems?: Array<boolean>
-  ): [jest.MockedObject<IntersectionObserver>, jest.MockedFn<any>] {
-    const intersectionObserverInstanceMock: any = {
+  // Create mock IntersectionObserver
+  const createIntersectionObserverMock = () => {
+    const mockObserve = jest.fn();
+    const mockDisconnect = jest.fn();
+    const mockUnobserve = jest.fn();
+
+    const MockIntersectionObserver = jest.fn().mockImplementation(() => ({
+      observe: mockObserve,
+      disconnect: mockDisconnect,
+      unobserve: mockUnobserve,
       root: null,
-      rootMargin: '',
+      rootMargin: '0px',
       thresholds: [0],
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-      takeRecords: jest.fn(),
+      takeRecords: jest.fn(() => []),
+    }));
+
+    return {
+      MockIntersectionObserver,
+      mockObserve,
+      mockDisconnect,
+      mockUnobserve,
     };
-
-    window.IntersectionObserver = jest
-      .fn()
-      .mockImplementation((callback: (entries: Array<IntersectionObserverEntry>) => void) => {
-        if (isIntersectingItems === undefined) {
-          callback([]);
-
-          return intersectionObserverInstanceMock;
-        }
-
-        const rect = {
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
-          toJSON: () => '',
-        };
-        callback(
-          isIntersectingItems.map((isIntersecting) => ({
-            isIntersecting,
-            intersectionRatio: 0,
-            intersectionRect: rect,
-            rootBounds: rect,
-            boundingClientRect: rect,
-            target: document.createElement('div'),
-            time: 0,
-          }))
-        );
-
-        return intersectionObserverInstanceMock;
-      });
-
-    return [intersectionObserverInstanceMock, window.IntersectionObserver as jest.MockedFn<any>];
-  }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
 
-    mockIntersectionObserver([true]);
+    const { MockIntersectionObserver } = createIntersectionObserverMock();
+
+    Object.assign(window, {
+      IntersectionObserver: MockIntersectionObserver,
+    });
 
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
       Promise.resolve({
@@ -198,13 +172,8 @@ describe('useLensProps', () => {
       })
     );
 
-    await act(async () => {
-      await Promise.resolve();
-    });
-
     act(() => {
       discoverFetch$.next({ type: 'fetch' });
-      jest.advanceTimersByTime(150);
     });
 
     await waitFor(() => {

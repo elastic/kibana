@@ -39,7 +39,7 @@ export type LensProps = Pick<
   | 'onLoad'
 >;
 
-const ROOT_MARGIN = '50px';
+const ROOT_MARGIN = '15px';
 export const useLensProps = ({
   title,
   query,
@@ -132,23 +132,24 @@ export const useLensProps = ({
 
   useEffect(() => {
     const attributesCurrent = attributes$.current;
-    const charRefCurrent = chartRef?.current;
+    const chartRefCurrent = chartRef?.current;
 
+    // progressively load Lens when the chart becomes visible
     const intersecting$ = new Observable<boolean>((subscriber) => {
       const observer = new IntersectionObserver(
         ([entry]) => subscriber.next(entry.isIntersecting),
         { threshold: 0.1, rootMargin: ROOT_MARGIN }
       );
 
-      if (charRefCurrent) {
-        observer.observe(charRefCurrent);
+      if (chartRefCurrent) {
+        observer.observe(chartRefCurrent);
       } else {
         subscriber.next(true);
         subscriber.complete();
       }
 
       return () => observer.disconnect();
-    }).pipe(startWith(!!charRefCurrent), distinctUntilChanged());
+    }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged());
 
     const subscription = merge(
       discoverFetch$,
