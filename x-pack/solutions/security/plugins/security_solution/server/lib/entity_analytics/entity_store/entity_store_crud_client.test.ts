@@ -7,7 +7,8 @@
 
 import { EntityStoreCrudClient } from './entity_store_crud_client';
 import { entityStoreDataClientMock } from './entity_store_data_client.mock';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   BadCRUDRequestError,
   DocumentNotFoundError,
