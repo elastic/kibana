@@ -1416,8 +1416,8 @@ export function getCompletionItemProvider(
                   range,
                   documentation: 'Numeric value',
                 });
-              } else {
-                // Generic string placeholder
+              } else if (lineUpToCursor.match(/:\s*$/)) {
+                // Generic string placeholder only if the value is still empty
                 valueSuggestions.push({
                   label: '""',
                   kind: monaco.languages.CompletionItemKind.Value,
