@@ -102,7 +102,7 @@ export function registerChatRoutes({
       summary: 'Converse with an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['oas-tag:agent-builder'],
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -167,7 +167,7 @@ export function registerChatRoutes({
       summary: 'Converse with an agent and stream events',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['oas-tag:agent-builder'],
+        tags: ['oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',

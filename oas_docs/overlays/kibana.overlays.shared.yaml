@@ -47,7 +47,7 @@ actions:
         description: Connector documentation
         url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
       x-displayName: 'Connectors'
-  - target: '$.tags[?(@.name=="agent-builder")]'
+  - target: '$.tags[?(@.name=="elastic agent builder")]'
     description: Change tag description and displayName
     update:
       # description: 

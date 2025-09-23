@@ -37,7 +37,7 @@ export function registerConversationRoutes({
       summary: 'List conversations',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation', 'oas-tag:agent-builder'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -90,7 +90,7 @@ export function registerConversationRoutes({
       summary: 'Get conversation by ID',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation', 'oas-tag:agent-builder'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -137,7 +137,7 @@ export function registerConversationRoutes({
       summary: 'Delete conversation by ID',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['conversation', 'oas-tag:agent-builder'],
+        tags: ['conversation', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
