@@ -103,6 +103,10 @@ export interface ResponseActionRunScriptOutputContent {
   code: string;
 }
 
+export interface ResponseActionCancelOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -253,6 +257,10 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+export interface ResponseActionCancelParameters {
+  id: string;
+}
+
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
@@ -262,7 +270,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -274,7 +283,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
