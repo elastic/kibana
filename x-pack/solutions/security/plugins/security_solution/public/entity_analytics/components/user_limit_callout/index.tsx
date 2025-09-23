@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserLimitStatus } from '../../hooks/use_privileged_monitoring_health';
 
@@ -15,11 +15,14 @@ interface UserLimitCallOutProps {
   variant?: 'compact' | 'full';
   /** Whether to show only when limit is exceeded (default: false - shows info at 90%+ usage) */
   showOnlyWhenExceeded?: boolean;
+  /** Callback when "Manage data sources" button is clicked */
+  onManageDataSources?: () => void;
 }
 
 export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   variant = 'full',
   showOnlyWhenExceeded = false,
+  onManageDataSources,
 }) => {
   const { userStats, isLoading, isLimitExceeded, isNearLimit, utilizationPercentage } =
     useUserLimitStatus();
@@ -40,14 +43,15 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   if (isLimitExceeded) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.exceeded.title"
             defaultMessage="User limit exceeded"
           />
         }
-        color="danger"
-        iconType="warning"
+        color="warning"
+        iconType="alert"
         data-test-subj="privileged-user-limit-exceeded-callout"
       >
         <EuiText size="s">
@@ -60,6 +64,20 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
             }}
           />
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
+        <EuiButton
+          size="s"
+          iconType="gear"
+          color="warning"
+          onClick={onManageDataSources || (() => {})}
+          data-test-subj="manage-data-sources-button-exceeded"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.manageDataSources"
+            defaultMessage="Manage data sources"
+          />
+        </EuiButton>
       </EuiCallOut>
     );
   }
@@ -67,6 +85,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   if (isNearLimit && variant === 'full') {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.nearLimit.title"
@@ -88,6 +107,20 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
             }}
           />
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
+        <EuiButton
+          size="s"
+          iconType="gear"
+          color="warning"
+          onClick={onManageDataSources || (() => {})}
+          data-test-subj="manage-data-sources-button-near-limit"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.manageDataSources"
+            defaultMessage="Manage data sources"
+          />
+        </EuiButton>
       </EuiCallOut>
     );
   }
@@ -95,6 +128,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   if (variant === 'compact') {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.info.title"

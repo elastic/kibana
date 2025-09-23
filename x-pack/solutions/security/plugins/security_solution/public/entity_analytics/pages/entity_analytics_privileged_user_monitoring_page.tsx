@@ -329,7 +329,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
             />
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <UserLimitCallOut />
+                <UserLimitCallOut onManageDataSources={onManageUserClicked} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <PrivilegedUserMonitoring
