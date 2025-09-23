@@ -47,7 +47,7 @@ const gaugeStateSharedOptionsSchema = {
           schema.literal('arc'),
         ]),
       }),
-    ])
+    ], defaultValue: { type: "bullet", direction: "horizontal" })
   ),
 };
 
