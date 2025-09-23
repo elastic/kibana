@@ -7,24 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Attachment, Case } from '@kbn/cases-plugin/common/types/domain';
 import type {
-  AttachmentRequest,
+  ApiResponse,
+  ApiStatusResponse,
+  Attachment,
+  Case,
+  CasesPatchRequest,
   CasePostRequest,
   CasesFindResponse,
+} from './types';
+
+export type {
+  ApiResponse,
+  ApiStatusResponse,
+  Attachment,
+  Case,
   CasesPatchRequest,
-} from '@kbn/cases-plugin/common/types/api';
+  CasePostRequest,
+  CasesFindResponse,
+} from './types';
+
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
-
-export interface ApiResponse<T> {
-  data: T;
-  status: number;
-}
-
-export interface ApiStatusResponse {
-  status: number;
-}
 
 export interface CasesApiService {
   create: (params: CasePostRequest, spaceId?: string) => Promise<ApiResponse<Case>>;
@@ -39,11 +43,7 @@ export interface CasesApiService {
     get: (spaceId?: string) => Promise<ApiResponse<any>>;
   };
   comments: {
-    create: (
-      caseId: string,
-      params: AttachmentRequest,
-      spaceId?: string
-    ) => Promise<ApiResponse<Case>>;
+    create: (caseId: string, params: any, spaceId?: string) => Promise<ApiResponse<Case>>;
     get: (caseId: string, commentId: string, spaceId?: string) => Promise<ApiResponse<Attachment>>;
   };
   cleanup: {

@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserCommentAttachment } from '@kbn/cases-plugin/common/types/domain';
-import {
-  AttachmentType,
-  ConnectorTypes,
-  CaseSeverity,
-} from '@kbn/cases-plugin/common/types/domain';
 import { apiTest, expect } from '../../../src/playwright';
 import { createCasePayload } from '../../fixtures/constants';
 
@@ -55,7 +49,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
         {
           id: caseId,
           version: currentCase.data.version,
-          severity: CaseSeverity.MEDIUM,
+          severity: 'medium',
         },
       ],
     });
@@ -74,7 +68,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
           connector: {
             id: 'jira',
             name: 'Jira',
-            type: ConnectorTypes.jira,
+            type: '.jira',
             fields: { issueType: 'Task', priority: null, parent: null },
           },
         },
@@ -133,7 +127,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
 
   apiTest('should post and find a comment', async ({ apiServices }) => {
     const { data: updatedCase, status } = await apiServices.cases.comments.create(caseId, {
-      type: AttachmentType.user,
+      type: 'user',
       comment: 'This is a test comment',
       owner: caseOwner,
     });
@@ -147,14 +141,13 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     const { data: fetchedComment, status: fetchCommentStatus } =
       await apiServices.cases.comments.get(caseId, commentId);
 
-    const fetchedUserComment = fetchedComment as UserCommentAttachment;
     expect(fetchCommentStatus).toBe(200);
-    expect(fetchedUserComment.comment).toBe('This is a test comment');
+    expect(fetchedComment.comment).toBe('This is a test comment');
   });
 
   apiTest('should post an alert', async ({ apiServices }) => {
     const createdAlert = await apiServices.cases.comments.create(caseId, {
-      type: AttachmentType.alert,
+      type: 'alert',
       owner: caseOwner,
       alertId: 'test-alert-id',
       index: 'test-index',
