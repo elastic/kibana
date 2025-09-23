@@ -9,7 +9,8 @@
 
 import fs from 'node:fs';
 
-import { uploadAllEventsFromPath } from './upload_events';
+import type { EventUploadOptions } from './upload_events';
+import { uploadAllEventsFromPath, nonThrowingUploadAllEventsFromPath } from './upload_events';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 jest.mock('node:fs');
@@ -208,6 +209,34 @@ describe('uploadAllEventsFromPath', () => {
     expect(log.info.mock.calls).toEqual([
       ['Connecting to Elasticsearch at esURL'],
       ["Recursively found 2 .ndjson event log files in directory 'mocked_directory'."],
+    ]);
+  });
+});
+
+describe('nonThrowingUploadAllEventsFromPath', () => {
+  it('should not throw and only log a warning', async () => {
+    jest.spyOn(fs, 'existsSync').mockRestore();
+
+    const log: jest.Mocked<ToolingLog> = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warning: jest.fn(),
+    } as any;
+
+    const eventLogPath = '/some/path/that/does/not/exist';
+    const eventUploadOptions: EventUploadOptions = {
+      esURL: 'esURL',
+      esAPIKey: 'esAPIKey',
+      verifyTLSCerts: true,
+      log,
+    };
+
+    await expect(
+      nonThrowingUploadAllEventsFromPath(eventLogPath, eventUploadOptions)
+    ).resolves.toBeUndefined();
+
+    expect(log.warning.mock.calls).toEqual([
+      [`An error was suppressed: The provided event log path '${eventLogPath}' does not exist.`],
     ]);
   });
 });
