@@ -282,7 +282,7 @@ export const useDashboardMenuItems = ({
   }, []);
 
   const viewModeTopNavConfig = useMemo(() => {
-    const { showWriteControls } = getDashboardCapabilities();
+    const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
@@ -295,9 +295,10 @@ export const useDashboardMenuItems = ({
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
-    const backgroundSearch = dataService.search.isBackgroundSearchEnabled
-      ? [menuItems.backgroundSearch]
-      : [];
+    const backgroundSearch =
+      storeSearchSession && dataService.search.isBackgroundSearchEnabled
+        ? [menuItems.backgroundSearch]
+        : [];
 
     return [
       ...labsMenuItem,
@@ -324,6 +325,8 @@ export const useDashboardMenuItems = ({
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
+    const { storeSearchSession } = getDashboardCapabilities();
+
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
       ? ([
@@ -348,9 +351,10 @@ export const useDashboardMenuItems = ({
     }
 
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
-    const backgroundSearch = dataService.search.isBackgroundSearchEnabled
-      ? [menuItems.backgroundSearch]
-      : [];
+    const backgroundSearch =
+      storeSearchSession && dataService.search.isBackgroundSearchEnabled
+        ? [menuItems.backgroundSearch]
+        : [];
 
     // insert share menu item before the last item in edit mode
     editModeTopNavConfigItems.splice(-1, 0, ...backgroundSearch, ...shareMenuItem);

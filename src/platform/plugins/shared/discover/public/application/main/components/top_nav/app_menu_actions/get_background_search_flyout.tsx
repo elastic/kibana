@@ -20,7 +20,7 @@ export const getBackgroundSearchFlyout = ({
     type: AppMenuActionType.primary,
     controlProps: {
       label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
-        defaultMessage: 'Open background search flyout',
+        defaultMessage: 'Background searches',
       }),
       iconType: 'clock',
       testId: 'openBackgroundSearchFlyoutButton',

@@ -127,7 +127,11 @@ export const useTopNavLinks = ({
         items.push(alertsAppMenuItem);
       }
 
-      if (!!appId && services.data.search.isBackgroundSearchEnabled) {
+      if (
+        !!appId &&
+        services.data.search.isBackgroundSearchEnabled &&
+        services.capabilities.discover_v2.storeSearchSession
+      ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
           onClick: () => services.data.search.showSearchSessionsFlyout({ appId }),
         });
