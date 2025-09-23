@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import {
-  Condition,
   type FilterCondition,
   getDefaultFormValueForOperator,
   getFilterOperator,
@@ -17,14 +17,6 @@ import {
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import {
-  FieldSelector,
-  FieldSuggestion,
-} from '@kbn/streams-app-plugin/public/components/data_management/shared/field_selector';
-import {
-  alwaysToEmptyEquals,
-  emptyEqualsToAlways,
-} from '@kbn/streams-app-plugin/public/util/condition';
 import { isPlainObject } from 'lodash';
 import useToggle from 'react-use/lib/useToggle';
 import {
@@ -40,6 +32,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useMemo } from 'react';
+import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
+import type { FieldSuggestion } from './field_selector';
+import { FieldSelector } from './field_selector';
 
 export interface ConditionEditorProps {
   condition: Condition;
