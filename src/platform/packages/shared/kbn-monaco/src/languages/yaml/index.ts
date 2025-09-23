@@ -23,11 +23,17 @@ const monacoYamlDefaultOptions: MonacoYamlOptions = {
   validate: true,
 };
 
-export const configureMonacoYamlSchema = async (schemas: MonacoYamlOptions['schemas']) => {
+export const configureMonacoYamlSchema = async (
+  schemas: MonacoYamlOptions['schemas'],
+  options?: Partial<MonacoYamlOptions>
+) => {
   const { configureMonacoYaml } = await import(/* webpackChunkName: "monaco-yaml" */ 'monaco-yaml');
 
-  return configureMonacoYaml(monaco, {
+  const finalOptions = {
     ...monacoYamlDefaultOptions,
+    ...(options || {}),
     schemas,
-  });
+  };
+
+  return configureMonacoYaml(monaco, finalOptions);
 };

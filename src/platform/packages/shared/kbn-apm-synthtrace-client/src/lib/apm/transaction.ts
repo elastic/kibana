@@ -20,10 +20,12 @@ export class Transaction extends BaseSpan {
   private readonly _events: Event[] = [];
 
   constructor(fields: ApmFields) {
+    const transactionId = generateShortId();
     super({
       ...fields,
       'processor.event': 'transaction',
-      'transaction.id': generateShortId(),
+      'transaction.id': transactionId,
+      'span.id': transactionId,
       'transaction.sampled': true,
       'http.request.method': 'GET',
       'http.response.status_code': 200,

@@ -170,6 +170,7 @@ describe('schema validation', () => {
         started_at: 'now',
         error: 'error',
       },
+      previous_version: '0.0.1',
     };
     savedObject = {
       type: 'type',
@@ -189,7 +190,7 @@ describe('schema validation', () => {
     };
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
-        alert: [],
+        alerting_rule_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -212,6 +213,7 @@ describe('schema validation', () => {
         ingest_pipeline: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
       },
     };
     packageInfo = {

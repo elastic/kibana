@@ -39,6 +39,7 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  type IndexSearchToolDefinitionWithSchema,
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
@@ -77,6 +78,7 @@ export {
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  agentIdRegexp,
 } from './agents';
 export {
   type RoundInput,
@@ -99,7 +101,11 @@ export {
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
   type ConversationUpdatedEventData,
+  type ConversationIdSetEvent,
+  type ConversationIdSetEventData,
   type ChatAgentEvent,
+  type ToolProgressEvent,
+  type ToolProgressEventData,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -112,6 +118,7 @@ export {
   type MessageCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type ToolCallProgress,
   isToolCallEvent,
   isToolResultEvent,
   isReasoningEvent,
@@ -120,4 +127,5 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isToolProgressEvent,
 } from './chat';

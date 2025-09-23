@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
-import { inputsFormat } from '../../../common/constants';
+import { FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -97,7 +97,15 @@ export async function populateAssignedAgentsCount(
           kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents]);
+      const fipsAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${FIPS_AGENT_KUERY}`,
+        })
+        .then(({ total }) => (agentPolicy.fips_agents = total));
+      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );

@@ -13,6 +13,7 @@ import type { EsConversationSchema } from './types';
 import { authenticatedUser } from '../../__mocks__/user';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { getEsConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -60,35 +61,7 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
         _id: '1',
         _index: '',
         _score: 0,
-        _source: {
-          '@timestamp': '2020-04-20T15:25:31.830Z',
-          created_at: '2020-04-20T15:25:31.830Z',
-          title: 'title-1',
-          updated_at: '2020-04-20T15:25:31.830Z',
-          messages: [],
-          id: '1',
-          namespace: 'default',
-          exclude_from_last_conversation_storage: false,
-          api_config: {
-            action_type_id: '.gen-ai',
-            connector_id: 'c1',
-            default_system_prompt_id: 'prompt-1',
-            model: 'test',
-            provider: 'Azure OpenAI',
-          },
-          category: 'assistant',
-          users: [
-            {
-              id: '1111',
-              name: 'elastic',
-            },
-          ],
-          created_by: {
-            id: '1111',
-            name: 'elastic',
-          },
-          replacements: undefined,
-        },
+        _source: getEsConversationSchemaMock(),
       },
     ],
     max_score: 0,

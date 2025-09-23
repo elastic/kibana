@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
@@ -23,13 +23,18 @@ interface Props {
   'data-test-subj'?: string;
 }
 
+const getStyles = ({ hidden }: { hidden?: boolean }) => ({
+  container: hidden
+    ? css`
+        display: none;
+      `
+    : undefined,
+});
+
 export const ContextMenu: FunctionComponent<Props> = (props) => {
   const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
+  const styles = getStyles({ hidden });
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const containerClasses = classNames({
-    'pipelineProcessorsEditor__item--displayNone': hidden,
-  });
 
   const contextMenuItems = [
     <EuiContextMenuItem
@@ -71,7 +76,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
   ].filter(Boolean) as JSX.Element[];
 
   return (
-    <div className={containerClasses}>
+    <div css={styles.container}>
       <EuiPopover
         data-test-subj={props['data-test-subj']}
         anchorPosition="leftCenter"
