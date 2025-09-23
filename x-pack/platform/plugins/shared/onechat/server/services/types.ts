@@ -44,5 +44,5 @@ export interface ServicesStartDeps {
   savedObjects: SavedObjectsServiceStart;
   // plugin deps
   inference: InferenceServerStart;
-  spaces: SpacesPluginStart | undefined;
+  spaces?: SpacesPluginStart;
 }
