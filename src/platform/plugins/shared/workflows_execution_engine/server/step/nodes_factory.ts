@@ -15,12 +15,14 @@ import type {
   EnterIfNode,
   EnterNormalPathNode,
   EnterRetryNode,
+  EnterTimeoutZoneNode,
   EnterTryBlockNode,
   ExitConditionBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  ExitTimeoutZoneNode,
   GraphNode,
   HttpGraphNode,
   UnionExecutionGraphNode,
@@ -53,6 +55,7 @@ import {
   EnterFallbackPathNodeImpl,
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
+import { EnterTimeoutZoneNodeImpl, ExitTimeoutZoneNodeImpl } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
@@ -146,6 +149,18 @@ export class NodesFactory {
         return new ExitNormalPathNodeImpl(node as ExitNormalPathNode, this.workflowRuntime);
       case 'exit-fallback-path':
         return new ExitFallbackPathNodeImpl(node as ExitFallbackPathNode, this.workflowRuntime);
+      case 'enter-timeout-zone':
+        return new EnterTimeoutZoneNodeImpl(
+          node as EnterTimeoutZoneNode,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'exit-timeout-zone':
+        return new ExitTimeoutZoneNodeImpl(
+          node as ExitTimeoutZoneNode,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'enter-if':
         return new EnterIfNodeImpl(
           node as EnterIfNode,
