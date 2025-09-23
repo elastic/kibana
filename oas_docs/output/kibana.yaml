@@ -52762,7 +52762,6 @@ paths:
                                           - name
                                           - filter
                                     required:
-                                      - system
                                       - kql
                               type: array
                             rules:
@@ -54649,7 +54648,6 @@ paths:
                                           - name
                                           - filter
                                     required:
-                                      - system
                                       - kql
                               type: array
                             rules:
@@ -56312,7 +56310,6 @@ paths:
                                           - name
                                           - filter
                                     required:
-                                      - system
                                       - kql
                               type: array
                             rules:
@@ -58049,7 +58046,6 @@ paths:
                                           - name
                                           - filter
                                     required:
-                                      - system
                                       - kql
                               type: array
                             rules:
@@ -59712,7 +59708,6 @@ paths:
                                       - name
                                       - filter
                                 required:
-                                  - system
                                   - kql
                           type: array
                         rules:
@@ -63862,7 +63857,6 @@ paths:
                                       - name
                                       - filter
                                 required:
-                                  - system
                                   - kql
                         required:
                           - index
@@ -64127,7 +64121,6 @@ paths:
                   type: string
               required:
                 - title
-                - system
                 - kql
       responses: {}
       summary: Upsert a query to a stream
@@ -64579,7 +64572,6 @@ paths:
                         - name
                         - filter
                   required:
-                    - system
                     - kql
               required:
                 - query
