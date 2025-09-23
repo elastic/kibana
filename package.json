@@ -1984,7 +1984,7 @@
     "stylelint-scss": "^4.3.0",
     "superagent": "^10.2.1",
     "supertest": "^7.1.1",
-    "svgo": "^3.3.2",
+    "svgo": "^4.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "table": "^6.8.2",
