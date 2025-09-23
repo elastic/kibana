@@ -29,7 +29,6 @@ interface EventKindFilterResult {
   };
 }
 
-
 /**
  * Test helper function to create and properly cast the event kind filter result
  * This centralizes the type casting to avoid repetition and type errors
