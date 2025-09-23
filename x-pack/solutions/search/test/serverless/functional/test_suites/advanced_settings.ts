@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -15,6 +16,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
+
+  const IGNORED_SETTINGS = [
+    // corresponding plugin not enabled in production yet
+    WORKFLOWS_UI_SETTING_ID,
+  ];
 
   describe('Search advanced settings', function () {
     before(async () => {
@@ -37,6 +43,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (isEditorFieldSetting(settingId)) {
           continue;
         }
+        if (IGNORED_SETTINGS.includes(settingId)) {
+          continue;
+        }
+
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
