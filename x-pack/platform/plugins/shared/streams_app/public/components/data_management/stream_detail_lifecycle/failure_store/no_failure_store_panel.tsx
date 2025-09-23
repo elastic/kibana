@@ -7,8 +7,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { Streams } from '@kbn/streams-schema';
 
-export const NoFailureStorePanel = ({ openModal }: { openModal: (show: boolean) => void }) => {
+export const NoFailureStorePanel = ({
+  openModal,
+  definition,
+}: {
+  openModal: (show: boolean) => void;
+  definition: Streams.ingest.all.GetResponse;
+}) => {
+  const {
+    privileges: { manage_failure_store: manageFailureStorePrivilege },
+  } = definition;
   return (
     <EuiPanel
       paddingSize="m"
@@ -35,17 +45,19 @@ export const NoFailureStorePanel = ({ openModal }: { openModal: (show: boolean) 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div>
-            <EuiButton
-              type="button"
-              onClick={() => openModal(true)}
-              data-test-subj="streamsAppFailureStoreEnableButton"
-            >
-              {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.button', {
-                defaultMessage: 'Enable failure store',
-              })}
-            </EuiButton>
-          </div>
+          {manageFailureStorePrivilege && !Streams.WiredStream.GetResponse.is(definition) && (
+            <div>
+              <EuiButton
+                type="button"
+                onClick={() => openModal(true)}
+                data-test-subj="streamsAppFailureStoreEnableButton"
+              >
+                {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.button', {
+                  defaultMessage: 'Enable failure store',
+                })}
+              </EuiButton>
+            </div>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

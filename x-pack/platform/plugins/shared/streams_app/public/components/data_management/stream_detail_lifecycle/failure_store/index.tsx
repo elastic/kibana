@@ -104,7 +104,7 @@ export const StreamDetailFailureStore = ({
               config={data?.config}
             />
           ) : (
-            <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} />
+            <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />
           )}
           <EuiSpacer size="s" />
         </>
