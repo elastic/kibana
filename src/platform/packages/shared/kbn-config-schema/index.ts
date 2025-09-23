@@ -118,6 +118,23 @@ function literal<T extends string | number | boolean | null>(value: T): LiteralT
   return new LiteralType(value);
 }
 
+/**
+ * Creates a literal union type from an array of string literals.
+ *
+ * @example
+ * ```ts
+ * const myEnums = ['foo', 'bar', 'baz'] as const;
+ * const myEnumType = schema.enum(myEnums);
+ * ```
+ */
+function enumeration<U extends string, D extends DefaultValue<U> = never>(
+  values: [U, ...U[]] | readonly [U, ...U[]],
+  options?: TypeOptions<U, U, D>
+): Type<U, U> {
+  const literalTypes = values.map((value) => literal(value)) as any;
+  return union(literalTypes, options);
+}
+
 function number<D extends DefaultValue<number> = never>(options?: NumberOptions<D>): NumberType<D> {
   return new NumberType(options);
 }
@@ -295,6 +312,7 @@ function lazy<T>(id: string): Lazy<T> {
 
 export const schema = {
   allOf: intersection,
+  enum: enumeration,
   any,
   arrayOf,
   boolean,
