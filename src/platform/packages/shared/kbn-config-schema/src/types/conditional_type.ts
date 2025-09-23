@@ -10,24 +10,35 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Reference } from '../references';
-import type { ExtendsDeepOptions, TypeOptions } from './type';
+import type { DefaultValue, ExtendsDeepOptions, SomeType, TypeOptions } from './type';
 import { Type } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 
-export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
-  private readonly leftOperand: Reference<A>;
-  private readonly rightOperand: Reference<A> | A | Type<unknown>;
-  private readonly equalType: Type<B>;
-  private readonly notEqualType: Type<C>;
-  private readonly options?: TypeOptions<B | C>;
+export type ConditionalTypeOptions<
+  A extends SomeType,
+  B extends SomeType,
+  D extends DefaultValue<A['_input'] | B['_input']> = never
+> = TypeOptions<A['_output'] | B['_output'], A['_input'] | B['_input'] | B, D>;
+
+export class ConditionalType<
+  T extends ConditionalTypeValue,
+  A extends SomeType,
+  B extends SomeType,
+  D extends DefaultValue<A['_input'] | B['_input']> = never
+> extends Type<A['_output'] | B['_output'], A['_input'] | B['_input'], D> {
+  private readonly leftOperand: Reference<T>;
+  private readonly rightOperand: Reference<T> | T | Type<unknown>;
+  private readonly equalType: A;
+  private readonly notEqualType: B;
+  private readonly options?: ConditionalTypeOptions<A, B, D>;
 
   constructor(
-    leftOperand: Reference<A>,
-    rightOperand: Reference<A> | A | Type<unknown>,
-    equalType: Type<B>,
-    notEqualType: Type<C>,
-    options?: TypeOptions<B | C>
+    leftOperand: Reference<T>,
+    rightOperand: Reference<T> | T | Type<unknown>,
+    equalType: A,
+    notEqualType: B,
+    options?: ConditionalTypeOptions<A, B, D>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
       is:
@@ -39,6 +50,7 @@ export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<
     });
 
     super(schema, options);
+
     this.leftOperand = leftOperand;
     this.rightOperand = rightOperand;
     this.equalType = equalType;

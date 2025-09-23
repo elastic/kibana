@@ -9,20 +9,32 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type {
+  TypeOptions,
+  ExtendsDeepOptions,
+  UnknownOptions,
+  DefaultValue,
+  SomeType,
+} from './type';
 import { Type } from './type';
 
-export type ArrayOptions<T> = TypeOptions<T[]> &
+export type ArrayOptions<
+  T extends SomeType,
+  D extends DefaultValue<T['_input'][]> = never
+> = TypeOptions<T['_output'][], T['_input'][], D> &
   UnknownOptions & {
     minSize?: number;
     maxSize?: number;
   };
 
-export class ArrayType<T> extends Type<T[]> {
-  private readonly arrayType: Type<T>;
-  private readonly arrayOptions: ArrayOptions<T>;
+export class ArrayType<
+  T extends SomeType,
+  D extends DefaultValue<T['_input'][]> = never
+> extends Type<T['_output'][], T['_input'][], D> {
+  private readonly itemType: T;
+  private readonly arrayOptions: ArrayOptions<T, D>;
 
-  constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
+  constructor(type: T, options: ArrayOptions<T, D> = {}) {
     let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
     if (options.minSize !== undefined) {
@@ -40,12 +52,12 @@ export class ArrayType<T> extends Type<T[]> {
     }
 
     super(schema, options);
-    this.arrayType = type;
+    this.itemType = type;
     this.arrayOptions = options;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
-    return new ArrayType(this.arrayType.extendsDeep(options), this.arrayOptions);
+  public extendsDeep(options: ExtendsDeepOptions): ArrayType<T, D> {
+    return new ArrayType(this.itemType.extendsDeep(options) as T, this.arrayOptions);
   }
 
   protected handleError(type: string, { limit, reason, value }: Record<string, any>) {

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Duration } from 'moment';
 import { duration as momentDuration } from 'moment';
 import { schema } from '../..';
 import { ensureDuration } from '../duration';
+import { expectType } from 'tsd';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
@@ -150,6 +152,29 @@ describe('#defaultValue', () => {
         "target": "PT1H",
       }
     `);
+  });
+});
+
+describe('#validate', () => {
+  test('should pass only Duration to validate', () => {
+    duration({
+      defaultValue: momentDuration(1, 'second'),
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
+    duration({
+      defaultValue: 123,
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
+    duration({
+      defaultValue: '1h',
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
   });
 });
 

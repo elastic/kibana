@@ -8,7 +8,8 @@
  */
 
 import { schema } from '../..';
-import type { Type, TypeOptions } from '../types';
+import type { Type } from '../types';
+import type { DefaultValue, TypeOptions } from '../types/type';
 
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
@@ -23,17 +24,24 @@ import type { Type, TypeOptions } from '../types';
  * const schema = env.packageInfo.buildFlavor === 'serverless' ? baseSchema.extend(a) : baseSchema.extend(b);
  * ```
  *
- * @example Only allow the setting on Serverless
+ * @example
+ * Only allow the setting on Serverless
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
  * });
+ * ```
  *
- * @example Only allow the setting on Traditional
+ * @example
+ * Only allow the setting on Traditional
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
  * });
- *
- * @example Fixed value on Traditional, configurable on Serverless
+ * ```
+ * @example
+ * Fixed value on Traditional, configurable on Serverless
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
@@ -41,27 +49,38 @@ import type { Type, TypeOptions } from '../types';
  *     options: { defaultValue: false },
  *   }),
  * });
+ * ```
  *
- * @example Setting is changeable on all offerings but with different defaults
+ *
+ * @example
+ * Setting is changeable on all offerings but with different defaults
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
  *     traditional: schema.boolean({ defaultValue: false }),
  *   }),
  * });
+ * ```
  *
  * @param opts.serverless The validation to apply in the Serverless offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.traditional The validation to apply in the Traditional offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.options Any options to pass down in the types.
  */
-export function offeringBasedSchema<V>(opts: {
-  serverless?: Type<V>;
-  traditional?: Type<V>;
-  options?: TypeOptions<V>;
+export function offeringBasedSchema<
+  Output,
+  Input = Output,
+  SLD extends DefaultValue<Input> = never,
+  TRD extends DefaultValue<Input> = never,
+  DV extends DefaultValue<Input> = never
+>(opts: {
+  serverless?: Type<Output, Input, SLD>;
+  traditional?: Type<Output, Input, TRD>;
+  options?: TypeOptions<Output, Input, DV>;
 }) {
   const { serverless = schema.never(), traditional = schema.never(), options } = opts;
   return schema.conditional(
-    schema.contextRef('serverless'),
+    schema.contextRef<boolean>('serverless'),
     true,
     serverless,
     traditional,

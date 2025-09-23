@@ -10,11 +10,11 @@
 import typeDetect from 'type-detect';
 import type { Stream } from 'stream';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export class StreamType extends Type<Stream> {
-  constructor(options?: TypeOptions<Stream>) {
+export class StreamType<D extends DefaultValue<Stream> = never> extends Type<Stream, Stream, D> {
+  constructor(options?: TypeOptions<Stream, Stream, D>) {
     super(internals.stream(), options);
   }
 

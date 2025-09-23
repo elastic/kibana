@@ -20,7 +20,6 @@ export type { ConditionalTypeValue } from './conditional_type';
 export { ConditionalType } from './conditional_type';
 export type { DurationOptions } from './duration_type';
 export { DurationType } from './duration_type';
-export type { IntersectionTypeOptions } from './intersection_type';
 export { IntersectionType } from './intersection_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';
@@ -30,11 +29,12 @@ export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
 export type {
   ObjectTypeOptions,
-  Props,
+  PreciseObjectProps,
   NullableProps,
-  TypeOf,
   ObjectResultType,
 } from './object_type';
+export type { TypeOf, TypeOfOutput, TypeOfInput } from './type_of';
+export type { SchemaOf } from './schema_of';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

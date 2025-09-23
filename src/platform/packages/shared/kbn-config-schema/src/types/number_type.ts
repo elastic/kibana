@@ -9,10 +9,14 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export type NumberOptions = TypeOptions<number> & {
+export type NumberOptions<D extends DefaultValue<number> = never> = TypeOptions<
+  number,
+  number,
+  D
+> & {
   min?: number;
   max?: number;
   /**
@@ -23,8 +27,8 @@ export type NumberOptions = TypeOptions<number> & {
   unsafe?: boolean;
 };
 
-export class NumberType extends Type<number> {
-  constructor(options: NumberOptions = {}) {
+export class NumberType<D extends DefaultValue<number> = never> extends Type<number, number, D> {
+  constructor(options: NumberOptions<D> = {}) {
     let schema = internals.number();
     if (options.min !== undefined) {
       schema = schema.min(options.min);

@@ -9,20 +9,24 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type, convertValidationFunction } from './type';
 
 import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 
-export type StringOptions = TypeOptions<string> & {
+export type StringOptions<D extends DefaultValue<string> = never> = TypeOptions<
+  string,
+  string,
+  D
+> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
   coerceFromNumber?: boolean;
 };
 
-export class StringType extends Type<string> {
-  constructor(options: StringOptions = {}) {
+export class StringType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
+  constructor(options: StringOptions<D> = {}) {
     // We want to allow empty strings, however calling `allow('')` causes
     // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
@@ -30,7 +34,7 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom((value, { error }) => {
+        : internals.any().custom((value: any, { error }: { error: any }) => {
             if (typeof value !== 'string') {
               if (options.coerceFromNumber && typeof value === 'number') {
                 return value.toString(10);
@@ -45,7 +49,7 @@ export class StringType extends Type<string> {
     if (options.minLength !== undefined) {
       schema = schema
         .custom(
-          convertValidationFunction((value) => {
+          convertValidationFunction((value: string) => {
             if (value.length < options.minLength!) {
               return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
             }
@@ -57,7 +61,7 @@ export class StringType extends Type<string> {
     if (options.maxLength !== undefined) {
       schema = schema
         .custom(
-          convertValidationFunction((value) => {
+          convertValidationFunction((value: string) => {
             if (value.length > options.maxLength!) {
               return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
             }
@@ -70,7 +74,7 @@ export class StringType extends Type<string> {
     super(schema, options);
   }
 
-  protected handleError(type: string, { limit, value }: Record<string, any>) {
+  protected handleError(type: string, { value }: Record<string, any>) {
     switch (type) {
       case 'any.required':
         return `expected value of type [string] but got [${typeDetect(value)}]`;

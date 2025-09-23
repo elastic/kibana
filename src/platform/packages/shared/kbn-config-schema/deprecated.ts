@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reference } from './reference';
+import type { SomeObjectType } from './src/types/object_type';
+import type { SchemaOf } from './src/types/schema_of';
 
-export class SiblingReference<T = any> extends Reference<T> {}
+/**
+ * @deprecated Use `SomeObjectType` instead.
+ */
+export type ObjectType = SomeObjectType;
+/**
+ * @deprecated Use `SchemaOf` instead.
+ */
+export type Type<T> = SchemaOf<T>;

@@ -9,11 +9,11 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export class BufferType extends Type<Buffer> {
-  constructor(options?: TypeOptions<Buffer>) {
+export class BufferType<D extends DefaultValue<Buffer> = never> extends Type<Buffer, Buffer, D> {
+  constructor(options?: TypeOptions<Buffer, Buffer, D>) {
     super(internals.binary(), options);
   }
 
