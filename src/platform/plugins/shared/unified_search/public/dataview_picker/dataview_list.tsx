@@ -8,14 +8,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSelectableProps, Direction } from '@elastic/eui';
+import type { Direction, EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiSelectable,
   EuiBadge,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButtonGroup,
+  EuiSelectable,
   toSentenceCase,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -65,6 +65,22 @@ const strings = {
     },
   },
 };
+
+function ManagedLabel({ name }: { name: string | undefined }) {
+  return (
+    <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
+      {strings.editorAndPopover.managed.getManagedDataviewLabel()}
+    </EuiBadge>
+  );
+}
+
+function AdHocLabel({ name }: { name: string | undefined }) {
+  return (
+    <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
+      {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
+    </EuiBadge>
+  );
+}
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -141,15 +157,17 @@ export function DataViewsList({
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
-        append: managed ? (
-          <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
-            {strings.editorAndPopover.managed.getManagedDataviewLabel()}
-          </EuiBadge>
-        ) : isAdhoc ? (
-          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
-            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
-          </EuiBadge>
-        ) : null,
+        append:
+          managed && isAdhoc ? (
+            <>
+              <ManagedLabel name={name} />
+              <AdHocLabel name={name} />
+            </>
+          ) : managed ? (
+            <ManagedLabel name={name} />
+          ) : isAdhoc ? (
+            <AdHocLabel name={name} />
+          ) : null,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {

@@ -11,7 +11,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import type { DataViewListItemEnhanced } from './dataview_list';
 
-const DEFAULT_WIDTH = 350;
+const DEFAULT_WIDTH = 425;
 
 export const changeDataViewStyles = ({
   fullWidth,
