@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
-import { getCurrentSpace } from '../../utils/spaces';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
 import {
@@ -73,7 +73,7 @@ export class AgentsService {
     });
 
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
-      const space = getCurrentSpace({ request, spaces });
+      const space = getCurrentSpaceId({ request, spaces });
       return createAgentRegistry({
         request,
         space,

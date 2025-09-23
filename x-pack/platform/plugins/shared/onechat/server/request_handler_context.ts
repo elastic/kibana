@@ -6,7 +6,7 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, CoreSetup } from '@kbn/core/server';
-import { getCurrentSpace } from './utils/spaces';
+import { getCurrentSpaceId } from './utils/spaces';
 import type { OnechatPluginStart, OnechatStartDependencies } from './types';
 
 export interface OnechatRequestHandlerContext {
@@ -33,7 +33,7 @@ export const registerOnechatHandlerContext = ({
 
       return {
         spaces: {
-          getSpaceId: () => getCurrentSpace({ request, spaces }),
+          getSpaceId: () => getCurrentSpaceId({ request, spaces }),
         },
       };
     }

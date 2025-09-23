@@ -14,7 +14,7 @@ export const isDefaultSpace = (space: string | undefined): boolean => {
   return !space || space === DEFAULT_SPACE_ID;
 };
 
-export const getCurrentSpace = ({
+export const getCurrentSpaceId = ({
   spaces,
   request,
 }: {
