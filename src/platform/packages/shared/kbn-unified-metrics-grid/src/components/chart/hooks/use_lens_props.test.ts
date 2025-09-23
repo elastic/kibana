@@ -28,6 +28,8 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
 };
 
 describe('useLensProps', () => {
+  let intersectionCallback: (entries: IntersectionObserverEntry[]) => void;
+
   const mockChartLayers: Array<LensSeriesLayer> = [
     {
       type: 'series',
@@ -39,7 +41,69 @@ describe('useLensProps', () => {
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
+  // Create mock chart ref
+  const createMockChartRef = () => {
+    const div = document.createElement('div');
+    return { current: div };
+  };
+
+  function mockIntersectionObserver(
+    isIntersectingItems?: Array<boolean>
+  ): [jest.MockedObject<IntersectionObserver>, jest.MockedFn<any>] {
+    const intersectionObserverInstanceMock: any = {
+      root: null,
+      rootMargin: '',
+      thresholds: [0],
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+      takeRecords: jest.fn(),
+    };
+
+    window.IntersectionObserver = jest
+      .fn()
+      .mockImplementation((callback: (entries: Array<IntersectionObserverEntry>) => void) => {
+        if (isIntersectingItems === undefined) {
+          callback([]);
+
+          return intersectionObserverInstanceMock;
+        }
+
+        const rect = {
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          toJSON: () => '',
+        };
+        callback(
+          isIntersectingItems.map((isIntersecting) => ({
+            isIntersecting,
+            intersectionRatio: 0,
+            intersectionRect: rect,
+            rootBounds: rect,
+            boundingClientRect: rect,
+            target: document.createElement('div'),
+            time: 0,
+          }))
+        );
+
+        return intersectionObserverInstanceMock;
+      });
+
+    return [intersectionObserverInstanceMock, window.IntersectionObserver as jest.MockedFn<any>];
+  }
+
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+
+    mockIntersectionObserver([true]);
+
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
       Promise.resolve({
         attributes: {} as any,
@@ -48,10 +112,11 @@ describe('useLensProps', () => {
       })
     );
     useChartLayersMock.mockReturnValue(mockChartLayers);
-    jest.clearAllMocks();
   });
 
   it('returns undefined initially before Lens attributes are built', async () => {
+    const chartRef = createMockChartRef();
+
     const { result } = renderHook(() =>
       useLensProps({
         title: 'Test Chart',
@@ -60,6 +125,7 @@ describe('useLensProps', () => {
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
+        chartRef,
       })
     );
 
@@ -76,6 +142,8 @@ describe('useLensProps', () => {
   });
 
   it('calls LensConfigBuilder.build with correct parameters', async () => {
+    const chartRef = createMockChartRef();
+
     renderHook(() =>
       useLensProps({
         title: 'Test Chart',
@@ -84,6 +152,7 @@ describe('useLensProps', () => {
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
+        chartRef,
       })
     );
 
@@ -116,6 +185,7 @@ describe('useLensProps', () => {
   });
 
   it('updates lensProps when discoverFetch$ emits', async () => {
+    const chartRef = createMockChartRef();
     const { result } = renderHook(() =>
       useLensProps({
         title: 'Test Chart',
@@ -124,6 +194,7 @@ describe('useLensProps', () => {
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
+        chartRef,
       })
     );
 
@@ -133,6 +204,7 @@ describe('useLensProps', () => {
 
     act(() => {
       discoverFetch$.next({ type: 'fetch' });
+      jest.advanceTimersByTime(150);
     });
 
     await waitFor(() => {
@@ -145,6 +217,24 @@ describe('useLensProps', () => {
         timeRange: getTimeRange(),
         viewMode: 'view',
       });
+    });
+  });
+
+  it('handles chartRef as null gracefully', async () => {
+    const { result } = renderHook(() =>
+      useLensProps({
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        seriesType: 'line',
+        services: servicesMock as UnifiedHistogramServices,
+        getTimeRange,
+        discoverFetch$,
+        chartRef: { current: null },
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current).not.toBeUndefined();
     });
   });
 });

@@ -143,12 +143,12 @@ export const useLensProps = ({
       if (charRefCurrent) {
         observer.observe(charRefCurrent);
       } else {
-        subscriber.next(false);
+        subscriber.next(true);
         subscriber.complete();
       }
 
       return () => observer.disconnect();
-    }).pipe(startWith(false), distinctUntilChanged());
+    }).pipe(startWith(!!charRefCurrent), distinctUntilChanged());
 
     const subscription = merge(
       discoverFetch$,
