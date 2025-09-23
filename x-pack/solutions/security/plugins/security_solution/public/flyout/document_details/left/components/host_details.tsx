@@ -81,7 +81,7 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';

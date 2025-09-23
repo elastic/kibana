@@ -31,8 +31,7 @@ import { useTimelineFullScreen } from '../../../common/containers/use_full_scree
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView, useSelectedPatterns } from '../../../data_view_manager';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`

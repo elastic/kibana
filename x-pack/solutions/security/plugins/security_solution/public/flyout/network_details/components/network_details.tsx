@@ -30,8 +30,7 @@ import { useInstalledSecurityJobNameById } from '../../../common/components/ml/h
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView, useSelectedPatterns } from '../../../data_view_manager';
 
 export interface NetworkDetailsProps {
   /**

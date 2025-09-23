@@ -26,7 +26,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { DataViewManagerScopeName, useDataView } from '../../../../../data_view_manager';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -43,7 +43,6 @@ import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
 import { WithMissingPrivileges } from '../missing_privileges';
 
 interface Props {

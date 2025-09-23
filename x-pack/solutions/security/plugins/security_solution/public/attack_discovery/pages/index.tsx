@@ -31,7 +31,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { Actions } from './header/actions';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize } from './helpers';
 import { deserializeQuery } from './local_storage/deserialize_query';

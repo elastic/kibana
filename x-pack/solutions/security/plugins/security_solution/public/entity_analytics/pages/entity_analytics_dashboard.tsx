@@ -22,7 +22,7 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import { PageLoader } from '../../common/components/page_loader';
 

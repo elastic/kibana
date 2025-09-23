@@ -14,7 +14,11 @@ import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import {
+  DataViewManagerScopeName,
+  useDataView,
+  useSelectedPatterns,
+} from '../../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -52,8 +56,6 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../common/components/page_loader';
 
 const ID = 'UsersQueryId';

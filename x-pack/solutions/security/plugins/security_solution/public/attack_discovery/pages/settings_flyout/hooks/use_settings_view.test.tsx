@@ -11,8 +11,8 @@ import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSettingsView } from './use_settings_view';
 import type { UseSettingsView } from './use_settings_view';
+import { useSettingsView } from './use_settings_view';
 import { TestProviders } from '../../../../common/mock';
 
 const mockFilterManager = createFilterManagerMock();
@@ -79,7 +79,7 @@ jest.mock('../../../../common/hooks/use_space_id', () => {
   };
 });
 
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
+jest.mock('../../../../data_view_manager', () => ({
   useDataView: jest.fn().mockReturnValue({
     dataView: {
       id: 'security',

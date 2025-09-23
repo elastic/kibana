@@ -14,8 +14,7 @@ import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields, useDataView } from '../../../data_view_manager';
 
 export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();

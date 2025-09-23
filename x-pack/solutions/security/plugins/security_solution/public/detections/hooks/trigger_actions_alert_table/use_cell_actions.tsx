@@ -17,10 +17,10 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
-  SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
+  SecurityAlertsTableContext,
 } from '../../components/alerts_table/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 
 export const useCellActionsOptions = (
   tableId: TableId,

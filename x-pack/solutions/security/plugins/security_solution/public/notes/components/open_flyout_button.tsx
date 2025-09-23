@@ -18,7 +18,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../data_view_manager';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',

@@ -43,7 +43,7 @@ import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;

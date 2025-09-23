@@ -12,10 +12,10 @@ import { useLensAttributes } from './use_lens_attributes';
 import {
   fieldNameExistsFilter,
   getDetailsPageFilter,
-  getIndexFilters,
-  sourceOrDestinationIpExistsFilter,
-  getNetworkDetailsPageFilter,
   getESQLGlobalFilters,
+  getIndexFilters,
+  getNetworkDetailsPageFilter,
+  sourceOrDestinationIpExistsFilter,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -26,11 +26,7 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import {
-  defaultImplementation,
-  withIndices,
-} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { defaultImplementation, useDataView, withIndices } from '../../../data_view_manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),

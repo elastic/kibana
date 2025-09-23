@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import {
   EuiButtonEmpty,
@@ -18,9 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
   type PrivMonHealthResponse,
-  type InitMonitoringEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -32,7 +33,7 @@ import { PrivilegedUserMonitoring } from '../components/privileged_user_monitori
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { DataViewManagerScopeName, useDataView, useDataViewSpec } from '../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
@@ -41,9 +42,7 @@ import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_mon
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =

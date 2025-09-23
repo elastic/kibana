@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';

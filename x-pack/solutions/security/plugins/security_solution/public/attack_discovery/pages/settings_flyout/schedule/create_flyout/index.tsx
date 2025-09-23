@@ -19,8 +19,7 @@ import {
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import React, { useCallback, useState } from 'react';
 
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { DataViewManagerScopeName, useDataView } from '../../../../../data_view_manager';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';

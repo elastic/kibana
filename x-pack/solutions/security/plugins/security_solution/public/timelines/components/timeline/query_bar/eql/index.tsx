@@ -10,9 +10,8 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
-
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView, useSelectedPatterns } from '../../../../../data_view_manager';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
@@ -23,7 +22,6 @@ import type { FormSchema, FormSubmitHandler } from '../../../../../shared_import
 import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
 import { getEqlOptions } from './selectors';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface TimelineEqlQueryBar {

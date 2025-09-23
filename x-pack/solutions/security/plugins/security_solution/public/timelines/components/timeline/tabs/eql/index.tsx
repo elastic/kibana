@@ -46,8 +46,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView, useSelectedPatterns } from '../../../../../data_view_manager';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 

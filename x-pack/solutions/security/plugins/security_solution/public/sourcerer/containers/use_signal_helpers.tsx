@@ -15,8 +15,7 @@ import { useDataView as useOldDataView } from '../../common/containers/source/us
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import { useDataView, useSignalIndexName } from '../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSignalHelpers = (): {

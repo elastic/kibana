@@ -14,7 +14,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields, useDataView } from '../../../../data_view_manager';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
@@ -30,7 +30,6 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery, getNonDropAreaFilters, TIMELINE_FILTER_DROP_AREA } from '../helpers';
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export interface QueryBarTimelineComponentProps {

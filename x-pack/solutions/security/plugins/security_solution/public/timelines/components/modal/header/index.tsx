@@ -18,7 +18,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import {
+  DataViewManagerScopeName,
+  useBrowserFields,
+  useDataView,
+} from '../../../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -43,8 +47,6 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AttachToCaseButton } from '../actions/attach_to_case_button';
 import { SaveTimelineButton } from '../actions/save_timeline_button';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 
 const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 const autoOverflowXCSS = { 'overflow-x': 'auto' };

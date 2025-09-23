@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';

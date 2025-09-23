@@ -19,8 +19,7 @@ import { useTimelineEventsDetails } from '../../../../timelines/containers/detai
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { GetFieldsData } from './use_get_fields_data';
 import { useGetFieldsData } from './use_get_fields_data';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields, useDataView } from '../../../../data_view_manager';
 
 /**
  * The referenced alert _index in the flyout uses the `.internal.` such as `.internal.alerts-security.alerts-spaceId` in the alert page flyout and .internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Action, CombinedState, Dispatch, Middleware, Store } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
@@ -26,7 +26,7 @@ import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
-import type { RootState as DataViewManagerState } from '../../data_view_manager/redux/reducer';
+import type { RootState as DataViewManagerState } from '../../data_view_manager';
 
 export type State = HostsPluginState &
   UsersPluginState &

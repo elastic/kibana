@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { TopValuesPopover } from './top_values_popover';
@@ -18,7 +18,7 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../data_view_manager');
 
 const element = document.createElement('button');
 document.body.appendChild(element);

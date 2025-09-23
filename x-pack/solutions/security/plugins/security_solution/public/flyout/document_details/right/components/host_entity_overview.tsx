@@ -67,7 +67,7 @@ import { MisconfigurationsInsight } from '../../shared/components/misconfigurati
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';

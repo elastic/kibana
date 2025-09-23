@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';

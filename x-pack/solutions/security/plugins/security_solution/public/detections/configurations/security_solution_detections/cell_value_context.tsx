@@ -7,7 +7,7 @@
 
 import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -16,9 +16,9 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
-import { eventRenderedViewColumns, getColumns } from './columns';
 import type { AlertColumnHeaders } from './columns';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { eventRenderedViewColumns, getColumns } from './columns';
+import { useBrowserFields } from '../../../data_view_manager';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;

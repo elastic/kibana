@@ -19,7 +19,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -39,7 +39,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;

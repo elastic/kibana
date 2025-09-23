@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
@@ -22,7 +22,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
 import { useHasSecurityCapability } from '../../helper_hooks';
