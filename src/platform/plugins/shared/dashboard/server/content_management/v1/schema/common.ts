@@ -311,7 +311,7 @@ export const searchResultsAttributes = {
   }),
   tags: schema.maybe(
     schema.arrayOf(
-      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
+      schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
     )
   ),
 };
