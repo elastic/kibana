@@ -78,7 +78,7 @@ export const createMockedExecutableTool = (
     type: ToolType.builtin,
     description: 'test description',
     readonly: false,
-    schema: z.object({}),
+    schema: () => z.object({}),
     configuration: {},
     tags: ['tag-1', 'tag-2'],
     ...parts,
