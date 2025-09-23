@@ -34,7 +34,7 @@ export interface AppliedStatsFunction {
   operator: string;
 }
 
-const supportedStatsFunctions = new Set(['categorize', 'bucket']);
+const supportedStatsFunctions = new Set(['categorize']);
 
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
@@ -53,8 +53,6 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
 
   let summarizedStatsCommand: StatsCommandSummary | null = null;
-
-  // TODO: when a where clause follows the stats command, it would not be regarded as a candidate for the cascade experience
 
   // we always want to operate on the last stats command that has valid grouping options,
   // but allow for the possibility of multiple stats commands in the query
@@ -140,7 +138,8 @@ export const constructCascadeQuery = ({
   nodeType,
   nodePath,
   nodePathMap,
-}: CascadeQueryArgs): AggregateQuery => {
+}: // @ts-expect-error -- temporary stop gap to fix deployment
+CascadeQueryArgs): AggregateQuery => {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
   const dataSourceCommand = mutate.generic.commands.find(

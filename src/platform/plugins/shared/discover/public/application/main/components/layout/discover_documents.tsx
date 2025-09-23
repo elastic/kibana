@@ -65,7 +65,6 @@ import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -86,7 +85,11 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { getESQLStatsQueryMeta } from '../../../context/components/data_cascade/esql_data_cascade';
+import { getESQLStatsQueryMeta } from './cascaded_documents';
+import {
+  useGetDocumentViewRenderer,
+  type DiscoverGridFlyoutProps,
+} from './helpers/render_document_view';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -221,6 +224,9 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
+
+  const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
+
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       dispatch(
@@ -311,36 +317,34 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta,
-      onClose: () => void = setExpandedDoc.bind(null, undefined)
-    ) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) =>
+      documentViewRenderer({
+        dataView,
+        hit,
+        hits: displayedRows,
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={persistedDiscoverSession?.id}
-        onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddColumn={onAddColumnWithTracking}
-        onClose={onClose}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-        initialTabId={initialDocViewerTabId}
-        docViewerRef={docViewerRef}
-      />
-    ),
+        columns: displayedColumns,
+        columnsMeta: customColumnsMeta,
+        savedSearchId: persistedDiscoverSession?.id!,
+        query,
+        initialTabId: initialDocViewerTabId,
+        onFilter: onAddFilter,
+        onRemoveColumn: onRemoveColumnWithTracking,
+        onAddColumn: onAddColumnWithTracking,
+        setExpandedDoc: expandedDocSetter,
+        onClose: expandedDocSetter.bind(null, undefined),
+      }),
     [
+      documentViewRenderer,
       dataView,
       persistedDiscoverSession?.id,
+      query,
+      initialDocViewerTabId,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
-      setExpandedDoc,
-      query,
-      initialDocViewerTabId,
     ]
   );
 
@@ -398,6 +402,29 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
+
+  const renderCascadeLayoutCallout = useCallback(() => {
+    return !supportsCascadeLayout && Boolean(cascadeGroups?.length) ? (
+      <EuiButton
+        iconType="inspect"
+        color="text"
+        size="s"
+        onClick={() => {
+          dispatch(
+            setLayoutUiState({
+              layoutUiState: { supportsCascade: true },
+            })
+          );
+        }}
+        data-test-subj="discoverEnableCascadeLayoutSwitch"
+      >
+        <FormattedMessage
+          id="discover.enableCascadeLayoutSwitchLabel"
+          defaultMessage="Try cascade layout"
+        />
+      </EuiButton>
+    ) : null;
+  }, [cascadeGroups?.length, dispatch, setLayoutUiState, supportsCascadeLayout]);
 
   const callouts = useMemo(
     () => (
@@ -523,28 +550,7 @@ function DiscoverDocumentsComponent({
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
             cascadeGroups={supportsCascadeLayout ? cascadeGroups : null}
-            externalAdditionalControls={
-              !supportsCascadeLayout && Boolean(cascadeGroups?.length) ? (
-                <EuiButton
-                  iconType="inspect"
-                  color="text"
-                  size="s"
-                  onClick={() => {
-                    dispatch(
-                      setLayoutUiState({
-                        layoutUiState: { supportsCascade: true },
-                      })
-                    );
-                  }}
-                  data-test-subj="discoverEnableCascadeLayoutSwitch"
-                >
-                  <FormattedMessage
-                    id="discover.enableCascadeLayoutSwitchLabel"
-                    defaultMessage="Try cascade layout"
-                  />
-                </EuiButton>
-              ) : null
-            }
+            externalAdditionalControls={renderCascadeLayoutCallout()}
           />
         </CellActionsProvider>
       </div>
