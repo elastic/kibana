@@ -1,0 +1,564 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Configures a template and its files to be scaffolded. Docs: https://moonrepo.dev/docs/config/template",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "title": "$schema",
+      "default": "https://moonrepo.dev/schemas/template.json",
+      "type": "string"
+    },
+    "description": {
+      "title": "description",
+      "description": "A description on what the template scaffolds.",
+      "type": "string"
+    },
+    "destination": {
+      "title": "destination",
+      "description": "A pre-populated destination to scaffold to, relative from the workspace root when leading with /, otherwise the working directory.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "markdownDescription": "A pre-populated destination to scaffold to, relative from the workspace root when leading with `/`, otherwise the working directory."
+    },
+    "extends": {
+      "title": "extends",
+      "description": "Extends one or many other templates.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "id": {
+      "title": "id",
+      "description": "Overrides the ID of the template, instead of using the folder name.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "title": {
+      "title": "title",
+      "description": "A human-readable title for the template.",
+      "type": "string",
+      "markdownDescription": "A human-readable title for the template."
+    },
+    "variables": {
+      "title": "variables",
+      "description": "A mapping of variables that'll be interpolated within each template file. Variables can also be populated by passing command line arguments.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/TemplateVariable"
+      },
+      "propertyNames": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "TemplateVariable": {
+      "description": "Each type of template variable.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/TemplateVariableArraySetting"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableBoolSetting"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableEnumSetting"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableNumberSetting"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableObjectSetting"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableStringSetting"
+        }
+      ]
+    },
+    "TemplateVariableArraySetting": {
+      "description": "Configuration for a template variable.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "type": "array",
+          "items": {
+            "type": [
+              "boolean",
+              "object",
+              "array",
+              "number",
+              "string",
+              "integer"
+            ]
+          }
+        },
+        "defaultValue": {
+          "title": "defaultValue",
+          "description": "The default value of the variable if none was provided.",
+          "type": "array",
+          "items": {
+            "type": [
+              "boolean",
+              "object",
+              "array",
+              "number",
+              "string",
+              "integer"
+            ]
+          }
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required": {
+          "title": "required",
+          "description": "Marks the variable as required, and will not accept an empty value.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "array"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableBoolSetting": {
+      "description": "Configuration for a template variable.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "type": "boolean"
+        },
+        "defaultValue": {
+          "title": "defaultValue",
+          "description": "The default value of the variable if none was provided.",
+          "type": "boolean"
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required": {
+          "title": "required",
+          "description": "Marks the variable as required, and will not accept an empty value.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableEnumDefault": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "TemplateVariableEnumSetting": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/TemplateVariableEnumDefault"
+            }
+          ]
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "multiple": {
+          "title": "multiple",
+          "description": "Allows multiple values to be selected.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "enum"
+        },
+        "values": {
+          "title": "values",
+          "description": "List of acceptable values for this variable.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TemplateVariableEnumValue"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableEnumValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/TemplateVariableEnumValueConfig"
+        }
+      ]
+    },
+    "TemplateVariableEnumValueConfig": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "title": "label",
+          "description": "A human-readable label for the value.",
+          "type": "string",
+          "markdownDescription": "A human-readable label for the value."
+        },
+        "value": {
+          "title": "value",
+          "description": "The literal enumerable value.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableNumberSetting": {
+      "description": "Configuration for a template variable.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "type": "number"
+        },
+        "defaultValue": {
+          "title": "defaultValue",
+          "description": "The default value of the variable if none was provided.",
+          "type": "number"
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required": {
+          "title": "required",
+          "description": "Marks the variable as required, and will not accept an empty value.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableObjectSetting": {
+      "description": "Configuration for a template variable.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "object",
+              "array",
+              "number",
+              "string",
+              "integer"
+            ]
+          },
+          "propertyNames": {
+            "type": "string"
+          }
+        },
+        "defaultValue": {
+          "title": "defaultValue",
+          "description": "The default value of the variable if none was provided.",
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "object",
+              "array",
+              "number",
+              "string",
+              "integer"
+            ]
+          },
+          "propertyNames": {
+            "type": "string"
+          }
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required": {
+          "title": "required",
+          "description": "Marks the variable as required, and will not accept an empty value.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplateVariableStringSetting": {
+      "description": "Configuration for a template variable.",
+      "type": "object",
+      "properties": {
+        "default": {
+          "title": "default",
+          "description": "The default value of the variable if none was provided.",
+          "type": "string"
+        },
+        "defaultValue": {
+          "title": "defaultValue",
+          "description": "The default value of the variable if none was provided.",
+          "type": "string"
+        },
+        "internal": {
+          "title": "internal",
+          "description": "Marks the variable as internal, and won't be overwritten via CLI arguments.",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "order",
+          "description": "The order in which variables should be prompted for.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt": {
+          "title": "prompt",
+          "description": "Prompt the user for a value when the generator is running.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required": {
+          "title": "required",
+          "description": "Marks the variable as required, and will not accept an empty value.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "title": "type",
+          "const": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

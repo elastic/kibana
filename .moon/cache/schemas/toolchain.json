@@ -1,0 +1,1014 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Configures all tools and platforms. Docs: https://moonrepo.dev/docs/config/toolchain",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "title": "$schema",
+      "default": "https://moonrepo.dev/schemas/toolchain.json",
+      "type": "string"
+    },
+    "bun": {
+      "title": "bun",
+      "description": "Configures and enables the Bun platform.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/BunConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "deno": {
+      "title": "deno",
+      "description": "Configures and enables the Deno platform.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DenoConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "extends": {
+      "title": "extends",
+      "description": "Extends one or many toolchain configuration files. Supports a relative file path or a secure URL.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ExtendsFrom"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "moon": {
+      "title": "moon",
+      "description": "Configures moon itself.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/MoonConfig"
+        }
+      ]
+    },
+    "node": {
+      "title": "node",
+      "description": "Configures and enables the Node.js platform.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/NodeConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "plugins": {
+      "title": "plugins",
+      "description": "All configured toolchains by unique ID.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ToolchainPluginConfig"
+      },
+      "propertyNames": {
+        "type": "string"
+      }
+    },
+    "proto": {
+      "title": "proto",
+      "description": "Configures how moon integrates with proto.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/ProtoConfig"
+        }
+      ]
+    },
+    "python": {
+      "title": "python",
+      "description": "Configures and enables the Python platform.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PythonConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rust": {
+      "title": "rust",
+      "description": "Configures and enables the Rust platform.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RustConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "BinConfig": {
+      "description": "Configures to a tool-specific binary to install.",
+      "type": "object",
+      "properties": {
+        "bin": {
+          "title": "bin",
+          "description": "Name of the binary, with optional version separated by @.",
+          "type": "string",
+          "markdownDescription": "Name of the binary, with optional version separated by `@`."
+        },
+        "force": {
+          "title": "force",
+          "description": "Force install the binary if it already exists.",
+          "type": "boolean"
+        },
+        "local": {
+          "title": "local",
+          "description": "Only install the binary locally, and not within CI.",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "name",
+          "description": "For supported tools, a custom name to use.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "markdownDescription": "Configures to a tool-specific binary to install."
+    },
+    "BinEntry": {
+      "description": "Configures to a tool-specific binary to install.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/BinConfig"
+        }
+      ],
+      "markdownDescription": "Configures to a tool-specific binary to install."
+    },
+    "BunConfig": {
+      "description": "Configures and enables the Bun platform. Docs: https://moonrepo.dev/docs/config/toolchain#bun",
+      "type": "object",
+      "properties": {
+        "dependencyVersionFormat": {
+          "title": "dependencyVersionFormat",
+          "description": "The dependency version format to use when syncing projects as dependencies.",
+          "default": "workspace",
+          "allOf": [
+            {
+              "$ref": "#/definitions/NodeVersionFormat"
+            }
+          ]
+        },
+        "inferTasksFromScripts": {
+          "title": "inferTasksFromScripts",
+          "description": "Automatically infer moon tasks from package.json scripts.",
+          "type": "boolean",
+          "markdownDescription": "Automatically infer moon tasks from `package.json` scripts."
+        },
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to bun install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `bun install` commands."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Bun support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rootPackageOnly": {
+          "title": "rootPackageOnly",
+          "description": "Assumes only the root package.json is used for dependencies. Can be used to support the \"one version policy\" pattern.",
+          "type": "boolean",
+          "markdownDescription": "Assumes only the root `package.json` is used for dependencies. Can be used to support the \"one version policy\" pattern."
+        },
+        "syncProjectWorkspaceDependencies": {
+          "title": "syncProjectWorkspaceDependencies",
+          "description": "Automatically syncs moon project-to-project relationships as dependencies for each package.json in the workspace.",
+          "default": true,
+          "type": "boolean",
+          "markdownDescription": "Automatically syncs moon project-to-project relationships as dependencies for each `package.json` in the workspace."
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Bun to download, install, and run bun tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Bun to download, install, and run `bun` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "BunpmConfig": {
+      "description": "Options for Bun, when used as a package manager.",
+      "type": "object",
+      "properties": {
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to bun install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `bun install` commands."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Bun support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Bun to download, install, and run bun tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Bun to download, install, and run `bun` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "DenoConfig": {
+      "description": "Configures and enables the Deno platform. Docs: https://moonrepo.dev/docs/config/toolchain#deno",
+      "type": "object",
+      "properties": {
+        "bins": {
+          "title": "bins",
+          "description": "List of binaries to install into the environment using deno install.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BinEntry"
+          },
+          "markdownDescription": "List of binaries to install into the environment using `deno install`."
+        },
+        "depsFile": {
+          "title": "depsFile",
+          "description": "Relative path to a dependency management file. Used for content hashing.",
+          "default": "deps.ts",
+          "type": "string"
+        },
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to deno install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `deno install` commands."
+        },
+        "lockfile": {
+          "title": "lockfile",
+          "description": "Requires and forces the use of deno.lock files.",
+          "type": "boolean",
+          "markdownDescription": "Requires and forces the use of `deno.lock` files."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Deno support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Deno to download, install, and run deno tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Deno to download, install, and run `deno` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ExtendsFrom": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "MoonConfig": {
+      "description": "Configures how and where updates will be received.",
+      "type": "object",
+      "properties": {
+        "downloadUrl": {
+          "title": "downloadUrl",
+          "description": "A secure URL for downloading the moon binary.",
+          "default": "https://github.com/moonrepo/moon/releases/latest/download",
+          "type": "string"
+        },
+        "manifestUrl": {
+          "title": "manifestUrl",
+          "description": "A secure URL to lookup the latest version.",
+          "default": "https://launch.moonrepo.app/moon/check_version",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "NodeConfig": {
+      "description": "Configures and enables the Node.js platform. Docs: https://moonrepo.dev/docs/config/toolchain#node",
+      "type": "object",
+      "properties": {
+        "addEnginesConstraint": {
+          "title": "addEnginesConstraint",
+          "description": "When version is defined, syncs the version as a constraint to package.json engines.",
+          "default": true,
+          "type": "boolean",
+          "markdownDescription": "When `version` is defined, syncs the version as a constraint to `package.json` engines."
+        },
+        "binExecArgs": {
+          "title": "binExecArgs",
+          "description": "Arguments to automatically pass to all tasks that execute the node binary.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "Arguments to automatically pass to all tasks that execute the `node` binary."
+        },
+        "bun": {
+          "title": "bun",
+          "description": "Options for Bun, when used as a package manager.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BunpmConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dedupeOnLockfileChange": {
+          "title": "dedupeOnLockfileChange",
+          "description": "Automatically dedupes the lockfile when dependencies have changed.",
+          "default": true,
+          "type": "boolean"
+        },
+        "dependencyVersionFormat": {
+          "title": "dependencyVersionFormat",
+          "description": "The dependency version format to use when syncing projects as dependencies.",
+          "default": "workspace",
+          "allOf": [
+            {
+              "$ref": "#/definitions/NodeVersionFormat"
+            }
+          ]
+        },
+        "inferTasksFromScripts": {
+          "title": "inferTasksFromScripts",
+          "description": "Automatically infer moon tasks from package.json scripts.",
+          "type": "boolean",
+          "markdownDescription": "Automatically infer moon tasks from `package.json` scripts."
+        },
+        "npm": {
+          "title": "npm",
+          "description": "Options for npm, when used as a package manager.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/NpmConfig"
+            }
+          ]
+        },
+        "packageManager": {
+          "title": "packageManager",
+          "description": "The package manager to use for installing dependencies.",
+          "default": "npm",
+          "allOf": [
+            {
+              "$ref": "#/definitions/NodePackageManager"
+            }
+          ]
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Node.js support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pnpm": {
+          "title": "pnpm",
+          "description": "Options for pnpm, when used as a package manager.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PnpmConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rootPackageOnly": {
+          "title": "rootPackageOnly",
+          "description": "Assumes only the root package.json is used for dependencies. Can be used to support the \"one version policy\" pattern.",
+          "type": "boolean",
+          "markdownDescription": "Assumes only the root `package.json` is used for dependencies. Can be used to support the \"one version policy\" pattern."
+        },
+        "syncPackageManagerField": {
+          "title": "syncPackageManagerField",
+          "description": "Automatically syncs the configured package manager version to the root packageManager field in package.json.",
+          "default": true,
+          "type": "boolean",
+          "markdownDescription": "Automatically syncs the configured package manager version to the root `packageManager` field in `package.json`."
+        },
+        "syncProjectWorkspaceDependencies": {
+          "title": "syncProjectWorkspaceDependencies",
+          "description": "Automatically syncs moon project-to-project relationships as dependencies for each package.json in the workspace.",
+          "default": true,
+          "type": "boolean",
+          "markdownDescription": "Automatically syncs moon project-to-project relationships as dependencies for each `package.json` in the workspace."
+        },
+        "syncVersionManagerConfig": {
+          "title": "syncVersionManagerConfig",
+          "description": "When version is defined, syncs the version to the chosen config.",
+          "default": "nvm",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/NodeVersionManager"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "When `version` is defined, syncs the version to the chosen config."
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Node.js to download, install, and run node tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Node.js to download, install, and run `node` tasks with."
+        },
+        "yarn": {
+          "title": "yarn",
+          "description": "Options for Yarn, when used as a package manager.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/YarnConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "NodePackageManager": {
+      "description": "The available package managers for Node.js.",
+      "type": "string",
+      "enum": [
+        "bun",
+        "npm",
+        "pnpm",
+        "yarn"
+      ]
+    },
+    "NodeVersionFormat": {
+      "description": "Formats that a package.json version dependency can be.",
+      "type": "string",
+      "enum": [
+        "file",
+        "link",
+        "star",
+        "version",
+        "version-caret",
+        "version-tilde",
+        "workspace",
+        "workspace-caret",
+        "workspace-tilde"
+      ],
+      "markdownDescription": "Formats that a `package.json` version dependency can be."
+    },
+    "NodeVersionManager": {
+      "description": "The available version managers for Node.js.",
+      "type": "string",
+      "enum": [
+        "nodenv",
+        "nvm"
+      ]
+    },
+    "NpmConfig": {
+      "description": "Options for npm, when used as a package manager.",
+      "type": "object",
+      "properties": {
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to npm install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `npm install` commands."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for npm support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of npm to download, install, and run npm tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of npm to download, install, and run `npm` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PipConfig": {
+      "type": "object",
+      "properties": {
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to pip install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `pip install` commands."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PluginLocator": {
+      "description": "Strategies and protocols for locating plugins.",
+      "type": "string"
+    },
+    "PnpmConfig": {
+      "description": "Options for pnpm, when used as a package manager.",
+      "type": "object",
+      "properties": {
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to pnpm install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `pnpm install` commands."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for pnpm support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of pnpm to download, install, and run pnpm tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of pnpm to download, install, and run `pnpm` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProtoConfig": {
+      "description": "Configures how moon integrates with proto.",
+      "type": "object",
+      "properties": {
+        "version": {
+          "title": "version",
+          "description": "The version of proto to download and install, and to use for installing and running other toolchains.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/VersionSpec"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PythonConfig": {
+      "type": "object",
+      "properties": {
+        "packageManager": {
+          "title": "packageManager",
+          "description": "The package manager to use for installing dependencies and managing the virtual environment.",
+          "default": "pip",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PythonPackageManager"
+            }
+          ]
+        },
+        "pip": {
+          "title": "pip",
+          "description": "Options for pip, when used as a package manager.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/PipConfig"
+            }
+          ]
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Python support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rootRequirementsOnly": {
+          "title": "rootRequirementsOnly",
+          "description": "Assumes a workspace root virtual environment is used for dependencies. Can be used to support the \"one version policy\" pattern.",
+          "type": "boolean"
+        },
+        "rootVenvOnly": {
+          "title": "rootVenvOnly",
+          "description": "Assumes a workspace root virtual environment is used for dependencies. Can be used to support the \"one version policy\" pattern.",
+          "type": "boolean"
+        },
+        "uv": {
+          "title": "uv",
+          "description": "Options for uv, when used as a package manager.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UvConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "venvName": {
+          "title": "venvName",
+          "description": "Defines the virtual environment name, which will be created in the workspace root. Project dependencies will be installed into this.",
+          "default": ".venv",
+          "type": "string"
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Python to download, install, and run python tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Python to download, install, and run `python` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PythonPackageManager": {
+      "description": "The available package managers for Python.",
+      "type": "string",
+      "enum": [
+        "pip",
+        "uv"
+      ]
+    },
+    "RustConfig": {
+      "description": "Configures and enables the Rust platform. Docs: https://moonrepo.dev/docs/config/toolchain#rust",
+      "type": "object",
+      "properties": {
+        "bins": {
+          "title": "bins",
+          "description": "List of binaries to install into the environment using cargo binstall.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BinEntry"
+          },
+          "markdownDescription": "List of binaries to install into the environment using `cargo binstall`."
+        },
+        "binstallVersion": {
+          "title": "binstallVersion",
+          "description": "The version of cargo-binstall to install. Defaults to latest if not defined.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of `cargo-binstall` to install. Defaults to latest if not defined."
+        },
+        "components": {
+          "title": "components",
+          "description": "Rust components to automatically install.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Rust support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "syncToolchainConfig": {
+          "title": "syncToolchainConfig",
+          "description": "When version is defined, syncs the version to rust-toolchain.toml.",
+          "type": "boolean",
+          "markdownDescription": "When `version` is defined, syncs the version to `rust-toolchain.toml`."
+        },
+        "targets": {
+          "title": "targets",
+          "description": "Rust targets to automatically install.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Rust to download, install, and run cargo tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Rust to download, install, and run `cargo` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolchainPluginConfig": {
+      "description": "Configures an individual toolchain.",
+      "type": "object",
+      "properties": {
+        "config": {
+          "title": "config",
+          "description": "Arbitrary configuration that'll be passed to the WASM plugin.",
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "boolean",
+              "object",
+              "array",
+              "number",
+              "string",
+              "integer"
+            ]
+          },
+          "propertyNames": {
+            "type": "string"
+          }
+        },
+        "disabled": {
+          "title": "disabled",
+          "type": "boolean"
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of the toolchain to download and install.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "versionFromPrototools": {
+          "title": "versionFromPrototools",
+          "description": "Inherit the version from the root .prototools. When true, matches using the same ID, otherwise a string can be provided for a custom ID.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/ToolchainPluginVersionFrom"
+            }
+          ],
+          "markdownDescription": "Inherit the version from the root `.prototools`. When true, matches using the same ID, otherwise a string can be provided for a custom ID."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ToolchainPluginVersionFrom": {
+      "description": "Strategy in which to inherit a version from .prototools.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "markdownDescription": "Strategy in which to inherit a version from `.prototools`."
+    },
+    "UnresolvedVersionSpec": {
+      "description": "Represents an unresolved version or alias that must be resolved to a fully-qualified version.",
+      "type": "string",
+      "markdownDescription": "Represents an unresolved version or alias that must be resolved to a fully-qualified version."
+    },
+    "UvConfig": {
+      "type": "object",
+      "properties": {
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for uv support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "syncArgs": {
+          "title": "syncArgs",
+          "description": "List of arguments to append to uv sync commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `uv sync` commands."
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of uv to download, install, and run uv tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of uv to download, install, and run `uv` tasks with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "VersionSpec": {
+      "description": "Represents a resolved version or alias.",
+      "type": "string"
+    },
+    "YarnConfig": {
+      "description": "Options for Yarn, when used as a package manager.",
+      "type": "object",
+      "properties": {
+        "installArgs": {
+          "title": "installArgs",
+          "description": "List of arguments to append to yarn install commands.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of arguments to append to `yarn install` commands."
+        },
+        "plugin": {
+          "title": "plugin",
+          "description": "Location of the WASM plugin to use for Yarn support.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PluginLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plugins": {
+          "title": "plugins",
+          "description": "Plugins to automatically install for Yarn v2 and above.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "title": "version",
+          "description": "The version of Yarn to download, install, and run yarn tasks with.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/UnresolvedVersionSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "markdownDescription": "The version of Yarn to download, install, and run `yarn` tasks with."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

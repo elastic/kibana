@@ -9,6 +9,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { FederatedConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { AxiosError } from 'axios';
 import axios from 'axios';
+import https from 'https';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
@@ -75,15 +76,9 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
   private async fetchAccessToken(): Promise<string | null> {
     const stored_access_token = storage.get('oauth_google_drive_credential');
 
-    console.log('ACCESS TOKEN');
-    console.log(stored_access_token);
-
     if (stored_access_token === null || stored_access_token === '') {
       console.log('EXCHANGING');
       const exchanged_access_token = await this.exchangeAccessToken();
-
-      console.log('ACCESS TOKEN AFTER EXCHANGE');
-      console.log(exchanged_access_token);
 
       return exchanged_access_token;
     }
@@ -98,16 +93,28 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
       return '';
     }
 
-    const response = await axios.post(
-      `http://localhost:9999/fetch_request_secrets?request_id=${oauthRequestId}`
-    );
+    try {
+      const response = await axios.get(
+        `https://localhost:8052/oauth/fetch_request_secrets?request_id=${oauthRequestId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false, // TODO: remove this not secure
+          }),
+        }
+      );
 
-    console.log(response);
+      const access_token = response.data.access_token;
 
-    const access_token = response.data.data.access_token;
-
-    storage.set('oauth_google_drive_credential', access_token);
-    return access_token;
+      storage.set('oauth_google_drive_credential', access_token);
+      return access_token;
+    } catch (error) {
+      console.log('ERROR', error);
+      throw error;
+    }
   }
 
   public async runDownload(
@@ -161,6 +168,7 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
       console.log(error);
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 403 || error.response.status === 401) {
+          console.log('ERROR RESPONSE' + error.response.status);
           console.log('IT WAS 403 or 401');
           // try connecting and tell about it
           const scope = [
@@ -172,14 +180,28 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
             'https://www.googleapis.com/auth/admin.directory.user.readonly',
           ];
 
-          const response = await axios.post(`http://localhost:9999/start_oauth`, {
-            service_type: 'gdrive',
-            scope,
-            cloud_id: 'local_kibana',
-          });
+          const response = await axios.post(
+            `https://localhost:8052/oauth/start/google`,
+            {
+              service_type: 'gdrive',
+              scope,
+              cloud_id: 'local_kibana',
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              timeout: 10000,
+              httpsAgent: new https.Agent({
+                rejectUnauthorized: false, // Accept self-signed certificates
+              }),
+            }
+          );
 
           const requestId = response.data.request_id;
           const authUrl = response.data.auth_url;
+
+          console.log(`AUTH URL${authUrl}`);
 
           storage.set('oauth_request_id', requestId);
 
@@ -189,7 +211,7 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
           };
         }
       } else {
-        console.log('IT WAS SOMETHING ELSE');
+        console.log('IT WAS SOMETHING ELSE'); // lol
         throw error;
       }
     }
@@ -200,6 +222,7 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<OAuthGoogleDriveQueryActionResponse> {
     try {
+      console.log('RUNNING API');
       const access_token = await this.fetchAccessToken();
 
       const config = {
@@ -217,6 +240,7 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 403 || error.response.status === 401) {
+          console.log('ERROR RESPONSE ', error.response.data.error);
           console.log('IT WAS 403 or 401');
           // try connecting and tell about it
           const scope = [
@@ -228,14 +252,28 @@ export class OAuthGoogleDriveConnector extends SubActionConnector<
             'https://www.googleapis.com/auth/admin.directory.user.readonly',
           ];
 
-          const response = await axios.post(`http://localhost:9999/start_oauth`, {
-            service_type: 'gdrive',
-            scope,
-            cloud_id: 'local_kibana',
-          });
+          const response = await axios.post(
+            `https://localhost:8052/oauth/start/google`,
+            {
+              service_type: 'gdrive',
+              scope,
+              cloud_id: 'local_kibana',
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              timeout: 10000,
+              httpsAgent: new https.Agent({
+                rejectUnauthorized: false, // Accept self-signed certificates
+              }),
+            }
+          );
 
           const requestId = response.data.request_id;
           const authUrl = response.data.auth_url;
+
+          console.log(`AUTH URL 1${authUrl}`);
 
           storage.set('oauth_request_id', requestId);
 
