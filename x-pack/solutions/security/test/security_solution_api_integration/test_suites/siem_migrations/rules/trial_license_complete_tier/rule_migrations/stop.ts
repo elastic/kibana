@@ -63,6 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationResponse = await migrationRulesRoutes.get({ migrationId });
       expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
       expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.total_execution_time_ms).to.be.greaterThan(0);
     });
 
     describe('error scenarios', () => {
