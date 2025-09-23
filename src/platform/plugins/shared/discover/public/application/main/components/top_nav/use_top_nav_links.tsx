@@ -22,6 +22,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -40,6 +41,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
@@ -59,6 +61,7 @@ export const useTopNavLinks = ({
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
+  persistedDiscoverSession,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -69,9 +72,11 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
+  const currentTabId = useCurrentTabSelector((tabState) => tabState.id);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
@@ -161,6 +166,8 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
+          currentTabId,
+          persistedDiscoverSession,
         });
         items.push(...shareAppMenuItem);
       }
@@ -175,6 +182,8 @@ export const useTopNavLinks = ({
       isEsqlMode,
       currentDataView,
       hasShareIntegration,
+      currentTabId,
+      persistedDiscoverSession,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

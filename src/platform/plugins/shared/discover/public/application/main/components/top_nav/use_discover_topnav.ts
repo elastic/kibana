@@ -9,14 +9,12 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import {
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} from '../../state_management/discover_state_provider';
+import { useSavedSearchHasChanged } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
@@ -25,8 +23,10 @@ import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   stateContainer,
+  persistedDiscoverSession,
 }: {
   stateContainer: DiscoverStateContainer;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
@@ -45,9 +45,9 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
-  const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();
-  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
+  const shouldShowESQLToDataViewTransitionModal =
+    !persistedDiscoverSession?.id || savedSearchHasChanged;
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
@@ -67,6 +67,7 @@ export const useDiscoverTopNav = ({
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
+    persistedDiscoverSession,
   });
 
   return {

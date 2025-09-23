@@ -65,6 +65,7 @@ describe('useTopNavLinks', () => {
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
+          persistedDiscoverSession: undefined,
         }),
       {
         wrapper: Wrapper,
@@ -133,6 +134,7 @@ describe('useTopNavLinks', () => {
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
+          persistedDiscoverSession: undefined,
         }),
       {
         wrapper: Wrapper,
@@ -210,6 +212,7 @@ describe('useTopNavLinks', () => {
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration,
+            persistedDiscoverSession: undefined,
           }),
         {
           wrapper: Wrapper,
@@ -287,6 +290,7 @@ describe('useTopNavLinks', () => {
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration: true,
+            persistedDiscoverSession: undefined,
           }),
         {
           wrapper: Wrapper,
