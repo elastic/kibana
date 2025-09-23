@@ -22,6 +22,7 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
 import type { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
@@ -295,6 +296,17 @@ If asset criticality records already exist for the specified entities, those rec
     ) {
       return supertest
         .post(getRouteUrlForSpace('/api/asset_criticality/bulk', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Cancel a running or pending response action (Applies only to some agent types).
+     */
+    cancelAction(props: CancelActionProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/api/endpoint/action/cancel', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -2389,6 +2401,9 @@ export interface AlertsMigrationCleanupProps {
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
