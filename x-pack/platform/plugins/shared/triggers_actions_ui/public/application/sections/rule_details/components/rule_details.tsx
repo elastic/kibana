@@ -430,6 +430,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }}
               onEnableDisable={onEnableDisable}
               onRunRule={onRunRule}
+              isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
           editButton,

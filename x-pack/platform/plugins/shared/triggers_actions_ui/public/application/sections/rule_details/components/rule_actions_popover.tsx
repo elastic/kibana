@@ -17,6 +17,7 @@ export interface RuleActionsPopoverProps {
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
   onRunRule: (ruleId: string) => void;
+  isInternallyManaged: boolean;
 }
 
 export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
@@ -25,6 +26,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   onApiKeyUpdate,
   onEnableDisable,
   onRunRule,
+  isInternallyManaged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -33,6 +35,19 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
       color: ${euiTheme.colors.textDanger};
     }
   `;
+
+  const getUpdateApiKeyItem = (testId: string) => {
+    return {
+      'data-test-subj': testId,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onApiKeyUpdate(rule.id);
+      },
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.updateAPIKeyButtonLabel', {
+        defaultMessage: 'Update API key',
+      }),
+    };
+  };
 
   return (
     <EuiPopover
@@ -59,58 +74,50 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
         panels={[
           {
             id: 0,
-            items: [
-              {
-                'data-test-subj': 'disableButton',
-                onClick: async () => {
-                  setIsPopoverOpen(false);
-                  onEnableDisable(!rule.enabled);
-                },
-                name: !rule.enabled
-                  ? i18n.translate(
-                      'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
-                      { defaultMessage: 'Enable' }
-                    )
-                  : i18n.translate(
-                      'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
-                      { defaultMessage: 'Disable' }
+            items: isInternallyManaged
+              ? [getUpdateApiKeyItem('updateAPIKeyButtonInternallyManaged')]
+              : [
+                  {
+                    'data-test-subj': 'disableButton',
+                    onClick: async () => {
+                      setIsPopoverOpen(false);
+                      onEnableDisable(!rule.enabled);
+                    },
+                    name: !rule.enabled
+                      ? i18n.translate(
+                          'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
+                          { defaultMessage: 'Enable' }
+                        )
+                      : i18n.translate(
+                          'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
+                          { defaultMessage: 'Disable' }
+                        ),
+                  },
+                  getUpdateApiKeyItem('updateAPIKeyButton'),
+                  {
+                    'data-test-subj': 'runRuleButton',
+                    onClick: () => {
+                      setIsPopoverOpen(false);
+                      onRunRule(rule.id);
+                    },
+                    name: i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.runRuleButtonLabel',
+                      { defaultMessage: 'Run rule' }
                     ),
-              },
-              {
-                'data-test-subj': 'updateAPIKeyButton',
-                onClick: () => {
-                  setIsPopoverOpen(false);
-                  onApiKeyUpdate(rule.id);
-                },
-                name: i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.updateAPIKeyButtonLabel',
-                  { defaultMessage: 'Update API key' }
-                ),
-              },
-              {
-                'data-test-subj': 'runRuleButton',
-                onClick: () => {
-                  setIsPopoverOpen(false);
-                  onRunRule(rule.id);
-                },
-                name: i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.runRuleButtonLabel',
-                  { defaultMessage: 'Run rule' }
-                ),
-              },
-              {
-                className: 'ruleActionsPopover__deleteButton',
-                'data-test-subj': 'deleteRuleButton',
-                onClick: () => {
-                  setIsPopoverOpen(false);
-                  onDelete(rule.id);
-                },
-                name: i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel',
-                  { defaultMessage: 'Delete rule' }
-                ),
-              },
-            ],
+                  },
+                  {
+                    className: 'ruleActionsPopover__deleteButton',
+                    'data-test-subj': 'deleteRuleButton',
+                    onClick: () => {
+                      setIsPopoverOpen(false);
+                      onDelete(rule.id);
+                    },
+                    name: i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel',
+                      { defaultMessage: 'Delete rule' }
+                    ),
+                  },
+                ],
           },
         ]}
         className="ruleActionsPopover"

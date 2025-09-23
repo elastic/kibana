@@ -286,6 +286,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  isInternallyManaged?: boolean;
 }
 
 export interface IErrorObject {
