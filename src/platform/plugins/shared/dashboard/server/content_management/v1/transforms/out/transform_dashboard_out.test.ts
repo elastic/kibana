@@ -129,7 +129,24 @@ describe('transformDashboardOut', () => {
       timeTo: 'now',
       title: 'title',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
+    const references = [
+      {
+        type: 'tag',
+        id: 'tag1',
+        name: 'tag-ref-tag1',
+      },
+      {
+        type: 'tag',
+        id: 'tag2',
+        name: 'tag-ref-tag2',
+      },
+      {
+        type: 'index-pattern',
+        id: 'index-pattern1',
+        name: 'index-pattern-ref-index-pattern1',
+      },
+    ];
+    expect(transformDashboardOut(input, references)).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
@@ -187,6 +204,7 @@ describe('transformDashboardOut', () => {
         pause: true,
         value: 1000,
       },
+      tags: ['tag1', 'tag2'],
       timeFrom: 'now-15m',
       timeRestore: true,
       timeTo: 'now',
