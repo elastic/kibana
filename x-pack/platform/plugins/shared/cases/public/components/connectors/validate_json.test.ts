@@ -12,30 +12,30 @@ describe('validateJSON', () => {
   const formData = {} as ValidationFuncArg<FormData, unknown>;
 
   it('does not return an error for valid JSON with less than maxProperties', () => {
-    expect(validateJSON({ ...formData, value: JSON.stringify({ foo: 'test' }) })).toBeUndefined();
+    expect(validateJSON()({ ...formData, value: JSON.stringify({ foo: 'test' }) })).toBeUndefined();
   });
 
   it('does not return an error with an empty string value', () => {
-    expect(validateJSON({ ...formData, value: '' })).toBeUndefined();
+    expect(validateJSON()({ ...formData, value: '' })).toBeUndefined();
   });
 
   it('does not return an error with undefined value', () => {
-    expect(validateJSON(formData)).toBeUndefined();
+    expect(validateJSON()({ ...formData, value: undefined })).toBeUndefined();
   });
 
   it('does not return an error with a null value', () => {
-    expect(validateJSON({ ...formData, value: null })).toBeUndefined();
+    expect(validateJSON()({ ...formData, value: null })).toBeUndefined();
   });
 
   it('validates syntax errors correctly', () => {
-    expect(validateJSON({ ...formData, value: 'foo' })).toEqual({
+    expect(validateJSON()({ ...formData, value: 'foo' })).toEqual({
       code: 'ERR_JSON_FORMAT',
       message: 'Invalid JSON.',
     });
   });
 
   it('validates a string with spaces correctly', () => {
-    expect(validateJSON({ ...formData, value: '   ' })).toEqual({
+    expect(validateJSON()({ ...formData, value: '   ' })).toEqual({
       code: 'ERR_JSON_FORMAT',
       message: 'Invalid JSON.',
     });
@@ -48,21 +48,21 @@ describe('validateJSON', () => {
     }
     value += '}';
 
-    expect(validateJSON({ ...formData, value })).toEqual({
+    expect(validateJSON()({ ...formData, value })).toEqual({
       code: 'ERR_JSON_FORMAT',
       message: 'A maximum of 10 additional fields can be defined at a time.',
     });
   });
 
   it('throws when a non object string is found', () => {
-    expect(validateJSON({ ...formData, value: '"foobar"' })).toEqual({
+    expect(validateJSON()({ ...formData, value: '"foobar"' })).toEqual({
       code: 'ERR_JSON_FORMAT',
       message: 'Invalid JSON.',
     });
   });
 
   it('throws when a non object empty string is found', () => {
-    expect(validateJSON({ ...formData, value: '""' })).toEqual({
+    expect(validateJSON()({ ...formData, value: '""' })).toEqual({
       code: 'ERR_JSON_FORMAT',
       message: 'Invalid JSON.',
     });
