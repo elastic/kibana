@@ -84,37 +84,43 @@ export type * from './deprecated';
  */
 export type ObjectProps = PreciseObjectProps;
 
-function any<D extends DefaultValue<any> = never>(options?: TypeOptions<any, any, D>): AnyType<D> {
+function any<D extends DefaultValue<any> = never>(
+  options?: TypeOptions<any, any, D>
+): Type<any, any, D> {
   return new AnyType(options);
 }
 
 function boolean<D extends DefaultValue<boolean> = never>(
   options?: TypeOptions<boolean, boolean, D>
-): BooleanType<D> {
+): Type<boolean, boolean, D> {
   return new BooleanType(options);
 }
 
 function buffer<D extends DefaultValue<Buffer> = never>(
   options?: TypeOptions<Buffer, Buffer, D>
-): BufferType<D> {
+): Type<Buffer, Buffer, D> {
   return new BufferType(options);
 }
 
 function stream<D extends DefaultValue<Stream> = never>(
   options?: TypeOptions<Stream, Stream, D>
-): StreamType<D> {
+): Type<Stream, Stream, D> {
   return new StreamType(options);
 }
 
-function string<D extends DefaultValue<string> = never>(options?: StringOptions<D>): StringType<D> {
+function string<D extends DefaultValue<string> = never>(
+  options?: StringOptions<D>
+): Type<string, string, D> {
   return new StringType(options);
 }
 
-function uri<D extends DefaultValue<string> = never>(options?: URIOptions<D>): URIType<D> {
+function uri<D extends DefaultValue<string> = never>(
+  options?: URIOptions<D>
+): Type<string, string, D> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean | null>(value: T): LiteralType<T> {
+function literal<T extends string | number | boolean | null>(value: T): Type<T, T, never> {
   return new LiteralType(value);
 }
 
@@ -154,27 +160,31 @@ function enumeration<U extends string, D extends DefaultValue<U> = never>(
   return union(literalTypes, options);
 }
 
-function number<D extends DefaultValue<number> = never>(options?: NumberOptions<D>): NumberType<D> {
+function number<D extends DefaultValue<number> = never>(
+  options?: NumberOptions<D>
+): Type<number, number, D> {
   return new NumberType(options);
 }
 
 function byteSize<D extends ByteSizeValueType = never>(
   options?: ByteSizeOptions<D>
-): ByteSizeType<D> {
+): Type<ByteSizeValue, ByteSizeValue, [D] extends [never] ? never : ByteSizeValue> {
   return new ByteSizeType(options);
 }
 
 function duration<D extends DurationDefaultValue = never>(
   options?: DurationOptions<D>
-): DurationType<D> {
+): Type<Duration, Duration, [D] extends [never] ? never : Duration> {
   return new DurationType(options);
 }
 
-function never(): NeverType {
+function never(): Type<never, never, never> {
   return new NeverType();
 }
 
-function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): IpType<D> {
+function ip<D extends DefaultValue<string> = never>(
+  options?: IpOptions<D>
+): Type<string, string, D> {
   return new IpType(options);
 }
 
@@ -183,7 +193,9 @@ function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): IpT
  *
  * @note wrapping with `maybe` ignores the `defaultValue` on `type` when validating.
  */
-function maybe<T extends SomeType>(type: T): MaybeType<T> {
+function maybe<T extends SomeType>(
+  type: T
+): Type<T['_output'] | undefined, T['_input'] | undefined, any> {
   return new MaybeType(type);
 }
 
@@ -210,7 +222,7 @@ function object<
 function arrayOf<T extends SomeType, D extends DefaultValue<T['_input'][]> = never>(
   itemType: T,
   options?: ArrayOptions<T, D>
-): ArrayType<T, D> {
+): Type<T['_output'][], T['_input'][], D> {
   return new ArrayType(itemType, options);
 }
 
@@ -218,7 +230,7 @@ function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>
   keyType: Type<K>,
   valueType: T,
   options?: MapOfOptions<K, T, D>
-): MapOfType<K, T, D> {
+): Type<Map<K, T['_output']>, Map<K, T['_input']>, D> {
   return new MapOfType(keyType, valueType, options);
 }
 
@@ -230,14 +242,14 @@ function recordOf<
   keyType: Type<K>,
   valueType: T,
   options?: RecordOfOptions<K, T['_input'], D>
-): RecordOfType<K, T, D> {
+): Type<Record<K, T['_output']>, Record<K, T['_input']>, D> {
   return new RecordOfType(keyType, valueType, options);
 }
 
 function union<
   T extends Readonly<[SomeType, ...SomeType[]]>,
   D extends DefaultValue<T[number]['_input']> = never
->(types: T, options?: UnionTypeOptions<T, D>): UnionType<T, D> {
+>(types: T, options?: UnionTypeOptions<T, D>): Type<T[number]['_output'], T[number]['_input'], D> {
   return new UnionType(types, options);
 }
 
@@ -316,14 +328,14 @@ function conditional<
   equalType: A,
   notEqualType: B,
   options?: ConditionalTypeOptions<A, B, D>
-): ConditionalType<T, A, B, D> {
+): Type<A['_output'] | B['_output'], A['_input'] | B['_input'], D> {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string): Lazy<T> {
+function lazy<T>(id: string): Type<T, T> {
   return new Lazy<T>(id);
 }
 
@@ -369,6 +381,8 @@ import {
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
 } from './src/oas_meta_fields';
 import type { ConditionalTypeOptions } from './src/types/conditional_type';
+import type { ByteSizeValue } from './src/byte_size_value';
+import type { Duration } from './src/duration';
 
 export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DISCONTINUED,

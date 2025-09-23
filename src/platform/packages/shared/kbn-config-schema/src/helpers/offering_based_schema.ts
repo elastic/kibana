@@ -8,8 +8,8 @@
  */
 
 import { schema } from '../..';
-import type { Type, TypeOptions } from '../types';
-import type { DefaultValue } from '../types/type';
+import type { Type } from '../types';
+import type { DefaultValue, TypeOptions } from '../types/type';
 
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
@@ -24,17 +24,24 @@ import type { DefaultValue } from '../types/type';
  * const schema = env.packageInfo.buildFlavor === 'serverless' ? baseSchema.extend(a) : baseSchema.extend(b);
  * ```
  *
- * @example Only allow the setting on Serverless
+ * @example
+ * Only allow the setting on Serverless
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
  * });
+ * ```
  *
- * @example Only allow the setting on Traditional
+ * @example
+ * Only allow the setting on Traditional
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
  * });
- *
- * @example Fixed value on Traditional, configurable on Serverless
+ * ```
+ * @example
+ * Fixed value on Traditional, configurable on Serverless
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
@@ -42,14 +49,19 @@ import type { DefaultValue } from '../types/type';
  *     options: { defaultValue: false },
  *   }),
  * });
+ * ```
  *
- * @example Setting is changeable on all offerings but with different defaults
+ *
+ * @example
+ * Setting is changeable on all offerings but with different defaults
+ * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
  *     traditional: schema.boolean({ defaultValue: false }),
  *   }),
  * });
+ * ```
  *
  * @param opts.serverless The validation to apply in the Serverless offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.traditional The validation to apply in the Traditional offering. If not provided, it doesn't allow the setting to be set in this offering.
