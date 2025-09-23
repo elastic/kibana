@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
+import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
@@ -36,18 +36,21 @@ import { processCondition, toDataTableRecordWithIndex } from './utils';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { definition } = routingSnapshot.context;
+  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
-    content = <SamplePreviewPanel />;
+    content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
   } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <SamplePreviewPanel />;
+    content = <SamplePreviewPanel enableActions />;
   }
 
   return (
@@ -102,7 +105,7 @@ const EditingPanel = () => (
   />
 );
 
-const SamplePreviewPanel = () => {
+const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
   const { setDocumentMatchFilter, changeRule, createNewRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
@@ -122,18 +125,13 @@ const SamplePreviewPanel = () => {
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
 
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { definition } = routingSnapshot.context;
-  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
-  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
-
   const cellActions = useMemo(() => {
-    if (!canCreateRoutingRules || maxNestingLevel) {
+    if (!enableActions) {
       return [];
     }
 
     return buildCellActions(documents, createNewRule, changeRule);
-  }, [canCreateRoutingRules, maxNestingLevel, documents, createNewRule, changeRule]);
+  }, [enableActions, documents, createNewRule, changeRule]);
 
   const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
     ? Number.NaN
