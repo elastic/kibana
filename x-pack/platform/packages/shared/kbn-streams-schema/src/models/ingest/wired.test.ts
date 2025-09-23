@@ -95,6 +95,7 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
         },
         effective_lifecycle: {
           dsl: {},

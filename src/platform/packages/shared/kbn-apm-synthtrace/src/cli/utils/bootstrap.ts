@@ -34,7 +34,7 @@ export async function bootstrap({
   const client = new Client({
     node: esUrl,
     ...(runOptions.apiKey && { auth: { apiKey: runOptions.apiKey } }),
-    tls: getEsClientTlsSettings(esUrl),
+    tls: getEsClientTlsSettings(esUrl, runOptions.insecure),
     Connection: HttpConnection,
     requestTimeout: 30_000,
   });
