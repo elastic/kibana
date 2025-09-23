@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AgentsService } from './agents_service';
-export type { AgentRegistry } from './agent_registry';
-export { runAgent } from './modes';
-export type { AgentsServiceSetup, AgentsServiceStart } from './types';
+import type { AgentDefinition } from '@kbn/onechat-common';
+
+export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'>;
