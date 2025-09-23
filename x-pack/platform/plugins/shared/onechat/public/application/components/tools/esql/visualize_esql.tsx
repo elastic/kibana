@@ -60,7 +60,6 @@ export function VisualizeESQL({
 
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>();
 
-  // initialization
   useEffect(() => {
     if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
       const context = {
@@ -85,7 +84,7 @@ export function VisualizeESQL({
         const attrs = getLensAttributesFromSuggestion({
           filters: [],
           query: {
-            esql: '',
+            esql: esqlQuery,
           },
           suggestion,
           dataView: dataViewAsync.value,
@@ -95,6 +94,7 @@ export function VisualizeESQL({
           attributes: attrs,
           id: uuidv4(),
         };
+
         setLensInput(lensEmbeddableInput);
       }
     }
