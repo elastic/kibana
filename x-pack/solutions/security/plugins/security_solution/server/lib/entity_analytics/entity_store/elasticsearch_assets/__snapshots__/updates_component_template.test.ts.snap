@@ -9,7 +9,7 @@ Object {
         "@timestamp": Object {
           "type": "date",
         },
-        "asset.business.unit": Object {
+        "asset.business_unit": Object {
           "type": "keyword",
         },
         "asset.criticality": Object {

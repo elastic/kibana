@@ -27,7 +27,7 @@ export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldD
     newestValue({ source: 'asset.vendor' }),
     newestValue({ source: 'asset.environment' }),
     newestValue({ source: 'asset.criticality' }),
-    newestValue({ source: 'asset.business.unit' }),
+    newestValue({ source: 'asset.business_unit' }),
     newestValue({
       source: `${ecsField}.risk.calculated_level`,
     }),

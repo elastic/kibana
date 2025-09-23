@@ -818,8 +818,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "asset.business.unit",
-      "source": "asset.business.unit",
+      "destination": "asset.business_unit",
+      "source": "asset.business_unit",
     },
     Object {
       "aggregation": Object {
@@ -864,7 +864,7 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
-    "asset.business.unit": Object {
+    "asset.business_unit": Object {
       "type": "keyword",
     },
     "asset.criticality": Object {
@@ -1312,8 +1312,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "asset.business.unit",
-      "source": "asset.business.unit",
+      "destination": "asset.business_unit",
+      "source": "asset.business_unit",
     },
     Object {
       "aggregation": Object {
@@ -1568,7 +1568,7 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
-    "asset.business.unit": Object {
+    "asset.business_unit": Object {
       "type": "keyword",
     },
     "asset.criticality": Object {
@@ -1921,8 +1921,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "asset.business.unit",
-      "source": "asset.business.unit",
+      "destination": "asset.business_unit",
+      "source": "asset.business_unit",
     },
     Object {
       "aggregation": Object {
@@ -2161,7 +2161,7 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
-    "asset.business.unit": Object {
+    "asset.business_unit": Object {
       "type": "keyword",
     },
     "asset.criticality": Object {
@@ -2470,8 +2470,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "asset.business.unit",
-      "source": "asset.business.unit",
+      "destination": "asset.business_unit",
+      "source": "asset.business_unit",
     },
     Object {
       "aggregation": Object {
@@ -2718,7 +2718,7 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
-    "asset.business.unit": Object {
+    "asset.business_unit": Object {
       "type": "keyword",
     },
     "asset.criticality": Object {

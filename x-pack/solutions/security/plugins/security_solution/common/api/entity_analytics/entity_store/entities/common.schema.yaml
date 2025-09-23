@@ -144,12 +144,8 @@ components:
           type: string
         criticality:
           $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
-        business:
-          type: object
-          additionalProperties: false
-          properties:
-            unit:
-              type: string
+        business_unit:
+          type: string
 
     UserEntity:
       type: object

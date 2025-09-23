@@ -104,12 +104,7 @@ export const Asset = z
     vendor: z.string().optional(),
     environment: z.string().optional(),
     criticality: AssetCriticalityLevel.optional(),
-    business: z
-      .object({
-        unit: z.string().optional(),
-      })
-      .strict()
-      .optional(),
+    business_unit: z.string().optional(),
   })
   .strict();
 
