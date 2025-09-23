@@ -45,12 +45,28 @@ const partitionStateSharedOptionsSchema = {
           defaultValue: false,
         })
       ),
-      // available only for waffle chart
-      values: schema.maybe(
-        schema.arrayOf(schema.oneOf([schema.literal('absolute')]), {
-          minSize: 1,
-          maxSize: 1,
+      truncate_after_lines: schema.maybe(
+        schema.number({
+          defaultValue: 1,
+          min: 1,
+          max: 10,
         })
+      ),
+      visible: schema.maybe(
+        schema.oneOf([
+          schema.literal('auto'),
+          schema.literal('show'),
+          schema.literal('hide'),
+        ])
+      ),
+      size: schema.maybe(
+        schema.oneOf([
+          schema.literal('auto'),
+          schema.literal('small'),
+          schema.literal('medium'),
+          schema.literal('large'),
+          schema.literal('xlarge'),
+        ])
       ),
     })
   ),
