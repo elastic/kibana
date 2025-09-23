@@ -167,7 +167,7 @@ export const toGroupedEsqlQueryHits = async (
         }
       }
 
-      if (r % chunkSize === 0) {
+      if (r !== 0 && r % chunkSize === 0) {
         await new Promise(setImmediate);
       }
     }
