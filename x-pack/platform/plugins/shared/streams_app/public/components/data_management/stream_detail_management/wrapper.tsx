@@ -27,7 +27,12 @@ import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
+import {
+  ClassicStreamBadge,
+  DiscoverBadgeButton,
+  LifecycleBadge,
+  WiredStreamBadge,
+} from '../../stream_badges';
 import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
 import { ExportContentPackFlyout } from '../content/export_flyout';
 import { ImportContentPackFlyout } from '../content/import_flyout';
@@ -140,6 +145,7 @@ export function Wrapper({
                     <DiscoverBadgeButton definition={definition} />
                   )}
                   {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <LifecycleBadge lifecycle={definition.effective_lifecycle} />
                   )}
@@ -190,7 +196,9 @@ export function Wrapper({
           isSelected: tab === tabKey,
         }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {tabs[tab]?.content}
+      </StreamsAppPageTemplate.Body>
 
       {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
         <>
