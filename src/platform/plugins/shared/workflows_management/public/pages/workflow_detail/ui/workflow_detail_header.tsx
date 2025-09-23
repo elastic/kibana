@@ -43,7 +43,6 @@ export interface WorkflowDetailHeaderProps {
   isEnabled: boolean;
   handleToggleWorkflow: () => void;
   canTestWorkflow: boolean;
-  handleTestClick: () => void;
   isValid: boolean;
   hasUnsavedChanges: boolean;
 }
@@ -60,7 +59,6 @@ export const WorkflowDetailHeader = ({
   isEnabled,
   handleToggleWorkflow,
   canTestWorkflow,
-  handleTestClick,
   handleTabChange,
   isValid,
   hasUnsavedChanges,
@@ -170,22 +168,6 @@ export const WorkflowDetailHeader = ({
                 />
               </EuiToolTip>
               <EuiFlexItem grow={false} css={styles.separator} />
-              <EuiToolTip content={runWorkflowTooltipContent}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="beaker"
-                  size="s"
-                  disabled={isLoading || !canTestWorkflow || !isValid}
-                  onClick={handleTestClick}
-                  title={runWorkflowTooltipContent ?? undefined}
-                  aria-label={i18n.translate(
-                    'workflows.workflowDetailHeader.testWorkflow.ariaLabel',
-                    {
-                      defaultMessage: 'Test workflow',
-                    }
-                  )}
-                />
-              </EuiToolTip>
               <EuiToolTip content={runWorkflowTooltipContent}>
                 <EuiButtonIcon
                   color="success"

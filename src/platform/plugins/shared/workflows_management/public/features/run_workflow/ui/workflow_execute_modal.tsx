@@ -26,11 +26,12 @@ import type { WorkflowDetailDto, WorkflowListItemDto } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
+import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 
-type TriggerType = 'manual' | 'alert' | 'scheduled';
+type TriggerType = 'manual' | 'index' | 'alert';
 
 export function WorkflowExecuteModal({
   workflow,
@@ -42,10 +43,8 @@ export function WorkflowExecuteModal({
   onSubmit: (data: Record<string, any>) => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
-  const enabledTriggers =
-    workflow?.definition!.triggers.filter((t: any) => t.enabled).map((t: any) => t.type) || [];
-
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(enabledTriggers[0]);
+  const enabledTriggers = ['alert', 'index', 'manual'];
+  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>('alert');
 
   const [executionInput, setExecutionInput] = useState<string>('');
   const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export function WorkflowExecuteModal({
             <EuiFlexItem key={trigger}>
               <EuiButton
                 color={selectedTrigger === trigger ? 'primary' : 'text'}
-                onClick={() => handleChangeTrigger(trigger)}
+                onClick={() => handleChangeTrigger(trigger as TriggerType)}
                 iconSide="right"
                 contentProps={{
                   style: {
@@ -92,6 +91,7 @@ export function WorkflowExecuteModal({
                 css={css`
                   width: 100%;
                   height: fit-content;
+                  min-height: 100%;
                   svg,
                   img {
                     margin-left: auto;
@@ -134,6 +134,14 @@ export function WorkflowExecuteModal({
             errors={executionInputErrors}
             setErrors={setExecutionInputErrors}
             setValue={setExecutionInput}
+          />
+        )}
+        {selectedTrigger === 'index' && (
+          <WorkflowExecuteIndexForm
+            value={executionInput}
+            setValue={setExecutionInput}
+            errors={executionInputErrors}
+            setErrors={setExecutionInputErrors}
           />
         )}
       </EuiModalBody>

@@ -20,6 +20,8 @@
       "security",
       "triggersActionsUi",
       "spaces",
+      "dataViews",
+      "fieldFormats",
       "embeddable"
     ],
     "optionalPlugins": ["alerting"]

@@ -31,9 +31,13 @@ export const MANUAL_TRIGGERS_DESCRIPTIONS: Record<string, string> = {
         'Provide custom JSON data manually for testing. Ideal for simulating specific scenarios or debugging edge cases.',
     }
   ),
-  alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
+  index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerDescription', {
     defaultMessage:
       'Choose a document directly from an index to use as the test input. This is helpful for verifying workflows against real indexed data.',
+  }),
+  alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
+    defaultMessage:
+      'Choose an exited alert directly from an index to use as the test input. This is helpful for verifying workflows against real alerts data.',
   }),
   scheduled: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.scheduledTriggerDescription',

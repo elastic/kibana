@@ -22,7 +22,6 @@ import { useWorkflowActions } from '../../../entities/workflows/model/use_workfl
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
-import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
@@ -121,7 +120,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   };
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const handleRunClick = () => {
     let needInput: boolean | undefined = false;
@@ -246,7 +244,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         handleSave={handleSave}
         handleToggleWorkflow={handleToggleWorkflow}
         canTestWorkflow={canTestWorkflow}
-        handleTestClick={() => setTestWorkflowModalOpen(true)}
         handleTabChange={(tab) => {
           setActiveTab(tab);
         }}
@@ -309,12 +306,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           workflow={workflow}
           onClose={() => setWorkflowExecuteModalOpen(false)}
           onSubmit={handleRunWorkflow}
-        />
-      )}
-      {testWorkflowModalOpen && (
-        <TestWorkflowModal
-          workflowYaml={workflowYaml}
-          onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
     </div>
