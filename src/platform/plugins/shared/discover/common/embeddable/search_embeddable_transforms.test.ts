@@ -29,11 +29,13 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Title',
           description: 'Test Description',
           columns: ['column1', 'column2'],
+          references: [{ id: 'ref1', name: 'ref', type: 'index-pattern' }],
         },
       } as SearchEmbeddableSerializedState;
       const expectedAttributes = {
         title: 'Test Title',
         description: 'Test Description',
+        references: [{ id: 'ref1', name: 'ref', type: 'index-pattern' }],
         tabs: [
           {
             id: expect.any(String),
@@ -88,11 +90,13 @@ describe('searchEmbeddableTransforms', () => {
             },
           ],
           columns: ['should be removed'],
+          references: [{ id: 'ref2', name: 'ref2', type: 'index-pattern' }],
         },
       } as SearchEmbeddableSerializedState;
       const expectedAttributes = {
         title: 'Test Title',
         description: 'Test Description',
+        references: [{ id: 'ref2', name: 'ref2', type: 'index-pattern' }],
         tabs: [
           {
             id: 'tab-1',

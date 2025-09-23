@@ -14,9 +14,9 @@ import type { SearchEmbeddableSerializedState } from '../../public';
 export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
   transformOut: (state) => {
     if (!state.attributes) return state;
-    const discoverSessionAttributes =
-      'tabs' in state.attributes ? state.attributes : extractTabs(state.attributes);
-    const attributes = removeTopLevelTabAttributes(discoverSessionAttributes);
+    const { references, ...attrs } = state.attributes;
+    const attrsWithTabs = 'tabs' in attrs ? attrs : extractTabs(attrs);
+    const attributes = { references, ...removeTopLevelTabAttributes(attrsWithTabs) };
     return { ...state, attributes };
   },
 };
