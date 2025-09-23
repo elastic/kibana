@@ -57,7 +57,9 @@ const getStateParams = ({
     appliedFilters = filters;
   }
 
-  const tabState = getStatesFromKbnUrl(window?.location?.href)?.[TAB_STATE_URL_KEY];
+  const tabState = !isEmbeddableView
+    ? getStatesFromKbnUrl(window?.location?.href)?.[TAB_STATE_URL_KEY]
+    : undefined;
 
   return {
     columns,
