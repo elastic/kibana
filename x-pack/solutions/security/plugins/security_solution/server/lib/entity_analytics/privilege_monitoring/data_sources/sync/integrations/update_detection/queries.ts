@@ -11,6 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_clie
 import type { AfterKey } from './privileged_status_match';
 import type { PrivMonIntegrationsUser } from '../../../../types';
 import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
+import { errorsMsg, getErrorFromBulkResponse } from '../../utils';
 
 /**
  * Build painless script for matcher
@@ -75,36 +76,6 @@ export const buildPrivilegedSearchBody = (
   },
 });
 
-/** Script to update privileged status and sources array based on new status from source
- * If new status is false, remove source from sources array, and if sources array is empty, set is_privileged to false
- * If new status is true, add source to sources array if not already present, and set is_privileged to true
- */
-export const UPDATE_SCRIPT_SOURCE = `
-if (params.new_privileged_status == false) {
-  if (ctx._source.user.is_privileged == true) {
-    if (ctx._source.labels.sources == null) {
-      ctx._source.labels.sources = [];
-    }
-    ctx._source.labels.sources.removeIf(s -> java.util.Objects.equals(s, params.labels.sources));
-    if (ctx._source.labels.sources.size() == 0) {
-      ctx._source.user.is_privileged = false;
-    }
-  }
-} else if (params.new_privileged_status == true) {
-  if (ctx._source.labels.sources == null) {
-    ctx._source.labels.sources = [];
-  }
-
-  if (ctx._source.user.is_privileged != true) {
-    ctx._source.user.is_privileged = true;
-  }
-
-  if (!ctx._source.labels.sources.contains(params.labels.sources)) {
-    ctx._source.labels.sources.add(params.labels.sources);
-  }
-}
-`;
-
 export const applyPrivilegedUpdates = async ({
   dataClient,
   users,
@@ -120,11 +91,13 @@ export const applyPrivilegedUpdates = async ({
   try {
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
-      const operations = opsForIntegration(chunk);
-      await esClient.bulk({
+      const operations = opsForIntegration(chunk); // get some response logging and errors here
+      const resp = await esClient.bulk({
         refresh: 'wait_for',
         body: operations,
       });
+      const errors = getErrorFromBulkResponse(resp);
+      dataClient.log('error', errorsMsg(errors));
     }
   } catch (error) {
     dataClient.log('error', `Error applying privileged updates: ${error.message}`);
