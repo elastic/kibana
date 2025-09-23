@@ -161,7 +161,7 @@ export class MapsStorage {
         references: [
           ...soReferences,
           // tag refs still passed via API
-          ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
         ],
       }
     );
@@ -229,7 +229,7 @@ export class MapsStorage {
         references: [
           ...soReferences,
           // tag refs still passed via API
-          ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
         ],
       }
     );
