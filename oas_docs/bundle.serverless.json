@@ -67484,6 +67484,9 @@
                           "objects": {
                             "additionalProperties": false,
                             "properties": {
+                              "mappings": {
+                                "type": "boolean"
+                              },
                               "queries": {
                                 "items": {
                                   "additionalProperties": false,
@@ -67520,6 +67523,7 @@
                               }
                             },
                             "required": [
+                              "mappings",
                               "queries",
                               "routing"
                             ],
