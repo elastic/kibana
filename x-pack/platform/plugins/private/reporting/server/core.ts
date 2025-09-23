@@ -12,6 +12,7 @@ import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
+  ExecutionContextStart,
   IBasePath,
   IClusterClient,
   KibanaRequest,
@@ -85,6 +86,7 @@ export interface ReportingInternalStart {
   esClient: IClusterClient;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
+  executionContext: ExecutionContextStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -275,6 +277,11 @@ export class ReportingCore {
       uuid: this.context.env.instanceUuid,
       protocol: serverInfo.protocol,
     };
+  }
+
+  public async getExecutionContext(): Promise<ExecutionContextStart> {
+    const { executionContext } = await this.getPluginStartDeps();
+    return executionContext;
   }
 
   public async getHealthInfo(): Promise<ReportingHealthInfo> {
