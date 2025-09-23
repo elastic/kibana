@@ -21,9 +21,8 @@ import { duration } from 'moment';
 import { Stream } from 'stream';
 
 import type { TypeOfOutput, TypeOfInput } from './type_of';
-import { ByteSizeValue, schema } from '../..';
-import type { IpOptions } from './ip_type';
-import type { ContextReference } from '../references';
+import { ByteSizeValue, schema } from '../../..';
+import type { ContextReference } from '../../references';
 
 function expectNever<T extends never>() {}
 
@@ -64,7 +63,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.string);
       });
       test('should output boolean value with default', () => {
-        const testSchema = schema.boolean({ defaultValue: true });
+        const testSchema = schema.boolean().default(true);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(true);
@@ -106,7 +105,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output string value with default', () => {
-        const testSchema = schema.string({ defaultValue: types.string });
+        const testSchema = schema.string().default(types.string);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.string);
@@ -125,7 +124,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output uri value with default', () => {
-        const testSchema = schema.uri({ defaultValue: types.uri });
+        const testSchema = schema.uri().default(types.uri);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.uri);
@@ -144,7 +143,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output number value with default', () => {
-        const testSchema = schema.number({ defaultValue: types.number });
+        const testSchema = schema.number().default(types.number);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.number);
@@ -163,7 +162,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output byteSize value with default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.byteSize });
+        const testSchema = schema.byteSize().default(types.byteSize);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -171,7 +170,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output byteSize value with string default', () => {
-        const testSchema = schema.byteSize({ defaultValue: '1gb' });
+        const testSchema = schema.byteSize().default('1gb');
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -179,7 +178,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output byteSize value with number default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.number });
+        const testSchema = schema.byteSize().default(types.number);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -198,7 +197,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output duration value with default', () => {
-        const testSchema = schema.duration({ defaultValue: types.duration });
+        const testSchema = schema.duration().default(types.duration);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -206,7 +205,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output duration value with string default', () => {
-        const testSchema = schema.duration({ defaultValue: '1h' });
+        const testSchema = schema.duration().default('1h');
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -214,7 +213,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output duration value with number default', () => {
-        const testSchema = schema.duration({ defaultValue: types.number });
+        const testSchema = schema.duration().default(types.number);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -235,8 +234,6 @@ describe('schema types', () => {
     });
 
     describe('ip', () => {
-      const baseOptions: IpOptions<string> = { versions: ['ipv4'] };
-
       test('should output ip value', () => {
         const testSchema = schema.ip();
         type SchemaType = TypeOfOutput<typeof testSchema>;
@@ -246,7 +243,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should output ip value with default', () => {
-        const testSchema = schema.ip({ ...baseOptions, defaultValue: types.ip });
+        const testSchema = schema.ip().default(types.ip);
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(types.ip);
@@ -268,7 +265,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.number);
       });
       test('should permit but ignore inner default', () => {
-        const testSchema = schema.nullable(schema.string({ defaultValue: types.string }));
+        const testSchema = schema.nullable(schema.string().default(types.string));
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(null);
@@ -300,7 +297,7 @@ describe('schema types', () => {
       });
       test('should output object types with property defaults', () => {
         const testSchema = schema.object({
-          str: schema.string({ defaultValue: types.string }),
+          str: schema.string().default(types.string),
           num: schema.number(),
         });
         type SchemaType = TypeOfOutput<typeof testSchema>;
@@ -358,7 +355,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.number);
       });
       test('should permit but ignore inner default', () => {
-        const testSchema = schema.maybe(schema.string({ defaultValue: types.string }));
+        const testSchema = schema.maybe(schema.string().default(types.string));
         type SchemaType = TypeOfOutput<typeof testSchema>;
 
         expectType<SchemaType>(undefined);
@@ -423,7 +420,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.string);
       });
       test('should input boolean value with default', () => {
-        const testSchema = schema.boolean({ defaultValue: true });
+        const testSchema = schema.boolean().default(true);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(true);
@@ -464,7 +461,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input string value with default', () => {
-        const testSchema = schema.string({ defaultValue: types.string });
+        const testSchema = schema.string().default(types.string);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.string);
@@ -482,7 +479,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input uri value with default', () => {
-        const testSchema = schema.uri({ defaultValue: types.string });
+        const testSchema = schema.uri().default(types.string);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.uri);
@@ -500,7 +497,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input number value with default', () => {
-        const testSchema = schema.number({ defaultValue: types.number });
+        const testSchema = schema.number().default(types.number);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.number);
@@ -518,14 +515,14 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input byteSize value with default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.byteSize });
+        const testSchema = schema.byteSize().default(types.byteSize);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
         expectType<SchemaType>(undefined);
       });
       test('should input byteSize value with string default', () => {
-        const testSchema = schema.byteSize({ defaultValue: '1gb' });
+        const testSchema = schema.byteSize().default('1gb');
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -534,7 +531,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.string);
       });
       test('should input byteSize value with number default', () => {
-        const testSchema = schema.byteSize({ defaultValue: types.number });
+        const testSchema = schema.byteSize().default(types.number);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.byteSize);
@@ -554,14 +551,14 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input duration value with default', () => {
-        const testSchema = schema.duration({ defaultValue: types.duration });
+        const testSchema = schema.duration().default(types.duration);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
         expectType<SchemaType>(undefined);
       });
       test('should input duration value with string default', () => {
-        const testSchema = schema.duration({ defaultValue: '1h' });
+        const testSchema = schema.duration().default('1h');
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -570,7 +567,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.string);
       });
       test('should input duration value with number default', () => {
-        const testSchema = schema.duration({ defaultValue: types.number });
+        const testSchema = schema.duration().default(types.number);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.duration);
@@ -603,7 +600,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.number);
       });
       test('should permit but ignore inner default', () => {
-        const testSchema = schema.nullable(schema.string({ defaultValue: types.string }));
+        const testSchema = schema.nullable(schema.string().default(types.string));
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(null);
@@ -634,13 +631,10 @@ describe('schema types', () => {
       });
       test('should input object types with property defaults', () => {
         const testSchema = schema.object({
-          str: schema.string({ defaultValue: types.string }),
+          str: schema.string().default(types.string),
           num: schema.number(),
         });
         type SchemaType = TypeOfInput<typeof testSchema>;
-
-        const nick = null! as SchemaType;
-        nick.num;
 
         expectType<SchemaType>({
           str: types.string,
@@ -681,8 +675,6 @@ describe('schema types', () => {
     });
 
     describe('ip', () => {
-      const baseOptions: IpOptions<string> = { versions: ['ipv4'] };
-
       test('should input ip value', () => {
         const testSchema = schema.ip();
         type SchemaType = TypeOfInput<typeof testSchema>;
@@ -692,7 +684,7 @@ describe('schema types', () => {
         expectType<SchemaType>(undefined);
       });
       test('should input ip value with default', () => {
-        const testSchema = schema.ip({ ...baseOptions, defaultValue: types.ip });
+        const testSchema = schema.ip().default(types.ip);
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(types.ip);
@@ -713,7 +705,7 @@ describe('schema types', () => {
         expectType<SchemaType>(types.number);
       });
       test('should permit but ignore inner default', () => {
-        const testSchema = schema.maybe(schema.string({ defaultValue: types.string }));
+        const testSchema = schema.maybe(schema.string().default(types.string));
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>(undefined);

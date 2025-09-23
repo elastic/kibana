@@ -110,7 +110,7 @@ test('fails for null values if optional', () => {
 });
 
 test('returns empty array if input is empty but type has default value', () => {
-  const type = schema.arrayOf(schema.string({ defaultValue: 'test' }));
+  const type = schema.arrayOf(schema.string().default('test'));
   expect(type.validate([])).toEqual([]);
 });
 
@@ -141,7 +141,7 @@ test('array within array', () => {
 test('object within array', () => {
   const type = schema.arrayOf(
     schema.object({
-      foo: schema.string({ defaultValue: 'foo' }),
+      foo: schema.string().default('foo'),
     })
   );
 
@@ -208,8 +208,7 @@ describe('#validate', () => {
 });
 
 describe('#defaultValue', () => {
-  // TODO: The defaultValue should be respected
-  test.failing('should validate with correct defaultValue', () => {
+  test('should validate with correct defaultValue', () => {
     const defaultValue = [{ foo: 'test' }];
     const type = schema.arrayOf(
       schema.object({

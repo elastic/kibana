@@ -8,7 +8,7 @@
  */
 
 import { expectType } from 'tsd';
-import type { Simplify } from './types';
+import type { Simplify } from './utils';
 
 const types = {
   string: 'some-string',

@@ -15,27 +15,39 @@ import type {
   TypeOptions,
   ExtendsDeepOptions,
   UnknownOptions,
-  DefaultValue,
   SomeType,
+  DefaultValue,
 } from './type';
 import { Type } from './type';
 
-export type MapOfOptions<
-  K,
-  T extends SomeType,
-  D extends DefaultValue<Map<K, T['_input']>> = never
-> = TypeOptions<Map<K, T['_output']>, Map<K, T['_input']>, D> & UnknownOptions;
+export type MapOfOptions<K, T extends SomeType> = TypeOptions<
+  Map<K, T['_output']>,
+  Map<K, T['_input']>
+> &
+  UnknownOptions;
 
-export class MapOfType<
-  K,
-  T extends SomeType,
-  D extends DefaultValue<Map<K, T['_input']>> = never
-> extends Type<Map<K, T['_output']>, Map<K, T['_input']>, D> {
+export class MapOfType<K, T extends SomeType> extends Type<
+  Map<K, T['_output']>,
+  Map<K, T['_input']>
+> {
   private readonly keyType: Type<K>;
   private readonly valueType: T;
-  private readonly mapOptions: MapOfOptions<K, T, D>;
+  private readonly mapOptions: MapOfOptions<K, T>;
 
-  constructor(keyType: Type<K>, valueType: T, options: MapOfOptions<K, T, D> = {}) {
+  /**
+   * Joi clones default values with `Hoek.clone`, and there is bug in cloning
+   * of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
+   * The only way to avoid cloning and hence the bug is to use function for
+   * default value instead.
+   */
+  private static modifyDefault<K, T extends SomeType>(
+    value?: DefaultValue<Map<K, T['_input']>>
+  ): DefaultValue<Map<K, T['_input']>> | undefined {
+    if (!value) return undefined;
+    return value instanceof Map ? () => value : value;
+  }
+
+  constructor(keyType: Type<K>, valueType: T, options: MapOfOptions<K, T> = {}) {
     const defaultValue = options.defaultValue;
     let schema = internals
       .map()
@@ -52,23 +64,25 @@ export class MapOfType<
 
     super(schema, {
       ...options,
-      // Joi clones default values with `Hoek.clone`, and there is bug in cloning
-      // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
-      // The only way to avoid cloning and hence the bug is to use function for
-      // default value instead.
-      defaultValue: (defaultValue instanceof Map ? () => defaultValue : defaultValue) as D,
+      defaultValue: MapOfType.modifyDefault(defaultValue),
     });
     this.keyType = keyType;
     this.valueType = valueType;
     this.mapOptions = options;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions): MapOfType<K, T, D> {
+  public extendsDeep(options: ExtendsDeepOptions): MapOfType<K, T> {
     return new MapOfType(
       this.keyType.extendsDeep(options),
       this.valueType.extendsDeep(options) as T,
       this.mapOptions
     );
+  }
+
+  protected getDefault(
+    value?: DefaultValue<Map<K, T['_input']>>
+  ): DefaultValue<Map<K, T['_input']>> | undefined {
+    return MapOfType.modifyDefault(value);
   }
 
   protected handleError(

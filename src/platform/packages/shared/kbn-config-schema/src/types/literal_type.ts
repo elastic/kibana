@@ -10,12 +10,16 @@
 import { internals } from '../internals';
 import { Type } from './type';
 
-export class LiteralType<T> extends Type<T, T, never> {
+export class LiteralType<T> extends Type<T> {
   private expectedValue: T;
 
   constructor(value: T) {
     super(internals.any().valid(value));
     this.expectedValue = value;
+  }
+
+  protected getDefault(defaultValue?: T): T | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string) {

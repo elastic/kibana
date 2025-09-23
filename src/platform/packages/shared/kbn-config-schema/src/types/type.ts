@@ -23,7 +23,7 @@ import { Reference } from '../references';
 /**
  * Generic schema type
  */
-export type SomeType = Type<any, any, any>;
+export type SomeType = Type<any>;
 
 export type TypeOrLazyType = SomeType | (() => SomeType);
 
@@ -49,11 +49,18 @@ export interface TypeMeta {
 
 export type DefaultValue<T> = T | (() => T) | Reference<T>;
 
-export interface TypeOptions<Output, Input = Output, M extends Record<string, any> = {}> {
+export interface TypeOptions<
+  Output,
+  Input = Output,
+  DV = DefaultValue<Input>,
+  M extends Record<string, any> = {}
+> {
   /**
    * Default value of type
+   *
+   * This is *not* supported for `input` types, use `xxxType.default()` instead.
    */
-  defaultValue?: DefaultValue<Input>;
+  defaultValue?: DV;
   /**
    * Supplemental validation, only called if primary validation is successful.
    *
@@ -113,7 +120,7 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<Output, Input = Output> {
+export abstract class Type<Output, Input = Output, DV = DefaultValue<Input>> {
   public readonly type!: Output;
   public readonly _output!: Output;
   public readonly _input!: Input;
@@ -121,27 +128,21 @@ export abstract class Type<Output, Input = Output> {
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
 
+  #internalSchema: Schema;
+  private set internalSchema(schema: Schema) {
+    this.#internalSchema = schema;
+  }
+
   /**
    * Internal "schema" backed by Joi.
    * @type {Schema}
    */
-  protected readonly internalSchema: Schema;
+  protected get internalSchema(): Schema {
+    return this.#internalSchema;
+  }
 
-  protected constructor(schema: Schema, options: TypeOptions<Output, Input> = {}) {
-    if (options.defaultValue !== undefined) {
-      schema = schema.optional();
-
-      // If default value is a function, then we must provide description for it.
-      if (typeof options.defaultValue === 'function') {
-        schema = schema.default(options.defaultValue);
-      } else {
-        schema = schema.default(
-          Reference.isReference(options.defaultValue)
-            ? options.defaultValue.getSchema()
-            : (options.defaultValue as any)
-        );
-      }
-    }
+  protected constructor(schema: Schema, options: TypeOptions<Output, Input, DV> = {}) {
+    schema = this.setDefault(this.getDefault(options.defaultValue), schema);
 
     if (options.validate) {
       schema = schema.custom(convertValidationFunction(options.validate));
@@ -164,10 +165,10 @@ export abstract class Type<Output, Input = Output> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    this.internalSchema = schema;
+    this.#internalSchema = schema;
   }
 
-  public extendsDeep(newOptions: ExtendsDeepOptions): Type<Output, Input> {
+  public extendsDeep(newOptions: ExtendsDeepOptions): Type<Output, Input, DV> {
     return this;
   }
 
@@ -204,6 +205,45 @@ export abstract class Type<Output, Input = Output> {
 
   public getSchemaStructure() {
     return recursiveGetSchemaStructure(this.internalSchema);
+  }
+
+  /**
+   * Set the default value of the type.
+   *
+   * Used instead of `options.defaultValue` for generating `input` types.
+   */
+  public default(value: DV): Type<Output, Input | undefined, DV> {
+    this.setDefault(this.getDefault(value));
+    return this;
+  }
+
+  /**
+   * Transform the default value into the expected `Input` type.
+   *
+   * Needed for `DurationType` and `ByteSizeType`.
+   */
+  protected abstract getDefault(defaultValue?: DV): DefaultValue<Input> | undefined;
+
+  private setDefault(value?: DefaultValue<Input>, schema: Schema = this.internalSchema): Schema {
+    let newSchema = schema;
+    if (value !== undefined) {
+      newSchema = newSchema.optional();
+
+      // If default value is a function, then we must provide description for it.
+      if (typeof value === 'function') {
+        newSchema = newSchema.default(value);
+      } else if (Reference.isReference(value)) {
+        newSchema = newSchema.default(value.getSchema());
+      } else {
+        newSchema = newSchema.default(value);
+      }
+    }
+
+    if (schema) {
+      this.internalSchema = newSchema;
+    }
+
+    return newSchema;
   }
 
   protected handleError(

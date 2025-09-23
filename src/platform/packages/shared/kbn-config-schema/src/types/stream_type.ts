@@ -13,9 +13,13 @@ import { internals } from '../internals';
 import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export class StreamType<D extends DefaultValue<Stream> = never> extends Type<Stream, Stream, D> {
-  constructor(options?: TypeOptions<Stream, Stream, D>) {
+export class StreamType extends Type<Stream> {
+  constructor(options?: TypeOptions<Stream>) {
     super(internals.stream(), options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<Stream>): DefaultValue<Stream> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

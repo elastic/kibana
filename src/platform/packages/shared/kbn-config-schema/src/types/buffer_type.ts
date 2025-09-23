@@ -9,12 +9,16 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { DefaultValue, TypeOptions } from './type';
+import type { TypeOptions } from './type';
 import { Type } from './type';
 
-export class BufferType<D extends DefaultValue<Buffer> = never> extends Type<Buffer, Buffer, D> {
-  constructor(options?: TypeOptions<Buffer, Buffer, D>) {
+export class BufferType extends Type<Buffer> {
+  constructor(options?: TypeOptions<Buffer>) {
     super(internals.binary(), options);
+  }
+
+  protected getDefault(defaultValue?: Buffer): Buffer | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

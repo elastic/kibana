@@ -9,7 +9,7 @@
 
 import type { ObjectTypeOptions, SomeObjectType } from './object_type';
 import { ObjectType } from './object_type';
-import type { DefaultValue, SomeType } from './type';
+import type { SomeType } from './type';
 
 export type IntersectionInput<T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>> =
   T extends readonly [infer First, ...infer Rest]
@@ -30,13 +30,9 @@ export type IntersectionOutput<T extends Readonly<[SomeObjectType, ...SomeObject
     : never;
 
 export class IntersectionType<
-  T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>,
-  D extends DefaultValue<IntersectionInput<T>> = never
-> extends ObjectType<IntersectionOutput<T>, IntersectionInput<T>, D> {
-  constructor(
-    types: T,
-    options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>, D>
-  ) {
+  T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>
+> extends ObjectType<IntersectionOutput<T>, IntersectionInput<T>> {
+  constructor(types: T, options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>>) {
     const props = types.reduce((mergedProps, type) => {
       const typeProps = type.props as Record<string, SomeType>;
       Object.entries(typeProps).forEach(([key, value]) => {

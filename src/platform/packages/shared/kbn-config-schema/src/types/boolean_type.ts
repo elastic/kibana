@@ -9,16 +9,16 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { DefaultValue, TypeOptions } from './type';
+import type { TypeOptions } from './type';
 import { Type } from './type';
 
-export class BooleanType<D extends DefaultValue<boolean> = never> extends Type<
-  boolean,
-  boolean,
-  D
-> {
-  constructor(options?: TypeOptions<boolean, boolean, D>) {
+export class BooleanType extends Type<boolean> {
+  constructor(options?: TypeOptions<boolean>) {
     super(internals.boolean(), options);
+  }
+
+  protected getDefault(defaultValue?: boolean): boolean | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

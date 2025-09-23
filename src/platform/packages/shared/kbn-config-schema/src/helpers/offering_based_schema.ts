@@ -9,7 +9,7 @@
 
 import { schema } from '../..';
 import type { Type } from '../types';
-import type { DefaultValue, TypeOptions } from '../types/type';
+import type { TypeOptions } from '../types/type';
 
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
@@ -28,7 +28,7 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * Only allow the setting on Serverless
  * ```ts
  * const config = schema.object({
- *   myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
+ *   myProp: offeringBasedSchema({ serverless: schema.boolean().default(true) }),
  * });
  * ```
  *
@@ -36,7 +36,7 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * Only allow the setting on Traditional
  * ```ts
  * const config = schema.object({
- *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
+ *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean().default(true) }),
  * });
  * ```
  * @example
@@ -44,7 +44,7 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
- *     serverless: schema.boolean({ defaultValue: true }),
+ *     serverless: schema.boolean().default(true),
  *     traditional: schema.literal(false), // this can be skipped if users can't specify it in the config
  *     options: { defaultValue: false },
  *   }),
@@ -57,8 +57,8 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * ```ts
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
- *     serverless: schema.boolean({ defaultValue: true }),
- *     traditional: schema.boolean({ defaultValue: false }),
+ *     serverless: schema.boolean().default(true),
+ *     traditional: schema.boolean().default(false),
  *   }),
  * });
  * ```
@@ -67,16 +67,10 @@ import type { DefaultValue, TypeOptions } from '../types/type';
  * @param opts.traditional The validation to apply in the Traditional offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.options Any options to pass down in the types.
  */
-export function offeringBasedSchema<
-  Output,
-  Input = Output,
-  SLD extends DefaultValue<Input> = never,
-  TRD extends DefaultValue<Input> = never,
-  DV extends DefaultValue<Input> = never
->(opts: {
-  serverless?: Type<Output, Input, SLD>;
-  traditional?: Type<Output, Input, TRD>;
-  options?: TypeOptions<Output, Input, DV>;
+export function offeringBasedSchema<Output, Input = Output>(opts: {
+  serverless?: Type<Output, Input>;
+  traditional?: Type<Output, Input>;
+  options?: TypeOptions<Output, Input>;
 }) {
   const { serverless = schema.never(), traditional = schema.never(), options } = opts;
   return schema.conditional(

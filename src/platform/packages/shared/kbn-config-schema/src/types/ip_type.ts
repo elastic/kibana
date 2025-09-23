@@ -9,22 +9,26 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { DefaultValue, TypeOptions } from './type';
+import type { TypeOptions } from './type';
 import { Type } from './type';
 
 export type IpVersion = 'ipv4' | 'ipv6';
-export type IpOptions<D extends DefaultValue<string> = never> = TypeOptions<string, string, D> & {
+export type IpOptions = TypeOptions<string> & {
   /**
    * IP versions to accept, defaults to ['ipv4', 'ipv6'].
    */
   versions?: IpVersion[];
 };
 
-export class IpType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
-  constructor(options: IpOptions<D> = {}) {
+export class IpType extends Type<string> {
+  constructor(options: IpOptions = {}) {
     const versions = options.versions ?? ['ipv4', 'ipv6'];
     const schema = internals.string().ip({ version: versions, cidr: 'forbidden' });
     super(schema, options);
+  }
+
+  protected getDefault(defaultValue?: string): string | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value, version }: Record<string, any>) {

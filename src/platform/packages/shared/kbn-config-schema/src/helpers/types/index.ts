@@ -7,22 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { internals } from '../internals';
-import { Type } from './type';
-
-export class NeverType extends Type<never> {
-  constructor() {
-    super(internals.any().forbidden());
-  }
-
-  protected getDefault() {
-    return undefined;
-  }
-
-  protected handleError(type: string) {
-    switch (type) {
-      case 'any.unknown':
-        return "a value wasn't expected to be present";
-    }
-  }
-}
+export * from './utils';
+export * from './type_of';
+export * from './schema_of';

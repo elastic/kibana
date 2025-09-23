@@ -14,28 +14,27 @@ import type {
   TypeOptions,
   ExtendsDeepOptions,
   UnknownOptions,
-  DefaultValue,
   SomeType,
+  DefaultValue,
 } from './type';
 import { Type } from './type';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
-export type RecordOfOptions<
-  K extends string,
-  T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>> = never
-> = TypeOptions<Record<K, T['_output']>, Record<K, T['_input']>, D> & UnknownOptions;
+export type RecordOfOptions<K extends string, T extends SomeType> = TypeOptions<
+  Record<K, T['_output']>,
+  Record<K, T['_input']>
+> &
+  UnknownOptions;
 
-export class RecordOfType<
-  K extends string,
-  T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>> = never
-> extends Type<Record<K, T['_output']>, Record<K, T['_input']>, D> {
+export class RecordOfType<K extends string, T extends SomeType> extends Type<
+  Record<K, T['_output']>,
+  Record<K, T['_input']>
+> {
   private readonly keyType: Type<K>;
   private readonly valueType: T;
-  private readonly options: RecordOfOptions<K, T, D>;
+  private readonly options: RecordOfOptions<K, T>;
 
-  constructor(keyType: Type<K>, valueType: T, options: RecordOfOptions<K, T, D> = {}) {
+  constructor(keyType: Type<K>, valueType: T, options: RecordOfOptions<K, T> = {}) {
     let schema = internals
       .record()
       .entries(keyType.getSchema(), valueType.getSchema())
@@ -55,12 +54,18 @@ export class RecordOfType<
     this.options = options;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions): RecordOfType<K, T, D> {
+  public extendsDeep(options: ExtendsDeepOptions): RecordOfType<K, T> {
     return new RecordOfType(
       this.keyType.extendsDeep(options),
       this.valueType.extendsDeep(options) as T,
       this.options
     );
+  }
+
+  protected getDefault(
+    defaultValue?: DefaultValue<Record<K, T['_input']>>
+  ): DefaultValue<Record<K, T['_input']>> | undefined {
+    return defaultValue;
   }
 
   protected handleError(

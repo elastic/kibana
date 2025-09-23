@@ -22,35 +22,17 @@ export type DurationDefaultValue =
   | (() => DurationValueType)
   | Reference<Duration>; // references must only be a Duration
 
-export interface DurationOptions<D extends DurationDefaultValue = never> {
-  defaultValue?: D;
+export interface DurationOptions {
+  defaultValue?: DurationDefaultValue;
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
   max?: DurationValueType;
 }
 
-export class DurationType<D extends DurationDefaultValue = never> extends Type<
-  Duration,
-  Duration,
-  [D] extends [never] ? never : Duration
-> {
-  constructor(options: DurationOptions<D> = {}) {
-    let defaultValue: DefaultValue<Duration> | undefined;
-
-    const originalDefaultValue = options.defaultValue;
-
-    if (typeof originalDefaultValue === 'function') {
-      defaultValue = () => ensureDuration(originalDefaultValue());
-    } else if (
-      typeof originalDefaultValue === 'string' ||
-      typeof originalDefaultValue === 'number'
-    ) {
-      defaultValue = ensureDuration(originalDefaultValue);
-    } else {
-      defaultValue = originalDefaultValue;
-    }
-
+export class DurationType extends Type<Duration, Duration, DurationDefaultValue> {
+  constructor(options: DurationOptions = {}) {
     let schema = internals.duration();
+
     if (options.min) {
       schema = schema.min(options.min);
     }
@@ -60,8 +42,17 @@ export class DurationType<D extends DurationDefaultValue = never> extends Type<
 
     super(schema, {
       validate: options.validate,
-      defaultValue: defaultValue as [D] extends [never] ? never : Duration,
+      defaultValue: options.defaultValue,
     });
+  }
+
+  getDefault(defaultValue?: DurationDefaultValue): DefaultValue<Duration> | undefined {
+    if (typeof defaultValue === 'function') {
+      return () => ensureDuration(defaultValue());
+    } else if (typeof defaultValue === 'string' || typeof defaultValue === 'number') {
+      return ensureDuration(defaultValue);
+    }
+    return defaultValue;
   }
 
   protected handleError(

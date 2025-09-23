@@ -237,8 +237,7 @@ describe('#validate', () => {
 });
 
 describe('#defaultValue', () => {
-  // TODO: The defaultValue should be respected
-  test.failing('should validate with correct defaultValue', () => {
+  test('should validate with correct defaultValue', () => {
     const defaultValue = new Map<string, string>([['foo', 'test']]);
     const type = schema.mapOf(schema.string(), schema.string(), {
       defaultValue,
@@ -393,12 +392,12 @@ test('handles references', () => {
       schema.contextRef('scenario'),
       'context',
       schema.object({
-        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
-        sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string().default(schema.contextRef('context_value')),
+        sibling: schema.string().default('sibling#1'),
       }),
       schema.object({
-        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
-        sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string().default(schema.siblingRef('sibling')),
+        sibling: schema.string().default('sibling#1'),
       })
     )
   );

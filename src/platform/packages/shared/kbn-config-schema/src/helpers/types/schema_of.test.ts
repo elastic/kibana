@@ -9,7 +9,7 @@
 
 import { expectType } from 'tsd';
 
-import { schema } from '../..';
+import { schema } from '../../..';
 import type { SchemaOf } from './schema_of';
 
 describe('SchemaOf', () => {
@@ -67,8 +67,8 @@ describe('SchemaOf', () => {
 
     expectType<Expected>(
       schema.object({
-        name: schema.string({ defaultValue: 'John' }),
-        age: schema.number({ defaultValue: 1 }),
+        name: schema.string().default('John'),
+        age: schema.number().default(1),
       })
     );
   });

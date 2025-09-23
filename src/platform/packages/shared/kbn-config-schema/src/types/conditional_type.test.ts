@@ -48,8 +48,8 @@ test('properly handles nested types with defaults', () => {
   const type = schema.conditional(
     schema.contextRef<number>('context_value_1'),
     schema.contextRef<number>('context_value_2'),
-    schema.string({ defaultValue: 'equal' }),
-    schema.string({ defaultValue: 'not equal' })
+    schema.string().default('equal'),
+    schema.string().default('not equal')
   );
 
   expect(
@@ -386,8 +386,8 @@ describe('#validate', () => {
         value: schema.conditional(
           schema.siblingRef('key'),
           'number',
-          schema.number({ defaultValue: 100 }),
-          schema.string({ defaultValue: 'some-string' })
+          schema.number().default(100),
+          schema.string().default('some-string')
         ),
       },
       {

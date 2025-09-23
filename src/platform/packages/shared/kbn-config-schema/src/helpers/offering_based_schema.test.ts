@@ -14,7 +14,7 @@ import { offeringBasedSchema } from './offering_based_schema';
 describe('Helper: offeringBasedSchema()', () => {
   describe('Example: Only allow the setting on Serverless', () => {
     const validation = schema.object({
-      myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
+      myProp: offeringBasedSchema({ serverless: schema.boolean().default(true) }),
     });
 
     test('it uses the non-serverless validation when the context is not present', () => {
@@ -44,7 +44,7 @@ describe('Helper: offeringBasedSchema()', () => {
 
   describe('Example: Only allow the setting on Traditional', () => {
     const validation = schema.object({
-      myProp: offeringBasedSchema({ traditional: schema.boolean({ defaultValue: true }) }),
+      myProp: offeringBasedSchema({ traditional: schema.boolean().default(true) }),
     });
 
     test('it uses the non-serverless validation when the context is not present', () => {
@@ -75,9 +75,8 @@ describe('Helper: offeringBasedSchema()', () => {
   describe('Example: Fixed setting on Traditional, configurable on Serverless', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
-        serverless: schema.string({ defaultValue: 'serverless' }),
-        options: { defaultValue: 'top-default' },
-      }),
+        serverless: schema.string().default('serverless'),
+      }).default('top-default'),
     });
 
     test('it uses the non-serverless validation when the context is not present', () => {
@@ -108,7 +107,7 @@ describe('Helper: offeringBasedSchema()', () => {
   describe('Example: Fixed setting on Traditional (though settable), configurable on Serverless', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean().default(true),
         traditional: schema.literal(false),
         options: { defaultValue: false },
       }),
@@ -143,7 +142,7 @@ describe('Helper: offeringBasedSchema()', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
         serverless: schema.literal(false),
-        traditional: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean().default(true),
         options: { defaultValue: false },
       }),
     });
@@ -176,8 +175,8 @@ describe('Helper: offeringBasedSchema()', () => {
   describe('Example: Setting is changeable on all offerings but with different defaults', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: true }),
-        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean().default(true),
+        traditional: schema.boolean().default(false),
       }),
     });
 
@@ -208,12 +207,12 @@ describe('Helper: offeringBasedSchema()', () => {
 
   test('TS resolves correct type with nested conditional', () => {
     const testSchema = offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: true }),
+      serverless: schema.boolean().default(true),
       traditional: schema.conditional(
         schema.contextRef('dev'),
         false,
-        schema.boolean({ defaultValue: true }),
-        schema.boolean({ defaultValue: false })
+        schema.boolean().default(true),
+        schema.boolean().default(false)
       ),
     });
     expectType<boolean>(testSchema._output);
@@ -223,9 +222,9 @@ describe('Helper: offeringBasedSchema()', () => {
   test('TS enforces the same types on both entries', () => {
     schema.object({
       myProp: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean().default(true),
         // @ts-expect-error
-        traditional: schema.string({ defaultValue: 'not on serverless' }),
+        traditional: schema.string().default('not on serverless'),
       }),
     });
   });

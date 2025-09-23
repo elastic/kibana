@@ -14,19 +14,15 @@ import { Type, convertValidationFunction } from './type';
 
 import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 
-export type StringOptions<D extends DefaultValue<string> = never> = TypeOptions<
-  string,
-  string,
-  D
-> & {
+export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
   coerceFromNumber?: boolean;
 };
 
-export class StringType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
-  constructor(options: StringOptions<D> = {}) {
+export class StringType extends Type<string> {
+  constructor(options: StringOptions = {}) {
     // We want to allow empty strings, however calling `allow('')` causes
     // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
@@ -72,6 +68,10 @@ export class StringType<D extends DefaultValue<string> = never> extends Type<str
 
     schema.type = 'string';
     super(schema, options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<string>): DefaultValue<string> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

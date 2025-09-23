@@ -9,9 +9,9 @@
 
 import { get } from 'lodash';
 import { expectType } from 'tsd';
-import type { TypeOf, TypeOfOutput } from './type_of';
+import type { TypeOf, TypeOfOutput } from '../helpers/types/type_of';
 import { offeringBasedSchema, schema } from '../..';
-import type { PreciseObjectProps } from './object_type';
+import type { ObjectProps } from './object_type';
 
 const types = {
   string: 'some-string',
@@ -84,7 +84,7 @@ test('fails if missing required value', () => {
 
 test('returns value if undefined string with default', () => {
   const type = schema.object({
-    name: schema.string({ defaultValue: 'test' }),
+    name: schema.string().default('test'),
   });
   const value = {};
 
@@ -108,7 +108,7 @@ test('fails if key does not exist in schema', () => {
 test('defined object within object', () => {
   const type = schema.object({
     foo: schema.object({
-      bar: schema.string({ defaultValue: 'hello world' }),
+      bar: schema.string().default('hello world'),
     }),
   });
 
@@ -122,7 +122,7 @@ test('defined object within object', () => {
 test('undefined object within object', () => {
   const type = schema.object({
     foo: schema.object({
-      bar: schema.string({ defaultValue: 'hello world' }),
+      bar: schema.string().default('hello world'),
     }),
   });
 
@@ -168,7 +168,7 @@ describe('#validate', () => {
     const type = schema.object(
       {
         foo: schema.object({
-          bar: schema.string({ defaultValue: 'baz' }),
+          bar: schema.string().default('baz'),
         }),
       },
       {
@@ -207,11 +207,11 @@ describe('#validate', () => {
     const mySchema = schema.object(
       {
         str: schema.string(),
-        num: schema.number({ defaultValue: types.number }),
+        num: schema.number().default(types.number),
         strMaybe: schema.maybe(schema.string()),
         obj: schema.object({
           str: schema.string(),
-          num: schema.number({ defaultValue: types.number }),
+          num: schema.number().default(types.number),
           strMaybe: schema.maybe(schema.string()),
         }),
       },
@@ -237,7 +237,7 @@ describe('#getPropSchemas', () => {
     const props = {
       str: schema.string(),
       num: schema.number(),
-    } satisfies PreciseObjectProps;
+    } satisfies ObjectProps;
     const type = schema.object(props);
 
     expect(type.props).not.toBe(props);
@@ -311,7 +311,7 @@ test('handles references', () => {
       defaultValue: schema.contextRef('context_value'),
     }),
     key: schema.string(),
-    value: schema.string({ defaultValue: schema.siblingRef('key') }),
+    value: schema.string().default(schema.siblingRef('key')),
   });
 
   expect(type.validate({ key: 'key#1' }, { context_value: 'context#1' })).toEqual({
@@ -331,8 +331,8 @@ test('handles conditionals', () => {
     value: schema.conditional(
       schema.siblingRef('key'),
       'some-key',
-      schema.string({ defaultValue: 'some-value' }),
-      schema.string({ defaultValue: 'unknown-value' })
+      schema.string().default('some-value'),
+      schema.string().default('unknown-value')
     ),
   });
 
@@ -382,10 +382,7 @@ test('individual keys can validated', () => {
 });
 
 test('allow unknown keys when unknowns = `allow`', () => {
-  const type = schema.object(
-    { foo: schema.string({ defaultValue: 'test' }) },
-    { unknowns: 'allow' }
-  );
+  const type = schema.object({ foo: schema.string().default('test') }, { unknowns: 'allow' });
 
   expect(
     type.validate({
@@ -414,10 +411,7 @@ test('unknowns = `allow` affects only own keys', () => {
 });
 
 test('does not allow unknown keys when unknowns = `forbid`', () => {
-  const type = schema.object(
-    { foo: schema.string({ defaultValue: 'test' }) },
-    { unknowns: 'forbid' }
-  );
+  const type = schema.object({ foo: schema.string().default('test') }, { unknowns: 'forbid' });
   expect(() =>
     type.validate({
       bar: 'baz',
@@ -426,10 +420,7 @@ test('does not allow unknown keys when unknowns = `forbid`', () => {
 });
 
 test('allow and remove unknown keys when unknowns = `ignore`', () => {
-  const type = schema.object(
-    { foo: schema.string({ defaultValue: 'test' }) },
-    { unknowns: 'ignore' }
-  );
+  const type = schema.object({ foo: schema.string().default('test') }, { unknowns: 'ignore' });
 
   expect(
     type.validate({
@@ -479,7 +470,7 @@ test('unknowns = `ignore` respects local preferences in sub-keys', () => {
 describe('nested unknowns', () => {
   test('allow unknown keys when unknowns = `allow`', () => {
     const type = schema.object({
-      myObj: schema.object({ foo: schema.string({ defaultValue: 'test' }) }, { unknowns: 'allow' }),
+      myObj: schema.object({ foo: schema.string().default('test') }, { unknowns: 'allow' }),
     });
 
     expect(
@@ -515,10 +506,7 @@ describe('nested unknowns', () => {
 
   test('does not allow unknown keys when unknowns = `forbid`', () => {
     const type = schema.object({
-      myObj: schema.object(
-        { foo: schema.string({ defaultValue: 'test' }) },
-        { unknowns: 'forbid' }
-      ),
+      myObj: schema.object({ foo: schema.string().default('test') }, { unknowns: 'forbid' }),
     });
     expect(() =>
       type.validate({
@@ -531,10 +519,7 @@ describe('nested unknowns', () => {
 
   test('allow and remove unknown keys when unknowns = `ignore`', () => {
     const type = schema.object({
-      myObj: schema.object(
-        { foo: schema.string({ defaultValue: 'test' }) },
-        { unknowns: 'ignore' }
-      ),
+      myObj: schema.object({ foo: schema.string().default('test') }, { unknowns: 'ignore' }),
     });
 
     expect(
@@ -598,10 +583,7 @@ describe('nested unknowns', () => {
   test('parent `allow`, child `ignore` should be honored', () => {
     const type = schema.object(
       {
-        myObj: schema.object(
-          { foo: schema.string({ defaultValue: 'test' }) },
-          { unknowns: 'ignore' }
-        ),
+        myObj: schema.object({ foo: schema.string().default('test') }, { unknowns: 'ignore' }),
       },
       { unknowns: 'allow' }
     );
@@ -623,7 +605,7 @@ describe('nested unknowns', () => {
     test('should strip unknown keys', () => {
       const type = schema.object({
         myObj: schema.object({
-          foo: schema.string({ defaultValue: 'test' }),
+          foo: schema.string().default('test'),
           nested: schema.object({
             a: schema.number(),
           }),
@@ -1044,107 +1026,106 @@ describe('#defaultValue', () => {
       num: schema.number(),
     };
 
-    schema.object(simpleProps, {
-      // @ts-expect-error
-      defaultValue: {},
-    });
-    schema.object(simpleProps, {
-      defaultValue: {
-        str: types.string,
-        num: types.number,
-      },
+    // @ts-expect-error
+    schema.object(simpleProps).default({});
+    schema.object(simpleProps).default({
+      str: types.string,
+      num: types.number,
     });
   });
-  test('should pass property default types to object default', () => {
+  test('should pass property default types to object defaultValue', () => {
     const simpleProps = {
-      str: schema.string({ defaultValue: types.string }),
+      str: schema.string().default(types.string),
       num: schema.number(),
-    } satisfies PreciseObjectProps;
+    } satisfies ObjectProps;
 
     schema.object(simpleProps, {
       // @ts-expect-error
       defaultValue: {},
     });
-    schema.object(simpleProps, {
-      defaultValue: {
-        num: types.number,
-      },
+    schema.object(simpleProps).default({
+      num: types.number,
     });
-    schema.object(simpleProps, {
-      defaultValue: {
-        str: types.string,
-        num: types.number,
-      },
+    schema.object(simpleProps).default({
+      str: types.string,
+      num: types.number,
+    });
+  });
+  test('should pass property default types to object.default()', () => {
+    const simpleProps = {
+      str: schema.string().default(types.string),
+      num: schema.number(),
+    } satisfies ObjectProps;
+
+    schema
+      .object(simpleProps)
+      // @ts-expect-error
+      .default({});
+    schema.object(simpleProps).default({
+      num: types.number,
+    });
+    schema.object(simpleProps).default({
+      str: types.string,
+      num: types.number,
     });
   });
   test('should handle nested schemas with defaults in object default', () => {
     const nestedProps = {
-      str: schema.string({ defaultValue: types.string }),
+      str: schema.string().default(types.string),
       num: schema.number(),
       obj: schema.object({
         str: schema.string(),
-        num: schema.number({ defaultValue: types.number }),
+        num: schema.number().default(types.number),
       }),
-      objMaybe: schema.object(
-        {
+      objMaybe: schema
+        .object({
           bool: schema.boolean(),
-        },
-        { defaultValue: { bool: false } }
-      ),
-    } satisfies PreciseObjectProps;
+        })
+        .default({ bool: false }),
+    } satisfies ObjectProps;
 
     // full
-    schema.object(nestedProps, {
-      defaultValue: {
+    schema.object(nestedProps).default({
+      str: types.string,
+      num: types.number,
+      obj: {
         str: types.string,
         num: types.number,
-        obj: {
-          str: types.string,
-          num: types.number,
-        },
-        objMaybe: {
-          bool: true,
-        },
+      },
+      objMaybe: {
+        bool: true,
       },
     });
     // sparse
-    schema.object(nestedProps, {
-      defaultValue: {
-        num: types.number,
-        obj: {
-          str: types.string,
-        },
+    schema.object(nestedProps).default({
+      num: types.number,
+      obj: {
+        str: types.string,
       },
     });
     // bad types
-    schema.object(nestedProps, {
-      defaultValue: {
+    schema.object(nestedProps).default({
+      // @ts-expect-error
+      str: types.number,
+      // @ts-expect-error
+      num: types.string,
+      obj: {
         // @ts-expect-error
         str: types.number,
         // @ts-expect-error
         num: types.string,
-        obj: {
-          // @ts-expect-error
-          str: types.number,
-          // @ts-expect-error
-          num: types.string,
-        },
-        objMaybe: {
-          // @ts-expect-error
-          bool: types.string,
-        },
+      },
+      objMaybe: {
+        // @ts-expect-error
+        bool: types.string,
       },
     });
-    schema.object(nestedProps, {
-      defaultValue: {
-        // @ts-expect-error
-        objMaybe: types.string,
-      },
+    schema.object(nestedProps).default({
+      // @ts-expect-error
+      objMaybe: types.string,
     });
     // empty
-    schema.object(nestedProps, {
-      // @ts-expect-error
-      defaultValue: {},
-    });
+    // @ts-expect-error
+    schema.object(nestedProps).default({});
   });
 });

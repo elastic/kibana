@@ -20,7 +20,6 @@ import type {
   MapOfOptions,
   NumberOptions,
   ObjectTypeOptions,
-  PreciseObjectProps,
   RecordOfOptions,
   StringOptions,
   TypeOptions,
@@ -51,76 +50,51 @@ import {
   StreamType,
   Lazy,
 } from './src/types';
-import type { DurationDefaultValue } from './src/types/duration_type';
-import type { ByteSizeValueType } from './src/types/byte_size_type';
 
-import type { DefaultValue, SomeType } from './src/types/type';
-import type { ObjectInputType, ObjectOutputType, SomeObjectType } from './src/types/object_type';
+import type { SomeType } from './src/types/type';
+import type {
+  ObjectInputType,
+  ObjectOutputType,
+  ObjectProps,
+  SomeObjectType,
+} from './src/types/object_type';
 import type { IntersectionInput, IntersectionOutput } from './src/types/intersection_type';
 
-export type { SomeType, SomeObjectType };
-export type { SchemaOf, TypeOf, TypeOfOutput, TypeOfInput } from './src/types';
+// bucket export to avoid naming collisions
+export type * from './deprecated';
+
+export type { SomeType, SomeObjectType, ObjectProps };
+export type { SchemaOf, TypeOf, TypeOfOutput, TypeOfInput } from './src/helpers/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
-// bucket export to avoid naming collisions
-export type * from './deprecated';
-
-/**
- * Used to define props to pass to `schema.object`.
- *
- * @note should *only* be used with `satisfies` to ensure the correct type is inferred.
- *
- * @example
- * ```ts
- * const mySchemaProps = {
- *   name: schema.string(),
- *   age: schema.number(),
- * } satisfies ObjectProps;
- * const mySchema = schema.object(mySchemaProps);
- * ```
- */
-export type ObjectProps = PreciseObjectProps;
-
-function any<D extends DefaultValue<any> = never>(
-  options?: TypeOptions<any, any, D>
-): Type<any, any, D> {
+function any(options?: TypeOptions<any>): Type<any> {
   return new AnyType(options);
 }
 
-function boolean<D extends DefaultValue<boolean> = never>(
-  options?: TypeOptions<boolean, boolean, D>
-): Type<boolean, boolean, D> {
+function boolean(options?: TypeOptions<boolean>): BooleanType {
   return new BooleanType(options);
 }
 
-function buffer<D extends DefaultValue<Buffer> = never>(
-  options?: TypeOptions<Buffer, Buffer, D>
-): Type<Buffer, Buffer, D> {
+function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
   return new BufferType(options);
 }
 
-function stream<D extends DefaultValue<Stream> = never>(
-  options?: TypeOptions<Stream, Stream, D>
-): Type<Stream, Stream, D> {
+function stream(options?: TypeOptions<Stream>): Type<Stream> {
   return new StreamType(options);
 }
 
-function string<D extends DefaultValue<string> = never>(
-  options?: StringOptions<D>
-): Type<string, string, D> {
+function string(options?: StringOptions): Type<string> {
   return new StringType(options);
 }
 
-function uri<D extends DefaultValue<string> = never>(
-  options?: URIOptions<D>
-): Type<string, string, D> {
+function uri(options?: URIOptions): Type<string> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean | null>(value: T): Type<T, T, never> {
+function literal<T extends string | number | boolean | null>(value: T): LiteralType<T> {
   return new LiteralType(value);
 }
 
@@ -142,49 +116,41 @@ function literal<T extends string | number | boolean | null>(value: T): Type<T, 
  * const myEnumType = schema.enum(status);
  * ```
  */
-function enumeration<U extends string, D extends DefaultValue<U> = never>(
+function enumeration<U extends string>(
   enumObj: Record<string, U>,
-  options?: TypeOptions<U, U, D>
-): Type<U, U, D>;
-function enumeration<U extends string, D extends DefaultValue<U> = never>(
+  options?: TypeOptions<U>
+): Type<U>;
+function enumeration<U extends string>(
   // eslint-disable-next-line @typescript-eslint/unified-signatures
   values: [U, ...U[]] | readonly [U, ...U[]] | U[] | readonly U[],
-  options?: TypeOptions<U, U, D>
-): Type<U, U, D>;
-function enumeration<U extends string, D extends DefaultValue<U> = never>(
+  options?: TypeOptions<U>
+): Type<U>;
+function enumeration<U extends string>(
   enumObj: Record<string, U> | U[],
-  options?: TypeOptions<U, U, D>
-): Type<U, U, D> {
+  options?: TypeOptions<U>
+): Type<U> {
   const values = Array.isArray(enumObj) ? enumObj : Object.values(enumObj);
   const literalTypes = values.map((value) => literal(value)) as any;
   return union(literalTypes, options);
 }
 
-function number<D extends DefaultValue<number> = never>(
-  options?: NumberOptions<D>
-): Type<number, number, D> {
+function number(options?: NumberOptions): Type<number> {
   return new NumberType(options);
 }
 
-function byteSize<D extends ByteSizeValueType = never>(
-  options?: ByteSizeOptions<D>
-): Type<ByteSizeValue, ByteSizeValue, [D] extends [never] ? never : ByteSizeValue> {
+function byteSize(options?: ByteSizeOptions): ByteSizeType {
   return new ByteSizeType(options);
 }
 
-function duration<D extends DurationDefaultValue = never>(
-  options?: DurationOptions<D>
-): Type<Duration, Duration, [D] extends [never] ? never : Duration> {
+function duration(options?: DurationOptions): DurationType {
   return new DurationType(options);
 }
 
-function never(): Type<never, never, never> {
+function never(): Type<never> {
   return new NeverType();
 }
 
-function ip<D extends DefaultValue<string> = never>(
-  options?: IpOptions<D>
-): Type<string, string, D> {
+function ip(options?: IpOptions): Type<string> {
   return new IpType(options);
 }
 
@@ -195,7 +161,7 @@ function ip<D extends DefaultValue<string> = never>(
  */
 function maybe<T extends SomeType>(
   type: T
-): Type<T['_output'] | undefined, T['_input'] | undefined, any> {
+): Type<T['_output'] | undefined, T['_input'] | undefined> {
   return new MaybeType(type);
 }
 
@@ -204,52 +170,44 @@ function maybe<T extends SomeType>(
  *
  * @note wrapping with `nullable` ignores the `defaultValue` from the `type` when validating.
  */
-function nullable<T extends SomeType>(type: T) {
+function nullable<T extends SomeType>(type: T): Type<T['_output'] | null, T['_input'] | null> {
   return union([type, literal(null)], { defaultValue: null });
 }
 
-function object<
-  T extends SomeObjectType,
-  P extends T['props'], // must derive props from general type to infer precise types
-  D extends DefaultValue<ObjectInputType<P>> = never
->(
+function object<P extends ObjectProps>(
   props: P,
-  options?: ObjectTypeOptions<ObjectOutputType<P>, ObjectInputType<P>, D>
-): ObjectType<P, ObjectOutputType<P>, ObjectInputType<P>, D> {
+  options?: ObjectTypeOptions<ObjectOutputType<P>, ObjectInputType<P>>
+): ObjectType<P, ObjectOutputType<P>, ObjectInputType<P>> {
   return new ObjectType(props, options);
 }
 
-function arrayOf<T extends SomeType, D extends DefaultValue<T['_input'][]> = never>(
+function arrayOf<T extends SomeType>(
   itemType: T,
-  options?: ArrayOptions<T, D>
-): Type<T['_output'][], T['_input'][], D> {
+  options?: ArrayOptions<T>
+): Type<T['_output'][], T['_input'][]> {
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, T extends SomeType, D extends DefaultValue<Map<K, T['_input']>> = never>(
+function mapOf<K, T extends SomeType>(
   keyType: Type<K>,
   valueType: T,
-  options?: MapOfOptions<K, T, D>
-): Type<Map<K, T['_output']>, Map<K, T['_input']>, D> {
+  options?: MapOfOptions<K, T>
+): Type<Map<K, T['_output']>, Map<K, T['_input']>> {
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<
-  K extends string,
-  T extends SomeType,
-  D extends DefaultValue<Record<K, T['_input']>> = never
->(
+function recordOf<K extends string, T extends SomeType>(
   keyType: Type<K>,
   valueType: T,
-  options?: RecordOfOptions<K, T['_input'], D>
-): Type<Record<K, T['_output']>, Record<K, T['_input']>, D> {
+  options?: RecordOfOptions<K, T['_input']>
+): Type<Record<K, T['_output']>, Record<K, T['_input']>> {
   return new RecordOfType(keyType, valueType, options);
 }
 
-function union<
-  T extends Readonly<[SomeType, ...SomeType[]]>,
-  D extends DefaultValue<T[number]['_input']> = never
->(types: T, options?: UnionTypeOptions<T, D>): Type<T[number]['_output'], T[number]['_input'], D> {
+function union<T extends Readonly<[SomeType, ...SomeType[]]>>(
+  types: T,
+  options?: UnionTypeOptions<T>
+): Type<T[number]['_output'], T[number]['_input']> {
   return new UnionType(types, options);
 }
 
@@ -268,44 +226,33 @@ function intersection<
   T1 extends SomeObjectType,
   T2 extends SomeObjectType,
   T3 extends SomeObjectType,
-  T4 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input'] & T4['_input']> = never
+  T4 extends SomeObjectType
 >(
   types: [T1, T2, T3, T4],
   options?: ObjectTypeOptions<
     T1['_output'] & T2['_output'] & T3['_output'] & T4['_output'],
-    T1['_input'] & T2['_input'] & T3['_input'] & T4['_input'],
-    D
+    T1['_input'] & T2['_input'] & T3['_input'] & T4['_input']
   >
-): IntersectionType<[T1, T2, T3, T4], D>;
+): IntersectionType<[T1, T2, T3, T4]>;
 function intersection<
   T1 extends SomeObjectType,
   T2 extends SomeObjectType,
-  T3 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input'] & T3['_input']> = never
+  T3 extends SomeObjectType
 >(
   types: [T1, T2, T3],
   options?: ObjectTypeOptions<
     T1['_output'] & T2['_output'] & T3['_output'],
-    T1['_input'] & T2['_input'] & T3['_input'],
-    D
+    T1['_input'] & T2['_input'] & T3['_input']
   >
-): IntersectionType<[T1, T2, T3], D>;
-function intersection<
-  T1 extends SomeObjectType,
-  T2 extends SomeObjectType,
-  D extends DefaultValue<T1['_input'] & T2['_input']> = never
->(
+): IntersectionType<[T1, T2, T3]>;
+function intersection<T1 extends SomeObjectType, T2 extends SomeObjectType>(
   types: [T1, T2],
-  options?: ObjectTypeOptions<T1['_output'] & T2['_output'], T1['_input'] & T2['_input'], D>
-): IntersectionType<[T1, T2], D>;
-function intersection<
-  T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>,
-  D extends DefaultValue<IntersectionInput<T>> = never
->(
+  options?: ObjectTypeOptions<T1['_output'] & T2['_output'], T1['_input'] & T2['_input']>
+): IntersectionType<[T1, T2]>;
+function intersection<T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>>(
   types: T,
-  options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>, D>
-): IntersectionType<T, D> {
+  options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>>
+): IntersectionType<T> {
   return new IntersectionType(types, options);
 }
 
@@ -317,25 +264,20 @@ function siblingRef<T = any>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<
-  T extends ConditionalTypeValue,
-  A extends SomeType,
-  B extends SomeType,
-  D extends DefaultValue<A['_input'] | B['_input']> = never
->(
+function conditional<T extends ConditionalTypeValue, A extends SomeType, B extends SomeType>(
   leftOperand: Reference<T>,
   rightOperand: Reference<T> | T | Type<unknown>,
   equalType: A,
   notEqualType: B,
-  options?: ConditionalTypeOptions<A, B, D>
-): Type<A['_output'] | B['_output'], A['_input'] | B['_input'], D> {
+  options?: ConditionalTypeOptions<A, B>
+): Type<A['_output'] | B['_output'], A['_input'] | B['_input']> {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string): Type<T, T> {
+function lazy<T>(id: string): Type<T> {
   return new Lazy<T>(id);
 }
 
@@ -381,8 +323,6 @@ import {
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
 } from './src/oas_meta_fields';
 import type { ConditionalTypeOptions } from './src/types/conditional_type';
-import type { ByteSizeValue } from './src/byte_size_value';
-import type { Duration } from './src/duration';
 
 export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DISCONTINUED,

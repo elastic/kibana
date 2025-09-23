@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from './type';
+import type { Type } from '../../types/type';
 
 /*
  * This `SchemaOf` is meant to allow driving schemas based on TS types.
@@ -37,4 +37,4 @@ import type { Type } from './type';
  *  }) satisfies SchemaOf<MySchemaOutput>;
  * ```
  */
-export type SchemaOf<T> = Omit<Type<T, T, any>, '_input' | 'extendsDeep'>;
+export type SchemaOf<Output, Input = any> = Type<Output, Input>;

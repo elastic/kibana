@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type OptionalKeys<T extends object> = {
-  [k in keyof T]: undefined extends T[k] ? k : never;
-}[keyof T];
-
-export type RequiredKeys<T extends object> = {
-  [k in keyof T]: undefined extends T[k] ? never : k;
-}[keyof T];
-
 /**
  * Makes all `undefined` values optional.
  *
@@ -30,10 +22,11 @@ export type RequiredKeys<T extends object> = {
  * ```
  */
 export type OptionalizeObject<T extends object> = Simplify<
+  // Do not extract key logic or will break VSCode prop definition linking
   {
-    [K in RequiredKeys<T>]: T[K];
+    [K in keyof T as undefined extends T[K] ? K : never]?: T[K];
   } & {
-    [K in OptionalKeys<T>]?: T[K];
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K];
   }
 >;
 

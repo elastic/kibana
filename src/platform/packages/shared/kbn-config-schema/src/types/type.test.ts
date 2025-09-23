@@ -17,6 +17,10 @@ class MyType extends Type<any> {
   constructor(opts: TypeOptions<any, any, never> = {}) {
     super(internals.any(), opts);
   }
+
+  protected getDefault(defaultValue?: any): any {
+    return defaultValue;
+  }
 }
 
 describe('meta', () => {

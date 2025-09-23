@@ -113,9 +113,9 @@ describe('#defaultValue', () => {
   test('can be a reference to a moment.Duration', () => {
     expect(
       object({
-        source: duration({ defaultValue: 600 }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default(600),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(700, 'ms') })
     ).toMatchInlineSnapshot(`
       Object {
@@ -127,9 +127,9 @@ describe('#defaultValue', () => {
 
     expect(
       object({
-        source: duration({ defaultValue: '1h' }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default('1h'),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
       Object {
@@ -141,9 +141,9 @@ describe('#defaultValue', () => {
 
     expect(
       object({
-        source: duration({ defaultValue: momentDuration(1, 'hour') }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default(momentDuration(1, 'hour')),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
       Object {

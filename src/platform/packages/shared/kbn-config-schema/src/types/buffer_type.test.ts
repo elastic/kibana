@@ -35,12 +35,12 @@ test('coerces strings to buffer', () => {
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = Buffer.from('Hi!');
-    expect(schema.buffer({ defaultValue: value }).validate(undefined)).toStrictEqual(value);
+    expect(schema.buffer().default(value).validate(undefined)).toStrictEqual(value);
   });
 
   test('returns value when specified', () => {
     const value = Buffer.from('Hi!');
-    expect(schema.buffer({ defaultValue: Buffer.from('Bye!') }).validate(value)).toStrictEqual(
+    expect(schema.buffer().default(Buffer.from('Bye!')).validate(value)).toStrictEqual(
       value
     );
   });

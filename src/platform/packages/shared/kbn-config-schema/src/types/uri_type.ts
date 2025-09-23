@@ -12,13 +12,17 @@ import { internals } from '../internals';
 import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
-export type URIOptions<D extends DefaultValue<string> = never> = TypeOptions<string, string, D> & {
+export type URIOptions = TypeOptions<string> & {
   scheme?: string | string[];
 };
 
-export class URIType<D extends DefaultValue<string> = never> extends Type<string, string, D> {
-  constructor(options: URIOptions<D> = {}) {
+export class URIType extends Type<string> {
+  constructor(options: URIOptions = {}) {
     super(internals.string().uri({ scheme: options.scheme }), options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<string>): DefaultValue<string> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value, scheme }: Record<string, unknown>) {

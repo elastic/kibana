@@ -34,7 +34,7 @@ describe('schema.allOf', () => {
   it('supports default value', () => {
     const type = schema.allOf([
       schema.object({ foo: schema.string() }),
-      schema.object({ bar: schema.string({ defaultValue: 'default' }) }),
+      schema.object({ bar: schema.string().default('default') }),
     ]);
 
     expect(type.validate({ foo: 'hello' })).toEqual({ foo: 'hello', bar: 'default' });

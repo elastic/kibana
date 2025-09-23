@@ -41,20 +41,20 @@ test('meta', () => {
 
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
-    expect(schema.any({ defaultValue: true }).validate(undefined)).toBe(true);
-    expect(schema.any({ defaultValue: 200 }).validate(undefined)).toBe(200);
-    expect(schema.any({ defaultValue: 'bar' }).validate(undefined)).toBe('bar');
-    expect(schema.any({ defaultValue: { baz: 'foo' } }).validate(undefined)).toEqual({
+    expect(schema.any().default(true).validate(undefined)).toBe(true);
+    expect(schema.any().default(200).validate(undefined)).toBe(200);
+    expect(schema.any().default('bar').validate(undefined)).toBe('bar');
+    expect(schema.any().default({ baz: 'foo' }).validate(undefined)).toEqual({
       baz: 'foo',
     });
   });
 
   test('returns value when specified', () => {
-    expect(schema.any({ defaultValue: true }).validate(false)).toBe(false);
-    expect(schema.any({ defaultValue: 200 }).validate(100)).toBe(100);
-    expect(schema.any({ defaultValue: 'bar' }).validate('foo')).toBe('foo');
-    expect(schema.any({ defaultValue: 'not-null' }).validate(null)).toBe(null);
-    expect(schema.any({ defaultValue: { baz: 'foo' } }).validate({ foo: 'bar', baz: 2 })).toEqual({
+    expect(schema.any().default(true).validate(false)).toBe(false);
+    expect(schema.any().default(200).validate(100)).toBe(100);
+    expect(schema.any().default('bar').validate('foo')).toBe('foo');
+    expect(schema.any().default('not-null').validate(null)).toBe(null);
+    expect(schema.any().default({ baz: 'foo' }).validate({ foo: 'bar', baz: 2 })).toEqual({
       foo: 'bar',
       baz: 2,
     });

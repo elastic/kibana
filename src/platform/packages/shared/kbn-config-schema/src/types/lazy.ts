@@ -13,8 +13,12 @@ import { internals } from '../internals';
 /**
  * Use this type to construct recursive runtime schemas.
  */
-export class Lazy<T> extends Type<T, T> {
+export class Lazy<T> extends Type<T> {
   constructor(id: string) {
     super(internals.link(`#${id}`));
+  }
+
+  protected getDefault(defaultValue?: T): T | undefined {
+    return defaultValue;
   }
 }

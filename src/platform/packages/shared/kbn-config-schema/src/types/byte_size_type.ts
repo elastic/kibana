@@ -19,19 +19,15 @@ export type ByteSizeValueType = ByteSizeValue | string | number;
 /**
  * Does not support function or `Reference` as `defaultValue`
  */
-export interface ByteSizeOptions<D extends ByteSizeValueType> {
-  defaultValue?: D;
+export interface ByteSizeOptions {
+  defaultValue?: ByteSizeValueType;
   validate?: (value: ByteSizeValue) => string | void;
   min?: ByteSizeValue | string | number;
   max?: ByteSizeValue | string | number;
 }
 
-export class ByteSizeType<D extends ByteSizeValueType> extends Type<
-  ByteSizeValue,
-  ByteSizeValue,
-  [D] extends [never] ? never : ByteSizeValue
-> {
-  constructor(options: ByteSizeOptions<D> = {}) {
+export class ByteSizeType extends Type<ByteSizeValue, ByteSizeValue, ByteSizeValueType> {
+  constructor(options: ByteSizeOptions = {}) {
     let schema = internals.bytes();
 
     if (options.min !== undefined) {
@@ -43,11 +39,13 @@ export class ByteSizeType<D extends ByteSizeValueType> extends Type<
     }
 
     super(schema, {
-      defaultValue: ensureByteSizeValue(options.defaultValue) as [D] extends [never]
-        ? never
-        : ByteSizeValue,
+      defaultValue: options.defaultValue,
       validate: options.validate,
     });
+  }
+
+  getDefault(defaultValue?: ByteSizeValueType): ByteSizeValue | undefined {
+    return ensureByteSizeValue(defaultValue);
   }
 
   protected handleError(

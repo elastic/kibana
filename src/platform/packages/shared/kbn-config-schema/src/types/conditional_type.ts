@@ -10,35 +10,33 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Reference } from '../references';
-import type { DefaultValue, ExtendsDeepOptions, SomeType, TypeOptions } from './type';
+import type { ExtendsDeepOptions, SomeType, TypeOptions } from './type';
 import { Type } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 
-export type ConditionalTypeOptions<
-  A extends SomeType,
-  B extends SomeType,
-  D extends DefaultValue<A['_input'] | B['_input']> = never
-> = TypeOptions<A['_output'] | B['_output'], A['_input'] | B['_input'] | B, D>;
+export type ConditionalTypeOptions<A extends SomeType, B extends SomeType> = TypeOptions<
+  A['_output'] | B['_output'],
+  A['_input'] | B['_input'] | B
+>;
 
 export class ConditionalType<
   T extends ConditionalTypeValue,
   A extends SomeType,
-  B extends SomeType,
-  D extends DefaultValue<A['_input'] | B['_input']> = never
-> extends Type<A['_output'] | B['_output'], A['_input'] | B['_input'], D> {
+  B extends SomeType
+> extends Type<A['_output'] | B['_output'], A['_input'] | B['_input']> {
   private readonly leftOperand: Reference<T>;
   private readonly rightOperand: Reference<T> | T | Type<unknown>;
   private readonly equalType: A;
   private readonly notEqualType: B;
-  private readonly options?: ConditionalTypeOptions<A, B, D>;
+  private readonly options?: ConditionalTypeOptions<A, B>;
 
   constructor(
     leftOperand: Reference<T>,
     rightOperand: Reference<T> | T | Type<unknown>,
     equalType: A,
     notEqualType: B,
-    options?: ConditionalTypeOptions<A, B, D>
+    options?: ConditionalTypeOptions<A, B>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
       is:
@@ -66,6 +64,12 @@ export class ConditionalType<
       this.notEqualType.extendsDeep(options),
       this.options
     );
+  }
+
+  protected getDefault(
+    defaultValue?: A['_input'] | B['_input']
+  ): A['_input'] | B['_input'] | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

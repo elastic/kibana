@@ -27,14 +27,7 @@ export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
-export type {
-  ObjectTypeOptions,
-  PreciseObjectProps,
-  NullableProps,
-  ObjectResultType,
-} from './object_type';
-export type { TypeOf, TypeOfOutput, TypeOfInput } from './type_of';
-export type { SchemaOf } from './schema_of';
+export type { ObjectTypeOptions, NullableProps, ObjectResultType } from './object_type';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

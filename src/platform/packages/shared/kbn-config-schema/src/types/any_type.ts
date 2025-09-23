@@ -10,12 +10,16 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { META_FIELD_X_OAS_ANY } from '../oas_meta_fields';
-import type { DefaultValue, TypeOptions } from './type';
+import type { TypeOptions } from './type';
 import { Type } from './type';
 
-export class AnyType<D extends DefaultValue<any> = never> extends Type<any, any, D> {
-  constructor(options?: TypeOptions<any, any, D>) {
+export class AnyType extends Type<any> {
+  constructor(options?: TypeOptions<any>) {
     super(internals.any().meta({ [META_FIELD_X_OAS_ANY]: true }), options);
+  }
+
+  protected getDefault(defaultValue?: any): any {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

@@ -8,14 +8,14 @@
  */
 
 import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
-import type { ExtendsDeepOptions, SomeType } from './type';
+import type { DefaultValue, ExtendsDeepOptions, SomeType } from './type';
 import { Type } from './type';
 
 export class MaybeType<T extends SomeType> extends Type<
   T['_output'] | undefined,
   T['_input'] | undefined
 > {
-  private readonly maybeType: Type<T['_output'] | undefined, T['_input'] | undefined, any>;
+  private readonly maybeType: Type<T['_output'] | undefined, T['_input'] | undefined>;
 
   constructor(type: T) {
     super(
@@ -26,6 +26,12 @@ export class MaybeType<T extends SomeType> extends Type<
         .default(() => undefined)
     );
     this.maybeType = type;
+  }
+
+  protected getDefault(
+    defaultValue?: DefaultValue<T['_input']>
+  ): DefaultValue<T['_input']> | undefined {
+    return defaultValue;
   }
 
   public extendsDeep(

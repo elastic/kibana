@@ -69,7 +69,7 @@ Every schema instance has a `validate` method that is used to perform a validati
 ```typescript
 const valueSchema = schema.object({
   isEnabled: schema.boolean(),
-  env: schema.string({ defaultValue: schema.contextRef('envName') }),
+  env: schema.string().default(schema.contextRef('envName')),
 });
 
 expect(valueSchema.validate({ isEnabled: true, env: 'prod' })).toEqual({
@@ -159,7 +159,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema = schema.boolean({ defaultValue: false });
+const valueSchema = schema.boolean().default(false);
 ```
 
 __Notes:__
@@ -196,7 +196,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema = schema.buffer({ defaultValue: Buffer.from('Hi, there!') });
+const valueSchema = schema.buffer().default(Buffer.from('Hi, there!'));
 ```
 
 ### `schema.stream()`
@@ -211,7 +211,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema = schema.stream({ defaultValue: new Stream() });
+const valueSchema = schema.stream().default(new Stream());
 ```
 
 ## Composite types
@@ -251,7 +251,7 @@ __Options:__
 __Usage:__
 ```typescript
 const valueSchema = schema.object({
-  isEnabled: schema.boolean({ defaultValue: false }),
+  isEnabled: schema.boolean().default(false),
   name: schema.string({ minLength: 10 }),
 });
 ```
@@ -307,7 +307,7 @@ __Notes:__
 
 ### `schema.intersection()` / `schema.allOf()`
 
-Creates an `object` schema being the intersection of the provided `object` schemas. 
+Creates an `object` schema being the intersection of the provided `object` schemas.
 Note that schema construction will throw an error if some of the intersection schema share the same key(s).
 
 See the documentation for [schema.object](#schemaobject).
@@ -463,7 +463,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema = schema.duration({ defaultValue: '70ms' });
+const valueSchema = schema.duration().default('70ms');
 ```
 
 __Notes:__
@@ -554,7 +554,7 @@ __Output type:__ `TReferenceValue`
 __Usage:__
 ```typescript
 const valueSchema = schema.object({
-  env: schema.string({ defaultValue: schema.contextRef('envName') }),
+  env: schema.string().default(schema.contextRef('envName')),
 });
 valueSchema.validate({}, { envName: 'dev' });
 ```
@@ -573,7 +573,7 @@ __Usage:__
 ```typescript
 const valueSchema = schema.object({
   node: schema.object({ tag: schema.string() }),
-  env: schema.string({ defaultValue: schema.siblingRef('node.tag') }),
+  env: schema.string().default(schema.siblingRef('node.tag')),
 });
 ```
 
@@ -628,9 +628,9 @@ deal with "defined or undefined"-like checks all over the place in your code. Yo
 * function that is invoked at the validation time and returns a plain value
 
 ```typescript
-const valueSchemaWithPlainValueDefault = schema.string({ defaultValue: 'n/a' });
-const valueSchemaWithReferencedValueDefault = schema.string({ defaultValue: schema.contextRef('env') });
-const valueSchemaWithFunctionEvaluatedDefault = schema.string({ defaultValue: () => Math.random().toString() });
+const valueSchemaWithPlainValueDefault = schema.string().default('n/a');
+const valueSchemaWithReferencedValueDefault = schema.string().default(schema.contextRef('env'));
+const valueSchemaWithFunctionEvaluatedDefault = schema.string().default(() => Math.random().toString());
 ```
 
 __Notes:__

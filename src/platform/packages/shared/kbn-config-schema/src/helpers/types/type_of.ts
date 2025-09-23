@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SomeType, TypeOrLazyType } from './type';
+import type { SomeType, TypeOrLazyType } from '../../types/type';
 
 /**
  * Resulting schema type.
@@ -48,4 +48,8 @@ export type TypeOfOutput<RT extends TypeOrLazyType> = RT extends () => SomeType
  * const MySchemaType = TypeOfOutput<typeof mySchema>;
  * ```
  */
-export type TypeOfInput<RT extends TypeOrLazyType> = RT extends SomeType ? RT['_input'] : never;
+export type TypeOfInput<RT extends TypeOrLazyType> = RT extends () => SomeType
+  ? ReturnType<RT>['_input']
+  : RT extends SomeType
+  ? RT['_input']
+  : never;
