@@ -181,11 +181,13 @@ async function runConfigs(
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
-          '--retryTimes=3',
         ];
 
         const proc = spawn(process.execPath, args, {
-          env: process.env,
+          env: {
+            ...process.env,
+            JEST_CONFIG_PATH: config, // Needed to enable Scout reporting
+          },
           stdio: ['ignore', 'pipe', 'pipe'],
         });
         let buffer = '';
