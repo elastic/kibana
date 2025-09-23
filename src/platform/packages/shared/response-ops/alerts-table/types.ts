@@ -55,6 +55,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -560,11 +561,11 @@ export interface BulkActionsConfig {
     clearSelection: () => void,
     refresh: () => void
   ) => void;
-  panel?: number;
+  panel?: EuiContextMenuPanelId;
 }
 
 interface PanelConfig {
-  id: number;
+  id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
@@ -578,12 +579,12 @@ export interface RenderContentPanelProps {
   closePopoverMenu: () => void;
 }
 
-interface ContentPanelConfig extends PanelConfig {
+export interface ContentPanelConfig extends PanelConfig {
   renderContent: (args: RenderContentPanelProps) => JSX.Element;
   items?: never;
 }
 
-interface ItemsPanelConfig extends PanelConfig {
+export interface ItemsPanelConfig extends PanelConfig {
   content?: never;
   items: BulkActionsConfig[];
 }
