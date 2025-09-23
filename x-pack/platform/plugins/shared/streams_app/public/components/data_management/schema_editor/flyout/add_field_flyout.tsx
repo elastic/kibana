@@ -24,7 +24,6 @@ import {
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isSchema, recursiveRecord, Streams } from '@kbn/streams-schema';
-import type { UseFieldsMetadataReturnType } from '@kbn/fields-metadata-plugin/public/hooks/use_fields_metadata';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { CodeEditor } from '@kbn/code-editor';
@@ -66,25 +65,9 @@ export const AddFieldButton = ({ onAddField }: Pick<AddFieldFlyoutProps, 'onAddF
 };
 
 export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => {
-  const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
-
   const { stream } = useSchemaEditorContext();
 
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-add-field' });
-
-  const { fieldsMetadata: rawFieldsMetadata } = useFieldsMetadata({
-    attributes: ['ignore_above', 'type', 'otel_equivalent'],
-    source: ['ecs', 'otel'],
-  });
-
-  // Map the fields metadata to the OTel equivalent if the stream is a wired stream
-  const fieldsMetadata = useMemo(
-    () =>
-      Streams.WiredStream.Definition.is(stream)
-        ? mapKeys(rawFieldsMetadata, (value, key) => value.otel_equivalent ?? prefixOTelField(key))
-        : rawFieldsMetadata,
-    [rawFieldsMetadata, stream]
-  );
 
   const methods = useForm<SchemaField>({
     defaultValues: {
@@ -119,7 +102,7 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
       <EuiFlyoutBody>
         <FormProvider {...methods}>
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-            <FieldNameSelector fieldsMetadata={fieldsMetadata} />
+            <FieldNameSelector />
             <FieldTypeSelector />
             {typeSupportsFormat(type) && <FieldFormatSelector />}
             <AdvancedFieldMappingEditor />
@@ -142,6 +125,7 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
           <EuiButton
             data-test-subj="streamsAppSchemaEditorAddFieldButton"
             onClick={methods.handleSubmit(handleSubmit)}
+            isDisabled={methods.formState.isSubmitted && !methods.formState.isValid}
           >
             {i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.addButtonLabel', {
               defaultMessage: 'Add field',
@@ -153,14 +137,17 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
   );
 };
 
-interface FieldSelectorProps {
-  fieldsMetadata: UseFieldsMetadataReturnType['fieldsMetadata'];
-}
+export const FieldNameSelector = () => {
+  const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
-export const FieldNameSelector = ({ fieldsMetadata }: FieldSelectorProps) => {
-  const { fields } = useSchemaEditorContext();
+  const { fields, stream } = useSchemaEditorContext();
 
   const { setValue } = useFormContext<SchemaField>();
+
+  const { fieldsMetadata: rawFieldsMetadata } = useFieldsMetadata({
+    attributes: ['ignore_above', 'type', 'otel_equivalent'],
+    source: ['ecs', 'otel'],
+  });
 
   const { field, fieldState } = useController<SchemaField, 'name'>({
     name: 'name',
@@ -180,13 +167,24 @@ export const FieldNameSelector = ({ fieldsMetadata }: FieldSelectorProps) => {
     },
   });
 
+  // Map the fields metadata to the OTel equivalent if the stream is a wired stream
+  const fieldsMetadata = useMemo(
+    () =>
+      Streams.WiredStream.Definition.is(stream)
+        ? mapKeys(rawFieldsMetadata, (value, key) => value.otel_equivalent ?? prefixOTelField(key))
+        : rawFieldsMetadata,
+    [rawFieldsMetadata, stream]
+  );
+
   const suggestions = useMemo(() => {
     if (!fieldsMetadata) return [];
 
-    return Object.keys(fieldsMetadata).map((label) => ({
-      label,
-    }));
-  }, [fieldsMetadata]);
+    const fieldNamesSet = new Set(fields.map((f) => f.name));
+
+    return Object.keys(fieldsMetadata)
+      .filter((name) => !fieldNamesSet.has(name))
+      .map((label) => ({ label }));
+  }, [fieldsMetadata, fields]);
 
   const selectedOptions = useMemo(() => {
     if (!field.value) return [];
