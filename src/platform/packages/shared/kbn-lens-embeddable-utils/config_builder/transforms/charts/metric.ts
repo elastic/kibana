@@ -48,6 +48,7 @@ const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -335,6 +336,9 @@ function reverseBuildVisualizationState(
     if (visualization.maxCols) {
       props.breakdown_by.columns = visualization.maxCols;
     }
+    if (visualization.collapseFn) {
+      props.breakdown_by.collapse_by = visualization.collapseFn;
+    }
   }
 
   return {
@@ -430,8 +434,12 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
   const visualization = buildVisualizationState(config);
 
   const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
-  const regularDataViews = Object.values(usedDataviews).filter((v) => v.type === 'dataView');
-  const references = buildReferences({ layer_0: regularDataViews[0]?.id });
+  const regularDataViews = Object.values(usedDataviews).filter(
+    (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
+  );
+  const references = regularDataViews.length
+    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    : [];
 
   return {
     visualizationType: 'lnsMetric',
@@ -463,7 +471,7 @@ export function fromLensStateToAPI(
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? 'layer_0',
+      layerId ?? LENS_DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences
