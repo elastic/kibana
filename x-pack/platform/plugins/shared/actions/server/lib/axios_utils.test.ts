@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios, { AxiosError } from 'axios';
+import type { AxiosInstance, AxiosResponse, AxiosStatic } from 'axios';
+import { AxiosError } from 'axios';
+import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import type { Logger } from '@kbn/core/server';
 import {
@@ -23,13 +23,23 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
+import { httpResponseUserErrorCodes } from './create_and_throw_user_error';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 let configurationUtilities = actionsConfigMock.create();
-jest.mock('axios');
-const axiosMock = axios as unknown as jest.Mock;
+jest.mock('axios', () => {
+  const originalAxios = jest.requireActual('axios');
+  const mock = jest.createMockFromModule('axios') as jest.Mocked<AxiosStatic>;
+  mock.isAxiosError = originalAxios.isAxiosError;
+  mock.AxiosError = originalAxios.AxiosError;
+  return mock;
+});
+const axiosMock = jest.mocked(axios);
 
 describe('addTimeZoneToDate', () => {
   test('adds timezone with default', () => {
@@ -46,11 +56,11 @@ describe('addTimeZoneToDate', () => {
 describe('request', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    axiosMock.mockImplementation(() => ({
+    axiosMock.mockResolvedValue({
       status: 200,
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
-    }));
+    });
     configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getResponseSettings.mockReturnValue({
       maxContentLength: 1000000,
@@ -83,7 +93,7 @@ describe('request', () => {
 
   test('adds request body bytes from request header on a successful request when connectorUsageCollector is provided', async () => {
     const contentLength = 12;
-    axiosMock.mockImplementation(() => ({
+    axiosMock.mockResolvedValue({
       status: 200,
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
@@ -91,7 +101,7 @@ describe('request', () => {
         headers: { 'Content-Length': contentLength },
         getHeader: () => contentLength,
       },
-    }));
+    });
     const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
@@ -110,11 +120,10 @@ describe('request', () => {
 
   test('adds request body bytes from request header on a failed', async () => {
     const contentLength = 12;
-    axiosMock.mockImplementation(
-      () =>
-        new AxiosError('failed', '500', undefined, {
-          headers: { 'Content-Length': contentLength },
-        })
+    axiosMock.mockRejectedValue(
+      new AxiosError('failed', '500', undefined, {
+        getHeader: () => contentLength,
+      })
     );
     const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
@@ -237,6 +246,7 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
     const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(false);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
@@ -260,6 +270,7 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
     const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(true);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
@@ -283,6 +294,7 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
     const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(true);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
@@ -306,6 +318,7 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
     const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
     expect(httpAgent instanceof HttpProxyAgent).toBe(false);
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
@@ -363,8 +376,8 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(2);
-    expect(axiosMock.mock.calls[0][1].timeout).toBe(360000);
-    expect(axiosMock.mock.calls[1][1].timeout).toBe(360000);
+    expect(axiosMock.mock.calls[0][1]!.timeout).toBe(360000);
+    expect(axiosMock.mock.calls[1][1]!.timeout).toBe(360000);
   });
 
   test('it uses timeout argument when one is provided that is greater than settings timeout', async () => {
@@ -393,11 +406,11 @@ describe('request', () => {
     });
 
     expect(axiosMock.mock.calls.length).toBe(2);
-    expect(axiosMock.mock.calls[0][1].timeout).toBe(360000);
-    expect(axiosMock.mock.calls[1][1].timeout).toBe(360001);
+    expect(axiosMock.mock.calls[0][1]!.timeout).toBe(360000);
+    expect(axiosMock.mock.calls[1][1]!.timeout).toBe(360001);
   });
 
-  test('throw an error if you use  baseUrl in your axios instance', async () => {
+  test('throw an error if you use baseUrl in your axios instance', async () => {
     await expect(async () => {
       await request({
         axios: {
@@ -465,15 +478,32 @@ describe('request', () => {
       },
     });
   });
+
+  test.each(httpResponseUserErrorCodes)('marks %s status codes as user errors', async (status) => {
+    axiosMock.mockRejectedValue(
+      new AxiosError('failed', status.toString(), undefined, undefined, {
+        status,
+      } as AxiosResponse)
+    );
+
+    const error = await request({
+      axios,
+      url: '/test',
+      logger,
+      configurationUtilities,
+    }).catch((e) => e);
+    const errorSource = getErrorSource(error);
+    expect(errorSource).toBe(TaskErrorSource.USER);
+  });
 });
 
 describe('patch', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    axiosMock.mockImplementation(() => ({
+    axiosMock.mockResolvedValue({
       status: 200,
       headers: { 'content-type': 'application/json' },
-    }));
+    });
     configurationUtilities = actionsConfigMock.create();
     configurationUtilities.getResponseSettings.mockReturnValue({
       maxContentLength: 1000000,
