@@ -29,7 +29,15 @@ interface SignificantEventsApi {
   generate: (connectorId: string) => SignificantEventsGenerateResponse;
 }
 
-export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
+export function useSignificantEventsApi({
+  name,
+  start,
+  end,
+}: {
+  name: string;
+  start: number;
+  end: number;
+}): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -96,6 +104,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             },
             query: {
               connectorId,
+              from: new Date(start).toString(),
+              to: new Date(end).toString(),
             },
           },
         }

@@ -54,6 +54,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
+    start,
+    end,
   });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
