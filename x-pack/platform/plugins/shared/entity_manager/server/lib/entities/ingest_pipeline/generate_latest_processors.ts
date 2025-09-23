@@ -49,8 +49,10 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
       return `${acc}\n${next}`;
     } else if (metadata.aggregation.type === 'top_value') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
-          ${mapDestinationToPainless(metadata)}
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value != null) {
+          if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
+            ${mapDestinationToPainless(metadata)}
+          }
         }
       `;
       return `${acc}\n${next}`;

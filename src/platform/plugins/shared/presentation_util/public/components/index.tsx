@@ -40,6 +40,13 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
+/**
+ * Used with `showSaveModal` to pass `SaveResult` back from `onSave`
+ */
+export const LazySavedObjectSaveModalDashboardWithSaveResult = React.lazy(
+  () => import('./saved_object_save_modal_dashboard_with_save_result')
+);
+
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));

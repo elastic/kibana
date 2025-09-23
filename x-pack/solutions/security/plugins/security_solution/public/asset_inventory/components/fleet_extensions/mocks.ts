@@ -8,10 +8,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
-import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
-import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import type { AssetInput } from './types';
+import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, 'aws', vars);
@@ -21,9 +19,10 @@ export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, 'azure', vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
-export const getMockPackageInfoAssetInventoryAWS = () => {
+export const getMockPackageInfoAWS = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -49,9 +48,10 @@ export const getMockPackageInfoAssetInventoryAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetGCP = () => {
+export const getMockPackageInfoGCP = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -80,6 +80,7 @@ export const getMockPackageInfoAssetGCP = () => {
 export const getMockPackageInfoAssetAzure = () => {
   return {
     name: 'cloud_asset_inventory',
+    version: '1.0.0',
     policy_templates: [
       {
         title: '',
@@ -135,6 +136,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    'azure.credentials.cloud_connector_id': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };
@@ -170,6 +172,11 @@ const getPolicyMock = (
       {
         type: CLOUDBEAT_GCP,
         policy_template: 'asset_inventory',
+        config: {
+          cloud_shell_url: {
+            value: 'https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=',
+          },
+        },
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -197,6 +204,7 @@ const getPolicyMock = (
 
 export const getPackageInfoMock = () => {
   return {
+    version: '1.0.0',
     data_streams: [
       {
         dataset: 'cloud_asset_inventory.asset_inventory',
@@ -271,13 +279,30 @@ export const getPackageInfoMock = () => {
                 title: 'Client Certificate Password',
                 type: 'text' as RegistryVarType,
               },
+              {
+                name: 'azure.credentials.client_id',
+                type: 'text',
+                secret: true,
+                title: 'Client ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.tenant_id',
+                type: 'text',
+                secret: true,
+                title: 'Tenant ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
             ],
           },
         ],
       },
     ],
     format_version: '3.3.2',
-    version: '0.0.0',
     name: 'cloud_asset_inventory',
     description: 'Discover and Create Cloud Assets Inventory',
     owner: {

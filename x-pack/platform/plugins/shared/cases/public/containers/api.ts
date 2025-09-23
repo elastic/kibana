@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachment, CaseCustomField, User, Attachment } from '../../common/types/domain';
+import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -27,6 +27,7 @@ import type {
   UserActionInternalFindResponse,
   CaseSummaryResponse,
   InferenceConnectorsResponse,
+  FindCasesContainingAllAlertsResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -72,6 +73,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -111,6 +113,7 @@ import {
   constructCustomFieldsFilter,
   decodeCaseSummaryResponse,
   decodeInferenceConnectorsResponse,
+  decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
@@ -219,6 +222,20 @@ export const getInferenceConnectors = async (
     }
   );
   return decodeInferenceConnectorsResponse(response);
+};
+
+export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+  const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        alertIds,
+        caseIds,
+      }),
+    }
+  );
+  return decodeFindAllAttachedAlertsResponse(response);
 };
 
 export const findCaseUserActions = async (
@@ -439,54 +456,30 @@ export const postComment = async (
 export const patchComment = async ({
   caseId,
   commentId,
+  commentUpdate,
   version,
-  patch,
+  owner,
   signal,
 }: {
   caseId: string;
   commentId: string;
-  patch: AttachmentRequest;
+  commentUpdate: string;
   version: string;
+  owner: string;
   signal?: AbortSignal;
-}): Promise<Attachment> => {
-  const response = await KibanaServices.get().http.fetch<Attachment>(getCaseCommentsUrl(caseId), {
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({ id: commentId, version, ...patch }),
+    body: JSON.stringify({
+      comment: commentUpdate,
+      type: AttachmentType.user,
+      id: commentId,
+      version,
+      owner,
+    }),
     signal,
   });
-  return convertToCamelCase(response);
-};
-
-export const removeAlertFromComment = async ({
-  caseId,
-  alertId: alertIdToRemove,
-  alertAttachment,
-  signal,
-}: {
-  caseId: string;
-  alertId: string;
-  alertAttachment: AlertAttachment;
-  signal?: AbortSignal;
-}): Promise<Attachment | void> => {
-  const { alertId, index, rule, version, id, owner } = alertAttachment;
-  if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
-    const alertIdx = alertId.indexOf(alertIdToRemove);
-    const newAlertId = [...alertId.slice(0, alertIdx), ...alertId.slice(alertIdx + 1)];
-    const newIndex = [...index.slice(0, alertIdx), ...index.slice(alertIdx + 1)];
-    return patchComment({
-      caseId,
-      commentId: id,
-      version,
-      patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
-      signal,
-    });
-  } else {
-    return deleteComment({
-      caseId,
-      commentId: alertAttachment.id,
-      signal,
-    });
-  }
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const deleteComment = async ({

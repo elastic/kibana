@@ -80,6 +80,7 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
+  view: 'classic' | 'streams';
 }
 
 export interface WithDataStreamDetails {
@@ -146,6 +147,7 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'selectedIssueTypes'
   | 'selectedFields'
   | 'qualityIssuesChart'
+  | 'view'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =

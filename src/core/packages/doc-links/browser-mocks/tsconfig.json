@@ -15,7 +15,8 @@
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-doc-links-browser",
     "@kbn/core-doc-links-browser-internal",
-    "@kbn/core-base-browser-mocks"
+    "@kbn/core-base-browser-mocks",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

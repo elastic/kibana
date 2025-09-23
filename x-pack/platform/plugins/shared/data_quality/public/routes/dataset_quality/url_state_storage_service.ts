@@ -12,8 +12,8 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/Either';
 import * as rt from 'io-ts';
-import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
-import * as urlSchemaV1 from './url_schema_v1';
+import { DATA_QUALITY_URL_STATE_KEY } from '@kbn/data-quality/common';
+import { datasetQualitySerializationSchemaV1 as urlSchemaV1 } from '@kbn/data-quality/public';
 
 export const updateUrlFromDatasetQualityState = ({
   urlStateStorageContainer,

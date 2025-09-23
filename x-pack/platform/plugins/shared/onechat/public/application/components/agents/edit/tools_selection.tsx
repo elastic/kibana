@@ -7,13 +7,12 @@
 
 import React, { useMemo, useCallback, useState } from 'react';
 import { EuiLoadingSpinner, EuiSpacer, EuiSearchBar } from '@elastic/eui';
-import type { ToolSelection, ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { ToolSelection, ToolDefinition } from '@kbn/onechat-common';
 import { filterToolsBySelection, activeToolsCountWarningThreshold } from '@kbn/onechat-common';
-import { toggleTypeSelection, toggleToolSelection } from '../../../utils/tool_selection_utils';
+import { toggleToolSelection } from '../../../utils/tool_selection_utils';
 import { ActiveToolsStatus } from './active_tools_status';
 import { ToolsSearchControls } from './tools_search_controls';
 import { ToolsFlatView } from './tools_flat_view';
-import { ToolsGroupedView } from './tools_grouped_view';
 
 interface ToolsSelectionProps {
   tools: ToolDefinition[];
@@ -23,8 +22,6 @@ interface ToolsSelectionProps {
   disabled?: boolean;
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
-  showGroupedView?: boolean;
-  onShowGroupedViewChange?: (showGroupedView: boolean) => void;
 }
 
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
@@ -35,8 +32,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   disabled = false,
   showActiveOnly = false,
   onShowActiveOnlyChange,
-  showGroupedView = true,
-  onShowGroupedViewChange,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -47,9 +42,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     if (showActiveOnly) {
       result = tools.filter((tool) => {
         return selectedTools.some((selection) => {
-          if (selection.type && selection.type !== tool.type) {
-            return false;
-          }
           return selection.tool_ids.includes(tool.id) || selection.tool_ids.includes('*');
         });
       });
@@ -68,38 +60,16 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     });
   }, [searchQuery, displayTools]);
 
-  const toolsByType = useMemo(() => {
-    const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
-    filteredTools.forEach((tool) => {
-      const toolType = tool.type;
-      if (!grouped[toolType]) {
-        grouped[toolType] = [];
-      }
-      grouped[toolType]!.push(tool);
-    });
-    return grouped;
-  }, [filteredTools]);
-
   const activeToolsCount = useMemo(() => {
     return filterToolsBySelection(tools, selectedTools).length;
   }, [tools, selectedTools]);
 
-  const handleToggleTypeTools = useCallback(
-    (type: ToolType) => {
-      const typeTools = toolsByType[type] || [];
-      const newSelection = toggleTypeSelection(type, typeTools, selectedTools);
-      onToolsChange(newSelection);
-    },
-    [selectedTools, onToolsChange, toolsByType]
-  );
-
   const handleToggleTool = useCallback(
-    (toolId: string, type: ToolType) => {
-      const typeTools = toolsByType[type] || [];
-      const newSelection = toggleToolSelection(toolId, type, typeTools, selectedTools);
+    (toolId: string) => {
+      const newSelection = toggleToolSelection(toolId, tools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, toolsByType]
+    [selectedTools, onToolsChange, tools]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -128,8 +98,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         displayTools={displayTools}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
-        showGroupedView={showGroupedView}
-        onShowGroupedViewChange={onShowGroupedViewChange}
         showActiveOnly={showActiveOnly}
         onShowActiveOnlyChange={onShowActiveOnlyChange}
         disabled={disabled}
@@ -137,24 +105,14 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!showGroupedView ? (
-        <ToolsFlatView
-          tools={filteredTools}
-          selectedTools={selectedTools}
-          onToggleTool={handleToggleTool}
-          disabled={disabled}
-          pageIndex={pageIndex}
-          onPageChange={handlePageChange}
-        />
-      ) : (
-        <ToolsGroupedView
-          toolsByType={toolsByType}
-          selectedTools={selectedTools}
-          onToggleTool={handleToggleTool}
-          onToggleTypeTools={handleToggleTypeTools}
-          disabled={disabled}
-        />
-      )}
+      <ToolsFlatView
+        tools={filteredTools}
+        selectedTools={selectedTools}
+        onToggleTool={handleToggleTool}
+        disabled={disabled}
+        pageIndex={pageIndex}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

@@ -147,21 +147,25 @@ const clickIndexPatternsMenuItem = () => {
   cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('not.exist');
 };
 
-export const clickAddIndexPatternsMenuItem = () => {
+export const clickBulkAddIndexPatternsMenuItem = () => {
   clickIndexPatternsMenuItem();
   cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
 };
 
+export const clickBulkDeleteIndexPatternsMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+};
+
 export const openBulkEditAddIndexPatternsForm = () => {
-  clickAddIndexPatternsMenuItem();
+  clickBulkAddIndexPatternsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add index patterns');
 };
 
 export const openBulkEditDeleteIndexPatternsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+  clickBulkDeleteIndexPatternsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete index patterns');
 };
@@ -197,20 +201,24 @@ const clickTagsMenuItem = () => {
   cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
 };
 
-export const clickAddTagsMenuItem = () => {
+export const clickBulkAddTagsMenuItem = () => {
   clickTagsMenuItem();
   cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
 };
 
+export const clickBulkDeleteTagsMenuItem = () => {
+  clickTagsMenuItem();
+  cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
+};
+
 export const openBulkEditAddTagsForm = () => {
-  clickAddTagsMenuItem();
+  clickBulkAddTagsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add tags');
 };
 
 export const openBulkEditDeleteTagsForm = () => {
-  clickTagsMenuItem();
-  cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
+  clickBulkDeleteTagsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete tags');
 };
@@ -254,20 +262,24 @@ const clickInvestigationFieldsMenuItem = () => {
   cy.get(INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
 };
 
-export const clickAddInvestigationFieldsMenuItem = () => {
+export const clickBulkAddInvestigationFieldsMenuItem = () => {
   clickInvestigationFieldsMenuItem();
   cy.get(ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
 };
 
+export const clickBulkDeleteInvestigationFieldsMenuItem = () => {
+  clickInvestigationFieldsMenuItem();
+  cy.get(DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+};
+
 export const openBulkEditAddInvestigationFieldsForm = () => {
-  clickAddInvestigationFieldsMenuItem();
+  clickBulkAddInvestigationFieldsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add custom highlighted fields');
 };
 
 export const openBulkEditDeleteInvestigationFieldsForm = () => {
-  clickInvestigationFieldsMenuItem();
-  cy.get(DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+  clickBulkDeleteInvestigationFieldsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete custom highlighted fields');
 };
@@ -315,9 +327,13 @@ export const clickDeleteAlertSuppressionMenuItem = () => {
 };
 
 // EDIT-SCHEDULE
-export const clickUpdateScheduleMenuItem = () => {
+export const clickBulkEditRuleScheduleMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(UPDATE_SCHEDULE_MENU_ITEM).click();
+};
+
+export const clickUpdateScheduleMenuItem = () => {
+  clickBulkEditRuleScheduleMenuItem();
   cy.get(UPDATE_SCHEDULE_MENU_ITEM).should('not.exist');
 };
 
@@ -472,7 +488,7 @@ export const scheduleManualRuleRunForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rulesYou are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.`
     );
     cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
   }
@@ -495,7 +511,7 @@ export const scheduleBulkFillGapsForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_FILL_RULE_GAPS_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule gap fills`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule gap fillsYou are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.`
     );
     cy.get(CONFIRM_FILL_RULE_GAPS_WARNING_BTN).click();
   }
