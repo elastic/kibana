@@ -32,15 +32,14 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   const { navigateToPrefilledEditor } = lens;
 
   const { value: attributes, error } = useAsync(async () => {
-    const { formula: formulaAPI } = await lens.stateHelperApi();
-    if (!dataViews || !formulaAPI || !params.dataset) {
+    if (!dataViews || !params.dataset) {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(dataViews, formulaAPI);
+    const builder = new LensConfigBuilder(dataViews);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params, dataViews, lens]);
+  }, [params, dataViews]);
 
   const injectFilters = useCallback(
     ({

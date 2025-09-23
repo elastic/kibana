@@ -97,6 +97,7 @@ tags:
   - name: Elastic Agent status
   - name: Elastic Agents
   - name: Elastic Package Manager (EPM)
+  - name: Fleet cloud connectors
   - name: Fleet enrollment API keys
   - name: Fleet internals
   - name: Fleet outputs
@@ -13975,6 +13976,46 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/endpoint/action/cancel:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/cancel</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Cancel a running or pending response action (Applies only to some agent types).
+      operationId: CancelAction
+      requestBody:
+        content:
+          application/json:
+            examples:
+              MicrosoftDefenderEndpoint:
+                summary: Cancel a response action on a Microsoft Defender for Endpoint host
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Successfully cancelled the response action
+      summary: Cancel a response action
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/endpoint/action/execute:
     post:
       description: |-
@@ -15441,6 +15482,57 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/entity_store/entities/{entityType}:
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update or create an entity in Entity Store.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+        > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+      operationId: UpsertEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+        description: Schema for the updating a single entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+          description: Entity updated or created
+        '403':
+          description: Operation on a restricted field
+        '404':
+          description: Entity not found
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+      summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/entity_store/entities/list:
     get:
       description: |-
@@ -19017,6 +19109,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -19330,6 +19426,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -19938,6 +20039,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -20251,6 +20356,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -20655,6 +20765,10 @@ paths:
                                     type: array
                                   agents:
                                     type: number
+                                  cloud_connector_id:
+                                    description: ID of the cloud connector associated with this package policy.
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -20968,6 +21082,11 @@ paths:
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
+                                  supports_cloud_connector:
+                                    default: false
+                                    description: Indicates whether the package policy supports cloud connectors.
                                     nullable: true
                                     type: boolean
                                   updated_at:
@@ -21351,6 +21470,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -21664,6 +21787,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -22272,6 +22400,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -22585,6 +22717,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -23060,6 +23197,10 @@ paths:
                                   type: array
                                 agents:
                                   type: number
+                                cloud_connector_id:
+                                  description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -23373,6 +23514,11 @@ paths:
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
+                                supports_cloud_connector:
+                                  default: false
+                                  description: Indicates whether the package policy supports cloud connectors.
                                   nullable: true
                                   type: boolean
                                 updated_at:
@@ -27496,6 +27642,225 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/cloud_connectors:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-connectors
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: perPage
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cloudProvider:
+                      type: string
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    packagePolicyCount:
+                      type: number
+                    updated_at:
+                      type: string
+                    vars:
+                      additionalProperties: {}
+                      type: object
+                  required:
+                    - id
+                    - name
+                    - cloudProvider
+                    - vars
+                    - packagePolicyCount
+                    - created_at
+                    - updated_at
+                type: array
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Get cloud connectors
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: post-fleet-cloud-connectors
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                cloudProvider:
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                name:
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 1000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          frozen:
+                            type: boolean
+                          type:
+                            maxLength: 50
+                            type: string
+                          value:
+                            anyOf:
+                              - maxLength: 1000
+                                type: string
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    maxLength: 255
+                                    type: string
+                                  isSecretRef:
+                                    type: boolean
+                                required:
+                                  - isSecretRef
+                                  - id
+                        required:
+                          - type
+                          - value
+                  type: object
+              required:
+                - name
+                - cloudProvider
+                - vars
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  cloudProvider:
+                    type: string
+                  created_at:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  packagePolicyCount:
+                    type: number
+                  updated_at:
+                    type: string
+                  vars:
+                    additionalProperties: {}
+                    type: object
+                required:
+                  - id
+                  - name
+                  - cloudProvider
+                  - vars
+                  - packagePolicyCount
+                  - created_at
+                  - updated_at
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Indicates a bad request call.
+      summary: Create cloud connector
+      tags:
+        - Fleet cloud connectors
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/data_streams:
     get:
       description: |-
@@ -37671,6 +38036,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -37986,6 +38355,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -38118,6 +38492,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -38335,6 +38713,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -38547,6 +38930,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -38862,6 +39249,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -39028,6 +39420,10 @@ paths:
                           type: array
                         agents:
                           type: number
+                        cloud_connector_id:
+                          description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -39343,6 +39739,11 @@ paths:
                           description: Indicates whether the package policy belongs to an agentless agent policy.
                           nullable: true
                           type: boolean
+                        supports_cloud_connector:
+                          default: false
+                          description: Indicates whether the package policy supports cloud connectors.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -39556,6 +39957,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -39871,6 +40276,11 @@ paths:
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -40011,6 +40421,10 @@ paths:
                         type: string
                       nullable: true
                       type: array
+                    cloud_connector_id:
+                      description: ID of the cloud connector associated with this package policy.
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -40223,6 +40637,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy.
                       nullable: true
                       type: boolean
+                    supports_cloud_connector:
+                      default: false
+                      description: Indicates whether the package policy supports cloud connectors.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -40433,6 +40852,10 @@ paths:
                         type: array
                       agents:
                         type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -40746,6 +41169,11 @@ paths:
                       supports_agentless:
                         default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
                       updated_at:
@@ -41245,6 +41673,10 @@ paths:
                                 type: array
                               agents:
                                 type: number
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -41560,6 +41992,11 @@ paths:
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
+                                nullable: true
+                                type: boolean
                               updated_at:
                                 type: string
                               updated_by:
@@ -41624,6 +42061,10 @@ paths:
                                   type: string
                                 nullable: true
                                 type: array
+                              cloud_connector_id:
+                                description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -41880,6 +42321,11 @@ paths:
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
+                              supports_cloud_connector:
+                                default: false
+                                description: Indicates whether the package policy supports cloud connectors.
                                 nullable: true
                                 type: boolean
                               updated_at:
@@ -42809,6 +43255,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -42949,6 +43397,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      action_secret_storage_requirements_met:
+                        type: boolean
                       delete_unenrolled_agents:
                         additionalProperties: false
                         type: object
@@ -53552,6 +54002,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -53695,9 +54147,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -55252,6 +55737,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -55395,9 +55882,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -56750,6 +57270,8 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
+                                                          customIdentifier:
+                                                            type: string
                                                           where:
                                                             allOf:
                                                               - anyOf:
@@ -56893,9 +57415,42 @@ paths:
                                                   type: array
                                               required:
                                                 - steps
+                                            settings:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                index.number_of_replicas:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.number_of_shards:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      type: number
+                                                  required:
+                                                    - value
+                                                index.refresh_interval:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    value:
+                                                      anyOf:
+                                                        - type: string
+                                                        - enum:
+                                                            - -1
+                                                          type: number
+                                                  required:
+                                                    - value
                                           required:
                                             - lifecycle
                                             - processing
+                                            - settings
                                       required:
                                         - ingest
                                     - type: object
@@ -58300,6 +58855,8 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      customIdentifier:
+                                                        type: string
                                                       where:
                                                         allOf:
                                                           - anyOf:
@@ -58443,9 +59000,42 @@ paths:
                                               type: array
                                           required:
                                             - steps
+                                        settings:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            index.number_of_replicas:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.number_of_shards:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  type: number
+                                              required:
+                                                - value
+                                            index.refresh_interval:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                value:
+                                                  anyOf:
+                                                    - type: string
+                                                    - enum:
+                                                        - -1
+                                                      type: number
+                                              required:
+                                                - value
                                       required:
                                         - lifecycle
                                         - processing
+                                        - settings
                                   required:
                                     - ingest
                           required:
@@ -60171,6 +60761,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
@@ -60314,9 +60906,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             wired:
@@ -61784,6 +62409,8 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
+                                          customIdentifier:
+                                            type: string
                                           where:
                                             allOf:
                                               - anyOf:
@@ -61927,9 +62554,42 @@ paths:
                                   type: array
                               required:
                                 - steps
+                            settings:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - enum:
+                                            - -1
+                                          type: number
+                                  required:
+                                    - value
                           required:
                             - lifecycle
                             - processing
+                            - settings
                         - type: object
                           properties:
                             classic:
@@ -62059,6 +62719,8 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            mappings:
+                              type: boolean
                             queries:
                               items:
                                 additionalProperties: false
@@ -62081,6 +62743,7 @@ paths:
                                       - destination
                               type: array
                           required:
+                            - mappings
                             - queries
                             - routing
                       required:
@@ -62795,13 +63458,13 @@ paths:
           schema:
             type: string
         - in: query
-          name: shortLookback
-          required: false
+          name: from
+          required: true
           schema:
             type: string
         - in: query
-          name: longLookback
-          required: false
+          name: to
+          required: true
           schema:
             type: string
       requestBody:
@@ -75972,11 +76635,10 @@ components:
         - type: string
         - additionalProperties: true
           type: object
-    Security_Detections_API_AlertStatus:
+    Security_Detections_API_AlertStatusExceptClosed:
       description: The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
       enum:
         - open
-        - closed
         - acknowledged
         - in-progress
       type: string
@@ -76612,6 +77274,47 @@ components:
       required:
         - action
         - run
+    Security_Detections_API_CloseAlertsByIds:
+      type: object
+      properties:
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+        signal_ids:
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+          items:
+            format: nonempty
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - signal_ids
+        - status
+    Security_Detections_API_CloseAlertsByQuery:
+      type: object
+      properties:
+        conflicts:
+          default: abort
+          enum:
+            - abort
+            - proceed
+          type: string
+        query:
+          additionalProperties: true
+          type: object
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - query
+        - status
     Security_Detections_API_ConcurrentSearches:
       minimum: 1
       type: integer
@@ -79475,6 +80178,16 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_QueryRuleCreateFields'
+    Security_Detections_API_ReasonEnum:
+      description: The reason for closing the alerts
+      enum:
+        - false_positive
+        - duplicate
+        - true_positive
+        - benign_positive
+        - automated_closure
+        - other
+      type: string
     Security_Detections_API_RelatedIntegration:
       description: |
         Related integration is a potential dependency of a rule. It's assumed that if the user installs
@@ -80592,6 +81305,14 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_SavedQueryRuleCreateFields'
     Security_Detections_API_SetAlertsStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/Security_Detections_API_CloseAlertsByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_CloseAlertsByIds'
+        - $ref: '#/components/schemas/Security_Detections_API_SetAlertsStatusByIdsBase'
+    Security_Detections_API_SetAlertsStatusByIdsBase:
       type: object
       properties:
         signal_ids:
@@ -80603,11 +81324,19 @@ components:
           minItems: 1
           type: array
         status:
-          $ref: '#/components/schemas/Security_Detections_API_AlertStatus'
+          $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
       required:
         - signal_ids
         - status
     Security_Detections_API_SetAlertsStatusByQuery:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/Security_Detections_API_CloseAlertsByQuery'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_CloseAlertsByQuery'
+        - $ref: '#/components/schemas/Security_Detections_API_SetAlertsStatusByQueryBase'
+    Security_Detections_API_SetAlertsStatusByQueryBase:
       type: object
       properties:
         conflicts:
@@ -80620,7 +81349,7 @@ components:
           additionalProperties: true
           type: object
         status:
-          $ref: '#/components/schemas/Security_Detections_API_AlertStatus'
+          $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
       required:
         - query
         - status
@@ -82470,6 +83199,54 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    Security_Endpoint_Management_API_CancelRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                id:
+                  description: ID of the response action to cancel
+                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+                  minLength: 1
+                  type: string
+              required:
+                - id
+          required:
+            - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
       type: object
       properties:
@@ -84057,12 +84834,14 @@ components:
         - entity_engine
         - entity_definition
         - index
+        - data_stream
         - component_template
         - index_template
         - ingest_pipeline
         - enrich_policy
         - task
         - transform
+        - ilm_policy
       type: string
     Security_Entity_Analytics_API_EngineComponentStatus:
       type: object
@@ -84161,6 +84940,7 @@ components:
         - status
         - fieldHistoryLength
     Security_Entity_Analytics_API_EngineMetadata:
+      additionalProperties: false
       type: object
       properties:
         Type:
@@ -84215,6 +84995,40 @@ components:
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityField:
+      additionalProperties: false
+      type: object
+      properties:
+        attributes:
+          additionalProperties: false
+          type: object
+          properties:
+            privileged:
+              type: boolean
+        behavior:
+          additionalProperties: false
+          type: object
+        EngineMetadata:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
+        id:
+          type: string
+        lifecycle:
+          additionalProperties: false
+          type: object
+          properties:
+            first_seen:
+              format: date-time
+              type: string
+        name:
+          type: string
+        source:
+          type: string
+        sub_type:
+          type: string
+        type:
+          type: string
+      required:
+        - id
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -84298,12 +85112,14 @@ components:
         - generic
       type: string
     Security_Entity_Analytics_API_GenericEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84311,33 +85127,18 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            category:
-              type: string
-            EngineMetadata:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
-            id:
-              type: string
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - id
-            - name
-            - type
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
       required:
         - entity
     Security_Entity_Analytics_API_HostEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84345,27 +85146,16 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         host:
+          additionalProperties: false
           type: object
           properties:
             architecture:
@@ -84376,6 +85166,8 @@ components:
               items:
                 type: string
               type: array
+            entity:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
             hostname:
               items:
                 type: string
@@ -84403,7 +85195,6 @@ components:
           required:
             - name
       required:
-        - host
         - entity
     Security_Entity_Analytics_API_IdField:
       enum:
@@ -84597,12 +85388,14 @@ components:
         - description
         - category
     Security_Entity_Analytics_API_ServiceEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84610,29 +85403,20 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         service:
+          additionalProperties: false
           type: object
           properties:
+            entity:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
             name:
               type: string
             risk:
@@ -84640,7 +85424,6 @@ components:
           required:
             - name
       required:
-        - service
         - entity
     Security_Entity_Analytics_API_StoreStatus:
       enum:
@@ -84716,12 +85499,14 @@ components:
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
+          additionalProperties: false
           type: object
           properties:
             criticality:
@@ -84729,27 +85514,16 @@ components:
           required:
             - criticality
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         user:
+          additionalProperties: false
           type: object
           properties:
             domain:
@@ -84776,6 +85550,7 @@ components:
               type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
+              additionalProperties: false
             roles:
               items:
                 type: string
@@ -84783,7 +85558,6 @@ components:
           required:
             - name
       required:
-        - user
         - entity
     Security_Entity_Analytics_API_UserName:
       type: object

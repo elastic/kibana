@@ -1846,7 +1846,6 @@ describe('getOAuthAccessToken()', () => {
         scope: 'https://graph.microsoft.com/.default',
         config: {
           clientId: 'abc',
-          tenantId: 'def',
         },
         secrets: {
           clientSecret: 'iamasecret',
@@ -1862,7 +1861,6 @@ describe('getOAuthAccessToken()', () => {
       credentials: {
         config: {
           clientId: 'abc',
-          tenantId: 'def',
         },
         secrets: {
           clientSecret: 'iamasecret',
@@ -1875,7 +1873,7 @@ describe('getOAuthAccessToken()', () => {
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"}",
+          "Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\"}",
         ],
       ]
     `);
@@ -1925,7 +1923,6 @@ describe('getOAuthAccessToken()', () => {
           scope: 'https://graph.microsoft.com/.default',
           config: {
             clientId: 'abc',
-            tenantId: 'def',
           },
           secrets: {
             clientSecret: 'iamasecret',
@@ -1938,7 +1935,7 @@ describe('getOAuthAccessToken()', () => {
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"} - Something went wrong!",
+          "Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\"} - Something went wrong!",
         ],
       ]
     `);
