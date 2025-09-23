@@ -23,6 +23,7 @@ import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
+import { NO_SYSTEM } from '../utils/default_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -57,11 +58,25 @@ export function ManualFlowForm({
   const validation = validateQuery(query);
 
   useEffect(() => {
-    const isValid =
-      !validation.title.isInvalid && !validation.kql.isInvalid && !validation.system.isInvalid;
+    const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
     const isTouched = touched.title || touched.kql || touched.system;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
+
+  const options = systems
+    .map((system) => ({
+      value: system,
+      inputDisplay: system.name,
+    }))
+    .concat([
+      {
+        value: NO_SYSTEM,
+        inputDisplay: i18n.translate(
+          'xpack.streams.addSignificantEventFlyout.manualFlow.noSystemOptionLabel',
+          { defaultMessage: 'No system' }
+        ),
+      },
+    ]);
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -105,15 +120,11 @@ export function ManualFlowForm({
                 )}
               </EuiFormLabel>
             }
-            {...(touched.system && { ...validation.system })}
           >
             <EuiSuperSelect
-              options={systems.map((system) => ({
-                value: system,
-                inputDisplay: system.name,
-              }))}
+              options={options}
               valueOfSelected={
-                systems.find((system) => system.name === query.system?.name) || undefined
+                options.find((option) => option.value.name === query.system?.name)?.value
               }
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
@@ -180,7 +191,7 @@ export function ManualFlowForm({
         <PreviewDataSparkPlot
           definition={definition}
           query={query}
-          isQueryValid={!validation.kql.isInvalid && !validation.system.isInvalid}
+          isQueryValid={!validation.kql.isInvalid}
         />
       </EuiFlexGroup>
     </EuiPanel>

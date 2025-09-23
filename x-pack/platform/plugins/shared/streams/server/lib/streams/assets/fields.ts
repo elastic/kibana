@@ -11,6 +11,6 @@ export const ASSET_ID = 'asset.id';
 export const ASSET_TYPE = 'asset.type';
 
 export const QUERY_TITLE = 'query.title';
-export const QUERY_SYSTEM_NAME = 'query.system.name';
-export const QUERY_SYSTEM_FILTER = 'query.system.filter';
 export const QUERY_KQL_BODY = 'query.kql.query';
+export const QUERY_SYSTEM_NAME = 'experimental.query.system.name';
+export const QUERY_SYSTEM_FILTER = 'experimental.query.system.filter';

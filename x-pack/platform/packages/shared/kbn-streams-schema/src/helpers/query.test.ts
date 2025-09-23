@@ -28,7 +28,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("message: \\"error\\" or message: \\"failed\\"")'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"error\\" or message: \\"failed\\"") AND some.field == "some value"'
       );
     });
   });
@@ -40,7 +40,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query, false);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("status: \\"success\\"")'
+        'FROM logs.child,logs.child.* | WHERE KQL("status: \\"success\\"") AND some.field == "some value"'
       );
     });
 
@@ -50,9 +50,23 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query, true);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE some.field == "some value" AND KQL("host.name: \\"server-01\\"")'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("host.name: \\"server-01\\"") AND some.field == "some value"'
       );
     });
+  });
+
+  it('should build query without system filter', () => {
+    const indices = ['logs.child', 'logs.child.*'];
+    const query: StreamQuery = {
+      id: 'irrelevant',
+      title: 'irrelevant',
+      kql: {
+        query: 'event.type: "access"',
+      },
+    };
+    const esqlQuery = buildEsqlQuery(indices, query);
+
+    expect(esqlQuery).toBe('FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"")');
   });
 
   describe('KQL query variations', () => {
@@ -62,7 +76,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("message: \\"hello world\\"")'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"hello world\\"") AND some.field == "some value"'
       );
     });
 
@@ -72,7 +86,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"")'
+        'FROM logs.child,logs.child.* | WHERE KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"") AND some.field == "some value"'
       );
     });
 
@@ -82,7 +96,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("message: *error* and host.name: web-*")'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: *error* and host.name: web-*") AND some.field == "some value"'
       );
     });
 
@@ -92,7 +106,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE some.field == "some value" AND KQL("url.path: \\"/api/v1/users\\" and response.status: 404")'
+        'FROM logs.child,logs.child.* | WHERE KQL("url.path: \\"/api/v1/users\\" and response.status: 404") AND some.field == "some value"'
       );
     });
   });

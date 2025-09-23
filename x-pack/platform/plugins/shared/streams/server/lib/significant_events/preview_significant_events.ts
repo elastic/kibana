@@ -24,14 +24,14 @@ type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'system'>;
 function createSearchRequest({
   from,
   to,
-  query,
+  kuery,
   systemFilter,
   bucketSize,
 }: {
   from: Date;
   to: Date;
-  query: string;
-  systemFilter: Condition;
+  kuery: string;
+  systemFilter?: Condition;
   bucketSize: string;
 }) {
   return {
@@ -47,10 +47,10 @@ function createSearchRequest({
               },
             },
           },
-          conditionToQueryDsl(systemFilter),
+          ...(systemFilter ? [conditionToQueryDsl(systemFilter)] : []),
           {
             kql: {
-              query,
+              query: kuery,
             },
             // TODO: kql is not in the ES client's types yet (06-2025)
           } as QueryDslQueryContainer,
@@ -96,8 +96,8 @@ export async function previewSignificantEvents(
   const searchRequest = createSearchRequest({
     bucketSize,
     from,
-    query: query.kql.query,
-    systemFilter: query.system.filter,
+    kuery: query.kql.query,
+    systemFilter: query.system?.filter,
     to,
   });
 

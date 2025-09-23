@@ -119,8 +119,6 @@ function ruleToAsset(ruleId: string, rule: SanitizedRule) {
 
 type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_TITLE]: string;
-  [QUERY_SYSTEM_NAME]: string;
-  [QUERY_SYSTEM_FILTER]: string;
   [QUERY_KQL_BODY]: string;
 };
 
@@ -137,21 +135,28 @@ interface AssetBulkDeleteOperation {
 
 function fromStorage(link: StoredAssetLink): AssetLink {
   if (link[ASSET_TYPE] === 'query') {
+    const storedQueryLink: StoredQueryLink & {
+      [QUERY_SYSTEM_NAME]: string;
+      [QUERY_SYSTEM_FILTER]: string;
+    } = link as any;
     return {
-      ...link,
+      ...storedQueryLink,
       query: {
-        id: link[ASSET_ID],
-        title: link[QUERY_TITLE],
-        system: {
-          name: link[QUERY_SYSTEM_NAME],
-          filter: JSON.parse(link[QUERY_SYSTEM_FILTER]),
-        },
+        id: storedQueryLink[ASSET_ID],
+        title: storedQueryLink[QUERY_TITLE],
         kql: {
-          query: link[QUERY_KQL_BODY],
+          query: storedQueryLink[QUERY_KQL_BODY],
         },
+        system: storedQueryLink[QUERY_SYSTEM_NAME]
+          ? {
+              name: storedQueryLink[QUERY_SYSTEM_NAME],
+              filter: JSON.parse(storedQueryLink[QUERY_SYSTEM_FILTER]),
+            }
+          : undefined,
       },
     } satisfies QueryLink;
   }
+
   return link;
 }
 
@@ -163,10 +168,10 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
       ...rest,
       [STREAM_NAME]: name,
       [QUERY_TITLE]: query.title,
-      [QUERY_SYSTEM_NAME]: query.system.name,
-      [QUERY_SYSTEM_FILTER]: JSON.stringify(query.system.filter),
       [QUERY_KQL_BODY]: query.kql.query,
-    };
+      [QUERY_SYSTEM_NAME]: query.system ? query.system.name : '',
+      [QUERY_SYSTEM_FILTER]: query.system ? JSON.stringify(query.system.filter) : '',
+    } as unknown as StoredAssetLink;
   }
 
   return {

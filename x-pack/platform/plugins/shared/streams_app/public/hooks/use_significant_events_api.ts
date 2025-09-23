@@ -9,6 +9,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQueryKql } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { NO_SYSTEM } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -41,6 +42,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
 
   return {
     upsertQuery: async ({ system, kql, title, id }) => {
+      const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -51,10 +53,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
           body: {
             kql,
             title,
-            system: {
-              name: system.name,
-              filter: system.filter,
-            },
+            system: effectiveSystem,
           },
         },
       });

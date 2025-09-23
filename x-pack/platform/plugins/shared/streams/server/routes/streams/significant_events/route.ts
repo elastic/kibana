@@ -35,10 +35,12 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        system: z.object({
-          name: NonEmptyString,
-          filter: conditionSchema,
-        }),
+        system: z
+          .object({
+            name: NonEmptyString,
+            filter: conditionSchema,
+          })
+          .optional(),
         kql: z.object({
           query: z.string(),
         }),
