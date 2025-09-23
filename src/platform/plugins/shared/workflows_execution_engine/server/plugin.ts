@@ -192,7 +192,7 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution = {
+      const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
@@ -203,10 +203,8 @@ export class WorkflowsExecutionEnginePlugin
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
-        lastUpdatedAt: workflowCreatedAt.toISOString(),
-        lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
-      } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
+      };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -299,7 +297,7 @@ export class WorkflowsExecutionEnginePlugin
       };
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution = {
+      const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
         stepId,
@@ -311,10 +309,8 @@ export class WorkflowsExecutionEnginePlugin
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
-        lastUpdatedAt: workflowCreatedAt.toISOString(),
-        lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
-      } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
+      };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
