@@ -10,7 +10,7 @@
 import { table } from 'table';
 import { compact, keyBy, partition, uniq } from 'lodash';
 import chalk from 'chalk';
-import { maybe } from '@kbn/std';
+import { maybe } from '@kbn/utility-types';
 import { toBenchmarkDiff } from '../diff/to_comparison';
 import { getTableConfig } from '../get_table_config';
 import { formatConfidence, formatDelta, formatMetricSummary } from '../format';
