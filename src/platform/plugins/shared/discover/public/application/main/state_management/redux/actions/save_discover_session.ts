@@ -168,6 +168,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               discoverSessionTitle: newTitle,
             },
           }),
+          managed: false,
         };
 
         const dataView = await services.dataViews.create(newDataViewSpec);
@@ -178,6 +179,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         newDataViewSpec = {
           ...dataViewSpec,
           id: uuidv4(),
+          managed: false,
         };
 
         // Clear out the old data view since it's no longer needed
