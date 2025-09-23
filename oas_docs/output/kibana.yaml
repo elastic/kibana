@@ -84633,6 +84633,28 @@ components:
           type: array
         - minLength: 1
           type: string
+    Security_Entity_Analytics_API_Asset:
+      additionalProperties: false
+      type: object
+      properties:
+        business_unit:
+          type: string
+        criticality:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+        environment:
+          type: string
+        id:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        vendor:
+          type: string
     Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -85003,11 +85025,24 @@ components:
           additionalProperties: false
           type: object
           properties:
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
             privileged:
               type: boolean
-        behavior:
+        behaviors:
           additionalProperties: false
           type: object
+          properties:
+            brute_force_victim:
+              type: boolean
+            new_country_login:
+              type: boolean
+            used_usb_device:
+              type: boolean
         EngineMetadata:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
         id:
@@ -85019,8 +85054,69 @@ components:
             first_seen:
               format: date-time
               type: string
+            last_activity:
+              format: date-time
+              type: string
         name:
           type: string
+        relationships:
+          additionalProperties: false
+          type: object
+          properties:
+            accessed_frequently_by:
+              items:
+                type: string
+              type: array
+            accesses_frequently:
+              items:
+                type: string
+              type: array
+            communicates_with:
+              items:
+                type: string
+              type: array
+            dependent_of:
+              items:
+                type: string
+              type: array
+            depends_on:
+              items:
+                type: string
+              type: array
+            owned_by:
+              items:
+                type: string
+              type: array
+            owns:
+              items:
+                type: string
+              type: array
+            supervised_by:
+              items:
+                type: string
+              type: array
+            supervises:
+              items:
+                type: string
+              type: array
+        risk:
+          additionalProperties: false
+          type: object
+          properties:
+            calculated_level:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
+              description: Lexical description of the entity's risk.
+              example: Critical
+            calculated_score:
+              description: The raw numeric value of the given entity's risk score.
+              format: double
+              type: number
+            calculated_score_norm:
+              description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+              format: double
+              maximum: 100
+              minimum: 0
+              type: number
         source:
           type: string
         sub_type:
@@ -85119,13 +85215,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
       required:
@@ -85138,13 +85229,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
@@ -85395,13 +85481,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
@@ -85506,13 +85587,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
         event:
