@@ -15,7 +15,7 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingElastic,
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -172,7 +172,7 @@ export function StreamListView() {
       <StreamsAppPageTemplate.Body grow>
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
-            icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+            icon={<EuiLoadingElastic size="xl" />}
             title={
               <h2>
                 {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
