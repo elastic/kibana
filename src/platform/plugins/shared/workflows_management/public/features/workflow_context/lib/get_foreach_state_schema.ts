@@ -14,9 +14,9 @@ import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { getSchemaAtPath } from '../../../../common/lib/zod_utils';
 
 export function getForeachStateSchema(stepContextSchema: z.ZodType, foreachStep: ForEachStep) {
-  const interateOverPath =
+  const iterateOverPath =
     parseVariablePath(foreachStep.foreach)?.propertyPath || foreachStep.foreach;
-  let itemSchema = getSchemaAtPath(stepContextSchema, interateOverPath);
+  let itemSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
   if (!itemSchema) {
     itemSchema = z.any();
   } else if (itemSchema instanceof z.ZodArray) {
