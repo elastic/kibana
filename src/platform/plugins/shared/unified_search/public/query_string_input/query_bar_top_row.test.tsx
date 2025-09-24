@@ -225,32 +225,24 @@ describe('QueryBarTopRowTopRow', () => {
         });
       });
 
-      describe('when the user clicks the secondary button', () => {
-        it('should call the send to background callback', async () => {
-          // Given
-          const user = userEvent.setup();
-          const onSendToBackground = jest.fn();
+      it('the secondary button should be disabled', () => {
+        // When
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Another Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
 
-          // When
-          const { getByTestId } = render(
-            wrapQueryBarTopRowInContext(
-              {
-                query: kqlQuery,
-                screenTitle: 'Another Screen',
-                isDirty: false,
-                indexPatterns: [stubIndexPattern],
-                timeHistory: mockTimeHistory,
-                onSendToBackground,
-                useBackgroundSearchButton: true,
-              },
-              { servicesOverride: { data } }
-            )
-          );
-          await user.click(getByTestId('querySubmitSplitButton-secondary-button'));
-
-          // Then
-          expect(onSendToBackground).toHaveBeenCalled();
-        });
+        // Then
+        expect(getByTestId('querySubmitSplitButton-secondary-button')).toBeDisabled();
       });
     });
 

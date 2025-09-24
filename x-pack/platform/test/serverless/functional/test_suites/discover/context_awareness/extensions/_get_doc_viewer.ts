@@ -19,7 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
 
-  describe('extension getDocViewer', () => {
+  describe('extension getDocViewer', function () {
+    // flaky on MKI, see https://github.com/elastic/kibana/issues/235841
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await svlCommonPage.loginAsAdmin();
     });
