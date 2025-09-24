@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ForEachStep,
-  IfStep,
-  MergeStep,
-  ParallelStep,
-  Step,
-  WorkflowYaml,
-} from '../spec/schema';
+import type { Step, WorkflowYaml } from '../spec/schema';
+import { isForeachStep, isIfStep, isMergeStep, isParallelStep } from '../types/utils';
 
 export function getStepByNameFromNestedSteps(
   steps: WorkflowYaml['steps'],
@@ -24,34 +18,34 @@ export function getStepByNameFromNestedSteps(
     if (step.name === stepName) {
       return step;
     }
-    if (step.type === 'foreach' && 'steps' in step) {
-      const result = getStepByNameFromNestedSteps((step as ForEachStep).steps, stepName);
+    if (isForeachStep(step) && Array.isArray(step.steps)) {
+      const result = getStepByNameFromNestedSteps(step.steps, stepName);
       if (result) {
         return result;
       }
     }
-    if (step.type === 'if' && 'steps' in step) {
-      const result = getStepByNameFromNestedSteps((step as IfStep).steps, stepName);
+    if (isIfStep(step) && Array.isArray(step.steps)) {
+      const result = getStepByNameFromNestedSteps(step.steps, stepName);
       if (result) {
         return result;
       }
     }
-    if (step.type === 'if' && 'else' in step) {
-      const result = getStepByNameFromNestedSteps((step as IfStep).else!, stepName);
+    if (isIfStep(step) && Array.isArray(step.else)) {
+      const result = getStepByNameFromNestedSteps(step.else, stepName);
       if (result) {
         return result;
       }
     }
-    if (step.type === 'parallel' && 'branches' in step) {
-      for (const branch of (step as ParallelStep).branches!) {
+    if (isParallelStep(step) && Array.isArray(step.branches)) {
+      for (const branch of step.branches) {
         const result = getStepByNameFromNestedSteps(branch.steps, stepName);
         if (result) {
           return result;
         }
       }
     }
-    if (step.type === 'merge' && 'steps' in step) {
-      const result = getStepByNameFromNestedSteps((step as MergeStep).steps, stepName);
+    if (isMergeStep(step) && Array.isArray(step.steps)) {
+      const result = getStepByNameFromNestedSteps(step.steps, stepName);
       if (result) {
         return result;
       }

@@ -7,7 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '../spec/schema';
+import type {
+  ElasticsearchStep,
+  ForEachStep,
+  HttpStep,
+  IfStep,
+  KibanaStep,
+  MergeStep,
+  ParallelStep,
+  Step,
+  WaitStep,
+  WorkflowYaml,
+} from '../spec/schema';
 import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
@@ -32,3 +43,14 @@ export function transformWorkflowYamlJsontoEsWorkflow(
 export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
+
+// Type guards for steps types
+export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
+export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
+export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
+  step.type === 'elasticsearch';
+export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
+export const isForeachStep = (step: Step): step is ForEachStep => step.type === 'foreach';
+export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
+export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
+export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
