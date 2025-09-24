@@ -105,6 +105,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -128,6 +129,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -155,6 +157,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -182,6 +185,7 @@ describe('ChatHeader', () => {
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
           getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
