@@ -213,7 +213,7 @@ export class JobsListUI extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
-        width: '60px',
+        width: '50px',
         render: (row) => {
           const showAlertIcon = Array.isArray(row.alertingRules) && row.alertingRules.length > 0;
           const showAuditIcon = Boolean(row.auditMessage);
