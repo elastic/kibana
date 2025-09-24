@@ -139,6 +139,9 @@ describe('createAlertingRuleFromTemplate', () => {
 });
 
 describe('stepCreateAlertingRules', () => {
+  beforeEach(() => {
+    jest.mocked(saveKibanaAssetsRefs).mockReset();
+  });
   it('does nothing for non elastic_agent package', async () => {
     const context = {
       packageInstallContext: {
@@ -153,6 +156,8 @@ describe('stepCreateAlertingRules', () => {
     };
 
     await stepCreateAlertingRules(context as any);
+
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
   it('install elastic_agent rules', async () => {
