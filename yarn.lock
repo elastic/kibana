@@ -3761,6 +3761,10 @@
 "@kbn/ai-assistant-default-llm-setting@link:x-pack/platform/packages/shared/ai-assistant-default-llm-setting":
   version "0.0.0"
   uid ""
+  
+"@kbn/ai-assistant-connector-selector-action@link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action":
+  version "0.0.0"
+  uid ""
 
 "@kbn/ai-assistant-icon@link:x-pack/platform/packages/shared/ai-assistant/icon":
   version "0.0.0"
