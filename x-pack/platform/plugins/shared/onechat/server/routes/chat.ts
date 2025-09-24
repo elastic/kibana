@@ -181,8 +181,7 @@ export function registerChatRoutes({
           request: { body: conversePayloadSchema },
         },
         options: {
-          oasOperationObject: () =>
-            path.join(__dirname, 'examples/chat_converse_async.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
