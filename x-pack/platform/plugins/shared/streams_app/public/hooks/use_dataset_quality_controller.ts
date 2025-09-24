@@ -12,11 +12,13 @@ import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
+import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
+import { useTimefilter } from './use_timefilter';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 
 export const useDatasetQualityController = (
@@ -33,6 +35,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
+  const { timeState } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -51,6 +54,11 @@ export const useDatasetQualityController = (
         initialState = {
           dataStream: definition.stream.name,
           view: 'streams' as DatasetQualityView,
+          timeRange: {
+            from: timeState.timeRange.from,
+            to: timeState.timeRange.to,
+            refresh: DEFAULT_DATEPICKER_REFRESH,
+          },
         };
       }
 
