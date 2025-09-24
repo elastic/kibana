@@ -186,6 +186,9 @@ export const createAppContextStartContractMock = (
     syncIntegrationsTask: {} as any,
     automaticAgentUpgradeTask: {} as any,
     autoInstallContentPackagesTask: {} as any,
+    alertingStart: {
+      getRulesClientWithRequest: jest.fn(),
+    } as any,
   };
 };
 

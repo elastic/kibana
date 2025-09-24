@@ -118,11 +118,6 @@ export async function stepCreateAlertingRules(
   }
 
   await withPackageSpan('Install elastic agent rules', async () => {
-    if (!context.authorizationHeader) {
-      // Need authorization to create a rule as it need an api key
-      return;
-    }
-
     const rulesClient = context.authorizationHeader
       ? await appContextService
           .getAlertingStart()

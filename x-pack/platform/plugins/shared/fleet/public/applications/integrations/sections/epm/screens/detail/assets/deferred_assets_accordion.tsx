@@ -50,11 +50,11 @@ interface Props {
 export const getDeferredAssetDescription = (
   assetType: string,
   assetCount: number,
-  permissions: { canReauthorizeTransforms: boolean }
+  permissions: { canEdit: boolean }
 ) => {
   switch (assetType) {
     case ElasticsearchAssetType.transform:
-      if (permissions.canReauthorizeTransforms) {
+      if (permissions.canEdit) {
         return i18n.translate(
           'xpack.fleet.epm.packageDetails.assets.deferredTransformReauthorizeDescription',
           {
@@ -102,9 +102,19 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
     [deferredInstallations]
   );
 
-  const canReauthorizeTransforms =
-    useAuthz().packagePrivileges?.transform?.actions?.canStartStopTransform?.executePackageAction ??
-    false;
+  const authz = useAuthz();
+  const canEdit = useMemo(() => {
+    if (type === ElasticsearchAssetType.transform) {
+      return (
+        authz.packagePrivileges?.transform?.actions?.canStartStopTransform?.executePackageAction ??
+        false
+      );
+    } else if (type === KibanaSavedObjectType.alert) {
+      return authz.integrations?.installPackages;
+    }
+
+    return false;
+  }, [type, authz]);
 
   const authorizeTransforms = useCallback(
     async (transformIds: Array<{ transformId: string }>) => {
@@ -242,14 +252,14 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
 
         <EuiText>
           {getDeferredAssetDescription(type, deferredInstallations.length, {
-            canReauthorizeTransforms,
+            canEdit,
           })}{' '}
         </EuiText>
         <EuiSpacer size="m" />
 
         <EuiButton
           data-test-subject={`fleetAssetsReauthorizeAll`}
-          disabled={!canReauthorizeTransforms}
+          disabled={!canEdit}
           isLoading={isLoading}
           size={'m'}
           onClick={(e: MouseEvent<HTMLButtonElement>) => {
@@ -261,7 +271,7 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
             }
           }}
           aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
-            canReauthorizeTransforms,
+            canEdit,
           })}
         >
           {type === ElasticsearchAssetType.transform
@@ -294,15 +304,13 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
                       <EuiFlexItem>
                         <EuiToolTip
                           content={
-                            canReauthorizeTransforms
-                              ? undefined
-                              : getDeferredAssetDescription(type, 1, { canReauthorizeTransforms })
+                            canEdit ? undefined : getDeferredAssetDescription(type, 1, { canEdit })
                           }
                           data-test-subject={`fleetAssetsReauthorizeTooltip-${assetId}-${isLoading}`}
                         >
                           <EuiButton
                             isLoading={isLoading}
-                            disabled={!canReauthorizeTransforms}
+                            disabled={!canEdit}
                             size={'s'}
                             onClick={(e: MouseEvent<HTMLButtonElement>) => {
                               e.preventDefault();

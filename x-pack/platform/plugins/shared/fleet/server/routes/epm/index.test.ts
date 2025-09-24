@@ -96,7 +96,7 @@ jest.mock('./handlers', () => ({
   getInputsHandler: jest.fn(),
 }));
 
-jest.mock('./kibana_assets_handler', () => ({
+jest.mock('./install_assets_handler', () => ({
   installPackageKibanaAssetsHandler: jest.fn(),
 }));
 
