@@ -10,6 +10,9 @@
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+
+import { DIMENSION_TYPES } from '@kbn/metrics-experience-plugin/common/fields/constants';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DIMENSIONS_COLUMN } from './constants';
 
 interface CreateESQLQueryParams {
@@ -29,16 +32,9 @@ const separator = '\u203A'.normalize('NFC');
  * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
  */
 function needsStringCasting(fieldType: string): boolean {
-  const typesNeedingCast = new Set([
-    'ip',
-    'long',
-    'integer',
-    'short',
-    'byte',
-    'unsigned_long',
-    'boolean',
-  ]);
-  return typesNeedingCast.has(fieldType);
+  return (
+    DIMENSION_TYPES.includes(fieldType as ES_FIELD_TYPES) && fieldType !== ES_FIELD_TYPES.KEYWORD
+  );
 }
 
 /**
