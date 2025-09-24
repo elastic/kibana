@@ -33385,6 +33385,7 @@ paths:
                                 - elasticsearch
                               type: string
                             write_to_logs_streams:
+                              nullable: true
                               type: boolean
                           required:
                             - name
@@ -33553,6 +33554,7 @@ paths:
                                 - remote_elasticsearch
                               type: string
                             write_to_logs_streams:
+                              nullable: true
                               type: boolean
                           required:
                             - name
@@ -34183,6 +34185,7 @@ paths:
                         - elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                   required:
                     - name
@@ -34351,6 +34354,7 @@ paths:
                         - remote_elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                   required:
                     - name
@@ -34930,6 +34934,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -35098,6 +35103,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -35803,6 +35809,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -35971,6 +35978,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -36594,6 +36602,7 @@ paths:
                         - elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -36756,6 +36765,7 @@ paths:
                         - remote_elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -37322,6 +37332,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -37490,6 +37501,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
