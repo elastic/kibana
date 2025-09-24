@@ -6,7 +6,11 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
+import {
+  platformCoreTools,
+  ToolResultType,
+  type ResolvedAgentCapabilities,
+} from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
@@ -19,11 +23,15 @@ const tools = {
 
 export const getActPrompt = ({
   customInstructions,
+  capabilities,
   messages,
 }: {
   customInstructions?: string;
+  capabilities: ResolvedAgentCapabilities;
   messages: BaseMessageLike[];
 }): BaseMessageLike[] => {
+  const visEnabled = capabilities.visualizations;
+
   return [
     [
       'system',
@@ -129,7 +137,7 @@ export const getActPrompt = ({
         CUSTOMIZATION AND PRECEDENCE
         - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
-        ${renderVisualizationPrompt()}
+        ${visEnabled ? renderVisualizationPrompt() : ''}
 
         ${customInstructionsBlock(customInstructions)}
 
