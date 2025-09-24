@@ -227,7 +227,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   });
 
   const panels = item.isInternallyManaged
-    ? [{ id: 0, hasFocus: true, items: [getUpdateAPIKeyPanel('updateApiKeyOnly')] }]
+    ? [{ id: 0, hasFocus: true, items: [getUpdateAPIKeyPanel('updateApiKeyInternallyManaged')] }]
     : [
         {
           id: 0,
