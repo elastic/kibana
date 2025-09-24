@@ -14,7 +14,6 @@ import {
   GROUPED_ITEM_ACTOR_TEST_ID,
   GROUPED_ITEM_TARGET_TEST_ID,
   GROUPED_ITEM_IP_TEST_ID,
-  GROUPED_ITEM_RISK_TEST_ID,
   GROUPED_ITEM_SKELETON_TEST_ID,
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
@@ -49,7 +48,6 @@ describe('<GroupedItem />', () => {
       expect(getByTestId(GROUPED_ITEM_TIMESTAMP_TEST_ID).textContent).toBe(
         formatDate(timestamp, `@ ${LIST_ITEM_DATE_FORMAT}`)
       );
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Moderate');
       expect(getByTestId(GROUPED_ITEM_IP_TEST_ID).textContent).toContain('IP: 5.5.5.5');
       expect(getByTestId(GROUPED_ITEM_GEO_TEST_ID).textContent).toBe(
         'Geo 🇺🇸 United States of America'
@@ -80,9 +78,6 @@ describe('<GroupedItem />', () => {
       );
       expect(getByTestId(GROUPED_ITEM_ACTOR_TEST_ID).textContent).toContain('user1');
       expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toContain('proc.exe');
-
-      // Should not render risk for event
-      expect(queryByTestId(GROUPED_ITEM_RISK_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('renders alert item with full details', () => {
@@ -109,9 +104,6 @@ describe('<GroupedItem />', () => {
       );
       expect(getByTestId(GROUPED_ITEM_ACTOR_TEST_ID).textContent).toContain('host');
       expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toContain('proc.exe');
-
-      // Should not render risk for event
-      expect(queryByTestId(GROUPED_ITEM_RISK_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
@@ -396,168 +388,6 @@ describe('<GroupedItem />', () => {
 
       const panel = container.querySelector(`[data-test-subj="${GROUPED_ITEM_TEST_ID}"]`);
       expect(panel).not.toHaveStyle(`border-left: 7px solid ${dangerColor}`);
-    });
-  });
-
-  describe('risk score boundary conditions', () => {
-    it('renders critical risk score', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 100,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Critical');
-    });
-
-    it('renders high risk score', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 75,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk High');
-    });
-
-    it('renders moderate risk score', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 55,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Moderate');
-    });
-
-    it('renders low risk score', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 35,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Low');
-    });
-
-    it('renders risk score with value 0', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 0,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Unknown');
-    });
-
-    it('handles negative risk values', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: -10,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Unknown');
-    });
-
-    it('handles risk values over 100', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 150,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk Critical');
-    });
-
-    it('handles decimal risk values', () => {
-      const { getByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: 75.5,
-          }}
-        />
-      );
-
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_ITEM_RISK_TEST_ID).textContent).toBe('Risk High');
-    });
-
-    it.each(['event', 'alert'])('does not render risk score for non-entity types', (itemType) => {
-      const { queryByTestId } = render(
-        <GroupedItem
-          item={
-            {
-              type: itemType,
-              id: 'event-1',
-              action: 'test_action',
-              risk: 50, // Risk should be ignored for events and alerts
-            } as any // eslint-disable-line @typescript-eslint/no-explicit-any
-          } // Type assertion needed for test case
-        />
-      );
-
-      expect(queryByTestId(GROUPED_ITEM_RISK_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('does not render risk score when risk is undefined', () => {
-      const { queryByTestId } = render(
-        <GroupedItem
-          item={{
-            type: 'entity',
-            id: 'e1',
-            label: 'entity-1',
-            risk: undefined,
-          }}
-        />
-      );
-
-      expect(queryByTestId(GROUPED_ITEM_RISK_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
