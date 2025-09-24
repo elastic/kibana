@@ -2036,10 +2036,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@70.1.1":
-  version "70.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.1.tgz#3ce1cd77b7d6b5c89cfe33f8dbdbf23e294d98e2"
-  integrity sha512-g6joH7VZlCL9syAJJDZ5Tf/x03XV3Zsc8HD0f77SioWa9MbMLPqRQZyuLG+Y2+1wCsoV6njuvk9AR96VgwbFdw==
+"@elastic/charts@70.1.4":
+  version "70.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.4.tgz#648bae6a0b23ac51978f8a0e5ee8c00151e09169"
+  integrity sha512-ZYejGjrYWyQxDaR6+TYsA3r8pnieZB49dCNW9b/cToZqZ/5Pg94Q9uR8WqNhi2pcLezV+cqE7mZKRvjll+kVYg==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2137,7 +2137,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0", "@elastic/eui@104.0.0-amsterdam.0":
+"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0":
   version "104.0.0-amsterdam.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
   integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
@@ -2186,6 +2186,47 @@
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
+
+"@elastic/eui@104.0.0-amsterdam.0":
+  version "104.0.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
+  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
+  dependencies:
+    "@elastic/eui-theme-common" "2.0.0"
+    "@elastic/prismjs-esql" "^1.1.0"
+    "@hello-pangea/dnd" "^16.6.0"
+    "@types/lodash" "^4.14.202"
+    "@types/numeral" "^2.0.5"
+    "@types/react-window" "^1.8.8"
+    "@types/refractor" "^3.4.0"
+    chroma-js "^2.4.2"
+    classnames "^2.5.1"
+    lodash "^4.17.21"
+    mdast-util-to-hast "^10.2.0"
+    numeral "^2.0.6"
+    prop-types "^15.8.1"
+    react-dropzone "^11.7.1"
+    react-element-to-jsx-string "^15.0.0"
+    react-focus-on "^3.9.1"
+    react-is "^17.0.2"
+    react-remove-scroll-bar "^2.3.4"
+    react-virtualized-auto-sizer "^1.0.24"
+    react-window "^1.8.10"
+    refractor "^3.6.0"
+    rehype-raw "^5.1.0"
+    rehype-react "^6.2.1"
+    rehype-stringify "^8.0.0"
+    remark-breaks "^2.0.2"
+    remark-emoji "^2.1.0"
+    remark-parse-no-trim "^8.0.4"
+    remark-rehype "^8.1.0"
+    tabbable "^5.3.3"
+    text-diff "^1.0.1"
+    unified "^9.2.2"
+    unist-util-visit "^2.0.3"
+    url-parse "^1.5.10"
+    uuid "^8.3.0"
+    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
