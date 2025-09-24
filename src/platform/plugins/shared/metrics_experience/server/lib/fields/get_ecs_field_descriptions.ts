@@ -16,6 +16,7 @@ export function getEcsFieldDescriptions(fieldNames: string[]): Map<string, strin
     const cleanFieldName = fieldName
       .replaceAll('resource.attributes.', '')
       .replaceAll('attributes.', '');
+
     const ecsField = (EcsFlat as Record<string, { short?: string }>)[cleanFieldName];
     if (ecsField && ecsField.short) {
       ecsMap.set(fieldName, ecsField.short);

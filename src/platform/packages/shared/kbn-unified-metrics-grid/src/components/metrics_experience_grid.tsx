@@ -9,31 +9,26 @@
 
 import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
 import {
-  EuiDelayRender,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiProgress,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { IconChartBarStacked } from '@kbn/chart-icons';
 import { Subject } from 'rxjs';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { DimensionsSelector } from './toolbar/dimensions_selector';
-import { ValuesSelector } from './toolbar/values_selector';
 import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
+import { MetricsGridWrapper } from './metrics_grid_wrapper';
+import { EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -50,17 +45,7 @@ export const MetricsExperienceGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const {
-    currentPage,
-    dimensions,
-    valueFilters,
-    onDimensionsChange,
-    onValuesChange,
-    onPageChange,
-    onClearValues,
-    onClearAllDimensions,
-  } = useMetricsGridState();
-
+  const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
   const { getTimeRange, updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -80,11 +65,17 @@ export const MetricsExperienceGrid = ({
   });
 
   const {
-    allFields = [],
     currentPageFields = [],
     totalPages = 0,
     dimensions: appliedDimensions = [],
-  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage }) ?? {};
+    filteredFieldsBySearch = [],
+  } = usePaginatedFields({
+    fields,
+    dimensions,
+    pageSize: 20,
+    currentPage,
+    searchTerm,
+  }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
     () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
@@ -107,121 +98,23 @@ export const MetricsExperienceGrid = ({
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
-  const actions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-    },
-  ];
-
-  const rightSideComponents = useMemo(
-    () => [
-      renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={getTimeRange()}
-          onClear={onClearValues}
-        />
-      ) : null,
-    ],
-    [
-      dimensions,
-      fields,
-      getTimeRange,
-      indexPattern,
-      onClearAllDimensions,
-      onClearValues,
-      onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      valueFilters,
-    ]
-  );
-
-  if (currentPageFields?.length === 0) {
-    return (
-      <div
-        css={css`
-          height: 100%;
-        `}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="spaceAround"
-          css={css`
-            height: 100%;
-          `}
-          gutterSize="s"
-        >
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiDelayRender delay={500} data-test-subj="metricsExperienceProgressBar">
-                <EuiProgress size="xs" color="accent" position="absolute" />
-              </EuiDelayRender>
-            </EuiFlexItem>
-          ) : (
-            <>
-              <EuiFlexItem
-                css={css`
-                  justify-content: end;
-                `}
-              >
-                <EuiIcon type={IconChartBarStacked as IconType} size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" data-test-subj="metricsExperienceNoData">
-                  {i18n.translate('metricsExperience.grid.noData', {
-                    defaultMessage: 'No results found',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      </div>
-    );
+  if (fields.length === 0) {
+    return <EmptyState isLoading={isLoading} />;
   }
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        leftSide: rightSideComponents,
-        rightSide: actions,
-      }}
+    <MetricsGridWrapper
+      indexPattern={indexPattern}
+      renderToggleActions={renderToggleActions}
+      chartToolbarCss={chartToolbarCss}
+      requestParams={requestParams}
+      fields={fields}
     >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
         tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
+        data-test-subj="metricsExperienceRendered"
         css={css`
           ${histogramCss || ''}
           height: 100%;
@@ -232,18 +125,45 @@ export const MetricsExperienceGrid = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          {isLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                  defaultMessage: '{count} metrics',
-                  values: { count: allFields.length },
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            direction="row"
+          >
+            <EuiFlexItem grow={false}>
+              {isLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                      values: { count: filteredFieldsBySearch.length },
+                    })}
+                  </strong>
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('metricsExperience.grid.technicalPreview.label', {
+                  defaultMessage: 'Technical preview',
                 })}
-              </strong>
-            </EuiText>
-          )}
+                tooltipContent={i18n.translate('metricsExperience.grid.technicalPreview.tooltip', {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                })}
+                tooltipPosition="left"
+                title={i18n.translate('metricsExperience.grid.technicalPreview.title', {
+                  defaultMessage: 'Technical preview',
+                })}
+                size="s"
+                data-test-subj="metricsExperienceTechnicalPreviewBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
           <MetricsGrid
@@ -268,6 +188,6 @@ export const MetricsExperienceGrid = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ChartSectionTemplate>
+    </MetricsGridWrapper>
   );
 };

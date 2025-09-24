@@ -9,8 +9,10 @@
 
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
@@ -37,11 +39,19 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
+    visContext?: UnifiedHistogramVisContext | {};
+    controlGroupJson?: string;
   };
   initialAppState?: DiscoverAppState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
+  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+  /**
+   * ESQL query variables
+   */
+  esqlVariables: ESQLControlVariable[] | undefined;
+  forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -75,6 +85,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -85,6 +96,7 @@ export interface DiscoverInternalState {
     areInitializing: boolean;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
+    unsavedIds: string[];
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

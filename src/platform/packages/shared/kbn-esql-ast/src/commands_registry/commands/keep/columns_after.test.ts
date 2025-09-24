@@ -7,25 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter } from './columns_after';
 
-describe('FORK', () => {
-  const context = {
-    userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-    fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
-    ]),
-  };
+describe('KEEP', () => {
   it('should return the correct fields after the command', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const result = columnsAfter(synth.cmd`KEEP field1`, previousCommandFields, context);
+    const result = columnsAfter(synth.cmd`KEEP field1`, previousCommandFields, '');
 
-    expect(result).toEqual([{ name: 'field1', type: 'keyword' }]);
+    expect(result).toEqual([{ name: 'field1', type: 'keyword', userDefined: false }]);
   });
 });

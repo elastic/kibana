@@ -8,4 +8,4 @@
  */
 
 export const WORKCHAT_APP_ID = 'workchat';
-export const ONECHAT_APP_ID = 'onechat';
+export const ONECHAT_APP_ID = 'agent_builder';
