@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
-  describe('FOO - Space support', () => {
+  describe('Space support', () => {
     const testTools: Array<{ toolId: string; spaceId: string }> = [
       { toolId: 'default-tool-1', spaceId: 'default' },
       { toolId: 'default-tool-2', spaceId: 'default' },
