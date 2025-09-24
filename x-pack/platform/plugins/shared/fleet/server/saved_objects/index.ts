@@ -917,6 +917,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '21': {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
