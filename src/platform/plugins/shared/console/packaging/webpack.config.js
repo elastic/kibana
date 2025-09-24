@@ -30,7 +30,7 @@ module.exports = [
     devtool: 'cheap-source-map',
     output: {
       libraryTarget: 'commonjs',
-      path: path.resolve(__dirname, '../target/react'),
+      path: path.resolve(BUILD_OUTPUT_DIR, 'react'),
       filename: 'index.js',
       chunkFilename: '[name].chunk.js',
       publicPath: 'auto',

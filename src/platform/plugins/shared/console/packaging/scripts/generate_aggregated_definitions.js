@@ -104,7 +104,7 @@ class StandaloneSpecDefinitionsService {
   loadJSONDefinitionsFiles() {
     const jsonPath = path.join(this.versionPath, 'json');
     const generatedPath = path.join(jsonPath, 'generated');
-    const overridesPath = path.join(jsonPath, 'overrides'); 
+    const overridesPath = path.join(jsonPath, 'overrides');
     const manualPath = path.join(jsonPath, 'manual');
 
     // Use globby to find files
@@ -147,7 +147,7 @@ class StandaloneSpecDefinitionsService {
 
   loadJSDefinitions() {
     const jsIndexPath = path.join(this.versionPath, 'js', 'index.ts');
-    
+
     // For now, we'll skip JS definitions as they require TypeScript compilation
     // and complex module resolution. This can be added later if needed.
     console.log(`Skipping JS definitions for version folder: ${this.versionPath}`);
@@ -160,7 +160,7 @@ class StandaloneSpecDefinitionsService {
 async function generateAggregatedDefinitions() {
   const scriptDir = __dirname;
   const consoleDefinitionsDir = path.join(scriptDir, '..', 'server', 'console_definitions');
-  
+
   // Check if console_definitions directory exists
   if (!fs.existsSync(consoleDefinitionsDir)) {
     console.error('Console definitions directory not found:', consoleDefinitionsDir);
@@ -174,7 +174,7 @@ async function generateAggregatedDefinitions() {
       const fullPath = path.join(consoleDefinitionsDir, item);
       return fs.statSync(fullPath).isDirectory() && !item.startsWith('.');
     })
-    .sort(); // Sort versions
+    .sort();
 
   console.log('Found versions:', versionDirs);
 
@@ -187,7 +187,7 @@ async function generateAggregatedDefinitions() {
     try {
       const service = new StandaloneSpecDefinitionsService(versionPath);
       const versionDefinitions = service.loadDefinitions('stack');
-      
+
       aggregatedResponse[version] = {
         es: versionDefinitions
       };
@@ -195,7 +195,6 @@ async function generateAggregatedDefinitions() {
       console.log(`✓ Processed version ${version}: ${Object.keys(versionDefinitions.endpoints).length} endpoints`);
     } catch (error) {
       console.error(`✗ Error processing version ${version}:`, error.message);
-      // Continue with other versions
     }
   }
 
@@ -205,15 +204,14 @@ async function generateAggregatedDefinitions() {
 
   Object.entries(aggregatedResponse).forEach(([version, versionData]) => {
     const outputPath = path.join(outputDir, `${version}.json`);
-    
+
     fs.writeFileSync(outputPath, JSON.stringify(versionData, null, 2));
     generatedFiles.push(outputPath);
   });
-  
+
   console.log('\\n=== Generation Complete ===');
   console.log(`Generated ${generatedFiles.length} versioned definition files:`);
-  
-  // Print summary for each file
+
   generatedFiles.forEach((filePath, index) => {
     const version = Object.keys(aggregatedResponse)[index];
     const data = aggregatedResponse[version];

@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { noop } from 'lodash';
 // import 'monaco-editor/min/vs/editor/editor.main.css';
 
 // Disable Monaco workers entirely to prevent "Unexpected usage" errors
@@ -27,30 +28,10 @@ import React, { useEffect } from 'react';
   }
 };
 
-// Create a provider factory for packaging environment
-const createPackagingParsedRequestsProvider = () => {
-  return (model: any) => {
-    // Add null check for model
-    if (!model) {
-      // eslint-disable-next-line no-console
-      console.warn('Monaco editor model is null, creating fallback provider');
-      return {
-        getRequests: () => Promise.resolve([]),
-        getErrors: () => Promise.resolve([]),
-      };
-    }
-    return createStandaloneParsedRequestsProvider(model);
-  };
-};
-
-// Let @kbn/monaco handle the Console language setup automatically
-// No manual registration needed - the Monaco Console integration will handle it
-
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
@@ -61,8 +42,10 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
 import { createStorage, createHistory, createSettings, setStorage } from '../../public/services';
-import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
 import { loadActiveApi } from '../../public/lib/kb';
+
+import { createPackagingParsedRequestsProvider } from './parser';
+import { injectedMetadata, coreContext, trackUiMetric } from './mocked_dependencies';
 
 import * as localStorageObjectClient from '../../public/lib/local_storage_object_client';
 import { Main } from '../../public/application/containers';
@@ -76,81 +59,6 @@ import { createApi, createEsHostService } from '../../public/application/lib';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
 import type { NotificationsSetup } from '@kbn/core/public';
-
-const trackUiMetricMock = { count: () => {}, load: () => {} };
-const injectedMetadata = {
-  getKibanaBranch: () => 'main',
-  getKibanaVersion: () => '9.1.0',
-  getKibanaBuildNumber: () => 12345,
-  getBasePath: () => '',
-  getServerBasePath: () => '',
-  getPublicBaseUrl: () => '',
-  getElasticsearchInfo: () => ({
-    cluster_uuid: 'test-cluster-uuid',
-    cluster_name: 'test-cluster-name',
-    cluster_version: '8.0.0',
-    cluster_build_flavor: 'development',
-  }),
-  getCspConfig: () =>
-    ({
-      warnLegacyBrowsers: true,
-    } as unknown),
-  getTheme: () =>
-    ({
-      darkMode: 'light',
-      name: 'default',
-      version: '1.0.0',
-      stylesheetPaths: {
-        default: [],
-        dark: [],
-      },
-    } as unknown),
-  getExternalUrlConfig: () => ({
-    policy: [
-      {
-        allow: true,
-        host: undefined,
-        protocol: undefined,
-      },
-    ],
-  }),
-  getAnonymousStatusPage: () => false,
-  getLegacyMetadata: () => ({} as unknown),
-  getPlugins: () => [],
-  getAssetsHrefBase: () => '/ui/',
-} as unknown as InternalInjectedMetadataSetup;
-const createLogger = (name?: string) => ({
-  debug: (...args: any[]) => console.debug(`[DEBUG]${name ? ` [${name}]` : ''}`, ...args),
-  info: (...args: any[]) => console.info(`[INFO]${name ? ` [${name}]` : ''}`, ...args),
-  warn: (...args: any[]) => console.warn(`[WARN]${name ? ` [${name}]` : ''}`, ...args),
-  error: (...args: any[]) => console.error(`[ERROR]${name ? ` [${name}]` : ''}`, ...args),
-  trace: (...args: any[]) => console.trace(`[TRACE]${name ? ` [${name}]` : ''}`, ...args),
-  fatal: (...args: any[]) => console.error(`[FATAL]${name ? ` [${name}]` : ''}`, ...args),
-  log: (...args: any[]) => console.log(`[LOG]${name ? ` [${name}]` : ''}`, ...args),
-  get: (childName?: string) => createLogger(childName || name),
-});
-
-const coreContext = {
-  coreId: Symbol('core'),
-  logger: {
-    get: createLogger,
-  },
-  env: {
-    packageInfo: {
-      buildFlavor: 'development',
-      // Add missing build info for analytics
-      isDistributable: false,
-      version: '1.0.0',
-      branch: 'main',
-      buildNum: 1,
-      buildSha: 'dev-build'
-    },
-    mode: {
-      name: 'development',
-      dev: true,
-    },
-  },
-};
 
 // Import all translation files statically so webpack includes them in the bundle
 const translations = {
@@ -200,12 +108,12 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
   // Use the custom notifications provided by the consumer
   const notifications = {
     toasts: {
-      addSuccess: customNotifications.addSuccess || (() => {}),
-      addWarning: customNotifications.addWarning || (() => {}),
-      addDanger: customNotifications.addDanger || (() => {}),
-      addError: customNotifications.addError || (() => {}),
-      add: customNotifications.add || (() => ({ id: '' })),
-      remove: customNotifications.remove || (() => {}),
+      addSuccess: customNotifications.addSuccess || noop,
+      addWarning: customNotifications.addWarning || noop,
+      addDanger: customNotifications.addDanger || noop,
+      addError: customNotifications.addError || noop,
+      add: customNotifications.add || noop,
+      remove: customNotifications.remove || noop,
     }
   };
 
@@ -259,9 +167,18 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
   return (
     <IntlProvider locale={lang} messages={selectedTranslations.messages}>
       <ServicesContextProvider
-        // @ts-ignore
         value={{
-          // ...coreStart,
+          analytics: {
+            reportEvent: () => {},
+          },
+          i18n: i18nService.getContext(),
+          theme: {
+            theme$: theme.theme$,
+          },
+          userProfile: {
+            getUserProfile$: () => ({ pipe: () => ({ subscribe: () => {} }) }),
+            userProfile: null,
+          } as any,
           docLinkVersion: docLinks.DOC_LINK_VERSION,
           docLinks: docLinks.links,
           services: {
@@ -270,10 +187,15 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
             history: storageHistory,
             settings,
             notifications: notifications as NotificationsSetup,
-            trackUiMetric: trackUiMetricMock,
+            trackUiMetric,
             objectStorageClient,
             http,
             autocompleteInfo,
+            // Mock required services that aren't available in packaging
+            dataViews: {} as any,
+            data: {} as any,
+            licensing: {} as any,
+            application: {} as any,
           },
           config: {
             isDevMode: false,
