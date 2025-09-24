@@ -72,7 +72,7 @@ export function useGenAIConnectorsWithoutContext(
     if (lastUsedConnector) {
       return lastUsedConnector;
     }
-    if (defaultConnector) {
+    if (defaultConnector !== NO_DEFAULT_CONNECTOR) {
       return defaultConnector;
     }
     return undefined;
@@ -107,15 +107,17 @@ export function useGenAIConnectorsWithoutContext(
 
             return result;
           }, Promise.resolve([]))
-          .then((c) => {
+          .then((_connectors) => {
             if (isConnectorSelectionRestricted) {
-              const defaultC = c.find((con) => con.id === defaultConnector);
-              setConnectors(defaultC ? [defaultC] : []);
-            } else {
-              setConnectors(c);
+              const defaultC = _connectors.find((con) => con.id === defaultConnector);
+              _connectors = defaultC ? [defaultC] : [];
             }
+            setConnectors(_connectors);
             setLastUsedConnector((connectorId) => {
-              if (connectorId && c.findIndex((result) => result.id === connectorId) === -1) {
+              if (
+                connectorId &&
+                _connectors.findIndex((result) => result.id === connectorId) === -1
+              ) {
                 return '';
               }
               return connectorId;
