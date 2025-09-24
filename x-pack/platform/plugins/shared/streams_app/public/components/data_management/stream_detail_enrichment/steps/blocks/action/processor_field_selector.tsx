@@ -73,7 +73,7 @@ export const ProcessorFieldSelector = ({
 
   const defaultLabel = i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorSourceLabel',
-    { defaultMessage: 'Source field' }
+    { defaultMessage: 'Field' }
   );
 
   const defaultHelpText = i18n.translate(
