@@ -77,7 +77,8 @@ describe('SavedObjectsService', () => {
   const createCoreContext = ({
     skipMigration = true,
     env,
-  }: { skipMigration?: boolean; env?: Env } = {}) => {
+    accessControlEnabled,
+  }: { skipMigration?: boolean; env?: Env; accessControlEnabled?: boolean } = {}) => {
     const configService = configServiceMock.create({ atPath: { skip: true } });
     configService.atPath.mockImplementation((path) => {
       if (path === 'migrations') {
@@ -86,6 +87,7 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: 10000,
+        enableAccessControl: accessControlEnabled ?? false,
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -395,6 +397,13 @@ describe('SavedObjectsService', () => {
         const soService = new SavedObjectsService(coreContext);
         const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
         expect(isAccessControlEnabled()).toEqual(false);
+      });
+
+      it('can be set to true', async () => {
+        const coreContext = createCoreContext({ accessControlEnabled: true });
+        const soService = new SavedObjectsService(coreContext);
+        const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
+        expect(isAccessControlEnabled()).toEqual(true);
       });
     });
   });
