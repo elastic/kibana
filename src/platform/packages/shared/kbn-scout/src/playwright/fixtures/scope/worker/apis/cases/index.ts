@@ -23,18 +23,18 @@ import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
 export interface CasesApiService {
-  create: (request: CaseCreateRequest, spaceId?: string) => Promise<ApiResponse<Case>>;
+  create: (params: CaseCreateRequest, spaceId?: string) => Promise<ApiResponse<Case>>;
   get: (caseId: string, spaceId?: string) => Promise<ApiResponse<Case>>;
-  update: (request: CaseUpdateRequest[], spaceId?: string) => Promise<ApiResponse<Case[]>>;
+  update: (params: CaseUpdateRequest[], spaceId?: string) => Promise<ApiResponse<Case[]>>;
   delete: (caseIds: string[], spaceId?: string) => Promise<ApiStatusResponse>;
-  find: (request?: CasesFindRequest, spaceId?: string) => Promise<ApiResponse<Case[]>>;
+  find: (params?: CasesFindRequest, spaceId?: string) => Promise<ApiResponse<Case[]>>;
   connectors: {
     get: (spaceId?: string) => Promise<ApiResponse<any>>;
   };
   comments: {
     create: (
       caseId: string,
-      request: AttachmentRequest,
+      params: AttachmentRequest,
       spaceId?: string
     ) => Promise<ApiResponse<Case>>;
     get: (caseId: string, commentId: string, spaceId?: string) => Promise<ApiResponse<Attachment>>;
@@ -70,16 +70,16 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
   };
 
   return {
-    create: async (request, spaceId) => {
+    create: async (params, spaceId) => {
       return await measurePerformanceAsync(
         log,
-        `casesApi.cases.create [${request.title}]`,
+        `casesApi.cases.create [${params.title}]`,
         async () => {
           const response = await kbnClient.request({
             method: 'POST',
             path: `${buildSpacePath(spaceId)}/api/cases`,
             retries: 3,
-            body: { ...request },
+            body: { ...params },
           });
           return { data: response.data as Case, status: response.status };
         }
@@ -96,17 +96,17 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
         return { data: response.data as Case, status: response.status };
       });
     },
-    update: async (request, spaceId) => {
+    update: async (params, spaceId) => {
       return await measurePerformanceAsync(
         log,
-        `casesApi.cases.update [${request.length} cases]`,
+        `casesApi.cases.update [${params.length} cases]`,
         async () => {
           const response = await kbnClient.request({
             method: 'PATCH',
             path: `${buildSpacePath(spaceId)}/api/cases`,
             retries: 3,
             body: {
-              cases: request.map((update) => {
+              cases: params.map((update) => {
                 // Validate required fields
                 if (!update.id) {
                   throw new Error('Case ID is required for update');
@@ -156,15 +156,15 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
         }
       );
     },
-    find: async (request, spaceId) => {
+    find: async (params, spaceId) => {
       return await measurePerformanceAsync(log, 'casesApi.cases.find', async () => {
         // Note: By default, the Cases API will return the first page with default page size.
-        // If not explicitly set in the request, this will only fetch the first page (up to 100 cases).
+        // If not explicitly set in the params, this will only fetch the first page (up to 100 cases).
         const response = await kbnClient.request({
           method: 'GET',
           path: `${buildSpacePath(spaceId)}/api/cases/_find`,
           retries: 3,
-          query: request,
+          query: params,
         });
         const data = response.data as CasesFindResponse;
 
@@ -184,7 +184,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
       },
     },
     comments: {
-      create: async (caseId, request, spaceId) => {
+      create: async (caseId, params, spaceId) => {
         return await measurePerformanceAsync(
           log,
           `casesApi.comments.create [${caseId}]`,
@@ -193,7 +193,7 @@ export const getCasesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Cases
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/api/cases/${caseId}/comments`,
               retries: 3,
-              body: request,
+              body: params,
             });
             return { data: response.data as Case, status: response.status };
           }
