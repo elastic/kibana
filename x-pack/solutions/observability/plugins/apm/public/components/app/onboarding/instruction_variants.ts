@@ -58,7 +58,6 @@ export type AgentApiDetails = AgentApiKey & {
 export interface AgentInstructions {
   baseUrl: string;
   apmServerUrl: string;
-  managedOtlpServiceUrl: string;
   apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
   checkAgentStatus: () => void;

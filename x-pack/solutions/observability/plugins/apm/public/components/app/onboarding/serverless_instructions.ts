@@ -32,14 +32,12 @@ export function serverlessInstructions(
     checkAgentStatus,
     agentStatus,
     agentStatusLoading,
-    managedOtlpServiceUrl,
   }: {
     baseUrl: string;
     config: ConfigSchema;
     checkAgentStatus: () => void;
     agentStatus?: boolean;
     agentStatusLoading: boolean;
-    managedOtlpServiceUrl: string;
   },
   apiKeyLoading: boolean,
   apiKeyDetails: AgentApiKey,
@@ -51,7 +49,6 @@ export function serverlessInstructions(
   const commonOptions: AgentInstructions = {
     baseUrl,
     apmServerUrl: `${config.managedServiceUrl}:443`,
-    managedOtlpServiceUrl: `${managedOtlpServiceUrl}:443`,
     checkAgentStatus,
     agentStatus,
     agentStatusLoading,
