@@ -16,6 +16,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
     InferenceTabularPage: {
       async expectHeaderToBeExist() {
         await testSubjects.existOrFail('allInferenceEndpointsPage');
+        await testSubjects.existOrFail('eis-documentation');
         await testSubjects.existOrFail('api-documentation');
         await testSubjects.existOrFail('view-your-models');
         await testSubjects.existOrFail('add-inference-endpoint-header-button');

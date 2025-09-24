@@ -9,21 +9,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
 
@@ -32,7 +20,6 @@ import { css } from '@emotion/react';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-import { docLinks } from '../shared/doc_links';
 import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
 import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
@@ -116,7 +103,6 @@ export const SearchIndexIndexMappings: React.FC = () => {
                         isFrozen: false,
                         name: indexToShow,
                       }}
-                      showAboutMappings={false}
                     />
                   ) : (
                     <EuiCallOut
@@ -132,87 +118,6 @@ export const SearchIndexIndexMappings: React.FC = () => {
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel grow={false} hasShadow={false} hasBorder>
-            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="info" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('xpack.contentConnectors.content.searchIndex.mappings.title', {
-                      defaultMessage: 'About index mappings',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.contentConnectors.content.searchIndex.mappings.description"
-                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
-                  values={{
-                    date: <EuiCode>date</EuiCode>,
-                    keyword: <EuiCode>keyword</EuiCode>,
-                    number: <EuiCode>number</EuiCode>,
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiLink
-              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnHowToCustomizeIndexMappingsAndSettingsLink"
-              href={docLinks.connectorsMappings}
-              target="_blank"
-              external
-            >
-              {i18n.translate('xpack.contentConnectors.content.searchIndex.mappings.docLink', {
-                defaultMessage: 'Learn how to customize index mappings and settings',
-              })}
-            </EuiLink>
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel grow={false} hasShadow={false} hasBorder>
-            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="info" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('xpack.contentConnectors.content.searchIndex.transform.title', {
-                      defaultMessage: 'Transform your searchable content',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.contentConnectors.content.searchIndex.transform.description"
-                  defaultMessage="Want to add custom fields, or use trained ML models to analyze and enrich your indexed documents? Use index-specific ingest pipelines to customize documents to your needs."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiLink
-              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnMoreLink"
-              href={docLinks.ingestPipelines}
-              target="_blank"
-              external
-            >
-              {i18n.translate('xpack.contentConnectors.content.searchIndex.transform.docLink', {
-                defaultMessage: 'Learn more',
-              })}
-            </EuiLink>
-          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
