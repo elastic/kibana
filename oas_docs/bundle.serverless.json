@@ -28159,6 +28159,9 @@
                                           {
                                             "additionalProperties": true,
                                             "properties": {
+                                              "hash": {
+                                                "type": "string"
+                                              },
                                               "id": {
                                                 "type": "string"
                                               }
@@ -28362,6 +28365,9 @@
                                       {
                                         "additionalProperties": true,
                                         "properties": {
+                                          "hash": {
+                                            "type": "string"
+                                          },
                                           "id": {
                                             "type": "string"
                                           }
@@ -28384,6 +28390,9 @@
                                           {
                                             "additionalProperties": true,
                                             "properties": {
+                                              "hash": {
+                                                "type": "string"
+                                              },
                                               "id": {
                                                 "type": "string"
                                               }
@@ -28581,6 +28590,9 @@
                                           {
                                             "additionalProperties": true,
                                             "properties": {
+                                              "hash": {
+                                                "type": "string"
+                                              },
                                               "id": {
                                                 "type": "string"
                                               }
@@ -28693,9 +28705,6 @@
                                   "logstash"
                                 ],
                                 "type": "string"
-                              },
-                              "write_to_logs_streams": {
-                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28989,6 +28998,9 @@
                                       {
                                         "additionalProperties": true,
                                         "properties": {
+                                          "hash": {
+                                            "type": "string"
+                                          },
                                           "id": {
                                             "type": "string"
                                           }
@@ -29011,6 +29023,9 @@
                                           {
                                             "additionalProperties": true,
                                             "properties": {
+                                              "hash": {
+                                                "type": "string"
+                                              },
                                               "id": {
                                                 "type": "string"
                                               }
@@ -29164,9 +29179,6 @@
                               },
                               "version": {
                                 "type": "string"
-                              },
-                              "write_to_logs_streams": {
-                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -29336,6 +29348,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -29539,6 +29554,9 @@
                               {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "hash": {
+                                    "type": "string"
+                                  },
                                   "id": {
                                     "type": "string"
                                   }
@@ -29561,6 +29579,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -29758,6 +29779,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -29870,9 +29894,6 @@
                           "logstash"
                         ],
                         "type": "string"
-                      },
-                      "write_to_logs_streams": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30166,6 +30187,9 @@
                               {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "hash": {
+                                    "type": "string"
+                                  },
                                   "id": {
                                     "type": "string"
                                   }
@@ -30188,6 +30212,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -30341,9 +30368,6 @@
                       },
                       "version": {
                         "type": "string"
-                      },
-                      "write_to_logs_streams": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30446,6 +30470,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -30649,6 +30676,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -30671,6 +30701,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -30868,6 +30901,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -30980,9 +31016,6 @@
                                 "logstash"
                               ],
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31276,6 +31309,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -31298,6 +31334,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -31451,9 +31490,6 @@
                             },
                             "version": {
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31721,6 +31757,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -31924,6 +31963,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -31946,6 +31988,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -32143,6 +32188,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -32255,9 +32303,6 @@
                                 "logstash"
                               ],
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32551,6 +32596,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -32573,6 +32621,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -32726,9 +32777,6 @@
                             },
                             "version": {
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32890,6 +32938,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -33086,6 +33137,9 @@
                               {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "hash": {
+                                    "type": "string"
+                                  },
                                   "id": {
                                     "type": "string"
                                   }
@@ -33108,6 +33162,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -33298,6 +33355,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -33410,9 +33470,6 @@
                           "logstash"
                         ],
                         "type": "string"
-                      },
-                      "write_to_logs_streams": {
-                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -33701,6 +33758,9 @@
                               {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "hash": {
+                                    "type": "string"
+                                  },
                                   "id": {
                                     "type": "string"
                                   }
@@ -33723,6 +33783,9 @@
                                   {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "hash": {
+                                        "type": "string"
+                                      },
                                       "id": {
                                         "type": "string"
                                       }
@@ -33876,9 +33939,6 @@
                       },
                       "version": {
                         "type": "string"
-                      },
-                      "write_to_logs_streams": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -33978,6 +34038,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -34181,6 +34244,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -34203,6 +34269,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -34400,6 +34469,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -34512,9 +34584,6 @@
                                 "logstash"
                               ],
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -34808,6 +34877,9 @@
                                     {
                                       "additionalProperties": true,
                                       "properties": {
+                                        "hash": {
+                                          "type": "string"
+                                        },
                                         "id": {
                                           "type": "string"
                                         }
@@ -34830,6 +34902,9 @@
                                         {
                                           "additionalProperties": true,
                                           "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
                                             "id": {
                                               "type": "string"
                                             }
@@ -34983,9 +35058,6 @@
                             },
                             "version": {
                               "type": "string"
-                            },
-                            "write_to_logs_streams": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
