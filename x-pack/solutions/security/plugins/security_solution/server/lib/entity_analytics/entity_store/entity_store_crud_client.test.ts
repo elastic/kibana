@@ -10,9 +10,9 @@ import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   BadCRUDRequestError,
-  DocumentNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
+  DocumentVersionConflictError,
 } from './errors';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
@@ -96,10 +96,10 @@ describe('EntityStoreCrudClient', () => {
       );
     });
 
-    it('when entity not found throw', async () => {
+    it('when conflicts throw', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
-      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ version_conflicts: 1 }));
 
       const doc: Entity = {
         entity: {
@@ -114,7 +114,7 @@ describe('EntityStoreCrudClient', () => {
       };
 
       await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
-        new DocumentNotFoundError()
+        new DocumentVersionConflictError()
       );
     });
 
@@ -151,6 +151,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_host_default',
         query: {
           term: {
@@ -226,6 +227,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_generic_default',
         query: {
           term: {
@@ -303,6 +305,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_host_default',
         query: {
           term: {
@@ -330,6 +333,61 @@ describe('EntityStoreCrudClient', () => {
           '@timestamp': mockedDate.toISOString(),
           host: {
             id: ['123'],
+            name: 'host-1',
+            entity: {
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              lifecycle: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                First_seen: '1995-12-17T03:24:00',
+              },
+            },
+          },
+        },
+      });
+
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
+    it('when valid update entity, but no entity found, just create', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        entity: {
+          id: 'host-1',
+          attributes: {
+            privileged: true,
+          },
+          lifecycle: {
+            first_seen: '1995-12-17T03:24:00',
+          },
+        },
+      };
+
+      await client.upsertEntity('host', doc);
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
+      expect(esClientMock.updateByQuery).toBeCalledTimes(1);
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.updates.security_host_default',
+        id: '123',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          host: {
             name: 'host-1',
             entity: {
               id: 'host-1',

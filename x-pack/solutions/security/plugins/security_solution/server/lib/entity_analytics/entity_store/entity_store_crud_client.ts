@@ -18,7 +18,6 @@ import type {
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import {
   BadCRUDRequestError,
-  DocumentNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
@@ -98,11 +97,8 @@ export class EntityStoreCrudClient {
       conflicts: 'proceed',
     });
 
-    if ((updateByQueryResp.updated || 0) < 1) {
-      if (updateByQueryResp.version_conflicts) {
-        throw new DocumentVersionConflictError();
-      }
-      throw new DocumentNotFoundError();
+    if (updateByQueryResp.version_conflicts) {
+      throw new DocumentVersionConflictError();
     }
 
     await this.esClient.create({

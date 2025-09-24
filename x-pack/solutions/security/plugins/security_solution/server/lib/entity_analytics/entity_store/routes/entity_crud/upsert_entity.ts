@@ -17,7 +17,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import {
   BadCRUDRequestError,
-  DocumentNotFoundError,
   EngineNotRunningError,
   DocumentVersionConflictError,
 } from '../../errors';
@@ -70,10 +69,6 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
 
           if (error instanceof BadCRUDRequestError) {
             return response.badRequest({ body: error as BadCRUDRequestError });
-          }
-
-          if (error instanceof DocumentNotFoundError) {
-            return response.notFound({ body: error as DocumentNotFoundError });
           }
 
           if (error instanceof DocumentVersionConflictError) {
