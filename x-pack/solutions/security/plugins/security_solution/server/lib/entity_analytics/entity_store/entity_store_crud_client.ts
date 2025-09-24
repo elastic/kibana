@@ -21,6 +21,7 @@ import {
   DocumentNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
+  DocumentVersionConflictError,
 } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
@@ -94,9 +95,13 @@ export class EntityStoreCrudClient {
         source: painlessUpdate,
         lang: 'painless',
       },
+      conflicts: 'proceed',
     });
 
     if ((updateByQueryResp.updated || 0) < 1) {
+      if (updateByQueryResp.version_conflicts) {
+        throw new DocumentVersionConflictError();
+      }
       throw new DocumentNotFoundError();
     }
 
