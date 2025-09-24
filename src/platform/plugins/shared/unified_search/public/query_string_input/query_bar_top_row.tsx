@@ -623,7 +623,7 @@ export const QueryBarTopRow = React.memo(
           <SplitButton
             aria-label={buttonLabelCancel}
             color="text"
-            data-test-subj="queryCancelSplitButton"
+            data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
             onClick={onClickCancelButton}
@@ -684,7 +684,7 @@ export const QueryBarTopRow = React.memo(
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitSplitButton"
+          data-test-subj="querySubmitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}

@@ -147,8 +147,8 @@ describe('QueryBarTopRowTopRow', () => {
     {
       value: true,
       description: 'enabled',
-      submitId: 'querySubmitSplitButton',
-      cancelId: 'queryCancelSplitButton',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
     },
   ])('when background search is $description', ({ value, submitId, cancelId }) => {
     describe('when it is NOT loading', () => {
@@ -218,7 +218,7 @@ describe('QueryBarTopRowTopRow', () => {
               { servicesOverride: { data } }
             )
           );
-          await user.click(getByTestId('querySubmitSplitButton-primary-button'));
+          await user.click(getByTestId('querySubmitButton'));
 
           // Then
           expect(onSubmit).toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('QueryBarTopRowTopRow', () => {
         );
 
         // Then
-        expect(getByTestId('querySubmitSplitButton-secondary-button')).toBeDisabled();
+        expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
       });
     });
 
@@ -271,7 +271,7 @@ describe('QueryBarTopRowTopRow', () => {
               { servicesOverride: { data } }
             )
           );
-          await user.click(getByTestId('queryCancelSplitButton-primary-button'));
+          await user.click(getByTestId('queryCancelButton'));
 
           // Then
           expect(onCancel).toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe('QueryBarTopRowTopRow', () => {
             )
           );
 
-          await user.click(getByTestId('queryCancelSplitButton-secondary-button'));
+          await user.click(getByTestId('queryCancelButton-secondary-button'));
 
           // Then
           expect(onSendToBackground).toHaveBeenCalled();
