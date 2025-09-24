@@ -60,7 +60,6 @@ export function SignificantEventsGeneratedTable({
         <PreviewDataSparkPlot
           definition={definition}
           query={query}
-          timeRange={timeState.timeRange}
           isQueryValid={!validation.kql.isInvalid}
         />
       );
