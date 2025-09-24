@@ -40,12 +40,11 @@ tasks:
   jest:
     description: Run jest tests for the project
   print-stats:
-    script: node -p "v8.getHeapStatistics().heap_size_limit / 1024 / 1024"
+    script: node print_stats.js
     options:
-      runFromWorkspaceRoot: true
       cache: false
     env:
-      NODE_OPTIONS: '--max-old-space-size=9216'
+      NODE_OPTIONS: '--max-old-space-size=8192'
   typecheck:
     command:
       - tsc
