@@ -116,8 +116,121 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
     target: 'jsonSchema7',
   });
 
-  // Fix broken $ref paths and enforce strict validation (additionalProperties: false)
-  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+  // Fix the schema to make it valid for JSON Schema validators
+  return fixInvalidJsonSchema(jsonSchema);
+}
+
+function fixInvalidJsonSchema(schema: any): any {
+  const schemaString = JSON.stringify(schema);
+  let fixedSchemaString = schemaString;
+
+  // Fix 1: Remove duplicate enum values (the main issue causing validation failure)
+  // This regex finds enum arrays and removes duplicates
+  fixedSchemaString = fixedSchemaString.replace(
+    /"enum":\s*\[([^\]]+)\]/g,
+    (match, enumValues) => {
+      try {
+        // Parse the enum values and remove duplicates
+        const values = JSON.parse(`[${enumValues}]`);
+        const uniqueValues = [...new Set(values)];
+        return `"enum":${JSON.stringify(uniqueValues)}`;
+      } catch (e) {
+        // If parsing fails, return original
+        return match;
+      }
+    }
+  );
+
+  // Fix 2: Apply our additionalProperties fix but more carefully
+  try {
+    const tempSchema = JSON.parse(fixedSchemaString);
+    fixAdditionalPropertiesInSchema(tempSchema);
+    
+    // Validate the fixed schema
+    const Ajv = require('ajv');
+    const ajv = new Ajv({ strict: false, validateFormats: false });
+    ajv.compile(tempSchema);
+    
+    console.log('✅ Generated valid JSON Schema for Monaco');
+    return tempSchema;
+  } catch (error) {
+    console.warn('⚠️ Schema validation failed, using basic fallback:', error.message);
+    
+    // Last resort: return a very basic schema that at least works
+    return createBasicWorkflowSchema();
+  }
+}
+
+function createBasicWorkflowSchema(): any {
+  return {
+    "$ref": "#/definitions/WorkflowSchema",
+    "definitions": {
+      "WorkflowSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "1",
+            "default": "1"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "type": { "type": "string" },
+                "with": { "type": "object" },
+                "if": { "type": "string" },
+                "foreach": { "type": "string" }
+              },
+              "required": ["name", "type"]
+            },
+            "minItems": 1
+          }
+        },
+        "required": ["version", "name", "steps"]
+      }
+    }
+  };
+}
+
+function fixAdditionalPropertiesInSchema(obj: any, insideAllOf = false): void {
+  if (typeof obj !== 'object' || obj === null) {
+    return;
+  }
+
+  if (Array.isArray(obj)) {
+    obj.forEach(item => fixAdditionalPropertiesInSchema(item, insideAllOf));
+    return;
+  }
+
+  // Check if this object is an allOf array
+  if (obj.allOf && Array.isArray(obj.allOf)) {
+    // Process items inside allOf with the flag set to true
+    obj.allOf.forEach((item: any) => fixAdditionalPropertiesInSchema(item, true));
+  }
+
+  // If this is an object type and we're not inside an allOf, add additionalProperties: false
+  if (obj.type === 'object' && !insideAllOf && !('additionalProperties' in obj)) {
+    obj.additionalProperties = false;
+  }
+
+  // Recursively process all properties
+  Object.keys(obj).forEach(key => {
+    if (key !== 'allOf') {
+      fixAdditionalPropertiesInSchema(obj[key], insideAllOf);
+    }
+  });
 }
 
 function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
@@ -175,6 +288,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
+  // BUT: we must be careful not to add it to objects inside allOf arrays
 
   // First, replace any existing "additionalProperties": true with false
   fixedSchemaString = fixedSchemaString.replace(
@@ -183,10 +297,19 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   );
 
   // Then, add additionalProperties: false to objects that don't have it
-  fixedSchemaString = fixedSchemaString.replace(
-    /"type":\s*"object"(?![^}]*"additionalProperties")/g,
-    '"type": "object", "additionalProperties": false'
-  );
+  // BUT we need to avoid objects that are inside allOf arrays to prevent conflicts
+  // We'll use a more sophisticated approach to parse and fix the schema
+  try {
+    const tempSchema = JSON.parse(fixedSchemaString);
+    fixAdditionalPropertiesInSchema(tempSchema);
+    fixedSchemaString = JSON.stringify(tempSchema);
+  } catch (parseError) {
+    // If parsing fails, fall back to the simple regex approach
+    fixedSchemaString = fixedSchemaString.replace(
+      /"type":\s*"object"(?![^}]*"additionalProperties")/g,
+      '"type": "object", "additionalProperties": false'
+    );
+  }
 
   try {
     const fixedSchema = JSON.parse(fixedSchemaString);
