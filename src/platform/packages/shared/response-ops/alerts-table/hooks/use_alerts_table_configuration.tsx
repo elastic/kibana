@@ -54,8 +54,7 @@ export const useAlertsTableConfiguration = ({
           defaultMessage: 'Unable to load alerts table configuration',
         }),
         text: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
-          defaultMessage:
-            'The saved configuration was invalid and has been reset to default.',
+          defaultMessage: 'The saved configuration was invalid and has been reset to default.',
         }),
       });
     }
