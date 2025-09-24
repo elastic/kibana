@@ -281,6 +281,10 @@ export class StreamsApp {
       .click();
   }
 
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+  }
+
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
   }
@@ -509,6 +513,10 @@ export class StreamsApp {
 
   async submitSchemaChanges() {
     await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+  }
+
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
   /**

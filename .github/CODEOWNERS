@@ -881,6 +881,7 @@ x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-manage
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
@@ -924,7 +925,6 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-streams-ai-cli @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
@@ -2458,7 +2458,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
+/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Cloud Security Posture
 
