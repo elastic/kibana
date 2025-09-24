@@ -10,7 +10,6 @@
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import type { NodeImplementation, MonitorableNode } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 
 import { parseDuration } from '../../utils';
@@ -21,7 +20,6 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private wfExecutionState: WorkflowExecutionState,
-    private workflowLogger: IWorkflowEventLogger,
     private stepContext: WorkflowContextManager
   ) {}
 
@@ -40,11 +38,10 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
 
     if (currentStepDuration > timeoutMs) {
       const currentStepDurationInSeconds = currentStepDuration / 1000;
-      this.workflowLogger.logDebug(
-        `Step timeout happened because it ran for ${currentStepDurationInSeconds}ms`
-      );
       monitoredContext.abortController.abort();
-      throw new Error(`Step timeout happened because it ran for ${currentStepDurationInSeconds}ms`);
+      throw new Error(
+        `Step timeout happened because it ran for ${currentStepDurationInSeconds} seconds`
+      );
     }
 
     return Promise.resolve();
