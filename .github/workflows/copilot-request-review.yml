@@ -39,7 +39,7 @@ jobs:
       - name: Request Copilot review
         if: steps.check_labels.outputs.should_request_review == 'true'
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # "Requesting Copilot review for PR #$PR_NUMBER"
