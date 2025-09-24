@@ -31,7 +31,7 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  monitor(monitoredContext: WorkflowContextManager): Promise<void> {
+  public monitor(monitoredContext: WorkflowContextManager): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
     const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
