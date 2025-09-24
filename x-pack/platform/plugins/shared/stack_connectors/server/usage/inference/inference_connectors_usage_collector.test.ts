@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   Collector,
