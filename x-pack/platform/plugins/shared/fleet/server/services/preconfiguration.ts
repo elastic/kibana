@@ -392,11 +392,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
         );
       }
-      if (
-        packagePoliciesToAdd.length > 0 ||
-        packagePoliciesUpdates.length > 0 ||
-        shouldAddIsManagedFlag
-      ) {
+      if (packagePoliciesUpdates.length > 0) {
         await agentPolicyService.bumpRevision(namespacedSoClient, esClient, policy!.id);
       }
     }
