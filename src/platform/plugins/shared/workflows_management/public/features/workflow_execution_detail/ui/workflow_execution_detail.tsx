@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -22,6 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { ExecutionDetail } from './execution_detail';
+import { CancelExecutionButton } from './cancel_execution_button';
 
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;
@@ -36,6 +37,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [execution, setExecution] = useState<WorkflowExecutionDto | undefined>();
 
   const { setSelectedStepExecution, selectedStepExecutionId, setSelectedStep } =
     useWorkflowUrlState();
@@ -80,19 +82,32 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
             setSelectedStep={setSelectedStep}
             setSelectedStepExecution={setSelectedStepExecution}
             onClose={onClose}
+            onExecutionChange={setExecution}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={onClose}
-            css={css({
-              marginTop: 'auto',
-              justifySelf: 'flex-end',
-              flexShrink: 0,
-            })}
-          >
-            <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-          </EuiButton>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {execution && (
+              <EuiFlexItem>
+                <CancelExecutionButton execution={execution} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiButton
+                onClick={onClose}
+                css={css({
+                  marginTop: 'auto',
+                  justifySelf: 'flex-end',
+                  flexShrink: 0,
+                })}
+              >
+                <FormattedMessage
+                  id="workflows.workflowStepExecutionList.done"
+                  defaultMessage="Done"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

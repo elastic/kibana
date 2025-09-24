@@ -9,7 +9,7 @@
 
 import React, { useEffect, useCallback, useMemo } from 'react';
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
@@ -23,6 +23,7 @@ export interface ExecutionProps {
   selectedStepExecutionId: string | undefined;
   setSelectedStep: (stepId: string | null) => void;
   onClose?: () => void;
+  onExecutionChange?: (execution: WorkflowExecutionDto | undefined) => void;
 }
 
 export const ExecutionDetail: React.FC<ExecutionProps> = ({
@@ -31,6 +32,7 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
   selectedStepExecutionId,
   setSelectedStep,
   onClose,
+  onExecutionChange,
 }) => {
   const {
     data: workflowExecution,
@@ -66,6 +68,8 @@ export const ExecutionDetail: React.FC<ExecutionProps> = ({
 
     return () => clearInterval(intervalId);
   }, [workflowExecution, refetch]);
+
+  useEffect(() => onExecutionChange?.(workflowExecution), [workflowExecution, onExecutionChange]);
 
   const selectedStepExecutionFlyout = useMemo(() => {
     if (!workflowExecution?.stepExecutions?.length) {
