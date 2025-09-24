@@ -32,6 +32,7 @@ import type { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -68,6 +69,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
+      systemClient: SystemClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -490,11 +492,17 @@ export class StreamsClient {
   }
 
   /**
-   * Checks whether the user has the required privileges to manage the stream.
+   * Checks whether the user has the required privileges to manage the stream (or streams).
    * Managing a stream means updating the stream properties. It does not
    * include the dashboard links.
+   *
+   * In case multiple streams are provided, it checks whether the user has
+   * the required privileges on all streams, and returns the least-privileged
+   * result.
    */
-  async getPrivileges(name: string) {
+  async getPrivileges(nameOrNames: string | string[]) {
+    const names = Array.isArray(nameOrNames) ? nameOrNames : [nameOrNames];
+    const isServerless = this.dependencies.isServerless;
     const REQUIRED_MANAGE_PRIVILEGES = [
       'manage_index_templates',
       'manage_ingest_pipelines',
@@ -502,21 +510,30 @@ export class StreamsClient {
       'read_pipeline',
     ];
 
+    if (!isServerless) {
+      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
+    }
+
+    const REQUIRED_INDEX_PRIVILEGES = [
+      'read',
+      'write',
+      'create',
+      'manage',
+      'monitor',
+      'manage_data_stream_lifecycle',
+      'read_failure_store',
+    ];
+    if (!isServerless) {
+      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
+    }
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
+        cluster: REQUIRED_MANAGE_PRIVILEGES,
         index: [
           {
-            names: [name],
-            privileges: [
-              'read',
-              'write',
-              'create',
-              'manage',
-              'monitor',
-              'manage_data_stream_lifecycle',
-              'manage_ilm',
-            ],
+            names,
+            privileges: REQUIRED_INDEX_PRIVILEGES,
           },
         ],
       });
@@ -524,12 +541,23 @@ export class StreamsClient {
     return {
       manage:
         REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
-        Object.values(privileges.index[name]).every((privilege) => privilege === true),
-      monitor: privileges.index[name].monitor,
-      lifecycle:
-        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
-      simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
-      text_structure: privileges.cluster.monitor_text_structure,
+        names.every((name) =>
+          Object.values(privileges.index[name]).every((privilege) => privilege === true)
+        ),
+      monitor: names.every((name) => privileges.index[name].monitor),
+      // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
+      lifecycle: isServerless
+        ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
+        : names.every(
+            (name) =>
+              privileges.index[name].manage_data_stream_lifecycle &&
+              privileges.index[name].manage_ilm
+          ),
+      simulate:
+        privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
+      // text structure is always available for the internal user, but not for the current user
+      text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
+      read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
     };
   }
 
@@ -743,27 +771,24 @@ export class StreamsClient {
   private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
     const { dashboards, queries, rules } = request;
 
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
-
-    // sync rules
-    await this.dependencies.assetClient.syncAssetList(
-      name,
-      rules.map((rule) => ({
-        [ASSET_ID]: rule,
-        [ASSET_TYPE]: 'rule' as const,
-      })),
-      'rule'
-    );
-
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(name, queries);
+    await Promise.all([
+      this.dependencies.assetClient.syncAssetList(
+        name,
+        dashboards.map((dashboard) => ({
+          [ASSET_ID]: dashboard,
+          [ASSET_TYPE]: 'dashboard' as const,
+        })),
+        'dashboard'
+      ),
+      this.dependencies.assetClient.syncAssetList(
+        name,
+        rules.map((rule) => ({
+          [ASSET_ID]: rule,
+          [ASSET_TYPE]: 'rule' as const,
+        })),
+        'rule'
+      ),
+      this.dependencies.queryClient.syncQueries(name, queries),
+    ]);
   }
 }

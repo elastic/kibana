@@ -12,6 +12,7 @@ import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { useMemo, useCallback, useState } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
@@ -35,6 +36,7 @@ export const useSchemaFields = ({
     core: {
       notifications: { toasts },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const abortController = useAbortController();
@@ -152,8 +154,15 @@ export const useSchemaFields = ({
     refreshDataViewFields();
   }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields]);
 
+  const addField = useCallback(
+    (field: SchemaField) => {
+      setFields([...fields, field]);
+    },
+    [fields]
+  );
+
   const updateField = useCallback(
-    async (field: SchemaField) => {
+    (field: SchemaField) => {
       const index = fields.findIndex((f) => f.name === field.name);
       if (index === -1) {
         return;
@@ -218,6 +227,10 @@ export const useSchemaFields = ({
         },
       });
 
+      telemetryClient.trackSchemaUpdated({
+        stream_type: getStreamTypeFromDefinition(definition.stream),
+      });
+
       toasts.addSuccess(
         i18n.translate('xpack.streams.streamDetailSchemaEditorEditSuccessToast', {
           defaultMessage: 'Schema was successfully modified',
@@ -234,13 +247,22 @@ export const useSchemaFields = ({
         toastLifeTimeMs: 5000,
       });
     }
-  }, [fields, streamsRepositoryClient, abortController.signal, definition, toasts, refreshFields]);
+  }, [
+    fields,
+    streamsRepositoryClient,
+    abortController.signal,
+    definition,
+    telemetryClient,
+    toasts,
+    refreshFields,
+  ]);
 
   return {
     fields,
     storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,
+    addField,
     updateField,
     pendingChangesCount,
     discardChanges,
