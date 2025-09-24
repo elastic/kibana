@@ -132,6 +132,7 @@ src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sha
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/navigation @elastic/eui-team
+src/core/packages/chrome/navigation-tour @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -880,8 +881,8 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
-x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
@@ -2918,6 +2919,7 @@ x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-ux-in
 x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/src/core/packages/chrome @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
 /src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
