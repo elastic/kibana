@@ -15,13 +15,8 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects([
-    'common',
-    'solutionNavigation',
-    'console',
-  ]);
-  const spaces = getService('spaces');
-  const browser = getService('browser');
+  const { solutionNavigation } = getPageObjects(['solutionNavigation']);
+  const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
@@ -31,18 +26,8 @@ export default function searchSolutionNavigation({
 
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
-      // Navigate to the spaces management page which will log us in Kibana
-      await common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-ftr',
-        solution: 'es',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-solution-nav-ftr'));
+      await searchSpace.navigateTo(spaceCreated.id);
       // Ensure the tour is closed before starting tests
       await solutionNavigation.sidenav.tour.ensureHidden();
     });
