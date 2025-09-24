@@ -63,8 +63,11 @@ describe('EventsTableForCases', () => {
     expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
 
     // Check if value cells are displayed at all
-    await waitFor(() => screen.getAllByTestId('dataGridRowCell'));
-    expect(screen.getAllByTestId('dataGridRowCell').length).toBeGreaterThan(2);
+    await waitFor(() => {
+      const cells = screen.getAllByTestId('dataGridRowCell');
+      
+      expect(cells.length).toBeGreaterThan(2);
+    });
   });
 
   it('calls the search events function', () => {
