@@ -28,6 +28,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   type RoundInput,
   type ChatEvent,
+  AgentCapabilities,
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isOnechatError,
@@ -82,6 +83,11 @@ export interface ChatConverseParams {
    */
   conversationId?: string;
   /**
+   * Set of capabilities to use for this round.
+   * Defaults to all capabilities being disabled.
+   */
+  capabilities?: AgentCapabilities;
+  /**
    * Create conversation with specified ID if not found.
    * Defaults to false. Has no effect when conversationId is not provided.
    */
@@ -133,6 +139,7 @@ class ChatServiceImpl implements ChatService {
     agentId = oneChatDefaultAgentId,
     conversationId,
     connectorId,
+    capabilities,
     request,
     abortSignal,
     nextInput,
@@ -206,6 +213,7 @@ class ChatServiceImpl implements ChatService {
             request,
             conversation$,
             nextInput,
+            capabilities,
             abortSignal,
             agentService: this.agentService,
             defaultConnectorId: selectedConnectorId,
