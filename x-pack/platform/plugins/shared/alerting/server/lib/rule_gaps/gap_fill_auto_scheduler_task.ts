@@ -536,6 +536,7 @@ export function registerGapFillAutoSchedulerTask({
               });
               const now = new Date();
               // Parse the gapFillRange using helper
+
               const startDate: Date = resolveStartDate(config.gapFillRange, logger);
 
               // Step 1: Get all rule IDs with gaps, we get the rule ids sorted from rule which has the oldest gap
@@ -591,6 +592,7 @@ export function registerGapFillAutoSchedulerTask({
                 const rules: RuleInfo[] = await findEnabledRules(rulesClient, currentRuleIds);
 
                 const enabledRuleIds = rules.map((rule: RuleInfo) => rule.id);
+
                 if (!enabledRuleIds.length) {
                   continue; // no enabled rules in this batch; move to next batch
                 }
