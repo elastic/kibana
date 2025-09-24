@@ -924,7 +924,6 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-streams-ai-cli @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
