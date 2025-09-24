@@ -357,7 +357,7 @@ $$$observability-profiling-show-error-frames$$$`observability:profilingShowError
 $$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar` {applies_to}`stack: preview`
 :   Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
 
-$$$observability-apm-enable-service-inventory-table-search-bar$$$observability:apmEnableServiceInventoryTableSearchBar {applies_to}`stack: preview`
+$$$observability-apm-enable-service-inventory-table-search-bar$$$`observability:apmEnableServiceInventoryTableSearchBar` {applies_to}`stack: preview`
 :   Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.
 
 $$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics` {applies_to}`stack: preview 9.0, removed 9.1`
