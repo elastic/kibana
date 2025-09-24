@@ -15,7 +15,7 @@ import {
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
@@ -67,7 +67,9 @@ export function createVisualizationRenderer({
     const { toolResultId } = chartAttributes;
 
     if (!toolResultId) {
-      return <p>Visualization requires a tool result ID.</p>;
+      return (
+        <EuiText>Visualization missing {visualizationElement.attributes.toolResultId}.</EuiText>
+      );
     }
 
     const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
@@ -79,14 +81,20 @@ export function createVisualizationRenderer({
       | TabularDataResult
       | undefined;
 
+    const VisualizationAttribute = (
+      <EuiCode>
+        {visualizationElement.attributes.toolResultId}={toolResultId}
+      </EuiCode>
+    );
+
     if (!toolResult) {
-      return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
+      return <EuiText>Unable to find visualization for {VisualizationAttribute}.</EuiText>;
     }
 
     const { columns, query } = toolResult.data;
 
     if (!query) {
-      return <p>Unable to find query for tool result ID: {toolResultId}</p>;
+      return <EuiText>Unable to find esql query for {VisualizationAttribute}.</EuiText>;
     }
 
     return (
