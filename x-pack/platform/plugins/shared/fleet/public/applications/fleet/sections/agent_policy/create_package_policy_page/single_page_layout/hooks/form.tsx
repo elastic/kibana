@@ -147,23 +147,16 @@ export const updateAgentlessCloudConnectorConfig = (
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   )[0];
 
-  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
-  if (
-    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
-    newAgentPolicy?.supports_agentless
-  ) {
-    let targetCsp;
-    if (input?.type.includes('aws')) {
-      targetCsp = 'aws';
-    }
-    if (input?.type.includes('gcp')) {
-      targetCsp = 'gcp';
-    }
-    if (input?.type.includes('azure')) {
-      targetCsp = 'azure';
-    }
+  const targetCsp = input?.type.match(/aws|azure|gcp/)?.[0];
 
-    if (targetCsp !== 'aws') {
+  const enabled = input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
+  if (
+    targetCsp &&
+    newAgentPolicy?.supports_agentless &&
+    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled ||
+      newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
+  ) {
+    if (targetCsp === 'gcp' && newAgentPolicy.agentless?.cloud_connectors) {
       setNewAgentPolicy({
         ...newAgentPolicy,
         agentless: {
@@ -179,23 +172,21 @@ export const updateAgentlessCloudConnectorConfig = (
       return;
     }
 
-    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: {
-            enabled,
-            target_csp: targetCsp,
-          },
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: {
+          enabled,
+          target_csp: targetCsp,
         },
-      });
+      },
+    });
 
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: true,
-      });
-    }
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: true,
+    });
   }
 };
 
