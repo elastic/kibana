@@ -368,7 +368,7 @@ export interface Profile {
   /**
    * Sidebar
    */
-  getSidebarToggleState: () => SidebarToggleState;
+  getSidebarToggleState: () => SidebarToggleState | undefined;
 
   /**
    * Chart

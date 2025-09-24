@@ -356,8 +356,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
-    sidebarToggleState$.getValue().isCollapsed
+    false
   );
+
+  const getSidebarToggleStateAccessor = useProfileAccessor('getSidebarToggleState');
+  useMemo(() => {
+    const initialSidebarState = getSidebarToggleStateAccessor(() => {
+      return undefined;
+    })();
+    if (initialSidebarState) {
+      const currentState = sidebarToggleState$.getValue();
+      currentState.toggle?.(initialSidebarState.isCollapsed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getSidebarToggleStateAccessor]);
 
   useEffect(() => {
     sidebarToggleState$.next({
