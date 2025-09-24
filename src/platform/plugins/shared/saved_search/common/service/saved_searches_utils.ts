@@ -13,7 +13,7 @@ import { pick } from 'lodash';
 import type { DiscoverSessionAttributes } from '../../server/saved_objects';
 import type { SavedSearch } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
-import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import type { SerializableSavedSearch } from '../types';
 import { extractTabs, removeTopLevelTabAttributes } from './extract_tabs';
 
 export const fromSavedSearchAttributes = (
@@ -36,7 +36,7 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes => {
+): DiscoverSessionAttributes => {
   const attributes = extractTabs({
     kibanaSavedObjectMeta: { searchSourceJSON },
     title: savedSearch.title ?? '',

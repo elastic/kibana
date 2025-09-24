@@ -29,7 +29,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -118,7 +118,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           const togglePopover = () => setIsPopoverOpen((open) => !open);
           const closePopover = () => setIsPopoverOpen(false);
           const [savedSearches, setSavedSearches] = useState<
-            Array<SOWithMetadata<SavedSearchAttributes>>
+            Array<SOWithMetadata<DiscoverSessionAttributes>>
           >([]);
 
           useEffect(() => {

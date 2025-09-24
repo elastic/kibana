@@ -17,11 +17,7 @@ import {
   findSavedObjectRef,
   SAVED_OBJECT_REF_NAME,
 } from '@kbn/presentation-publishing';
-import {
-  toSavedSearchAttributes,
-  type SavedSearch,
-  type SavedSearchAttributes,
-} from '@kbn/saved-search-plugin/common';
+import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects';
@@ -97,7 +93,7 @@ export const serializeState = ({
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
   savedObjectId?: string;
-}): SerializedPanelState<SearchEmbeddableSerializedState> => {
+}): SerializedPanelState<SearchEmbeddableSerializedState<DiscoverSessionAttributes>> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
@@ -149,7 +145,7 @@ export const serializeState = ({
       ...serializeTitles(),
       ...serializeTimeRange(),
       ...dynamicActionsState,
-      ...(state as unknown as SavedSearchAttributes),
+      ...(state as unknown as DiscoverSessionAttributes),
     },
     references: [...references, ...(dynamicActionsReferences ?? [])],
   };

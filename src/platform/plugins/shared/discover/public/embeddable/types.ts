@@ -80,6 +80,8 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
+// Prior to tabs, unlinked search embeddables could be created without `tabs` property and have `sort`, `columns` etc. at the root of the saved object
+// Since embeddables don't automatically apply migrations but require opening/saving, we need to support both cases here
 export type SearchEmbeddableSerializedState<
   T extends SavedSearchAttributes | DiscoverSessionAttributes = SavedSearchAttributes
 > = SerializedTitles &

@@ -209,9 +209,9 @@ describe('saved_searches_utils', () => {
 
       const result = toSavedSearchAttributes(savedSearch, '{}');
       // Top-level attributes should not include rowsPerPage, sampleSize, breakdownField
-      expect(result.rowsPerPage).toBeUndefined();
-      expect(result.sampleSize).toBeUndefined();
-      expect(result.breakdownField).toBeUndefined();
+      expect(result).not.toHaveProperty('rowsPerPage');
+      expect(result).not.toHaveProperty('sampleSize');
+      expect(result).not.toHaveProperty('breakdownField');
       // But they should be present in the tab attributes
       expect(result.tabs?.[0].attributes.rowsPerPage).toBe(100);
       expect(result.tabs?.[0].attributes.sampleSize).toBe(500);

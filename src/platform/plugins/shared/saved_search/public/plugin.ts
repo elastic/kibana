@@ -21,14 +21,10 @@ import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { once } from 'lodash';
+import type { DiscoverSessionAttributes } from '../server/saved_objects';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type {
-  DiscoverSession,
-  SavedSearch,
-  SavedSearchAttributes,
-  SerializableSavedSearch,
-} from '../common/types';
+import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import type { SavedSearchesServiceDeps } from './service/saved_searches_service';
 import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
@@ -56,7 +52,7 @@ export interface SavedSearchPublicPluginStart {
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getDiscoverSession: (discoverSessionId: string) => Promise<DiscoverSession>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
-  getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
+  getAll: () => Promise<Array<SOWithMetadata<DiscoverSessionAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
