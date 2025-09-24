@@ -25,13 +25,14 @@ import {
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
+  resetDiscoverSession,
 } from './actions';
 
-export type {
-  DiscoverInternalState,
-  TabState,
-  TabStateGlobalState,
-  InternalStateDataRequestParams,
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type InternalStateDataRequestParams,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
@@ -61,6 +62,7 @@ export const internalStateActions = {
   clearAllTabs,
   initializeTabs,
   saveDiscoverSession,
+  resetDiscoverSession,
 };
 
 export {
@@ -79,6 +81,7 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
 } from './selectors';
 
 export {
