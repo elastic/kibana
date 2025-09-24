@@ -11,13 +11,14 @@ import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { isPair, isScalar, parseDocument, visit } from 'yaml';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowGraph, isEnterForeach } from '@kbn/workflows/graph';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   parseWorkflowYamlToJSON,
   formatValidationError,
   getCurrentPath,
   getPathFromAncestors,
+  getStepNode,
 } from '../../../../common/lib/yaml_utils';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod_utils';
@@ -25,6 +26,12 @@ import { getContextSchemaForPath } from '../../../features/workflow_context/lib/
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
 import type { MockZodError } from '../../../../common/lib/errors/invalid_yaml_schema';
+
+interface RawVariableItem {
+  start: number;
+  end: number;
+  key: string | null;
+}
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -222,20 +229,42 @@ export function useYamlValidation({
           }
         }
 
-        const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+        // Currently, foreach doesn't use mustache expressions, so we need to handle it separately
+        // TODO: remove if/when foreach uses mustache expressions
+        const foreachVariableItems = workflowGraph
+          ?.getAllNodes()
+          .map((node) => {
+            if (isEnterForeach(node)) {
+              const yamlNode = getStepNode(yamlDocument, node.stepId);
+              const foreachValueNode = yamlNode?.get('foreach', true);
+              if (foreachValueNode && foreachValueNode.range) {
+                return {
+                  start: foreachValueNode.range[0],
+                  end: foreachValueNode.range[2],
+                  key: node.configuration.foreach,
+                };
+              }
+            }
+            return null;
+          })
+          .filter((foreach) => foreach) as RawVariableItem[];
+        const textMatches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)].map((match) => ({
+          start: match.index ?? 0,
+          end: (match.index ?? 0) + match[0].length, // match[0] is the entire {{...}} expression
+          key: match.groups?.key ?? null,
+        }));
+        const variableItems = [...textMatches, ...foreachVariableItems];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
-        for (const match of matches) {
-          const matchStart = match.index ?? 0;
-          const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
-
+        for (const variableItem of variableItems) {
+          const { start, end, key } = variableItem;
           // Get the position (line, column) for the match
-          const startPos = model.getPositionAt(matchStart);
-          const endPos = model.getPositionAt(matchEnd);
+          const startPos = model.getPositionAt(start);
+          const endPos = model.getPositionAt(end);
 
           let errorMessage: string | null = null;
           let severity: YamlValidationErrorSeverity = 'error';
 
-          const path = getCurrentPath(yamlDocument, matchStart);
+          const path = getCurrentPath(yamlDocument, start);
           let context = null;
           if (result.success) {
             try {
@@ -247,12 +276,12 @@ export function useYamlValidation({
             }
           }
 
-          if (!match.groups?.key) {
+          if (!key) {
             errorMessage = `Variable is not defined`;
           } else {
-            const parsedPath = parseVariablePath(match.groups.key);
+            const parsedPath = parseVariablePath(key);
             if (!parsedPath) {
-              errorMessage = `Invalid variable path: ${match.groups.key}`;
+              errorMessage = `Invalid variable path: ${key}`;
             } else if (parsedPath.errors) {
               errorMessage = parsedPath.errors.join(', ');
             } else if (parsedPath?.propertyPath && !errorMessage) {
