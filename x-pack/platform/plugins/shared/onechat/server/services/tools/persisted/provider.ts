@@ -127,13 +127,15 @@ export const createPersistedToolClient = ({
       const tools = await toolClient.list();
       const context = conversionContext();
       return Promise.all(
-        tools.map((tool) => {
-          const definition = definitionMap[tool.type];
-          if (!definition) {
-            throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
-          }
-          return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, context);
-        })
+        tools
+          .filter((tool) => {
+            // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
+            return definitionMap[tool.type];
+          })
+          .map((tool) => {
+            const definition = definitionMap[tool.type]!;
+            return definition.toToolDefinition(tool as ToolPersistedDefinition<any>, context);
+          })
       );
     },
 
