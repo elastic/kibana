@@ -270,7 +270,7 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-function getServerlessNodeNames(prefix?: string): [string, string, string] {
+function getServerlessNodeNames(prefix?: string): string[] {
   const base = ['es01', 'es02', 'es03'] as const;
   return prefix
     ? [`${prefix}-${base[0]}`, `${prefix}-${base[1]}`, `${prefix}-${base[2]}`]
