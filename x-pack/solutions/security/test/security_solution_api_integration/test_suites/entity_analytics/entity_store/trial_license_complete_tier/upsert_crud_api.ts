@@ -106,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.domain).toEqual(['domain.com']);
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.behaviors?.First_seen).toBeTruthy();
+            expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
           });
 
           return true;
@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.domain).toContain('domain.com updated');
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.behaviors?.First_seen).toBeTruthy();
+            expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
           });
           return true;
         });
