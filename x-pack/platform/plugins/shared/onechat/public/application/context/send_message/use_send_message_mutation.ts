@@ -63,11 +63,18 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
     onMutate: ({ message }) => {
-      isMutatingNewConversationRef.current = !conversationId;
+      const isNewConversation = !conversationId;
+      isMutatingNewConversationRef.current = isNewConversation;
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
       conversationActions.addOptimisticRound({ userMessage: message });
+      if (isNewConversation) {
+        if (!agentId) {
+          throw new Error('Agent id must be defined for a new conversation');
+        }
+        conversationActions.setAgentId(agentId);
+      }
       setIsResponseLoading(true);
     },
     onSettled: () => {
