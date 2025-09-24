@@ -48,16 +48,19 @@ export const serviceEntityEngineDescription: EntityDescription = {
       source: `service.entity.relationships.Communicates_with`,
       destination: 'entity.relationships.Communicates_with',
       mapping: { type: 'date' },
+      allowAPIUpdate: true,
     }),
     collect({
       source: `service.entity.relationships.Depends_on`,
       destination: 'entity.relationships.Depends_on',
       mapping: { type: 'date' },
+      allowAPIUpdate: true,
     }),
     collect({
       source: `service.entity.relationships.Dependent_of`,
       destination: 'entity.relationships.Dependent_of',
       mapping: { type: 'date' },
+      allowAPIUpdate: true,
     }),
   ],
 };

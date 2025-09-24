@@ -60,23 +60,28 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.attributes.Privileged`,
       destination: 'entity.attributes.Privileged',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: `${prefix}.attributes.Asset`,
       destination: 'entity.attributes.Asset',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: `${prefix}.attributes.Managed`,
       destination: 'entity.attributes.Managed',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: `${prefix}.attributes.Mfa_enabled`,
       destination: 'entity.attributes.Mfa_enabled',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
 
+    /* Lifecycle fields should not allow update via the API */
     newestValue({
       source: `${prefix}.lifecycle.First_seen`,
       destination: 'entity.lifecycle.First_seen',
@@ -92,16 +97,19 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.behaviors.Brute_force_victim`,
       destination: 'entity.behaviors.Brute_force_victim',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: `${prefix}.behaviors.New_country_login`,
       destination: 'entity.behaviors.New_country_login',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: `${prefix}.behaviors.Used_usb_device`,
       destination: 'entity.behaviors.Used_usb_device',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
     }),
 
     newestValue({
