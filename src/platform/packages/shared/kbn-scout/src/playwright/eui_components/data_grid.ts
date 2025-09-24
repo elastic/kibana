@@ -97,7 +97,6 @@ export class EuiDataGridWrapper {
     try {
       await actionButton.click({ timeout: 5000 });
     } catch {
-      // eslint-disable-next-line playwright/no-force-option
       await actionButton.click({ force: true });
     }
 

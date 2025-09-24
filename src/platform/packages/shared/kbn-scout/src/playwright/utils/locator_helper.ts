@@ -22,10 +22,9 @@ export type SelectorInput = string | { dataTestSubj: string } | { locator: strin
 export function resolveSelector(page: ScoutPage, selector: SelectorInput): Locator {
   if (typeof selector === 'string') {
     // Backward compatibility: treat string as dataTestSubj
-    // eslint-disable-next-line playwright/no-nth-methods
+
     return page.testSubj.locator(selector).first();
   } else if ('dataTestSubj' in selector) {
-    // eslint-disable-next-line playwright/no-nth-methods
     return page.testSubj.locator(selector.dataTestSubj).first();
   } else if ('locator' in selector) {
     return page.locator(selector.locator);
