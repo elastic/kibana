@@ -10,7 +10,7 @@ import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface CloudConnectorTab {
-  id: string;
+  id: 'new-connection' | 'existing-connection';
   name: string | React.ReactNode;
   content: React.ReactNode;
 }

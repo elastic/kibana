@@ -11,12 +11,16 @@ import type {
   PackageInfo,
   PackagePolicyConfigRecord,
 } from '@kbn/fleet-plugin/common';
+import semver from 'semver';
+
 import type { GetCloudConnectorRemoteRoleTemplateParams } from './types';
 
 import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 import {
+  AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AWS_SINGLE_ACCOUNT,
-  CLOUD_CONNECTOR_FIELD_NAMES,
+  CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
@@ -121,24 +125,24 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
   const updatedVars = { ...input.streams[0].vars };
 
   // Update role_arn
-  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]) {
-    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value =
-      credentials[CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN];
+  if (credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]) {
+    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value =
+      credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN];
   }
   // Update external_id
-  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]) {
-    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value =
-      credentials[CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID];
+  if (credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]) {
+    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value =
+      credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID];
   }
   // Update aws.role_arn
-  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
-      credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
+  if (credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
+      credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
   }
   // Update aws.credentials.external_id
-  if (credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
-    updatedVars[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
-      credentials[CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
+  if (credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+    updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
+      credentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
   }
 
   updatedPolicy.inputs = [
@@ -174,8 +178,7 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
  */
 export const updateInputVarsWithCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
-  credentials: CloudConnectorCredentials | undefined,
-  isNewCredentials: boolean = false
+  credentials: CloudConnectorCredentials | undefined
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
@@ -186,16 +189,16 @@ export const updateInputVarsWithCredentials = (
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn.value = credentials.roleArn;
     }
-    if (updatedInputVars['aws.role_arn']) {
-      updatedInputVars['aws.role_arn'].value = credentials.roleArn;
+    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value = credentials.roleArn;
     }
   } else {
     // Clear role_arn fields when roleArn is undefined
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn = { value: undefined };
     }
-    if (updatedInputVars['aws.role_arn']) {
-      updatedInputVars['aws.role_arn'] = { value: undefined };
+    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = { value: undefined };
     }
   }
 
@@ -204,16 +207,18 @@ export const updateInputVarsWithCredentials = (
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: credentials.externalId };
     }
-    if (updatedInputVars['aws.credentials.external_id']) {
-      updatedInputVars['aws.credentials.external_id'] = { value: credentials.externalId };
+    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = {
+        value: credentials.externalId,
+      };
     }
   } else {
     // Clear external_id fields when externalId is undefined
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: undefined };
     }
-    if (updatedInputVars['aws.credentials.external_id']) {
-      updatedInputVars['aws.credentials.external_id'] = { value: undefined };
+    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = { value: undefined };
     }
   }
 
@@ -258,4 +263,18 @@ export const updatePolicyInputs = (
     ...updatedPolicy,
     inputs: updatedInputs,
   };
+};
+
+export const isCloudConnectorReusableEnabled = (
+  packageInfoVersion: string,
+  templateName: string
+) => {
+  if (templateName === 'cspm') {
+    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION);
+  }
+
+  if (templateName === 'asset_inventory') {
+    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
+  }
+  return false;
 };

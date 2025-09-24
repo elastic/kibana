@@ -17,7 +17,7 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
 } from '../utils';
-import { CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 
@@ -85,13 +85,13 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
             if (credentials) {
               const updatedCredentials = { ...credentials };
               if (
-                key === CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||
-                key === CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN
+                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||
+                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN
               ) {
                 updatedCredentials.roleArn = value;
               } else if (
-                key === CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
-                key === CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
+                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
+                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
               ) {
                 updatedCredentials.externalId = value;
               }

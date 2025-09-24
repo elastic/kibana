@@ -9,6 +9,7 @@ import {
   updateInputVarsWithCredentials,
   updatePolicyInputs,
   updatePolicyWithAwsCloudConnectorCredentials,
+  isCloudConnectorReusableEnabled,
 } from './utils';
 
 import type {
@@ -497,5 +498,41 @@ describe('updatePolicyWithAwsCloudConnectorCredentials', () => {
         inputs: expect.any(Array),
       })
     );
+  });
+});
+
+describe('isCloudConnectorReusableEnabled', () => {
+  it('should return true for CSPM when package version meets minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled('3.1.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled('3.2.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled('4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for CSPM when package version is below minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled('3.0.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('3.1.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('2.5.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for asset inventory when package version meets minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled('1.1.5', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled('1.2.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled('2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for asset inventory when package version is below minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled('1.1.4', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('1.0.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('0.9.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should handle unknown template names by defaulting to asset inventory version', () => {
+    expect(isCloudConnectorReusableEnabled('1.1.5', 'unknown_template')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('1.1.4', 'unknown_template')).toBe(false);
+  });
+
+  it('should handle edge cases with version formats', () => {
+    expect(isCloudConnectorReusableEnabled('3.1.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled('3.1.0-preview06', 'cspm')).toBe(true);
   });
 });

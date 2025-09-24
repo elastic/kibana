@@ -118,7 +118,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount: savedObject.attributes.packagePolicyCount,
         created_at: savedObject.attributes.created_at,
         updated_at: savedObject.attributes.updated_at,
-        namespace: savedObject.attributes.namespace,
+        namespace: savedObject.attributes.namespace || undefined,
       };
     } catch (error) {
       logger.error('Failed to create cloud connector', error.message);
@@ -149,7 +149,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return cloudConnectors.saved_objects.map((so) => ({
         id: so.id,
         name: so.attributes.name,
-        namespace: so.attributes.namespace,
+        namespace: so.attributes.namespace || undefined,
         cloudProvider: so.attributes.cloudProvider,
         vars: so.attributes.vars,
         packagePolicyCount: so.attributes.packagePolicyCount,
@@ -183,7 +183,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: cloudConnector.id,
         name: cloudConnector.attributes.name,
-        namespace: cloudConnector.attributes.namespace,
+        namespace: cloudConnector.attributes.namespace || undefined,
         cloudProvider: cloudConnector.attributes.cloudProvider,
         vars: cloudConnector.attributes.vars,
         packagePolicyCount: cloudConnector.attributes.packagePolicyCount,
@@ -263,7 +263,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount: mergedAttributes.packagePolicyCount,
         created_at: mergedAttributes.created_at,
         updated_at: mergedAttributes.updated_at,
-        namespace: mergedAttributes.namespace,
+        namespace: mergedAttributes.namespace || undefined,
       };
     } catch (error) {
       logger.error('Failed to update cloud connector', error.message);

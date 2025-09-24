@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,7 +23,7 @@ import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
-
+import { isCloudConnectorReusableEnabled } from './utils';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -47,11 +47,16 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloudProvider,
   templateName,
 }) => {
-  const isCloudConnectorReusableEnabled = true;
-  const [selectedTabId, setSelectedTabId] = useState('new-connection');
+  const reusableFeatureEnabled = isCloudConnectorReusableEnabled(packageInfo.version, templateName);
 
   const { data: cloudConnectors } = useGetCloudConnectors();
   const cloudConnectorsCount = cloudConnectors?.length;
+
+  const [selectedTabId, setSelectedTabId] = useState(
+    cloudConnectorsCount && cloudConnectorsCount > 0
+      ? TABS.EXISTING_CONNECTION
+      : TABS.NEW_CONNECTION
+  );
 
   // Use the cloud connector setup hook
   const {
@@ -60,13 +65,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
   } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
-
-  // Auto-select existing-connection tab when cloud connectors are available
-  useEffect(() => {
-    if (cloudConnectorsCount && cloudConnectorsCount > 0) {
-      setSelectedTabId(TABS.EXISTING_CONNECTION);
-    }
-  }, [cloudConnectorsCount]);
 
   const tabs: CloudConnectorTab[] = [
     {
@@ -141,7 +139,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   ];
 
   const onTabClick = useCallback(
-    (tab: { id: string }) => {
+    (tab: { id: 'new-connection' | 'existing-connection' }) => {
       setSelectedTabId(tab.id);
 
       if (tab.id === TABS.NEW_CONNECTION && newConnectionCredentials.roleArn) {
@@ -163,22 +161,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
   return (
     <>
-      {!isCloudConnectorReusableEnabled && (
-        <NewCloudConnectorForm
-          input={input}
-          templateName={templateName}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={cloudProvider}
-          credentials={newConnectionCredentials}
-          setCredentials={updatePolicyWithNewCredentials}
-        />
-      )}
-      {isCloudConnectorReusableEnabled && (
+      {/* This shows the Phase 2 Reusable Cloud connector Form */}
+      {reusableFeatureEnabled && (
         <CloudConnectorTabs
           tabs={tabs}
           selectedTabId={selectedTabId}

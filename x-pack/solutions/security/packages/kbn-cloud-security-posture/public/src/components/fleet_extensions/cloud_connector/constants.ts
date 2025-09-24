@@ -24,9 +24,13 @@ export const TABS = {
 export const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html';
 
-export const CLOUD_CONNECTOR_FIELD_NAMES = {
+export const AWS_CLOUD_CONNECTOR_FIELD_NAMES = {
   ROLE_ARN: 'role_arn',
   EXTERNAL_ID: 'external_id',
   AWS_ROLE_ARN: 'aws.role_arn',
   AWS_EXTERNAL_ID: 'aws.credentials.external_id',
 } as const;
+
+// Minimum version required for cloud connector reusability feature
+export const CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION = '3.1.0-preview06';
+export const CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';

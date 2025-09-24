@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiComboBox, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiComboBox, EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
 import type { CloudConnectorOption, ComboBoxOption } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
@@ -19,6 +20,7 @@ export const AWSReusableConnectorForm: React.FC<{
   setCredentials: (credentials: CloudConnectorCredentials) => void;
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
+  const { euiTheme } = useEuiTheme();
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
   const comboBoxOptions: ComboBoxOption[] = cloudConnectors.map((connector) => ({
@@ -70,14 +72,24 @@ export const AWSReusableConnectorForm: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="m" />
+      <div
+        css={css`
+          display: flex;
+          gap: ${euiTheme.size.m};
+        `}
+      />
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.cloudConnectorInstructions"
           defaultMessage="To streamline your AWS integration process, you can reuse the same Role ARN for different use cases within Elastic. Simply choose the existing Role ARN from the options below:"
         />
       </EuiText>
-      <EuiSpacer size="m" />
+      <div
+        css={css`
+          display: flex;
+          gap: ${euiTheme.size.m};
+        `}
+      />
       <EuiFormRow label="Role ARN" fullWidth>
         <EuiComboBox
           aria-label="Select Role ARN"
@@ -89,7 +101,12 @@ export const AWSReusableConnectorForm: React.FC<{
           onChange={handleConnectorChange}
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
+      <div
+        css={css`
+          display: flex;
+          gap: ${euiTheme.size.m};
+        `}
+      />
     </>
   );
 };

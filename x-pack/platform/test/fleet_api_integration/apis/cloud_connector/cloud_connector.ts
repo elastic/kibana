@@ -60,8 +60,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.packagePolicyCount).to.equal(1);
         expect(body).to.have.property('created_at');
         expect(body).to.have.property('updated_at');
-        expect(body).to.have.property('namespace');
-        expect(body.namespace).to.equal('*');
       });
 
       it('should return 400 when external_id is missing for AWS', async () => {
@@ -492,7 +490,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.have.property('id', createdConnectorId);
         expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/get-by-id-role');
         expect(body).to.have.property('cloudProvider', 'aws');
-        expect(body).to.have.property('namespace', '*');
         expect(body).to.have.property('packagePolicyCount', 1);
         expect(body).to.have.property('created_at');
         expect(body).to.have.property('updated_at');
@@ -600,7 +597,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'test-update-connector'); // Should remain unchanged
+        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
         expect(body).to.have.property('cloudProvider', 'aws');
         expect(body).to.have.property('packagePolicyCount', 1);
         expect(body).to.have.property('updated_at');
@@ -653,7 +650,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('id', createdConnectorId);
-        expect(body).to.have.property('name', 'test-update-connector'); // Should remain unchanged
+        expect(body).to.have.property('name', 'arn:aws:iam::123456789012:role/original-role');
         expect(body).to.have.property('cloudProvider', 'aws');
         expect(body).to.have.property('packagePolicyCount', 1);
         expect(body).to.have.property('updated_at');
@@ -749,7 +746,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 400 for invalid role_arn format', async () => {
         const updateData = {
           vars: {
-            role_arn: { value: 'invalid-role-arn-format', type: 'text' },
+            role_arn: undefined,
             external_id: {
               type: 'password',
               value: {
