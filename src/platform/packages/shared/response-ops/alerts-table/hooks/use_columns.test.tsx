@@ -10,7 +10,7 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { BrowserFields } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
@@ -105,6 +105,33 @@ describe('useColumns', () => {
       const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
       const lastVisibleColumn = columnsWithFieldsData.find((col) => col.id === lastVisibleColumnId);
       expect(lastVisibleColumn).not.toHaveProperty('initialWidth');
+    });
+
+    it('should add isSortable flag to columns', async () => {
+      const columns = [...defaultColumns, { id: 'test', displayAsText: 'test' }];
+      const visibleColumns = columns.map((col) => col.id);
+      const setColumns = jest.fn();
+      const setVisibleColumns = jest.fn();
+      const { result } = renderHook(
+        () =>
+          useColumns({
+            columns,
+            setColumns,
+            defaultColumns,
+            visibleColumns,
+            setVisibleColumns,
+            defaultVisibleColumns,
+            alertsFields,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() =>
+        expect(result.current.columnsWithFieldsData).toMatchObject([
+          ...defaultColumns,
+          { id: 'test', isSortable: false },
+        ])
+      );
     });
   });
 

@@ -635,7 +635,7 @@ export const QueryBarTopRow = React.memo(
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
             secondaryButtonIcon="clock"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size="s"
           >
             {buttonLabelCancel}
           </SplitButton>

@@ -349,12 +349,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -362,6 +364,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError, queryParams]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -443,6 +455,18 @@ const AlertsTableContent = typedForwardRef(
       },
       [setSort, visibleColumns]
     );
+
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
+      if (fieldWithSortingError) {
+        const newSort = sort.filter((sortField) => !deepEqual(sortField, fieldWithSortingError));
+        setSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        setSort(initialSort);
+        onResetColumns();
+      }
+    }, [fieldWithSortingError, sort, initialSort, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -638,6 +662,9 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}

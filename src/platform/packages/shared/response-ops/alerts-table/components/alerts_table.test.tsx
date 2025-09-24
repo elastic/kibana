@@ -13,7 +13,12 @@ import { act, render as rtlRender, screen, waitFor } from '@testing-library/reac
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import { get } from 'lodash';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -65,6 +70,10 @@ const columns = [
   {
     id: ALERT_MAINTENANCE_WINDOW_IDS,
     displayAsText: 'Maintenance Windows',
+  },
+  {
+    id: ALERT_TIME_RANGE,
+    displayAsText: 'Time Range',
   },
 ];
 const alerts: Alert[] = [
@@ -995,6 +1004,152 @@ describe('AlertsTable', () => {
 
     describe('when persistent controls are set', () => {
       testPersistentControls();
+    });
+  });
+
+  describe('Error state', () => {
+    beforeEach(() => {
+      mockStorageData.clear();
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('An error occurred'),
+      });
+    });
+
+    it('should show error if sorted by column which is not supported', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
+      });
+
+      render(
+        <AlertsTable
+          {...tableProps}
+          initialSort={[
+            {
+              [ALERT_TIME_RANGE]: { order: 'asc' },
+            },
+          ]}
+        />
+      );
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [
+            {
+              'kibana.alert.time_range': { order: 'asc' },
+            },
+          ],
+        })
+      );
+
+      expect(await screen.findByTestId('alertsTableEmptyState')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Sorting by range field [kibana.alert.time_range] is not supported')
+      ).toBeInTheDocument();
+    });
+
+    it('should render reset button on error', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Error while fetching alerts'),
+      });
+
+      render(<AlertsTable {...tableProps} />);
+
+      const resetButton = await screen.findByTestId('resetButton');
+      expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset');
+    });
+
+    it('should go back to previous state when reset sort button is clicked', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
+      });
+
+      render(
+        <AlertsTable
+          {...tableProps}
+          initialSort={[
+            {
+              [ALERT_TIME_RANGE]: { order: 'asc' },
+            },
+          ]}
+        />
+      );
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [
+            {
+              'kibana.alert.time_range': { order: 'asc' },
+            },
+          ],
+        })
+      );
+
+      const resetButton = await screen.findByTestId('resetButton');
+      expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset sort');
+
+      await userEvent.click(resetButton);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [],
+        })
+      );
+    });
+
+    it('should go back to default state when reset button is clicked', async () => {
+      mockSearchAlerts.mockResolvedValue({
+        alerts: [],
+        oldAlertsData: [],
+        ecsAlertsData: [],
+        total: 0,
+        querySnapshot: { request: [], response: [] },
+        error: new Error('Something went wrong'),
+      });
+
+      render(<AlertsTable {...tableProps} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          sort: [],
+        })
+      );
+
+      const resetButton = await screen.findByTestId('resetButton');
+      expect(resetButton).toBeInTheDocument();
+      expect(resetButton).toHaveTextContent('Reset');
+
+      await userEvent.click(resetButton);
+
+      expect(mockStorageWrapper.set).toHaveBeenCalledWith(
+        tableProps.id,
+        JSON.stringify({
+          columns: columns.map(({ id }) => ({ id })),
+          visibleColumns: columns.map(({ id }) => id),
+          sort: [],
+        })
+      );
     });
   });
 

@@ -13,8 +13,11 @@ import type { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/
 import type { BrowserField, BrowserFields } from '@kbn/alerting-types';
 import { isEmpty } from 'lodash';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import { createKbnFieldTypes } from '@kbn/field-types/src/kbn_field_types_factory';
 import { toggleColumn, toggleVisibleColumn } from '../utils/toggle_column';
 import * as i18n from '../translations';
+
+const registeredKbnTypes = createKbnFieldTypes();
 
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
@@ -70,8 +73,11 @@ const euiColumnFactory = (
   const column = formatSystemColumn(defaultColumn ? defaultColumn : { id: columnId });
 
   const browserFieldsProps = getBrowserFieldProps(columnId, browserFields);
+
+  const sortingData = registeredKbnTypes.find((t) => t.name === browserFieldsProps?.type);
   return {
     ...column,
+    isSortable: (sortingData?.sortable && browserFieldsProps?.aggregatable) ?? false,
     schema: fieldTypeToDataGridColumnTypeMapper(browserFieldsProps.type),
   };
 };
