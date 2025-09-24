@@ -27,6 +27,8 @@ import {
   keys,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
+import { useLocation } from 'react-router-dom';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
@@ -37,6 +39,7 @@ import {
   type ProviderSolution,
 } from './providers/render_service_provider/service_provider';
 import type { ServiceProviderKeys } from '../constants';
+import { ServiceProviderKeyMap } from '../constants';
 import {
   DEFAULT_TASK_TYPE,
   INTERNAL_OVERRIDE_FIELDS,
@@ -132,6 +135,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     []
   );
   const [authenticationFormFields, setAuthenticationFormFields] = useState<ConfigEntryView[]>([]);
+  const location = useLocation();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'secrets.providerSecrets',
@@ -406,8 +410,33 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         setSolutionFilter(currentSolution);
       }
       setUpdatedProviders(getUpdatedProviders(currentSolution));
+
+      const params = parse(location.search, {
+        sort: false,
+      });
+      const { selectedConnector, connectorState } = params;
+
+      try {
+        const selectedProvider =
+          typeof connectorState === 'string' && JSON.parse(connectorState).provider;
+        const providerKey =
+          typeof selectedProvider === 'string' ? ServiceProviderKeyMap[selectedProvider] : null;
+
+        if (
+          selectedConnector === '.inference' &&
+          typeof providerKey === 'string' &&
+          !config?.provider
+        ) {
+          onProviderChange(providerKey);
+        }
+      } catch (e) {
+        // No action necessary - the params are malformed or not relevant to this page
+        // eslint-disable-next-line no-console
+        console.error('Error parsing url params:', e);
+      }
     }
-  }, [providers, currentSolution, getUpdatedProviders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config?.provider, providers, currentSolution, getUpdatedProviders]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {

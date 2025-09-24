@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -42,6 +42,7 @@ import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  defaultActionTypeId?: string;
   onClose: () => void;
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
@@ -51,6 +52,7 @@ export interface CreateConnectorFlyoutProps {
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
+  defaultActionTypeId,
   featureId,
   onClose,
   onConnectorCreated,
@@ -215,6 +217,46 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (
+      defaultActionTypeId &&
+      allActionTypes &&
+      allActionTypes[defaultActionTypeId] &&
+      actionType?.id !== defaultActionTypeId
+    ) {
+      setActionType(allActionTypes[defaultActionTypeId]);
+    }
+  }, [defaultActionTypeId, allActionTypes, actionType?.id]);
+
+  const banner = useMemo(() => {
+    const banners = [];
+    if (!actionType && hasActionsUpgradeableByTrial) {
+      banners.push(<UpgradeLicenseCallOut />);
+    }
+
+    if (allActionTypes && actionTypeModel?.deprecationMessage) {
+      const DeprecationMessageComponent = actionTypeModel?.deprecationMessage;
+      banners.push(
+        banners.length ? <EuiSpacer /> : null,
+        <DeprecationMessageComponent
+          allActionTypes={allActionTypes}
+          handleActionTypeChange={setActionType}
+          id={actionTypeModel.id}
+          name={actionTypeModel.actionTypeTitle}
+        />
+      );
+    }
+
+    return banners;
+  }, [
+    allActionTypes,
+    actionType,
+    actionTypeModel?.deprecationMessage,
+    actionTypeModel?.id,
+    actionTypeModel?.actionTypeTitle,
+    hasActionsUpgradeableByTrial,
+  ]);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -229,10 +271,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
+        isDeprecated={actionTypeModel?.isDeprecated}
       />
-      <EuiFlyoutBody
-        banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
-      >
+      <EuiFlyoutBody banner={banner}>
         {!hasConnectorTypeSelected && (
           <>
             <CreateConnectorFilter
@@ -264,6 +305,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"

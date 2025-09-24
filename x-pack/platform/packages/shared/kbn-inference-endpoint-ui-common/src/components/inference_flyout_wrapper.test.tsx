@@ -11,6 +11,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 
 import { InferenceFlyoutWrapper } from './inference_flyout_wrapper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,6 +21,9 @@ import { mockProviders } from '../utils/mock_providers';
 const mockMutationFn = jest.fn();
 const httpMock = httpServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
+const history = createMemoryHistory({
+  initialEntries: ['/'],
+});
 
 jest.mock('../hooks/use_providers', () => ({
   useProviders: jest.fn(() => ({
@@ -50,14 +55,16 @@ describe('InferenceFlyout', () => {
   const renderComponent = (props = {}) => {
     return render(
       <Wrapper>
-        <InferenceFlyoutWrapper
-          onFlyoutClose={jest.fn()}
-          http={httpMock}
-          toasts={notificationsMock.toasts}
-          isEdit={false}
-          onSubmitSuccess={jest.fn()}
-          {...props}
-        />
+        <Router history={history}>
+          <InferenceFlyoutWrapper
+            onFlyoutClose={jest.fn()}
+            http={httpMock}
+            toasts={notificationsMock.toasts}
+            isEdit={false}
+            onSubmitSuccess={jest.fn()}
+            {...props}
+          />
+        </Router>
       </Wrapper>
     );
   };

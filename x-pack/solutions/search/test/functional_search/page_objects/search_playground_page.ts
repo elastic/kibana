@@ -266,7 +266,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const s = await findService.byCssSelector(
           '.euiBasicTable[data-test-subj="actionsTable"] .euiTableCellContent__text'
         );
-        expect(await s.getVisibleText()).to.be(connectorName);
+        // Updating to use 'contain' to handle deprecated connectors which appear as <connectorName> (deprecated)
+        expect(await s.getVisibleText()).to.contain(connectorName);
       },
       async deleteConnector(connectorName: string) {
         await this.searchConnector(connectorName);
