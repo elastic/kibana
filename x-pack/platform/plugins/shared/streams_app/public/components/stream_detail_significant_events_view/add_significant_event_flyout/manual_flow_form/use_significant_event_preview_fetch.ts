@@ -67,12 +67,6 @@ export function useSignificantEventPreviewFetch({
             },
             body: {
               query: {
-                system: system
-                  ? {
-                      name: system.name,
-                      filter: system.filter,
-                    }
-                  : undefined,
                 kql: { query: kqlQuery },
                 system: effectiveSystem,
               },
