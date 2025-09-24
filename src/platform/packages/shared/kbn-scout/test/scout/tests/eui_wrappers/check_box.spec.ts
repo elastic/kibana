@@ -25,15 +25,15 @@ test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'
 
     await test.step('should be checked', async () => {
       const checkBox = new EuiCheckBoxWrapper(page, selector);
-      expect(await checkBox.isChecked()).toBe(false);
+      await expect(checkBox).not.toBeChecked();
       await checkBox.check();
-      expect(await checkBox.isChecked()).toBe(true);
+      await expect(checkBox).toBeChecked();
     });
 
     await test.step('should be unchecked', async () => {
       const checkBox = new EuiCheckBoxWrapper(page, selector);
       await checkBox.uncheck();
-      expect(await checkBox.isChecked()).toBe(false);
+      await expect(checkBox).not.toBeChecked();
     });
 
     await test.step('should return label text', async () => {
