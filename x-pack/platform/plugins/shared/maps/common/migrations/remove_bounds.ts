@@ -13,7 +13,6 @@ export function removeBoundsFromSavedObject({
   attributes: StoredMapAttributes;
 }): StoredMapAttributes {
   const newAttributes = { ...attributes };
-  // @ts-expect-error
   // This removes an unused parameter from pre 7.8=< saved objects
   delete newAttributes.bounds;
   return { ...newAttributes };
