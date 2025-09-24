@@ -114,7 +114,7 @@
     "@elastic/apm-rum": "^5.17.0",
     "@elastic/apm-rum-core": "^5.23.0",
     "@elastic/apm-rum-react": "^2.0.6",
-    "@elastic/charts": "69.1.1",
+    "@elastic/charts": "69.2.3",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "^1.2.1",
     "@elastic/ecs": "^8.11.5",
