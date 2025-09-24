@@ -8,7 +8,7 @@
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { LayerStatsCollector } from './layer_stats_collector';
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes } from '../../server';
 
 const expecteds = [
   {

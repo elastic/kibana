@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../../../common/content_management';
+import type { MapAttributes } from '../..';
 import type {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,

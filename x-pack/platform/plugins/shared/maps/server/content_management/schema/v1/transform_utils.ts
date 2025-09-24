@@ -7,32 +7,31 @@
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
-import type { MapItem, MapAttributes } from '../../../../common/content_management';
-import type { MapsSavedObjectAttributes } from './types';
+import type { MapItem } from '../../../../common/content_management';
+import type { MapAttributes } from './types';
+import type { StoredMapAttributes } from '../../../saved_objects/types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
 interface PartialMapsItem {
-  attributes: Partial<MapItem['attributes']>;
+  attributes: Partial<MapAttributes>;
   references: SavedObjectReference[] | undefined;
 }
 
 export function savedObjectToItem(
-  savedObject: SavedObject<MapsSavedObjectAttributes>,
+  savedObject: SavedObject<StoredMapAttributes>,
   partial: false
 ): MapItem;
 
 export function savedObjectToItem(
-  savedObject: PartialSavedObject<MapsSavedObjectAttributes>,
+  savedObject: PartialSavedObject<StoredMapAttributes>,
   partial: true
 ): PartialMapsItem;
 
 export function savedObjectToItem(
-  savedObject:
-    | SavedObject<MapsSavedObjectAttributes>
-    | PartialSavedObject<MapsSavedObjectAttributes>,
+  savedObject: SavedObject<StoredMapAttributes> | PartialSavedObject<StoredMapAttributes>,
   partial: boolean
 ): MapItem | PartialMapsItem {
   const { references, attributes, ...rest } = savedObject;
@@ -43,7 +42,7 @@ export function savedObjectToItem(
   };
 }
 
-function transformMapOut(storedMapState: MapAttributes, references: SavedObjectReference[]) {
+function transformMapOut(storedMapState: StoredMapAttributes, references: SavedObjectReference[]) {
   const { attributes } = injectReferences({
     attributes: storedMapState,
     references: references ?? [],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes } from '../../server';
 import type { MapSettings } from '../descriptor_types';
 
 export class MapSettingsCollector {

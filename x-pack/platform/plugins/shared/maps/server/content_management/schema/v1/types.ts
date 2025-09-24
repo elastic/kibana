@@ -18,7 +18,7 @@ import type {
 /**
  * Shape of map attributes in REST APIs
  */
-export type MapsAttributes = TypeOf<typeof mapAttributesSchema>;
+export type MapAttributes = TypeOf<typeof mapAttributesSchema>;
 
 export type MapsCreateOptions = TypeOf<typeof mapsCreateOptionsSchema>;
 export type MapsUpdateOptions = TypeOf<typeof mapsUpdateOptionsSchema>;

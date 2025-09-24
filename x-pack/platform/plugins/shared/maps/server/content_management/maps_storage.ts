@@ -18,10 +18,10 @@ import type {
   SearchQuery,
   DeleteResult,
 } from '@kbn/content-management-plugin/common';
-import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
+import type { MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import type {
-  MapsAttributes,
+  MapAttributes,
   MapsGetOut,
   MapsSearchOptions,
   MapsCreateOptions,
@@ -31,7 +31,7 @@ import type {
 } from './schema/v1/types';
 import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
-import { StoredMapAttributes } from '../saved_objects/types';
+import type { StoredMapAttributes } from '../saved_objects/types';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -331,10 +331,7 @@ export class MapsStorage {
 
   mSearch = {
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObject<StoredMapAttributes>
-    ): MapItem => {
+    toItemResult: (ctx: StorageContext, savedObject: SavedObject<StoredMapAttributes>): MapItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
       const contentItem = savedObjectToItem(savedObject, false);

@@ -20,7 +20,7 @@ import type {
   JoinDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes } from '../../server';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {

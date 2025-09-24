@@ -15,6 +15,7 @@ export type MapsUsage = MapStats;
 export async function getMapsTelemetry(): Promise<MapsUsage> {
   const mapStatsCollector = new MapStatsCollector();
   await findMaps(getSavedObjectClient(), async (savedObject) => {
+    // TODO convert to MapAttributes
     mapStatsCollector.push(savedObject.attributes);
   });
 

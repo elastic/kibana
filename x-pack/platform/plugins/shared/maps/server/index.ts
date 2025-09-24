@@ -10,7 +10,11 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { MapsXPackConfig } from './config';
 import { configSchema } from './config';
 
+export type { StoredMapAttributes } from './saved_objects/types';
+
 export type {
+  MapAttributes,
+
   //
   // Layer types
   //

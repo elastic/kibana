@@ -11,6 +11,7 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import type { MapContentType } from '../types';
+import type { MapAttributes } from '../../../server';
 
 export type MapCrudTypes = ContentManagementCrudTypes<
   MapContentType,
