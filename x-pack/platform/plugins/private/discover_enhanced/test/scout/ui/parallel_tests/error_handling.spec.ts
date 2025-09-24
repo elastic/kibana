@@ -11,7 +11,7 @@ import { spaceTest, testData } from '../fixtures';
 spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
+    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
     await scoutSpace.uiSettings.setDefaultTime({
       from: testData.LOGSTASH_DEFAULT_START_TIME,
       to: testData.LOGSTASH_DEFAULT_END_TIME,

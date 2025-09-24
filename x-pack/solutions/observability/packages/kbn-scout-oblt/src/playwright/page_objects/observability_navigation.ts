@@ -11,7 +11,7 @@ export class ObservabilityNavigation {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    this.page.gotoApp('observability');
+    await this.page.gotoApp('observability');
   }
 
   async gotoLanding() {

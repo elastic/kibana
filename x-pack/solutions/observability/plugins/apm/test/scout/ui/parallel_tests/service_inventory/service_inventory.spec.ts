@@ -37,7 +37,7 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('loads the service overview for a service when clicking on it', async ({ page }) => {
-    page.getByText('opbeans-node').click();
+    await page.getByText('opbeans-node').click();
     expect(page.url()).toContain('/apm/services/opbeans-node/overview');
     await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-node');
   });
