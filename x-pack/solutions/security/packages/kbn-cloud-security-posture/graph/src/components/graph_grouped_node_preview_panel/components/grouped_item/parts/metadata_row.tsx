@@ -10,18 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getCountryName, getCountryFlag } from '../../../../node/country_flags/country_codes';
-import {
-  GROUPED_ITEM_RISK_TEST_ID,
-  GROUPED_ITEM_IP_TEST_ID,
-  GROUPED_ITEM_GEO_TEST_ID,
-} from '../../../test_ids';
+import { GROUPED_ITEM_IP_TEST_ID, GROUPED_ITEM_GEO_TEST_ID } from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
 import { i18nNamespaceKey } from '../utils';
-import { RiskLevel } from './risk_level';
-
-const riskLabel = i18n.translate(`${i18nNamespaceKey}.riskLabel`, {
-  defaultMessage: 'Risk',
-});
 
 const geoLabel = i18n.translate(`${i18nNamespaceKey}.geoLabel`, {
   defaultMessage: 'Geo',
@@ -82,31 +73,6 @@ export const MetadataRow = ({ item }: MetadataRowProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup wrap gutterSize="m" responsive={false} alignItems="center" direction="row">
-      {item.type === 'entity' && typeof item.risk === 'number' && (
-        <EuiFlexItem grow={false}>
-          <div
-            data-test-subj={GROUPED_ITEM_RISK_TEST_ID}
-            css={css`
-              display: flex;
-              align-items: center;
-              gap: ${euiTheme.size.xs};
-            `}
-          >
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                font-weight: ${euiTheme.font.weight.medium};
-              `}
-            >
-              {/* NOTE: Leave space after risk label for screen readers */}
-              {`${riskLabel} `}
-            </EuiText>
-            <RiskLevel risk={item.risk} />
-          </div>
-        </EuiFlexItem>
-      )}
-
       {item.ip && (
         <EuiFlexItem grow={false}>
           <div
