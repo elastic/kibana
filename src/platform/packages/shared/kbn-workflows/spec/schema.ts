@@ -477,6 +477,8 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  // using object instead of record to avoid type mismatch when
+  // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
   now: z.date().optional(),
