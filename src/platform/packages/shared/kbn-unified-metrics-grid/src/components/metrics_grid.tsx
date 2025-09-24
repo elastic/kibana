@@ -105,6 +105,7 @@ export const MetricsGrid = ({
               onBrushEnd={onBrushEnd}
               onFilter={onFilter}
               onViewDetails={handleViewDetails}
+              metricName={metric.name}
             />
           </EuiFlexItem>
         ))}

@@ -40,6 +40,15 @@ jest.mock('@kbn/esql-composer', () => ({
   where: jest.fn(),
 }));
 
+jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
+  ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+    <div data-test-subj="ContentFrameworkSection" {...rest}>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  ),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockUseFetchSpanLinks = require('./use_fetch_span_links').useFetchSpanLinks;
 
