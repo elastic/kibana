@@ -100,7 +100,7 @@ export const WhereBlock = ({
               `
             : css`
                 border: ${euiTheme.border.thin};
-                padding: ${euiTheme.size.s} ${euiTheme.size.m};
+                padding: ${euiTheme.size.m};
                 border-radius: ${euiTheme.size.s};
               `
         }

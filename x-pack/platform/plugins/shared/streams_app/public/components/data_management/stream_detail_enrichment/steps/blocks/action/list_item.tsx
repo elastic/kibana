@@ -102,7 +102,10 @@ export const ActionBlockListItem = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} color={descriptionPanelColour} paddingSize="s">
+          <EuiPanel hasShadow={false} color={descriptionPanelColour}
+              css={css`
+                padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+              `}>
             <EuiTextTruncate
               text={stepDescription}
               truncation="end"

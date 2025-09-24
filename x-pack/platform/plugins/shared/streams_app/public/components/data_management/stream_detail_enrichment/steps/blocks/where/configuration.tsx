@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiForm, EuiFlexGroup, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiFlexGroup, EuiButton, EuiButtonEmpty, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangWhereBlockWithUIAttributes } from '@kbn/streamlang';
 import { isCondition } from '@kbn/streamlang';
@@ -91,46 +91,58 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
         </FormProvider>
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween">
-          {canDelete && (
-            <EuiButton
-              data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
-              color="danger"
-              onClick={handleDelete}
-              size="s"
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
-                { defaultMessage: 'Delete condition' }
-              )}
-            </EuiButton>
-          )}
-          <EuiButtonEmpty
-            data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
-            onClick={handleCancel}
-            size="s"
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.cancel',
-              { defaultMessage: 'Cancel' }
+          <EuiFlexItem>
+            {canDelete && (
+              <div>
+                <EuiButton
+                  data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
+                  color="danger"
+                  onClick={handleDelete}
+                  size="s"
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
+                    { defaultMessage: 'Delete condition' }
+                  )}
+                </EuiButton>
+              </div>
             )}
-          </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="streamsAppConditionConfigurationSaveConditionButton"
-            size="s"
-            fill
-            onClick={methods.handleSubmit(handleSubmit)}
-            disabled={!canSave || !isValid}
-          >
-            {isConfigured
-              ? i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmUpdateCondition',
-                  { defaultMessage: 'Update' }
-                )
-              : i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmCreateCondition',
-                  { defaultMessage: 'Create condition' }
-                )}
-          </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent='flexEnd'>
+              <div>
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
+                  onClick={handleCancel}
+                  size="s"
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.cancel',
+                    { defaultMessage: 'Cancel' }
+                  )}
+                </EuiButtonEmpty>
+              </div>
+              <div>
+                <EuiButton
+                  data-test-subj="streamsAppConditionConfigurationSaveConditionButton"
+                  size="s"
+                  fill
+                  onClick={methods.handleSubmit(handleSubmit)}
+                  disabled={!canSave || !isValid}
+                >
+                  {isConfigured
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmUpdateCondition',
+                        { defaultMessage: 'Update' }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.WhereBlockConfiguration.confirmCreateCondition',
+                        { defaultMessage: 'Create condition' }
+                      )}
+                </EuiButton>
+              </div>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
     );
