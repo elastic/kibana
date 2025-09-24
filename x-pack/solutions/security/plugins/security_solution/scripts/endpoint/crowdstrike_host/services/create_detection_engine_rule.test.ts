@@ -34,7 +34,7 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
     const existingRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'existing-rule-id',
-    } as any;
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     mockedDetectionRulesServices.findRules.mockResolvedValue({
       page: 1,
       perPage: 10,
@@ -62,7 +62,7 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',
-    } as any;
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     mockedDetectionRulesServices.createRule.mockResolvedValue(newRule);
 
     const result = await createDetectionEngineCrowdStrikeRuleIfNeeded(mockKbnClient, mockLog);
@@ -92,7 +92,7 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',
-    } as any;
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     mockedDetectionRulesServices.createRule.mockResolvedValue(newRule);
 
     await createDetectionEngineCrowdStrikeRuleIfNeeded(mockKbnClient, mockLog, 'test-namespace');
