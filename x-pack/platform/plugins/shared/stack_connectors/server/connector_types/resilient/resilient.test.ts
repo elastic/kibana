@@ -239,7 +239,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc',
             incidentTypes: [1001],
             severityCode: 6,
-            additional_fields: '',
+            additional_fields: null,
           },
           connectorUsageCollector
         )
@@ -265,7 +265,7 @@ describe('IBM Resilient connector', () => {
         description: 'desc',
         incidentTypes: [1001],
         severityCode: 6,
-        additional_fields: '',
+        additional_fields: null,
       },
     };
     it('updates the incident correctly', async () => {

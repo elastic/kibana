@@ -32,7 +32,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
     externalId: schema.nullable(schema.string()),
     incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
     severityCode: schema.nullable(schema.number()),
-    additional_fields: schema.nullable(schema.string()),
+    additional_fields: schema.nullable(schema.recordOf(schema.string(), schema.any())),
   }),
   comments: schema.nullable(
     schema.arrayOf(
@@ -49,6 +49,7 @@ export const PushToServiceIncidentSchema = {
   description: schema.nullable(schema.string()),
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.number()),
+  additional_fields: schema.nullable(schema.recordOf(schema.string(), schema.any())),
 };
 
 // Reserved for future implementation

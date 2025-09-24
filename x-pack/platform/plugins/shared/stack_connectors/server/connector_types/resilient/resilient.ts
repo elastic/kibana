@@ -156,6 +156,10 @@ export class ResilientConnector extends CaseConnector<
         };
       }
 
+      if (incident.additional_fields) {
+        data = { ...data, ...incident.additional_fields };
+      }
+
       const res = await this.request(
         {
           url: `${this.urls.incident}?text_content_output_format=objects_convert`,

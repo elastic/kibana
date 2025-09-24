@@ -83,6 +83,7 @@ export interface CreateIncidentData {
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
   severity_code?: { id: number };
+  additional_fields?: string;
 }
 
 export type ResilientConfig = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
