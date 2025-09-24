@@ -47,64 +47,119 @@ fi
 failedConfigs=""
 results=()
 
-while read -r config; do
-  if [[ ! "$config" ]]; then
-    continue;
+# Build an array of config args to pass all configs to a single functional_tests run
+mapfile -t configs_array <<< "$configs"
+config_args=()
+for cfg in "${configs_array[@]}"; do
+  if [[ -n "$cfg" ]]; then
+    config_args+=("--config" "$cfg")
   fi
+done
 
-  FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
-  echo "--- $ $FULL_COMMAND"
+# Log the full command for debugging/visibility
+FULL_COMMAND="node scripts/functional_tests --bail --kibana-install-dir \"$KIBANA_BUILD_LOCATION\" ${config_args[*]} $EXTRA_ARGS"
+echo "--- $ $FULL_COMMAND"
 
-  start=$(date +%s)
+# Optional Chrome Beta setup (preserved behavior)
+if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
+  echo "USE_CHROME_BETA was set - using google-chrome-beta"
+  export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
 
-  if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
-    echo "USE_CHROME_BETA was set - using google-chrome-beta"
-    export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
+  # download the beta version of chromedriver
+  export CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
+  export DETECT_CHROMEDRIVER_VERSION=false
+  node node_modules/chromedriver/install.js --chromedriver-force-download
 
-    # download the beta version of chromedriver
-    export CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
-    export DETECT_CHROMEDRIVER_VERSION=false
-    node node_modules/chromedriver/install.js --chromedriver-force-download
+  # set annotation on the build
+  buildkite-agent annotate --style info --context chrome-beta "This build uses Google Chrome Beta @ ${CHROMEDRIVER_VERSION}"
+fi
 
-    # set annotation on the build
-    buildkite-agent annotate --style info --context chrome-beta "This build uses Google Chrome Beta @ ${CHROMEDRIVER_VERSION}"
+# Run functional tests once with all configs; capture output to parse per-config results
+LOG_FILE=$(mktemp -t ftr-functional-tests-XXXXXX.log)
+start=$(date +%s)
+set +e
+node ./scripts/functional_tests \
+  --bail \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  "${config_args[@]}" \
+  "$EXTRA_ARGS" | tee "$LOG_FILE"
+# capture exit code of node, not tee
+lastCode=${PIPESTATUS[0]}
+set -e
+
+# Compute total duration (per-config durations are not available from a single run)
+timeSec=$(($(date +%s)-start))
+if [[ $timeSec -gt 60 ]]; then
+  min=$((timeSec/60))
+  sec=$((timeSec-(min*60)))
+  totalDuration="${min}m ${sec}s"
+else
+  totalDuration="${timeSec}s"
+fi
+
+# Parse results from scheduler logs: successes and failures per config
+declare -A passed_map
+declare -A failed_map
+
+# Successful completion lines look like: "✔️ Completed i/N: path (completed=x)"
+while IFS= read -r line; do
+  rel_path=$(sed -E 's/^.*✔️ Completed [0-9]+\/[0-9]+: ([^ ]+).*$/\1/' <<< "$line")
+  if [[ -n "$rel_path" && "$rel_path" != "$line" ]]; then
+    passed_map["$rel_path"]=1
   fi
+done < <(grep -E "✔️ Completed [0-9]+/[0-9]+: " "$LOG_FILE" || true)
 
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  node ./scripts/functional_tests \
-    --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config="$config" \
-    "$EXTRA_ARGS"
-  lastCode=$?
-  set -e;
+# Failed run lines: "Run failed for path: <error>"
+while IFS= read -r line; do
+  rel_path=$(sed -E 's/^.*Run failed for ([^:]+):.*$/\1/' <<< "$line")
+  if [[ -n "$rel_path" && "$rel_path" != "$line" ]]; then
+    failed_map["$rel_path"]=1
+  fi
+done < <(grep -E "Run failed for " "$LOG_FILE" || true)
 
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
+# Warm failed lines: "Warm failed for path: <error>"
+while IFS= read -r line; do
+  rel_path=$(sed -E 's/^.*Warm failed for ([^:]+):.*$/\1/' <<< "$line")
+  if [[ -n "$rel_path" && "$rel_path" != "$line" ]]; then
+    failed_map["$rel_path"]=1
+  fi
+done < <(grep -E "Warm failed for " "$LOG_FILE" || true)
+
+# Build results and failedConfigs preserving original output shape
+for config in "${configs_array[@]}"; do
+  [[ -z "$config" ]] && continue
+  if [[ -n "${failed_map[$config]:-}" ]]; then
+    results+=("- $config
+    duration: n/a
+    result: 1")
+    if [[ -n "$failedConfigs" ]]; then
+      failedConfigs+=$'\n'
+    fi
+    failedConfigs+="$config"
   else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "FTR exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
+    # If neither failed nor explicitly passed, assume failed (did not run/finish)
+    if [[ -n "${passed_map[$config]:-}" ]]; then
+      results+=("- $config
+    duration: n/a
+    result: 0")
     else
-      failedConfigs="$config"
+      results+=("- $config
+    duration: n/a
+    result: 1")
+      if [[ -n "$failedConfigs" ]]; then
+        failedConfigs+=$'\n'
+      fi
+      failedConfigs+="$config"
     fi
   fi
-done <<< "$configs"
+done
+
+# Overall exit code follows previous behavior: 10 if any config failed
+if [[ -n "$failedConfigs" ]]; then
+  exitCode=10
+  echo "FTR had failing configs"
+  echo "^^^ +++"
+fi
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
