@@ -1,17 +1,19 @@
+// @ts-nocheck
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-09-20T11:19:16.303Z
+ * Generated at: 2025-09-24T08:45:48.733Z
  * Source: Kibana OpenAPI spec (456 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '@kbn/workflows';
 // Import schemas from generated schemas file
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import {
   post_actions_connector_id_Body,
   put_actions_connector_id_Body,
@@ -691,19 +693,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_actions_connector_id_Body.merge(z.object({
+    paramsSchema: z.intersection(post_actions_connector_id_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_actions_connector_id_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_actions_connector_id API')
   },
   {
@@ -719,19 +711,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_actions_connector_id_Body.merge(z.object({
+    paramsSchema: z.intersection(put_actions_connector_id_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_actions_connector_id_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_actions_connector_id API')
   },
   {
@@ -747,19 +729,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_actions_connector_id_execute_Body.merge(z.object({
+    paramsSchema: z.intersection(post_actions_connector_id_execute_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_actions_connector_id_execute_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_actions_connector_id_execute API')
   },
   {
@@ -866,19 +838,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_alerting_rule_id_Body.merge(z.object({
+    paramsSchema: z.intersection(post_alerting_rule_id_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_alerting_rule_id_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_alerting_rule_id API')
   },
   {
@@ -894,19 +856,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_alerting_rule_id_Body.merge(z.object({
+    paramsSchema: z.intersection(put_alerting_rule_id_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_alerting_rule_id_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_alerting_rule_id API')
   },
   {
@@ -1017,19 +969,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_alerting_rule_id_snooze_schedule_Body.merge(z.object({
+    paramsSchema: z.intersection(post_alerting_rule_id_snooze_schedule_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_alerting_rule_id_snooze_schedule_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_alerting_rule_id_snooze_schedule API')
   },
   {
@@ -1124,19 +1066,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return APM_UI_agent_keys_object.merge(z.object({
+    paramsSchema: z.intersection(APM_UI_agent_keys_object, z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(APM_UI_agent_keys_object, z.object({
-    'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createAgentKey API')
   },
   {
@@ -1171,21 +1103,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return APM_UI_create_annotation_object.merge(z.object({
+    paramsSchema: z.intersection(APM_UI_create_annotation_object, z.object({
     serviceName: z.string().describe('Path parameter: serviceName (required)'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(APM_UI_create_annotation_object, z.object({
-    serviceName: z.string().describe('Path parameter: serviceName (required)'),
-    'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createAnnotation API')
   },
   {
@@ -1260,21 +1181,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["overwrite","elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return APM_UI_agent_configuration_intake_object.merge(z.object({
+    paramsSchema: z.intersection(APM_UI_agent_configuration_intake_object, z.object({
     overwrite: z.any().optional().describe('Query parameter: overwrite'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(APM_UI_agent_configuration_intake_object, z.object({
-    overwrite: z.any().optional().describe('Query parameter: overwrite'),
-    'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createUpdateAgentConfiguration API')
   },
   {
@@ -1328,19 +1238,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return APM_UI_search_agent_configuration_object.merge(z.object({
+    paramsSchema: z.intersection(APM_UI_search_agent_configuration_object, z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(APM_UI_search_agent_configuration_object, z.object({
-    'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from searchSingleConfiguration API')
   },
   {
@@ -1396,19 +1296,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return APM_UI_upload_source_map_object.merge(z.object({
+    paramsSchema: z.intersection(APM_UI_upload_source_map_object, z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(APM_UI_upload_source_map_object, z.object({
-    'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from uploadSourceMap API')
   },
   {
@@ -1664,19 +1554,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Cases_update_case_comment_request.merge(z.object({
+    paramsSchema: z.intersection(Cases_update_case_comment_request, z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Cases_update_case_comment_request, z.object({
-    caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from updateCaseCommentDefaultSpace API')
   },
   {
@@ -1692,19 +1572,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Cases_add_case_comment_request.merge(z.object({
+    paramsSchema: z.intersection(Cases_add_case_comment_request, z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Cases_add_case_comment_request, z.object({
-    caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from addCaseCommentDefaultSpace API')
   },
   {
@@ -1799,19 +1669,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Cases_add_case_file_request.merge(z.object({
+    paramsSchema: z.intersection(Cases_add_case_file_request, z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Cases_add_case_file_request, z.object({
-    caseId: z.string().describe('Path parameter: caseId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from addCaseFileDefaultSpace API')
   },
   {
@@ -1900,19 +1760,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Cases_update_case_configuration_request.merge(z.object({
+    paramsSchema: z.intersection(Cases_update_case_configuration_request, z.object({
     configurationId: z.string().describe('Path parameter: configurationId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Cases_update_case_configuration_request, z.object({
-    configurationId: z.string().describe('Path parameter: configurationId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from updateCaseConfigurationDefaultSpace API')
   },
   {
@@ -2053,19 +1903,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Data_views_update_data_view_request_object.merge(z.object({
+    paramsSchema: z.intersection(Data_views_update_data_view_request_object, z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Data_views_update_data_view_request_object, z.object({
-    viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from updateDataViewDefault API')
   },
   {
@@ -2100,19 +1940,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return createRuntimeFieldDefault_Body.merge(z.object({
+    paramsSchema: z.intersection(createRuntimeFieldDefault_Body, z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(createRuntimeFieldDefault_Body, z.object({
-    viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createRuntimeFieldDefault API')
   },
   {
@@ -2128,19 +1958,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return createRuntimeFieldDefault_Body.merge(z.object({
+    paramsSchema: z.intersection(createRuntimeFieldDefault_Body, z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(createRuntimeFieldDefault_Body, z.object({
-    viewId: z.string().describe('Path parameter: viewId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createUpdateRuntimeFieldDefault API')
   },
   {
@@ -2439,19 +2259,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["dry_run"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return PerformRulesBulkAction_Body.merge(z.object({
+    paramsSchema: z.intersection(PerformRulesBulkAction_Body, z.object({
     dry_run: z.any().optional().describe('Query parameter: dry_run'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(PerformRulesBulkAction_Body, z.object({
-    dry_run: z.any().optional().describe('Query parameter: dry_run'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from PerformRulesBulkAction API')
   },
   {
@@ -2528,19 +2338,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return CreateRuleExceptionListItems_Body.merge(z.object({
+    paramsSchema: z.intersection(CreateRuleExceptionListItems_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(CreateRuleExceptionListItems_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from CreateRuleExceptionListItems API')
   },
   {
@@ -2592,19 +2392,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["enable_logged_requests"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return RulePreview_Body.merge(z.object({
+    paramsSchema: z.intersection(RulePreview_Body, z.object({
     enable_logged_requests: z.any().optional().describe('Query parameter: enable_logged_requests'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(RulePreview_Body, z.object({
-    enable_logged_requests: z.any().optional().describe('Query parameter: enable_logged_requests'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from RulePreview API')
   },
   {
@@ -3365,19 +3155,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_Entity_Analytics_API_MonitoredUserUpdateDoc.merge(z.object({
+    paramsSchema: z.intersection(Security_Entity_Analytics_API_MonitoredUserUpdateDoc, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_Entity_Analytics_API_MonitoredUserUpdateDoc, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from UpdatePrivMonUser API')
   },
   {
@@ -3518,19 +3298,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return InitEntityEngine_Body.merge(z.object({
+    paramsSchema: z.intersection(InitEntityEngine_Body, z.object({
     entityType: z.string().describe('Path parameter: entityType (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(InitEntityEngine_Body, z.object({
-    entityType: z.string().describe('Path parameter: entityType (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from InitEntityEngine API')
   },
   {
@@ -3997,19 +3767,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_agent_download_sources_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_agent_download_sources_Body, z.object({
     sourceId: z.string().describe('Path parameter: sourceId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_agent_download_sources_Body, z.object({
-    sourceId: z.string().describe('Path parameter: sourceId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_agent_download_sources_sourceid API')
   },
   {
@@ -4045,19 +3805,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["sys_monitoring"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_agent_policies_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_agent_policies_Body, z.object({
     sys_monitoring: z.any().optional().describe('Query parameter: sys_monitoring'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_agent_policies_Body, z.object({
-    sys_monitoring: z.any().optional().describe('Query parameter: sys_monitoring'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies API')
   },
   {
@@ -4108,19 +3858,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_agent_policies_agentpolicyid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_agent_policies_agentpolicyid_Body, z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_agent_policies_agentpolicyid_Body, z.object({
-    agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_agent_policies_agentpolicyid API')
   },
   {
@@ -4155,19 +3895,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_agent_policies_agentpolicyid_copy_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_agent_policies_agentpolicyid_copy_Body, z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_agent_policies_agentpolicyid_copy_Body, z.object({
-    agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_agentpolicyid_copy API')
   },
   {
@@ -4396,19 +4126,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_agents_agentid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_agents_agentid_Body, z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_agents_agentid_Body, z.object({
-    agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_agents_agentid API')
   },
   {
@@ -4424,19 +4144,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_agents_agentid_actions_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_agents_agentid_actions_Body, z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_agents_agentid_actions_Body, z.object({
-    agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_actions API')
   },
   {
@@ -4509,19 +4219,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_agents_agentid_upgrade_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_agents_agentid_upgrade_Body, z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_agents_agentid_upgrade_Body, z.object({
-    agentId: z.string().describe('Path parameter: agentId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_upgrade API')
   },
   {
@@ -4983,19 +4683,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_epm_custom_integrations_pkgname_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_epm_custom_integrations_pkgname_Body, z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_epm_custom_integrations_pkgname_Body, z.object({
-    pkgName: z.string().describe('Path parameter: pkgName (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_epm_custom_integrations_pkgname API')
   },
   {
@@ -5070,19 +4760,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["prerelease"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_epm_packages_bulk_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_epm_packages_bulk_Body, z.object({
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_epm_packages_bulk_Body, z.object({
-    prerelease: z.any().optional().describe('Query parameter: prerelease'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk API')
   },
   {
@@ -5334,23 +5014,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["prerelease"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body.merge(z.object({
+    paramsSchema: z.intersection(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body, z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body, z.object({
-    pkgName: z.string().describe('Path parameter: pkgName (required)'),
-    pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
-    prerelease: z.any().optional().describe('Query parameter: prerelease'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize API')
   },
   {
@@ -5530,19 +5198,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_fleet_server_hosts_itemid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_fleet_server_hosts_itemid_Body, z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_fleet_server_hosts_itemid_Body, z.object({
-    itemId: z.string().describe('Path parameter: itemId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_fleet_server_hosts_itemid API')
   },
   {
@@ -5724,19 +5382,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_outputs_outputid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_outputs_outputid_Body, z.object({
     outputId: z.string().describe('Path parameter: outputId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_outputs_outputid_Body, z.object({
-    outputId: z.string().describe('Path parameter: outputId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_outputs_outputid API')
   },
   {
@@ -5861,19 +5509,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_package_policies_packagepolicyid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_package_policies_packagepolicyid_Body, z.object({
     packagePolicyId: z.string().describe('Path parameter: packagePolicyId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_package_policies_packagepolicyid_Body, z.object({
-    packagePolicyId: z.string().describe('Path parameter: packagePolicyId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_package_policies_packagepolicyid API')
   },
   {
@@ -6008,19 +5646,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_fleet_proxies_itemid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_fleet_proxies_itemid_Body, z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_fleet_proxies_itemid_Body, z.object({
-    itemId: z.string().describe('Path parameter: itemId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_fleet_proxies_itemid API')
   },
   {
@@ -6579,19 +6207,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_logstash_pipeline_Body.merge(z.object({
+    paramsSchema: z.intersection(put_logstash_pipeline_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_logstash_pipeline_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_logstash_pipeline API')
   },
   {
@@ -6678,19 +6296,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return patch_maintenance_window_id_Body.merge(z.object({
+    paramsSchema: z.intersection(patch_maintenance_window_id_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(patch_maintenance_window_id_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from patch_maintenance_window_id API')
   },
   {
@@ -6990,19 +6598,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_Osquery_API_UpdatePacksRequestBody.merge(z.object({
+    paramsSchema: z.intersection(Security_Osquery_API_UpdatePacksRequestBody, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_Osquery_API_UpdatePacksRequestBody, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from OsqueryUpdatePacks API')
   },
   {
@@ -7091,19 +6689,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_Osquery_API_UpdateSavedQueryRequestBody.merge(z.object({
+    paramsSchema: z.intersection(Security_Osquery_API_UpdateSavedQueryRequestBody, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_Osquery_API_UpdateSavedQueryRequestBody, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from OsqueryUpdateSavedQuery API')
   },
   {
@@ -7224,21 +6812,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["compatibilityMode","createNewCopies"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return resolveImportErrors_Body.merge(z.object({
+    paramsSchema: z.intersection(resolveImportErrors_Body, z.object({
     compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
     createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(resolveImportErrors_Body, z.object({
-    compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
-    createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from resolveImportErrors API')
   },
   {
@@ -7289,19 +6866,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["content_references_disabled"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_AI_Assistant_API_ChatCompleteProps.merge(z.object({
+    paramsSchema: z.intersection(Security_AI_Assistant_API_ChatCompleteProps, z.object({
     content_references_disabled: z.any().optional().describe('Query parameter: content_references_disabled'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_AI_Assistant_API_ChatCompleteProps, z.object({
-    content_references_disabled: z.any().optional().describe('Query parameter: content_references_disabled'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from ChatComplete API')
   },
   {
@@ -7407,19 +6974,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_AI_Assistant_API_ConversationUpdateProps.merge(z.object({
+    paramsSchema: z.intersection(Security_AI_Assistant_API_ConversationUpdateProps, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_AI_Assistant_API_ConversationUpdateProps, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from UpdateConversation API')
   },
   {
@@ -7563,19 +7120,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps.merge(z.object({
+    paramsSchema: z.intersection(Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from UpdateKnowledgeBaseEntry API')
   },
   {
@@ -7697,21 +7244,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["createOnly"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_security_role_name_Body.merge(z.object({
+    paramsSchema: z.intersection(put_security_role_name_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
     createOnly: z.any().optional().describe('Query parameter: createOnly'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_security_role_name_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-    createOnly: z.any().optional().describe('Query parameter: createOnly'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_security_role_name API')
   },
   {
@@ -7982,19 +7518,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_spaces_space_Body.merge(z.object({
+    paramsSchema: z.intersection(post_spaces_space_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_spaces_space_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_spaces_space_id API')
   },
   {
@@ -8132,19 +7658,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_streams_name_Body.merge(z.object({
+    paramsSchema: z.intersection(put_streams_name_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_streams_name_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name API')
   },
   {
@@ -8160,19 +7676,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_streams_name_fork_Body.merge(z.object({
+    paramsSchema: z.intersection(post_streams_name_fork_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_streams_name_fork_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_streams_name_fork API')
   },
   {
@@ -8207,19 +7713,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_streams_name_group_Body.merge(z.object({
+    paramsSchema: z.intersection(put_streams_name_group_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_streams_name_group_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name_group API')
   },
   {
@@ -8254,19 +7750,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_streams_name_ingest_Body.merge(z.object({
+    paramsSchema: z.intersection(put_streams_name_ingest_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_streams_name_ingest_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name_ingest API')
   },
   {
@@ -8282,19 +7768,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_streams_name_content_export_Body.merge(z.object({
+    paramsSchema: z.intersection(post_streams_name_content_export_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_streams_name_content_export_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_streams_name_content_export API')
   },
   {
@@ -8348,19 +7824,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_streams_name_dashboards_bulk_Body.merge(z.object({
+    paramsSchema: z.intersection(post_streams_name_dashboards_bulk_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_streams_name_dashboards_bulk_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_streams_name_dashboards_bulk API')
   },
   {
@@ -8395,21 +7861,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return get_streams_Body.merge(z.object({
+    paramsSchema: z.intersection(get_streams_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
     dashboardId: z.string().describe('Path parameter: dashboardId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(get_streams_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-    dashboardId: z.string().describe('Path parameter: dashboardId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name_dashboards_dashboardid API')
   },
   {
@@ -8444,19 +7899,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_streams_name_queries_bulk_Body.merge(z.object({
+    paramsSchema: z.intersection(post_streams_name_queries_bulk_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_streams_name_queries_bulk_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_streams_name_queries_bulk API')
   },
   {
@@ -8491,21 +7936,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_streams_name_queries_queryid_Body.merge(z.object({
+    paramsSchema: z.intersection(put_streams_name_queries_queryid_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
     queryId: z.string().describe('Path parameter: queryId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_streams_name_queries_queryid_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-    queryId: z.string().describe('Path parameter: queryId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name_queries_queryid API')
   },
   {
@@ -8559,21 +7993,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return get_streams_Body.merge(z.object({
+    paramsSchema: z.intersection(get_streams_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
     ruleId: z.string().describe('Path parameter: ruleId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(get_streams_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-    ruleId: z.string().describe('Path parameter: ruleId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_streams_name_rules_ruleid API')
   },
   {
@@ -8632,25 +8055,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["from","to","bucketSize"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_streams_name_significant_events_preview_Body.merge(z.object({
+    paramsSchema: z.intersection(post_streams_name_significant_events_preview_Body, z.object({
     name: z.string().describe('Path parameter: name (required)'),
     from: z.any().optional().describe('Query parameter: from'),
     to: z.any().optional().describe('Query parameter: to'),
     bucketSize: z.any().optional().describe('Query parameter: bucketSize'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_streams_name_significant_events_preview_Body, z.object({
-    name: z.string().describe('Path parameter: name (required)'),
-    from: z.any().optional().describe('Query parameter: from'),
-    to: z.any().optional().describe('Query parameter: to'),
-    bucketSize: z.any().optional().describe('Query parameter: bucketSize'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from post_streams_name_significant_events_preview API')
   },
   {
@@ -8779,19 +8189,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return post_synthetic_monitors_Body.merge(z.object({
+    paramsSchema: z.intersection(post_synthetic_monitors_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(post_synthetic_monitors_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_synthetic_monitor API')
   },
   {
@@ -8896,19 +8296,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return put_parameter_Body.merge(z.object({
+    paramsSchema: z.intersection(put_parameter_Body, z.object({
     id: z.string().describe('Path parameter: id (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(put_parameter_Body, z.object({
-    id: z.string().describe('Path parameter: id (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from put_parameter API')
   },
   {
@@ -9153,19 +8543,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["file_name"],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return ExportTimelines_Body.merge(z.object({
+    paramsSchema: z.intersection(ExportTimelines_Body, z.object({
     file_name: z.any().optional().describe('Query parameter: file_name'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(ExportTimelines_Body, z.object({
-    file_name: z.any().optional().describe('Query parameter: file_name'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from ExportTimelines API')
   },
   {
@@ -9341,19 +8721,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return SLOs_create_slo_request.merge(z.object({
+    paramsSchema: z.intersection(SLOs_create_slo_request, z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(SLOs_create_slo_request, z.object({
-    spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from createSloOp API')
   },
   {
@@ -9369,19 +8739,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return SLOs_bulk_delete_request.merge(z.object({
+    paramsSchema: z.intersection(SLOs_bulk_delete_request, z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(SLOs_bulk_delete_request, z.object({
-    spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from bulkDeleteOp API')
   },
   {
@@ -9417,19 +8777,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return SLOs_bulk_purge_rollup_request.merge(z.object({
+    paramsSchema: z.intersection(SLOs_bulk_purge_rollup_request, z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(SLOs_bulk_purge_rollup_request, z.object({
-    spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from deleteRollupDataOp API')
   },
   {
@@ -9445,19 +8795,9 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return SLOs_delete_slo_instances_request.merge(z.object({
+    paramsSchema: z.intersection(SLOs_delete_slo_instances_request, z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(SLOs_delete_slo_instances_request, z.object({
-    spaceId: z.string().describe('Path parameter: spaceId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from deleteSloInstancesOp API')
   },
   {
@@ -9512,21 +8852,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: (() => {
-        try {
-          // Try merge first (works with ZodObject schemas)
-          return SLOs_update_slo_request.merge(z.object({
+    paramsSchema: z.intersection(SLOs_update_slo_request, z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     sloId: z.string().describe('Path parameter: sloId (required)'),
-          }));
-        } catch (e) {
-          // Fallback to intersection for non-object schemas (unions, etc.)
-          return z.intersection(SLOs_update_slo_request, z.object({
-    spaceId: z.string().describe('Path parameter: spaceId (required)'),
-    sloId: z.string().describe('Path parameter: sloId (required)'),
-          }));
-        }
-      })(),
+        })),
     outputSchema: z.any().describe('Response from updateSloOp API')
   },
   {

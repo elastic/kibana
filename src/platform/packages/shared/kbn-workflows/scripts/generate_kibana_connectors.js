@@ -496,7 +496,7 @@ function extractEndpointInfo(content) {
  */
 function extractBodySchemaName(endpoint) {
   if (!endpoint.parameters) return null;
-  
+
   for (const param of endpoint.parameters) {
     if (param.type === 'Body' && param.schema) {
       // Handle different ways the schema might be represented
@@ -526,44 +526,55 @@ function collectSchemaDependencies(schemaName, visited = new Set()) {
     return new Set(); // Avoid infinite recursion
   }
   visited.add(schemaName);
-  
+
   const dependencies = new Set([schemaName]);
-  
+
   try {
     if (!fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
       return dependencies;
     }
-    
+
     const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
     const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const schemaRegex = new RegExp(
       `export const ${escapedSchemaName} = ([\\s\\S]*?)(?=\\nexport const |\\n$)`,
       'm'
     );
-    
+
     const match = schemasContent.match(schemaRegex);
     if (match) {
       const schemaDefinition = match[1];
-      
+
       // Find all schema references in this definition
       const depRegex = /([A-Z][a-zA-Z0-9_]*(?:_[A-Z][a-zA-Z0-9_]*)*)/g;
       let depMatch;
-      
+
       while ((depMatch = depRegex.exec(schemaDefinition)) !== null) {
         const depName = depMatch[1];
         // Skip common zod methods and the schema itself
-        if (depName !== schemaName && 
-            !['ZodType', 'ZodObject', 'ZodString', 'ZodNumber', 'ZodBoolean', 'ZodArray', 'ZodUnion', 'ZodEnum'].includes(depName)) {
+        if (
+          depName !== schemaName &&
+          ![
+            'ZodType',
+            'ZodObject',
+            'ZodString',
+            'ZodNumber',
+            'ZodBoolean',
+            'ZodArray',
+            'ZodUnion',
+            'ZodEnum',
+          ].includes(depName)
+        ) {
           // Recursively collect dependencies
           const subDeps = collectSchemaDependencies(depName, visited);
-          subDeps.forEach(dep => dependencies.add(dep));
+          subDeps.forEach((dep) => dependencies.add(dep));
         }
       }
     }
   } catch (error) {
     console.warn(`⚠️ Error collecting dependencies for ${schemaName}:`, error.message);
   }
-  
+
   return dependencies;
 }
 
@@ -575,39 +586,54 @@ function extractSchemaFieldNames(schemaName) {
     if (!fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
       return [];
     }
-    
+
     const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
     const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const schemaRegex = new RegExp(
       `export const ${escapedSchemaName} = ([\\s\\S]*?)(?=\\nexport const |\\n$)`,
       'm'
     );
-    
+
     const match = schemasContent.match(schemaRegex);
     if (match) {
       const schemaDefinition = match[1];
       const objectMatch = schemaDefinition.match(/\.object\(\s*\{([\s\S]*?)\}\s*\)/);
-      
+
       if (objectMatch) {
         const objectContent = objectMatch[1];
         const fieldRegex = /(?:(\w+)|["']([^"']+)["'])\s*:\s*/g;
         const fieldNames = [];
         let fieldMatch;
-        
+
         while ((fieldMatch = fieldRegex.exec(objectContent)) !== null) {
           const fieldName = fieldMatch[1] || fieldMatch[2];
-          if (fieldName && !['object', 'string', 'number', 'boolean', 'array', 'union', 'enum', 'any', 'optional', 'describe', 'passthrough'].includes(fieldName)) {
+          if (
+            fieldName &&
+            ![
+              'object',
+              'string',
+              'number',
+              'boolean',
+              'array',
+              'union',
+              'enum',
+              'any',
+              'optional',
+              'describe',
+              'passthrough',
+            ].includes(fieldName)
+          ) {
             fieldNames.push(fieldName);
           }
         }
-        
+
         return fieldNames;
       }
     }
   } catch (error) {
     console.warn(`⚠️ Error extracting field names from ${schemaName}:`, error.message);
   }
-  
+
   return [];
 }
 
@@ -653,27 +679,42 @@ function extractTopLevelFieldsFromSchema(schemaName) {
 
     if (match) {
       const schemaDefinition = match[1];
-      
+
       // Look for .object({ ... }) pattern to extract top-level fields
       const objectMatch = schemaDefinition.match(/\.object\(\s*\{([\s\S]*)\}\s*\)/);
       if (objectMatch) {
         const objectContent = objectMatch[1];
-        
+
         // Extract top-level field names (but not their nested content)
         const fieldRegex = /(?:(\w+)|["']([^"']+)["'])\s*:\s*/g;
         let fieldMatch;
-        
+
         while ((fieldMatch = fieldRegex.exec(objectContent)) !== null) {
           const fieldName = fieldMatch[1] || fieldMatch[2];
-          
-          if (fieldName && !['object', 'string', 'number', 'boolean', 'array', 'union', 'enum', 'any', 'optional', 'describe', 'passthrough'].includes(fieldName)) {
+
+          if (
+            fieldName &&
+            ![
+              'object',
+              'string',
+              'number',
+              'boolean',
+              'array',
+              'union',
+              'enum',
+              'any',
+              'optional',
+              'describe',
+              'passthrough',
+            ].includes(fieldName)
+          ) {
             // Use the schema shape reference to preserve nested structure
             // Handle field names that aren't valid JavaScript identifiers (like @timestamp)
             const isValidIdentifier = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(fieldName);
-            const schemaReference = isValidIdentifier 
+            const schemaReference = isValidIdentifier
               ? `${schemaName}.shape.${fieldName}`
               : `${schemaName}.shape['${fieldName}']`;
-            
+
             if (schemaName && schemaName.trim() && fieldName && fieldName.trim()) {
               // Validate that the field actually exists in the schema by checking if it's properly defined
               // Skip fields that might be undefined to avoid runtime errors
@@ -778,11 +819,11 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
 
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
     const bodySchemaName = extractBodySchemaName(endpoint);
-    
+
     if (bodySchemaName && bodySchemaName.trim()) {
       // Check if the schema actually exists in the generated schemas file
       const schemaExists = checkSchemaExists(bodySchemaName);
-      
+
       if (schemaExists) {
         // Use the schema directly as paramsSchema to avoid body wrapper
         // This gives users the clean syntax: with: { connector: ..., description: ... }
@@ -845,49 +886,41 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
       : '';
 
   // Check if we have a direct schema (no body wrapper)
-  const directSchemaField = schemaFields.find(field => field.startsWith('DIRECT_SCHEMA:'));
+  const directSchemaField = schemaFields.find((field) => field.startsWith('DIRECT_SCHEMA:'));
   let paramsSchemaSection;
-  let cleanBodyParams = bodyParams.filter(param => param !== 'DIRECT_SCHEMA');
-  
+  let cleanBodyParams = bodyParams.filter((param) => param !== 'DIRECT_SCHEMA');
+
   if (directSchemaField) {
     // Use the schema directly for clean syntax
     const schemaName = directSchemaField.replace('DIRECT_SCHEMA:', '');
-    const nonBodyFields = schemaFields.filter(field => !field.startsWith('DIRECT_SCHEMA:'));
-    
+    const nonBodyFields = schemaFields.filter((field) => !field.startsWith('DIRECT_SCHEMA:'));
+
     if (nonBodyFields.length > 0) {
       // For schemas with alert_suppression or other complex nested types,
       // avoid merge/intersection and use a simpler z.object approach
       // to prevent zod-to-json-schema from generating invalid $ref paths
-      const hasComplexFields = nonBodyFields.some(field => 
-        field.includes('alert_suppression') || 
-        field.includes('Security_Detections_API')
+      const hasComplexFields = nonBodyFields.some(
+        (field) => field.includes('alert_suppression') || field.includes('Security_Detections_API')
       );
-      
+
       if (hasComplexFields) {
         // Extract top-level fields from the schema and combine them manually
         const topLevelFields = extractTopLevelFieldsFromSchema(schemaName);
-        const allFields = [...Array.from(topLevelFields.entries()).map(([name, ref]) => 
-          `    ${name}: ${ref}.optional().describe('${name} from ${schemaName}')`
-        ), ...nonBodyFields];
-        
+        const allFields = [
+          ...Array.from(topLevelFields.entries()).map(
+            ([name, ref]) => `    ${name}: ${ref}.optional().describe('${name} from ${schemaName}')`
+          ),
+          ...nonBodyFields,
+        ];
+
         paramsSchemaSection = `paramsSchema: z.object({
 ${allFields.join(',\n')}
         })`;
       } else {
-        // Try to merge schemas for simpler cases
-        paramsSchemaSection = `paramsSchema: (() => {
-          try {
-            // Try merge first (works with ZodObject schemas)
-            return ${schemaName}.merge(z.object({
+        // Use intersection for all cases to avoid .merge() issues with ZodUnion types
+        paramsSchemaSection = `paramsSchema: z.intersection(${schemaName}, z.object({
 ${nonBodyFields.join('\n')}
-            }));
-          } catch (e) {
-            // Fallback to intersection for non-object schemas (unions, etc.)
-            return z.intersection(${schemaName}, z.object({
-${nonBodyFields.join('\n')}
-            }));
-          }
-        })()`;
+        }))`;
       }
     } else {
       // Use the schema directly
@@ -1140,11 +1173,11 @@ function generateKibanaConnectors() {
         directSchemas.add(schemaName);
       }
     }
-    
+
     // Collect all dependencies for each directly referenced schema
     for (const schemaName of directSchemas) {
       const dependencies = collectSchemaDependencies(schemaName);
-      dependencies.forEach(dep => usedSchemas.add(dep));
+      dependencies.forEach((dep) => usedSchemas.add(dep));
     }
 
     // Schemas already copied earlier
@@ -1174,13 +1207,14 @@ function generateKibanaConnectors() {
 
     const schemaImportsSection =
       existingSchemas.length > 0
-        ? `\n// Import schemas from generated schemas file\n// eslint-disable-next-line @typescript-eslint/naming-convention\nimport {\n  ${existingSchemas.join(
+        ? `\n// Import schemas from generated schemas file\nimport {\n  ${existingSchemas.join(
             ',\n  '
           )}\n} from './generated_kibana_schemas';\n`
         : '';
 
     // Generate the TypeScript file
-    let fileContent = `/*
+    let fileContent = `// @ts-nocheck
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
@@ -1189,6 +1223,8 @@ function generateKibanaConnectors() {
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '@kbn/workflows';${schemaImportsSection}
