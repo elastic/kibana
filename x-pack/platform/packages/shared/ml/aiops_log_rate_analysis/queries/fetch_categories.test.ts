@@ -67,34 +67,36 @@ describe('getCategoryRequest', () => {
     // time range filter whatsoever, for example for start/end (0,50).
     expect(query).toEqual({
       index: 'the-index',
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    range: {
-                      'the-time-field-name': {
-                        gte: 10,
-                        lte: 20,
-                        format: 'epoch_millis',
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        'the-time-field-name': {
+                          gte: 10,
+                          lte: 20,
+                          format: 'epoch_millis',
+                        },
                       },
                     },
-                  },
-                  {
-                    range: {
-                      'the-time-field-name': {
-                        gte: 30,
-                        lte: 40,
-                        format: 'epoch_millis',
+                    {
+                      range: {
+                        'the-time-field-name': {
+                          gte: 30,
+                          lte: 40,
+                          format: 'epoch_millis',
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
         aggs: {
           sample: {
@@ -114,8 +116,8 @@ describe('getCategoryRequest', () => {
             },
           },
         },
+        size: 0,
       },
-      size: 0,
     });
   });
 });
