@@ -39,7 +39,7 @@ import {
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
+import { loadDataViewList, initializeTabs } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
@@ -92,6 +92,15 @@ export const internalStateSlice = createSlice({
       action: PayloadAction<DiscoverInternalState['initializationState']>
     ) => {
       state.initializationState = action.payload;
+    },
+
+    setPersistedDiscoverSession: (
+      state,
+      action: PayloadAction<{
+        persistedDiscoverSession: DiscoverInternalState['persistedDiscoverSession'];
+      }>
+    ) => {
+      state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     },
 
     setTabs: (
@@ -279,12 +288,6 @@ export const internalStateSlice = createSlice({
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     });
 
-    builder.addCase(saveDiscoverSession.fulfilled, (state, action) => {
-      if (action.payload.discoverSession) {
-        state.persistedDiscoverSession = action.payload.discoverSession;
-      }
-    });
-
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
       state.tabs.areInitializing = false;
     });
@@ -353,18 +356,20 @@ const createMiddleware = (options: InternalStateDependencies) => {
     ),
   });
 
-  startListening({
-    predicate: (_, currentState, previousState) => {
-      return (
-        currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
-      );
-    },
-    effect: (_, listenerApi) => {
-      const { tabsStorageManager } = listenerApi.extra;
-      const { persistedDiscoverSession } = listenerApi.getState();
-      tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
-    },
-  });
+  // TODO: Delete updateDiscoverSessionIdLocally
+
+  // startListening({
+  //   predicate: (_, currentState, previousState) => {
+  //     return (
+  //       currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
+  //     );
+  //   },
+  //   effect: (_, listenerApi) => {
+  //     const { tabsStorageManager } = listenerApi.extra;
+  //     const { persistedDiscoverSession } = listenerApi.getState();
+  //     tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
+  //   },
+  // });
 
   startListening({
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,

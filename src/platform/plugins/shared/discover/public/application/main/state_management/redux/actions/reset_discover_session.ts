@@ -17,7 +17,7 @@ import {
 } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
-import { updateTabs } from './tabs';
+import { updateDiscoverSessionAndTabs } from './tabs';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -87,6 +87,12 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
 
-    await dispatch(updateTabs({ items: allTabs, selectedItem: selectedTab }));
+    await dispatch(
+      updateDiscoverSessionAndTabs({
+        items: allTabs,
+        selectedItem: selectedTab,
+        persistedDiscoverSession: discoverSession,
+      })
+    );
   }
 );

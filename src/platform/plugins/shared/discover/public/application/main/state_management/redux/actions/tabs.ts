@@ -14,8 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { type TabState } from '../types';
+import type { TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -249,6 +250,25 @@ export const updateTabs: InternalStateThunkActionCreator<
     );
   };
 
+export const updateDiscoverSessionAndTabs: InternalStateThunkActionCreator<
+  [
+    {
+      items: TabState[] | TabItem[];
+      selectedItem: TabState | TabItem | null;
+      persistedDiscoverSession: DiscoverSession | undefined;
+    }
+  ],
+  Promise<void>
+> = ({ items, selectedItem, persistedDiscoverSession }) =>
+  async function updateDiscoverSessionAndTabsThunkFn(dispatch) {
+    dispatch(
+      internalStateSlice.actions.setPersistedDiscoverSession({
+        persistedDiscoverSession,
+      })
+    );
+    await dispatch(updateTabs({ items, selectedItem }));
+  };
+
 export const initializeTabs = createInternalStateAsyncThunk(
   'internalState/initializeTabs',
   async function initializeTabsThunkFn(
@@ -259,7 +279,12 @@ export const initializeTabs = createInternalStateAsyncThunk(
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
     const currentState = getState();
-    const { userId: existingUserId, spaceId: existingSpaceId } = currentState;
+    const {
+      userId: existingUserId,
+      spaceId: existingSpaceId,
+      persistedDiscoverSession: currentlyPersistedDiscoverSession,
+      tabs: { unsafeCurrentId },
+    } = currentState;
 
     const getUserId = async () => {
       try {
@@ -296,6 +321,15 @@ export const initializeTabs = createInternalStateAsyncThunk(
       );
 
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
+    }
+
+    if (
+      unsafeCurrentId &&
+      !shouldClearAllTabs &&
+      currentlyPersistedDiscoverSession?.id === discoverSessionId
+    ) {
+      // already initialized with the requested discover session via resetDiscoverSession
+      return { userId, spaceId, persistedDiscoverSession };
     }
 
     const initialTabsState = tabsStorageManager.loadLocally({
