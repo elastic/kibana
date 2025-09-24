@@ -36,8 +36,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           iconV2: 'discoverApp',
         },
         defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
-        // version 2 sidenav
-        ...defaultNavigationTree.v2(services),
         {
           breadcrumbStatus: 'hidden',
           children: [
@@ -99,6 +97,8 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           ],
         },
         defaultNavigationTree.ml({ sideNavVersion: 'v1' }),
+        // version 2 sidenav
+        ...defaultNavigationTree.v2(services),
       ],
     },
   ],
@@ -143,10 +143,12 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               title: i18nStrings.launchPad.migrations.title,
               children: [
                 {
+                  id: SecurityPageName.siemMigrationsRules,
                   link: securityLink(SecurityPageName.siemMigrationsRules),
                   sideNavVersion: 'v2',
                 },
                 {
+                  id: SecurityPageName.siemMigrationsDashboards,
                   link: securityLink(SecurityPageName.siemMigrationsDashboards),
                   sideNavVersion: 'v2',
                 },
