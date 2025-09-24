@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TabItem } from '@kbn/unified-tabs';
-import { cloneDeep, differenceBy, omit, pick } from 'lodash';
+import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
+import type { TabItem } from '@kbn/unified-tabs';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import type { TabState } from '../types';
+import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -105,15 +105,12 @@ export const setTabs: InternalStateThunkActionCreator<
 export const updateTabs: InternalStateThunkActionCreator<
   [{ items: TabState[] | TabItem[]; selectedItem: TabState | TabItem | null }],
   Promise<void>
-> = ({ items, selectedItem }) =>
-  async function updateTabsThunkFn(
-    dispatch,
-    getState,
-    { services, runtimeStateManager, urlStateStorage }
-  ) {
+> =
+  ({ items, selectedItem }) =>
+    async function updateTabsThunkFn (dispatch, getState, { services, runtimeStateManager, urlStateStorage })  {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
-    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+    const currentTabId = currentState.tabs.unsafeCurrentId;
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
     const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
@@ -129,7 +126,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           },
         },
         ...existingTab,
-        ...pick(item, 'id', 'label', 'duplicatedFromId'),
+        ...item,
       };
 
       if (!existingTab) {
@@ -171,19 +168,17 @@ export const updateTabs: InternalStateThunkActionCreator<
           tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
         } else if (!tab.initialAppState) {
           // the new tab is a fresh one
-          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTab.id)?.query;
+          const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTabId)?.query;
           const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
 
           if (!currentQuery || !currentDataView) {
             return tab;
           }
 
-          const isCurrentModeESQL = isOfAggregateQueryType(currentQuery);
-
           tab.initialAppState = {
-            query: isCurrentModeESQL
-              ? { esql: getInitialESQLQuery(currentDataView, true) }
-              : undefined,
+            ...(isOfAggregateQueryType(currentQuery)
+              ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
+              : {}),
             dataSource: createDataSource({
               dataView: currentDataView,
               query: currentQuery,
@@ -195,10 +190,12 @@ export const updateTabs: InternalStateThunkActionCreator<
       return tab;
     });
 
-    if (selectedItem?.id !== currentTab.id) {
+    if (selectedItem?.id !== currentTabId) {
       currentTabStateContainer?.actions.stopSyncing();
 
-      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
+      const nextTab = selectedItem
+        ? updatedTabs.find((tab) => tab.id === selectedItem.id)
+        : undefined;
       const nextTabRuntimeState = selectedItem
         ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
         : undefined;
@@ -227,6 +224,11 @@ export const updateTabs: InternalStateThunkActionCreator<
         );
 
         nextTabStateContainer.actions.initializeAndSync();
+
+        if (nextTab.forceFetchOnSelect) {
+          nextTabStateContainer.dataState.reset();
+          nextTabStateContainer.actions.fetchData();
+        }
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
         await urlStateStorage.set(APP_STATE_URL_KEY, null);
@@ -238,7 +240,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     dispatch(
       setTabs({
         allTabs: updatedTabs,
-        selectedTabId: selectedItem?.id ?? currentTab.id,
+        selectedTabId: selectedItem?.id ?? currentTabId,
         recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
       })
     );

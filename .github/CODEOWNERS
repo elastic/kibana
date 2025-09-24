@@ -508,6 +508,7 @@ src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
@@ -923,7 +924,6 @@ x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kiban
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-streams-ai-cli @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
@@ -2457,7 +2457,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
+/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Cloud Security Posture
 

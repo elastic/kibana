@@ -36,12 +36,11 @@ import {
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
-  type InternalStateDataRequestParams,
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
 import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
-import { selectTab } from './selectors';
+import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
@@ -52,6 +51,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
@@ -61,8 +61,9 @@ const initialState: DiscoverInternalState = {
     areInitializing: false,
     byId: {},
     allIds: [],
-    unsafeCurrentId: '',
+    unsavedIds: [],
     recentlyClosedTabIds: [],
+    unsafeCurrentId: '',
   },
 };
 
@@ -106,7 +107,8 @@ export const internalStateSlice = createSlice({
       >(
         (acc, tab) => ({
           ...acc,
-          [tab.id]: tab,
+          [tab.id]:
+            tab.id === action.payload.selectedTabId ? { ...tab, forceFetchOnSelect: false } : tab,
         }),
         {}
       );
@@ -115,7 +117,17 @@ export const internalStateSlice = createSlice({
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
 
-    setIsDataViewLoading: (state, action: TabAction<{ isDataViewLoading: boolean }>) =>
+    setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
+      state.hasUnsavedChanges = action.payload.hasUnsavedChanges;
+      state.tabs.unsavedIds = action.payload.unsavedTabIds;
+    },
+
+    setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
+      withTab(state, action, (tab) => {
+        tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
+      }),
+
+    setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
       }),
@@ -144,29 +156,19 @@ export const internalStateSlice = createSlice({
       state.initialDocViewerTabId = undefined;
     },
 
-    setDataRequestParams: (
-      state,
-      action: TabAction<{ dataRequestParams: InternalStateDataRequestParams }>
-    ) =>
+    setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
       withTab(state, action, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
-    setGlobalState: (
-      state,
-      action: TabAction<{
-        globalState: TabState['globalState'];
-      }>
-    ) =>
+    setGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
       withTab(state, action, (tab) => {
         tab.globalState = action.payload.globalState;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: TabAction<{
-        overriddenVisContextAfterInvalidation: TabState['overriddenVisContextAfterInvalidation'];
-      }>
+      action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
     ) =>
       withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation =
@@ -209,10 +211,7 @@ export const internalStateSlice = createSlice({
           },
         },
       }),
-      reducer: (
-        state,
-        action: TabAction<{ resetDefaultProfileState: TabState['resetDefaultProfileState'] }>
-      ) =>
+      reducer: (state, action: TabAction<Pick<TabState, 'resetDefaultProfileState'>>) =>
         withTab(state, action, (tab) => {
           tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
         }),
