@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
+  useUpdateEffect,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
@@ -194,7 +195,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [tool, reset]);
 
   // Switching tool types clears tool-specific fields
-  useEffect(() => {
+  useUpdateEffect(() => {
     if (!toolType) return;
     if (mode !== ToolFormMode.Create) return;
     const currentValues = getValues();
@@ -246,7 +247,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   );
 
   const renderTestButton = useCallback(
-    ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
+    ({ size = 's', testSubj }: Pick<EuiButtonProps, 'size'> & { testSubj?: string } = {}) => {
       const isCreateMode = mode === ToolFormMode.Create;
       const commonProps: EuiButtonProps = {
         size,
@@ -259,11 +260,17 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           onClick={handleSubmit(handleSaveAndTest)}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_TEST}
           minWidth="124px"
+          data-test-subj={testSubj}
         >
           {labels.tools.saveAndTestButtonLabel}
         </EuiButton>
       ) : (
-        <EuiButton {...commonProps} onClick={handleTestTool} minWidth="112px">
+        <EuiButton
+          {...commonProps}
+          onClick={handleTestTool}
+          minWidth="112px"
+          data-test-subj={testSubj}
+        >
           {labels.tools.testButtonLabel}
         </EuiButton>
       );
@@ -344,7 +351,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               ...(mode !== ToolFormMode.View
                 ? [renderSaveButton({ size: 'm', testSubj: 'toolFormSaveButton' })]
                 : []),
-              renderTestButton({ size: 'm' }),
+              renderTestButton({ size: 'm', testSubj: 'toolFormTestButton' }),
               ...(mode === ToolFormMode.Edit ? [<ToolEditContextMenu />] : []),
             ]}
             rightSideGroupProps={{ gutterSize: 's' }}

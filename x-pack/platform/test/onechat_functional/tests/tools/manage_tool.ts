@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('manage tool', function () {
     it('should edit a tool from the tool details page', async () => {
@@ -79,10 +80,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .expect(200);
       await common.navigateToApp(APP_ID, {
         path: `tools/${toolId}`,
-        search: 'open_test_flyout=true',
       });
+      await testSubjects.click('toolFormTestButton');
       await testSubjects.existOrFail('euiFlyoutCloseButton');
+      await testSubjects.existOrFail('agentBuilderToolTestSubmitButton');
+      await testSubjects.click('agentBuilderToolTestSubmitButton');
+
+      await testSubjects.existOrFail('agentBuilderToolTestResponse');
+      await retry.try(async () => {
+        const response = await testSubjects.getVisibleText('agentBuilderToolTestResponse');
+        if (response.includes('{}')) {
+          throw new Error('Tool execution response not ready');
+        }
+      });
     });
+
     it('should delete a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest
