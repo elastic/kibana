@@ -164,7 +164,7 @@ $$$sort-options$$$`sort:options`
 $$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview`
 :   Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
-$$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated`
+$$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated 9.0`
 :   The UI theme that the {{kib}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{kib}} UI theme follow the system theme. You must refresh the page to apply the setting.
 
 $$$theme-version$$$`theme:version`
