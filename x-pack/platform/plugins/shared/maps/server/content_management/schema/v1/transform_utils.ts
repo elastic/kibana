@@ -8,7 +8,7 @@
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import type { MapItem } from '../../../../common/content_management';
-import type { MapAttributes } from './types';
+import type { MapAttributes } from './map_attributes_schema';
 import type { StoredMapAttributes } from '../../../saved_objects/types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {

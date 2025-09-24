@@ -21,7 +21,6 @@ import type {
 import type { MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import type {
-  MapAttributes,
   MapsGetOut,
   MapsSearchOptions,
   MapsCreateOptions,
@@ -29,6 +28,7 @@ import type {
   MapsUpdateOptions,
   MapsUpdateOut,
 } from './schema/v1/types';
+import type { MapAttributes } from './schema/v1/map_attributes_schema';
 import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
 import type { StoredMapAttributes } from '../saved_objects/types';

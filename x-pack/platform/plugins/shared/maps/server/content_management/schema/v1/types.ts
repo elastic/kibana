@@ -7,18 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
-  mapAttributesSchema,
   mapsGetResultSchema,
   mapsCreateOptionsSchema,
   mapsCreateResultSchema,
   mapsSearchOptionsSchema,
   mapsUpdateOptionsSchema,
 } from './cm_services';
-
-/**
- * Shape of map attributes in REST APIs
- */
-export type MapAttributes = TypeOf<typeof mapAttributesSchema>;
 
 export type MapsCreateOptions = TypeOf<typeof mapsCreateOptionsSchema>;
 export type MapsUpdateOptions = TypeOf<typeof mapsUpdateOptionsSchema>;

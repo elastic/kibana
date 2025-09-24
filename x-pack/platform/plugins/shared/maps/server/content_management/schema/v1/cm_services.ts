@@ -12,20 +12,7 @@ import {
   createResultSchema,
   referencesSchema,
 } from '@kbn/content-management-utils';
-
-/**
- * TODO destringify values
- */
-export const mapAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    description: schema.maybe(schema.string()),
-    mapStateJSON: schema.maybe(schema.string()),
-    layerListJSON: schema.maybe(schema.string()),
-    uiStateJSON: schema.maybe(schema.string()),
-  },
-  { unknowns: 'forbid' }
-);
+import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
