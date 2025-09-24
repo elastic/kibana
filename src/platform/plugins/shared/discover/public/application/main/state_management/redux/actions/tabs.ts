@@ -343,7 +343,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     // to the URL clears it, but initial location state must be passed on,
     // e.g. ad hoc data views specs
     if (locationState) {
-      history.replace(history.createHref(history.location), locationState);
+      history.replace({ ...history.location, state: locationState });
     }
 
     dispatch(
