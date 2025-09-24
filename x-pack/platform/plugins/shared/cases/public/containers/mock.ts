@@ -18,7 +18,6 @@ import type {
   CaseConnector,
   Attachment,
   ObservableType,
-  AlertAttachment,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -53,6 +52,7 @@ import type {
   InternalFindCaseUserActions,
   CaseSummary,
   InferenceConnectors,
+  EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -138,6 +138,21 @@ export const alertCommentWithIndices: AlertAttachmentUI = {
     id: 'rule-id-1',
     name: 'Awesome rule',
   },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const eventComment: EventAttachmentUI = {
+  eventId: 'event-id-1',
+  index: 'event-index-1',
+  type: AttachmentType.event,
+  id: 'event-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
@@ -249,6 +264,7 @@ export const basicCase: CaseUI = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
@@ -388,6 +404,7 @@ export const mockCase: CaseUI = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
@@ -417,37 +434,9 @@ export const basicCommentPatch: AttachmentUI = {
   },
 };
 
-export const alertCommentPatch = {
-  id: '56bf08d1-540d-33dr-b712-9ebface784r2',
-  version: 'test',
-  type: AttachmentType.alert,
-  alertId: [
-    '00cea26c-4396-49ad-8e80-e32146bf2ee6',
-    '8591828c-3e33-4588-a3b8-5dfcad22786e',
-    '920b1cbf-e6a8-4164-a83c-6ae52e5a60f2',
-    'd2a19346-5f1a-467b-9fd4-e8e1241a6786',
-  ],
-  index: [
-    '.internal.alerts-observability.slo.alerts-default-000001',
-    '.internal.alerts-observability.slo.alerts-default-000001',
-    '.internal.alerts-observability.slo.alerts-default-000001',
-    '.internal.alerts-observability.slo.alerts-default-000001',
-  ],
-  rule: {
-    id: '97bf08d1-540d-44b0-b712-9ebface5331d',
-    name: 'Ticket Price Burn Rate rule',
-  },
-  owner: 'observability',
-} as AlertAttachment;
-
 export const basicCaseCommentPatch = {
   ...basicCase,
   comments: [basicCommentPatch],
-};
-
-export const alertCaseCommentPatch = {
-  ...basicCase,
-  comments: [alertCommentPatch],
 };
 
 export const casesMetrics: CasesMetrics = {
@@ -951,6 +940,24 @@ export const getMultipleAlertsUserAction = (
         id: 'rule-id-1',
         name: 'Awesome rule',
       },
+    },
+  },
+  ...overrides,
+});
+
+export const getEventUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
+  id: 'event-action-id',
+  commentId: 'event-comment-id',
+  type: UserActionTypes.comment,
+  payload: {
+    comment: {
+      type: AttachmentType.event,
+      eventId: 'event-id-1',
+      index: 'index-id-1',
+      owner: SECURITY_SOLUTION_OWNER,
     },
   },
   ...overrides,

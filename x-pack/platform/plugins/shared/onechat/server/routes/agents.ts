@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type {
   GetAgentResponse,
@@ -16,13 +17,12 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
-import { getTechnicalPreviewWarning, supportedToolTypes } from './utils';
+import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
-    type: schema.maybe(supportedToolTypes),
     tool_ids: schema.arrayOf(schema.string()),
   })
 );
@@ -33,7 +33,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // List agents
   router.versioned
     .get({
-      path: '/api/chat/agents',
+      path: `${publicApiPath}/agents`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -54,7 +54,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents: agentsService } = getInternalServices();
-        const service = await agentsService.getScopedClient({ request });
+        const service = await agentsService.getRegistry({ request });
         const agents = await service.list();
         return response.ok<ListAgentResponse>({ body: { results: agents } });
       })
@@ -63,7 +63,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Get agent by id
   router.versioned
     .get({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -86,7 +86,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient({ request });
+        const service = await agents.getRegistry({ request });
 
         const profile = await service.get(request.params.id);
         return response.ok<GetAgentResponse>({ body: profile });
@@ -96,7 +96,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Create agent
   router.versioned
     .post({
-      path: '/api/chat/agents',
+      path: `${publicApiPath}/agents`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -132,7 +132,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient({ request });
+        const service = await agents.getRegistry({ request });
         const profile = await service.create(request.body);
         return response.ok<CreateAgentResponse>({ body: profile });
       })
@@ -141,7 +141,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Update agent
   router.versioned
     .put({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -179,7 +179,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient({ request });
+        const service = await agents.getRegistry({ request });
         const profile = await service.update(request.params.id, request.body);
         return response.ok<UpdateAgentResponse>({ body: profile });
       })
@@ -188,7 +188,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Delete agent
   router.versioned
     .delete({
-      path: '/api/chat/agents/{id}',
+      path: `${publicApiPath}/agents/{id}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
@@ -211,7 +211,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient({ request });
+        const service = await agents.getRegistry({ request });
 
         const result = await service.delete({ id: request.params.id });
         return response.ok<DeleteAgentResponse>({

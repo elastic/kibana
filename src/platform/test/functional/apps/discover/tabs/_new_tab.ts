@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
-      expect(await esql.getEsqlEditorQuery()).to.be('FROM logsta* | LIMIT 10');
+      expect(await esql.getEsqlEditorQuery()).to.be('FROM logsta*');
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // tab 1 - create another new tab in ES|QL mode
-      const defaultQuery = 'FROM logst* | LIMIT 10';
+      const defaultQuery = 'FROM logst*';
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();

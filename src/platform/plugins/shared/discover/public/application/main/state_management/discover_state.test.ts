@@ -26,7 +26,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { getInitialState } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -559,11 +559,14 @@ describe('Discover state', () => {
       const savedSearch = copySavedSearch(savedSearchMock);
       const savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       const { state, customizationService, getCurrentUrl } = await getState('/', {
@@ -790,11 +793,14 @@ describe('Discover state', () => {
       let savedSearch = copySavedSearch(savedSearchMock);
       let savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       const { state, customizationService, history } = await getState('/', {
@@ -817,6 +823,8 @@ describe('Discover state', () => {
       savedSearch = { ...copySavedSearch(savedSearchMockWithTimeField), id: savedSearch.id };
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
@@ -865,11 +873,14 @@ describe('Discover state', () => {
       savedSearch = copySavedSearch(savedSearchMock);
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       mockServices.data.search.searchSource.create = jest
@@ -1043,11 +1054,18 @@ describe('Discover state', () => {
           globalState: { filters },
         })
       );
-      state.appState.set({ query });
-      await state.actions.transitionFromDataViewToESQL(dataViewMock);
-      expect(state.appState.getState().query).toStrictEqual({
-        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""") | LIMIT 10',
+      state.appState.set({
+        query,
+        sort: [
+          ['@timestamp', 'asc'],
+          ['bytes', 'desc'],
+        ],
       });
+      await state.actions.transitionFromDataViewToESQL(dataViewMockWithTimeField);
+      expect(state.appState.getState().query).toStrictEqual({
+        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
+      });
+      expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
       expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
       expect(state.appState.getState().filters).toStrictEqual([]);
     });
@@ -1055,7 +1073,7 @@ describe('Discover state', () => {
     test('transitionFromESQLToDataView', async () => {
       const savedSearchWithQuery = copySavedSearch(savedSearchMock);
       const query = {
-        esql: 'FROM the-data-view-title | LIMIT 10',
+        esql: 'FROM the-data-view-title',
       };
       savedSearchWithQuery.searchSource.setField('query', query);
       const { state } = await getState('/', { savedSearch: savedSearchWithQuery });

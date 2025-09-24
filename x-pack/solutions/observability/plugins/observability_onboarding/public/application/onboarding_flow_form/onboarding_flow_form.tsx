@@ -223,6 +223,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         columns={metricsOnboardingEnabled ? 2 : 3}
         role="group"
         aria-labelledby={categorySelectorTitleId}
+        data-test-subj="observabilityOnboardingUseCaseGrid"
       >
         {options.map((option) => (
           <EuiFlexItem

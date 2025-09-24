@@ -23,6 +23,10 @@ const tab1 = getTabStateMock({
   id: '1',
   label: 'Tab 1',
   duplicatedFromId: '0',
+  initialInternalState: {
+    serializedSearchSource: { index: 'test-data-view-1' },
+    visContext: { foo: 'bar' },
+  },
   globalState: {
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
@@ -32,6 +36,10 @@ const tab1 = getTabStateMock({
 const tab2 = getTabStateMock({
   id: '2',
   label: 'Tab 2',
+  initialInternalState: {
+    serializedSearchSource: { index: 'test-data-view-2' },
+    visContext: { bar: 'foo' },
+  },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
@@ -48,12 +56,14 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": true,
@@ -70,7 +80,10 @@ describe('tab mapping utils', () => {
             "columns": Array [
               "column2",
             ],
-            "dataSource": undefined,
+            "dataSource": Object {
+              "dataViewId": "test-data-view-2",
+              "type": "dataView",
+            },
             "density": undefined,
             "filters": undefined,
             "grid": Object {},
@@ -85,7 +98,13 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "initialInternalState": Object {
-            "serializedSearchSource": Object {},
+            "controlGroupJson": undefined,
+            "serializedSearchSource": Object {
+              "index": "test-data-view-2",
+            },
+            "visContext": Object {
+              "bar": "foo",
+            },
           },
           "isDataViewLoading": false,
           "label": "Tab 2",
@@ -106,12 +125,14 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
+          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
+          "esqlVariables": undefined,
           "globalState": Object {
             "refreshInterval": Object {
               "pause": false,
@@ -128,7 +149,10 @@ describe('tab mapping utils', () => {
             "columns": Array [
               "column2",
             ],
-            "dataSource": undefined,
+            "dataSource": Object {
+              "dataViewId": "test-data-view-2",
+              "type": "dataView",
+            },
             "density": undefined,
             "filters": undefined,
             "grid": Object {},
@@ -143,7 +167,13 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "initialInternalState": Object {
-            "serializedSearchSource": Object {},
+            "controlGroupJson": undefined,
+            "serializedSearchSource": Object {
+              "index": "test-data-view-2",
+            },
+            "visContext": Object {
+              "bar": "foo",
+            },
           },
           "isDataViewLoading": false,
           "label": "Tab 2",
@@ -179,6 +209,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "description",
           "grid": Object {},
@@ -227,7 +258,9 @@ describe('tab mapping utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
     });
@@ -246,6 +279,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -258,13 +292,17 @@ describe('tab mapping utils', () => {
           "rowHeight": undefined,
           "rowsPerPage": undefined,
           "sampleSize": undefined,
-          "serializedSearchSource": Object {},
+          "serializedSearchSource": Object {
+            "index": "test-data-view-1",
+          },
           "sort": Array [],
           "timeRange": undefined,
           "timeRestore": false,
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
       savedObjectTab = fromTabStateToSavedObjectTab({ tab: tab1, timeRestore: true, services });
@@ -274,6 +312,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "column1",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -289,7 +328,9 @@ describe('tab mapping utils', () => {
           "rowHeight": undefined,
           "rowsPerPage": undefined,
           "sampleSize": undefined,
-          "serializedSearchSource": Object {},
+          "serializedSearchSource": Object {
+            "index": "test-data-view-1",
+          },
           "sort": Array [],
           "timeRange": Object {
             "from": "now-7d",
@@ -298,7 +339,9 @@ describe('tab mapping utils', () => {
           "timeRestore": true,
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
     });
@@ -308,7 +351,7 @@ describe('tab mapping utils', () => {
     it('should map saved search to saved object tab', () => {
       const savedObjectTab = fromSavedSearchToSavedObjectTab({
         tab: tab1,
-        savedSearch: savedSearchMock,
+        savedSearch: { ...savedSearchMock, visContext: { foo: 'bar' } },
         services,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
@@ -317,6 +360,7 @@ describe('tab mapping utils', () => {
           "columns": Array [
             "default_column",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -337,7 +381,9 @@ describe('tab mapping utils', () => {
           "timeRestore": undefined,
           "usesAdHocDataView": undefined,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
     });

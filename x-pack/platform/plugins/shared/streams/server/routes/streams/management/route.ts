@@ -90,10 +90,15 @@ export const getStreamsStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean | 'conflict' }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ enabled: boolean | 'conflict'; can_manage: boolean }> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    return { enabled: await streamsClient.checkStreamStatus() };
+    const privileges = await streamsClient.getPrivileges('logs,logs.*');
+
+    return { enabled: await streamsClient.checkStreamStatus(), can_manage: privileges.manage };
   },
 });
 

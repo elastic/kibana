@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
     let migrationId: string;
     let indexedIds: string[];
     beforeEach(async () => {
-      deleteAllDashboardMigrations(es);
+      await deleteAllDashboardMigrations(es);
       const migrationResponse = await dashboardMigrationRoutes.create({});
       migrationId = migrationResponse.body.migration_id;
 
