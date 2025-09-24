@@ -1050,8 +1050,8 @@ export const getSavedObjectTypes = (
         '7': {
           changes: [
             {
-              type: 'data_backfill',
-              backfillFn: disableBrowserInputWhenBothEnabled,
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
             },
           ],
         },

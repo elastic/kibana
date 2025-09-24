@@ -44,9 +44,11 @@ describe('package-policy model-version: disableBrowserInputWhenBothEnabled', () 
 
     const migrated = disableBrowserInputWhenBothEnabled(pkgPolicyDoc, ctx);
 
-    const browser = migrated.attributes.inputs?.find((i) => i.type === 'synthetics/browser');
+    const browser = migrated.document.attributes.inputs?.find(
+      (i) => i.type === 'synthetics/browser'
+    );
     expect(browser?.enabled).toBe(false);
-    const http = migrated.attributes.inputs?.find((i) => i.type === 'synthetics/http');
+    const http = migrated.document.attributes.inputs?.find((i) => i.type === 'synthetics/http');
     expect(http?.enabled).toBe(true);
   });
 
@@ -74,7 +76,7 @@ describe('package-policy model-version: disableBrowserInputWhenBothEnabled', () 
 
     const migrated = disableBrowserInputWhenBothEnabled(otherDoc, ctx);
 
-    expect(migrated).toEqual(otherDoc); // identity – no changes
+    expect(migrated.document).toEqual(otherDoc);
   });
 
   it('does nothing when only one input is enabled', () => {
@@ -104,6 +106,6 @@ describe('package-policy model-version: disableBrowserInputWhenBothEnabled', () 
 
     const migrated = disableBrowserInputWhenBothEnabled(pkgPolicyDoc, ctx);
 
-    expect(migrated).toEqual(pkgPolicyDoc); // unchanged
+    expect(migrated.document).toEqual(pkgPolicyDoc);
   });
 });
