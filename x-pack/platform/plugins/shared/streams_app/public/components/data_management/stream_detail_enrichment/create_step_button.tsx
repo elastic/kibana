@@ -114,7 +114,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
   const inlineButton = (
     <EuiButtonIcon
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
-      size="s"
+      size="xs"
       iconType="plusInCircle"
       onClick={togglePopover}
       disabled={!canAddStep}

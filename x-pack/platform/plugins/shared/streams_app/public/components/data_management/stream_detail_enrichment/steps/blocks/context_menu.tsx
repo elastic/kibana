@@ -126,7 +126,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({ stepRef, stepU
         }
       )}
       disabled={!!stepUnderEdit}
-      size="s"
+      size="xs"
       iconType="boxesVertical"
       onClick={togglePopover}
     />
