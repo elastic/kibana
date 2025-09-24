@@ -8,18 +8,17 @@
  */
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { once } from 'lodash';
-import type { SidebarToggleState } from '../../../../../application/types';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { SidebarToggleStateOverride } from '../../../../application/types';
+import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const createSidebarToggleState = (
   metricsExperienceClient?: MetricsExperienceClient
-): DataSourceProfileProvider['profile']['getSidebarToggleState'] =>
-  once((prev: () => SidebarToggleState) =>
+): DataSourceProfileProvider['profile']['getSidebarToggleStateOverride'] =>
+  once((prev: () => SidebarToggleStateOverride) =>
     once(() => {
       return {
         ...(prev ? prev() : {}),
         isCollapsed: true,
-        toggle: undefined,
       };
     })
   );

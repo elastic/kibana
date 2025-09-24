@@ -359,17 +359,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     false
   );
 
-  const getSidebarToggleStateAccessor = useProfileAccessor('getSidebarToggleState');
+  const getSidebarToggleStateOverrideAccessor = useProfileAccessor('getSidebarToggleStateOverride');
   useMemo(() => {
-    const initialSidebarState = getSidebarToggleStateAccessor(() => {
+    const sidebarStateOverride = getSidebarToggleStateOverrideAccessor(() => {
       return undefined;
     })();
-    if (initialSidebarState) {
+    if (sidebarStateOverride) {
       const currentState = sidebarToggleState$.getValue();
-      currentState.toggle?.(initialSidebarState.isCollapsed);
+      currentState.toggle?.(sidebarStateOverride.isCollapsed);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getSidebarToggleStateAccessor]);
+  }, [getSidebarToggleStateOverrideAccessor]);
 
   useEffect(() => {
     sidebarToggleState$.next({

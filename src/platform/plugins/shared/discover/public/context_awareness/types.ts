@@ -29,7 +29,7 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { SidebarToggleState } from '../application/types';
+import type { SidebarToggleStateOverride } from '../application/types';
 
 /**
  * Supports extending the Discover app menu
@@ -370,7 +370,7 @@ export interface Profile {
    * e.g.: with metric queries, the intention is to close the sidebar.
    * @returns The sidebar toggle state, or `undefined` if default behavior is desired.
    */
-  getSidebarToggleState: () => SidebarToggleState | undefined;
+  getSidebarToggleStateOverride: () => SidebarToggleStateOverride;
 
   /**
    * Chart

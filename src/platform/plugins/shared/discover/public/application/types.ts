@@ -31,3 +31,10 @@ export interface SidebarToggleState {
   isCollapsed: boolean;
   toggle: undefined | ((isCollapsed: boolean) => void);
 }
+
+// The type used to override the sidebar toggle state when a context aware profile is applied (e.g. Metrics)
+export type SidebarToggleStateOverride =
+  | {
+      isCollapsed: boolean;
+    }
+  | undefined;
