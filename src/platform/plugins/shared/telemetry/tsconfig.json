@@ -43,7 +43,7 @@
     "@kbn/telemetry-config",
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",

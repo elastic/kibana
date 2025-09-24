@@ -28,7 +28,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/logging",
     "@kbn/core-http-common",

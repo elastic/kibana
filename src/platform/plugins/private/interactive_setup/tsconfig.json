@@ -28,6 +28,7 @@
     "@kbn/css-utils",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",

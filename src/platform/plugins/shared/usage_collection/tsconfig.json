@@ -29,10 +29,10 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/lazy-object",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-execution-context-server-mocks",
     "@kbn/core-metrics-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",

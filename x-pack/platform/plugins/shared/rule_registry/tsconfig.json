@@ -36,7 +36,6 @@
     "@kbn/alerting-types",
     "@kbn/management-settings-ids",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks"

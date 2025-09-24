@@ -73,7 +73,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-doc-links-server-mocks",
-    "@kbn/core-status-server-mocks"
+    "@kbn/core-status-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

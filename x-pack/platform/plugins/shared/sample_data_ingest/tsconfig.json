@@ -19,7 +19,6 @@
     "@kbn/logging-mocks",
     "@kbn/inference-common",
     "@kbn/i18n",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
   ]

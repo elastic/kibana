@@ -61,7 +61,6 @@
     "@kbn/css-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/config-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks"
   ],

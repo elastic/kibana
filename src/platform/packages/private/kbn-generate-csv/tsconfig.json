@@ -33,9 +33,9 @@
     "@kbn/task-manager-plugin",
     "@kbn/esql-utils",
     "@kbn/safer-lodash-set",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ]
 }

@@ -60,9 +60,9 @@
     "@kbn/xstate-utils",
     "@kbn/ml-plugin",
     "@kbn/saved-search-component",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ]
 }
