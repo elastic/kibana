@@ -174,9 +174,9 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
         errorMessage = 'HTTP request was cancelled';
         isAborted = true;
       } else if (error.response) {
-        errorMessage = `HTTP Error: ${error.response.status} ${error.response.statusText}`;
+        errorMessage = `${error.response.status} ${error.response.statusText}`;
       } else {
-        errorMessage = `HTTP Error: ${error.message ? error.message : error.name}`;
+        errorMessage = `${error.message ? error.message : error.name}`;
       }
     } else if (error instanceof Error) {
       errorMessage = error.message;

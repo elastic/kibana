@@ -78,6 +78,8 @@ describe('HttpStepImpl', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => (mockedAxios as unknown as jest.Mock).mockReset());
+
   describe('getInput', () => {
     it('should render URL with context', () => {
       const context = {
@@ -287,6 +289,27 @@ describe('HttpStepImpl', () => {
       expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalled();
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+    });
+
+    it('should return error about cancelled request if aborted', async () => {
+      const axiosError = {
+        code: 'ERR_CANCELED',
+        message: 'Some error',
+      };
+
+      (mockedAxios as unknown as jest.Mock).mockRejectedValueOnce(axiosError);
+      (mockedAxios as any).isAxiosError = jest.fn().mockReturnValue(true);
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+      };
+
+      const result = await (httpStep as any)._run(input);
+
+      expect((mockedAxios as any).isAxiosError).toHaveBeenCalledWith(axiosError);
+      expect(result.error).toBe('HTTP request was cancelled');
     });
   });
 
