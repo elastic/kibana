@@ -14,9 +14,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 
 const solutions = ['es', 'oblt', 'security'] as const;
 
-const solutionSchemaLiterals = [...solutions].map((s) => schema.literal(s)) as [
-  ReturnType<typeof schema.literal<Exclude<SolutionId, 'chat'>>>
-];
+const solutionSchema = schema.enum<Exclude<SolutionId, 'chat'>>(solutions);
 
 export const ConfigSchema = schema.object({
   enabled: schema.conditional(
@@ -61,7 +59,7 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
-  defaultSolution: schema.maybe(schema.oneOf(solutionSchemaLiterals)),
+  defaultSolution: schema.maybe(solutionSchema),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

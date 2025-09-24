@@ -22,11 +22,7 @@ const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
-const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
-  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
-  ]
-);
+const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.enum(RUNTIME_FIELD_TYPES2);
 
 const primitiveRuntimeFieldSchemaShared = {
   script: schema.maybe(

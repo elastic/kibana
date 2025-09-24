@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
@@ -21,9 +21,7 @@ const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
 );
 
-const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
-  Type<string>
-];
+const UseLogicalAndField = schema.enum(useLogicalAndFields);
 
 const CommonQuerySchema = {
   query: schema.maybe(schema.string()),
@@ -37,7 +35,7 @@ const CommonQuerySchema = {
   monitorQueryIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+    schema.oneOf([schema.string(), schema.arrayOf(UseLogicalAndField)])
   ),
 };
 

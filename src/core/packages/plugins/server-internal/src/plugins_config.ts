@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema, type Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
@@ -27,15 +27,7 @@ const configSchema = schema.object({
    * Defines an array of groups to include when loading plugins.
    * Plugins from all groups will be taken into account if the parameter is not provided.
    */
-  allowlistPluginGroups: schema.maybe(
-    schema.arrayOf(
-      schema.oneOf(
-        KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
-          Type<KibanaGroup> // This cast is needed because it's different to Type<T>[] :sight:
-        ]
-      )
-    )
-  ),
+  allowlistPluginGroups: schema.maybe(schema.arrayOf(schema.enum<KibanaGroup>(KIBANA_GROUPS))),
   /**
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
