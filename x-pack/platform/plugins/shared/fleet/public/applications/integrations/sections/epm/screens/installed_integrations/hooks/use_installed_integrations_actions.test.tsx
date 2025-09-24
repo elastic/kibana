@@ -247,4 +247,92 @@ describe('useInstalledIntegrationsActions', () => {
       expect(sendBulkUpgradePackagesForRq).not.toHaveBeenCalled();
     });
   });
+
+  describe('bulkRollbackIntegrationsWithConfirmModal', () => {
+    it('should work with single integration', async () => {
+      const renderer = createFleetTestRendererMock();
+      const res = renderer.renderHook(() => useInstalledIntegrationsActions());
+      const bulkRollbackIntegrationsWithConfirmModalResult =
+        res.result.current.actions.bulkRollbackIntegrationsWithConfirmModal([
+          {
+            name: 'test',
+            installationInfo: {
+              version: '1.2.0',
+              previous_version: '1.0.0',
+            },
+          },
+        ] as any);
+
+      // Mount the modal
+      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modalResult = renderer.render(modal as any);
+
+      modalResult.getByTestId('confirmModalConfirmButton').click();
+
+      await expect(bulkRollbackIntegrationsWithConfirmModalResult).resolves;
+
+      expect(sendBulkRollbackPackagesForRq).toBeCalledTimes(1);
+      expect(sendBulkRollbackPackagesForRq).toBeCalledWith({ packages: [{ name: 'test' }] });
+    });
+
+    it('should work with multiple integrations', async () => {
+      const renderer = createFleetTestRendererMock();
+      const res = renderer.renderHook(() => useInstalledIntegrationsActions());
+      const bulkRollbackIntegrationsWithConfirmModalResult =
+        res.result.current.actions.bulkRollbackIntegrationsWithConfirmModal([
+          {
+            name: 'test',
+            installationInfo: {
+              version: '1.2.0',
+              previous_version: '1.0.0',
+            },
+          },
+          {
+            name: 'test2',
+            installationInfo: {
+              version: '1.2.0',
+              previous_version: '1.2.0',
+            },
+          },
+        ] as any);
+
+      // Mount the modal
+      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modalResult = renderer.render(modal as any);
+
+      modalResult.getByTestId('confirmModalConfirmButton').click();
+
+      await expect(bulkRollbackIntegrationsWithConfirmModalResult).resolves;
+
+      expect(sendBulkRollbackPackagesForRq).toBeCalledTimes(1);
+      expect(sendBulkRollbackPackagesForRq).toBeCalledWith({
+        packages: [{ name: 'test' }, { name: 'test2' }],
+      });
+    });
+
+    it('should support canceling action', async () => {
+      const renderer = createFleetTestRendererMock();
+      const res = renderer.renderHook(() => useInstalledIntegrationsActions());
+      const bulkRollbackIntegrationsWithConfirmModalResult =
+        res.result.current.actions.bulkRollbackIntegrationsWithConfirmModal([
+          {
+            name: 'test',
+            version: '1.2.0',
+            installationInfo: {
+              version: '1.0.0',
+            },
+          },
+        ] as any);
+
+      // Mount the modal
+      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modalResult = renderer.render(modal as any);
+
+      modalResult.getByTestId('confirmModalCancelButton').click();
+
+      await expect(bulkRollbackIntegrationsWithConfirmModalResult).resolves;
+
+      expect(sendBulkRollbackPackagesForRq).not.toHaveBeenCalled();
+    });
+  });
 });
