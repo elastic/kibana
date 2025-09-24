@@ -9,12 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { useKibana } from '../../../../hooks/use_kibana';
 import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
-import {
-  FailureStoreChartBarPhasesSeries,
-  FailureStoreChartBarSeries,
-} from '../common/chart_components';
+import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
 export function FailureStoreIngestionRate({
@@ -26,7 +22,6 @@ export function FailureStoreIngestionRate({
   stats?: FailureStoreStats;
   isLoadingStats: boolean;
 }) {
-  const { isServerless } = useKibana();
   const { timeState } = useTimefilter();
 
   return (
@@ -58,21 +53,12 @@ export function FailureStoreIngestionRate({
         direction="column"
         gutterSize="xs"
       >
-        {isServerless ? (
-          <FailureStoreChartBarSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-          />
-        ) : (
-          <FailureStoreChartBarPhasesSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-          />
-        )}
+        <FailureStoreChartBarSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+        />
       </EuiFlexGroup>
     </EuiPanel>
   );

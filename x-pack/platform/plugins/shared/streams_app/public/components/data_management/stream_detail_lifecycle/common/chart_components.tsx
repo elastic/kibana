@@ -111,7 +111,7 @@ export function FailureStoreChartBarSeries({
       ingestionRateError={ingestionRateError}
       isLoadingStats={isLoadingStats}
       formatAsBytes={formatAsBytes}
-      isFailureStore={false}
+      isFailureStore
     />
   );
 }
@@ -244,42 +244,6 @@ function ChartBarPhasesSeriesBase({
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
-  );
-}
-
-export function FailureStoreChartBarPhasesSeries({
-  definition,
-  stats,
-  timeState,
-  isLoadingStats,
-}: ChartPhasesComponentProps) {
-  const { timeState: defaultTimeState } = useTimefilter();
-  const currentTimeState = timeState || defaultTimeState;
-
-  // Use the appropriate hook based on isFailureStore flag
-  const failureStoreResult = useIngestionRatePerTier({
-    definition,
-    stats,
-    timeState: currentTimeState,
-    isFailureStore: true,
-  });
-
-  const {
-    ingestionRate,
-    isLoading: isLoadingIngestionRate,
-    error: ingestionRateError,
-  } = failureStoreResult;
-
-  const formatAsBytes = Boolean(stats?.bytesPerDoc && stats?.bytesPerDoc > 0);
-
-  return (
-    <ChartBarPhasesSeriesBase
-      ingestionRate={ingestionRate}
-      isLoadingIngestionRate={isLoadingIngestionRate}
-      ingestionRateError={ingestionRateError}
-      isLoadingStats={isLoadingStats}
-      formatAsBytes={formatAsBytes}
-    />
   );
 }
 

@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoFailureStorePanel } from './no_failure_store_panel';
@@ -80,37 +80,39 @@ export const StreamDetailFailureStore = ({
   };
 
   return (
-    <>
-      {readFailureStorePrivilege ? (
-        <>
-          {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.config && (
-            <FailureStoreModal
-              onCloseModal={closeModal}
-              onSaveModal={handleSaveModal}
-              failureStoreProps={{
-                failureStoreEnabled: data?.config.enabled,
-                defaultRetentionPeriod: data?.config.retentionPeriod.default,
-                customRetentionPeriod: data?.config.retentionPeriod.custom,
-              }}
-            />
-          )}
-          {isLoadingStats || data?.config.enabled ? (
-            <FailureStoreInfo
-              openModal={setIsFailureStoreModalOpen}
-              definition={definition}
-              statsError={statsError}
-              isLoadingStats={isLoadingStats}
-              stats={data?.stats}
-              config={data?.config}
-            />
-          ) : (
-            <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />
-          )}
-          <EuiSpacer size="s" />
-        </>
-      ) : (
-        <NoPermissionBanner />
-      )}
-    </>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {readFailureStorePrivilege ? (
+          <>
+            {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.config && (
+              <FailureStoreModal
+                onCloseModal={closeModal}
+                onSaveModal={handleSaveModal}
+                failureStoreProps={{
+                  failureStoreEnabled: data?.config.enabled,
+                  defaultRetentionPeriod: data?.config.retentionPeriod.default,
+                  customRetentionPeriod: data?.config.retentionPeriod.custom,
+                }}
+              />
+            )}
+            {isLoadingStats || data?.config.enabled ? (
+              <FailureStoreInfo
+                openModal={setIsFailureStoreModalOpen}
+                definition={definition}
+                statsError={statsError}
+                isLoadingStats={isLoadingStats}
+                stats={data?.stats}
+                config={data?.config}
+              />
+            ) : (
+              <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />
+            )}
+            <EuiSpacer size="s" />
+          </>
+        ) : (
+          <NoPermissionBanner />
+        )}
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };
