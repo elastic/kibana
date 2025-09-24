@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -34,6 +35,7 @@ export const useAddToCaseActions = ({
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
+  const caseEventsIntegrationEnabled = useIsExperimentalFeatureEnabled('caseEventsIntegration');
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
@@ -41,7 +43,7 @@ export const useAddToCaseActions = ({
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     if (!isAlert) {
-      return ecsData?._id
+      return ecsData?._id && caseEventsIntegrationEnabled
         ? [
             {
               eventId: ecsData?._id ?? '',
@@ -62,7 +64,7 @@ export const useAddToCaseActions = ({
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, isAlert, nonEcsData]);
+  }, [caseEventsIntegrationEnabled, casesUi.helpers, ecsData, isAlert, nonEcsData]);
 
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
@@ -107,7 +109,7 @@ export const useAddToCaseActions = ({
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (userCasesPermissions.createComment && userCasesPermissions.read) {
+    if (userCasesPermissions.createComment && userCasesPermissions.read && caseAttachments.length) {
       return [
         // add to existing case menu item
         {
@@ -133,6 +135,7 @@ export const useAddToCaseActions = ({
   }, [
     userCasesPermissions.createComment,
     userCasesPermissions.read,
+    caseAttachments.length,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,

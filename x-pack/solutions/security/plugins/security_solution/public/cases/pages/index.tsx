@@ -38,6 +38,7 @@ import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -138,6 +139,8 @@ const CaseContainerComponent: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const caseEventsIntegrationEnabled = useIsExperimentalFeatureEnabled('caseEventsIntegration');
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
@@ -153,7 +156,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
-            events: { enabled: true },
+            events: { enabled: caseEventsIntegrationEnabled },
           },
           refreshRef,
           actionsNavigation: {

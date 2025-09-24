@@ -323,6 +323,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Readiness Dashboard feature
    */
   siemReadinessDashboard: false,
+
+  /**
+   * Enables events integration with the Cases plugin
+   */
+  caseEventsIntegration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

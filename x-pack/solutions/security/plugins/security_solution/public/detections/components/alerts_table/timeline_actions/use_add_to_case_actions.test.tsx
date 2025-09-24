@@ -18,6 +18,10 @@ import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+
 const refetch = jest.fn();
 const submit = jest.fn();
 const open = jest.fn().mockImplementation(() => {
@@ -94,14 +98,36 @@ describe('useAddToCaseActions', () => {
     );
   });
 
-  it('should render case options when event is not alert ', () => {
-    const { result } = renderHook(
-      () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+  describe('when cases integration feature is enabled', () => {
+    beforeAll(() => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    });
+
+    it('should render case options when event is not alert ', () => {
+      const { result } = renderHook(
+        () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      expect(result.current.addToCaseActionItems.length).toEqual(2);
+    });
+  });
+
+  describe('when cases integration feature is disabled', () => {
+    beforeAll(() => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    });
+
+    it('should not render case options when event is not alert ', () => {
+      const { result } = renderHook(
+        () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      expect(result.current.addToCaseActionItems.length).toEqual(0);
+    });
   });
 
   it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
