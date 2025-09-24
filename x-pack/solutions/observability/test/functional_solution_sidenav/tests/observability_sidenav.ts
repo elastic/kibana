@@ -90,9 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('renders a feedback callout', async () => {
-        await browser.removeLocalStorageItem('sideNavigationFeedback');
-        await browser.refresh();
-
+        await solutionNavigation.sidenav.feedbackCallout.reset();
         await solutionNavigation.sidenav.openPanel('applications');
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();

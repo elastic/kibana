@@ -73,15 +73,23 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
     );
     if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
-      const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
-      const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
-      log.debug(
-        'SolutionNavigation.sidenav.collapseMoreIfNeeded - More Popover Visible',
-        isExpanded
-      );
-      if (isExpanded === 'true') {
-        await moreMenuItem.click();
-      }
+      // TODO: find a better way to collapse
+      // https://github.com/elastic/kibana/issues/236242
+      await retry.try(async () => {
+        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+        log.debug(
+          'SolutionNavigation.sidenav.collapseMoreIfNeeded - More Popover Visible',
+          isExpanded
+        );
+        if (isExpanded === 'true') {
+          await moreMenuItem.click();
+        }
+        isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+        if (isExpanded === 'true') {
+          throw new Error('More menu still expanded');
+        }
+      });
     }
   }
 
@@ -131,6 +139,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       ) {
         log.debug('SolutionNavigation.sidenav.expectLinkExists', JSON.stringify(by));
 
+        // TODO: find a better way without expanding every time
+        // https://github.com/elastic/kibana/issues/236242
         await expandMoreIfNeeded();
 
         if ('deepLinkId' in by) {
@@ -187,6 +197,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
+        // TODO: find a better way without expanding every time
+        // https://github.com/elastic/kibana/issues/236242
         await expandMoreIfNeeded();
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
@@ -249,8 +261,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async clickPanelLink(navId: string) {
         if (await isV2()) {
+          // TODO: find a better way without trying to collapse every time
+          // https://github.com/elastic/kibana/issues/236242
           await collapseMoreIfNeeded();
+          // TODO: find a better way without trying to dismiss feedback every time
+          // https://github.com/elastic/kibana/issues/236242
           await this.feedbackCallout.dismiss();
+          // TODO: properly distinguish between panel link and main nav link
+          // https://github.com/elastic/kibana/issues/236242
           await testSubjects.click(`~nav-item-id-${navId}`);
         } else {
           await testSubjects.click(`~panelNavItem-id-${navId}`);
@@ -340,6 +358,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           try {
             await this.expectLinkActive({ navId: sectionId });
             // TODO: check if panel is actually open
+            // https://github.com/elastic/kibana/issues/236242
             return true;
           } catch (e) {
             return false;
@@ -398,6 +417,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       feedbackCallout: {
+        async disable() {
+          await browser.setLocalStorageItem('sideNavigationFeedback', `${Date.now()}`);
+          await browser.refresh();
+        },
+        async reset() {
+          await browser.removeLocalStorageItem('sideNavigationFeedback');
+          await browser.refresh();
+        },
         async getFeedbackTestSubjectId() {
           return (await isV2()) ? 'feedbackSnippetPanel' : 'sideNavfeedbackCallout';
         },
@@ -421,6 +448,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
               });
         },
         async dismiss() {
+          // TODO: find a better way without trying to collapse every time
+          // https://github.com/elastic/kibana/issues/236242
+          await collapseMoreIfNeeded();
           const feedbackTestSubjectId = await this.getFeedbackTestSubjectId();
           if (await testSubjects.exists(feedbackTestSubjectId, { timeout: TIMEOUT_CHECK })) {
             await testSubjects.click(await this.getFeedbackDismissTestSubjectId());
