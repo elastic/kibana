@@ -58,7 +58,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize_request.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -163,7 +163,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list.yaml'),
         },
       },
       wrapHandler(async (ctx, _, response) => {
@@ -202,7 +202,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list_request.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list.yaml'),
         },
       },
       wrapHandler(async (ctx, _, response) => {

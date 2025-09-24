@@ -114,7 +114,7 @@ export function registerA2ARoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task_request.yaml'),
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
