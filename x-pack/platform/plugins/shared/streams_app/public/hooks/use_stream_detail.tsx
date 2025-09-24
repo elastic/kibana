@@ -22,7 +22,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: Streams.all.GetResponse & { privileges: { read_failure_store: boolean } };
+  definition: Streams.all.GetResponse;
   loading: boolean;
   refresh: () => void;
 }
