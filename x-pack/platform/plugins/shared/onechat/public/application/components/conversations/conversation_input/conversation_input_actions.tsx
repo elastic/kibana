@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
@@ -18,6 +18,10 @@ interface ConversationInputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
+  agents?: AgentDefinition[];
+  currentAgent?: AgentDefinition | null;
+  isLoading?: boolean;
+  hasActiveConversation?: boolean;
 }
 
 const labels = {
@@ -33,10 +37,12 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
+  agents,
+  currentAgent,
+  isLoading,
+  hasActiveConversation,
 }) => {
   const { setAgentId } = useConversationActions();
-  const agentId = useAgentId();
-  const hasActiveConversation = useHasActiveConversation();
   const { canCancel, cancel } = useSendMessage();
   const { euiTheme } = useEuiTheme();
   const cancelButtonStyles = css`
@@ -47,13 +53,15 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           {hasActiveConversation ? (
-            <AgentDisplay selectedAgentId={agentId} />
+            <AgentDisplay currentAgent={currentAgent} isLoading={isLoading} />
           ) : (
             <AgentSelectDropdown
-              selectedAgentId={agentId}
+              selectedAgentId={currentAgent?.id}
               onAgentChange={(newAgentId: string) => {
                 setAgentId(newAgentId);
               }}
+              agents={agents}
+              isLoading={isLoading}
             />
           )}
         </EuiFlexItem>

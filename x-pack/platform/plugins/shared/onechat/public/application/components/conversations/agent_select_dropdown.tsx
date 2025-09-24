@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useOnechatAgents } from '../../hooks/agents/use_agents';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { labels } from '../../utils/i18n';
@@ -55,14 +55,17 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
 interface AgentSelectDropdownProps {
   selectedAgentId?: string;
   onAgentChange: (agentId: string) => void;
+  agents?: AgentDefinition[];
+  isLoading?: boolean;
 }
 
 export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   selectedAgentId = oneChatDefaultAgentId,
   onAgentChange,
+  agents = [],
+  isLoading = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { agents, isLoading } = useOnechatAgents();
   const { createOnechatUrl } = useNavigation();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

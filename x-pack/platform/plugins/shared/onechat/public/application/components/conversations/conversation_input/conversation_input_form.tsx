@@ -11,8 +11,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
+import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { ConversationInputActions } from './conversation_input_actions';
 
 interface ConversationInputFormProps {
   onSubmit?: () => void;
@@ -27,6 +29,12 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const [input, setInput] = useState('');
   const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
+  const { agents, isLoading } = useOnechatAgents();
+  const agentId = useAgentId();
+  const hasActiveConversation = useHasActiveConversation();
+
+  // Find the current agent from the agents array
+  const currentAgent = agents?.find((agent) => agent.id === agentId);
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {
@@ -71,6 +79,10 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
             setInput(pendingMessage);
           }
         }}
+        agents={agents}
+        currentAgent={currentAgent}
+        isLoading={isLoading}
+        hasActiveConversation={hasActiveConversation}
       />
     </EuiFlexGroup>
   );

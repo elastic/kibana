@@ -7,22 +7,21 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { useOnechatAgentById } from '../../hooks/agents/use_agent_by_id';
+import type { AgentDefinition } from '@kbn/onechat-common';
 
 interface AgentDisplayProps {
-  selectedAgentId?: string;
+  currentAgent?: AgentDefinition | null;
+  isLoading?: boolean;
 }
 
-export const AgentDisplay: React.FC<AgentDisplayProps> = ({ selectedAgentId }) => {
-  const { agent, isLoading } = useOnechatAgentById(selectedAgentId);
-
+export const AgentDisplay: React.FC<AgentDisplayProps> = ({ currentAgent, isLoading }) => {
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
 
   return (
     <EuiText color="subdued" size="s">
-      {agent?.name}
+      {currentAgent?.name}
     </EuiText>
   );
 };
