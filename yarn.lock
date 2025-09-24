@@ -4240,6 +4240,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bench@link:src/platform/packages/shared/kbn-bench":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
@@ -5329,6 +5333,10 @@
   uid ""
 
 "@kbn/core-security-server@link:src/core/packages/security/server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-server-benchmarks@link:src/platform/packages/shared/kbn-core-server-benchmarks":
   version "0.0.0"
   uid ""
 
@@ -6428,6 +6436,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/jest-benchmarks@link:src/platform/packages/shared/kbn-jest-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
@@ -7137,6 +7149,10 @@
   uid ""
 
 "@kbn/profiler-cli@link:x-pack/platform/packages/shared/kbn-profiler-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/profiler@link:src/platform/packages/shared/kbn-profiler":
   version "0.0.0"
   uid ""
 
@@ -8673,6 +8689,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
   version "0.0.0"
   uid ""
 
@@ -12949,10 +12969,10 @@
   dependencies:
     "@types/sizzle" "*"
 
-"@types/jquery@^3.5.32":
-  version "3.5.32"
-  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.32.tgz#3eb0da20611b92c7c49ebed6163b52a4fdc57def"
-  integrity sha512-b9Xbf4CkMqS02YH8zACqN1xzdxc3cO735Qe5AbSUFmyOiaWAbcpqh9Wna+Uk0vgACvoQHpWDg2rGdHkYPLmCiQ==
+"@types/jquery@^3.5.33":
+  version "3.5.33"
+  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.33.tgz#f42f40bac3edd84abdc9f6297d28e570fe463b35"
+  integrity sha512-SeyVJXlCZpEki5F0ghuYe+L+PprQta6nRZqhONt9F13dWBtR/ftoaIbdRQ7cis7womE+X2LKhsDdDtkkDhJS6g==
   dependencies:
     "@types/sizzle" "*"
 
