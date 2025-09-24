@@ -17,7 +17,7 @@ import type {
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import type {
-  MapsSavedObjectAttributes,
+  MapsAttributes,
   MapsGetOut,
   MapsSearchOptions,
   MapsCreateOptions,
@@ -27,6 +27,7 @@ import type {
 } from './schema/v1/types';
 import { savedObjectToItem, itemToSavedObject } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
+import { StoredMapAttributes } from '../saved_objects/types';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -86,7 +87,7 @@ export class MapsStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<MapsSavedObjectAttributes>(MAP_SAVED_OBJECT_TYPE, id);
+    } = await soClient.resolve<StoredMapAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
     const response = {
       item: savedObject,
@@ -151,7 +152,7 @@ export class MapsStorage {
     });
 
     // Save data in DB
-    const savedObject = await soClient.create<MapsSavedObjectAttributes>(
+    const savedObject = await soClient.create<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       soAttributes,
       { ...optionsToLatest, references: soReferences }
@@ -214,7 +215,7 @@ export class MapsStorage {
     });
 
     // Save data in DB
-    const partialSavedObject = await soClient.update<MapsSavedObjectAttributes>(
+    const partialSavedObject = await soClient.update<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
@@ -279,7 +280,7 @@ export class MapsStorage {
     }
 
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
-    const soResponse = await soClient.find<MapsSavedObjectAttributes>(soQuery);
+    const soResponse = await soClient.find<StoredMapAttributes>(soQuery);
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
@@ -319,7 +320,7 @@ export class MapsStorage {
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
     toItemResult: (
       ctx: StorageContext,
-      savedObject: SavedObject<MapsSavedObjectAttributes>
+      savedObject: SavedObject<StoredMapAttributes>
     ): MapItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 

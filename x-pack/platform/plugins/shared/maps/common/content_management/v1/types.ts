@@ -22,12 +22,3 @@ export type MapCrudTypes = ContentManagementCrudTypes<
     onlyTitle?: boolean;
   }
 >;
-
-/* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
-export type MapAttributes = {
-  title: string;
-  description?: string;
-  mapStateJSON?: string;
-  layerListJSON?: string;
-  uiStateJSON?: string;
-};

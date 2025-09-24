@@ -15,7 +15,10 @@ import type {
   mapsUpdateOptionsSchema,
 } from './cm_services';
 
-export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
+/**
+ * Shape of map attributes in REST APIs
+ */
+export type MapsAttributes = TypeOf<typeof mapAttributesSchema>;
 
 export type MapsCreateOptions = TypeOf<typeof mapsCreateOptionsSchema>;
 export type MapsUpdateOptions = TypeOf<typeof mapsUpdateOptionsSchema>;

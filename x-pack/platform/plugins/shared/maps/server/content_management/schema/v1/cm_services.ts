@@ -14,6 +14,9 @@ import {
   updateOptionsSchema,
 } from '@kbn/content-management-utils';
 
+/**
+ * TODO destringify values
+ */
 export const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
