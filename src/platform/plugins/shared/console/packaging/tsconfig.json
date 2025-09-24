@@ -23,7 +23,6 @@
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/core-notifications-browser",
     "@kbn/core-doc-links-browser-internal",
     "@kbn/core-base-browser-internal",
     "@kbn/core-injected-metadata-browser-internal",
