@@ -138,7 +138,7 @@ export class ScoutReportDataStream {
         return { create: { _index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME } };
       },
       refresh: false,
-      refreshOnCompletion: true,
+      refreshOnCompletion: false,
     });
 
     this.log.info(`Uploaded ${stats.total} events in ${stats.time / 1000}s.`);
