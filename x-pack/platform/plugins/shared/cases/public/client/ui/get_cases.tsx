@@ -38,6 +38,7 @@ export const getCasesLazy = ({
   features,
   releasePhase,
   renderAlertsTable,
+  renderEventsTable,
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
@@ -61,6 +62,7 @@ export const getCasesLazy = ({
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
         renderAlertsTable={renderAlertsTable}
+        renderEventsTable={renderEventsTable}
       />
     </Suspense>
   </CasesProvider>

@@ -17,8 +17,10 @@
     ],
     "optionalPlugins": [
       "console",
+      "cloud",
       "usageCollection",
       "searchNavigation",
+      "share",
     ],
     "requiredBundles": [
       "kibanaReact",
