@@ -103,7 +103,7 @@ export const useAlertsTableConfiguration = ({
               defaultMessage: 'Unable to save alerts table configuration',
             }),
             text: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
-              defaultMessage: "The new configuration was invalid and couldn't be saved.",
+              defaultMessage: 'The new configuration is invalid and cannot be saved.',
             }),
           });
         }
