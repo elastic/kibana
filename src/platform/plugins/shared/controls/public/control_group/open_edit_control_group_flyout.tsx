@@ -22,12 +22,10 @@ export const openEditControlGroupFlyout = (
 ) => {
   const lastSavedState = stateManager.getLatestState();
 
-  console.log('Opening edit control group flyout');
   openLazyFlyout({
     core: coreServices,
     parentApi: controlGroupApi.parentApi,
     loadContent: async ({ closeFlyout }) => {
-      console.log('Loading control group editor component');
       const { ControlGroupEditor } = await import('./components/control_group_editor');
       return (
         <ControlGroupEditor
