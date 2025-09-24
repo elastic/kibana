@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -48,34 +47,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Classic view', function () {
-      it('stores a finished search', async () => {
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Refresh query');
-
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
-
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
-      });
-
-      it('starts and stores a new search', async () => {
+      it('stores a running search', async () => {
         await queryBar.setQuery('Carrier: "Kibana Airlines"');
 
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Needs updating');
+        await testSubjects.click('querySubmitSplitButton-primary-button');
 
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
+        await retry.waitFor('waits for the Cancel button to appear', async () => {
+          const ariaLabel = await testSubjects.getAttribute(
+            'queryCancelSplitButton-primary-button',
+            'aria-label'
+          );
+          return ariaLabel === 'Cancel';
+        });
+
+        await testSubjects.click('queryCancelSplitButton-secondary-button');
 
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
