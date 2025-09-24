@@ -4,4 +4,6 @@ responses:
       application/json:
         examples:
           deleteConversationResponseExample:
-            success: true
+            description: "Example response showing that deletion of conversation has been successful"
+            value:
+              success: true

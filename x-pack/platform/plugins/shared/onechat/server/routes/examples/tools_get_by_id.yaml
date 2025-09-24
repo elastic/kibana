@@ -4,6 +4,7 @@ responses:
       application/json:
         examples:
           getBuiltinToolExample:
+            description: "Example response returning built-in platform.core.search tool"
             value:
               id: platform.core.search
               type: builtin
@@ -25,6 +26,7 @@ responses:
                 additionalProperties: false
                 "$schema": http://json-schema.org/draft-07/schema#
           getEsqlToolExample:
+            description: "Example response returning custom example-esql-tool tool"
             value:
               id: example-esql-tool
               type: esql
@@ -59,6 +61,7 @@ responses:
                 description: Parameters needed to execute the query
                 "$schema": http://json-schema.org/draft-07/schema#
           getIndexSearchToolExample:
+            description: "Example response returning custom example-index-search-tool tool"
             value:
               id: example-index-search-tool
               type: index_search

@@ -3,16 +3,19 @@ requestBody:
     application/json:
       examples:
         converseAsyncRequestExample:
-          input: "Hello"
-          agent_id: "elastic-ai-agent"
-          conversation_id: "c250305b-1929-4248-b568-b9e3f065fda5"
+          description: "Example request to send a message to the agent as a part of the conversation"
+          value:
+            input: "Hello"
+            agent_id: "elastic-ai-agent"
+            conversation_id: "c250305b-1929-4248-b568-b9e3f065fda5"
 responses:
   200:
     content:
       text/event-stream:
         examples:
           converseAsyncResponseExample:
-            value: |
+            description: "Example response containing the chain of events representing a conversation with the agent"
+            value:
               event: conversation_id_set
               data: {"data":{"conversation_id":"c250305b-1929-4248-b568-b9e3f065fda5"}}
               

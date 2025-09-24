@@ -4,4 +4,6 @@ responses:
       application/json:
         examples:
           deleteAgentResponseExample:
-            success: true
+            description: "Example response showing that the deletion operation was successful"
+            value:
+              success: true

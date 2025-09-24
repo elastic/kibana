@@ -3,23 +3,27 @@ requestBody:
     application/json:
       examples:
         executeBuiltinToolRequest:
+          description: "Example request executing platform.core.get_document_by_id tool"
           value:
             tool_id: platform.core.get_document_by_id
             tool_params:
               id: TRD-20250805-0820a89f
               index: financial_trades
         executeBuiltinEsqlToolRequest:
+          description: "Example request executing platform.core.execute_esql tool"
           value:
             tool_id: platform.core.execute_esql
             tool_params:
               query: "FROM financial_trades | LIMIT 3"
         executeCustomEsqlToolRequest:
+          description: "Example request executing custom example-esql-tool tool"
           value:
             tool_id: example-esql-tool
             tool_params:
               startTime: "2024-01-01T00:00:00Z"
               limit: 3
         executeIndexSearchToolRequest:
+          description: "Example request executing custom example-index-search-tool tool"
           value:
             tool_id: example-index-search-tool
             tool_params:
@@ -30,6 +34,7 @@ responses:
       application/json:
         examples:
           executeBuiltinToolExample:
+            description: "Example response calling built-in platform.core.get_document_by_id tool"
             value:
               results:
                 - type: resource
@@ -52,6 +57,7 @@ responses:
                       status_reason: fully_filled
                       last_updated: "2025-09-15T13:23:36"
           executeBuiltinEsqlToolExample:
+            description: "Example response calling built-in platform.core.execute_esql tool"
             value:
               results:
                 - type: query
@@ -76,6 +82,7 @@ responses:
                       - ["ACC00407-0bbb", 660.4199829101562, "V", "buy"]
                       - ["ACC00179-1f91", 440.3599853515625, "KO", "buy"]
           executeCustomEsqlToolExample:
+            description: "Example response calling custom example-esql-tool tool"
             value:
               results:
                 - tool_result_id: Voy8
@@ -95,6 +102,7 @@ responses:
                       - [2112, 104.20854155945055, "INTL_CORP_ASIA_D"]
                       - [2105, 89.93244177666526, "INTL_CORP_EU_B"]
           executeIndexSearchToolExample:
+            description: "Example response calling custom example-index-search-tool tool"
             value:
               results:
                 - type: query

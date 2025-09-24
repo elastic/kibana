@@ -3,6 +3,7 @@ requestBody:
     application/json:
       examples:
         updateEsqlToolRequest:
+          description: "Example request to update the custom ESQL tool"
           value:
             description: Updated ES|QL query tool for comprehensive financial analysis with enhanced filtering
             tags:
@@ -22,6 +23,7 @@ requestBody:
                   type: integer
                   description: Maximum number of results to return
         updateIndexSearchToolRequest:
+          description: "Example request to update the custom Search tool"
           value:
             description: Updated search tool for comprehensive financial data analysis, reporting, and compliance monitoring
             tags:
@@ -35,6 +37,7 @@ responses:
       application/json:
         examples:
           updateEsqlToolExample:
+            description: "Example response showing the updated ESQL tool"
             value:
               id: example-esql-tool
               type: esql
@@ -77,6 +80,7 @@ responses:
                 description: Parameters needed to execute the enhanced query
                 "$schema": http://json-schema.org/draft-07/schema#
           updateIndexSearchToolExample:
+            description: "Example response showing the updated Search tool"
             value:
               id: example-index-search-tool
               type: index_search

@@ -4,6 +4,7 @@ responses:
       application/json:
         examples:
           listToolsResponseExample:
+            description: "Example response returning a list of existing tools"
             value:
               results:
                 - id: platform.core.search
