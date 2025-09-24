@@ -45,7 +45,15 @@ export const useFetchLatestScan = ({
           },
         });
 
-        const insights = response.data;
+        // we only want latest for each type
+        const insightsMap = response.data.reduce((acc, curr) => {
+          if (!acc[curr.insightType]) {
+            acc[curr.insightType] = curr;
+          }
+
+          return acc;
+        }, {} as Record<DefendInsightType, DefendInsightsResponse>);
+        const insights = Object.values(insightsMap);
 
         const processQueryResults = (insightResults: DefendInsightsResponse[]) => {
           if (!insightResults.length) {
