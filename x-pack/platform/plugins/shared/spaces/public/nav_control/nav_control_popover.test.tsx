@@ -74,7 +74,8 @@ describe('NavControlPopover', () => {
       eventTracker,
       showTour$: Rx.of(false),
       onFinishTour: jest.fn(),
-      theme: { euiTheme: { levels: { navigation: 1000 } } } as any,
+      manageSpacesLink: '/manage/spaces',
+      manageSpacesDocsLink: 'https://elastic.co/docs',
       ...props,
     };
 

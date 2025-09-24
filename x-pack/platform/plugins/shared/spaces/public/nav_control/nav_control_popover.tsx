@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiHeaderSectionItemButton,
   EuiPopover,
   EuiSkeletonRectangle,
-  withEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
@@ -19,7 +19,6 @@ import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SpacesMenu } from './components/spaces_menu';
-import { useSpaces } from './hooks/use_spaces';
 import { SolutionViewTour } from './solution_view_tour';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
@@ -38,34 +37,36 @@ export interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
-  theme: WithEuiThemeProps['theme'];
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
   showTour$: Observable<boolean>;
   onFinishTour: () => void;
+  manageSpacesDocsLink: string;
+  manageSpacesLink: string;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
 
-const NavControlPopoverUI: React.FC<Props> = ({
+const NavControlPopoverUI = ({
   spacesManager,
   anchorPosition,
   capabilities,
   navigateToApp,
   navigateToUrl,
   serverBasePath,
-  theme,
   allowSolutionVisibility,
   eventTracker,
   showTour$,
   onFinishTour,
-}) => {
+  manageSpacesDocsLink,
+  manageSpacesLink,
+}: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [showSpaceSelector, setShowSpaceSelector] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
+  const [spaces, setSpaces] = useState<Space[]>([]);
   const [showTour, setShowTour] = useState(false);
-
-  // Use React Query to fetch spaces, only when the popover is open
-  const { data: spaces = [], isLoading } = useSpaces(spacesManager, showSpaceSelector);
 
   useEffect(() => {
     const activeSpace$ = spacesManager.onActiveSpaceChange$.subscribe({
@@ -74,25 +75,28 @@ const NavControlPopoverUI: React.FC<Props> = ({
       },
     });
 
-    const showTour$Sub = showTour$.subscribe((shouldShowTour: boolean) => {
-      setShowTour(shouldShowTour);
+    const showTour$Sub = showTour$.subscribe((tour: boolean) => {
+      setShowTour(tour);
     });
 
     return () => {
-      activeSpace$?.unsubscribe();
-      showTour$Sub?.unsubscribe();
+      activeSpace$.unsubscribe();
+      showTour$Sub.unsubscribe();
     };
   }, [spacesManager, showTour$]);
 
-  const toggleSpaceSelector = useCallback(() => {
-    setShowSpaceSelector((prev) => !prev);
-  }, []);
+  const loadSpaces = useCallback(async () => {
+    if (loading) {
+      return;
+    }
 
-  const closeSpaceSelector = useCallback(() => {
-    setShowSpaceSelector(false);
-  }, []);
+    setLoading(true);
+    const spacesList = await spacesManager.getSpaces();
+    setSpaces(spacesList);
+    setLoading(false);
+  }, [spacesManager, loading]);
 
-  const getAlignedLoadingSpinner = () => {
+  const getAlignedLoadingSpinner = useCallback(() => {
     return (
       <EuiSkeletonRectangle
         borderRadius="m"
@@ -101,9 +105,50 @@ const NavControlPopoverUI: React.FC<Props> = ({
         })}
       />
     );
-  };
+  }, []);
 
-  const getActiveSpaceButton = () => {
+  const toggleSpaceSelector = useCallback(() => {
+    const isOpening = !showSpaceSelector;
+
+    if (isOpening) {
+      loadSpaces();
+    }
+
+    setShowSpaceSelector(!showSpaceSelector);
+  }, [showSpaceSelector, loadSpaces]);
+
+  const getButton = useCallback(
+    (linkIcon: JSX.Element, linkTitle: string) => {
+      return (
+        <EuiHeaderSectionItemButton
+          aria-controls={popoutContentId}
+          aria-expanded={showSpaceSelector}
+          aria-haspopup="true"
+          aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
+            defaultMessage: 'Spaces navigation',
+          })}
+          aria-describedby="spacesNavDetails"
+          data-test-subj="spacesNavSelector"
+          title={linkTitle}
+          onClick={toggleSpaceSelector}
+        >
+          {linkIcon}
+          <p id="spacesNavDetails" hidden>
+            {i18n.translate('xpack.spaces.navControl.popover.spaceNavigationDetails', {
+              defaultMessage:
+                '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
+              values: {
+                space: linkTitle,
+              },
+            })}
+          </p>
+        </EuiHeaderSectionItemButton>
+      );
+    },
+    [showSpaceSelector, toggleSpaceSelector]
+  );
+
+  const getActiveSpaceButton = useCallback(() => {
     if (!activeSpace) {
       return getButton(getAlignedLoadingSpinner(), 'loading spaces navigation');
     }
@@ -114,35 +159,17 @@ const NavControlPopoverUI: React.FC<Props> = ({
       </Suspense>,
       (activeSpace as Space).name
     );
-  };
+  }, [activeSpace, getButton, getAlignedLoadingSpinner]);
 
-  const getButton = (linkIcon: JSX.Element, linkTitle: string) => {
-    return (
-      <EuiHeaderSectionItemButton
-        aria-controls={popoutContentId}
-        aria-expanded={showSpaceSelector}
-        aria-haspopup="true"
-        aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
-          defaultMessage: 'Spaces navigation',
-        })}
-        aria-describedby="spacesNavDetails"
-        data-test-subj="spacesNavSelector"
-        title={linkTitle}
-        onClick={toggleSpaceSelector}
-      >
-        {linkIcon}
-        <p id="spacesNavDetails" hidden>
-          {i18n.translate('xpack.spaces.navControl.popover.spaceNavigationDetails', {
-            defaultMessage:
-              '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
-            values: {
-              space: linkTitle,
-            },
-          })}
-        </p>
-      </EuiHeaderSectionItemButton>
-    );
-  };
+  const closeSpaceSelector = useCallback(() => {
+    setShowSpaceSelector(false);
+  }, []);
+
+  const handleManageSpaceBtnClick = useCallback(() => {
+    // No need to show the tour anymore, the user is taking action
+    onFinishTour();
+    toggleSpaceSelector();
+  }, [onFinishTour, toggleSpaceSelector]);
 
   const button = getActiveSpaceButton();
   const isTourOpen = Boolean(activeSpace) && showTour && !showSpaceSelector;
@@ -152,6 +179,9 @@ const NavControlPopoverUI: React.FC<Props> = ({
       solution={activeSpace?.solution}
       isTourOpen={isTourOpen}
       onFinishTour={onFinishTour}
+      manageSpacesLink={manageSpacesLink}
+      manageSpacesDocsLink={manageSpacesDocsLink}
+      navigateToUrl={navigateToUrl}
     >
       <EuiPopover
         id="spcMenuPopover"
@@ -162,7 +192,7 @@ const NavControlPopoverUI: React.FC<Props> = ({
         panelPaddingSize="none"
         repositionOnScroll
         ownFocus
-        zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
+        zIndex={Number(euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
         panelProps={{
           'data-test-subj': 'spaceMenuPopoverPanel',
         }}
@@ -178,16 +208,12 @@ const NavControlPopoverUI: React.FC<Props> = ({
           activeSpace={activeSpace}
           allowSolutionVisibility={allowSolutionVisibility}
           eventTracker={eventTracker}
-          isLoading={isLoading}
-          onClickManageSpaceBtn={() => {
-            // No need to show the tour anymore, the user is taking action
-            onFinishTour();
-            toggleSpaceSelector();
-          }}
+          onClickManageSpaceBtn={handleManageSpaceBtnClick}
+          isLoading={loading}
         />
       </EuiPopover>
     </SolutionViewTour>
   );
 };
 
-export const NavControlPopover = withEuiTheme(NavControlPopoverUI);
+export const NavControlPopover = NavControlPopoverUI;
