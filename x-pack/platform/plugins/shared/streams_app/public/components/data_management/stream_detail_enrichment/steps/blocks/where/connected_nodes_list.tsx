@@ -33,7 +33,7 @@ export const ConnectedNodesList = ({ children }: PropsWithChildren) => {
           border-left: 1px solid ${euiTheme.colors.borderBasePlain};
           padding-left: ${euiTheme.size.base};
           position: relative;
-          padding-bottom: ${euiTheme.size.base};
+          padding-bottom: ${euiTheme.size.s};
         }
         > li::before {
           content: '';
