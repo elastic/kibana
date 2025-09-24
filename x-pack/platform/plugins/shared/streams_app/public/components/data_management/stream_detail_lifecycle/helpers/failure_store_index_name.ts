@@ -6,11 +6,8 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { FAILURE_STORE_SELECTOR } from '../../../../util/constants';
 
 export const getFailureStoreIndexName = (definition: Streams.ingest.all.GetResponse) => {
-  return getIndexPatternsForStream(definition.stream)
-    ?.map((index) => index + FAILURE_STORE_SELECTOR)
-    .join(',');
+  return definition.stream.name + FAILURE_STORE_SELECTOR;
 };

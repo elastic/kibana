@@ -99,7 +99,7 @@ interface FailureStoreFormData {
 
 interface Props {
   onCloseModal: () => void;
-  onSaveModal: (data: FailureStoreFormData) => void;
+  onSaveModal: (data: FailureStoreFormData) => Promise<void> | void;
   failureStoreProps: FailureStoreFormProps;
 }
 
