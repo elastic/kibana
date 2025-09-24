@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiPaletteWarm } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsChartTooltip } from '../streams_chart_tooltip';
 
@@ -60,6 +61,9 @@ export function SparkPlot({
   const defaultTheme = charts.theme.chartsDefaultBaseTheme;
 
   const sparkplotChartTheme: PartialTheme = {
+    colors: {
+      vizColors: euiPaletteWarm(1),
+    },
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     chartPaddings: {
       top: 12,
@@ -75,10 +79,16 @@ export function SparkPlot({
       color: `rgba(0,0,0,0)`,
     },
     axes: {
+      axisLine: {
+        visible: false,
+      },
       tickLine: {
         visible: false,
       },
       gridLine: {
+        vertical: {
+          dash: [5],
+        },
         horizontal: {
           visible: false,
         },
@@ -107,7 +117,7 @@ export function SparkPlot({
           return xFormatter(data.value);
         }}
       />
-      <Axis id="y_axis" position="left" hide domain={{ min: 0, max: NaN }} />
+      <Axis id="y_axis" position="left" hide={compressed} domain={{ min: 0, max: NaN }} />
       <Axis id="x_axis" position="bottom" hide={compressed} />
       <Settings
         theme={[sparkplotChartTheme, baseTheme]}
