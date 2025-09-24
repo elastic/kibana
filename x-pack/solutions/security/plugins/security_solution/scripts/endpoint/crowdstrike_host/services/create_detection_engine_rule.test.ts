@@ -69,9 +69,12 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
 
     expect(result).toBe(newRule);
     expect(mockedDetectionRulesServices.createRule).toHaveBeenCalledWith(mockKbnClient, {
-      index: ['logs-crowdstrike.alert*', 'logs-crowdstrike.detection*', 'logs-crowdstrike.fdr*'],
-      query: 'crowdstrike.event.aid:* OR crowdstrike.detection.aid:*',
-      from: 'now-3660s',
+      index: ['*crowdstrike.alert*'],
+      query: 'device.id: *',
+      from: 'now-360s',
+      meta: {
+        from: '90m',
+      },
       name: 'Promote CrowdStrike alerts',
       description: expect.stringContaining('Created by dev script'),
       tags: ['dev-script-run-crowdstrike-host'],
@@ -95,13 +98,12 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
     await createDetectionEngineCrowdStrikeRuleIfNeeded(mockKbnClient, mockLog, 'test-namespace');
 
     expect(mockedDetectionRulesServices.createRule).toHaveBeenCalledWith(mockKbnClient, {
-      index: [
-        'logs-crowdstrike.alert-test-namespace*',
-        'logs-crowdstrike.detection-test-namespace*',
-        'logs-crowdstrike.fdr-test-namespace*',
-      ],
-      query: 'crowdstrike.event.aid:* OR crowdstrike.detection.aid:*',
-      from: 'now-3660s',
+      index: ['*crowdstrike.alert-test-namespace*'],
+      query: 'device.id: *',
+      from: 'now-360s',
+      meta: {
+        from: '90m',
+      },
       name: 'Promote CrowdStrike alerts',
       description: expect.stringContaining('Created by dev script'),
       tags: ['dev-script-run-crowdstrike-host'],
