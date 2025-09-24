@@ -114,19 +114,19 @@ export class SiemMigrationsDataMigrationClient<
       throw new Error(MIGRATION_ID_NOT_FOUND(id));
     }
 
-    const finishesAt = new Date();
+    const finishedAt = new Date();
     let latestExecutionTimeMs = 0;
 
     // ideally started_at should always be defined here, but if it is not, we do not want to throw an error
     if (currentMigrationDoc.last_execution?.started_at) {
       latestExecutionTimeMs =
-        finishesAt.getTime() - new Date(currentMigrationDoc.last_execution.started_at).getTime();
+        finishedAt.getTime() - new Date(currentMigrationDoc.last_execution.started_at).getTime();
     }
 
     const currentExecutionTime = currentMigrationDoc?.last_execution?.total_execution_time_ms ?? 0;
 
     await this.updateLastExecution(id, {
-      finished_at: finishesAt.toISOString(),
+      finished_at: finishedAt.toISOString(),
       total_execution_time_ms: currentExecutionTime + latestExecutionTimeMs,
       error,
     });
