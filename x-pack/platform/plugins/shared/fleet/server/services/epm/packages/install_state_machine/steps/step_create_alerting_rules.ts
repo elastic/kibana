@@ -69,6 +69,7 @@ export async function createAlertingRuleFromTemplate(
       return {
         id: ruleId,
         type: KibanaSavedObjectType.alert,
+        deferred: false,
       };
     }
 
@@ -89,6 +90,7 @@ export async function createAlertingRuleFromTemplate(
     return {
       id: ruleId,
       type: KibanaSavedObjectType.alert,
+      deferred: false,
     };
   } catch (e) {
     logger.error(`Error creating rule: ${ruleId} for package ${pkgName}`, { error: e });
@@ -101,7 +103,12 @@ export async function createAlertingRuleFromTemplate(
   }
 }
 
-export async function stepCreateAlertingRules(context: InstallContext) {
+export async function stepCreateAlertingRules(
+  context: Pick<
+    InstallContext,
+    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
+  >
+) {
   const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
@@ -141,7 +148,6 @@ export async function stepCreateAlertingRules(context: InstallContext) {
       },
       (path) => path.match(/\/alerting_rule_template\//) !== null
     );
-
     await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
   });
 }

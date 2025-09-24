@@ -1324,7 +1324,7 @@ export const saveKibanaAssetsRefs = async (
       let newAssetRefs = assetRefs !== null ? assetRefs : [];
       if (append && installation) {
         newAssetRefs = uniqBy(
-          [...(installation.attributes.installed_kibana ?? []), ...newAssetRefs],
+          [...newAssetRefs, ...(installation.attributes.installed_kibana ?? [])],
           (asset) => asset.id + asset.type
         );
       }

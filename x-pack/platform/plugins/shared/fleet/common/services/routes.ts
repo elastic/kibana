@@ -121,6 +121,12 @@ export const epmRouteService = {
       .replace(/\/$/, ''); // trim trailing slash
   },
 
+  getInstallRuleAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
   getUpdatePath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
       '{pkgVersion}',

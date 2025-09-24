@@ -703,6 +703,18 @@ export const InstallKibanaAssetsRequestSchema = {
   ),
 };
 
+export const InstallRuleAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(schema.boolean()),
+    })
+  ),
+};
+
 export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),

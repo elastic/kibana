@@ -72,7 +72,7 @@ import {
   updateCustomIntegrationHandler,
 } from './handlers';
 
-import { installPackageKibanaAssetsHandler } from './kibana_assets_handler';
+import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
