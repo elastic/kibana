@@ -366,7 +366,9 @@ export interface Profile {
   >;
 
   /**
-   * Sidebar
+   * Gets the intended initial SidebarToggleState after the profile is resolved.
+   * e.g.: with metric queries, the intention is to close the sidebar.
+   * @returns The sidebar toggle state, or `undefined` if default behavior is desired.
    */
   getSidebarToggleState: () => SidebarToggleState | undefined;
 
