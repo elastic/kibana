@@ -245,6 +245,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           out.isWarmed = true;
           warmedDeferred.resolve();
           await runGate.promise;
+          // No dynamic port allocation here since we won't warm/start servers,
+          // but still execute tests if present
           await runFtr({ log, config: baseConfig, esVersion: options.esVersion });
           return;
         }
@@ -414,12 +416,31 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               warmedDeferred.resolve();
               await runGate.promise;
 
-              await runFtr({
-                log,
-                config: augmentedConfig,
-                esVersion: options.esVersion,
-                signal: abortCtrl.signal,
-              });
+              // Ensure tests which rely on kbnTestConfig read the correct Kibana URL/port
+              const prevUrl = process.env.TEST_KIBANA_URL;
+              const prevPort = process.env.TEST_KIBANA_PORT;
+              try {
+                process.env.TEST_KIBANA_PORT = String(kbnPort);
+                process.env.TEST_KIBANA_URL = `${kbnProtocol}://${kbnHost}:${kbnPort}`;
+
+                await runFtr({
+                  log,
+                  config: augmentedConfig,
+                  esVersion: options.esVersion,
+                  signal: abortCtrl.signal,
+                });
+              } finally {
+                if (prevUrl === undefined) {
+                  delete process.env.TEST_KIBANA_URL;
+                } else {
+                  process.env.TEST_KIBANA_URL = prevUrl;
+                }
+                if (prevPort === undefined) {
+                  delete process.env.TEST_KIBANA_PORT;
+                } else {
+                  process.env.TEST_KIBANA_PORT = prevPort;
+                }
+              }
             } finally {
               try {
                 const delay = augmentedConfig.get('kbnTestServer.delayShutdown');
