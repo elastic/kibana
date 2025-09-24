@@ -8,6 +8,7 @@
  */
 
 import type {
+  BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
   HttpStep,
@@ -16,9 +17,11 @@ import type {
   MergeStep,
   ParallelStep,
   Step,
+  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
+import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
 import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
@@ -54,3 +57,7 @@ export const isForeachStep = (step: Step): step is ForEachStep => step.type === 
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
 export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
+export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
+  BuiltInStepTypes.includes(type as BuiltInStepType);
+export const isTriggerType = (type: string): type is TriggerType =>
+  TriggerTypes.includes(type as TriggerType);
