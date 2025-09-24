@@ -27,7 +27,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
-    await apiServices.cases.delete([caseId]);
+    apiServices.cases.delete([caseId]);
     const fetchedResponse = await apiServices.cases.get(caseId);
     expect(fetchedResponse.status).toBe(404);
     caseId = '';
