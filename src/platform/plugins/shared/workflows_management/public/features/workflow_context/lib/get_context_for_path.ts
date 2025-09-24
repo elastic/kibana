@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
-import type { WorkflowYaml, ForEachStep } from '@kbn/workflows';
-import { StepContextSchema } from '@kbn/workflows';
+import type { WorkflowYaml, ForEachContextSchema } from '@kbn/workflows';
+import { StepContextSchema, isForeachStep } from '@kbn/workflows';
 import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import _ from 'lodash';
@@ -55,7 +54,7 @@ export function getContextSchemaForPath(
   );
 
   for (const enrichment of enrichments) {
-    schema = schema.extend({ [enrichment.key]: enrichment.value });
+    schema = schema.extend({ [enrichment.key]: enrichment.value.optional() });
   }
 
   return schema;
@@ -67,18 +66,18 @@ function getStepContextSchemaEnrichmentEntries(
   workflowDefinition: WorkflowYaml,
   stepId: string
 ) {
-  const enrichments: { key: string; value: z.ZodType }[] = [];
+  const enrichments: { key: 'foreach'; value: typeof ForEachContextSchema }[] = [];
   const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
   for (const node of predecessors) {
     if (node.stepType === 'foreach') {
       // if one of the predecessors is a foreach, we need to enrich the step context with the foreach state
       const foreachStep = getStepByNameFromNestedSteps(workflowDefinition.steps, node.stepId);
-      if (!foreachStep || foreachStep.type !== 'foreach') {
+      if (!foreachStep || !isForeachStep(foreachStep)) {
         continue;
       }
       enrichments.push({
         key: 'foreach',
-        value: getForeachStateSchema(stepContextSchema, foreachStep as ForEachStep),
+        value: getForeachStateSchema(stepContextSchema, foreachStep),
       });
     }
   }

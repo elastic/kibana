@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ForEachStep, StepContextSchema } from '@kbn/workflows';
-import { getStepId, type WorkflowYaml } from '@kbn/workflows';
+import type { StepContextSchema } from '@kbn/workflows';
+import { getStepId, isForeachStep, type WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
 import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
@@ -46,15 +46,16 @@ export function getStepsCollectionSchema(
       });
     } else {
       const foreachStep = getStepByNameFromNestedSteps(workflowDefinition.steps, node.stepId);
-      if (foreachStep && foreachStep.type === 'foreach') {
-        // if the step is a foreach, add the foreach schema to the step state schema
-        stepsSchema = stepsSchema.extend({
-          [node.stepId]: getForeachStateSchema(
-            (stepContextSchema as z.ZodObject<any>).merge(z.object({ steps: stepsSchema })),
-            foreachStep as ForEachStep
-          ),
-        });
+      if (!foreachStep || !isForeachStep(foreachStep)) {
+        continue;
       }
+      // if the step is a foreach, add the foreach schema to the step state schema
+      stepsSchema = stepsSchema.extend({
+        [node.stepId]: getForeachStateSchema(
+          stepContextSchema.merge(z.object({ steps: stepsSchema })),
+          foreachStep
+        ),
+      });
     }
   }
   return stepsSchema;

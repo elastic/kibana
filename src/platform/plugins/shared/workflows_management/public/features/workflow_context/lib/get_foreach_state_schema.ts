@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ForEachStep } from '@kbn/workflows';
+import type { ForEachStep, StepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { getSchemaAtPath } from '../../../../common/lib/zod_utils';
 
-export function getForeachStateSchema(stepContextSchema: z.ZodType, foreachStep: ForEachStep) {
+export function getForeachStateSchema(
+  stepContextSchema: typeof StepContextSchema,
+  foreachStep: ForEachStep
+) {
   const iterateOverPath =
     parseVariablePath(foreachStep.foreach)?.propertyPath || foreachStep.foreach;
   let itemSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
