@@ -125,7 +125,7 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false}>
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -140,17 +140,17 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <StepsEditor />
               </EuiResizablePanel>
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+              <EuiResizableButton indicator="border" />
               <EuiResizablePanel
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="s"
+                paddingSize="l"
                 css={verticalFlexCss}
               >
                 <MemoSimulationPlayground />
@@ -159,7 +159,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
+      {hasChanges && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={detectedFields.length > 0 ? openConfirmationModal : saveChanges}
@@ -167,7 +167,7 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
         />
-      </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 }
