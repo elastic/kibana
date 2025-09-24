@@ -25,10 +25,9 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
+    lifecycle: { inherit: {} },
     processing: { steps: [] },
+    settings: {},
   },
 };
 
@@ -53,6 +52,13 @@ export const Edit: StoryFn<{}> = () => {
         title: 'Operational Event: Service Lifecycle - LockScreenActivity',
         kql: {
           query: 'message:"cmp=com.tencent.qqmusic/.business.lockscreen.LockScreenActivity"',
+        },
+        system: {
+          name: 'Test system',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
         },
       }}
     />

@@ -31,7 +31,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   test('should create a new processor successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
     await pageObjects.streams.saveProcessorsListChanges();
@@ -45,7 +45,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickAddProcessor();
 
     await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton')
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
     ).toBeDisabled();
 
     // Cancel the operation
@@ -53,7 +53,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
 
     // Verify we're back to idle state
     await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton')
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
     ).toBeEnabled();
   });
 
@@ -63,7 +63,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
   }) => {
     // Create a new processor ready to be saved
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
 
@@ -73,7 +73,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickEditProcessor(0);
 
     // Verify save button is disabled
-    await expect(page.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeHidden();
     await pageObjects.streams.clickCancelProcessorChanges();
     // Verify save button is enabled
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
@@ -83,7 +83,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.clickAddProcessor();
 
     // Fill in some data
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
 
     // Cancel the changes and confirm discard
@@ -99,12 +99,10 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
+    // Field can be automatically filled based on the samples, empty it.
+    await pageObjects.streams.fillProcessorFieldInput('');
 
-    // Try to create without filling required fields
-    await pageObjects.streams.clickSaveProcessor();
-    await expect(page.getByText('A field value is required.')).toBeVisible();
-
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.clickSaveProcessor();
     await expect(page.getByText('Empty patterns are not allowed.')).toBeVisible();
 
@@ -125,7 +123,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
 
     // Create button should be disabled or show tooltip
-    const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton');
+    const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
     await expect(createButton).toBeHidden();
   });
 });

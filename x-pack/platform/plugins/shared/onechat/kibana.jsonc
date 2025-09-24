@@ -20,13 +20,15 @@
       "inference",
       "kibanaUtils",
       "lens",
+      "management",
       "share"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "spaces"
     ],
     "extraPublicDirs": []
   }

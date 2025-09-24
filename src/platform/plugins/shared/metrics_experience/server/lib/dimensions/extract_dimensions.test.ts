@@ -51,6 +51,14 @@ describe('extractDimensions', () => {
         time_series_dimension: false,
       },
     },
+    'host.ip': {
+      ip: {
+        aggregatable: true,
+        searchable: true,
+        type: 'ip',
+        time_series_dimension: true,
+      },
+    },
     _metric_names_hash: {
       keyword: {
         aggregatable: true,
@@ -84,6 +92,11 @@ describe('extractDimensions', () => {
         name: 'service.name',
         type: 'keyword',
         description: 'The service name',
+      },
+      {
+        name: 'host.ip',
+        type: 'ip',
+        description: undefined,
       },
     ]);
   });

@@ -269,11 +269,15 @@ export class DiscoverPageObject extends FtrService {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
+  public async isLensEditFlyoutOpen() {
+    return await this.testSubjects.exists('lnsChartSwitchPopover');
+  }
+
   public async openLensEditFlyout() {
     await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
     await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
     await this.retry.waitFor('flyout', async () => {
-      return await this.testSubjects.exists('lnsChartSwitchPopover');
+      return await this.isLensEditFlyoutOpen();
     });
   }
 

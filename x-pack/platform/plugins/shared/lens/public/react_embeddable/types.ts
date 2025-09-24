@@ -266,6 +266,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface LensRequestHandlersProps {

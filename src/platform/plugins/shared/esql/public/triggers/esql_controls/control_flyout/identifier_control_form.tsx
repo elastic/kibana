@@ -31,6 +31,7 @@ interface IdentifierControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  currentApp?: string;
 }
 
 export function IdentifierControlForm({
@@ -40,6 +41,7 @@ export function IdentifierControlForm({
   queryString,
   cursorPosition,
   esqlVariables,
+  currentApp,
   setControlState,
   search,
 }: IdentifierControlFormProps) {

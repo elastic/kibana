@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes } from '../../types';
 import { transformControlGroupOut } from './transform_control_group_out';
@@ -17,8 +18,7 @@ import { transformPanelsOut } from './transform_panels_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[],
-  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
+  references?: SavedObjectReference[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -34,11 +34,10 @@ export function transformDashboardOut(
     title,
     version,
   } = attributes;
-  // Inject any tag names from references into the attributes
-  let tags: string[] | undefined;
-  if (getTagNamesFromReferences && references && references.length) {
-    tags = getTagNamesFromReferences(references);
-  }
+  // Extract tag references
+  const tags: string[] = references
+    ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
+    : [];
 
   let controlGroupOut;
   if (controlGroupInput) {
