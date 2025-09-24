@@ -10,4 +10,6 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB_COPY_TO_CLIPBOARD_BUTTON = getDataTestSubjectSelector(
   'securitySolutionFlyoutJsonTabCopyToClipboard'
 );
-export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT = getDataTestSubjectSelector('jsonView');
+export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT = getDataTestSubjectSelector(
+  'securitySolutionFlyoutjsonView'
+);
