@@ -502,6 +502,12 @@ export const WorkflowContextSchema = z.object({
 
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
+export const StepDataSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+export type StepData = z.infer<typeof StepDataSchema>;
+
 export const ForEachContextSchema = z.object({
   items: z.array(z.any()),
   index: z.number().int(),
@@ -509,11 +515,6 @@ export const ForEachContextSchema = z.object({
   total: z.number().int(),
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
-
-export const StepStateSchema = z.object({
-  output: z.any().optional(),
-  error: z.any().optional(),
-});
 
 export const StepContextSchema = WorkflowContextSchema.extend({
   // using object instead of record to avoid type mismatch when
