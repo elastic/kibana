@@ -271,7 +271,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should use the output id when it is not the default', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
-    expect(generateOtelcolConfig(inputs, {...defaultOutput, is_default: false})).toEqual({
+    expect(generateOtelcolConfig(inputs, { ...defaultOutput, is_default: false })).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
