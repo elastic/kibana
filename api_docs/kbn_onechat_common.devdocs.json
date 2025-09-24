@@ -2483,6 +2483,22 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolParam.optional",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "optional",
+            "description": [
+              "\nWhether the parameter is optional."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

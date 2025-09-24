@@ -980,7 +980,7 @@
                 "section": "def-public.IconButton",
                 "text": "IconButton"
               },
-              "[] | undefined; } | undefined"
+              "[] | undefined; additionalControls?: { prependRight?: React.ReactNode; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
             "deprecated": false,
@@ -1717,6 +1717,27 @@
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.DatatableColumn",
                 "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
               },
               "[] | undefined"
             ],
@@ -3005,7 +3026,15 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; breakdownField?: string | undefined; externalVisContext?: ",
+          "[] | undefined; breakdownField?: string | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; externalVisContext?: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",

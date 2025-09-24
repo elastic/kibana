@@ -672,6 +672,10 @@
                 "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
               },
               {
+                "plugin": "@kbn/index-editor",
+                "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/telemetry_service.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
