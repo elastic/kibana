@@ -42,6 +42,9 @@ export default function searchSolutionNavigation({
         solution: 'es',
       }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+
+      // Ensure the tour is closed before starting tests
+      await solutionNavigation.sidenav.tour.ensureHidden();
     });
 
     after(async () => {

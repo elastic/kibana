@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'solutionNavigation']);
   const log = getService('log');
   const testSubjects = getService('testSubjects');
 
@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // or manually update the index.
     it('should close the solution tour if its visible', async () => {
       await PageObjects.common.navigateToApp('spaceSelector');
+      await PageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       if (await testSubjects.exists('spaceSolutionTour')) {
         log.info('Found the solution tour open, closing it');
         await testSubjects.click('closeTourBtn'); // close the tour

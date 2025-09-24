@@ -416,6 +416,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await collapseNavBtn.click();
         }
       },
+      tour: {
+        ensureHidden: async () => {
+          await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
+          await browser.refresh();
+        },
+      },
       feedbackCallout: {
         async disable() {
           await browser.setLocalStorageItem('sideNavigationFeedback', `${Date.now()}`);
