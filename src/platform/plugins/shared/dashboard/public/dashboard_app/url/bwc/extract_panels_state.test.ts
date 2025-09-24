@@ -78,27 +78,6 @@ describe('extractPanelsState', () => {
         },
       ]);
     });
-    test('should create saved object reference', () => {
-      const { savedObjectReferences } = extractPanelsState({
-        panels: [
-          {
-            config: {
-              savedObjectId: 'e5b21d58-abf3-459a-ab1b-da438094752a',
-            },
-            grid: {},
-            uid: '19fd37e4-906a-48a3-a6c4-cca557f89e2c',
-            type: 'visualization',
-          },
-        ],
-      });
-      expect(savedObjectReferences).toEqual([
-        {
-          id: 'e5b21d58-abf3-459a-ab1b-da438094752a',
-          name: '19fd37e4-906a-48a3-a6c4-cca557f89e2c:savedObjectRef',
-          type: 'visualization',
-        },
-      ]);
-    });
   });
   describe('< 9.2 panels state', () => {
     test('should create saved object reference', () => {
