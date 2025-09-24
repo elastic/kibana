@@ -156,7 +156,6 @@ describe('run_all.ts', () => {
         maxParallel: undefined,
       });
 
-      const parsed = mockGetopts();
       expect(process.env.JEST_MAX_PARALLEL).toBe('2');
     });
 
