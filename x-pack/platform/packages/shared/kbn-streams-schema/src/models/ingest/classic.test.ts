@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { emptyAssets } from '../../helpers/empty_assets';
 import { ClassicStream } from './classic';
 
 describe('ClassicStream', () => {
@@ -14,12 +15,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
@@ -27,12 +25,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream-with-fields',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {
             field_overrides: {
               xxx: {
@@ -52,12 +47,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: null,
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
@@ -72,12 +64,9 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
-          lifecycle: {
-            inherit: {},
-          },
-          processing: {
-            steps: [],
-          },
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
           wired: {},
         },
@@ -94,27 +83,26 @@ describe('ClassicStream', () => {
           name: 'classic-stream',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
         },
         data_stream_exists: true,
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
       expect(ClassicStream.GetResponse.is(val)).toBe(true);
@@ -126,18 +114,16 @@ describe('ClassicStream', () => {
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
         effective_lifecycle: {
           dsl: {},
         },
+        effective_settings: {},
         privileges: {
           lifecycle: true,
           manage: true,
@@ -157,21 +143,16 @@ describe('ClassicStream', () => {
   describe('UpsertRequest', () => {
     it.each([
       {
-        dashboards: [],
-        queries: [],
-        rules: [],
         stream: {
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
+        ...emptyAssets,
       },
     ])('is valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val)).toBe(true);
@@ -186,10 +167,9 @@ describe('ClassicStream', () => {
           name: 'my-name',
           description: '',
           ingest: {
-            lifecycle: {
-              inherit: {},
-            },
+            lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },

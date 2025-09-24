@@ -21,7 +21,10 @@ const dataViewsService = {
   }),
   getExistingIndices: jest.fn().mockResolvedValue(['test-pattern']),
 } as unknown as jest.Mocked<DataViewsServicePublic>;
-describe('getSourcererDataView', () => {
+
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('getSourcererDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

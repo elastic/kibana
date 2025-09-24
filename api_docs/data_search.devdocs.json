@@ -159,7 +159,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -664,6 +666,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStart.isBackgroundSearchEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBackgroundSearchEnabled",
+            "description": [
+              "\nFeature flag value to make it easier to use in different plugins"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStart.searchSource",
             "type": "Object",
             "tags": [],
@@ -694,7 +709,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -1196,7 +1213,9 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+          "{ start: () => string; clear: () => void; save: () => Promise<",
+          "SearchSessionSavedObject",
+          ">; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -12898,7 +12917,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12934,6 +12953,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

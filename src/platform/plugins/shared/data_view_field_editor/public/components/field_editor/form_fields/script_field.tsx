@@ -35,6 +35,7 @@ import type { PreviewState } from '../../preview/types';
 interface Props {
   links: { runtimePainless: string };
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
@@ -63,7 +64,7 @@ const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview
 const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 const concreteFieldsSelector = (state: PreviewState) => state.concreteFields;
 
-const ScriptFieldComponent = ({ links, placeholder }: Props) => {
+const ScriptFieldComponent = ({ links, placeholder, disabled }: Props) => {
   const {
     validation: { setScriptEditorValidation },
   } = useFieldPreviewContext();
@@ -289,6 +290,7 @@ const ScriptFieldComponent = ({ links, placeholder }: Props) => {
                   suggest: {
                     snippetsPreventQuickSuggestions: false,
                   },
+                  readOnly: disabled,
                 }}
                 data-test-subj="scriptField"
                 aria-label={i18n.translate(

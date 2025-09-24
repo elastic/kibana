@@ -17,475 +17,132 @@
     "objects": []
   },
   "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [
+    "classes": [
       {
         "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.IndexWarning",
-        "type": "Interface",
+        "id": "def-common.Version",
+        "type": "Class",
         "tags": [],
-        "label": "IndexWarning",
+        "label": "Version",
         "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+        "signature": [
           {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.IndexWarning.warningType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "warningType",
-            "description": [],
-            "signature": [
-              "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "pluginId": "@kbn/upgrade-assistant-pkg-common",
+            "scope": "common",
+            "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+            "section": "def-common.Version",
+            "text": "Version"
           },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.IndexWarning.flow",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "flow",
-            "description": [],
-            "signature": [
-              "\"reindex\" | \"all\" | \"readonly\""
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.IndexWarning.meta",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "\nOptional metadata for deprecations\n"
-            ],
-            "signature": [
-              "{ [key: string]: string | boolean | string[]; } | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
+          " implements ",
+          "IVersion"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.QueueSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "QueueSettings",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.QueueSettings.queuedAt",
-            "type": "number",
+            "id": "def-common.Version.setup",
+            "type": "Function",
             "tags": [],
-            "label": "queuedAt",
-            "description": [
-              "\nA Unix timestamp of when the reindex operation was enqueued.\n"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.QueueSettings.startedAt",
-            "type": "number",
-            "tags": [],
-            "label": "startedAt",
-            "description": [
-              "\nA Unix timestamp of when the reindex operation was started.\n"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexOperation",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReindexOperation",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.indexName",
-            "type": "string",
-            "tags": [],
-            "label": "indexName",
-            "description": [],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.newIndexName",
-            "type": "string",
-            "tags": [],
-            "label": "newIndexName",
-            "description": [],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.status",
-            "type": "Enum",
-            "tags": [],
-            "label": "status",
+            "label": "setup",
             "description": [],
             "signature": [
+              "(version: string) => void"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.ReindexStatus",
-                "text": "ReindexStatus"
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+                "id": "def-common.Version.setup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.lastCompletedStep",
-            "type": "Enum",
+            "id": "def-common.Version.getCurrentVersion",
+            "type": "Function",
             "tags": [],
-            "label": "lastCompletedStep",
+            "label": "getCurrentVersion",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.ReindexStep",
-                "text": "ReindexStep"
-              }
+              "() => ",
+              "node_modules/@types/semver/classes/semver"
             ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.locked",
-            "type": "CompoundType",
+            "id": "def-common.Version.getMajorVersion",
+            "type": "Function",
             "tags": [],
-            "label": "locked",
+            "label": "getMajorVersion",
             "description": [],
             "signature": [
-              "string | null"
+              "() => number"
             ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.reindexTaskId",
-            "type": "CompoundType",
+            "id": "def-common.Version.getNextMajorVersion",
+            "type": "Function",
             "tags": [],
-            "label": "reindexTaskId",
+            "label": "getNextMajorVersion",
             "description": [],
             "signature": [
-              "string | null"
+              "() => number"
             ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.reindexTaskPercComplete",
-            "type": "CompoundType",
+            "id": "def-common.Version.getPrevMajorVersion",
+            "type": "Function",
             "tags": [],
-            "label": "reindexTaskPercComplete",
+            "label": "getPrevMajorVersion",
             "description": [],
             "signature": [
-              "number | null"
+              "() => number"
             ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.errorMessage",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "errorMessage",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.runningReindexCount",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "runningReindexCount",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.rollupJob",
-            "type": "string",
-            "tags": [],
-            "label": "rollupJob",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.backupSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "backupSettings",
-            "description": [
-              "\nThe original index settings to set after reindex is completed.\nThe target index is created with other defaults to improve reindexing performance.\nhttps://github.com/elastic/kibana/issues/201605"
-            ],
-            "signature": [
-              "{ 'index.number_of_replicas'?: number | undefined; 'index.refresh_interval'?: number | undefined; } | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperation.reindexOptions",
-            "type": "Object",
-            "tags": [],
-            "label": "reindexOptions",
-            "description": [
-              "\nOptions for the reindexing strategy.\n"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.ReindexOptions",
-                "text": "ReindexOptions"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexOperationCancelResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReindexOperationCancelResponse",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOperationCancelResponse.acknowledged",
-            "type": "boolean",
-            "tags": [],
-            "label": "acknowledged",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReindexOptions",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOptions.openAndClose",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "openAndClose",
-            "description": [
-              "\nWhether to treat the index as if it were closed. This instructs the\nreindex strategy to first open the index, perform reindexing and\nthen close the index again."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexOptions.queueSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "queueSettings",
-            "description": [
-              "\nSet this key to configure a reindex operation as part of a\nbatch to be run in series."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.QueueSettings",
-                "text": "QueueSettings"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexStatusResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReindexStatusResponse",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexStatusResponse.meta",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [],
-            "signature": [
-              "{ indexName: string; reindexName: string; aliases: string[]; isReadonly: boolean; isFrozen: boolean; isInDataStream: boolean; isFollowerIndex: boolean; }"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexStatusResponse.warnings",
-            "type": "Array",
-            "tags": [],
-            "label": "warnings",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.IndexWarning",
-                "text": "IndexWarning"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexStatusResponse.reindexOp",
-            "type": "Object",
-            "tags": [],
-            "label": "reindexOp",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/upgrade-assistant-pkg-common",
-                "scope": "common",
-                "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-                "section": "def-common.ReindexOperation",
-                "text": "ReindexOperation"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-            "id": "def-common.ReindexStatusResponse.hasRequiredPrivileges",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasRequiredPrivileges",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
     "enums": [
       {
         "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
@@ -498,36 +155,9 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexStep",
-        "type": "Enum",
-        "tags": [],
-        "label": "ReindexStep",
-        "description": [],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.IndexWarningType",
-        "type": "Type",
-        "tags": [],
-        "label": "IndexWarningType",
-        "description": [],
-        "signature": [
-          "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
-        ],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
         "id": "def-common.ML_UPGRADE_OP_TYPE",
@@ -554,30 +184,6 @@
           "\"upgrade-assistant-reindex-operation\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
-        "id": "def-common.ReindexSavedObject",
-        "type": "Type",
-        "tags": [],
-        "label": "ReindexSavedObject",
-        "description": [],
-        "signature": [
-          "SavedObject",
-          "<",
-          {
-            "pluginId": "@kbn/upgrade-assistant-pkg-common",
-            "scope": "common",
-            "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
-            "section": "def-common.ReindexOperation",
-            "text": "ReindexOperation"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

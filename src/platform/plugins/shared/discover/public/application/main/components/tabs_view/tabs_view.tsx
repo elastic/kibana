@@ -9,7 +9,7 @@
 
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import React, { useCallback } from 'react';
-import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
+import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
   internalStateActions,
@@ -22,7 +22,9 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 
-export const TabsView = (props: DiscoverSessionViewProps) => {
+const MAX_TABS_COUNT = 25;
+
+export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
@@ -30,6 +32,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -42,7 +45,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   );
 
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
-    () => <DiscoverSessionView key={currentTabId} {...props} />,
+    () => <SingleTabView key={currentTabId} {...props} />,
     [currentTabId, props]
   );
 
@@ -52,6 +55,8 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
+      unsavedItemIds={unsavedTabIds}
+      maxItemsCount={MAX_TABS_COUNT}
       hideTabsBar={hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}

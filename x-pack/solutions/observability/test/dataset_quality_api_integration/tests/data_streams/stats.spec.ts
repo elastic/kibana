@@ -86,6 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               canRead: true,
               canMonitor: true,
               canReadFailureStore: true,
+              canManageFailureStore: true,
             },
           },
           canViewIntegrations: true,

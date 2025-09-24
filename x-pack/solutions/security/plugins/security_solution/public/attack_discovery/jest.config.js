@@ -15,5 +15,8 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/attack_discovery/**/*.{ts,tsx}',
   ],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/attack_discovery/test/setup.ts',
+  ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };

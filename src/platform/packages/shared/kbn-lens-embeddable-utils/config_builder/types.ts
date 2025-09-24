@@ -66,6 +66,9 @@ export interface LensBaseLayer {
   format?: 'bits' | 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
   decimals?: number;
   normalizeByUnit?: 's' | 'm' | 'h' | 'd';
+  suffix?: string;
+  fromUnit?: string;
+  toUnit?: string;
   compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
@@ -102,6 +105,7 @@ export interface LensConfigOptions {
 export interface LensAxisTitleVisibilityConfig {
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
+  showYRightAxisTitle?: boolean;
 }
 
 export interface LensYBoundsConfig {
@@ -291,7 +295,6 @@ export interface LensXYConfigBase {
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;
-  formulaAPI?: FormulaPublicApi;
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;

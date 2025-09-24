@@ -88,7 +88,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneRunScriptEnabled: false,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
    * Space awareness for Elastic Defend management.
@@ -124,6 +124,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: true,
+
+  /**
+   * Disables ESQL-based risk scoring
+   */
+  disableESQLRiskScoring: true,
+  /**
+   * Enables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -236,11 +245,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
   serviceEntityStoreEnabled: true,
-
   /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
 
   /**
    * Enables Integrations Sync for Privileged User Monitoring
@@ -251,11 +256,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
-
-  /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -298,7 +298,7 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -318,6 +318,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: false,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -10,6 +10,7 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
   StreamRoutingContext,
   StreamRoutingEvent,
@@ -60,6 +61,11 @@ export const streamRoutingMachine = setup({
       return {
         currentRuleId: newRule.id,
         routing: [...context.routing, newRule],
+      };
+    }),
+    appendRoutingRules: assign(({ context }, params: { definitions: RoutingDefinition[] }) => {
+      return {
+        routing: [...context.routing, ...params.definitions.map(routingConverter.toUIDefinition)],
       };
     }),
     patchRule: assign(
@@ -131,12 +137,36 @@ export const streamRoutingMachine = setup({
           actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
           reenter: true,
         },
+        'suggestion.preview': {
+          target: '#idle',
+          actions: enqueueActions(({ enqueue, event }) => {
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: event.toggle
+                ? { type: 'suggestion', name: event.name, index: event.index }
+                : undefined,
+            });
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: event.toggle ? event.condition : undefined,
+            });
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            });
+          }),
+        },
+        'suggestion.append': {
+          target: '#idle',
+          actions: [{ type: 'appendRoutingRules', params: ({ event }) => event }],
+        },
       },
       invoke: {
         id: 'routingSamplesMachine',
         src: 'routingSamplesMachine',
         input: ({ context }) => ({
           definition: context.definition,
+          documentMatchFilter: 'matched',
         }),
       },
       states: {
@@ -161,12 +191,30 @@ export const streamRoutingMachine = setup({
         },
         creatingNewRule: {
           id: 'creatingNewRule',
-          entry: [{ type: 'addNewRoutingRule' }],
+          entry: [
+            { type: 'addNewRoutingRule' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'createStream' },
+            }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: { always: {} },
+            }),
+          ],
           exit: [
             { type: 'resetRoutingChanges' },
             sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: undefined,
+            }),
+            sendTo('routingSamplesMachine', {
               type: 'routingSamples.updateCondition',
               condition: undefined,
+            }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
             }),
           ],
           initial: 'changing',
@@ -199,6 +247,14 @@ export const streamRoutingMachine = setup({
                   guard: 'canForkStream',
                   target: 'forking',
                 },
+                'routingSamples.setDocumentMatchFilter': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: event.filter,
+                    });
+                  }),
+                },
               },
             },
             forking: {
@@ -230,6 +286,12 @@ export const streamRoutingMachine = setup({
         editingRule: {
           id: 'editingRule',
           initial: 'changing',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           exit: [{ type: 'resetRoutingChanges' }],
           states: {
             changing: {
@@ -304,6 +366,12 @@ export const streamRoutingMachine = setup({
         reorderingRules: {
           id: 'reorderingRules',
           initial: 'reordering',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           states: {
             reordering: {
               on: {
@@ -352,10 +420,15 @@ export const createStreamRoutingMachineImplementations = ({
   data,
   timeState$,
   forkSuccessNofitier,
+  telemetryClient,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
-    forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
+    forkStream: createForkStreamActor({
+      streamsRepositoryClient,
+      forkSuccessNofitier,
+      telemetryClient,
+    }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     routingSamplesMachine: routingSamplesMachine.provide(
       createRoutingSamplesMachineImplementations({
