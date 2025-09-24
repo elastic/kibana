@@ -49,7 +49,10 @@ class StandaloneSpecDefinitionsService {
     }
 
     if (urlParamsDef) {
-      description.url_params = Object.assign(description.url_params || {}, copiedDescription.url_params);
+      description.url_params = Object.assign(
+        description.url_params || {},
+        copiedDescription.url_params
+      );
       Object.assign(description.url_params, urlParamsDef);
     }
 
@@ -62,7 +65,7 @@ class StandaloneSpecDefinitionsService {
       id: endpoint,
       patterns: [endpoint],
       methods: ['GET'],
-      ...copiedDescription
+      ...copiedDescription,
     });
 
     this.endpoints[endpoint] = copiedDescription;
@@ -173,8 +176,9 @@ async function generateAggregatedDefinitions() {
   }
 
   // Find all version directories
-  const versionDirs = fs.readdirSync(consoleDefinitionsDir)
-    .filter(item => {
+  const versionDirs = fs
+    .readdirSync(consoleDefinitionsDir)
+    .filter((item) => {
       const fullPath = path.join(consoleDefinitionsDir, item);
       return fs.statSync(fullPath).isDirectory() && !item.startsWith('.');
     })
@@ -193,10 +197,14 @@ async function generateAggregatedDefinitions() {
       const versionDefinitions = service.loadDefinitions('stack');
 
       aggregatedResponse[version] = {
-        es: versionDefinitions
+        es: versionDefinitions,
       };
 
-      console.log(`✓ Processed version ${version}: ${Object.keys(versionDefinitions.endpoints).length} endpoints`);
+      console.log(
+        `✓ Processed version ${version}: ${
+          Object.keys(versionDefinitions.endpoints).length
+        } endpoints`
+      );
     } catch (error) {
       console.error(`✗ Error processing version ${version}:`, error.message);
     }
@@ -215,7 +223,7 @@ async function generateAggregatedDefinitions() {
 
   // Clean up version folders after successful aggregation
   console.log('Cleaning up version folders...');
-  versionDirs.forEach(version => {
+  versionDirs.forEach((version) => {
     if (aggregatedResponse[version]) {
       const versionPath = path.join(consoleDefinitionsDir, version);
       try {
@@ -235,7 +243,9 @@ async function generateAggregatedDefinitions() {
     const data = aggregatedResponse[version];
     const endpointCount = Object.keys(data.es.endpoints).length;
     const globalRuleCount = Object.keys(data.es.globals).length;
-    console.log(`  - ${path.basename(filePath)}: ${endpointCount} endpoints, ${globalRuleCount} global rules`);
+    console.log(
+      `  - ${path.basename(filePath)}: ${endpointCount} endpoints, ${globalRuleCount} global rules`
+    );
   });
 
   console.log('');

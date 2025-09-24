@@ -69,10 +69,10 @@ module.exports = [
         callback();
       },
       // function (context, request, callback) {
-        // if (/^@kbn\/code-editor\//.test(request)) {
-          // return callback(null, 'commonjs ' + request);
-        // }
-        // callback();
+      // if (/^@kbn\/code-editor\//.test(request)) {
+      // return callback(null, 'commonjs ' + request);
+      // }
+      // callback();
       // },
     ],
     module: {

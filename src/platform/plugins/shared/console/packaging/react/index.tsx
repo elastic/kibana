@@ -14,7 +14,7 @@ import { noop } from 'lodash';
 // Disable Monaco workers entirely to prevent "Unexpected usage" errors
 // This sacrifices some language features but allows the editor to work in external apps
 (window as any).MonacoEnvironment = {
-  getWorker: function () {
+  getWorker() {
     // Return a minimal mock worker that doesn't actually do anything
     return {
       postMessage: () => {},
@@ -23,9 +23,9 @@ import { noop } from 'lodash';
       terminate: () => {},
       onerror: null,
       onmessage: null,
-      onmessageerror: null
+      onmessageerror: null,
     };
-  }
+  },
 };
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -41,6 +41,7 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
+import type { NotificationsSetup } from '@kbn/core/public';
 import { createStorage, createHistory, createSettings, setStorage } from '../../public/services';
 import { loadActiveApi } from '../../public/lib/kb';
 
@@ -58,7 +59,6 @@ import {
 import { createApi, createEsHostService } from '../../public/application/lib';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
-import type { NotificationsSetup } from '@kbn/core/public';
 
 // Import all translation files statically so webpack includes them in the bundle
 const translations = {
@@ -71,7 +71,11 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({ lang = 'en', http: customHttp, notifications: customNotifications }: OneConsoleProps) => {
+export const OneConsole = ({
+  lang = 'en',
+  http: customHttp,
+  notifications: customNotifications,
+}: OneConsoleProps) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
 
@@ -114,7 +118,7 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
       addError: customNotifications.addError || noop,
       add: customNotifications.add || noop,
       remove: customNotifications.remove || noop,
-    }
+    },
   };
 
   const executionContextService = new ExecutionContextService();
