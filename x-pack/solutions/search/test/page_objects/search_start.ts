@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchStartProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -42,6 +42,9 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain('/app/ml/filedatavisualizer');
       });
+    },
+    async expectToBeOnDiscoverPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
     },
     async expectIndexNameToExist() {
       await testSubjects.existOrFail('indexNameField');
@@ -139,6 +142,20 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     },
     async clearSkipEmptyStateStorageFlag() {
       await browser.removeLocalStorageItem('search_onboarding_global_empty_state_skip');
+    },
+    async expectAnalyzeLogsLink() {
+      await testSubjects.existOrFail('analyzeLogsBtn');
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
+        'https://www.elastic.co/docs/manage-data/ingest'
+      );
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
+    },
+    async expectO11yTrialLink() {
+      await testSubjects.existOrFail('startO11yTrialBtn');
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).match(
+        /^https?\:\/\/.*\/projects\/create\/observability\/start/
+      );
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },
   };
 }
