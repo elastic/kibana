@@ -152,6 +152,22 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        syncMetaData:
+          type: object
+          properties:
+            latestFullSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last full synchronization.
+            latestPartialSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last update
+            error: 
+                type: string				
+                description: Error message from the last sync attempt, if any.		
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -193,6 +209,22 @@ components:
               oneOf:
                 - type: string
                 - type: object
+        syncMetaData:
+          type: object
+          properties:
+            latestFullSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last full synchronization.
+            latestPartialSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last update
+            error: 
+                type: string				
+                description: Error message from the last sync attempt, if any.	
 
     MonitoringEntitySourceProperties:
       type: object
@@ -232,6 +264,23 @@ components:
               oneOf:
               - type: string
               - type: object
+        syncMetaData:
+          type: object
+          properties:
+            latestFullSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last full synchronization.
+            latestPartialSyncMarker:
+                type: string
+                format: date-time                
+                default: '@timestamp'
+                description: The timestamp of the last update
+            error: 
+                type: string				
+                description: Error message from the last sync attempt, if any.	
+
 
     MonitoringEntitySourceNoId:
       allOf:

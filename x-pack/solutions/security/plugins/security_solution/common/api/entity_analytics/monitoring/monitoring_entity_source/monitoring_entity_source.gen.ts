@@ -39,6 +39,22 @@ export const CreateMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  syncMetaData: z
+    .object({
+      /**
+       * The timestamp of the last full synchronization.
+       */
+      latestFullSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * The timestamp of the last update
+       */
+      latestPartialSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * Error message from the last sync attempt, if any.
+       */
+      error: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
@@ -63,6 +79,22 @@ export const UpdatedMonitoringEntitySource = z.object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
+  syncMetaData: z
+    .object({
+      /**
+       * The timestamp of the last full synchronization.
+       */
+      latestFullSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * The timestamp of the last update
+       */
+      latestPartialSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * Error message from the last sync attempt, if any.
+       */
+      error: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
@@ -84,6 +116,22 @@ export const MonitoringEntitySourceProperties = z.object({
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
+  syncMetaData: z
+    .object({
+      /**
+       * The timestamp of the last full synchronization.
+       */
+      latestFullSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * The timestamp of the last update
+       */
+      latestPartialSyncMarker: z.string().datetime().optional().default('@timestamp'),
+      /**
+       * Error message from the last sync attempt, if any.
+       */
+      error: z.string().optional(),
     })
     .optional(),
 });
