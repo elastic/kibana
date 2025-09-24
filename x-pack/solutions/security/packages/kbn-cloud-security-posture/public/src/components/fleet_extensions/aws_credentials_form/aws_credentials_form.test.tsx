@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AwsCredentialsForm } from './aws_credentials_form';
 import { type CloudSetupContextValue, useCloudSetup } from '../hooks/use_cloud_setup_context';
@@ -20,7 +21,7 @@ import {
   AWS_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
 import { getMockPolicyAWS } from '../test/mock';
-import type { UpdatePolicy } from '../types';
+import type { CloudSetupConfig, UpdatePolicy } from '../types';
 
 // Mock dependencies
 jest.mock('../hooks/use_cloud_setup_context');
@@ -84,16 +85,12 @@ describe('AwsCredentialsForm', () => {
     getCloudSetupProviderByInputType: jest.fn(),
     config: {
       showCloudTemplates: true,
-    } as CloudSetupConfig, // or a more accurate mock if needed
+    } as CloudSetupConfig,
     showCloudTemplates: false,
     defaultProvider: 'aws',
-    getCloudSetupProviders: jest.fn(),
-    getCloudSetupTemplateInputOptions: jest.fn(),
-    getProviderDetails: jest.fn(),
-    cloud: {} as CloudSetup,
-    uiSettings: {} as UiSettingsService,
-    packagePolicy: {} as NewPackagePolicy,
-    packageInfo: {} as PackageInfo,
+    defaultProviderType: 'aws',
+    awsInputFieldMapping: {},
+    isAwsCloudConnectorEnabled: false,
   };
 
   interface AwsCredentialsFormTestProps {
