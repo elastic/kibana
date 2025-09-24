@@ -342,6 +342,12 @@ export class StreamsApp {
   async fillFieldInput(dataTestSubj: string, value: string) {
     const comboBoxInput = this.page.getByTestId(dataTestSubj);
     await comboBoxInput.click();
+    // Clear the combo box input
+    // We need the below check for headed tests on MacOS to work around a Playwright issue
+    await this.page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
+    await this.page.keyboard.press('Backspace');
+
+    // Now type new stuff
     await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
