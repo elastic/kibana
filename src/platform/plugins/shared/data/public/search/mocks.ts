@@ -22,7 +22,9 @@ function createSetupContract(): jest.Mocked<ISearchSetup> {
   };
 }
 
-function createStartContract(): jest.Mocked<ISearchStart> {
+function createStartContract(
+  overrides: Partial<jest.Mocked<ISearchStart>> = {}
+): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
@@ -33,6 +35,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     session: getSessionServiceMock(),
     sessionsClient: getSessionsClientMock(),
     searchSource: searchSourceMock.createStartContract(),
+    ...overrides,
   };
 }
 
