@@ -33,7 +33,7 @@ export const DashboardsUploadStep = ({
   );
 
   return (
-    <EuiPanel data-test-subj="siemMigrationsDashboardsUploadStep">
+    <EuiPanel data-test-subj="siemMigrationsDashboardsUploadStep" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">

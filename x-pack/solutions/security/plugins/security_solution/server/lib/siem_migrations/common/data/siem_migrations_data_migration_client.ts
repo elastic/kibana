@@ -109,18 +109,24 @@ export class SiemMigrationsDataMigrationClient<
    * Saves a migration as ended, updating the last execution parameters with the current timestamp.
    */
   async saveAsFinished({ id, error }: { id: string; error?: string }): Promise<void> {
-    const finishedAt = new Date().toISOString();
     const currentMigrationDoc = await this.get(id);
     if (!currentMigrationDoc) {
       throw new Error(MIGRATION_ID_NOT_FOUND(id));
     }
-    const startedAt = currentMigrationDoc.last_execution?.started_at ?? new Date().toISOString();
+
+    const finishesAt = new Date();
+    let latestExecutionTimeMs = 0;
+
+    // ideally started_at should always be defined here, but if it is not, we do not want to throw an error
+    if (currentMigrationDoc.last_execution?.started_at) {
+      latestExecutionTimeMs =
+        finishesAt.getTime() - new Date(currentMigrationDoc.last_execution.started_at).getTime();
+    }
 
     const currentExecutionTime = currentMigrationDoc?.last_execution?.total_execution_time_ms ?? 0;
-    const latestExecutionTimeMs = new Date(finishedAt).getTime() - new Date(startedAt).getTime();
 
     await this.updateLastExecution(id, {
-      finished_at: finishedAt,
+      finished_at: finishesAt.toISOString(),
       total_execution_time_ms: currentExecutionTime + latestExecutionTimeMs,
       error,
     });
