@@ -40,7 +40,6 @@ export type LensProps = Pick<
   | 'onLoad'
 >;
 
-const ROOT_MARGIN = '15px';
 export const useLensProps = ({
   title,
   query,
