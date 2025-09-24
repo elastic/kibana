@@ -148,7 +148,7 @@ export function parseJestArguments(): ParsedJestArguments {
 
   If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
 
-  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  Run 'yarn jest --help | node scripts/read_jest_help.cjs' to update this scripts knowledge of what
   flags jest supports
 
 `);
