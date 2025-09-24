@@ -8,6 +8,7 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { schema } from '@kbn/config-schema';
 import {
   dashboardGetResultSchema,
   dashboardCreateOptionsSchema,
@@ -17,7 +18,6 @@ import {
   dashboardItemSchema,
   dashboardState,
 } from './schema';
-import { schema } from '@kbn/config-schema';
 
 export const serviceDefinition: ServicesDefinition = {
   get: {

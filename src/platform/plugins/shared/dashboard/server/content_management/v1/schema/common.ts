@@ -304,7 +304,7 @@ export const dashboardState = {
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
-// 
+//
 export const dashboardAttributesSchema = schema.object({
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),

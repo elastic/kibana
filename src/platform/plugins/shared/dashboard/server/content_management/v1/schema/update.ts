@@ -9,11 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { updateOptionsSchema } from '@kbn/content-management-utils';
 
-import {
-  referenceSchema,
-  dashboardState,
-  dashboardAPICreateResultSchema,
-} from './common';
+import { referenceSchema, dashboardState, dashboardAPICreateResultSchema } from './common';
 
 export const dashboardUpdateOptionsSchema = schema.object({
   references: schema.maybe(schema.arrayOf(referenceSchema)),
