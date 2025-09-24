@@ -213,6 +213,7 @@ export class JobsListUI extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
+        width: '60px',
         render: (row) => {
           const showAlertIcon = Array.isArray(row.alertingRules) && row.alertingRules.length > 0;
           const showAuditIcon = Boolean(row.auditMessage);
@@ -420,7 +421,6 @@ export class JobsListUI extends Component {
           className={`jobs-list-table ${selectedJobsClass}`}
           items={pageOfItems}
           columns={columns}
-          tableLayout="auto"
           pagination={pagination}
           onChange={this.onTableChange}
           selection={selectionControls}
