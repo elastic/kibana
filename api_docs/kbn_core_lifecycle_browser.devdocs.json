@@ -467,42 +467,6 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
-            "id": "def-public.CoreStart.savedObjects",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "savedObjects",
-            "description": [
-              "\n{@link SavedObjectsStart}"
-            ],
-            "signature": [
-              "SavedObjectsStart"
-            ],
-            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/browser-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/browser-internal/src/plugin_context.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/root/browser-internal/src/core_system.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-public.CoreStart.i18n",
             "type": "Object",
             "tags": [],

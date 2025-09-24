@@ -46,7 +46,7 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
       connector_type_id: 'crowdstrike',
       is_preconfigured: false,
       is_deprecated: false,
-      is_system_action: false
+      is_system_action: false,
     };
     mockedConnectorsServices.fetchConnectorByType.mockResolvedValue(existingConnector);
 
@@ -73,7 +73,7 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
       name: 'test-connector',
       isPreconfigured: false,
       isDeprecated: false,
-      isSystemAction: false
+      isSystemAction: false,
     };
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 
@@ -106,7 +106,7 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
       name: 'test-connector',
       isPreconfigured: false,
       isDeprecated: false,
-      isSystemAction: false
+      isSystemAction: false,
     };
     mockedConnectorsServices.createConnector.mockResolvedValue(newConnector);
 

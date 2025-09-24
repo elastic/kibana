@@ -13,6 +13,7 @@ import { EuiText } from '@elastic/eui';
 import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
 import type { AzureCredentialsType } from '../types';
+import { getAzureCredentialsType } from '../utils';
 
 export type AzureCredentialsFields = Record<
   string,
@@ -73,7 +74,118 @@ const I18N_CLIENT_ID = i18n.translate(
   }
 );
 
-export const getAzureCredentialsFormOptions = (): AzureOptions => ({
+const I18N_CLOUD_CONNECTOR_ID = i18n.translate(
+  'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorIdLabel',
+  {
+    defaultMessage: 'Cloud Connector ID',
+  }
+);
+
+export const getAgentlessCredentialsType = (
+  input: NewPackagePolicyInput,
+  showCloudConnectors: boolean
+): AzureCredentialsType => {
+  const credentialsType = getAzureCredentialsType(input);
+  if (
+    (!credentialsType && showCloudConnectors) ||
+    (credentialsType === AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE && showCloudConnectors)
+  ) {
+    return AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+  }
+
+  if (credentialsType === AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE || !credentialsType) {
+    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
+  }
+
+  return credentialsType;
+};
+
+const getAzureClientIdAndTenantIdFields = (): AzureCredentialsFields => ({
+  'azure.credentials.tenant_id': {
+    label: I18N_TENANT_ID,
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+    isSecret: true,
+    type: 'text',
+  },
+  'azure.credentials.client_id': {
+    label: I18N_CLIENT_ID,
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+    isSecret: true,
+    type: 'text',
+  },
+});
+
+const getAzureSericePrincipalWithClientSecretFields = (): AzureCredentialsFields => ({
+  ...getAzureClientIdAndTenantIdFields(),
+  'azure.credentials.client_secret': {
+    type: 'password',
+    isSecret: true,
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
+      {
+        defaultMessage: 'Client Secret',
+      }
+    ),
+    testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+  },
+});
+
+export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
+  AzureOptions,
+  'cloud_connectors' | 'service_principal_with_client_secret'
+> => {
+  return {
+    [AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsLabel',
+        {
+          defaultMessage: 'Cloud Connectors (recommended)',
+        }
+      ),
+      info: (
+        <EuiText color="subdued" size="s">
+          <FormattedMessage
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsInfo"
+            defaultMessage="Cloud Connectors allow you to connect to various cloud services securely."
+          />
+        </EuiText>
+      ),
+      fields: {
+        ...getAzureClientIdAndTenantIdFields(),
+        azure_credentials_cloud_connector_id: {
+          label: I18N_CLOUD_CONNECTOR_ID,
+          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
+        },
+      },
+    },
+    [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.servicePrincipalWithClientSecretLabel',
+        {
+          defaultMessage: 'Service principal with Client Secret',
+        }
+      ),
+      fields: getAzureSericePrincipalWithClientSecretFields(),
+    },
+  };
+};
+
+export const getAzureAgentlessCredentialFormOptions = (): Pick<
+  AzureOptions,
+  'service_principal_with_client_secret'
+> => ({
+  [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.servicePrincipalWithClientSecretLabel',
+      {
+        defaultMessage: 'Service principal with Client Secret',
+      }
+    ),
+    fields: getAzureSericePrincipalWithClientSecretFields(),
+  },
+});
+
+export const getAzureCredentialsFormOptions = (): Omit<AzureOptions, 'cloud_connectors'> => ({
   [AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY]: {
     label: i18n.translate(
       'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.credentialType.managedIdentityLabel',
@@ -109,27 +221,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         defaultMessage: 'Service principal with Client Secret',
       }
     ),
-    fields: {
-      'azure.credentials.tenant_id': {
-        label: I18N_TENANT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-      },
-      'azure.credentials.client_id': {
-        label: I18N_CLIENT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-      },
-      'azure.credentials.client_secret': {
-        type: 'password',
-        isSecret: true,
-        label: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientSecretLabel',
-          {
-            defaultMessage: 'Client Secret',
-          }
-        ),
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
-      },
-    },
+    fields: getAzureSericePrincipalWithClientSecretFields(),
   },
   [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE]: {
     label: i18n.translate(
@@ -139,14 +231,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       }
     ),
     fields: {
-      'azure.credentials.tenant_id': {
-        label: I18N_TENANT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-      },
-      'azure.credentials.client_id': {
-        label: I18N_CLIENT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-      },
+      ...getAzureClientIdAndTenantIdFields(),
       'azure.credentials.client_certificate_path': {
         label: i18n.translate(
           'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientCertificatePathLabel',
@@ -175,14 +260,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       { defaultMessage: 'Service principal with Client Username and Password' }
     ),
     fields: {
-      'azure.credentials.tenant_id': {
-        label: I18N_TENANT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
-      },
-      'azure.credentials.client_id': {
-        label: I18N_CLIENT_ID,
-        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
-      },
+      ...getAzureClientIdAndTenantIdFields(),
       'azure.credentials.client_username': {
         label: i18n.translate(
           'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.clientUsernameLabel',

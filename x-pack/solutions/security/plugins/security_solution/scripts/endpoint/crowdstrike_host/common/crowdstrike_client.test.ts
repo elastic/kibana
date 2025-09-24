@@ -77,7 +77,7 @@ describe('CrowdStrikeClient', () => {
           },
         ],
       };
-      
+
       (axios.request as jest.Mock).mockResolvedValueOnce({ data: mockResponse });
 
       const result = await client.getSensorInstallers('ubuntu');

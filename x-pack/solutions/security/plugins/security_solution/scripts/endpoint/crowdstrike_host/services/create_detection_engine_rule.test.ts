@@ -31,7 +31,6 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
   });
 
   it('should skip creation if rule already exists', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'existing-rule-id',
@@ -53,8 +52,13 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
   });
 
   it('should create new rule if none exists', async () => {
-    mockedDetectionRulesServices.findRules.mockResolvedValue({ page: 1, perPage: 10, total: 0, data: [] });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedDetectionRulesServices.findRules.mockResolvedValue({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',
@@ -75,8 +79,13 @@ describe('createDetectionEngineCrowdStrikeRuleIfNeeded', () => {
   });
 
   it('should include namespace in index patterns when provided', async () => {
-    mockedDetectionRulesServices.findRules.mockResolvedValue({ page: 1, perPage: 10, total: 0, data: [] });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedDetectionRulesServices.findRules.mockResolvedValue({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+
     const newRule = {
       name: 'Promote CrowdStrike alerts',
       id: 'new-rule-id',

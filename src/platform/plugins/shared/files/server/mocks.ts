@@ -11,34 +11,37 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
 import { clone } from 'lodash';
+import { lazyObject } from '@kbn/lazy-object';
 import type { File, FileJSON } from '../common';
 import type { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
-export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
-  create: jest.fn(),
-  delete: jest.fn(),
-  bulkDelete: jest.fn(),
-  deleteShareObject: jest.fn(),
-  find: jest.fn(),
-  getById: jest.fn(),
-  bulkGetById: jest.fn(),
-  getByToken: jest.fn(),
-  getShareObject: jest.fn(),
-  getUsageMetrics: jest.fn(),
-  listShareObjects: jest.fn(),
-  update: jest.fn(),
-  updateShareObject: jest.fn(),
-});
+export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> =>
+  lazyObject({
+    create: jest.fn(),
+    delete: jest.fn(),
+    bulkDelete: jest.fn(),
+    deleteShareObject: jest.fn(),
+    find: jest.fn(),
+    getById: jest.fn(),
+    bulkGetById: jest.fn(),
+    getByToken: jest.fn(),
+    getShareObject: jest.fn(),
+    getUsageMetrics: jest.fn(),
+    listShareObjects: jest.fn(),
+    update: jest.fn(),
+    updateShareObject: jest.fn(),
+  });
 
-export const createFileServiceFactoryMock = (): DeeplyMockedKeys<FileServiceFactory> => ({
-  asInternal: jest.fn(createFileServiceMock),
-  asScoped: jest.fn((_: KibanaRequest) => createFileServiceMock()),
-});
+export const createFileServiceFactoryMock = (): DeeplyMockedKeys<FileServiceFactory> =>
+  lazyObject({
+    asInternal: jest.fn(createFileServiceMock),
+    asScoped: jest.fn((_: KibanaRequest) => createFileServiceMock()),
+  });
 
 export const createFileMock = <Meta = unknown>(
   fileDataOverride: Partial<FileJSON<Meta>> = {}
 ): DeeplyMockedKeys<File> => {
-  const fileMock: DeeplyMockedKeys<File> = {
+  const fileMock: DeeplyMockedKeys<File> = lazyObject({
     id: '123',
     data: {
       id: '123',
@@ -65,7 +68,7 @@ export const createFileMock = <Meta = unknown>(
     toJSON: jest.fn(() => {
       return clone(fileMock.data);
     }),
-  };
+  });
 
   fileMock.update.mockResolvedValue(fileMock);
   fileMock.uploadContent.mockResolvedValue(fileMock);
@@ -78,7 +81,7 @@ export const createFileClientMock = <Meta = unknown>(
 ): DeeplyMockedKeys<FileClient> => {
   const fileMock = createFileMock(fileDataOverride);
 
-  return {
+  return lazyObject({
     fileKind: 'none',
     create: jest.fn().mockResolvedValue(fileMock),
     get: jest.fn().mockResolvedValue(fileMock),
@@ -88,11 +91,11 @@ export const createFileClientMock = <Meta = unknown>(
     share: jest.fn(),
     unshare: jest.fn(),
     listShares: jest.fn().mockResolvedValue({ shares: [] }),
-  };
+  });
 };
 
 export const createFilesSetupMock = (): DeeplyMockedKeys<FilesSetup> => {
-  return {
+  return lazyObject({
     registerFileKind: jest.fn(),
-  };
+  });
 };
