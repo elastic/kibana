@@ -49,6 +49,58 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.registerIndexEditorAnalyticsEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "registerIndexEditorAnalyticsEvents",
+        "description": [
+          "\nRegisters the index editor analytics events.\nThis function is wrapped in `once` to ensure that the events are registered only once."
+        ],
+        "signature": [
+          "(analytics: ",
+          "AnalyticsServiceSetup",
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.registerIndexEditorAnalyticsEvents.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -94,6 +146,17 @@
             "type": "boolean",
             "tags": [],
             "label": "canEditIndex",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.triggerSource",
+            "type": "string",
+            "tags": [],
+            "label": "triggerSource",
             "description": [],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
             "deprecated": false,
