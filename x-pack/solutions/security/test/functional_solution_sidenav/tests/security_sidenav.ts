@@ -11,7 +11,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
   const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
 
   describe('security solution', () => {
     let cleanUp: () => Promise<unknown>;
