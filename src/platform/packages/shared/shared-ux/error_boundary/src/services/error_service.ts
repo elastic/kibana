@@ -14,8 +14,8 @@ import { ThrowIfError } from '../ui/throw_if_error';
 
 const MATCH_CHUNK_LOAD_ERROR = /ChunkLoadError/;
 
-// Maximum duration to track for error component rendering (2 minutes in ms)
-export const DEFAULT_MAX_ERROR_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+// Maximum duration to track for error component rendering (10 seconds)
+export const DEFAULT_MAX_ERROR_DURATION_MS = 10 * 1000; // 10 seconds
 
 // Time to wait before checking if navigation occurred after an error
 export const MONITOR_NAVIGATION_WITHIN_MS = 250;
