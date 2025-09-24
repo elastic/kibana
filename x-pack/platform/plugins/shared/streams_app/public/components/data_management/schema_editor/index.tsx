@@ -139,11 +139,7 @@ export function SchemaEditor({
                   onClick={() => {
                     fieldSelection.forEach((fieldName) => {
                       const field = fields.find(({ name }) => name === fieldName)!;
-                      onFieldUpdate({
-                        name: field.name,
-                        parent: field.parent,
-                        status: 'unmapped',
-                      } as SchemaField);
+                      onFieldUpdate({ ...field, status: 'unmapped' } as SchemaField);
                       onFieldSelection(fieldSelection, false);
                     });
                   }}
