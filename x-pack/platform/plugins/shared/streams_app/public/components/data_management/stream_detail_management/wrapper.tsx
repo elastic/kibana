@@ -73,6 +73,7 @@ export function Wrapper({
 
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
+    canReadFailureStore: definition.privileges.read_failure_store,
   });
   const docCountsFetch = getStreamDocCounts(streamId);
 
