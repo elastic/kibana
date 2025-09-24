@@ -11,6 +11,8 @@ jobs:
   request_review:
     name: Request review from Copilot
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     if: github.event.repository.fork == false
     steps:
       - name: Check for team labels
