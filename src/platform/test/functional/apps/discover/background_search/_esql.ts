@@ -58,17 +58,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'FROM kibana_sample_data_flights | LIMIT 10 | WHERE DELAY(1000ms)'
         );
 
-        await testSubjects.click('querySubmitSplitButton-primary-button');
+        await testSubjects.click('querySubmitButton');
 
         await retry.waitFor('waits for the Cancel button to appear', async () => {
-          const ariaLabel = await testSubjects.getAttribute(
-            'queryCancelSplitButton-primary-button',
-            'aria-label'
-          );
+          const ariaLabel = await testSubjects.getAttribute('queryCancelButton', 'aria-label');
           return ariaLabel === 'Cancel';
         });
 
-        await testSubjects.click('queryCancelSplitButton-secondary-button');
+        await testSubjects.click('queryCancelButton-secondary-button');
 
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
