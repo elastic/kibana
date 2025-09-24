@@ -16,6 +16,10 @@ const LazyIconBulb = lazy(() =>
   import('./v2_icons/bulb').then(({ iconBulb }) => ({ default: iconBulb }))
 );
 
+const LazyIconWorkflow = lazy(() =>
+  import('./v2_icons/workflow').then(({ iconWorkflow }) => ({ default: iconWorkflow }))
+);
+
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   defaultNavigationTree.dashboards({ sideNavVersion: 'v2' }),
   defaultNavigationTree.rules({ sideNavVersion: 'v2' }),
@@ -26,8 +30,8 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
     sideNavVersion: 'v2',
   },
   {
-    // TODO: update icon before release
-    iconV2: 'merge',
+    // TODO: update icon from EUI
+    iconV2: LazyIconWorkflow,
     link: 'workflows',
     withBadge: true,
     badgeTypeV2: 'techPreview' as const,
@@ -62,6 +66,7 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   },
   {
     id: SecurityPageName.threatIntelligence,
+    // TODO: update icon from EUI
     iconV2: LazyIconBulb,
     link: securityLink(SecurityPageName.threatIntelligence),
     sideNavVersion: 'v2',
