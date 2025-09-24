@@ -11,7 +11,6 @@ import { updateOptionsSchema } from '@kbn/content-management-utils';
 
 import {
   referenceSchema,
-  searchResultsAttributes,
   dashboardState,
   dashboardAPICreateResultSchema,
 } from './common';
@@ -22,7 +21,6 @@ export const dashboardUpdateOptionsSchema = schema.object({
 });
 
 export const dashboardUpdateRequestAttributesSchema = schema.object({
-  ...searchResultsAttributes,
   ...dashboardState,
   type: schema.maybe(schema.string()),
   references: schema.maybe(schema.arrayOf(referenceSchema)),

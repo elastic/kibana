@@ -10,8 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas } from '@kbn/content-management-utils';
 
 import {
-  searchResultsAttributes,
-  dashboardState,
   referenceSchema,
   dashboardDataAttributesSchema,
   dashboardMetaSchema,
@@ -24,10 +22,6 @@ export const dashboardCreateOptionsSchema = schema.object({
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
 });
-
-export const dashboardCreateSchema = schema
-  .object(searchResultsAttributes)
-  .extends(dashboardState);
 
 export const dashboardStorageCreateResultSchema = schema.object(
   {

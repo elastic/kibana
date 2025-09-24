@@ -269,7 +269,8 @@ export const searchSourceSchema = schema.object(
 );
 
 export const dashboardState = {
-  // Search
+  controlGroupInput: schema.maybe(controlsGroupSchema),
+  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
   kibanaSavedObjectMeta: schema.object(
     {
       searchSource: schema.maybe(searchSourceSchema),
@@ -281,39 +282,30 @@ export const dashboardState = {
       defaultValue: {},
     }
   ),
-  // Time
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  refreshInterval: schema.maybe(refreshIntervalSchema),
-
-  // Dashboard Content
-  controlGroupInput: schema.maybe(controlsGroupSchema),
-  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-};
-
-export const searchResultsAttributes = {
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
-  timeRestore: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to restore time upon viewing this dashboard' },
-  }),
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
   tags: schema.maybe(
     schema.arrayOf(
       schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
     )
   ),
+  timeFrom: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  timeRestore: schema.boolean({
+    defaultValue: false,
+    meta: { description: 'Whether to restore time upon viewing this dashboard' },
+  }),
+  timeTo: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
 // 
 export const dashboardAttributesSchema = schema.object({
-  ...searchResultsAttributes,
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -340,7 +332,6 @@ export const dashboardAPICreateResultSchema = schema.object(
 );
 
 export const dashboardResponseAttributesSchema = schema.object({
-  ...searchResultsAttributes,
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -406,7 +397,6 @@ export const dashboardResolveMetaSchema = {
 };
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
-  ...searchResultsAttributes,
   ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
