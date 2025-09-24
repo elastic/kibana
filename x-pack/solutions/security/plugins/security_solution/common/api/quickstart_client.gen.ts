@@ -3070,6 +3070,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     * Update or create an entity in Entity Store.
 If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
 > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
 
     */
   async upsertEntity(props: UpsertEntityProps) {
