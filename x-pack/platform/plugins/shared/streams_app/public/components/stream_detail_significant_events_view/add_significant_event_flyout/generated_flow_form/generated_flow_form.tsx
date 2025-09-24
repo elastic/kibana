@@ -7,9 +7,11 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { validateQuery } from '../common/validate_query';
@@ -17,6 +19,7 @@ import { AIConnectorSelector } from './ai_connector_selector';
 import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -28,9 +31,13 @@ interface Props {
 export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
+  const {
+    timeState: { start, end },
+  } = useTimefilter();
   const aiFeatures = useAIFeatures();
-  const { generate } = useSignificantEventsApi({ name: definition.name });
+  const { generate } = useSignificantEventsApi({ name: definition.name, start, end });
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -71,6 +78,8 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                 }
                 iconType="sparkles"
                 onClick={() => {
+                  const startTime = Date.now();
+
                   setIsGenerating(true);
                   setGeneratedQueries([]);
                   setSelectedQueries([]);
@@ -86,7 +95,12 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                       if (!validation.kql.isInvalid) {
                         setGeneratedQueries((prev) => [
                           ...prev,
-                          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                          {
+                            id: v4(),
+                            kql: { query: result.query.kql },
+                            title: result.query.title,
+                            system: result.query.system,
+                          },
                         ]);
                       }
                     },
@@ -110,6 +124,10 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                           'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
                           { defaultMessage: `Generated significant events queries successfully` }
                         ),
+                      });
+                      telemetryClient.trackSignificantEventsSuggestionsGenerate({
+                        duration_ms: Date.now() - startTime,
+                        stream_type: getStreamTypeFromDefinition(definition),
                       });
                       setIsGenerating(false);
                     },

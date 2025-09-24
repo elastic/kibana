@@ -11,8 +11,8 @@ import { buildRequestFromConnector } from '@kbn/workflows';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
+import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -20,7 +20,7 @@ export interface ElasticsearchActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionStep> {
+export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
   constructor(
     step: ElasticsearchActionStep,
     contextManager: WorkflowContextManager,
@@ -35,14 +35,29 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
     const context = this.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return Object.entries(stepWith).reduce((acc: Record<string, any>, [key, value]) => {
-      if (typeof value === 'string') {
-        acc[key] = this.templatingEngine.render(value, context);
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    return this.renderObjectTemplate(stepWith, context);
+  }
+
+  /**
+   * Recursively render the object template.
+   * @param obj - The object to render.
+   * @param context - The context to use for rendering.
+   * @returns The rendered object.
+   */
+  private renderObjectTemplate(obj: any, context: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.renderObjectTemplate(item, context));
+    }
+    if (obj && typeof obj === 'object') {
+      return Object.entries(obj).reduce((acc, [key, value]) => {
+        acc[key] = this.renderObjectTemplate(value, context);
+        return acc;
+      }, {} as any);
+    }
+    if (typeof obj === 'string') {
+      return this.templatingEngine.render(obj, context);
+    }
+    return obj;
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -105,6 +120,14 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
+      return await esClient.transport.request({
+        method,
+        path,
+        body,
+      });
+    } else if (stepType === 'elasticsearch.request') {
+      // Special case: elasticsearch.request type uses raw API format at top level
+      const { method = 'GET', path, body } = params;
       return await esClient.transport.request({
         method,
         path,

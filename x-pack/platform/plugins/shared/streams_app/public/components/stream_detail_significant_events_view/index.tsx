@@ -7,7 +7,8 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,6 +24,8 @@ import { SignificantEventsTable } from './significant_events_table';
 import type { TimelineEvent } from './timeline';
 import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
+import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -31,6 +34,7 @@ interface Props {
 export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -50,6 +54,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
+    start,
+    end,
   });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
@@ -87,6 +93,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       definition={definition.stream}
       query={queryToEdit}
       onSave={async (data: SaveData) => {
+        const streamType = getStreamTypeFromDefinition(definition.stream);
+
         switch (data.type) {
           case 'single':
             await upsertQuery(data.query).then(
@@ -96,6 +104,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     'xpack.streams.significantEvents.savedSingle.successfullyToastTitle',
                     { defaultMessage: `Saved significant event query successfully` }
                   ),
+                });
+                telemetryClient.trackSignificantEventsCreated({
+                  count: 1,
+                  stream_type: streamType,
                 });
                 setIsEditFlyoutOpen(false);
                 significantEventsFetchState.refresh();
@@ -119,6 +131,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
                     { defaultMessage: `Saved significant events queries successfully` }
                   ),
+                });
+                telemetryClient.trackSignificantEventsCreated({
+                  count: data.queries.length,
+                  stream_type: streamType,
                 });
                 setIsEditFlyoutOpen(false);
                 significantEventsFetchState.refresh();
@@ -192,7 +208,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             response={significantEventsFetchState}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
-              setQueryToEdit(item.query);
+              setQueryToEdit({
+                ...item.query,
+                system: item.query.system ?? NO_SYSTEM,
+              });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {
