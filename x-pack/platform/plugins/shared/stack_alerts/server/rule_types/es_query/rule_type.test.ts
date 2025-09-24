@@ -26,6 +26,7 @@ import type {
   OnlySearchSourceRuleParams,
 } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { of } from 'rxjs';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
@@ -699,7 +700,9 @@ describe('ruleType', () => {
           return [];
         }
       });
-      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
+      (searchSourceInstanceMock.fetch$ as jest.Mock).mockReturnValueOnce(
+        of({ rawResponse: searchResult })
+      );
 
       await invokeExecutor({ params, ruleServices });
 
@@ -743,9 +746,13 @@ describe('ruleType', () => {
         }
       });
 
-      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce({
-        hits: { total: 3, hits: [{}, {}, {}] },
-      });
+      (searchSourceInstanceMock.fetch$ as jest.Mock).mockReturnValueOnce(
+        of({
+          rawResponse: {
+            hits: { total: 3, hits: [{}, {}, {}] },
+          },
+        })
+      );
 
       await invokeExecutor({
         params,

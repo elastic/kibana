@@ -9,6 +9,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
 
 import type { TimefilterContract, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
@@ -88,7 +89,7 @@ export class RangeControl extends Control<RangeFilterManager> {
 
     let resp;
     try {
-      resp = await searchSource.fetch({ abortSignal });
+      resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
     } catch (error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
@@ -101,8 +102,8 @@ export class RangeControl extends Control<RangeFilterManager> {
       return;
     }
 
-    const min = _.get(resp, 'aggregations.minAgg.value', null);
-    const max = _.get(resp, 'aggregations.maxAgg.value', null);
+    const min = _.get(resp.rawResponse, 'aggregations.minAgg.value', null);
+    const max = _.get(resp.rawResponse, 'aggregations.maxAgg.value', null);
 
     if (min === null || max === null) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
