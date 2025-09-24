@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint @typescript-eslint/naming-convention: 0 */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
