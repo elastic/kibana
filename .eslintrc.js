@@ -1638,21 +1638,6 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         'playwright/valid-describe-callback': 'error',
         'playwright/valid-title': 'error',
-        'playwright/valid-test-tags': [
-          'warn',
-          {
-            // Should be kept in sync with the tags defined in src/platform/packages/shared/kbn-scout/src/playwright/tags.ts
-            allowedTags: [
-              '@ess',
-              '@svlChat',
-              '@svlLogsEssentials',
-              '@svlOblt',
-              '@svlSearch',
-              '@svlSecurity',
-              '@perf',
-            ],
-          },
-        ],
       },
     },
     {
