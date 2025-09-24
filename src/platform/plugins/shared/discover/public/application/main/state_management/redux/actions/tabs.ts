@@ -330,11 +330,21 @@ export const initializeTabs = createInternalStateAsyncThunk(
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
-    // Replace instead of push to the URL on initialization in order to avoid
-    // capturing a browser history entry with a potentially empty _tab state
+    const history = services.getScopedHistory();
+    const locationState = history?.location.state;
+
+    // Replace instead of push the tab ID to the URL on initialization in order to
+    // avoid capturing a browser history entry with a potentially empty _tab state
     await tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId, {
       replace: true,
     });
+
+    // Manually restore the previous location state since pushing the tab ID
+    // to the URL clears it, but initial location state must be passed on,
+    // e.g. ad hoc data views specs
+    if (locationState) {
+      history.replace(history.createHref(history.location), locationState);
+    }
 
     dispatch(
       setTabs({
