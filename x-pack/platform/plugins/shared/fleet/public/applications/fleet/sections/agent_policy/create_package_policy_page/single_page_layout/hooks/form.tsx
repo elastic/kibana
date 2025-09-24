@@ -62,7 +62,6 @@ import {
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
-import { NewAgentActionSchema } from '@kbn/fleet-plugin/server/types';
 
 const DEFAULT_AGENTLESS_LIMIT = 5;
 
