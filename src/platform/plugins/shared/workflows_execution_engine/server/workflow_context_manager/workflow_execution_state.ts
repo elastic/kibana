@@ -67,6 +67,10 @@ export class WorkflowExecutionState {
     return Array.from(this.stepExecutions.values());
   }
 
+  public getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined {
+    return this.stepExecutions.get(stepExecutionId);
+  }
+
   /**
    * Retrieves all executions for a specific workflow step in chronological order.
    * @param stepId The unique identifier of the step
@@ -109,33 +113,7 @@ export class WorkflowExecutionState {
     }
   }
 
-  public async flush(): Promise<void> {
-    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
-  }
-
-  private async flushWorkflowChanges(): Promise<void> {
-    if (!this.workflowChanges.length) {
-      return;
-    }
-
-    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
-      (prev, acc) => ({ ...prev, ...acc.change }),
-      { id: this.workflowExecution.id } as EsWorkflowExecution
-    );
-
-    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
-
-    const fetchedWorkflowExecution =
-      await this.workflowExecutionRepository.getWorkflowExecutionById(
-        this.workflowExecution.id,
-        this.workflowExecution.spaceId
-      );
-    this.workflowExecution = fetchedWorkflowExecution!;
-
-    this.workflowChanges = [];
-  }
-
-  private async flushStepChanges(): Promise<void> {
+  public async flushStepChanges(): Promise<void> {
     const stepChanges = Array.from(this.stepChanges.values());
     const tasks: Promise<void>[] = [];
 
@@ -187,6 +165,32 @@ export class WorkflowExecutionState {
     this.stepChanges = [];
   }
 
+  public async flush(): Promise<void> {
+    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
+  }
+
+  private async flushWorkflowChanges(): Promise<void> {
+    if (!this.workflowChanges.length) {
+      return;
+    }
+
+    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
+      (prev, acc) => ({ ...prev, ...acc.change }),
+      { id: this.workflowExecution.id } as EsWorkflowExecution
+    );
+
+    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
+
+    const fetchedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionById(
+        this.workflowExecution.id,
+        this.workflowExecution.spaceId
+      );
+    this.workflowExecution = fetchedWorkflowExecution!;
+
+    this.workflowChanges = [];
+  }
+
   private createStep(step: Partial<EsWorkflowStepExecution>) {
     const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
     if (!stepExecutions.length) {
@@ -196,7 +200,8 @@ export class WorkflowExecutionState {
     const newStep: EsWorkflowStepExecution = {
       ...step,
       id: step.id,
-      executionIndex: stepExecutions.length,
+      globalExecutionIndex: this.stepExecutions.size,
+      stepExecutionIndex: stepExecutions.length,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
@@ -237,7 +242,7 @@ export class WorkflowExecutionState {
         stepExecutionIds.sort((a, b) => {
           const aExecution = this.stepExecutions.get(a);
           const bExecution = this.stepExecutions.get(b);
-          return (aExecution?.executionIndex ?? 0) - (bExecution?.executionIndex ?? 0);
+          return (aExecution?.stepExecutionIndex ?? 0) - (bExecution?.stepExecutionIndex ?? 0);
         })
       );
     }

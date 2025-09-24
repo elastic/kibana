@@ -8,7 +8,7 @@
  */
 
 import { deduplicateFields } from './deduplicate_fields';
-import type { MetricField } from '../../../common/fields/types';
+import type { MetricField } from '../../../common/types';
 
 describe('deduplicateFields', () => {
   const baseField: Omit<MetricField, 'name'> = {

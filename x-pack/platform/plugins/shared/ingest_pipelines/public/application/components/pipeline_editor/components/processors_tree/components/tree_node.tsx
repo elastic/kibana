@@ -8,7 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 
 import type { ProcessorInternal } from '../../../types';
 
@@ -30,6 +31,20 @@ export interface Props {
 
 const INDENTATION_PX = 34;
 
+const useStyles = ({ level }: { level: number }) => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    container: css`
+      margin-top: ${euiTheme.size.s};
+      margin-bottom: ${euiTheme.size.s};
+      margin-left: ${level * INDENTATION_PX}px;
+      & > * {
+        overflow: visible;
+      }
+    `,
+  };
+};
+
 export const TreeNode: FunctionComponent<Props> = ({
   processor,
   processorInfo,
@@ -37,7 +52,8 @@ export const TreeNode: FunctionComponent<Props> = ({
   movingProcessor,
   level,
 }) => {
-  const stringSelector = processorInfo.selector.join('.');
+  const stringSelector = useMemo(() => processorInfo.selector.join('.'), [processorInfo.selector]);
+  const styles = useStyles({ level });
   const handlers = useMemo((): Handlers => {
     return {
       onMove: () => {
@@ -55,10 +71,7 @@ export const TreeNode: FunctionComponent<Props> = ({
     }
 
     return (
-      <div
-        className="pipelineProcessorsEditor__tree__onFailureHandlerContainer"
-        style={{ marginLeft: `${level * INDENTATION_PX}px` }}
-      >
+      <div css={styles.container}>
         <EuiText size="m" color="subdued">
           {i18n.translate('xpack.ingestPipelines.pipelineEditor.onFailureProcessorsLabel', {
             defaultMessage: 'Failure handlers',

@@ -16,23 +16,11 @@ components:
               type: string
               description: The name of the user.
 
-    MonitoredUserDoc:
+    MonitoredUserUpdateDoc:
       type: object
       properties:
         id:
           type: string
-
-        event:
-          type: object
-          properties:
-            ingested:
-              type: string
-              format: date-time
-
-        "@timestamp":
-          type: string
-          format: date-time
-
         user:
           type: object
           properties:
@@ -59,7 +47,6 @@ components:
               type: array
               items:
                 type: string
-
         entity_analytics_monitoring:
           type: object
           properties:
@@ -74,3 +61,18 @@ components:
                     type: string
                   source:
                     type: string
+
+    MonitoredUserDoc:
+      allOf:
+      - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
+      - type: object
+        properties:
+          event:
+            type: object
+            properties:
+              ingested:
+                type: string
+                format: date-time
+          "@timestamp":
+            type: string
+            format: date-time
