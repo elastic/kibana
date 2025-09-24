@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { omit } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -140,7 +141,7 @@ export function SchemaEditor({
                   onClick={() => {
                     fieldSelection.forEach((fieldName) => {
                       const field = fields.find(({ name }) => name === fieldName)!;
-                      onFieldUpdate({ ...field, status: 'unmapped' } as SchemaField);
+                      onFieldUpdate(omit({ ...field, status: 'unmapped' }, 'type') as SchemaField);
                       onFieldSelection(fieldSelection, false);
                     });
                   }}

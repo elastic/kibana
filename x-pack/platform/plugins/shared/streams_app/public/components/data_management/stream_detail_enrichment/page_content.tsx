@@ -37,8 +37,7 @@ import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
-import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
-import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -79,13 +78,13 @@ export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
   const { appParams, core } = context;
 
-  const { refresh: refreshDefinition } = useStreamDetail();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -93,8 +92,6 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
-
-  const { storedFields } = useSchemaFields({ definition, refreshDefinition });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -116,7 +113,7 @@ export function StreamDetailEnrichmentContentImpl() {
           <SchemaChangesReviewModal
             fields={detectedFields}
             definition={definition}
-            storedFields={storedFields}
+            storedFields={definitionFields}
             submitChanges={async () => saveChanges()}
             onClose={() => overlay.close()}
           />
@@ -168,7 +165,7 @@ export function StreamDetailEnrichmentContentImpl() {
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={
-            detectedFields.length > 0 && getChanges(detectedFields, storedFields).length > 0
+            detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
               ? openConfirmationModal
               : saveChanges
           }

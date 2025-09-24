@@ -77,37 +77,9 @@ export const useSchemaFields = ({
   const [fields, setFields] = useState<SchemaField[]>([]);
 
   const storedFields = useMemo(() => {
-    let inheritedFields: SchemaField[] = [];
+    const definitionFields = getDefinitionFields(definition);
 
-    if (Streams.WiredStream.GetResponse.is(definition)) {
-      inheritedFields = Object.entries(definition.inherited_fields).map(([name, field]) => ({
-        name,
-        type: field.type,
-        format: 'format' in field ? field.format : undefined,
-        additionalParameters: getAdvancedParameters(name, field),
-        parent: field.from,
-        alias_for: field.alias_for,
-        status: 'inherited',
-      }));
-    }
-
-    const mappedFields: SchemaField[] = Object.entries(
-      Streams.WiredStream.GetResponse.is(definition)
-        ? definition.stream.ingest.wired.fields
-        : definition.stream.ingest.classic.field_overrides || {}
-    ).map(([name, field]) => ({
-      name,
-      type: field.type,
-      format: 'format' in field ? field.format : undefined,
-      additionalParameters: getAdvancedParameters(name, field),
-      parent: definition.stream.name,
-      status: 'mapped',
-    }));
-
-    const allManagedFieldsSet = new Set([
-      ...inheritedFields.map((field) => field.name),
-      ...mappedFields.map((field) => field.name),
-    ]);
+    const allManagedFieldsSet = new Set([...definitionFields.map((field) => field.name)]);
 
     const unmanagedFields: SchemaField[] = dataViewFields
       ? dataViewFields
@@ -124,8 +96,7 @@ export const useSchemaFields = ({
       : [];
 
     const allFoundFieldsSet = new Set([
-      ...inheritedFields.map((field) => field.name),
-      ...mappedFields.map((field) => field.name),
+      ...definitionFields.map((field) => field.name),
       ...unmanagedFields.map((field) => field.name),
     ]);
 
@@ -138,12 +109,7 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    const nextStoredFields = [
-      ...inheritedFields,
-      ...mappedFields,
-      ...unmanagedFields,
-      ...unmappedFields,
-    ];
+    const nextStoredFields = [...definitionFields, ...unmanagedFields, ...unmappedFields];
     setFields(nextStoredFields);
     return nextStoredFields;
   }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
@@ -269,4 +235,35 @@ export const useSchemaFields = ({
     discardChanges,
     submitChanges,
   };
+};
+
+export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse): SchemaField[] => {
+  let inheritedFields: SchemaField[] = [];
+
+  if (Streams.WiredStream.GetResponse.is(definition)) {
+    inheritedFields = Object.entries(definition.inherited_fields).map(([name, field]) => ({
+      name,
+      type: field.type,
+      format: 'format' in field ? field.format : undefined,
+      additionalParameters: getAdvancedParameters(name, field),
+      parent: field.from,
+      alias_for: field.alias_for,
+      status: 'inherited',
+    }));
+  }
+
+  const mappedFields: SchemaField[] = Object.entries(
+    Streams.WiredStream.GetResponse.is(definition)
+      ? definition.stream.ingest.wired.fields
+      : definition.stream.ingest.classic.field_overrides || {}
+  ).map(([name, field]) => ({
+    name,
+    type: field.type,
+    format: 'format' in field ? field.format : undefined,
+    additionalParameters: getAdvancedParameters(name, field),
+    parent: definition.stream.name,
+    status: 'mapped',
+  }));
+
+  return [...inheritedFields, ...mappedFields];
 };
