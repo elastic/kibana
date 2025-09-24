@@ -19,7 +19,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
-export const visualizationPlugin = () => {
+export const visualizationTagParser = () => {
   const visitor = (node: Node) => {
     if ('children' in node) {
       const parent = node as Parent;
@@ -54,7 +54,7 @@ export const visualizationPlugin = () => {
   };
 };
 
-export function getVisualizationHandler({
+export function createVisualizationRenderer({
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
