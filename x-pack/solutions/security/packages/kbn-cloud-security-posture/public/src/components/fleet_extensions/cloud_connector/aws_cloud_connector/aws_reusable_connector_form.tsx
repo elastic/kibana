@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiComboBox, EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
 import type { CloudConnectorOption, ComboBoxOption } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
