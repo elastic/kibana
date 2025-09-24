@@ -16,12 +16,15 @@ import type { WorkflowExecutionState } from './workflow_context_manager/workflow
 import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
 import type { NodesFactory } from './step/nodes_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { buildStepExecutionId } from './utils';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
   workflowRuntime: WorkflowExecutionRuntimeManager;
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: WorkflowEventLogger;
+  workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
   esClient: any; // TODO: properly type it
   fakeRequest: any; // TODO: properly type it
@@ -53,14 +56,6 @@ export interface WorkflowExecutionLoopParams {
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    if (
-      params.workflowRuntime.getWorkflowExecution().cancelRequested ||
-      params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
-    ) {
-      await markWorkflowCancelled(params.workflowExecutionState);
-      break;
-    }
-
     await runStep(params);
     await params.workflowLogger.flushEvents();
   }
@@ -88,10 +83,9 @@ async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
-    await params.workflowRuntime.failStep(error);
   } finally {
     monitorAbortController.abort();
-    await catchError(params);
+    await catchError(params, stepContext);
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }
@@ -134,6 +128,13 @@ async function runStackMonitor(
       monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
     });
 
+    await cancelWorkflowIfRequested(
+      params.workflowExecutionRepository,
+      params.workflowExecutionState,
+      monitoredContext,
+      monitoredContext.abortController
+    );
+
     let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
 
     while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
@@ -161,31 +162,60 @@ async function runStackMonitor(
   }
 }
 
-async function markWorkflowCancelled(
-  workflowExecutionState: WorkflowExecutionState
+/**
+ * This function retrieves the current workflow execution and verifies if cancellation requested.
+ * In case when cancelRequested is true, it aborts the monitoredContext.abortController and marks the workflow as cancelled.
+ * When monitoredContext.abortController.abort() is called, it will send cancellation signal to currently running node/step,
+ * and in case if the node/step supports cancellation (like HTTP step with AbortSignal), it will stop its execution immediately.
+ */
+async function cancelWorkflowIfRequested(
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  workflowExecutionState: WorkflowExecutionState,
+  monitoredContext: WorkflowContextManager,
+  monitorAbortController?: AbortController
 ): Promise<void> {
-  const inProgressSteps = workflowExecutionState
-    .getAllStepExecutions()
-    .filter((stepExecution) =>
-      [
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.PENDING,
-      ].includes(stepExecution.status)
+  const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+    workflowExecutionState.getWorkflowExecution().id,
+    workflowExecutionState.getWorkflowExecution().spaceId
+  );
+
+  if (!currentExecution?.cancelRequested) {
+    return;
+  }
+
+  monitorAbortController?.abort();
+  monitoredContext.abortController.abort();
+  let nodeStack = monitoredContext.scopeStack;
+
+  // mark current step scopes as cancelled
+  while (!nodeStack.isEmpty()) {
+    const scopeData = nodeStack.getCurrentScope()!;
+    nodeStack = nodeStack.exitScope();
+    const stepExecutionId = buildStepExecutionId(
+      workflowExecutionState.getWorkflowExecution().id,
+      scopeData.stepId,
+      nodeStack.stackFrames
     );
 
-  inProgressSteps.forEach((runningStep) =>
-    workflowExecutionState.upsertStep({
-      id: runningStep.id,
-      status: ExecutionStatus.CANCELLED,
-    })
-  );
+    if (workflowExecutionState.getStepExecution(stepExecutionId)) {
+      workflowExecutionState.upsertStep({
+        id: buildStepExecutionId(
+          workflowExecutionState.getWorkflowExecution().id,
+          scopeData.stepId,
+          nodeStack.stackFrames
+        ),
+        status: ExecutionStatus.CANCELLED,
+      });
+    }
+  }
+
+  workflowExecutionState.upsertStep({
+    id: monitoredContext.stepExecutionId,
+    status: ExecutionStatus.CANCELLED,
+  });
   workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.CANCELLED,
   });
-
-  await workflowExecutionState.flush();
 }
 
 /**
@@ -205,7 +235,10 @@ async function markWorkflowCancelled(
  * @param workflowLogger - Logger for workflow events
  * @param nodesFactory - Factory for creating step implementations
  */
-async function catchError(params: WorkflowExecutionLoopParams) {
+async function catchError(
+  params: WorkflowExecutionLoopParams,
+  failedStepContext: WorkflowContextManager
+) {
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
@@ -213,6 +246,19 @@ async function catchError(params: WorkflowExecutionLoopParams) {
     // 2. There are items in the execution stack
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
+
+    if (!params.workflowRuntime.getWorkflowExecution().error) {
+      return;
+    }
+
+    if (params.workflowExecutionState.getStepExecution(failedStepContext.stepExecutionId)) {
+      await params.workflowExecutionState.upsertStep({
+        id: failedStepContext.stepExecutionId,
+        status: ExecutionStatus.FAILED,
+        error: params.workflowRuntime.getWorkflowExecution().error,
+      });
+    }
+
     while (
       params.workflowRuntime.getWorkflowExecution().error &&
       params.workflowRuntime.getWorkflowExecution().scopeStack.length
@@ -229,17 +275,16 @@ async function catchError(params: WorkflowExecutionLoopParams) {
 
       if (node) {
         params.workflowRuntime.navigateToNode(node.id);
-        const stepImplementation = params.nodesFactory.create(
-          new WorkflowContextManager({
-            workflowExecutionGraph: params.workflowExecutionGraph,
-            workflowExecutionState: params.workflowExecutionState,
-            esClient: params.esClient,
-            fakeRequest: params.fakeRequest,
-            coreStart: params.coreStart,
-            node: node as UnionExecutionGraphNode,
-            stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-          })
-        );
+        const stepContext = new WorkflowContextManager({
+          workflowExecutionGraph: params.workflowExecutionGraph,
+          workflowExecutionState: params.workflowExecutionState,
+          esClient: params.esClient,
+          fakeRequest: params.fakeRequest,
+          coreStart: params.coreStart,
+          node: node as UnionExecutionGraphNode,
+          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+        });
+        const stepImplementation = params.nodesFactory.create(stepContext);
 
         if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
           const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
@@ -251,7 +296,10 @@ async function catchError(params: WorkflowExecutionLoopParams) {
           }
         }
 
-        if (params.workflowRuntime.getWorkflowExecution().error) {
+        if (
+          params.workflowRuntime.getWorkflowExecution().error &&
+          params.workflowExecutionState.getStepExecution(stepContext.stepExecutionId)
+        ) {
           await params.workflowRuntime.failStep(
             params.workflowRuntime.getWorkflowExecution().error!
           );

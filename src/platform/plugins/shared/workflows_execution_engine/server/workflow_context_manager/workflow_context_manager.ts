@@ -40,6 +40,10 @@ export class WorkflowContextManager {
   public readonly stepExecutionId: string;
   public readonly abortController = new AbortController();
 
+  public get scopeStack(): WorkflowScopeStack {
+    return WorkflowScopeStack.fromStackFrames(this.stackFrames);
+  }
+
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;

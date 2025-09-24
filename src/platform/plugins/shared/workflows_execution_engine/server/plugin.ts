@@ -111,6 +111,7 @@ export class WorkflowsExecutionEnginePlugin
               await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
@@ -171,6 +172,7 @@ export class WorkflowsExecutionEnginePlugin
               await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
@@ -256,6 +258,7 @@ export class WorkflowsExecutionEnginePlugin
         await workflowExecutionLoop({
           workflowRuntime,
           workflowExecutionState,
+          workflowExecutionRepository,
           workflowLogger,
           nodesFactory,
           workflowExecutionGraph,

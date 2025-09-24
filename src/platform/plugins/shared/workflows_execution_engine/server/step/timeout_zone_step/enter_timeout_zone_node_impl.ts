@@ -27,7 +27,7 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
 
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope('timeout-zone');
+    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
