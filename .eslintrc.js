@@ -1638,6 +1638,8 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         'playwright/valid-describe-callback': 'error',
         'playwright/valid-title': 'error',
+        // Scout has a its own runtime validator for test tags
+        'playwright/valid-test-tags': 'off',
       },
     },
     {
