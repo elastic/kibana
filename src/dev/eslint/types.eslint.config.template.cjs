@@ -50,7 +50,8 @@ module.exports = {
         'ui_capabilities/**/*',
         'upgrade/apps/**/*',
         'usage_collection/test_suites/**/*',
-        'src/platform/packages/shared/kbn-scout/src/playwright/page_objects/**/*',
+        'src/playwright/page_objects/**/*',
+        'test/scout/**/*',
       ],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
