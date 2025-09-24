@@ -14,8 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
-  describe('tool management', function () {
-    it('edits', async () => {
+  describe('manage tool', function () {
+    it('should edit a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest
         .post('/api/agent_builder/tools')
@@ -31,7 +31,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      // Edit description
       const descriptionEditor = await testSubjects.find('agentBuilderToolDescriptionEditor');
       const descriptionTextarea = await descriptionEditor.findByCssSelector(
         'textarea.euiMarkdownEditorTextArea'
@@ -39,12 +38,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await descriptionTextarea.clearValue();
       await descriptionTextarea.type('FTR updated description');
 
-      // Save and assert toast
       await testSubjects.click('toolFormSaveButton');
       await testSubjects.existOrFail('toastCloseButton');
     });
 
-    it('clones', async () => {
+    it('should clone a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest
         .post('/api/agent_builder/tools')
@@ -62,12 +60,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('agentBuilderToolContextMenuButton');
       await testSubjects.click('agentBuilderToolCloneButton');
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      // Save cloned tool and assert success toast
       await testSubjects.click('toolFormSaveButton');
       await testSubjects.existOrFail('toastCloseButton');
     });
 
-    it('tests', async () => {
+    it('should test a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest
         .post('/api/agent_builder/tools')
@@ -84,10 +81,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         path: `tools/${toolId}`,
         search: 'open_test_flyout=true',
       });
-      // Basic flyout presence check using generic flyout subjects
       await testSubjects.existOrFail('euiFlyoutCloseButton');
     });
-    it('deletes', async () => {
+    it('should delete a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest
         .post('/api/agent_builder/tools')
@@ -109,7 +105,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('views built-in as read-only', async () => {
-      // Built-in tool ids are system-owned; navigate to a known builtin and assert read-only state
       const builtInToolId = 'platform.core.search';
       await common.navigateToApp(APP_ID, { path: `tools/${builtInToolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');

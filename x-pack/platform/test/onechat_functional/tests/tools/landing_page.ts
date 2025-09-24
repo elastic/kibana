@@ -14,15 +14,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
-  describe('tools table', function () {
-    it('renders', async () => {
+  describe('tools landing page', function () {
+    it('should render', async () => {
       await common.navigateToApp(APP_ID, { path: 'tools' });
       await testSubjects.existOrFail('agentBuilderToolsPage');
       await testSubjects.existOrFail('agentBuilderToolsTable');
     });
 
-    it('bulk deletes', async () => {
-      // Arrange: create two editable tools
+    it('should bulk delete tools from the table', async () => {
       const ids = [`ftr.esql.${Date.now()}.a`, `ftr.esql.${Date.now()}.b`];
       for (const id of ids) {
         await supertest
@@ -41,13 +40,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await common.navigateToApp(APP_ID, { path: 'tools' });
       await testSubjects.existOrFail('agentBuilderToolsTable');
 
-      // Select all (excludes readonly tools internally) and bulk delete
+      await testSubjects.click(`checkboxSelectRow-${ids[0]}`);
       await testSubjects.click('agentBuilderToolsSelectAllButton');
       await testSubjects.click('agentBuilderToolsBulkDeleteButton');
-      // Confirm modal is the shared EUI confirm modal; use standard testSubjects
       await testSubjects.click('confirmModalConfirmButton');
 
-      // Assert the table re-renders; optionally verify quick actions are not present for deleted ids
       await testSubjects.existOrFail('agentBuilderToolsTable');
     });
   });

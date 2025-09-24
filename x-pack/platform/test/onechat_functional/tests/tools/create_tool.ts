@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const es = getService('es');
 
-  describe('tool creation', function () {
+  describe('create tool', function () {
     let testIndexName: string;
 
     before(async () => {
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       }
     });
 
-    it('creates an esql tool', async () => {
+    it('should create an esql tool', async () => {
       await common.navigateToApp(APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.setValue('agentBuilderToolIdInput', `ftr.esql.${Date.now()}`);
@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('toastCloseButton');
     });
 
-    it('creates an index search tool', async () => {
+    it('should create an index search tool', async () => {
       await common.navigateToApp(APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.setValue('agentBuilderToolIdInput', `ftr.index.${Date.now()}`);
