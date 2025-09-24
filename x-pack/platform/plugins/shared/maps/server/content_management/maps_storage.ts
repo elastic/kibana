@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
-import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import type {
   CreateResult,
@@ -25,7 +29,7 @@ import type {
   MapsUpdateOptions,
   MapsUpdateOut,
 } from './schema/v1/types';
-import { savedObjectToItem, itemToSavedObject } from './schema/v1/transform_utils';
+import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
 import { StoredMapAttributes } from '../saved_objects/types';
 
@@ -89,8 +93,9 @@ export class MapsStorage {
       outcome,
     } = await soClient.resolve<StoredMapAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
+    const item = savedObjectToItem(savedObject, false);
     const response = {
-      item: savedObject,
+      item,
       meta: { aliasPurpose, aliasTargetId, outcome },
     };
 
@@ -146,16 +151,20 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
 
     // Save data in DB
     const savedObject = await soClient.create<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      {
+        ...optionsToLatest,
+        references: [
+          ...soReferences,
+          // tag refs still passed via API
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
     const item = savedObjectToItem(savedObject, false);
@@ -209,17 +218,21 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
 
     // Save data in DB
     const partialSavedObject = await soClient.update<StoredMapAttributes>(
       MAP_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      {
+        ...optionsToLatest,
+        references: [
+          ...soReferences,
+          // tag refs still passed via API
+          ...((optionsToLatest?.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
     const item = savedObjectToItem(partialSavedObject, true);
