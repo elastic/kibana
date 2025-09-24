@@ -59,9 +59,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const dispatch = useDispatch();
 
-  const browserFields = useMemo(() => {
-    return buildBrowserFields(dataView.fields);
-  }, [dataView.fields]);
+  const browserFields = useMemo(() => buildBrowserFields(dataView.fields), [dataView.fields]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
 
