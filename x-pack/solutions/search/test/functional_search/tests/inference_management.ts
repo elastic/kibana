@@ -4,29 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { testHasEmbeddedConsole } from './embedded_console';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
-    'svlCommonPage',
+    'common',
     'embeddedConsole',
     'searchInferenceManagementPage',
     'header',
   ]);
-  const svlSearchNavigation = getService('svlSearchNavigation');
-
-  describe('Serverless Inference Management UI', function () {
-    // see details: https://github.com/elastic/kibana/issues/204539
-    this.tags(['failsOnMKI']);
+  const searchSpace = getService('searchSpace');
+  describe('Inference Management UI', function () {
+    let cleanUp: () => Promise<unknown>;
+    let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('developer');
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+        'search-inference-management-ftr'
+      ));
+      await searchSpace.navigateTo(spaceCreated.id);
+    });
+
+    after(async () => {
+      // Clean up space created
+      if (!cleanUp) return;
+      await cleanUp();
     });
 
     beforeEach(async () => {
-      await svlSearchNavigation.navigateToInferenceManagementPage();
+      // Navigate to search solution space
+      await searchSpace.navigateTo(spaceCreated.id);
+      // Navigate to index management app
+      await pageObjects.common.navigateToApp('searchInferenceEndpoints', {
+        basePath: `s/${spaceCreated.id}`,
+      });
     });
 
     describe('endpoint tabular view', () => {
