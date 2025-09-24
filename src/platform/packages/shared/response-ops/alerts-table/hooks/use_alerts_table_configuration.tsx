@@ -50,12 +50,11 @@ export const useAlertsTableConfiguration = ({
     } catch (e) {
       configurationStorage.remove(id);
       toasts.addWarning({
-        title: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
+        title: i18n.translate('xpack.responseOpsAlertsTable.loadConfigurationError', {
           defaultMessage: 'Unable to load alerts table configuration',
         }),
-        text: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
-          defaultMessage:
-            'The saved configuration was invalid and has been reset to default.',
+        text: i18n.translate('xpack.responseOpsAlertsTable.loadConfigurationError', {
+          defaultMessage: 'The saved configuration was invalid and has been reset to default.',
         }),
       });
     }
@@ -82,30 +81,37 @@ export const useAlertsTableConfiguration = ({
         try {
           // Parsing the configuration ensures that it is valid and contains only the minimal
           // user overrides
-          const parsedConfig =
-            newConfig === null ? null : alertsTableConfigurationSchema.parse(newConfig);
-          const serializedConfig = JSON.stringify(parsedConfig);
+          const parsedConfig = !newConfig ? null : alertsTableConfigurationSchema.parse(newConfig);
+          if (parsedConfig === null) {
+            // If the new config is null, remove the saved configuration
+            configurationStorage.remove(id);
+            return parsedConfig;
+          }
 
+          const serializedConfig = JSON.stringify(parsedConfig);
           if (serializedConfig === JSON.stringify(prevConfig)) {
             // Avoid causing rerenders and saving to storage if the previous and new configurations
             // are structurally equivalent
             return prevConfig;
           }
-          if (parsedConfig === null) {
-            // If the new config is null, remove the saved configuration
-            configurationStorage.remove(id);
-          } else {
-            configurationStorage.set(id, serializedConfig);
-          }
+
+          configurationStorage.set(id, serializedConfig);
           return parsedConfig;
         } catch {
-          // TODO add toast?
+          toasts.addWarning({
+            title: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
+              defaultMessage: 'Unable to save alerts table configuration',
+            }),
+            text: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
+              defaultMessage: "The new configuration was invalid and couldn't be saved.",
+            }),
+          });
         }
 
         return prevConfig;
       });
     },
-    [configurationStorage, id]
+    [configurationStorage, id, toasts]
   );
 
   if (!configurationStorage) {

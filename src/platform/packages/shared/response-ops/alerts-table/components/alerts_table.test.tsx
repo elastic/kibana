@@ -325,11 +325,15 @@ describe('AlertsTable', () => {
   };
 
   let onChangePageIndex: AlertsDataGridProps['onChangePageIndex'];
+  let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
+  let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
     onChangePageIndex = props.onChangePageIndex;
+    onToggleColumn = props.onToggleColumn;
+    onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
     return <ActualAlertsDataGrid {...props} />;
   });
@@ -356,6 +360,39 @@ describe('AlertsTable', () => {
         for (const { id: columnId } of columns) {
           expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
         }
+      });
+
+      it('should keep references to the initial `columns` and `visibleColumns` to reset to', async () => {
+        const testColumnId = 'test-column';
+
+        render(
+          <AlertsTable
+            {...tableProps}
+            columns={[{ id: testColumnId, displayAsText: 'Test' }]}
+            visibleColumns={[testColumnId]}
+          />
+        );
+
+        expect(await screen.findByTestId(`dataGridHeaderCell-test-column`)).toBeInTheDocument();
+
+        act(() => {
+          onToggleColumn(AlertsField.name);
+          onToggleColumn(testColumnId);
+        });
+
+        expect(
+          await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId(`dataGridHeaderCell-test-column`)).not.toBeInTheDocument();
+
+        act(() => {
+          onResetColumns();
+        });
+
+        expect(await screen.findByTestId(`dataGridHeaderCell-test-column`)).toBeInTheDocument();
+        expect(
+          screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -924,7 +961,7 @@ describe('AlertsTable', () => {
   testPersistentControls();
 
   const testInspectButton = () => {
-    describe('inspect button', () => {
+    describe('Inspect button', () => {
       it('should hide the inspect button by default', () => {
         render(<AlertsTable {...tableProps} />);
         expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();

@@ -108,6 +108,8 @@ const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
+const getLocalStorageWrapper = () => new LocalStorageWrapper(window.localStorage);
+
 const emptyRowSelection = new Map<number, RowSelectionState>();
 
 const initialBulkActionsState = {
@@ -157,7 +159,6 @@ export const AlertsTable = memo(
 
 const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
 const DEFAULT_SORT: AlertsTableSortCombinations[] = [];
-const localStorageWrapper = new LocalStorageWrapper(window.localStorage);
 
 const AlertsTableContent = typedForwardRef(
   <AC extends AdditionalContext>(
@@ -199,7 +200,7 @@ const AlertsTableContent = typedForwardRef(
       flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
-      configurationStorage = localStorageWrapper,
+      configurationStorage: configurationStorageProp,
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -212,6 +213,10 @@ const AlertsTableContent = typedForwardRef(
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
+    const configurationStorage = useMemo(
+      () => configurationStorageProp ?? getLocalStorageWrapper(),
+      [configurationStorageProp]
+    );
 
     const [configuration, setConfiguration] = useAlertsTableConfiguration({
       id,
@@ -221,7 +226,8 @@ const AlertsTableContent = typedForwardRef(
 
     // Keeping a stable reference to the default columns to support the reset functionality and
     // to apply default properties to the configured columns
-    const [defaultColumns] = useState(columnsProp ?? defaultAlertsTableColumns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const defaultColumns = useMemo(() => columnsProp ?? defaultAlertsTableColumns, []);
     const [columns, setColumns] = useControllableState({
       prop: columnsProp,
       onChange: onColumnsChange,
@@ -230,7 +236,9 @@ const AlertsTableContent = typedForwardRef(
         configuredColumns: configuration?.columns,
       }),
     });
-    const [defaultVisibleColumns] = useState(visibleColumnsProp ?? columns.map((c) => c.id));
+    // Like `defaultColumns`, purposefully keeping the initial value only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const defaultVisibleColumns = useMemo(() => visibleColumnsProp ?? columns.map((c) => c.id), []);
     const [visibleColumns, setVisibleColumns] = useControllableState({
       prop: visibleColumnsProp,
       onChange: onVisibleColumnsChange,

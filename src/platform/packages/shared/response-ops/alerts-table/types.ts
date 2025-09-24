@@ -319,7 +319,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   lastReloadRequestTime?: number;
   /**
    * A storage provider where to persist the table configuration
-   * @default new Storage(window.localStorage)
+   * @default new LocalStorageWrapper(window.localStorage)
    */
   configurationStorage?: IStorageWrapper | null;
   /**
