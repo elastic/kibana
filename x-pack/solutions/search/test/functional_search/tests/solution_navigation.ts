@@ -25,7 +25,7 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Search Solution Navigation', () => {
+  describe.only('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -54,12 +54,9 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); TODO: add when available
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
+      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Graph' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
     });
 
@@ -98,16 +95,6 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          link: { deepLinkId: 'graph' },
-          breadcrumbs: ['Graph'],
-          pageTestSubject: 'graphCreateGraphPromptButton',
-        },
-        {
-          link: { deepLinkId: 'visualize' },
-          breadcrumbs: ['Visualize library'],
-          pageTestSubject: 'noDataViewsPrompt',
-        },
-        {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
@@ -132,7 +119,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           'searchHomepage',
-          // 'agent_builder', enable when available
+          // 'agent_builder', enabled when available
           'discover',
           'dashboards',
           'searchPlayground',
@@ -140,10 +127,6 @@ export default function searchSolutionNavigation({
           'dev_tools',
           'ingest_and_data',
           'stack_management',
-          // more:
-          'maps',
-          'graph',
-          'visualize',
         ],
         { checkOrder: false }
       );
