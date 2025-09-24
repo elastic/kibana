@@ -113,7 +113,7 @@ export const WhereBlock = ({
         {isUnderEdit ? (
           <WhereBlockConfiguration stepRef={stepRef} ref={freshBlockRef} />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize='s'>
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 {hasChildren ? (

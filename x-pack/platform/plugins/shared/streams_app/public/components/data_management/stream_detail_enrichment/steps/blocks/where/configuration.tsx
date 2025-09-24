@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiForm, EuiFlexGroup, EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangWhereBlockWithUIAttributes } from '@kbn/streamlang';
 import { isCondition } from '@kbn/streamlang';
@@ -98,17 +92,17 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween">
           {canDelete && (
-              <EuiButton
-                data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
-                color="danger"
-                onClick={handleDelete}
-                size="s"
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
-                  { defaultMessage: 'Delete condition' }
-                )}
-              </EuiButton>
+            <EuiButton
+              data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
+              color="danger"
+              onClick={handleDelete}
+              size="s"
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
+                { defaultMessage: 'Delete condition' }
+              )}
+            </EuiButton>
           )}
           <EuiButtonEmpty
             data-test-subj="streamsAppWhereBlockConfigurationCancelButton"

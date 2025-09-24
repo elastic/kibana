@@ -102,16 +102,17 @@ export const ActionBlockListItem = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} color={descriptionPanelColour} paddingSize='s'>
+          <EuiPanel hasShadow={false} color={descriptionPanelColour} paddingSize="s">
             <EuiTextTruncate
               text={stepDescription}
               truncation="end"
               children={() => (
-                <EuiText size="xs" color="subdued"
-                 css={css`
-  font-family: ${euiTheme.font.familyCode};
-`
-}
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={css`
+                    font-family: ${euiTheme.font.familyCode};
+                  `}
                 >
                   {stepDescription}
                 </EuiText>
