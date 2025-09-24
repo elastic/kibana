@@ -7,10 +7,12 @@
 
 import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
+
+const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,
@@ -19,6 +21,15 @@ export const hostEntityEngineDescription: EntityDescription = {
   settings: {
     timestampField: '@timestamp',
   },
+  pipeline: [
+    {
+      set: {
+        field: 'entity.type',
+        value: HOST_ENTITY_TYPE,
+        override: false,
+      },
+    },
+  ],
   fields: [
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),
@@ -45,5 +56,6 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
+    ...getEntityFieldsDescriptions('host'),
   ],
 };

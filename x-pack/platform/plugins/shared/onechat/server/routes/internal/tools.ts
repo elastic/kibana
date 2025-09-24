@@ -72,7 +72,7 @@ export function registerInternalToolsRoutes({
   // resolve search sources (internal)
   router.get(
     {
-      path: '/internal/chat/tools/_resolve_search_sources',
+      path: `${internalApiPath}/tools/_resolve_search_sources`,
       validate: {
         query: schema.object({
           pattern: schema.string(),

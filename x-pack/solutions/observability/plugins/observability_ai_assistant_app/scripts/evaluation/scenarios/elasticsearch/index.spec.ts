@@ -11,6 +11,12 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/elasticsearch/elasticsearch.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 describe('Elasticsearch function', () => {
   describe('health', () => {
     it('returns the cluster health state', async () => {

@@ -31,7 +31,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
-  by_datastream_dataset?: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
 export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
@@ -53,9 +52,6 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
 
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
-        data_stream: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
-          ? aggregations.by_datastream_dataset.buckets.map((bucket) => bucket.key)
-          : [],
       };
     },
     {
