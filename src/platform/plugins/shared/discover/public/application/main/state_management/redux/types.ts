@@ -94,10 +94,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    byId: Record<string, TabState>;
     allIds: string[];
     unsavedIds: string[];
-    recentlyClosedTabIds: string[];
+    recentlyClosedTabs: RecentlyClosedTabState[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,

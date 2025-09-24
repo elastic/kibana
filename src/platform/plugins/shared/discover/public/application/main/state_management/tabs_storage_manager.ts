@@ -289,14 +289,6 @@ export const createTabsStorageManager = ({
       }
     }
 
-    // console.trace('getNRecentlyClosedTabs', {
-    //   previousOpenTabs,
-    //   previousRecentlyClosedTabs,
-    //   nextOpenTabs,
-    //   justRemovedTabs,
-    //   result: latestNRecentlyClosedTabs,
-    // });
-
     return latestNRecentlyClosedTabs;
   };
 

@@ -62,7 +62,7 @@ const initialState: DiscoverInternalState = {
     byId: {},
     allIds: [],
     unsavedIds: [],
-    recentlyClosedTabIds: [],
+    recentlyClosedTabs: [],
     unsafeCurrentId: '',
   },
 };
@@ -111,9 +111,7 @@ export const internalStateSlice = createSlice({
         recentlyClosedTabs: RecentlyClosedTabState[];
       }>
     ) => {
-      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState | RecentlyClosedTabState>
-      >(
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
           [tab.id]:
@@ -123,7 +121,7 @@ export const internalStateSlice = createSlice({
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
-      state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
+      state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
