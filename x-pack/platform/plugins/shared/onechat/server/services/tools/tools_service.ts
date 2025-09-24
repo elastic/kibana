@@ -8,7 +8,9 @@
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ToolTypeInfo } from '../../../common/tools';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
   registerBuiltinTools,
@@ -27,6 +29,7 @@ export interface ToolsServiceSetupDeps {
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class ToolsService {
@@ -46,7 +49,7 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
+  start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
     const builtInToolSource = createBuiltInToolSource({ registry: this.builtinRegistry });
     const persistedToolSource = createPersistedToolSource({
@@ -56,8 +59,11 @@ export class ToolsService {
     });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+
       return createToolRegistry({
         getRunner,
+        space,
         request,
         toolSources: [builtInToolSource, persistedToolSource],
       });

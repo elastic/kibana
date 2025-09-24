@@ -22,6 +22,7 @@ describe('fromEs', () => {
         id: 'id',
         name: 'name',
         type: AgentType.chat,
+        space: 'space',
         description: 'description',
         labels: ['foo', 'bar'],
         configuration: {
@@ -89,6 +90,7 @@ describe('createRequestToEs', () => {
 
     const docProperties = createRequestToEs({
       profile: createRequest,
+      space: 'space-2',
       creationDate: date,
     });
 
@@ -96,6 +98,7 @@ describe('createRequestToEs', () => {
       type: AgentType.chat,
       id: 'id',
       name: 'name',
+      space: 'space-2',
       description: 'description',
       configuration: {
         instructions: 'instructions',
@@ -121,6 +124,7 @@ describe('updateRequestToEs', () => {
       type: AgentType.chat,
       name: 'name',
       description: 'description',
+      space: 'space',
       configuration: {
         instructions: 'instructions',
         tools: [
@@ -151,6 +155,7 @@ describe('updateRequestToEs', () => {
     expect(docProperties).toEqual({
       id: 'id',
       type: AgentType.chat,
+      space: 'space',
       name: 'new name',
       description: 'description',
       configuration: {

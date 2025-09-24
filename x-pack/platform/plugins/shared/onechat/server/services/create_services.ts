@@ -45,6 +45,7 @@ export class ServiceManager {
   startServices({
     logger,
     security,
+    spaces,
     elasticsearch,
     inference,
     uiSettings,
@@ -65,10 +66,12 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      spaces,
       elasticsearch,
     });
 
     const agents = this.services.agents.start({
+      spaces,
       security,
       elasticsearch,
       getRunner,

@@ -20,6 +20,7 @@ const storageSettings = {
       id: types.keyword({}),
       name: types.keyword({}),
       type: types.keyword({}),
+      space: types.keyword({}),
       description: types.text({}),
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
@@ -35,6 +36,7 @@ export interface AgentProperties {
   id: string;
   name: string;
   type: AgentType;
+  space: string;
   description: string;
   labels?: string[];
   avatar_color?: string;

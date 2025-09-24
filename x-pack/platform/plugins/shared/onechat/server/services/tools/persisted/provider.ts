@@ -51,13 +51,14 @@ export const createPersistedToolSource = ({
     id: 'persisted',
     toolTypes,
     readonly: false,
-    getClient: ({ request }) => {
+    getClient: ({ space }) => {
       const esClient = elasticsearch.client.asInternalUser;
       return createPersistedToolClient({
         request,
         definitions: toolDefinitions,
         logger,
         esClient,
+        space,
       });
     },
   };
@@ -70,13 +71,15 @@ export const createPersistedToolClient = ({
   definitions,
   logger,
   esClient,
+  space,
 }: {
   definitions: PersistedToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
+  space: string;
   request: KibanaRequest;
 }): ToolTypeClient<any> => {
-  const toolClient = createClient({ esClient, logger });
+  const toolClient = createClient({ space, esClient, logger });
   const definitionMap = definitions.reduce((map, def) => {
     map[def.toolType] = def;
     return map;

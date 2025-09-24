@@ -79,5 +79,7 @@
     "@kbn/spaces-plugin",
     "@kbn/doc-links",
     "@kbn/workflows",
+    "@kbn/spaces-utils",
+    "@kbn/spaces-plugin",
   ]
 }
