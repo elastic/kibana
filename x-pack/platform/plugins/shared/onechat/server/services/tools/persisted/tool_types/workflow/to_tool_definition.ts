@@ -14,7 +14,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type { ToolHandlerReturn } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '../../../tool_provider';
 import type { ToolPersistedDefinition } from '../../client';
-import type { ToolTypConversionContext } from '../types';
+import type { ToolTypeConversionContext } from '../types';
 import { generateSchema } from './generate_schema';
 
 const WORKFLOW_MAX_WAIT = 60_000;
@@ -28,12 +28,9 @@ export const toToolDefinitionFactory = ({
 }) => {
   return function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<any>>(
     workflowTool: ToolPersistedDefinition<WorkflowToolConfig>,
-    context: ToolTypConversionContext
+    { spaceId }: ToolTypeConversionContext
   ): InternalToolDefinition<WorkflowToolConfig, TSchema> {
     const { id, description, tags, configuration } = workflowTool;
-
-    // TODO: actually get spaceId from request
-    const spaceId = 'default';
 
     return {
       id,

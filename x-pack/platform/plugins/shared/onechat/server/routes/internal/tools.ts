@@ -166,10 +166,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const [, { spaces }] = await coreSetup.getStartServices();
-      const currentSpace = spaces
-        ? (await spaces.spacesService.getActiveSpace(request)).id
-        : 'default';
+      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
 
       const { results } = await workflowsManagement.management.getWorkflows(
         { page: request.query.page, limit: request.query.limit, enabled: [true] },
@@ -213,10 +210,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const [, { spaces }] = await coreSetup.getStartServices();
-      const currentSpace = spaces
-        ? (await spaces.spacesService.getActiveSpace(request)).id
-        : 'default';
+      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
 
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,

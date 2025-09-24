@@ -25,7 +25,7 @@ import {
 import type {
   PersistedToolTypeDefinition,
   ToolTypeValidatorContext,
-  ToolTypConversionContext,
+  ToolTypeConversionContext,
 } from './tool_types/types';
 
 export const createPersistedToolSource = ({
@@ -51,7 +51,7 @@ export const createPersistedToolSource = ({
     id: 'persisted',
     toolTypes,
     readonly: false,
-    getClient: ({ space }) => {
+    getClient: ({ request, space }) => {
       const esClient = elasticsearch.client.asInternalUser;
       return createPersistedToolClient({
         request,
@@ -89,13 +89,15 @@ export const createPersistedToolClient = ({
     return {
       esClient,
       request,
+      spaceId: space,
     };
   };
 
-  const conversionContext = (): ToolTypConversionContext => {
+  const conversionContext = (): ToolTypeConversionContext => {
     return {
       esClient,
       request,
+      spaceId: space,
     };
   };
 

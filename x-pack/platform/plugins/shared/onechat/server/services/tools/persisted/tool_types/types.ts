@@ -14,8 +14,9 @@ import type { ToolType } from '@kbn/onechat-common';
 import type { InternalToolDefinition } from '../../tool_provider';
 import type { ToolPersistedDefinition } from '../client';
 
-export interface ToolTypConversionContext {
+export interface ToolTypeConversionContext {
   request: KibanaRequest;
+  spaceId: string;
   esClient: ElasticsearchClient;
 }
 
@@ -24,11 +25,12 @@ export type ToolDefinitionConverter<
   TSchema extends z.ZodObject<any> = z.ZodObject<any>
 > = (
   persisted: ToolPersistedDefinition<ToolTypeConfig>,
-  context: ToolTypConversionContext
+  context: ToolTypeConversionContext
 ) => MaybePromise<InternalToolDefinition<ToolTypeConfig, TSchema>>;
 
 export interface ToolTypeValidatorContext {
   request: KibanaRequest;
+  spaceId: string;
   esClient: ElasticsearchClient;
 }
 
