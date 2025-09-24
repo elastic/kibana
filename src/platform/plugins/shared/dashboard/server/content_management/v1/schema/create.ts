@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import { createOptionsSchemas } from '@kbn/content-management-utils';
+import { createOptionsSchemas, referenceSchema } from '@kbn/content-management-utils';
 
 import {
   searchResultsAttributes,
   dashboardAdditionalAttributes,
-  referenceSchema,
   dashboardDataAttributesSchema,
   dashboardMetaSchema,
   dashboardResolveMetaSchema,

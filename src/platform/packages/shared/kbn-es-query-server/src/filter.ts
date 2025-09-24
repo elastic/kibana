@@ -45,12 +45,15 @@ export const filterMetaSchema = schema.object({
   value: schema.maybe(schema.string()),
 });
 
-export const filterSchema = schema.object({
-  meta: filterMetaSchema,
-  query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  $state: schema.maybe(
-    schema.object({
-      store: filterStateStoreSchema,
-    })
-  ),
-});
+export const filterSchema = schema.object(
+  {
+    meta: filterMetaSchema,
+    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    $state: schema.maybe(
+      schema.object({
+        store: filterStateStoreSchema,
+      })
+    ),
+  },
+  { meta: { id: 'kbn-es-query-server-filterSchema' } }
+);

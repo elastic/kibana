@@ -11,6 +11,7 @@ import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import { filterSchema, querySchema } from '@kbn/es-query-server';
+import { referenceSchema } from '@kbn/content-management-utils';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -25,15 +26,6 @@ const apiError = schema.object({
   statusCode: schema.number(),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
-
-export const referenceSchema = schema.object(
-  {
-    name: schema.string(),
-    type: schema.string(),
-    id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const panelGridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
