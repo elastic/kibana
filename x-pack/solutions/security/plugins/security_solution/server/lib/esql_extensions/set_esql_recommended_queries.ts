@@ -12,11 +12,11 @@ const METRICS_INDEX_PATTERN = 'metrics-*';
 // Those are only Metrics Experience recommended queries that we can toggle on/off with a FF
 const METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES = [
   {
-    name: i18n.translate('xpack.observability.esqlQueries.allMetrics.name', {
+    name: i18n.translate('xpack.securitySolution.esqlQueries.allMetrics.name', {
       defaultMessage: 'All metrics',
     }),
     query: `FROM ${METRICS_INDEX_PATTERN}`,
-    description: i18n.translate('xpack.observability.esqlQueries.allMetrics.description', {
+    description: i18n.translate('xpack.securitySolution.esqlQueries.allMetrics.description', {
       defaultMessage: 'Loads all available metrics',
     }),
   },

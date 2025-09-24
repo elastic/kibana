@@ -260,6 +260,7 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/rrule",
-    "@kbn/core-analytics-server-mocks"
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/metrics-experience-plugin"
   ]
 }
