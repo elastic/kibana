@@ -60,7 +60,7 @@ describe('LensStore', () => {
           ...item,
           references,
           extraProp: 'test',
-          visualizationType: item.visualizationType ?? 'lenXY',
+          visualizationType: item.visualizationType ?? 'lnsXY',
         },
         meta: { type: 'lens' },
       }));
@@ -95,7 +95,7 @@ describe('LensStore', () => {
           ...item,
           references,
           extraProp: 'test',
-          visualizationType: item.visualizationType ?? 'lenXY',
+          visualizationType: item.visualizationType ?? 'lnsXY',
         },
         meta: { type: 'lens' },
       }));
