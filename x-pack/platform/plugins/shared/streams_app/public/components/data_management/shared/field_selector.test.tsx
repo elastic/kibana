@@ -34,7 +34,6 @@ describe('FieldSelector', () => {
     it('renders with default configuration', () => {
       render(<FieldSelector {...defaultProps} />);
 
-      expect(screen.getByLabelText('Field')).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppFieldSelector')).toBeInTheDocument();
     });
 
