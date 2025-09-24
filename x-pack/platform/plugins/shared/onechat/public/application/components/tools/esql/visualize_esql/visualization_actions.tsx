@@ -13,17 +13,8 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { EditVisualizationButton } from './edit_visualization_button';
+import { EditVisualizationButton, saveButtonLabel } from './edit_visualization_button';
 import { actionsContainer } from './styles';
-
-const editButtonLabel = i18n.translate('xpack.onechat.conversation.visualization.edit', {
-  defaultMessage: 'Edit visualization',
-});
-
-const saveButtonLabel = i18n.translate('xpack.onechat.conversation.visualization.saveToDashboard', {
-  defaultMessage: 'Save to dashboard',
-});
 
 interface Props {
   onSave: () => void;
@@ -54,7 +45,6 @@ export function VisualizationActions({
         lensLoadEvent={lensLoadEvent}
         onAttributesChange={(attrs) => setLensInput({ ...lensInput, attributes: attrs })}
         onApply={onSave}
-        label={editButtonLabel}
       />
       <EuiButtonIcon
         display="base"

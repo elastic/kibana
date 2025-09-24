@@ -12,6 +12,18 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
+
+export const editButtonLabel = i18n.translate('xpack.onechat.conversation.visualization.edit', {
+  defaultMessage: 'Edit visualization',
+});
+
+export const saveButtonLabel = i18n.translate(
+  'xpack.onechat.conversation.visualization.saveToDashboard',
+  {
+    defaultMessage: 'Save to dashboard',
+  }
+);
 
 interface Props {
   uiActions: UiActionsStart;
@@ -19,7 +31,6 @@ interface Props {
   lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
   onAttributesChange: (a: TypedLensByValueInput['attributes']) => void;
   onApply: () => void;
-  label: string;
 }
 
 export function EditVisualizationButton({
@@ -28,15 +39,14 @@ export function EditVisualizationButton({
   lensLoadEvent,
   onAttributesChange,
   onApply,
-  label,
 }: Props) {
-  const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
+  const editModalOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
     if (!lensInput?.attributes) {
       return;
     }
 
     return {
-      applyButtonLabel: label,
+      applyButtonLabel: saveButtonLabel,
       attributes: lensInput.attributes,
       lensEvent: lensLoadEvent ?? { adapters: {} },
       onUpdate: onAttributesChange,
@@ -44,19 +54,19 @@ export function EditVisualizationButton({
       onCancel: () => {},
       container: null,
     };
-  }, [lensInput, lensLoadEvent, onAttributesChange, onApply, label]);
+  }, [lensInput, lensLoadEvent, onAttributesChange, onApply]);
 
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
+    <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
         color="text"
         size="s"
         iconType="pencil"
-        aria-label={label}
+        aria-label={editButtonLabel}
         onClick={() => {
-          if (triggerOptions) {
-            uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+          if (editModalOptions) {
+            uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(editModalOptions);
           }
         }}
       />
