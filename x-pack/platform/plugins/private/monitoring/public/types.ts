@@ -35,6 +35,7 @@ interface LegacyStartDependencies {
   element: HTMLElement;
   core: CoreStart;
   isCloud: boolean;
+  cloudBaseUrl?: string;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   appMountParameters: AppMountParameters;

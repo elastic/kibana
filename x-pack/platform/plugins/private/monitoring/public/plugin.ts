@@ -43,7 +43,7 @@ import { getIndexPatterns } from '../common/get_index_patterns';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
-  cloud?: { isCloudEnabled: boolean };
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -105,6 +105,7 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          cloudBaseUrl: plugins.cloud?.baseUrl,
           pluginInitializerContext: this.initializerContext,
           externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
@@ -120,6 +121,7 @@ export class MonitoringPlugin
           data: deps.data,
           navigation: deps.navigation,
           isCloud: deps.isCloud,
+          cloudBaseUrl: deps.cloudBaseUrl,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
           triggersActionsUi: deps.triggersActionsUi,

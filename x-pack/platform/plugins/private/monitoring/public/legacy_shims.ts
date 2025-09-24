@@ -69,6 +69,7 @@ export interface IShims {
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
+  cloudBaseUrl?: string;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
@@ -82,6 +83,7 @@ export class Legacy {
     core,
     data,
     isCloud,
+    cloudBaseUrl,
     triggersActionsUi,
     usageCollection,
     appMountParameters,
@@ -136,6 +138,7 @@ export class Legacy {
           ...options,
         }),
       isCloud,
+      cloudBaseUrl,
       triggersActionsUi,
       usageCollection,
       kibanaServices: {

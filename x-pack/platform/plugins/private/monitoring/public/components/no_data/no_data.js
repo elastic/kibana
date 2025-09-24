@@ -20,6 +20,9 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
   EuiScreenReaderOnly,
+  EuiCallOut,
+  EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -28,6 +31,7 @@ import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
 import { CloudDeployment } from './blurbs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
+import { Legacy } from '../../legacy_shims';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage, isCollectionEnabledUpdated } = props;
@@ -44,6 +48,7 @@ function NoDataMessage(props) {
 }
 
 export function NoData(props) {
+  const { euiTheme } = useEuiTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [useInternalCollection, setUseInternalCollection] = useState(false);
   const isCloudEnabled = props.isCloudEnabled;
@@ -70,6 +75,48 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.monitoring.noData.cloud.autoOps.title"
+                defaultMessage="This cluster is connected to AutoOps, our advanced cluster monitoring"
+              />
+            }
+            color="accent"
+            iconType="alert"
+            style={{ margin: `0 ${euiTheme.size.l}` }}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.cloud.autoOps.description"
+                defaultMessage="Simplify cluster management with insights tailored to your Elasticsearch operations and configuration. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FormattedMessage
+                        id="xpack.monitoring.noData.cloud.autoOps.learnMore"
+                        defaultMessage="Learn more"
+                      />
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+            <EuiButton
+              color="accent"
+              fill
+              size="s"
+              href={`${Legacy.shims.cloudBaseUrl || ''}/connect-cluster-services-portal`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FormattedMessage
+                id="xpack.monitoring.noData.cloud.autoOps.openButton"
+                defaultMessage="Open AutoOps"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             title={
