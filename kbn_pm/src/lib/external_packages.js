@@ -32,6 +32,6 @@ module.exports = {
 
   ['@kbn/get-repo-files']() {
     require('@kbn/babel-register').install();
-    return require('@kbn/get-repo-files');
+    return require('@kbn/get-repo-files/get_repo_files');
   },
 };

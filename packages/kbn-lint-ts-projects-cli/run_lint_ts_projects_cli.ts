@@ -12,7 +12,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { RepoPath } from '@kbn/repo-path';
-import { getRepoFiles } from '@kbn/get-repo-files';
+import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { PackageFileMap, TsProjectFileMap } from '@kbn/repo-file-maps';
 import { getPackages } from '@kbn/repo-packages';

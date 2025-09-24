@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/check-prod-native-modules-cli');
+require('@kbn/check-prod-native-modules-cli/run_check_prod_native_modules_cli');

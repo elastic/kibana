@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/styled-components-mapping-cli');
+require('@kbn/styled-components-mapping-cli/src/run_styled_components_mapping_cli');

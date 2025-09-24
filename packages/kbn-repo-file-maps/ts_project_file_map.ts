@@ -10,9 +10,9 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SetMap } from '@kbn/set-map';
+import { SetMap } from '@kbn/set-map/set_map';
 import type { RepoPath } from '@kbn/repo-path';
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import type { TsProject } from '@kbn/ts-projects';
 
 import type { PackageFileMap } from './package_file_map';

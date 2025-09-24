@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { readPackageJson } from '@kbn/repo-packages';

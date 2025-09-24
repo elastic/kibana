@@ -11,12 +11,12 @@ import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { getRepoFiles } from '@kbn/get-repo-files';
+import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { updatePackageMap, getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { TS_PROJECTS } from '@kbn/ts-projects';
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import { runLintRules, PackageLintTarget } from '@kbn/repo-linter';
 
 import { RULES } from './rules';
