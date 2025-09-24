@@ -2959,10 +2959,10 @@
     base64-js "1.3.1"
     unicode-trie "^2.0.0"
 
-"@foliojs-fork/pdfkit@^0.15.1":
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.1.tgz#ecae3bcb7aad46b58e50493de593317f9b738074"
-  integrity sha512-4Cq2onHZAhThIfzv3/AFTPALqHzbmV8uNvgRELULWNbsZATgVeqEL4zHOzCyblLfX6tMXVO2BVaPcXboIxGjiw==
+"@foliojs-fork/pdfkit@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.3.tgz#590b31e770a98e2af62ce44f268a0d06b41ff32f"
+  integrity sha512-Obc0Wmy3bm7BINFVvPhcl2rnSSK61DQrlHU8aXnAqDk9LCjWdUOPwhgD8Ywz5VtuFjRxmVOM/kQ/XLIBjDvltw==
   dependencies:
     "@foliojs-fork/fontkit" "^1.9.2"
     "@foliojs-fork/linebreak" "^1.1.1"
@@ -10761,6 +10761,19 @@
     tar-fs "^3.1.0"
     yargs "^17.7.2"
 
+"@puppeteer/browsers@2.10.9":
+  version "2.10.9"
+  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.9.tgz#7d96549e83a49534e94c23eeaf81142be40ce039"
+  integrity sha512-kUGHwABarVhvMP+zhW5zvDA7LmGcd4TwrTEBwcTQic5EebUqaK5NjC0UXLJepIFVGsr2N/Z8NJQz2JYGo1ZwxA==
+  dependencies:
+    debug "^4.4.1"
+    extract-zip "^2.0.1"
+    progress "^2.0.3"
+    proxy-agent "^6.5.0"
+    semver "^7.7.2"
+    tar-fs "^3.1.0"
+    yargs "^17.7.2"
+
 "@readme/better-ajv-errors@^2.3.2":
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/@readme/better-ajv-errors/-/better-ajv-errors-2.3.2.tgz#e2446332d77f13eb895cf7774f775a81031b6c8b"
@@ -12749,10 +12762,12 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/extract-zip@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-1.6.2.tgz#5c7eb441c41136167a42b88b64051e6260c29e86"
-  integrity sha1-XH60QcQRNhZ6QriLZAUeYmDCnoY=
+"@types/extract-zip@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-2.0.3.tgz#5872005fd818767734c3528ba0bf57fc80a8c848"
+  integrity sha512-yrO7h+0qOIGxHCmBeL5fKFzR+PBafh9LG6sOLBFFi2JuN+Hj663TAxfnqJh5vkQn963VimrhBF1GZzea3A+4Ig==
+  dependencies:
+    extract-zip "*"
 
 "@types/fetch-mock@^7.3.1":
   version "7.3.1"
@@ -13315,10 +13330,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/pdfmake@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@types/pdfmake/-/pdfmake-0.2.2.tgz#5683262e97e9b0189745a8572c49c51ba87c1573"
-  integrity sha512-CBtkugrgklpXsZ9Wj/+cw+zYoeDnJxVev62ahwpdPCz/O405Wxr+iq76JgUiZc/QAo3P2lWbI2nYA5GrrSL8VQ==
+"@types/pdfmake@^0.2.11":
+  version "0.2.11"
+  resolved "https://registry.yarnpkg.com/@types/pdfmake/-/pdfmake-0.2.11.tgz#ca5475efe44c966e88aed90040670f562ac1eebc"
+  integrity sha512-gglgMQhnG6C2kco13DJlvokqTxL+XKxHwCejElH8fSCNF9ZCkRK6Mzo011jQ0zuug+YlIgn6BpcpZrARyWdW3Q==
   dependencies:
     "@types/node" "*"
     "@types/pdfkit" "*"
@@ -18472,6 +18487,11 @@ devtools-protocol@0.0.1475386:
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1475386.tgz#5378401a2c5698ab68c3482c9b7816ff62ec652b"
   integrity sha512-RQ809ykTfJ+dgj9bftdeL2vRVxASAuGU+I9LEx9Ij5TXU5HrgAQVmzi72VA+mkzscE12uzlRv5/tWWv9R9J1SA==
 
+devtools-protocol@0.0.1495869:
+  version "0.0.1495869"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1495869.tgz#f68daef77a48d5dcbcdd55dbfa3265a51989c91b"
+  integrity sha512-i+bkd9UYFis40RcnkW7XrOprCujXRAHg62IVh/Ah3G8MmNXpCGt1m0dTFhSdx/AVs8XEMbdOGRwdkR1Bcta8AA==
+
 devtools-protocol@0.0.927104:
   version "0.0.927104"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
@@ -19978,7 +19998,7 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-zip@2.0.1, extract-zip@^2.0.1:
+extract-zip@*, extract-zip@2.0.1, extract-zip@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-2.0.1.tgz#663dca56fe46df890d5f131ef4a06d22bb8ba13a"
   integrity sha512-GDhU9ntwuKyGXdZBUgTIe+vXnWj0fppUEtMDL0+idd5Sta8TGpHssn/eusA9mrPr9qNDym6SxAYZjNvCn/9RBg==
@@ -27039,15 +27059,15 @@ pdf-lib@^1.17.1:
     pako "^1.0.11"
     tslib "^1.11.1"
 
-pdfmake@^0.2.15:
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.15.tgz#86bbc2c854e8a1cc98d4d6394b39dae00cc3a3b0"
-  integrity sha512-Ryef9mjxo6q8dthhbssAK0zwCsPZ6Pl7kCHnIEXOvQdd79LUGZD6SHGi21YryFXczPjvw6V009uxQwp5iritcA==
+pdfmake@^0.2.20:
+  version "0.2.20"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.20.tgz#a2e37114e46247c9a295df2fc1c7184942de567e"
+  integrity sha512-bGbxbGFP5p8PWNT3Phsu1ZcRLnRfF6jmnuKTkgmt6i5PZzSdX6JaB+NeTz9q+aocfW8SE9GUjL3o/5GroBqGcQ==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.2"
-    "@foliojs-fork/pdfkit" "^0.15.1"
+    "@foliojs-fork/pdfkit" "^0.15.3"
     iconv-lite "^0.6.3"
-    xmldoc "^1.3.0"
+    xmldoc "^2.0.1"
 
 peggy@^4.2.0:
   version "4.2.0"
@@ -27961,7 +27981,20 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@24.17.0, puppeteer-core@^24.10.0:
+puppeteer-core@24.20.0:
+  version "24.20.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.20.0.tgz#405b0f3dc0db8a33a4d8fdbf82bd99689517b121"
+  integrity sha512-n0y/f8EYyZt4yEJkjP3Vrqf9A4qa3uYpKYdsiedIY4bxIfTw1aAJSpSVPmWBPlr1LO4cNq2hGNIBWKPhvBF68w==
+  dependencies:
+    "@puppeteer/browsers" "2.10.9"
+    chromium-bidi "8.0.0"
+    debug "^4.4.1"
+    devtools-protocol "0.0.1495869"
+    typed-query-selector "^2.12.0"
+    webdriver-bidi-protocol "0.2.8"
+    ws "^8.18.3"
+
+puppeteer-core@^24.10.0:
   version "24.17.0"
   resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.17.0.tgz#66eaa3532d06c22fbbdc36e09f416cb69b8c8637"
   integrity sha512-RYOBKFiF+3RdwIZTEacqNpD567gaFcBAOKTT7742FdB1icXudrPI7BlZbYTYWK2wgGQUXt9Zi1Yn+D5PmCs4CA==
@@ -27973,16 +28006,16 @@ puppeteer-core@24.17.0, puppeteer-core@^24.10.0:
     typed-query-selector "^2.12.0"
     ws "^8.18.3"
 
-puppeteer@24.17.0:
-  version "24.17.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.17.0.tgz#2fa286ed7b755846ef6064c1ee42b5491abcd21b"
-  integrity sha512-CGrmJ8WgilK3nyE73k+pbxHggETPpEvL6AQ9H5JSK1RgZRGMQVJ+iO3MocGm9yBQXQJ9U5xijyLvkYXFeb0/+g==
+puppeteer@24.20.0:
+  version "24.20.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.20.0.tgz#33137972aac5d10ee63037833bc15150f02cbdf9"
+  integrity sha512-iLnLV9oHKKAujmxiSxRWKfcT1q2COu0g1N9iU2TCp1MlmsyjgNAkcBOR3cAOqKb5UTiVPIGG4z5PO5yfpYZ6jA==
   dependencies:
-    "@puppeteer/browsers" "2.10.7"
+    "@puppeteer/browsers" "2.10.9"
     chromium-bidi "8.0.0"
     cosmiconfig "^9.0.0"
-    devtools-protocol "0.0.1475386"
-    puppeteer-core "24.17.0"
+    devtools-protocol "0.0.1495869"
+    puppeteer-core "24.20.0"
     typed-query-selector "^2.12.0"
 
 pure-rand@^6.0.0:
@@ -33443,6 +33476,11 @@ web-streams-polyfill@^4.2.0:
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-4.2.0.tgz#93295e67af95889a1e044a6beff1366c82720650"
   integrity sha512-0rYDzGOh9EZpig92umN5g5D/9A1Kff7k0/mzPSSCY8jEQeYkgRMoY7LhbXtUCWzLCMX0TUE9aoHkjFNB7D9pfA==
 
+webdriver-bidi-protocol@0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/webdriver-bidi-protocol/-/webdriver-bidi-protocol-0.2.8.tgz#a5dfe45137db4e8e1dc2c44c342095d52059dc8f"
+  integrity sha512-KPvtVAIX8VHjLZH1KHT5GXoOaPeb0Ju+JlAcdshw6Z/gsmRtLoxt0Hw99PgJwZta7zUQaAUIHHWDRkzrPHsQTQ==
+
 webidl-conversions@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
@@ -33931,10 +33969,10 @@ xmlchars@^2.2.0:
   resolved "https://registry.yarnpkg.com/xmlchars/-/xmlchars-2.2.0.tgz#060fe1bcb7f9c76fe2a17db86a9bc3ab894210cb"
   integrity sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==
 
-xmldoc@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-1.3.0.tgz#7823225b096c74036347c9ec5924d06b6a3cebab"
-  integrity sha512-y7IRWW6PvEnYQZNZFMRLNJw+p3pezM4nKYPfr15g4OOW9i8VpeydycFuipE2297OvZnh3jSb2pxOt9QpkZUVng==
+xmldoc@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-2.0.2.tgz#1ad89f9054cc8b1c500135e746da2a608b7bca6b"
+  integrity sha512-UiRwoSStEXS3R+YE8OqYv3jebza8cBBAI2y8g3B15XFkn3SbEOyyLnmPHjLBPZANrPJKEzxxB7A3XwcLikQVlQ==
   dependencies:
     sax "^1.2.4"
 
