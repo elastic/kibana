@@ -156,6 +156,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       deployTrainedModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-deploy-models`,
       documentLevelSecurity: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level`,
       e5Model: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
+      elasticInferenceService: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis`,
       elser: `${ELASTIC_DOCS}solutions/search/semantic-search/semantic-search-semantic-text`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: isServerless
@@ -599,7 +600,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tlsCertificate: `${ELASTIC_DOCS}solutions/observability/incident-management/create-tls-certificate-rule`,
       uptimeDurationAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-uptime-duration-anomaly-rule`,
       monitorLogs: `${ELASTIC_DOCS}solutions/observability/logs/explore-logs`,
-      logsStreams: `${ELASTIC_DOCS}solutions/observability/logs/streams/streams`,
+      logsStreams: `${ELASTIC_DOCS}solutions/observability/streams/streams`,
+      wiredStreams: `${ELASTIC_DOCS}solutions/observability/streams/wired-streams`,
       analyzeMetrics: `${ELASTIC_DOCS}solutions/observability/infra-and-hosts/analyze-infrastructure-host-metrics`,
       monitorUptimeSynthetics: `${ELASTIC_DOCS}solutions/observability/synthetics`,
       userExperience: `${ELASTIC_DOCS}solutions/observability/applications/user-experience`,
@@ -907,6 +909,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
       remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
       agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
+      fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1017,6 +1020,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${ELASTIC_DOCS}solutions/search/rag/playground-query`,
       context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
+    },
+    agentBuilder: {
+      agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
+      getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
+      agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
+      tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,
+      programmaticAccess: `${ELASTIC_DOCS}solutions/search/agent-builder/programmatic-access`,
+      kibanaApi: `${ELASTIC_DOCS}solutions/search/agent-builder/kibana-api`,
+      mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
+      a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
+      limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless

@@ -35,13 +35,16 @@ describe('toolToLangchain', () => {
   it('converts the tool to langchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
+      schema: z.object({ foo: z.string() }),
     });
 
     const langchainTool = toolToLangchain({ tool, toolId: tool.id, logger });
     expect(langchainTool.name).toEqual('toolA');
     expect(langchainTool.description).toEqual('desc');
     expect(langchainTool.responseFormat).toEqual('content_and_artifact');
-    expect(langchainTool.schema).toEqual(tool.schema);
+
+    const toolKeys = Object.keys((langchainTool.schema as any).shape);
+    expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
   });
 
   it('wraps the tool handler', async () => {
