@@ -129,11 +129,6 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-  node scripts/scout upload-events --dontFailOnError
-else
-  echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-fi
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures
