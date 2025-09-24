@@ -54,7 +54,6 @@ export function ActionBlock({
   return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
-      paddingSize="m"
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
       css={
@@ -62,9 +61,12 @@ export function ActionBlock({
           ? css`
               border: 1px solid ${euiTheme.colors.borderStrongPrimary};
               box-sizing: border-box;
+              padding: ${euiTheme.size.s} ${euiTheme.size.m}
             `
           : css`
               border: ${euiTheme.border.thin};
+              border-radius: ${euiTheme.size.s};
+              padding: ${euiTheme.size.s} ${euiTheme.size.m}
             `
       }
     >

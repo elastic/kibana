@@ -12,10 +12,12 @@ import {
   EuiBadge,
   EuiPanel,
   EuiTextTruncate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
 import React from 'react';
+import { css } from '@emotion/react';
 import { useSelector } from '@xstate5/react';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { getStepDescription } from './utils';
@@ -34,6 +36,7 @@ export const ActionBlockListItem = ({
   stepsProcessingSummaryMap,
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const { euiTheme } = useEuiTheme();
 
   const isUnsaved = useSelector(
     stepRef,
@@ -99,12 +102,17 @@ export const ActionBlockListItem = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} color={descriptionPanelColour}>
+          <EuiPanel hasShadow={false} color={descriptionPanelColour} paddingSize='s'>
             <EuiTextTruncate
               text={stepDescription}
               truncation="end"
               children={() => (
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued"
+                 css={css`
+  font-family: ${euiTheme.font.familyCode};
+`
+}
+                >
                   {stepDescription}
                 </EuiText>
               )}

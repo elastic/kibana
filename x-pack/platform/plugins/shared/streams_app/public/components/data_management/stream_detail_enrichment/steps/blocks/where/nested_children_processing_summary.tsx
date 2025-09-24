@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StepsProcessingSummaryMap } from '../../../state_management/use_steps_processing_summary';
+import { EuiText } from '@elastic/eui';
 
 const statusLabels: Record<string, string> = {
   pending: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.pending', {
@@ -69,8 +70,8 @@ export const NestedChildrenProcessingSummary = ({
   });
 
   return summary ? (
-    <span>
+    <EuiText size='xs' color="subdued">
       {summary} {stepsLabel}
-    </span>
+    </EuiText>
   ) : null;
 };

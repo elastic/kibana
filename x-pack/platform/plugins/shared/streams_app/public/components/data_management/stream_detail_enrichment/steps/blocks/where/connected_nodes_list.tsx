@@ -17,6 +17,7 @@ export const ConnectedNodesList = ({ children }: PropsWithChildren) => {
     <ul
       css={css`
         position: relative;
+        margin-left: 8px;
 
         ::after {
           content: '';

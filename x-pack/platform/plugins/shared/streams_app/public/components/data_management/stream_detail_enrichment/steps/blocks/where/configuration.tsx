@@ -8,7 +8,6 @@
 import {
   EuiForm,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
@@ -97,24 +96,20 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
           </EuiForm>
         </FormProvider>
         <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
           {canDelete && (
-            <EuiFlexItem>
-              <>
-                <EuiButton
-                  data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
-                  color="danger"
-                  onClick={handleDelete}
-                >
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
-                    { defaultMessage: 'Delete condition' }
-                  )}
-                </EuiButton>
-              </>
-            </EuiFlexItem>
+              <EuiButton
+                data-test-subj="streamsAppWhereBlockConfigurationDeleteButton"
+                color="danger"
+                onClick={handleDelete}
+                size="s"
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.deleteWhereBlockLabel',
+                  { defaultMessage: 'Delete condition' }
+                )}
+              </EuiButton>
           )}
-          <EuiFlexItem />
           <EuiButtonEmpty
             data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
             onClick={handleCancel}

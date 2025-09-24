@@ -31,6 +31,7 @@ export const WhereBlockSummary = ({
 }) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
+
   if (!isWhereBlock(step)) return null;
 
   return (
