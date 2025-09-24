@@ -37,6 +37,7 @@
     "@kbn/lazy-object",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-http-server-mocks",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

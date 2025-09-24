@@ -76,6 +76,8 @@
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/doc-links",
+    "@kbn/spaces-utils",
+    "@kbn/spaces-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-security-server-mocks",

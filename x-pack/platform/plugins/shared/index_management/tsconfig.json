@@ -63,6 +63,8 @@
     "@kbn/licensing-types",
     "@kbn/core-http-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/reindex-service-plugin",
+    "@kbn/upgrade-assistant-pkg-common",
   ],
   "exclude": ["target/**/*"]
 }

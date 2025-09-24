@@ -82,6 +82,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: date,
       dateEnd: date,
+      sourceFields: [],
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -173,6 +174,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: date,
       dateEnd: date,
+      sourceFields: [],
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -238,6 +240,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: date,
       dateEnd: date,
+      sourceFields: [],
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -303,6 +306,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: date,
       dateEnd: date,
+      sourceFields: [],
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -401,6 +405,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: date,
       dateEnd: date,
+      sourceFields: [],
     });
     expect(logger.warn).toHaveBeenCalledWith(`Top hits size is capped at 100`);
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
@@ -524,6 +529,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
+      sourceFields: [],
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -604,6 +610,7 @@ describe('fetchEsQuery', () => {
       spacePrefix: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
+      sourceFields: [],
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(

@@ -58,6 +58,7 @@
     "@kbn/spaces-utils",
     "@kbn/css-utils",
     "@kbn/licensing-types",
+    "@kbn/licensing-types",
     "@kbn/core-http-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
