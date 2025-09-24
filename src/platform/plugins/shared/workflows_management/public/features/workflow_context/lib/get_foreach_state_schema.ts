@@ -12,7 +12,7 @@ import { ForEachContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath } from '../../../../common/lib/zod_utils';
+import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod_utils';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
@@ -22,11 +22,14 @@ export function getForeachStateSchema(
     parseVariablePath(foreachStep.foreach)?.propertyPath || foreachStep.foreach;
   let itemSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
   if (!itemSchema) {
+    // TODO: indicate in the UI that we can't infer the type of the item
     itemSchema = z.any();
   } else if (itemSchema instanceof z.ZodArray) {
     itemSchema = itemSchema.element;
   } else {
-    throw new Error('Foreach configuration must be an array');
+    throw new Error(
+      `Foreach step must iterate over an array type, but received: ${getZodTypeName(itemSchema)}`
+    );
   }
   return ForEachContextSchema.extend({
     item: itemSchema,
