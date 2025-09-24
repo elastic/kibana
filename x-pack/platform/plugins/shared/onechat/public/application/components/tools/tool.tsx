@@ -341,7 +341,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
               ) : undefined
             }
             rightSideItems={[
-              ...(mode !== ToolFormMode.View ? [renderSaveButton({ size: 'm' })] : []),
+              ...(mode !== ToolFormMode.View
+                ? [renderSaveButton({ size: 'm', testSubj: 'toolFormSaveButton' })]
+                : []),
               renderTestButton({ size: 'm' }),
               ...(mode === ToolFormMode.Edit ? [<ToolEditContextMenu />] : []),
             ]}
