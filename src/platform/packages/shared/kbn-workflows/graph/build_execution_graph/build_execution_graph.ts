@@ -9,22 +9,22 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
-import {
-  type BaseStep,
-  type ForEachStep,
-  type HttpStep,
-  type IfStep,
-  type WaitStep,
-  type ElasticsearchStep,
-  type KibanaStep,
-  type WorkflowYaml,
-  type WorkflowRetry,
-  type StepWithOnFailure,
-  type StepWithIfCondition,
-  type StepWithForeach,
-  type WorkflowSettings,
-  type WorkflowOnFailure,
-  type StepWithTimeout,
+import type {
+  BaseStep,
+  ForEachStep,
+  HttpStep,
+  IfStep,
+  WaitStep,
+  ElasticsearchStep,
+  KibanaStep,
+  WorkflowYaml,
+  WorkflowRetry,
+  StepWithOnFailure,
+  StepWithIfCondition,
+  StepWithForeach,
+  WorkflowSettings,
+  WorkflowOnFailure,
+  StepWithTimeout,
 } from '../../spec/schema';
 import type {
   GraphNode,
