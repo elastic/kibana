@@ -9,7 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { FleetError } from '../../../../../../common';
+import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
 import { createKibanaRequestFromAuth } from '../../../../request_utils';
 import { appContextService } from '../../../../app_context';
@@ -113,13 +113,11 @@ export async function stepCreateAlertingRules(
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
-  // TODO if feature flag or pkg !== elastic agent return
+  if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
+    return;
+  }
 
   await withPackageSpan('Install elastic agent rules', async () => {
-    if (pkgName !== 'all_assets') {
-      return;
-    }
-
     if (!context.authorizationHeader) {
       // Need authorization to create a rule as it need an api key
       return;

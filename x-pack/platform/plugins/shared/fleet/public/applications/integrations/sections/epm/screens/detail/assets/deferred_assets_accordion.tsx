@@ -182,7 +182,7 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
   );
 
   const createAlerts = useCallback(
-    async (alertIds: Array<{ transformId: string }>) => {
+    async (alertIds: Array<string>) => {
       setIsLoading(true);
       notifications.toasts.addInfo(
         i18n.translate('xpack.fleet.epm.packageDetails.assets.creatingAlerts', {
@@ -257,16 +257,24 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
             if (type === ElasticsearchAssetType.transform) {
               authorizeTransforms(deferredAssets.map((t) => ({ transformId: t.id })));
             } else if (type === KibanaSavedObjectType.alert) {
-              createAlerts(deferredAssets.map((t) => ({ transformId: t.id })));
+              createAlerts(deferredAssets.map(({ id }) => id));
             }
           }}
           aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
             canReauthorizeTransforms,
           })}
         >
-          {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
-            defaultMessage: 'Reauthorize all',
-          })}
+          {type === ElasticsearchAssetType.transform
+            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
+                defaultMessage: 'Reauthorize all',
+              })
+            : null}
+
+          {type === KibanaSavedObjectType.alert
+            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createAlertsButton', {
+                defaultMessage: 'Create alerts',
+              })
+            : null}
         </EuiButton>
 
         <EuiSpacer size="m" />
