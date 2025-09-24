@@ -9,7 +9,11 @@ import expect from 'expect';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
+import {
+  disablePrivmonSetting,
+  enablePrivmonSetting,
+  toggleIntegrationsSyncFlag,
+} from '../../utils';
 import {
   PrivMonUtils,
   PlainIndexSyncUtils,
@@ -22,12 +26,12 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
+  const es = getService('es');
   const spaces = getService('spaces');
   const supertest = getService('supertest');
 
   const customSpace = 'privmontestspace';
 
-  const privMonUtils = PrivMonUtils(getService);
   const privMonUtilsCustomSpace = PrivMonUtils(getService, customSpace);
 
   async function getPrivMonSoStatus(space: string = 'default') {
@@ -331,6 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
       const indexName = 'tatooine-privileged-users';
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
       before(async () => {
+        toggleIntegrationsSyncFlag(kibanaServer, true);
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
           { useCreate: true }
@@ -345,9 +350,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await indexSyncUtils.createIndex();
-        await kibanaServer.uiSettings.update({
-          'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': false,
-        });
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
       });
@@ -424,6 +426,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         privMonUtils.assertIsPrivileged(user1After, true);
         expect(user1After?.user?.name).toEqual(user1.name);
+        // eslint-disable-next-line no-console
+        console.log(`User1 sources: ${JSON.stringify(user1After, null, 2)}`);
         expect(user1After?.labels?.sources).toEqual(['api', 'index']);
         privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
@@ -463,15 +467,14 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
-        await kibanaServer.uiSettings.update({
-          'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': true,
-        });
+        await toggleIntegrationsSyncFlag(kibanaServer, true);
       });
 
       afterEach(async () => {
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
+        await toggleIntegrationsSyncFlag(kibanaServer, false);
       });
 
       it('update detection should sync integrations', async () => {

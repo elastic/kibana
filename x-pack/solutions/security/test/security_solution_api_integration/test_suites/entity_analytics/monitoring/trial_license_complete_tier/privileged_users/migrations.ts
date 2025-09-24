@@ -12,7 +12,11 @@ import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
+import {
+  enablePrivmonSetting,
+  disablePrivmonSetting,
+  toggleIntegrationsSyncFlag,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -47,6 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
     beforeEach(async () => {
+      await toggleIntegrationsSyncFlag(kibanaServer, false);
+      // await toggleIntegrationsSyncFlag(kibanaServer, false);
       await asyncForEach(SPACES, async (space) => {
         if (space !== 'default') {
           await spacesService.create({
