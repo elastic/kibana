@@ -1,4 +1,11 @@
 tasks:
+  print-stats:
+    script: 'node -p "v8.getHeapStatistics().heap_size_limit / 1024 / 1024"'
+    options:
+      runFromWorkspaceRoot: true
+      cache: false
+    env:
+      NODE_OPTIONS: '--max-old-space-size=9216'
   typecheck:
     command:
       - 'tsc'
@@ -14,6 +21,7 @@ tasks:
     deps:
       - 'kibana:generateAllTypecheckConfigs'
       - '^:typecheck'
+      - '~:print-stats'
     options:
       runFromWorkspaceRoot: true
       mergeOutputs: replace
