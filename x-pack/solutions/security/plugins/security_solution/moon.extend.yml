@@ -1,0 +1,23 @@
+tasks:
+  typecheck:
+    command:
+      - 'tsc'
+      - '--build'
+      - '$projectSource/tsconfig.moon.json'
+      - '--pretty'
+    inputs:
+      - '@group(src)'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
+    outputs:
+      - 'target'
+    deps:
+      - 'kibana:generateAllTypecheckConfigs'
+      - '^:typecheck'
+    options:
+      runFromWorkspaceRoot: true
+      mergeOutputs: replace
+      mergeArgs: replace
+      mergeInputs: replace
+    env:
+      NODE_OPTIONS: '--max-old-space-size=9216'
