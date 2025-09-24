@@ -155,15 +155,12 @@ export class KibanaMigrator implements IKibanaMigrator {
         this.status$.next({ status: 'running' });
       }
 
-      this.log.info(`Performing migrations`);
-      const startTime = performance.now();
       this.migrationResult = this.runMigrationsInternal({ skipVersionCheck }).then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
           this.status$.next({ status: 'completed', result });
         }
-        const duration = Math.floor(performance.now() - startTime);
-        this.log.info(`Completed all migrations in ${duration}ms`);
+
         return result;
       });
     }
