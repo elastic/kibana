@@ -31,13 +31,10 @@ import type {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { ISearchOptions } from '@kbn/search-types';
+import { LRUCache } from 'lru-cache';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
-import type {
-  SessionMeta,
-  SessionStateContainer,
-  SessionStateInternal,
-} from './search_session_state';
+import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
   createSessionStateContainer,
   SearchSessionState,
@@ -53,6 +50,16 @@ import { formatSessionName } from './lib/session_name_formatter';
  * until the user saves the session
  */
 const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30000;
+
+/**
+ * To prevent the session ids map from growing indefinitely we can use an LRU cache - we will limit it to 30 sessions for
+ * now given that there can be 25 tabs opened at the same time (see src/platform/packages/shared/kbn-unified-tabs/src/constants.ts)
+ * and we want to make room for the other apps that may use background search.
+ */
+const LRU_OPTIONS = {
+  max: 30,
+  ttl: 1000 * 60 * 60, // 1 hour TTL
+};
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -115,7 +122,7 @@ interface TrackSearchHandler {
 /**
  * Represents a search session state in {@link SessionService} in any given moment of time
  */
-export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
+export type SessionSnapshot = SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -188,12 +195,7 @@ export class SessionService {
 
   private toastService?: ToastService;
 
-  /**
-   * Holds snapshot of last cleared session so that it can be continued
-   * Can be used to re-use a session between apps
-   * @internal
-   */
-  private lastSessionSnapshot?: SessionSnapshot;
+  private sessionSnapshots: LRUCache<string, SessionSnapshot>;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -212,6 +214,8 @@ export class SessionService {
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -352,6 +356,8 @@ export class SessionService {
    * @returns {@link TrackSearchHandler}
    */
   public trackSearch(searchDescriptor: TrackSearchDescriptor): TrackSearchHandler {
+    const sessionId = this.getSessionId();
+
     this.state.transitions.trackSearch(searchDescriptor, {
       lastPollingTime: new Date(),
       isStored: false,
@@ -359,12 +365,17 @@ export class SessionService {
 
     return {
       complete: () => {
-        this.state.transitions.completeSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) return;
+
+        state.transitions.completeSearch(searchDescriptor);
 
         // when search completes and session has just been saved,
         // trigger polling once again to save search into a session and extend its keep_alive
         if (this.isStored()) {
-          const search = this.state.selectors.getSearch(searchDescriptor);
+          const search = state.selectors.getSearch(searchDescriptor);
           if (search && !search.searchMeta.isStored) {
             search.searchDescriptor.poll().catch((e) => {
               // eslint-disable-next-line no-console
@@ -374,18 +385,27 @@ export class SessionService {
         }
       },
       error: () => {
-        this.state.transitions.errorSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) return;
+
+        state.transitions.errorSearch(searchDescriptor);
       },
       beforePoll: () => {
-        const search = this.state.selectors.getSearch(searchDescriptor);
-        this.state.transitions.updateSearchMeta(searchDescriptor, {
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+
+        const search = state?.selectors.getSearch(searchDescriptor);
+        state?.transitions.updateSearchMeta(searchDescriptor, {
           lastPollingTime: new Date(),
         });
 
         return [
           { isSearchStored: search?.searchMeta?.isStored ?? false },
           ({ isSearchStored }) => {
-            this.state.transitions.updateSearchMeta(searchDescriptor, {
+            state?.transitions.updateSearchMeta(searchDescriptor, {
               isStored: isSearchStored,
             });
           },
@@ -397,7 +417,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
-    this.lastSessionSnapshot = undefined;
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
   }
 
   /**
@@ -421,15 +441,19 @@ export class SessionService {
   /**
    * Is current session already saved as SO (send to background)
    */
-  public isStored() {
-    return this.state.get().isStored;
+  public isStored(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isStored;
   }
 
   /**
    * Is restoring the older saved searches
    */
-  public isRestore() {
-    return this.state.get().isRestore;
+  public isRestore(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isRestore;
   }
 
   /**
@@ -438,6 +462,8 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
+    this.storeSessionSnapshot();
 
     this.state.transitions.start({ appName: this.currentApp });
 
@@ -466,25 +492,32 @@ export class SessionService {
    *
    * @deprecated
    */
-  public continue(sessionId: string) {
-    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+  public continue(sessionId: string, keepSearches = false) {
+    const sessionSnapshot = this.sessionSnapshots.get(sessionId);
+    if (sessionSnapshot) {
+      this.storeSessionSnapshot();
       this.state.set({
-        ...this.lastSessionSnapshot,
+        ...sessionSnapshot.get(),
         // have to change a name, so that current app can cancel a session that it continues
         appName: this.currentApp,
         // also have to drop all pending searches which are used to derive client side state of search session indicator,
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
-        trackedSearches: [],
+        trackedSearches: keepSearches ? sessionSnapshot.get().trackedSearches : [],
         isContinued: true,
       });
-      this.lastSessionSnapshot = undefined;
+      this.sessionSnapshots.delete(sessionId);
     } else {
       // eslint-disable-next-line no-console
-      console.warn(
-        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
-      );
+      console.warn(`Unknown ${sessionId} search session id recevied`);
     }
+  }
+
+  private storeSessionSnapshot() {
+    if (!this.getSessionId()) return;
+    const currentState = createSessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>();
+    currentState.stateContainer.set(this.state.get());
+    this.sessionSnapshots.set(this.getSessionId()!, currentState.stateContainer);
   }
 
   /**
@@ -503,9 +536,7 @@ export class SessionService {
       return;
     }
 
-    if (this.getSessionId()) {
-      this.lastSessionSnapshot = this.state.get();
-    }
+    this.storeSessionSnapshot();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
@@ -665,11 +696,14 @@ export class SessionService {
       return null;
     }
 
-    const isCurrentSession = this.isCurrentSession(sessionId);
+    const state = this.isCurrentSession(sessionId)
+      ? this.state
+      : this.sessionSnapshots.get(sessionId);
+
     return {
       sessionId,
-      isRestore: isCurrentSession ? this.isRestore() : false,
-      isStored: isCurrentSession ? this.isStored() : false,
+      isRestore: state ? this.isRestore(state) : false,
+      isStored: state ? this.isStored(state) : false,
     };
   }
 

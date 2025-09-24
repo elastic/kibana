@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
@@ -29,24 +30,33 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services;
+  const { chrome, docLinks, spaces, history, data, core } = services;
 
   /**
    * Adhoc data views functionality
    */
   useAdHocDataViews();
 
+  useEffect(() => {
+    return () => {
+      const areTabsEnabled = core.featureFlags.getBooleanValue(
+        TABS_ENABLED_FEATURE_FLAG_KEY,
+        false
+      );
+      if (areTabsEnabled) {
+        // when tabs are enabled we do the clear from src/platform/plugins/shared/discover/public/application/main/components/tabs_view/tabs_view.tsx
+        return;
+      }
+
+      // clear session when navigating away from discover main
+      data.search.session.clear();
+    };
+  }, [data.search.session, core.featureFlags]);
+
   // TODO: Move this higher up in the component tree
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
-
-  useEffect(() => {
-    return () => {
-      // clear session when navigating away from discover main
-      data.search.session.clear();
-    };
-  }, [data.search.session]);
 
   // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
