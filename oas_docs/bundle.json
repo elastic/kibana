@@ -66345,6 +66345,9 @@
                           "objects": {
                             "additionalProperties": false,
                             "properties": {
+                              "mappings": {
+                                "type": "boolean"
+                              },
                               "queries": {
                                 "items": {
                                   "additionalProperties": false,
@@ -66381,6 +66384,7 @@
                               }
                             },
                             "required": [
+                              "mappings",
                               "queries",
                               "routing"
                             ],
@@ -67316,16 +67320,16 @@
           },
           {
             "in": "query",
-            "name": "shortLookback",
-            "required": false,
+            "name": "from",
+            "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "longLookback",
-            "required": false,
+            "name": "to",
+            "required": true,
             "schema": {
               "type": "string"
             }

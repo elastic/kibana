@@ -13,7 +13,7 @@ import type {
 } from '../lib/servicenow/types';
 
 import { createExternalService as createExternalServiceCommon } from '../lib/servicenow/service';
-import { createServiceError } from '../lib/servicenow/utils';
+import { addServiceMessageToError } from '../lib/servicenow/utils';
 
 const getAddEventURL = (url: string) => `${url}/api/global/em/jsonv2`;
 
@@ -48,7 +48,7 @@ export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
 
       snService.checkInstance(res);
     } catch (error) {
-      throw createServiceError(error, `Unable to add event`);
+      throw addServiceMessageToError(error, `Unable to add event`);
     }
   };
 
