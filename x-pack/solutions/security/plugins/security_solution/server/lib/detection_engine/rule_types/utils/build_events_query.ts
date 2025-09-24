@@ -112,7 +112,7 @@ export const buildEventsSearchQuery = <
   TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
 >(
   params: BuildEventsSearchQueryParams<TAggs>
-): estypes.SearchRequest => {
+) => {
   return {
     ...buildEventsSearchQueryCore(params),
     index: params.index,
@@ -124,7 +124,7 @@ export const buildEventsSearchQueryWithPit = <
   TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
 >(
   params: BuildEventsSearchQueryWithPitParams<TAggs>
-): estypes.SearchRequest => {
+) => {
   return {
     ...buildEventsSearchQueryCore(params),
     pit: {
@@ -149,7 +149,7 @@ const buildEventsSearchQueryCore = <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-}: BuildEventsSearchQueryCoreParams<TAggs>): estypes.SearchRequest => {
+}: BuildEventsSearchQueryCoreParams<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
