@@ -94,6 +94,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         .join('\n')
     );
 
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
