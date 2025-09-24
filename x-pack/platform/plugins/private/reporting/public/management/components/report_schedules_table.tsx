@@ -116,11 +116,11 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           >
             {item.enabled
               ? i18n.translate('xpack.reporting.schedules.status.active', {
-                defaultMessage: 'Active',
-              })
+                  defaultMessage: 'Active',
+                })
               : i18n.translate('xpack.reporting.schedules.status.disabled', {
-                defaultMessage: 'Disabled',
-              })}
+                  defaultMessage: 'Disabled',
+                })}
           </EuiHealth>
         );
       },
