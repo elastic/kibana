@@ -19,9 +19,9 @@ describe('classicNavigationFactory', function () {
       title: 'Home',
     },
     {
-      id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web Crawlers',
-      url: '/app/elasticsearch/content/crawlers',
+      id: 'enterpriseSearchApplications:searchApplications',
+      title: 'Search Applications',
+      url: '/app/elasticsearch/content/search_applications',
     },
   ];
   const mockedCoreStart = {
@@ -101,9 +101,9 @@ describe('classicNavigationFactory', function () {
         name: 'Content',
         items: [
           {
-            id: 'searchWebCrawlers',
+            id: 'searchApplications',
             deepLink: {
-              link: 'enterpriseSearchContent:webCrawlers',
+              link: 'enterpriseSearchApplications:searchApplications',
             },
           },
         ],
@@ -116,10 +116,10 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/elasticsearch/content/crawlers',
-            id: 'searchWebCrawlers',
+            href: '/app/elasticsearch/content/search_applications',
+            id: 'searchApplications',
             isSelected: false,
-            name: 'Web Crawlers',
+            name: 'Search Applications',
             onClick: expect.any(Function),
           },
         ],
@@ -130,20 +130,20 @@ describe('classicNavigationFactory', function () {
   it('returns name if provided over the deeplink title', () => {
     const items: ClassicNavItem[] = [
       {
-        id: 'searchWebCrawlers',
+        id: 'searchApplications',
         deepLink: {
-          link: 'enterpriseSearchContent:webCrawlers',
+          link: 'enterpriseSearchApplications:searchApplications',
         },
-        name: 'Date Crawlers',
+        name: 'Date Applications',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/content/crawlers',
-        id: 'searchWebCrawlers',
+        href: '/app/elasticsearch/content/search_applications',
+        id: 'searchApplications',
         isSelected: false,
-        name: 'Date Crawlers',
+        name: 'Date Applications',
         onClick: expect.any(Function),
       },
     ]);
