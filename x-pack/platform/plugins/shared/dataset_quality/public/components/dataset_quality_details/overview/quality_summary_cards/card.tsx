@@ -13,6 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -25,6 +27,7 @@ export function Card({
   kpiValue,
   footer,
   onClick,
+  isLoading = false,
 }: {
   isDisabled?: boolean;
   isSelected?: boolean;
@@ -33,6 +36,7 @@ export function Card({
   kpiValue: string;
   footer: React.ReactNode;
   onClick?: () => void;
+  isLoading?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -45,28 +49,37 @@ export function Card({
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
   `;
 
+  const divStyle = css`
+    ${style}
+    padding: ${euiTheme.size.m};
+  `;
+
   const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${title}`;
 
   const content = (
     <>
       <EuiText textAlign="left">
         {titleTooltipContent ? (
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>{title}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiIconTip css={{ minWidth: '300px' }} content={titleTooltipContent} size="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={titleTooltipContent} size="m" />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
           title
         )}
       </EuiText>
+      <EuiSpacer size="m" />
+      <EuiSkeletonTitle size="m" isLoading={isLoading}>
+        <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
+          <h2>{kpiValue}</h2>
+        </EuiText>
+      </EuiSkeletonTitle>
       <EuiSpacer size="xs" />
-      <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
-        <h2>{kpiValue}</h2>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText textAlign="left">{footer}</EuiText>
+      <EuiSkeletonText lines={1} isLoading={isLoading}>
+        <EuiText textAlign="left">{footer}</EuiText>
+      </EuiSkeletonText>
     </>
   );
 
@@ -80,12 +93,13 @@ export function Card({
           justify-content: flex-start;
         `,
       }}
+      aria-label={title}
       data-test-subj={dataTestSubject}
     >
       {content}
     </EuiButtonEmpty>
   ) : (
-    <div css={style} data-test-subj={dataTestSubject}>
+    <div css={divStyle} data-test-subj={dataTestSubject}>
       {content}
     </div>
   );
