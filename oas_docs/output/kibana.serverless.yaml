@@ -29262,6 +29262,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29405,6 +29407,8 @@ paths:
                                     - additionalProperties: true
                                       type: object
                                       properties:
+                                        hash:
+                                          type: string
                                         id:
                                           type: string
                                       required:
@@ -29419,6 +29423,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29558,6 +29564,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29633,8 +29641,6 @@ paths:
                               enum:
                                 - logstash
                               type: string
-                            write_to_logs_streams:
-                              type: boolean
                           required:
                             - name
                             - type
@@ -29811,6 +29817,8 @@ paths:
                                     - additionalProperties: true
                                       type: object
                                       properties:
+                                        hash:
+                                          type: string
                                         id:
                                           type: string
                                       required:
@@ -29825,6 +29833,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29920,8 +29930,6 @@ paths:
                                 - not: {}
                             version:
                               type: string
-                            write_to_logs_streams:
-                              type: boolean
                           required:
                             - name
                             - type
@@ -30045,6 +30053,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30188,6 +30198,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -30202,6 +30214,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30341,6 +30355,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30416,8 +30432,6 @@ paths:
                       enum:
                         - logstash
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - type
@@ -30594,6 +30608,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -30608,6 +30624,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30703,8 +30721,6 @@ paths:
                         - not: {}
                     version:
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - type
@@ -30784,6 +30800,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -30927,6 +30945,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -30941,6 +30961,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31080,6 +31102,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31155,8 +31179,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -31333,6 +31355,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -31347,6 +31371,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31442,8 +31468,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -31635,6 +31659,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31778,6 +31804,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -31792,6 +31820,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31931,6 +31961,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -32006,8 +32038,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -32184,6 +32214,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -32198,6 +32230,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -32293,8 +32327,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -32411,6 +32443,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32548,6 +32582,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -32562,6 +32598,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32695,6 +32733,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32770,8 +32810,6 @@ paths:
                       enum:
                         - logstash
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32944,6 +32982,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -32958,6 +32998,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -33053,8 +33095,6 @@ paths:
                         - not: {}
                     version:
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -33131,6 +33171,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33274,6 +33316,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -33288,6 +33332,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33427,6 +33473,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33502,8 +33550,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -33680,6 +33726,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -33694,6 +33742,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33789,8 +33839,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
