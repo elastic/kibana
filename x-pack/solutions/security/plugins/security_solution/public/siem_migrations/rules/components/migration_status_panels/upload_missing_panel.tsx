@@ -20,9 +20,9 @@ import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { PanelText } from '../../../../common/components/panel_text';
-import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
+import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import * as i18n from './translations';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import { useMigrationDataInputContext } from '../../../common/components';
 import type { RuleMigrationStats } from '../../types';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 
@@ -33,7 +33,7 @@ interface RuleMigrationsUploadMissingPanelProps {
 export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
   ({ migrationStats, topSpacerSize }) => {
     const [missingResources, setMissingResources] = useState<SiemMigrationResourceBase[]>([]);
-    const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
+    const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
 
     useEffect(() => {
       getMissingResources(migrationStats.id);
@@ -63,7 +63,7 @@ const RuleMigrationsUploadMissingPanelContent =
     ({ migrationStats, topSpacerSize, missingResources }) => {
       const { euiTheme } = useEuiTheme();
       const { telemetry } = useKibana().services.siemMigrations.rules;
-      const { openFlyout } = useRuleMigrationDataInputContext();
+      const { openFlyout } = useMigrationDataInputContext();
 
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);

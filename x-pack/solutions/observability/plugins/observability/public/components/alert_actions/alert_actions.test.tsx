@@ -54,12 +54,6 @@ mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
 
-mockKibana.services.cases.hooks.useRemoveAlertFromCaseModal.mockReturnValue({
-  ...caseHooksReturnedValue,
-  onSuccess: jest.fn(),
-  onClose: jest.fn(),
-});
-
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
 
@@ -74,6 +68,7 @@ const config: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
+    managedOtlpServiceUrl: '',
   },
 };
 

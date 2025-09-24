@@ -190,6 +190,7 @@ describe('BurnRateRuleExecutor', () => {
       share: {} as SharePluginStart,
       getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
       getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+      getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
     };
   });
 

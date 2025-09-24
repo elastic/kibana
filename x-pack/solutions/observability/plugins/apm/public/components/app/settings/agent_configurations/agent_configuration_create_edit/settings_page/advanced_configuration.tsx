@@ -81,7 +81,7 @@ export function AdvancedConfiguration({
             <p>
               <FormattedMessage
                 id="xpack.apm.agentConfig.settingsPage.advancedConfigurationDescription"
-                defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT collector. Use with caution as incorrect configuration may affect your collector's behavior."
+                defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT SDK. Use with caution as incorrect configuration may affect your SDK's behavior."
               />
             </p>
           </EuiText>

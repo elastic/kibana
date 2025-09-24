@@ -21,6 +21,7 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import type { User } from '@kbn/elastic-assistant-common';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { ConversationListItem } from './conversation_list_item';
 import { useConversation } from '../../use_conversation';
@@ -34,6 +35,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   currentConversation?: Conversation;
+  currentUser?: User;
   onConversationSelected: ({ cId }: { cId: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -82,6 +84,7 @@ const getNextConversation = (
 export const ConversationSidePanel = React.memo<Props>(
   ({
     currentConversation,
+    currentUser,
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
@@ -194,6 +197,7 @@ export const ConversationSidePanel = React.memo<Props>(
                 {convoList.map((conversation) => (
                   <ConversationListItem
                     conversation={conversation}
+                    currentUser={currentUser}
                     isActiveConversation={
                       !isEmpty(conversation.id)
                         ? conversation.id === currentConversation?.id
@@ -217,6 +221,7 @@ export const ConversationSidePanel = React.memo<Props>(
         conversationsCategorizedByDate,
         currentConversation?.id,
         currentConversation?.title,
+        currentUser,
         handleCopyUrl,
         handleDuplicateConversation,
         lastConversationId,

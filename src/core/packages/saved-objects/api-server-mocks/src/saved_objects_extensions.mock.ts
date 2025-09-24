@@ -13,13 +13,15 @@ import type {
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
-  isEncryptableType: jest.fn(),
-  decryptOrStripResponseAttributes: jest.fn(),
-  encryptAttributes: jest.fn(),
-  shouldEnforceRandomId: jest.fn(),
-});
+const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> =>
+  lazyObject({
+    isEncryptableType: jest.fn(),
+    decryptOrStripResponseAttributes: jest.fn(),
+    encryptAttributes: jest.fn(),
+    shouldEnforceRandomId: jest.fn(),
+  });
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
   authorizeCreate: jest.fn(),
@@ -47,17 +49,19 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   authorizeChangeAccessControl: jest.fn(),
 });
 
-const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
-  getCurrentNamespace: jest.fn(),
-  getSearchableNamespaces: jest.fn(),
-  asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
-});
+const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>
+  lazyObject({
+    getCurrentNamespace: jest.fn(),
+    getSearchableNamespaces: jest.fn(),
+    asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
+  });
 
-const create = (): jest.Mocked<SavedObjectsExtensions> => ({
-  encryptionExtension: createEncryptionExtension(),
-  securityExtension: createSecurityExtension(),
-  spacesExtension: createSpacesExtension(),
-});
+const create = (): jest.Mocked<SavedObjectsExtensions> =>
+  lazyObject({
+    encryptionExtension: createEncryptionExtension(),
+    securityExtension: createSecurityExtension(),
+    spacesExtension: createSpacesExtension(),
+  });
 
 export const savedObjectsExtensionsMock = {
   create,

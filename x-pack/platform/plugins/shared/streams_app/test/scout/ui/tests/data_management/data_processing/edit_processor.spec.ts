@@ -31,7 +31,7 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
   });
 
   test('should edit an existing processor', async ({ page, pageObjects }) => {
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
     await pageObjects.streams.clickEditProcessor(0);
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
@@ -43,14 +43,14 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
 
   test('should not let edit other processors while one is in progress', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeDisabled();
 
     await pageObjects.streams.clickCancelProcessorChanges();
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeEnabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeEnabled();
   });
 
-  test('should cancel editing a processor', async ({ page, pageObjects }) => {
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+  test('should cancel editing a processor', async ({ pageObjects }) => {
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
     await pageObjects.streams.clickEditProcessor(0);
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
@@ -60,7 +60,7 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
     await pageObjects.streams.confirmDiscardInModal();
 
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeVisible();
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
   });
 
   test('should remove a processor with confirmation', async ({ page, pageObjects }) => {
@@ -70,7 +70,7 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
     await pageObjects.streams.confirmDeleteInModal();
 
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(0);
-    await expect(page.getByText('%{WORD:attributes.method}')).toBeHidden();
+    await expect(page.getByTestId('fullText')).toBeHidden();
   });
 
   test('should cancel a processor removal', async ({ pageObjects }) => {

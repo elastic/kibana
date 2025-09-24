@@ -96,6 +96,7 @@
     "@kbn/css-utils",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",
