@@ -30,6 +30,7 @@ requestBody:
               nlQuery: "find trades with high execution prices above 100"
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       application/json:
         examples:

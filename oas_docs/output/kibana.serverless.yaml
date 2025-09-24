@@ -79,6 +79,8 @@ tags:
     x-displayName: Data views
   - name: Elastic Agent actions
   - name: Elastic Agent binary download sources
+  - name: elastic agent builder
+    x-displayName: Elastic Agent Builder
   - name: Elastic Agent policies
   - name: Elastic Agent status
   - name: Elastic Agents
@@ -790,13 +792,15 @@ paths:
           application/json:
             examples:
               a2aTaskRequestExample:
-                id: task-123
-                jsonrpc: '2.0'
-                method: complete
-                params:
-                  messages:
-                    - content: Hello from A2A protocol
-                      role: user
+                description: Example request for A2A Task Endpoint
+                value:
+                  id: task-123
+                  jsonrpc: '2.0'
+                  method: complete
+                  params:
+                    messages:
+                      - content: Hello from A2A protocol
+                        role: user
             schema: {}
       responses:
         '200':
@@ -804,15 +808,19 @@ paths:
             application/json:
               examples:
                 a2aTaskResponseExample:
-                  id: task-123
-                  jsonrpc: '2.0'
-                  result:
-                    conversation_id: conv-456
-                    response:
-                      message: Hello! How can I help you today?
-                    type: response
+                  description: Example response from A2A Task Endpoint with results of task execution
+                  value:
+                    id: task-123
+                    jsonrpc: '2.0'
+                    result:
+                      conversation_id: conv-456
+                      response:
+                        message: Hello! How can I help you today?
+                      type: response
+          description: Indicates a successful response
       summary: A2A Task Endpoint
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -834,44 +842,48 @@ paths:
             application/json:
               examples:
                 a2aAgentCardResponseExample:
-                  capabilities:
-                    pushNotifications: false
-                    stateTransitionHistory: false
-                    streaming: false
-                  defaultInputModes:
-                    - text/plain
-                  defaultOutputModes:
-                    - text/plain
-                  description: Elastic AI Agent
-                  name: Elastic AI Agent
-                  protocolVersion: 0.3.0
-                  provider:
-                    organization: Elastic
-                    url: https://elastic.co
-                  securitySchemes:
-                    authorization:
-                      description: Authentication token
-                      in: header
-                      name: Authorization
-                      type: apiKey
-                  skills:
-                    - description: A powerful tool for searching and analyzing data within your Elasticsearch cluster.
-                      examples: []
-                      id: platform.core.search
-                      inputModes:
-                        - text/plain
-                        - application/json
-                      name: platform.core.search
-                      outputModes:
-                        - text/plain
-                        - application/json
-                      tags:
-                        - tool
-                  supportsAuthenticatedExtendedCard: false
-                  url: http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent
-                  version: 0.1.0
+                  description: Example response card of Elastic AI Agent
+                  value:
+                    capabilities:
+                      pushNotifications: false
+                      stateTransitionHistory: false
+                      streaming: false
+                    defaultInputModes:
+                      - text/plain
+                    defaultOutputModes:
+                      - text/plain
+                    description: Elastic AI Agent
+                    name: Elastic AI Agent
+                    protocolVersion: 0.3.0
+                    provider:
+                      organization: Elastic
+                      url: https://elastic.co
+                    securitySchemes:
+                      authorization:
+                        description: Authentication token
+                        in: header
+                        name: Authorization
+                        type: apiKey
+                    skills:
+                      - description: A powerful tool for searching and analyzing data within your Elasticsearch cluster.
+                        examples: []
+                        id: platform.core.search
+                        inputModes:
+                          - text/plain
+                          - application/json
+                        name: platform.core.search
+                        outputModes:
+                          - text/plain
+                          - application/json
+                        tags:
+                          - tool
+                    supportsAuthenticatedExtendedCard: false
+                    url: http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent
+                    version: 0.1.0
+          description: Indicates a successful response
       summary: A2A Agent Card
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -887,37 +899,41 @@ paths:
             application/json:
               examples:
                 listAgentsResponseExample:
-                  results:
-                    - configuration:
-                        tools:
-                          - tool_ids:
-                              - platform.core.search
-                              - platform.core.list_indices
-                              - platform.core.get_index_mapping
-                              - platform.core.get_document_by_id
-                      description: Elastic AI Agent
-                      id: elastic-ai-agent
-                      name: Elastic AI Agent
-                      type: chat
-                    - avatar_color: '#BFDBFF'
-                      avatar_symbol: SI
-                      configuration:
-                        instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
-                        tools:
-                          - tool_ids:
-                              - platform.core.search
-                              - platform.core.list_indices
-                              - platform.core.get_index_mapping
-                              - platform.core.get_document_by_id
-                      description: Hi! I can help you search the data within the indices starting with "content-" prefix.
-                      id: created-agent-id
-                      labels:
-                        - custom-indices
-                        - department-search
-                      name: Search Index Helper
-                      type: chat
+                  description: Example response that returns one built-in Elastic agent and one created by the user
+                  value:
+                    results:
+                      - configuration:
+                          tools:
+                            - tool_ids:
+                                - platform.core.search
+                                - platform.core.list_indices
+                                - platform.core.get_index_mapping
+                                - platform.core.get_document_by_id
+                        description: Elastic AI Agent
+                        id: elastic-ai-agent
+                        name: Elastic AI Agent
+                        type: chat
+                      - avatar_color: '#BFDBFF'
+                        avatar_symbol: SI
+                        configuration:
+                          instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                          tools:
+                            - tool_ids:
+                                - platform.core.search
+                                - platform.core.list_indices
+                                - platform.core.get_index_mapping
+                                - platform.core.get_document_by_id
+                        description: Hi! I can help you search the data within the indices starting with "content-" prefix.
+                        id: created-agent-id
+                        labels:
+                          - custom-indices
+                          - department-search
+                        name: Search Index Helper
+                        type: chat
+          description: Indicates a successful response
       summary: List agents
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -936,6 +952,26 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAgentRequestExample:
+                description: Example request for creating a custom agent with special prompt and tools
+                value:
+                  avatar_color: '#BFDBFF'
+                  avatar_symbol: SI
+                  configuration:
+                    instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                    tools:
+                      - tool_ids:
+                          - platform.core.search
+                          - platform.core.list_indices
+                          - platform.core.get_index_mapping
+                          - platform.core.get_document_by_id
+                  description: Hi! I can help you search the data within the indices starting with "content-" prefix.
+                  id: created-agent-id
+                  labels:
+                    - custom-indices
+                    - department-search
+                  name: Search Index Helper
             schema:
               additionalProperties: false
               type: object
@@ -997,25 +1033,29 @@ paths:
             application/json:
               examples:
                 createAgentResponseExample:
-                  avatar_color: '#BFDBFF'
-                  avatar_symbol: SI
-                  configuration:
-                    instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
-                    tools:
-                      - tool_ids:
-                          - platform.core.search
-                          - platform.core.list_indices
-                          - platform.core.get_index_mapping
-                          - platform.core.get_document_by_id
-                  description: Hi! I can help you search the data within the indices starting with "content-" prefix.
-                  id: created-agent-id
-                  labels:
-                    - custom-indices
-                    - department-search
-                  name: Search Index Helper
-                  type: chat
+                  description: Example response returning the definition of an agent created as a result of the request
+                  value:
+                    avatar_color: '#BFDBFF'
+                    avatar_symbol: SI
+                    configuration:
+                      instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                      tools:
+                        - tool_ids:
+                            - platform.core.search
+                            - platform.core.list_indices
+                            - platform.core.get_index_mapping
+                            - platform.core.get_document_by_id
+                    description: Hi! I can help you search the data within the indices starting with "content-" prefix.
+                    id: created-agent-id
+                    labels:
+                      - custom-indices
+                      - department-search
+                    name: Search Index Helper
+                    type: chat
+          description: Indicates a successful response
       summary: Create an agent
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1044,9 +1084,13 @@ paths:
             application/json:
               examples:
                 deleteAgentResponseExample:
-                  success: true
+                  description: Example response showing that deletion of the agent has been successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete an agent
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1067,25 +1111,29 @@ paths:
             application/json:
               examples:
                 getAgentByIdResponseExample:
-                  avatar_color: '#BFDBFF'
-                  avatar_symbol: SI
-                  configuration:
-                    instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
-                    tools:
-                      - tool_ids:
-                          - platform.core.search
-                          - platform.core.list_indices
-                          - platform.core.get_index_mapping
-                          - platform.core.get_document_by_id
-                  description: Hi! I can help you search the data within the indices starting with "content-" prefix.
-                  id: created-agent-id
-                  labels:
-                    - custom-indices
-                    - department-search
-                  name: Search Index Helper
-                  type: chat
+                  description: Example response that an agent created by the user that will query elasticsearch indices starting with 'content-' prefix to answer the questions.
+                  value:
+                    avatar_color: '#BFDBFF'
+                    avatar_symbol: SI
+                    configuration:
+                      instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                      tools:
+                        - tool_ids:
+                            - platform.core.search
+                            - platform.core.list_indices
+                            - platform.core.get_index_mapping
+                            - platform.core.get_document_by_id
+                    description: Hi! I can help you search the data within the indices starting with "content-" prefix.
+                    id: created-agent-id
+                    labels:
+                      - custom-indices
+                      - department-search
+                    name: Search Index Helper
+                    type: chat
+          description: Indicates a successful response
       summary: Get an agent
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1110,6 +1158,27 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAgentRequestExample:
+                description: Example request for updating custom agent
+                value:
+                  avatar_color: '#BFDBFF'
+                  avatar_symbol: SI
+                  configuration:
+                    instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                    tools:
+                      - tool_ids:
+                          - platform.core.search
+                          - platform.core.list_indices
+                          - platform.core.get_index_mapping
+                          - platform.core.get_document_by_id
+                  description: Updated description - Search for anything in "content-*" indices!
+                  id: created-agent-id
+                  labels:
+                    - custom-indices
+                    - department-search
+                    - elastic-employees
+                  name: Search Index Helper
             schema:
               additionalProperties: false
               type: object
@@ -1161,26 +1230,30 @@ paths:
             application/json:
               examples:
                 updateAgentResponseExample:
-                  avatar_color: '#BFDBFF'
-                  avatar_symbol: SI
-                  configuration:
-                    instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
-                    tools:
-                      - tool_ids:
-                          - platform.core.search
-                          - platform.core.list_indices
-                          - platform.core.get_index_mapping
-                          - platform.core.get_document_by_id
-                  description: Updated description - Search for anything in "content-*" indices!
-                  id: created-agent-id
-                  labels:
-                    - custom-indices
-                    - department-search
-                    - elastic-employees
-                  name: Search Index Helper
-                  type: chat
+                  description: Example response returning the agent definition with the changes applied from the request
+                  value:
+                    avatar_color: '#BFDBFF'
+                    avatar_symbol: SI
+                    configuration:
+                      instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
+                      tools:
+                        - tool_ids:
+                            - platform.core.search
+                            - platform.core.list_indices
+                            - platform.core.get_index_mapping
+                            - platform.core.get_document_by_id
+                    description: Updated description - Search for anything in "content-*" indices!
+                    id: created-agent-id
+                    labels:
+                      - custom-indices
+                      - department-search
+                      - elastic-employees
+                    name: Search Index Helper
+                    type: chat
+          description: Indicates a successful response
       summary: Update an agent
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1202,16 +1275,20 @@ paths:
             application/json:
               examples:
                 listConversationsResponseExample:
-                  results:
-                    - agent_id: elastic-ai-agent
-                      created_at: '2025-09-19T17:45:39.554Z'
-                      id: bcc176c5-38f6-40be-be0c-898e34fa1480
-                      title: General Greeting
-                      updated_at: '2025-09-19T17:45:39.554Z'
-                      user:
-                        username: elastic
+                  description: Example response containing the list of conversations with all agents
+                  value:
+                    results:
+                      - agent_id: elastic-ai-agent
+                        created_at: '2025-09-19T17:45:39.554Z'
+                        id: bcc176c5-38f6-40be-be0c-898e34fa1480
+                        title: General Greeting
+                        updated_at: '2025-09-19T17:45:39.554Z'
+                        user:
+                          username: elastic
+          description: Indicates a successful response
       summary: List conversations
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1240,9 +1317,13 @@ paths:
             application/json:
               examples:
                 deleteConversationResponseExample:
-                  success: true
+                  description: Example response showing that deletion of conversation has been successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete conversation by ID
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1263,25 +1344,29 @@ paths:
             application/json:
               examples:
                 getConversationByIdResponseExample:
-                  agent_id: elastic-ai-agent
-                  created_at: '2025-09-19T17:45:39.554Z'
-                  id: bcc176c5-38f6-40be-be0c-898e34fa1480
-                  rounds:
-                    - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
-                      input:
-                        message: Hello, how are you?
-                      response:
-                        message: |-
-                          Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.
+                  description: Example response containing the contents of a convesation with the chat agent
+                  value:
+                    agent_id: elastic-ai-agent
+                    created_at: '2025-09-19T17:45:39.554Z'
+                    id: bcc176c5-38f6-40be-be0c-898e34fa1480
+                    rounds:
+                      - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                        input:
+                          message: Hello, how are you?
+                        response:
+                          message: |-
+                            Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.
 
-                          Hello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?
-                      steps: []
-                  title: General Greeting
-                  updated_at: '2025-09-19T17:45:39.554Z'
-                  user:
-                    username: elastic
+                            Hello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?
+                        steps: []
+                    title: General Greeting
+                    updated_at: '2025-09-19T17:45:39.554Z'
+                    user:
+                      username: elastic
+          description: Indicates a successful response
       summary: Get conversation by ID
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1303,9 +1388,11 @@ paths:
           application/json:
             examples:
               converseRequestExample:
-                agent_id: elastic-ai-agent
-                connector_id: my-connector-id
-                input: What is Elasticsearch?
+                description: Example request to send a message to the agent as a part of the conversation
+                value:
+                  agent_id: elastic-ai-agent
+                  connector_id: my-connector-id
+                  input: What is Elasticsearch?
             schema:
               additionalProperties: false
               type: object
@@ -1331,25 +1418,29 @@ paths:
             application/json:
               examples:
                 converseResponseExample:
-                  conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
-                  response:
-                    message: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
-                  steps:
-                    - reasoning: Searching for official documentation or content that explains what Elasticsearch is
-                      type: reasoning
-                    - params:
-                        query: what is elasticsearch definition overview introduction
-                      progression:
-                        - message: Selecting the best target for this query
-                      results:
-                        - data:
-                            message: Could not figure out which index to use
-                          type: error
-                      tool_call_id: tooluse_shOdUwKIRwC9YhqGzeg0cQ
-                      tool_id: platform.core.search
-                      type: tool_call
+                  description: Example response containing the chain of events representing a conversation with the agent
+                  value:
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                    response:
+                      message: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
+                    steps:
+                      - reasoning: Searching for official documentation or content that explains what Elasticsearch is
+                        type: reasoning
+                      - params:
+                          query: what is elasticsearch definition overview introduction
+                        progression:
+                          - message: Selecting the best target for this query
+                        results:
+                          - data:
+                              message: Could not figure out which index to use
+                            type: error
+                        tool_call_id: tooluse_shOdUwKIRwC9YhqGzeg0cQ
+                        tool_id: platform.core.search
+                        type: tool_call
+          description: Indicates a successful response
       summary: Converse with an agent
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1371,9 +1462,11 @@ paths:
           application/json:
             examples:
               converseAsyncRequestExample:
-                agent_id: elastic-ai-agent
-                conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
-                input: Hello
+                description: Example request to send a message to the agent as a part of the conversation
+                value:
+                  agent_id: elastic-ai-agent
+                  conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
+                  input: Hello
             schema:
               additionalProperties: false
               type: object
@@ -1399,23 +1492,44 @@ paths:
             text/event-stream:
               examples:
                 converseAsyncResponseExample:
-                  value: |
-                    event: conversation_id_set
-                    data: {"data":{"conversation_id":"c250305b-1929-4248-b568-b9e3f065fda5"}}
-
-                    event: reasoning
-                    data: {"data":{"reasoning":"Starting with a general search to understand what content is available."}}
-
-                    event: tool_call
-                    data: {"data":{"tool_call_id":"tooluse__2aJELgyRYqD8SDOKSiwtg","tool_id":"platform.core.search","params":{"query":"latest documents"}}}
-
-                    event: tool_result
-                    data: {"data":{"tool_call_id":"tooluse__2aJELgyRYqD8SDOKSiwtg","results":[{"type":"error","data":{"message":"Could not figure out which index to use"}}]}}
-
-                    event: round_complete
-                    data: {"data":{"round":{"id":"a5692d54-bc06-4a6e-aea1-412779c73f66","input":{"message":"Hello"},"response":{"message":"Hello! How can I help you today?"}}}}
+                  description: Example stream containing the chain of events representing a conversation with the agent
+                  value:
+                    - data:
+                        data:
+                          conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
+                      event: conversation_id_set
+                    - data:
+                        data:
+                          reasoning: Starting with a general search to understand what content is available.
+                      event: reasoning
+                    - data:
+                        data:
+                          params:
+                            query: latest documents
+                          tool_call_id: tooluse__2aJELgyRYqD8SDOKSiwtg
+                          tool_id: platform.core.search
+                      event: tool_call
+                    - data:
+                        data:
+                          results:
+                            - data:
+                                message: Could not figure out which index to use
+                              type: error
+                          tool_call_id: tooluse__2aJELgyRYqD8SDOKSiwtg
+                      event: tool_result
+                    - data:
+                        data:
+                          round:
+                            id: a5692d54-bc06-4a6e-aea1-412779c73f66
+                            input:
+                              message: Hello
+                            response:
+                              message: Hello! How can I help you today?
+                      event: round_complete
+          description: Indicates a successful response
       summary: Converse with an agent and stream events
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1431,13 +1545,17 @@ paths:
             application/json:
               examples:
                 mcpMethodNotAllowedExample:
-                  attributes:
-                    code: -32000
-                  error: Method Not Allowed
-                  message: Method not allowed
-                  statusCode: 405
+                  description: Example response showing that the method to list MCP tools is not allowed
+                  value:
+                    attributes:
+                      code: -32000
+                    error: Method Not Allowed
+                    message: Method not allowed
+                    statusCode: 405
+          description: Indicates a Method Not Allowed response
       summary: MCP server
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1452,13 +1570,17 @@ paths:
             application/json:
               examples:
                 mcpMethodNotAllowedExample:
-                  attributes:
-                    code: -32000
-                  error: Method Not Allowed
-                  message: Method not allowed
-                  statusCode: 405
+                  description: Example response showing that the method to list MCP tools is not allowed
+                  value:
+                    attributes:
+                      code: -32000
+                    error: Method Not Allowed
+                    message: Method not allowed
+                    statusCode: 405
+          description: Indicates a Method Not Allowed response
       summary: MCP server
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1472,15 +1594,17 @@ paths:
           application/json:
             examples:
               mcpInitializeRequestExample:
-                id: 1
-                jsonrpc: '2.0'
-                method: initialize
-                params:
-                  capabilities: {}
-                  clientInfo:
-                    name: test-client
-                    version: 1.0.0
-                  protocolVersion: '2024-11-05'
+                description: Example request to initalise communication over MCP protocol
+                value:
+                  id: 1
+                  jsonrpc: '2.0'
+                  method: initialize
+                  params:
+                    capabilities: {}
+                    clientInfo:
+                      name: test-client
+                      version: 1.0.0
+                    protocolVersion: '2024-11-05'
             schema: {}
       responses:
         '200':
@@ -1488,18 +1612,22 @@ paths:
             application/json:
               examples:
                 mcpInitializeResponseExample:
-                  id: 1
-                  jsonrpc: '2.0'
-                  result:
-                    capabilities:
-                      tools:
-                        listChanged: true
-                    protocolVersion: '2024-11-05'
-                    serverInfo:
-                      name: elastic-mcp-server
-                      version: 0.0.1
+                  description: Example response showing the successful result of communication initialisation over MCP protocol
+                  value:
+                    id: 1
+                    jsonrpc: '2.0'
+                    result:
+                      capabilities:
+                        tools:
+                          listChanged: true
+                      protocolVersion: '2024-11-05'
+                      serverInfo:
+                        name: elastic-mcp-server
+                        version: 0.0.1
+          description: Indicates a successful response
       summary: MCP server
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1515,6 +1643,7 @@ paths:
             application/json:
               examples:
                 listToolsResponseExample:
+                  description: Example response returning a list of existing tools
                   value:
                     results:
                       - configuration: {}
@@ -1652,8 +1781,10 @@ paths:
                           - search
                           - finance
                         type: index_search
+          description: Indicates a successful response
       summary: List tools
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1674,6 +1805,7 @@ paths:
           application/json:
             examples:
               createEsqlToolRequest:
+                description: Example request to create an ESQL query tool with a pre-defined query
                 value:
                   configuration:
                     params:
@@ -1691,6 +1823,7 @@ paths:
                     - finance
                   type: esql
               createIndexSearchToolRequest:
+                description: Example request to create an index_search tool with a pre-defined index pattern
                 value:
                   configuration:
                     pattern: financial_*
@@ -1738,6 +1871,7 @@ paths:
             application/json:
               examples:
                 createEsqlToolExample:
+                  description: Example response returning a definition of ESQL tool created
                   value:
                     configuration:
                       params:
@@ -1772,6 +1906,7 @@ paths:
                       - finance
                     type: esql
                 createIndexSearchToolExample:
+                  description: Example response returning a definition of search tool tool created
                   value:
                     configuration:
                       pattern: financial_*
@@ -1792,8 +1927,10 @@ paths:
                       - search
                       - finance
                     type: index_search
+          description: Indicates a successful response
       summary: Create a tool
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -1815,23 +1952,27 @@ paths:
           application/json:
             examples:
               executeBuiltinEsqlToolRequest:
+                description: Example request executing platform.core.execute_esql tool
                 value:
                   tool_id: platform.core.execute_esql
                   tool_params:
                     query: FROM financial_trades | LIMIT 3
               executeBuiltinToolRequest:
+                description: Example request executing platform.core.get_document_by_id tool
                 value:
                   tool_id: platform.core.get_document_by_id
                   tool_params:
                     id: TRD-20250805-0820a89f
                     index: financial_trades
               executeCustomEsqlToolRequest:
+                description: Example request executing custom example-esql-tool tool
                 value:
                   tool_id: example-esql-tool
                   tool_params:
                     limit: 3
                     startTime: '2024-01-01T00:00:00Z'
               executeIndexSearchToolRequest:
+                description: Example request executing custom example-index-search-tool tool
                 value:
                   tool_id: example-index-search-tool
                   tool_params:
@@ -1859,6 +2000,7 @@ paths:
             application/json:
               examples:
                 executeBuiltinEsqlToolExample:
+                  description: Example response calling built-in platform.core.execute_esql tool
                   value:
                     results:
                       - data:
@@ -1892,6 +2034,7 @@ paths:
                         tool_result_id: xTpT
                         type: tabular_data
                 executeBuiltinToolExample:
+                  description: Example response calling built-in platform.core.get_document_by_id tool
                   value:
                     results:
                       - data:
@@ -1914,6 +2057,7 @@ paths:
                             index: financial_trades
                         type: resource
                 executeCustomEsqlToolExample:
+                  description: Example response calling custom example-esql-tool tool
                   value:
                     results:
                       - data:
@@ -1939,6 +2083,7 @@ paths:
                         tool_result_id: Voy8
                         type: tabular_data
                 executeIndexSearchToolExample:
+                  description: Example response calling custom example-index-search-tool tool
                   value:
                     results:
                       - data:
@@ -1982,8 +2127,10 @@ paths:
                               - sell
                         tool_result_id: uE8y
                         type: tabular_data
+          description: Indicates a successful response
       summary: Execute a Tool
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -2012,9 +2159,13 @@ paths:
             application/json:
               examples:
                 deleteAgentResponseExample:
-                  success: true
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete a tool
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -2035,6 +2186,7 @@ paths:
             application/json:
               examples:
                 getBuiltinToolExample:
+                  description: Example response returning built-in platform.core.search tool
                   value:
                     configuration: {}
                     description: |-
@@ -2074,6 +2226,7 @@ paths:
                     tags: []
                     type: builtin
                 getEsqlToolExample:
+                  description: Example response returning custom example-esql-tool tool
                   value:
                     configuration:
                       params:
@@ -2108,6 +2261,7 @@ paths:
                       - finance
                     type: esql
                 getIndexSearchToolExample:
+                  description: Example response returning custom example-index-search-tool tool
                   value:
                     configuration:
                       pattern: financial_*
@@ -2128,8 +2282,10 @@ paths:
                       - search
                       - finance
                     type: index_search
+          description: Indicates a successful response
       summary: Get a tool by id
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -2157,6 +2313,7 @@ paths:
           application/json:
             examples:
               updateEsqlToolRequest:
+                description: Example request to update the custom ESQL tool
                 value:
                   configuration:
                     params:
@@ -2176,6 +2333,7 @@ paths:
                     - finance
                     - reporting
               updateIndexSearchToolRequest:
+                description: Example request to update the custom Search tool
                 value:
                   description: Updated search tool for comprehensive financial data analysis, reporting, and compliance monitoring
                   tags:
@@ -2206,6 +2364,7 @@ paths:
             application/json:
               examples:
                 updateEsqlToolExample:
+                  description: Example response showing the updated ESQL tool
                   value:
                     configuration:
                       params:
@@ -2248,6 +2407,7 @@ paths:
                       - reporting
                     type: esql
                 updateIndexSearchToolExample:
+                  description: Example response showing the updated Search tool
                   value:
                     configuration:
                       pattern: financial_*
@@ -2270,8 +2430,10 @@ paths:
                       - compliance
                       - reporting
                     type: index_search
+          description: Indicates a successful response
       summary: Update a tool
-      tags: []
+      tags:
+        - elastic agent builder
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless

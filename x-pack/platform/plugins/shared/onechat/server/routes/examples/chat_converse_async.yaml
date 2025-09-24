@@ -10,6 +10,7 @@ requestBody:
             conversation_id: "c250305b-1929-4248-b568-b9e3f065fda5"
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       text/event-stream:
         examples:

@@ -16,6 +16,7 @@ requestBody:
             id: 1
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       application/json:
         examples:

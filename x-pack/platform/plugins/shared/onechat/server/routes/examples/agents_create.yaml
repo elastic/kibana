@@ -25,6 +25,7 @@ requestBody:
                 - platform.core.get_document_by_id
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       application/json:
         examples:

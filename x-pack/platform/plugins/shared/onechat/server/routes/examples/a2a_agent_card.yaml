@@ -1,11 +1,11 @@
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       application/json:
         examples:
           a2aAgentCardResponseExample:
-            description: ""
-            summary: ""
+            description: "Example response card of Elastic AI Agent"
             value:
               name: "Elastic AI Agent"
               description: "Elastic AI Agent"

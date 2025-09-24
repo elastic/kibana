@@ -878,16 +878,19 @@
             "application/json": {
               "examples": {
                 "a2aTaskRequestExample": {
-                  "id": "task-123",
-                  "jsonrpc": "2.0",
-                  "method": "complete",
-                  "params": {
-                    "messages": [
-                      {
-                        "content": "Hello from A2A protocol",
-                        "role": "user"
-                      }
-                    ]
+                  "description": "Example request for A2A Task Endpoint",
+                  "value": {
+                    "id": "task-123",
+                    "jsonrpc": "2.0",
+                    "method": "complete",
+                    "params": {
+                      "messages": [
+                        {
+                          "content": "Hello from A2A protocol",
+                          "role": "user"
+                        }
+                      ]
+                    }
                   }
                 }
               },
@@ -901,19 +904,23 @@
               "application/json": {
                 "examples": {
                   "a2aTaskResponseExample": {
-                    "id": "task-123",
-                    "jsonrpc": "2.0",
-                    "result": {
-                      "conversation_id": "conv-456",
-                      "response": {
-                        "message": "Hello! How can I help you today?"
-                      },
-                      "type": "response"
+                    "description": "Example response from A2A Task Endpoint with results of task execution",
+                    "value": {
+                      "id": "task-123",
+                      "jsonrpc": "2.0",
+                      "result": {
+                        "conversation_id": "conv-456",
+                        "response": {
+                          "message": "Hello! How can I help you today?"
+                        },
+                        "type": "response"
+                      }
                     }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "A2A Task Endpoint",
@@ -944,58 +951,62 @@
               "application/json": {
                 "examples": {
                   "a2aAgentCardResponseExample": {
-                    "capabilities": {
-                      "pushNotifications": false,
-                      "stateTransitionHistory": false,
-                      "streaming": false
-                    },
-                    "defaultInputModes": [
-                      "text/plain"
-                    ],
-                    "defaultOutputModes": [
-                      "text/plain"
-                    ],
-                    "description": "Elastic AI Agent",
-                    "name": "Elastic AI Agent",
-                    "protocolVersion": "0.3.0",
-                    "provider": {
-                      "organization": "Elastic",
-                      "url": "https://elastic.co"
-                    },
-                    "securitySchemes": {
-                      "authorization": {
-                        "description": "Authentication token",
-                        "in": "header",
-                        "name": "Authorization",
-                        "type": "apiKey"
-                      }
-                    },
-                    "skills": [
-                      {
-                        "description": "A powerful tool for searching and analyzing data within your Elasticsearch cluster.",
-                        "examples": [],
-                        "id": "platform.core.search",
-                        "inputModes": [
-                          "text/plain",
-                          "application/json"
-                        ],
-                        "name": "platform.core.search",
-                        "outputModes": [
-                          "text/plain",
-                          "application/json"
-                        ],
-                        "tags": [
-                          "tool"
-                        ]
-                      }
-                    ],
-                    "supportsAuthenticatedExtendedCard": false,
-                    "url": "http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent",
-                    "version": "0.1.0"
+                    "description": "Example response card of Elastic AI Agent",
+                    "value": {
+                      "capabilities": {
+                        "pushNotifications": false,
+                        "stateTransitionHistory": false,
+                        "streaming": false
+                      },
+                      "defaultInputModes": [
+                        "text/plain"
+                      ],
+                      "defaultOutputModes": [
+                        "text/plain"
+                      ],
+                      "description": "Elastic AI Agent",
+                      "name": "Elastic AI Agent",
+                      "protocolVersion": "0.3.0",
+                      "provider": {
+                        "organization": "Elastic",
+                        "url": "https://elastic.co"
+                      },
+                      "securitySchemes": {
+                        "authorization": {
+                          "description": "Authentication token",
+                          "in": "header",
+                          "name": "Authorization",
+                          "type": "apiKey"
+                        }
+                      },
+                      "skills": [
+                        {
+                          "description": "A powerful tool for searching and analyzing data within your Elasticsearch cluster.",
+                          "examples": [],
+                          "id": "platform.core.search",
+                          "inputModes": [
+                            "text/plain",
+                            "application/json"
+                          ],
+                          "name": "platform.core.search",
+                          "outputModes": [
+                            "text/plain",
+                            "application/json"
+                          ],
+                          "tags": [
+                            "tool"
+                          ]
+                        }
+                      ],
+                      "supportsAuthenticatedExtendedCard": false,
+                      "url": "http://localhost:5601/api/agent_builder/a2a/elastic-ai-agent",
+                      "version": "0.1.0"
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "A2A Agent Card",
@@ -1016,55 +1027,59 @@
               "application/json": {
                 "examples": {
                   "listAgentsResponseExample": {
-                    "results": [
-                      {
-                        "configuration": {
-                          "tools": [
-                            {
-                              "tool_ids": [
-                                "platform.core.search",
-                                "platform.core.list_indices",
-                                "platform.core.get_index_mapping",
-                                "platform.core.get_document_by_id"
-                              ]
-                            }
-                          ]
+                    "description": "Example response that returns one built-in Elastic agent and one created by the user",
+                    "value": {
+                      "results": [
+                        {
+                          "configuration": {
+                            "tools": [
+                              {
+                                "tool_ids": [
+                                  "platform.core.search",
+                                  "platform.core.list_indices",
+                                  "platform.core.get_index_mapping",
+                                  "platform.core.get_document_by_id"
+                                ]
+                              }
+                            ]
+                          },
+                          "description": "Elastic AI Agent",
+                          "id": "elastic-ai-agent",
+                          "name": "Elastic AI Agent",
+                          "type": "chat"
                         },
-                        "description": "Elastic AI Agent",
-                        "id": "elastic-ai-agent",
-                        "name": "Elastic AI Agent",
-                        "type": "chat"
-                      },
-                      {
-                        "avatar_color": "#BFDBFF",
-                        "avatar_symbol": "SI",
-                        "configuration": {
-                          "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
-                          "tools": [
-                            {
-                              "tool_ids": [
-                                "platform.core.search",
-                                "platform.core.list_indices",
-                                "platform.core.get_index_mapping",
-                                "platform.core.get_document_by_id"
-                              ]
-                            }
-                          ]
-                        },
-                        "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
-                        "id": "created-agent-id",
-                        "labels": [
-                          "custom-indices",
-                          "department-search"
-                        ],
-                        "name": "Search Index Helper",
-                        "type": "chat"
-                      }
-                    ]
+                        {
+                          "avatar_color": "#BFDBFF",
+                          "avatar_symbol": "SI",
+                          "configuration": {
+                            "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                            "tools": [
+                              {
+                                "tool_ids": [
+                                  "platform.core.search",
+                                  "platform.core.list_indices",
+                                  "platform.core.get_index_mapping",
+                                  "platform.core.get_document_by_id"
+                                ]
+                              }
+                            ]
+                          },
+                          "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                          "id": "created-agent-id",
+                          "labels": [
+                            "custom-indices",
+                            "department-search"
+                          ],
+                          "name": "Search Index Helper",
+                          "type": "chat"
+                        }
+                      ]
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "List agents",
@@ -1091,6 +1106,35 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "createAgentRequestExample": {
+                  "description": "Example request for creating a custom agent with special prompt and tools",
+                  "value": {
+                    "avatar_color": "#BFDBFF",
+                    "avatar_symbol": "SI",
+                    "configuration": {
+                      "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                      "tools": [
+                        {
+                          "tool_ids": [
+                            "platform.core.search",
+                            "platform.core.list_indices",
+                            "platform.core.get_index_mapping",
+                            "platform.core.get_document_by_id"
+                          ]
+                        }
+                      ]
+                    },
+                    "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                    "id": "created-agent-id",
+                    "labels": [
+                      "custom-indices",
+                      "department-search"
+                    ],
+                    "name": "Search Index Helper"
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1175,33 +1219,37 @@
               "application/json": {
                 "examples": {
                   "createAgentResponseExample": {
-                    "avatar_color": "#BFDBFF",
-                    "avatar_symbol": "SI",
-                    "configuration": {
-                      "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
-                      "tools": [
-                        {
-                          "tool_ids": [
-                            "platform.core.search",
-                            "platform.core.list_indices",
-                            "platform.core.get_index_mapping",
-                            "platform.core.get_document_by_id"
-                          ]
-                        }
-                      ]
-                    },
-                    "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
-                    "id": "created-agent-id",
-                    "labels": [
-                      "custom-indices",
-                      "department-search"
-                    ],
-                    "name": "Search Index Helper",
-                    "type": "chat"
+                    "description": "Example response returning the definition of an agent created as a result of the request",
+                    "value": {
+                      "avatar_color": "#BFDBFF",
+                      "avatar_symbol": "SI",
+                      "configuration": {
+                        "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                        "tools": [
+                          {
+                            "tool_ids": [
+                              "platform.core.search",
+                              "platform.core.list_indices",
+                              "platform.core.get_index_mapping",
+                              "platform.core.get_document_by_id"
+                            ]
+                          }
+                        ]
+                      },
+                      "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                      "id": "created-agent-id",
+                      "labels": [
+                        "custom-indices",
+                        "department-search"
+                      ],
+                      "name": "Search Index Helper",
+                      "type": "chat"
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Create an agent",
@@ -1242,11 +1290,15 @@
               "application/json": {
                 "examples": {
                   "deleteAgentResponseExample": {
-                    "success": true
+                    "description": "Example response showing that deletion of the agent has been successful",
+                    "value": {
+                      "success": true
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Delete an agent",
@@ -1275,33 +1327,37 @@
               "application/json": {
                 "examples": {
                   "getAgentByIdResponseExample": {
-                    "avatar_color": "#BFDBFF",
-                    "avatar_symbol": "SI",
-                    "configuration": {
-                      "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
-                      "tools": [
-                        {
-                          "tool_ids": [
-                            "platform.core.search",
-                            "platform.core.list_indices",
-                            "platform.core.get_index_mapping",
-                            "platform.core.get_document_by_id"
-                          ]
-                        }
-                      ]
-                    },
-                    "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
-                    "id": "created-agent-id",
-                    "labels": [
-                      "custom-indices",
-                      "department-search"
-                    ],
-                    "name": "Search Index Helper",
-                    "type": "chat"
+                    "description": "Example response that an agent created by the user that will query elasticsearch indices starting with 'content-' prefix to answer the questions.",
+                    "value": {
+                      "avatar_color": "#BFDBFF",
+                      "avatar_symbol": "SI",
+                      "configuration": {
+                        "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                        "tools": [
+                          {
+                            "tool_ids": [
+                              "platform.core.search",
+                              "platform.core.list_indices",
+                              "platform.core.get_index_mapping",
+                              "platform.core.get_document_by_id"
+                            ]
+                          }
+                        ]
+                      },
+                      "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                      "id": "created-agent-id",
+                      "labels": [
+                        "custom-indices",
+                        "department-search"
+                      ],
+                      "name": "Search Index Helper",
+                      "type": "chat"
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Get an agent",
@@ -1337,6 +1393,36 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "createAgentRequestExample": {
+                  "description": "Example request for updating custom agent",
+                  "value": {
+                    "avatar_color": "#BFDBFF",
+                    "avatar_symbol": "SI",
+                    "configuration": {
+                      "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                      "tools": [
+                        {
+                          "tool_ids": [
+                            "platform.core.search",
+                            "platform.core.list_indices",
+                            "platform.core.get_index_mapping",
+                            "platform.core.get_document_by_id"
+                          ]
+                        }
+                      ]
+                    },
+                    "description": "Updated description - Search for anything in \"content-*\" indices!",
+                    "id": "created-agent-id",
+                    "labels": [
+                      "custom-indices",
+                      "department-search",
+                      "elastic-employees"
+                    ],
+                    "name": "Search Index Helper"
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1408,34 +1494,38 @@
               "application/json": {
                 "examples": {
                   "updateAgentResponseExample": {
-                    "avatar_color": "#BFDBFF",
-                    "avatar_symbol": "SI",
-                    "configuration": {
-                      "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
-                      "tools": [
-                        {
-                          "tool_ids": [
-                            "platform.core.search",
-                            "platform.core.list_indices",
-                            "platform.core.get_index_mapping",
-                            "platform.core.get_document_by_id"
-                          ]
-                        }
-                      ]
-                    },
-                    "description": "Updated description - Search for anything in \"content-*\" indices!",
-                    "id": "created-agent-id",
-                    "labels": [
-                      "custom-indices",
-                      "department-search",
-                      "elastic-employees"
-                    ],
-                    "name": "Search Index Helper",
-                    "type": "chat"
+                    "description": "Example response returning the agent definition with the changes applied from the request",
+                    "value": {
+                      "avatar_color": "#BFDBFF",
+                      "avatar_symbol": "SI",
+                      "configuration": {
+                        "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                        "tools": [
+                          {
+                            "tool_ids": [
+                              "platform.core.search",
+                              "platform.core.list_indices",
+                              "platform.core.get_index_mapping",
+                              "platform.core.get_document_by_id"
+                            ]
+                          }
+                        ]
+                      },
+                      "description": "Updated description - Search for anything in \"content-*\" indices!",
+                      "id": "created-agent-id",
+                      "labels": [
+                        "custom-indices",
+                        "department-search",
+                        "elastic-employees"
+                      ],
+                      "name": "Search Index Helper",
+                      "type": "chat"
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Update an agent",
@@ -1466,22 +1556,26 @@
               "application/json": {
                 "examples": {
                   "listConversationsResponseExample": {
-                    "results": [
-                      {
-                        "agent_id": "elastic-ai-agent",
-                        "created_at": "2025-09-19T17:45:39.554Z",
-                        "id": "bcc176c5-38f6-40be-be0c-898e34fa1480",
-                        "title": "General Greeting",
-                        "updated_at": "2025-09-19T17:45:39.554Z",
-                        "user": {
-                          "username": "elastic"
+                    "description": "Example response containing the list of conversations with all agents",
+                    "value": {
+                      "results": [
+                        {
+                          "agent_id": "elastic-ai-agent",
+                          "created_at": "2025-09-19T17:45:39.554Z",
+                          "id": "bcc176c5-38f6-40be-be0c-898e34fa1480",
+                          "title": "General Greeting",
+                          "updated_at": "2025-09-19T17:45:39.554Z",
+                          "user": {
+                            "username": "elastic"
+                          }
                         }
-                      }
-                    ]
+                      ]
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "List conversations",
@@ -1522,11 +1616,15 @@
               "application/json": {
                 "examples": {
                   "deleteConversationResponseExample": {
-                    "success": true
+                    "description": "Example response showing that deletion of conversation has been successful",
+                    "value": {
+                      "success": true
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Delete conversation by ID",
@@ -1555,30 +1653,34 @@
               "application/json": {
                 "examples": {
                   "getConversationByIdResponseExample": {
-                    "agent_id": "elastic-ai-agent",
-                    "created_at": "2025-09-19T17:45:39.554Z",
-                    "id": "bcc176c5-38f6-40be-be0c-898e34fa1480",
-                    "rounds": [
-                      {
-                        "id": "170ec3b2-0f5a-4538-8b60-549572386d2a",
-                        "input": {
-                          "message": "Hello, how are you?"
-                        },
-                        "response": {
-                          "message": "Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.\n\nHello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?"
-                        },
-                        "steps": []
+                    "description": "Example response containing the contents of a convesation with the chat agent",
+                    "value": {
+                      "agent_id": "elastic-ai-agent",
+                      "created_at": "2025-09-19T17:45:39.554Z",
+                      "id": "bcc176c5-38f6-40be-be0c-898e34fa1480",
+                      "rounds": [
+                        {
+                          "id": "170ec3b2-0f5a-4538-8b60-549572386d2a",
+                          "input": {
+                            "message": "Hello, how are you?"
+                          },
+                          "response": {
+                            "message": "Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.\n\nHello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?"
+                          },
+                          "steps": []
+                        }
+                      ],
+                      "title": "General Greeting",
+                      "updated_at": "2025-09-19T17:45:39.554Z",
+                      "user": {
+                        "username": "elastic"
                       }
-                    ],
-                    "title": "General Greeting",
-                    "updated_at": "2025-09-19T17:45:39.554Z",
-                    "user": {
-                      "username": "elastic"
                     }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Get conversation by ID",
@@ -1609,9 +1711,12 @@
             "application/json": {
               "examples": {
                 "converseRequestExample": {
-                  "agent_id": "elastic-ai-agent",
-                  "connector_id": "my-connector-id",
-                  "input": "What is Elasticsearch?"
+                  "description": "Example request to send a message to the agent as a part of the conversation",
+                  "value": {
+                    "agent_id": "elastic-ai-agent",
+                    "connector_id": "my-connector-id",
+                    "input": "What is Elasticsearch?"
+                  }
                 }
               },
               "schema": {
@@ -1649,41 +1754,45 @@
               "application/json": {
                 "examples": {
                   "converseResponseExample": {
-                    "conversation_id": "696ccd6d-4bff-4b26-a62e-522ccf2dcd16",
-                    "response": {
-                      "message": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
-                    },
-                    "steps": [
-                      {
-                        "reasoning": "Searching for official documentation or content that explains what Elasticsearch is",
-                        "type": "reasoning"
+                    "description": "Example response containing the chain of events representing a conversation with the agent",
+                    "value": {
+                      "conversation_id": "696ccd6d-4bff-4b26-a62e-522ccf2dcd16",
+                      "response": {
+                        "message": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
                       },
-                      {
-                        "params": {
-                          "query": "what is elasticsearch definition overview introduction"
+                      "steps": [
+                        {
+                          "reasoning": "Searching for official documentation or content that explains what Elasticsearch is",
+                          "type": "reasoning"
                         },
-                        "progression": [
-                          {
-                            "message": "Selecting the best target for this query"
-                          }
-                        ],
-                        "results": [
-                          {
-                            "data": {
-                              "message": "Could not figure out which index to use"
-                            },
-                            "type": "error"
-                          }
-                        ],
-                        "tool_call_id": "tooluse_shOdUwKIRwC9YhqGzeg0cQ",
-                        "tool_id": "platform.core.search",
-                        "type": "tool_call"
-                      }
-                    ]
+                        {
+                          "params": {
+                            "query": "what is elasticsearch definition overview introduction"
+                          },
+                          "progression": [
+                            {
+                              "message": "Selecting the best target for this query"
+                            }
+                          ],
+                          "results": [
+                            {
+                              "data": {
+                                "message": "Could not figure out which index to use"
+                              },
+                              "type": "error"
+                            }
+                          ],
+                          "tool_call_id": "tooluse_shOdUwKIRwC9YhqGzeg0cQ",
+                          "tool_id": "platform.core.search",
+                          "type": "tool_call"
+                        }
+                      ]
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Converse with an agent",
@@ -1714,9 +1823,12 @@
             "application/json": {
               "examples": {
                 "converseAsyncRequestExample": {
-                  "agent_id": "elastic-ai-agent",
-                  "conversation_id": "c250305b-1929-4248-b568-b9e3f065fda5",
-                  "input": "Hello"
+                  "description": "Example request to send a message to the agent as a part of the conversation",
+                  "value": {
+                    "agent_id": "elastic-ai-agent",
+                    "conversation_id": "c250305b-1929-4248-b568-b9e3f065fda5",
+                    "input": "Hello"
+                  }
                 }
               },
               "schema": {
@@ -1754,11 +1866,74 @@
               "text/event-stream": {
                 "examples": {
                   "converseAsyncResponseExample": {
-                    "value": "event: conversation_id_set\ndata: {\"data\":{\"conversation_id\":\"c250305b-1929-4248-b568-b9e3f065fda5\"}}\n\nevent: reasoning\ndata: {\"data\":{\"reasoning\":\"Starting with a general search to understand what content is available.\"}}\n\nevent: tool_call\ndata: {\"data\":{\"tool_call_id\":\"tooluse__2aJELgyRYqD8SDOKSiwtg\",\"tool_id\":\"platform.core.search\",\"params\":{\"query\":\"latest documents\"}}}\n\nevent: tool_result\ndata: {\"data\":{\"tool_call_id\":\"tooluse__2aJELgyRYqD8SDOKSiwtg\",\"results\":[{\"type\":\"error\",\"data\":{\"message\":\"Could not figure out which index to use\"}}]}}\n\nevent: round_complete\ndata: {\"data\":{\"round\":{\"id\":\"a5692d54-bc06-4a6e-aea1-412779c73f66\",\"input\":{\"message\":\"Hello\"},\"response\":{\"message\":\"Hello! How can I help you today?\"}}}}\n"
+                    "description": "Example stream containing the chain of events representing a conversation with the agent",
+                    "value": [
+                      {
+                        "data": {
+                          "data": {
+                            "conversation_id": "c250305b-1929-4248-b568-b9e3f065fda5"
+                          }
+                        },
+                        "event": "conversation_id_set"
+                      },
+                      {
+                        "data": {
+                          "data": {
+                            "reasoning": "Starting with a general search to understand what content is available."
+                          }
+                        },
+                        "event": "reasoning"
+                      },
+                      {
+                        "data": {
+                          "data": {
+                            "params": {
+                              "query": "latest documents"
+                            },
+                            "tool_call_id": "tooluse__2aJELgyRYqD8SDOKSiwtg",
+                            "tool_id": "platform.core.search"
+                          }
+                        },
+                        "event": "tool_call"
+                      },
+                      {
+                        "data": {
+                          "data": {
+                            "results": [
+                              {
+                                "data": {
+                                  "message": "Could not figure out which index to use"
+                                },
+                                "type": "error"
+                              }
+                            ],
+                            "tool_call_id": "tooluse__2aJELgyRYqD8SDOKSiwtg"
+                          }
+                        },
+                        "event": "tool_result"
+                      },
+                      {
+                        "data": {
+                          "data": {
+                            "round": {
+                              "id": "a5692d54-bc06-4a6e-aea1-412779c73f66",
+                              "input": {
+                                "message": "Hello"
+                              },
+                              "response": {
+                                "message": "Hello! How can I help you today?"
+                              }
+                            }
+                          }
+                        },
+                        "event": "round_complete"
+                      }
+                    ]
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Converse with an agent and stream events",
@@ -1779,16 +1954,20 @@
               "application/json": {
                 "examples": {
                   "mcpMethodNotAllowedExample": {
-                    "attributes": {
-                      "code": -32000
-                    },
-                    "error": "Method Not Allowed",
-                    "message": "Method not allowed",
-                    "statusCode": 405
+                    "description": "Example response showing that the method to list MCP tools is not allowed",
+                    "value": {
+                      "attributes": {
+                        "code": -32000
+                      },
+                      "error": "Method Not Allowed",
+                      "message": "Method not allowed",
+                      "statusCode": 405
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a Method Not Allowed response"
           }
         },
         "summary": "MCP server",
@@ -1807,16 +1986,20 @@
               "application/json": {
                 "examples": {
                   "mcpMethodNotAllowedExample": {
-                    "attributes": {
-                      "code": -32000
-                    },
-                    "error": "Method Not Allowed",
-                    "message": "Method not allowed",
-                    "statusCode": 405
+                    "description": "Example response showing that the method to list MCP tools is not allowed",
+                    "value": {
+                      "attributes": {
+                        "code": -32000
+                      },
+                      "error": "Method Not Allowed",
+                      "message": "Method not allowed",
+                      "statusCode": 405
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a Method Not Allowed response"
           }
         },
         "summary": "MCP server",
@@ -1834,16 +2017,19 @@
             "application/json": {
               "examples": {
                 "mcpInitializeRequestExample": {
-                  "id": 1,
-                  "jsonrpc": "2.0",
-                  "method": "initialize",
-                  "params": {
-                    "capabilities": {},
-                    "clientInfo": {
-                      "name": "test-client",
-                      "version": "1.0.0"
-                    },
-                    "protocolVersion": "2024-11-05"
+                  "description": "Example request to initalise communication over MCP protocol",
+                  "value": {
+                    "id": 1,
+                    "jsonrpc": "2.0",
+                    "method": "initialize",
+                    "params": {
+                      "capabilities": {},
+                      "clientInfo": {
+                        "name": "test-client",
+                        "version": "1.0.0"
+                      },
+                      "protocolVersion": "2024-11-05"
+                    }
                   }
                 }
               },
@@ -1857,24 +2043,28 @@
               "application/json": {
                 "examples": {
                   "mcpInitializeResponseExample": {
-                    "id": 1,
-                    "jsonrpc": "2.0",
-                    "result": {
-                      "capabilities": {
-                        "tools": {
-                          "listChanged": true
+                    "description": "Example response showing the successful result of communication initialisation over MCP protocol",
+                    "value": {
+                      "id": 1,
+                      "jsonrpc": "2.0",
+                      "result": {
+                        "capabilities": {
+                          "tools": {
+                            "listChanged": true
+                          }
+                        },
+                        "protocolVersion": "2024-11-05",
+                        "serverInfo": {
+                          "name": "elastic-mcp-server",
+                          "version": "0.0.1"
                         }
-                      },
-                      "protocolVersion": "2024-11-05",
-                      "serverInfo": {
-                        "name": "elastic-mcp-server",
-                        "version": "0.0.1"
                       }
                     }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "MCP server",
@@ -1895,6 +2085,7 @@
               "application/json": {
                 "examples": {
                   "listToolsResponseExample": {
+                    "description": "Example response returning a list of existing tools",
                     "value": {
                       "results": [
                         {
@@ -2048,7 +2239,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "List tools",
@@ -2077,6 +2269,7 @@
             "application/json": {
               "examples": {
                 "createEsqlToolRequest": {
+                  "description": "Example request to create an ESQL query tool with a pre-defined query",
                   "value": {
                     "configuration": {
                       "params": {
@@ -2101,6 +2294,7 @@
                   }
                 },
                 "createIndexSearchToolRequest": {
+                  "description": "Example request to create an index_search tool with a pre-defined index pattern",
                   "value": {
                     "configuration": {
                       "pattern": "financial_*"
@@ -2166,6 +2360,7 @@
               "application/json": {
                 "examples": {
                   "createEsqlToolExample": {
+                    "description": "Example response returning a definition of ESQL tool created",
                     "value": {
                       "configuration": {
                         "params": {
@@ -2212,6 +2407,7 @@
                     }
                   },
                   "createIndexSearchToolExample": {
+                    "description": "Example response returning a definition of search tool tool created",
                     "value": {
                       "configuration": {
                         "pattern": "financial_*"
@@ -2242,7 +2438,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Create a tool",
@@ -2273,6 +2470,7 @@
             "application/json": {
               "examples": {
                 "executeBuiltinEsqlToolRequest": {
+                  "description": "Example request executing platform.core.execute_esql tool",
                   "value": {
                     "tool_id": "platform.core.execute_esql",
                     "tool_params": {
@@ -2281,6 +2479,7 @@
                   }
                 },
                 "executeBuiltinToolRequest": {
+                  "description": "Example request executing platform.core.get_document_by_id tool",
                   "value": {
                     "tool_id": "platform.core.get_document_by_id",
                     "tool_params": {
@@ -2290,6 +2489,7 @@
                   }
                 },
                 "executeCustomEsqlToolRequest": {
+                  "description": "Example request executing custom example-esql-tool tool",
                   "value": {
                     "tool_id": "example-esql-tool",
                     "tool_params": {
@@ -2299,6 +2499,7 @@
                   }
                 },
                 "executeIndexSearchToolRequest": {
+                  "description": "Example request executing custom example-index-search-tool tool",
                   "value": {
                     "tool_id": "example-index-search-tool",
                     "tool_params": {
@@ -2339,6 +2540,7 @@
               "application/json": {
                 "examples": {
                   "executeBuiltinEsqlToolExample": {
+                    "description": "Example response calling built-in platform.core.execute_esql tool",
                     "value": {
                       "results": [
                         {
@@ -2397,6 +2599,7 @@
                     }
                   },
                   "executeBuiltinToolExample": {
+                    "description": "Example response calling built-in platform.core.get_document_by_id tool",
                     "value": {
                       "results": [
                         {
@@ -2427,6 +2630,7 @@
                     }
                   },
                   "executeCustomEsqlToolExample": {
+                    "description": "Example response calling custom example-esql-tool tool",
                     "value": {
                       "results": [
                         {
@@ -2472,6 +2676,7 @@
                     }
                   },
                   "executeIndexSearchToolExample": {
+                    "description": "Example response calling custom example-index-search-tool tool",
                     "value": {
                       "results": [
                         {
@@ -2538,7 +2743,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Execute a Tool",
@@ -2579,11 +2785,15 @@
               "application/json": {
                 "examples": {
                   "deleteAgentResponseExample": {
-                    "success": true
+                    "description": "Example response showing that the deletion operation was successful",
+                    "value": {
+                      "success": true
+                    }
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Delete a tool",
@@ -2612,6 +2822,7 @@
               "application/json": {
                 "examples": {
                   "getBuiltinToolExample": {
+                    "description": "Example response returning built-in platform.core.search tool",
                     "value": {
                       "configuration": {},
                       "description": "A powerful tool for searching and analyzing data within your Elasticsearch cluster.\nIt supports both full-text relevance searches and structured analytical queries.\n\nUse this tool for any query that involves finding documents, counting, aggregating, or summarizing data from a known index.\n\nExamples of queries:\n- \"find articles about serverless architecture\"\n- \"search for support tickets mentioning 'billing issue' or 'refund request'\"\n- \"what is our policy on parental leave?\"\n- \"list all products where the category is 'electronics'\"\n- \"show me the last 5 documents from that index\"\n- \"show me the sales over the last year break down by month\"\n\nNote:\n- The 'index' parameter can be used to specify which index to search against.\n If not provided, the tool will decide itself which is the best index to use.\n- It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already\n know about the index and fields you want to search on, e.g. if the user explicitly specified it.",
@@ -2640,6 +2851,7 @@
                     }
                   },
                   "getEsqlToolExample": {
+                    "description": "Example response returning custom example-esql-tool tool",
                     "value": {
                       "configuration": {
                         "params": {
@@ -2686,6 +2898,7 @@
                     }
                   },
                   "getIndexSearchToolExample": {
+                    "description": "Example response returning custom example-index-search-tool tool",
                     "value": {
                       "configuration": {
                         "pattern": "financial_*"
@@ -2716,7 +2929,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Get a tool by id",
@@ -2756,6 +2970,7 @@
             "application/json": {
               "examples": {
                 "updateEsqlToolRequest": {
+                  "description": "Example request to update the custom ESQL tool",
                   "value": {
                     "configuration": {
                       "params": {
@@ -2783,6 +2998,7 @@
                   }
                 },
                 "updateIndexSearchToolRequest": {
+                  "description": "Example request to update the custom Search tool",
                   "value": {
                     "description": "Updated search tool for comprehensive financial data analysis, reporting, and compliance monitoring",
                     "tags": [
@@ -2826,6 +3042,7 @@
               "application/json": {
                 "examples": {
                   "updateEsqlToolExample": {
+                    "description": "Example response showing the updated ESQL tool",
                     "value": {
                       "configuration": {
                         "params": {
@@ -2882,6 +3099,7 @@
                     }
                   },
                   "updateIndexSearchToolExample": {
+                    "description": "Example response showing the updated Search tool",
                     "value": {
                       "configuration": {
                         "pattern": "financial_*"
@@ -2914,7 +3132,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Indicates a successful response"
           }
         },
         "summary": "Update a tool",

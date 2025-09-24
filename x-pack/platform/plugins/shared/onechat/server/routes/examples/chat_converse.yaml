@@ -10,6 +10,7 @@ requestBody:
             connector_id: "my-connector-id"
 responses:
   200:
+    description: "Indicates a successful response"
     content:
       application/json:
         examples:
