@@ -10,7 +10,8 @@ import { Annotation } from '@langchain/langgraph';
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
   answer: Annotation<string>(),
-  rule: Annotation<any>(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rule: Annotation<Record<string, any>>(),
   error: Annotation<string>(),
   indices: Annotation<{
     shortlistedIndexPatterns: string[];

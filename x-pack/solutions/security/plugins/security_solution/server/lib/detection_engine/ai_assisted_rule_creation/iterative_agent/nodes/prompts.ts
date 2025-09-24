@@ -51,3 +51,34 @@ A: Please find matched rule JSON object below:
   ],
   ['ai', 'Please find generated rule JSON object below:'],
 ]);
+
+export const TAGS_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful assistant that analyzes user query and ES|QL query for creating Elastic Detection (SIEM) rules and selects relevant tags from available options.
+
+Your task is to:
+1. Understand the intent and context of the user's security detection rule request
+2. Select the most relevant tags from the provided list that would categorize this rule appropriately
+3. Consider security domains, attack techniques, data sources, and threat types
+
+Guidelines:
+- Select 3-8 most relevant tags
+- Prioritize tags that directly relate to the security use case
+- Include data source tags if mentioned (e.g., "windows", "linux", "network")
+- Include technique/tactic tags if applicable (e.g., "persistence", "lateral_movement")
+- Include severity or priority indicators if relevant
+- Avoid generic tags unless specifically relevant
+
+Respond with a JSON object containing only the "relevant_tags" array.`,
+  ],
+  [
+    'human',
+    `
+    <query>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+      Available tags: {available_tags}
+    </query>`,
+  ],
+]);

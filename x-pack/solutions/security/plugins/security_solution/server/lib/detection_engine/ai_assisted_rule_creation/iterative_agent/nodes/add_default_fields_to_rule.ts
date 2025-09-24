@@ -6,10 +6,10 @@
  */
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { RuleCreationAnnotation } from '../iterative_agent/state';
+import type { RuleCreationState } from '../state';
 
 export const addDefaultFieldsToRulesNode = ({ model }: { model: InferenceChatModel }) => {
-  return async (state: typeof RuleCreationAnnotation.State) => {
+  return async (state: RuleCreationState) => {
     return {
       rule: {
         ...state.rule,
@@ -25,7 +25,7 @@ export const addDefaultFieldsToRulesNode = ({ model }: { model: InferenceChatMod
         author: [],
         setup: '',
         max_signals: 100,
-        tags: ['mock'], // TODO: remove
+        //  tags: ['mock'], // TODO: remove
         interval: '5m',
         risk_score: 47,
         severity: 'medium',

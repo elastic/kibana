@@ -52,11 +52,13 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
         console.log('Creating AI-assisted rule');
         const { user_query: userQuery, connector_id: connectorId } = request.body;
 
-        const ctx = await context.resolve(['securitySolution']);
+        const ctx = await context.resolve(['securitySolution', 'alerting']);
         const inferenceService = ctx.securitySolution.getInferenceService();
 
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const savedObjectsClient = core.savedObjects.client;
+        const rulesClient = await ctx.alerting.getRulesClient();
 
         const abortController = new AbortController();
 
@@ -127,6 +129,8 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             connectorId,
             request,
             esClient,
+            savedObjectsClient,
+            rulesClient,
           });
 
           const result = await iterativeAgent.invoke({ userQuery });

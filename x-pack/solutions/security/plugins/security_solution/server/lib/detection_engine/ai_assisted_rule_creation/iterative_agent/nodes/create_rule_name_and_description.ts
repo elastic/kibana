@@ -22,7 +22,6 @@ export const createRuleNameAndDescriptionNode = ({
     CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT.pipe(model).pipe(jsonParser);
   return async (state: typeof RuleCreationAnnotation.State) => {
     try {
-      console.log('state createRuleNameAndDescriptionNode', JSON.stringify(state, null, 2));
       const baseRuleParams = await ruleCreationChain.invoke({
         user_request: state.userQuery,
         esql_query: state.rule.query,

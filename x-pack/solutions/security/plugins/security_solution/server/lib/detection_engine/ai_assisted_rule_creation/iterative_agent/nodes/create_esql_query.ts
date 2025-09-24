@@ -8,11 +8,8 @@
 import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { User } from '@kbn/elastic-assistant-common';
-import { UserMessages } from '@kbn/lens-plugin/public/react_embeddable/user_messages/container';
+
 import type { RuleCreationAnnotation } from '../state';
 import { getGenerateEsqlGraph } from '../../../../../assistant/tools/esql/graphs/generate_esql/generate_esql';
 interface CreateEsqlRuleNodeParams {

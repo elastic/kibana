@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { RuleCreationState } from '../state';
+// interface CreateEsqlRuleNodeParams {
+//   //   model: InferenceChatModel;
+//   //   esClient: ElasticsearchClient;
+//   //   connectorId: string;
+//   //   inference: InferenceServerStart;
+//   //   logger: Logger;
+//   //   request: KibanaRequest;
+//   //   createLlmInstance: () => Promise<InferenceChatModel>;
+// }
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { User } from '@kbn/elastic-assistant-common';
-import { UserMessages } from '@kbn/lens-plugin/public/react_embeddable/user_messages/container';
-import type { RuleCreationAnnotation } from '../state';
-import { getGenerateEsqlGraph } from '../../../../../assistant/tools/esql/graphs/generate_esql/generate_esql';
-interface CreateEsqlRuleNodeParams {
-  //   model: InferenceChatModel;
-  //   esClient: ElasticsearchClient;
-  //   connectorId: string;
-  //   inference: InferenceServerStart;
-  //   logger: Logger;
-  //   request: KibanaRequest;
-  //   createLlmInstance: () => Promise<InferenceChatModel>;
-}
-
-export const validateEsqlQueryNode = ({}: CreateEsqlRuleNodeParams) => {
-  // const ruleCreationChain = CREATE_ESQL_RULE_PROMPT.pipe(model).pipe(jsonParser);
-  return async (state: typeof RuleCreationAnnotation.State) => {
+export const validateEsqlQueryNode = () => {
+  return async (state: RuleCreationState) => {
     try {
       const match = state.rule.query.match(/```esql\s*([\s\S]*?)```/);
       const esql = match ? match[1].trim() : undefined;

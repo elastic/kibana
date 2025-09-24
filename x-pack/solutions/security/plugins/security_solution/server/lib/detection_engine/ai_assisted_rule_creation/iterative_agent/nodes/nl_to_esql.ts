@@ -7,22 +7,15 @@
 
 import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import type { InferenceClient } from '@kbn/inference-common';
 import { lastValueFrom } from 'rxjs';
-import {
-  messagesToInference,
-  toolDefinitionToInference,
-} from '@kbn/inference-langchain/src/chat_model/to_inference';
+import { messagesToInference } from '@kbn/inference-langchain/src/chat_model/to_inference';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { User } from '@kbn/elastic-assistant-common';
-import { UserMessages } from '@kbn/lens-plugin/public/react_embeddable/user_messages/container';
-import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
+import { HumanMessage } from '@langchain/core/messages';
+
 import type { RuleCreationAnnotation } from '../state';
-import { getGenerateEsqlGraph } from '../../../../../assistant/tools/esql/graphs/generate_esql/generate_esql';
+
 interface CreateEsqlRuleNodeParams {
   model: InferenceChatModel;
   esClient: ElasticsearchClient;
