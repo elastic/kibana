@@ -13,8 +13,10 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiButton,
+  EuiButtonEmpty,
   EuiToolTip,
   euiDragDropReorder,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +32,15 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import { useAIFeatures } from './review_suggestions_form/generate_suggestions_button';
+import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
+import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
+import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
+import {
+  useReviewSuggestionsForm,
+  ReviewSuggestionsFormProvider,
+} from './review_suggestions_form/use_review_suggestions_form';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -49,13 +60,17 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const { euiTheme } = useEuiTheme();
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-
+  const aiFeatures = useAIFeatures();
+  const reviewSuggestionForm = useReviewSuggestionsForm();
+  const { timeState } = useTimefilter();
+  const isEditMode = routingSnapshot.matches({ ready: 'editingRule' });
   const { currentRuleId, definition, routing } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
   const canManageRoutingRules = definition.privileges.manage;
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
+  const CreateButtonComponent = aiFeatures ? EuiButtonEmpty : EuiButton;
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -65,8 +80,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   };
 
   const renderCreateButton = () => {
-    if (!shouldDisplayCreateButton) return null;
-
     return (
       <EuiFlexItem grow={false} alignItems="flex-start">
         <EuiFlexGroup
@@ -79,50 +92,71 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             min-height: 80px;
           `}
         >
-          <EuiToolTip
-            content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
-          >
-            <EuiButton
-              size="m"
-              data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-              onClick={createNewRule}
-              disabled={!canCreateRoutingRules || maxNestingLevel}
+          {aiFeatures && (
+            <EuiFlexItem grow={false}>
+              <GenerateSuggestionButton
+                size="s"
+                onClick={(connectorId) =>
+                  reviewSuggestionForm.fetchSuggestions({
+                    streamName: definition.stream.name,
+                    connectorId,
+                    start: timeState.start,
+                    end: timeState.end,
+                  })
+                }
+                isLoading={reviewSuggestionForm.isLoadingSuggestions}
+                aiFeatures={aiFeatures}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
+                  {
+                    defaultMessage: 'Suggest partitions with AI',
+                  }
+                )}
+              </GenerateSuggestionButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="bottom"
+              content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
             >
-              {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                defaultMessage: 'Create partition manually',
-              })}
-            </EuiButton>
-          </EuiToolTip>
+              <CreateButtonComponent
+                size="s"
+                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                onClick={createNewRule}
+                disabled={!canCreateRoutingRules || maxNestingLevel}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+                  defaultMessage: 'Create partition manually',
+                })}
+              </CreateButtonComponent>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     );
   };
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      className={css`
-        overflow: auto;
-      `}
-    >
-      <CurrentStreamEntry definition={definition} />
-
-      {/* Scrollable routing rules container */}
-      <EuiFlexItem
-        grow={false}
+    <ReviewSuggestionsFormProvider form={reviewSuggestionForm}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
         className={css`
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          max-height: calc(100% - 80px);
+          overflow: auto;
         `}
       >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="xs"
+        <CurrentStreamEntry definition={definition} />
+
+        {/* Scrollable routing rules container */}
+        <EuiFlexItem
+          grow={false}
           className={css`
-            padding-left: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: calc(100% - 80px);
           `}
         >
           <EuiDragDropContext onDragEnd={handlerItemDrag}>
@@ -161,6 +195,8 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                               })}
                               onEditIconClick={editRule}
                               routingRule={routingRule}
+                              totalRoutingRules={routing.length}
+                              isEditMode={isEditMode}
                             />
                           )}
                         </NestedView>
@@ -171,10 +207,24 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               </EuiFlexGroup>
             </EuiDroppable>
           </EuiDragDropContext>
-        </EuiFlexGroup>
-      </EuiFlexItem>
 
-      {renderCreateButton()}
-    </EuiFlexGroup>
+          {aiFeatures && shouldDisplayCreateButton && (
+            <>
+              <EuiSpacer size="m" />
+              {reviewSuggestionForm.isEmpty ? (
+                <NoSuggestionsCallout definition={definition} aiFeatures={aiFeatures} />
+              ) : reviewSuggestionForm.suggestions.length ? (
+                <ReviewSuggestionsForm definition={definition} aiFeatures={aiFeatures} />
+              ) : null}
+            </>
+          )}
+        </EuiFlexItem>
+
+        {shouldDisplayCreateButton &&
+          !reviewSuggestionForm.isEmpty &&
+          !reviewSuggestionForm.suggestions.length &&
+          renderCreateButton()}
+      </EuiFlexGroup>
+    </ReviewSuggestionsFormProvider>
   );
 }
