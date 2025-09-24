@@ -35,15 +35,3 @@ jobs:
           done
 
           echo "should_request_review=$SHOULD_REQUEST_REVIEW" >> $GITHUB_OUTPUT
-
-      - name: Request Copilot review
-        if: steps.check_labels.outputs.should_request_review == 'true'
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          # "Requesting Copilot review for PR #$PR_NUMBER"
-
-          # Workaround from https://github.com/cli/cli/issues/10598
-          gh api --method POST "/repos/elastic/kibana/pulls/${PR_NUMBER}/requested_reviewers" \
-            -f "reviewers[]=copilot-pull-request-reviewer[bot]"
