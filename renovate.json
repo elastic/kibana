@@ -2816,7 +2816,7 @@
       "enabled": true
     },
     {
-      "groupName": "reporting dependencies - puppeteer",
+      "groupName": "puppeteer",
       "matchDepNames": [
         "puppeteer"
       ],
