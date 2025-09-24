@@ -8,13 +8,14 @@
  */
 
 import type { SomeObjectType } from './src/types/object_type';
-import type { SchemaOf } from './src/types/schema_of';
+import type { SchemaOf } from './src/helpers/types/schema_of';
 
 /**
  * @deprecated Use `SomeObjectType` instead.
  */
 export type ObjectType = SomeObjectType;
+
 /**
  * @deprecated Use `SchemaOf` instead.
  */
-export type Type<T> = SchemaOf<T>;
+export type Type<T> = SchemaOf<T, any>;

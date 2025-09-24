@@ -218,6 +218,17 @@ describe('Helper: offeringBasedSchema()', () => {
     expectType<boolean>(testSchema._output);
     expectType<boolean | undefined>(testSchema._input);
   });
+  test('TS resolves correct top-level default type', () => {
+    const testSchema = offeringBasedSchema({
+      serverless: schema.string(),
+      traditional: schema.literal('traditional'),
+    }).default('other');
+
+    expectType<string>(testSchema._output);
+    // @ts-expect-error
+    expectType<string>(testSchema._input);
+    expectType<string | undefined>(testSchema._input);
+  });
 
   test('TS enforces the same types on both entries', () => {
     schema.object({

@@ -169,6 +169,7 @@ describe('#defaultValue', () => {
 
   test('should allow only string defaults', () => {
     schema.string().default('some-string');
+    // @ts-expect-error
     schema.string().default(undefined);
     // @ts-expect-error
     schema.string().default(123);

@@ -46,8 +46,7 @@ import type { TypeOptions } from '../types/type';
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean().default(true),
  *     traditional: schema.literal(false), // this can be skipped if users can't specify it in the config
- *     options: { defaultValue: false },
- *   }),
+ *   }).default(false),
  * });
  * ```
  *

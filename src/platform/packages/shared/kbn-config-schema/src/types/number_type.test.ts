@@ -96,6 +96,7 @@ describe('#defaultValue', () => {
 
   test('should allow only number defaults', () => {
     schema.number().default(123);
+    // @ts-expect-error
     schema.number().default(undefined);
     // @ts-expect-error
     schema.number().default('some-string');

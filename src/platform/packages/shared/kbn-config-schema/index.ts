@@ -170,8 +170,8 @@ function maybe<T extends SomeType>(
  *
  * @note wrapping with `nullable` ignores the `defaultValue` from the `type` when validating.
  */
-function nullable<T extends SomeType>(type: T): Type<T['_output'] | null, T['_input'] | null> {
-  return union([type, literal(null)], { defaultValue: null });
+function nullable<T extends SomeType>(type: T) {
+  return union([type, literal(null)]).default(null);
 }
 
 function object<P extends ObjectProps>(

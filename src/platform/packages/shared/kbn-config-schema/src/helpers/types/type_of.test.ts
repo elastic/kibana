@@ -649,15 +649,10 @@ describe('schema types', () => {
         expectType<SchemaType>({});
       });
       test('should input object types with object default', () => {
-        const testSchema = schema.object(
-          { str: schema.string(), num: schema.number() },
-          {
-            defaultValue: {
-              str: types.string,
-              num: types.number,
-            },
-          }
-        );
+        const testSchema = schema.object({ str: schema.string(), num: schema.number() }).default({
+          str: types.string,
+          num: types.number,
+        });
         type SchemaType = TypeOfInput<typeof testSchema>;
 
         expectType<SchemaType>({

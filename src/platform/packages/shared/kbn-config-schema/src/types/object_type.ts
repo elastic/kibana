@@ -181,11 +181,11 @@ export class ObjectType<
    * ```ts
    * const origin = schema.object({
    *   initial: schema.string(),
-   * }, { defaultValue: { initial: 'foo' }});
+   * }).default({ initial: 'foo' });
    *
    * const extended = origin.extends({
    *   added: schema.number(),
-   * }, { defaultValue: { initial: 'foo', added: 'bar' }});
+   * }).default({ initial: 'foo', added: 'bar' });
    * ```
    *
    * @remarks
