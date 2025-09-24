@@ -28276,6 +28276,7 @@
                                 "type": "string"
                               },
                               "write_to_logs_streams": {
+                                "nullable": true,
                                 "type": "boolean"
                               }
                             },
@@ -28517,6 +28518,7 @@
                                 "type": "string"
                               },
                               "write_to_logs_streams": {
+                                "nullable": true,
                                 "type": "boolean"
                               }
                             },
@@ -29465,6 +29467,7 @@
                         "type": "string"
                       },
                       "write_to_logs_streams": {
+                        "nullable": true,
                         "type": "boolean"
                       }
                     },
@@ -29706,6 +29709,7 @@
                         "type": "string"
                       },
                       "write_to_logs_streams": {
+                        "nullable": true,
                         "type": "boolean"
                       }
                     },
@@ -30587,6 +30591,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
@@ -30828,6 +30833,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
@@ -31874,6 +31880,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
@@ -32115,6 +32122,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
@@ -33055,6 +33063,7 @@
                         "type": "string"
                       },
                       "write_to_logs_streams": {
+                        "nullable": true,
                         "type": "boolean"
                       }
                     },
@@ -33289,6 +33298,7 @@
                         "type": "string"
                       },
                       "write_to_logs_streams": {
+                        "nullable": true,
                         "type": "boolean"
                       }
                     },
@@ -34155,6 +34165,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
@@ -34396,6 +34407,7 @@
                               "type": "string"
                             },
                             "write_to_logs_streams": {
+                              "nullable": true,
                               "type": "boolean"
                             }
                           },
