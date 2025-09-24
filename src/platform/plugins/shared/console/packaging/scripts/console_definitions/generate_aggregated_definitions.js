@@ -158,8 +158,12 @@ class StandaloneSpecDefinitionsService {
  * Main aggregation function
  */
 async function generateAggregatedDefinitions() {
+  console.log('=== Console API Definitions Aggregator ===');
+
   const scriptDir = __dirname;
-  const consoleDefinitionsDir = path.join(scriptDir, '..', 'server', 'console_definitions');
+  console.log('Script directory:', scriptDir);
+
+  const consoleDefinitionsDir = path.join(scriptDir, '..', '..', 'target', 'console_definitions');
 
   // Check if console_definitions directory exists
   if (!fs.existsSync(consoleDefinitionsDir)) {
@@ -198,8 +202,8 @@ async function generateAggregatedDefinitions() {
     }
   }
 
-  // Write individual versioned files
-  const outputDir = path.join(scriptDir, '..', 'server', 'console_definitions');
+  // Write individual versioned files to the target directory
+  const outputDir = path.join(scriptDir, '..', '..', 'target', 'console_definitions');
   const generatedFiles = [];
 
   Object.entries(aggregatedResponse).forEach(([version, versionData]) => {
@@ -207,6 +211,20 @@ async function generateAggregatedDefinitions() {
 
     fs.writeFileSync(outputPath, JSON.stringify(versionData, null, 2));
     generatedFiles.push(outputPath);
+  });
+
+  // Clean up version folders after successful aggregation
+  console.log('Cleaning up version folders...');
+  versionDirs.forEach(version => {
+    if (aggregatedResponse[version]) {
+      const versionPath = path.join(consoleDefinitionsDir, version);
+      try {
+        fs.rmSync(versionPath, { recursive: true, force: true });
+        console.log(`Removed version folder: ${version}/`);
+      } catch (error) {
+        console.warn(`Warning: Could not remove version folder ${version}:`, error.message);
+      }
+    }
   });
 
   console.log('\\n=== Generation Complete ===');
@@ -219,6 +237,11 @@ async function generateAggregatedDefinitions() {
     const globalRuleCount = Object.keys(data.es.globals).length;
     console.log(`  - ${path.basename(filePath)}: ${endpointCount} endpoints, ${globalRuleCount} global rules`);
   });
+
+  console.log('');
+  console.log('Versioned definition files are now available at:');
+  console.log(outputDir);
+  console.log('Look for files like: 9.0.json, 9.1.json, etc.');
 }
 
 // Run the script if called directly
