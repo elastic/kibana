@@ -21,7 +21,11 @@ import {
   getStepNode,
 } from '../../../../common/lib/yaml_utils';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod_utils';
+import {
+  getSchemaAtPath,
+  getZodTypeName,
+  getDetailedTypeDescription,
+} from '../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
@@ -262,6 +266,7 @@ export function useYamlValidation({
           const endPos = model.getPositionAt(end);
 
           let errorMessage: string | null = null;
+          let hoverMessage: string | null = null;
           let severity: YamlValidationErrorSeverity = 'error';
 
           const path = getCurrentPath(yamlDocument, start);
@@ -290,6 +295,9 @@ export function useYamlValidation({
                 errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
               } else {
                 const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
+                hoverMessage = `(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
+                  refSchema
+                )}`;
                 if (!refSchema) {
                   errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
                 } else if (getZodTypeName(refSchema) === 'unknown') {
@@ -322,6 +330,7 @@ export function useYamlValidation({
               options: {
                 inlineClassName: 'template-variable-error',
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: hoverMessage ? createMarkdownContent(errorMessage) : null,
               },
             });
           } else {
@@ -335,6 +344,7 @@ export function useYamlValidation({
               options: {
                 inlineClassName: 'template-variable-valid',
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: hoverMessage ? createMarkdownContent(hoverMessage) : null,
               },
             });
           }
@@ -472,5 +482,13 @@ export function useYamlValidation({
     validationErrors,
     validateVariables,
     handleMarkersChanged,
+  };
+}
+
+function createMarkdownContent(content: string): monaco.IMarkdownString {
+  return {
+    value: content,
+    isTrusted: true,
+    supportHtml: true,
   };
 }

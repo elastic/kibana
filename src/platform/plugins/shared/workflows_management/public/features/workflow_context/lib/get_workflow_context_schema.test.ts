@@ -9,7 +9,7 @@
 
 import { WorkflowContextSchema } from '@kbn/workflows';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 import { z } from '@kbn/zod';
 
 describe('getWorkflowContextSchema', () => {

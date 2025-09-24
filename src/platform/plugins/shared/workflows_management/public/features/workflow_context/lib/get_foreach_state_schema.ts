@@ -11,8 +11,8 @@ import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import { getDetailedTypeDescription, getSchemaAtPath } from '../../../../common/lib/zod';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod_utils';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
@@ -27,7 +27,9 @@ export function getForeachStateSchema(
     itemSchema = itemSchema.element;
   } else {
     throw new Error(
-      `Foreach step must iterate over an array type, but received: ${getZodTypeName(itemSchema)}`
+      `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
+        itemSchema
+      )}`
     );
   }
   return ForEachContextSchema.extend({

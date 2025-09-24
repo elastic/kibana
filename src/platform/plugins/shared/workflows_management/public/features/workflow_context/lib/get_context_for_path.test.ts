@@ -10,7 +10,7 @@
 import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { getContextSchemaForPath } from './get_context_for_path';
 import { z } from '@kbn/zod';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 import { StepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
