@@ -288,12 +288,6 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-/**
- * Extracts the partial query string up to a specific cursor position
- * @param queryString - The complete query string
- * @param cursorPosition - The cursor position
- * @returns The query string up to the cursor position
- */
 export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
   const lines = queryString.split('\n');
   const lineNumber = cursorPosition?.lineNumber ?? lines.length;
