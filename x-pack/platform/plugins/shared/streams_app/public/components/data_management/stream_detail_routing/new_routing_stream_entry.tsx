@@ -30,7 +30,7 @@ export function NewRoutingStreamEntry() {
 
   return (
     <div ref={panelRef}>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m" direction="column">
           <StreamNameFormRow
             value={currentRule.destination}
