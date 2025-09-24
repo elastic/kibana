@@ -170,7 +170,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
-      '--xpack.cloud.serverless.project_id=ftr_fake_project_id',
       `--xpack.fleet.fleetServerHosts=[${JSON.stringify({
         id: 'default-fleet-server',
         name: 'Default Fleet Server',
