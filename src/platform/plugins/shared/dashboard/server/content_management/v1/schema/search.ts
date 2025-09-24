@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import { dashboardAPIItemSchema } from './common';
+import { dashboardAPIItemSchema, dashboardState } from './common';
 
 export const dashboardSearchResultsSchema = dashboardAPIItemSchema.extends({
   attributes: schema.object({
-    title: schema.string(),
-    description: schema.string(),
-    tags: schema.maybe(
-      schema.arrayOf(
-        schema.string()
-      )
-    ),
+    title: dashboardState.title,
+    description: dashboardState.description,
+    tags: dashboardState.tags,
   }),
 });
 
