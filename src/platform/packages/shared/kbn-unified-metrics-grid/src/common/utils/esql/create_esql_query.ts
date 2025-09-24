@@ -20,6 +20,14 @@ interface CreateESQLQueryParams {
 
 const separator = '\u203A'.normalize('NFC');
 
+/**
+ * Checks if a given field type requires explicit casting to a string in an ESQL query.
+ * This is necessary for non-keyword types like IP, numeric, and boolean fields when
+ * used in CONCAT operations.
+ *
+ * @param fieldType - The Elasticsearch field type (e.g., 'ip', 'long', 'keyword').
+ * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
+ */
 function needsStringCasting(fieldType: string): boolean {
   const typesNeedingCast = new Set([
     'ip',
@@ -33,6 +41,17 @@ function needsStringCasting(fieldType: string): boolean {
   return typesNeedingCast.has(fieldType);
 }
 
+/**
+ * Creates a complete ESQL query string for metrics visualizations.
+ * The function constructs a query that includes time series aggregation, filtering,
+ * and selective string casting for dimension fields to prevent query failures with
+ * non-keyword types.
+ *
+ * @param metric - The full metric field object, including dimension type information.
+ * @param dimensions - An array of selected dimension names.
+ * @param filters - An array of filters to apply to the query.
+ * @returns A complete ESQL query string.
+ */
 export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
   const {
     name: metricField,
