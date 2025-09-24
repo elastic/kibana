@@ -413,7 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
-        expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel, untitledTabLabel]);
+        expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel]);
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
         expect(await discover.getSavedSearchTitle()).to.be(secondSession);

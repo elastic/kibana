@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -326,8 +327,9 @@ export const initializeTabs = createInternalStateAsyncThunk(
     if (
       unsafeCurrentId &&
       !shouldClearAllTabs &&
-      currentlyPersistedDiscoverSession?.id === discoverSessionId &&
-      currentlyPersistedDiscoverSession?.tabs === persistedDiscoverSession?.tabs
+      persistedDiscoverSession?.id &&
+      currentlyPersistedDiscoverSession?.id === persistedDiscoverSession.id &&
+      deepEqual(currentlyPersistedDiscoverSession?.tabs, persistedDiscoverSession.tabs)
     ) {
       // already initialized with the requested discover session via resetDiscoverSession
       return { userId, spaceId, persistedDiscoverSession };
@@ -341,7 +343,21 @@ export const initializeTabs = createInternalStateAsyncThunk(
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
-    dispatch(setTabs(initialTabsState));
+    if (!unsafeCurrentId) {
+      // first initialization
+      dispatch(setTabs(initialTabsState));
+    } else {
+      // re-initialization due to discover session change
+      await dispatch(
+        updateDiscoverSessionAndTabs({
+          persistedDiscoverSession,
+          items: initialTabsState.allTabs,
+          selectedItem:
+            initialTabsState.allTabs.find((tab) => tab.id === initialTabsState.selectedTabId) ||
+            initialTabsState.allTabs[0],
+        })
+      );
+    }
 
     return { userId, spaceId, persistedDiscoverSession };
   }
