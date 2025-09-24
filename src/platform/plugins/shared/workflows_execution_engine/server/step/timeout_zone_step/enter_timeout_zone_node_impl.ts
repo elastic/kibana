@@ -8,7 +8,7 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import type { NodeImplementation, NodeWithPing } from '../node_implementation';
+import type { NodeImplementation, MonitorableNode } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
@@ -16,7 +16,7 @@ import type { WorkflowExecutionState } from '../../workflow_context_manager/work
 
 import { buildStepExecutionId, parseDuration } from '../../utils';
 
-export class EnterTimeoutZoneNodeImpl implements NodeImplementation, NodeWithPing {
+export class EnterTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
@@ -30,7 +30,7 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, NodeWithPin
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public async ping(stack: WorkflowScopeStack): Promise<void> {
+  public async monitor(stack: WorkflowScopeStack): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
     const stepExecution = this.wfExecutionState.getStepExecution(
       buildStepExecutionId(

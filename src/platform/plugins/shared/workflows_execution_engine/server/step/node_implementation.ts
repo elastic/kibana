@@ -42,8 +42,8 @@ export interface NodeWithErrorCatching {
   catchError(): Promise<void>;
 }
 
-export interface NodeWithPing {
-  ping(nodeStack: WorkflowScopeStack): Promise<void>;
+export interface MonitorableNode {
+  monitor(nodeStack: WorkflowScopeStack): Promise<void>;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>

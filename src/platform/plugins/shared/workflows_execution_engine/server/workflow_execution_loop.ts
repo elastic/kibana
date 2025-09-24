@@ -13,7 +13,7 @@ import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/grap
 import type { NodesFactory } from './step/nodes_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
-import type { NodeWithErrorCatching, NodeWithPing } from './step/node_implementation';
+import type { NodeWithErrorCatching, MonitorableNode } from './step/node_implementation';
 import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
 
@@ -94,6 +94,31 @@ async function runStep(
   }
 }
 
+/**
+ * Continuously monitors the workflow execution stack by calling monitor() on nodes that implement MonitorableNode.
+ *
+ * This function runs in parallel with step execution to provide periodic health checks and monitoring
+ * capabilities for workflow nodes. It iterates through the node stack frames and calls the monitor()
+ * method on any nodes that implement the MonitorableNode interface.
+ *
+ * The monitor runs at regular intervals (every 500ms) and can be used for various monitoring purposes:
+ * - Timeout detection (checking if steps exceed their allowed execution time)
+ * - Resource monitoring (memory, CPU, external dependencies)
+ * - Health checks (verifying external services are available)
+ * - Custom validation logic (ensuring step conditions remain valid)
+ *
+ * If any monitor() call throws an error, it indicates a monitoring condition has been violated
+ * (e.g., timeout exceeded) and the error will propagate to stop the workflow execution.
+ *
+ * @param nodeStackFrames - The stack frames representing the current execution context
+ * @param workflowGraph - The workflow graph containing node definitions
+ * @param nodesFactory - Factory for creating node implementation instances
+ * @param monitorAbortController - AbortController to stop the monitoring loop
+ *
+ * @remarks
+ * The monitoring loop continues until the AbortController is signaled. Each monitoring cycle
+ * recreates the node stack from the original frames to ensure consistency.
+ */
 async function runStackMonitor(
   nodeStackFrames: StackFrame[],
   workflowGraph: WorkflowGraph,
@@ -115,9 +140,9 @@ async function runStackMonitor(
 
       const nodeImplementation = nodesFactory.create(node as UnionExecutionGraphNode);
 
-      if (typeof (nodeImplementation as unknown as NodeWithPing).ping === 'function') {
-        const nodePing = nodeImplementation as unknown as NodeWithPing;
-        await nodePing.ping(nodeStack);
+      if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
+        const monitored = nodeImplementation as unknown as MonitorableNode;
+        await monitored.monitor(nodeStack);
       }
     }
   }
