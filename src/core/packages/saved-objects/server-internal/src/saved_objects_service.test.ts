@@ -388,6 +388,15 @@ describe('SavedObjectsService', () => {
         );
       });
     });
+
+    describe('#isAccessControlEnabled', () => {
+      it('returns false by default', async () => {
+        const coreContext = createCoreContext({});
+        const soService = new SavedObjectsService(coreContext);
+        const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
+        expect(isAccessControlEnabled()).toEqual(false);
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -725,13 +734,6 @@ describe('SavedObjectsService', () => {
 
       describe('#getDefaultIndex', () => {
         it('return the default index', async () => {
-          const { getDefaultIndex } = await soService.start(createStartDeps());
-          expect(getDefaultIndex()).toEqual(MAIN_SAVED_OBJECT_INDEX);
-        });
-      });
-
-      describe('#isAccessControlEnabled', () => {
-        it('returns true by default', async () => {
           const { getDefaultIndex } = await soService.start(createStartDeps());
           expect(getDefaultIndex()).toEqual(MAIN_SAVED_OBJECT_INDEX);
         });
