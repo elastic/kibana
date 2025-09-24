@@ -138,13 +138,15 @@ export class EuiDataGridWrapper {
   async openFullScreenMode() {
     await this.ensureGridVisible();
     await this.toolbarFullScreenButton.click();
-    await expect(this.dataGridWrapper).toContainClass('euiDataGrid--fullScreen');
+    const classAttr = await this.dataGridWrapper.getAttribute('class');
+    expect(classAttr).toContain('euiDataGrid--fullScreen');
   }
 
   async closeFullScreenMode() {
     await this.ensureGridVisible();
     await this.toolbarFullScreenButton.click();
-    await expect(this.dataGridWrapper).not.toContainClass('euiDataGrid--fullScreen');
+    const classAttr = await this.dataGridWrapper.getAttribute('class');
+    expect(classAttr).not.toContain('euiDataGrid--fullScreen');
   }
 
   async openDisplaySelector() {
