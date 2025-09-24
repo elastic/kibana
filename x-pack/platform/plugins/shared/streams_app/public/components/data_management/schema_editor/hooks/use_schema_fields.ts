@@ -110,7 +110,7 @@ export const useSchemaFields = ({
         })) ?? [];
 
     return [...definitionFields, ...unmanagedFields, ...unmappedFields];
-  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
+  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields, definitionFields]);
 
   useEffect(() => setFields(storedFields), [storedFields]);
 
@@ -153,7 +153,7 @@ export const useSchemaFields = ({
     }).length;
 
     return added + changed;
-  }, [fields, definitionFields]);
+  }, [fields, definitionFields, storedFields]);
 
   const discardChanges = useCallback(() => {
     setFields(storedFields);
