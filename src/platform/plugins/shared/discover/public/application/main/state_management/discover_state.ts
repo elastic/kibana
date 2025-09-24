@@ -257,7 +257,7 @@ export function getDiscoverStateContainer({
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = selectTab(internalState.getState(), tabId).globalState;
+      const state = selectTab(internalState.getState(), tabId)?.globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
         internalState.dispatch(
           injectCurrentTab(internalStateActions.setGlobalState)({
@@ -386,7 +386,7 @@ export function getDiscoverStateContainer({
     });
 
     // clears pinned filters
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
+    const globalState = selectTab(internalState.getState(), tabId)?.globalState;
     internalState.dispatch(
       injectCurrentTab(internalStateActions.setGlobalState)({
         globalState: {
@@ -572,11 +572,11 @@ export function getDiscoverStateContainer({
     addLog('undoSavedSearchChanges');
 
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
+    const globalState = selectTab(internalState.getState(), tabId)?.globalState;
     const globalStateUpdate = restoreStateFromSavedSearch({ savedSearch: nextSavedSearch });
 
     // a saved search can't have global (pinned) filters so we can reset global filters state
-    if (globalState.filters) {
+    if (globalState?.filters) {
       globalStateUpdate.filters = [];
     }
 

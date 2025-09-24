@@ -261,7 +261,7 @@ export const getDiscoverAppStateContainer = ({
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
+    const { timeRange: time, refreshInterval, filters } = tabState?.globalState ?? {};
 
     return { time, refreshInterval, filters };
   };

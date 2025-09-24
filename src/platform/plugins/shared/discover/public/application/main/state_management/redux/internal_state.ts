@@ -111,7 +111,12 @@ export const internalStateSlice = createSlice({
         recentlyClosedTabs: RecentlyClosedTabState[];
       }>
     ) => {
-      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
+      // RecentlyClosedTabs here is a safeguard that currentTab/selectTab will not be undefined in runtime while switching between tabs
+      // (otherwise we need to update types everywhere too).
+      // If id in open tabs matches one of recently closed tabs, we prefer the open tab state in this merge.
+      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
+        Record<string, TabState>
+      >(
         (acc, tab) => ({
           ...acc,
           [tab.id]:

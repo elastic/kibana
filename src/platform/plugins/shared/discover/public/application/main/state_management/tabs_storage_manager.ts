@@ -167,13 +167,13 @@ export const createTabsStorageManager = ({
 
   const toTabStateInStorage = (
     tabState: TabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined,
-    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
+    getAppState: ((tabId: string) => DiscoverAppState | undefined) | undefined,
+    getInternalState: ((tabId: string) => TabState['initialInternalState'] | undefined) | undefined
   ): TabStateInLocalStorage => {
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
-      getInternalState(tabId) || tabState.initialInternalState;
+      getInternalState?.(tabId) || tabState.initialInternalState;
     const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
-      getAppState(tabId) || tabState.initialAppState;
+      getAppState?.(tabId) || tabState.initialAppState;
 
     return {
       id: tabState.id,
@@ -185,11 +185,9 @@ export const createTabsStorageManager = ({
   };
 
   const toRecentlyClosedTabStateInStorage = (
-    tabState: RecentlyClosedTabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined,
-    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
+    tabState: RecentlyClosedTabState
   ): RecentlyClosedTabStateInLocalStorage => {
-    const state = toTabStateInStorage(tabState, getAppState, getInternalState);
+    const state = toTabStateInStorage(tabState, undefined, undefined);
     return {
       ...state,
       closedAt: tabState.closedAt,
@@ -308,7 +306,7 @@ export const createTabsStorageManager = ({
       toTabStateInStorage(tab, getAppState, getInternalState)
     );
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) =>
-      toRecentlyClosedTabStateInStorage(tab, getAppState, getInternalState)
+      toRecentlyClosedTabStateInStorage(tab)
     );
 
     const nextTabsInStorage: TabsStateInLocalStorage = {
