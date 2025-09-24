@@ -166,6 +166,7 @@ function getMockedSoClient(
         return mockOutputSO('existing-es-output', {
           type: 'elasticsearch',
           is_default: false,
+          write_to_logs_streams: false,
         });
       }
 
@@ -1506,6 +1507,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'logstash',
         hosts: ['test:4343'],
+        write_to_logs_streams: false,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
@@ -1868,6 +1870,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'kafka',
         hosts: ['test:4343'],
+        write_to_logs_streams: false,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {

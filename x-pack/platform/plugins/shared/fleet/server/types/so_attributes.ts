@@ -153,7 +153,7 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
 }
 
-interface OutputSoBaseAttributes {
+export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;

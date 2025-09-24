@@ -36,6 +36,7 @@ import type {
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
   SecretReference,
+  OutputSoBaseAttributes,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -998,11 +999,13 @@ class OutputService {
         updateData.ca_sha256 = null;
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
+        delete (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams;
       }
 
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
+        delete (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams;
 
         if (!data.version) {
           updateData.version = '1.0.0';
