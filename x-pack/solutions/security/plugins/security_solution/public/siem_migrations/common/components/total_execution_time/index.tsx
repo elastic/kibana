@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import { EuiText, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { DurationFormat } from '@kbn/field-formats-plugin/common';
+import * as i18n from './translations';
+
+const getDurationFomatter = () => {
+  return new DurationFormat({
+    inputFormat: 'milliseconds',
+    outputFormat: 'humanize',
+    showSuffix: true,
+    useShortSuffix: true,
+    includeSpaceWithSuffix: true,
+  });
+};
+
+export const TotalExecutionTime: React.FC<{ milliseconds: number }> = ({ milliseconds }) => {
+  const humanizedDuration = useMemo(() => {
+    return getDurationFomatter().convert(milliseconds);
+  }, [milliseconds]);
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          aria-label={i18n.TOTAL_EXECUTION_TIME_TOOLTIP}
+          type="info"
+          size="m"
+          content={i18n.TOTAL_EXECUTION_TIME_TOOLTIP}
+          color="warning"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{i18n.TOTAL_EXECUTION_TIME(humanizedDuration)}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
