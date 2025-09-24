@@ -26,7 +26,7 @@ import type {
   TrackedAlerts,
   DetermineDelayedAlertsOpts,
 } from './types';
-import { DEFAULT_MAX_ALERTS } from '../config';
+import { DEFAULT_MAX_ALERTS, ALLOWED_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
@@ -96,7 +96,7 @@ export class LegacyAlertsClient<
     activeAlertsFromState,
     recoveredAlertsFromState,
   }: InitializeExecutionOpts) {
-    this.maxAlerts = maxAlerts;
+    this.maxAlerts = Math.min(maxAlerts, ALLOWED_MAX_ALERTS);
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
@@ -124,7 +124,7 @@ export class LegacyAlertsClient<
     >({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
-      maxAlerts: this.maxAlerts,
+      configuredMaxAlerts: maxAlerts, // Pass in the configured max alerts value, so we can determine if alert limit is set above the allowed threshold
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
