@@ -76,13 +76,6 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
     };
   }, [controlGroupApi]);
 
-  useEffect(() => {
-    // ensure opened overlays are closed if a navigation event happens
-    return () => {
-      dashboardApi.clearOverlays();
-    };
-  }, [dashboardApi]);
-
   const onSave = () => {
     dashboardApi.scrollToTop();
   };
@@ -97,8 +90,6 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
       core: coreServices,
       parentApi: dashboardApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        closePopover();
-
         const { AddPanelFlyout } = await import('../add_panel_button/components/add_panel_flyout');
 
         return (
@@ -114,7 +105,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         triggerId: 'dashboardAddTopNavButton',
       },
     });
-  }, [closePopover, coreServices, dashboardApi]);
+  }, [coreServices, dashboardApi]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -136,7 +127,10 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           }),
           icon: 'plusInCircle',
           'data-test-subj': 'dashboardOpenAddPanelFlyoutButton',
-          onClick: openAddPanelFlyout,
+          onClick: () => {
+            openAddPanelFlyout();
+            closePopover();
+          },
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
@@ -249,7 +243,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         },
         {
           name: getEditControlGroupButtonTitle(),
-          icon: 'gear',
+          icon: 'empty',
           'data-test-subj': 'controls-settings-button',
           disabled: !controlGroupApi,
           onClick: async () => {
