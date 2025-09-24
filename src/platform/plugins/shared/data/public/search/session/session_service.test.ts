@@ -622,4 +622,26 @@ describe('Session service', () => {
       expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('can continue an old session', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i < 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).toBe(firstSessionId);
+  });
+
+  it('holds a maximum of 30 sessions', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i <= 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).not.toBe(firstSessionId);
+  });
 });
