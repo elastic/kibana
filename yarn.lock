@@ -4628,6 +4628,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-navigation-tour@link:src/core/packages/chrome/navigation-tour":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-navigation@link:src/core/packages/chrome/navigation":
   version "0.0.0"
   uid ""
