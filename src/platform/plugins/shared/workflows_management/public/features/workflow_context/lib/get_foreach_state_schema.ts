@@ -22,8 +22,7 @@ export function getForeachStateSchema(
     parseVariablePath(foreachStep.foreach)?.propertyPath || foreachStep.foreach;
   let itemSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
   if (!itemSchema) {
-    // TODO: indicate in the UI that we can't infer the type of the item
-    itemSchema = z.any();
+    itemSchema = z.unknown();
   } else if (itemSchema instanceof z.ZodArray) {
     itemSchema = itemSchema.element;
   } else {

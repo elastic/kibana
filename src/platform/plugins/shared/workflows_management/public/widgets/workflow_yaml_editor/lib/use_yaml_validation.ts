@@ -20,7 +20,7 @@ import {
   getPathFromAncestors,
 } from '../../../../common/lib/yaml_utils';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
+import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MarkerSeverity, getSeverityString } from './utils';
@@ -233,25 +233,40 @@ export function useYamlValidation({
           const endPos = model.getPositionAt(matchEnd);
 
           let errorMessage: string | null = null;
-          const severity: YamlValidationErrorSeverity = 'warning';
+          let severity: YamlValidationErrorSeverity = 'error';
 
           const path = getCurrentPath(yamlDocument, matchStart);
-          const context = result.success
-            ? getContextSchemaForPath(result.data, workflowGraph!, path)
-            : null;
+          let context = null;
+          if (result.success) {
+            try {
+              context = getContextSchemaForPath(result.data, workflowGraph!, path);
+            } catch (e) {
+              // Fallback to the main workflow schema if context detection fails
+              context = null;
+              errorMessage = e.message;
+            }
+          }
 
           if (!match.groups?.key) {
             errorMessage = `Variable is not defined`;
           } else {
             const parsedPath = parseVariablePath(match.groups.key);
-            if (parsedPath?.errors) {
+            if (!parsedPath) {
+              errorMessage = `Invalid variable path: ${match.groups.key}`;
+            } else if (parsedPath.errors) {
               errorMessage = parsedPath.errors.join(', ');
-            }
-            if (parsedPath?.propertyPath) {
+            } else if (parsedPath?.propertyPath && !errorMessage) {
               if (!context) {
+                severity = 'warning';
                 errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
-              } else if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
-                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+              } else {
+                const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
+                if (!refSchema) {
+                  errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+                } else if (getZodTypeName(refSchema) === 'unknown') {
+                  severity = 'warning';
+                  errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`;
+                }
               }
             }
           }

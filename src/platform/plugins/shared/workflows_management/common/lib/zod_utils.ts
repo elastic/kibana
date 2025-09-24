@@ -80,6 +80,8 @@ export function getSchemaAtPath(
         current = current.element;
       } else if (current instanceof z.ZodAny) {
         return z.any();
+      } else if (current instanceof z.ZodUnknown) {
+        return z.unknown();
       } else {
         return null;
       }
@@ -160,6 +162,8 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'any';
     case 'ZodNull':
       return 'null';
+    case 'ZodUnknown':
+      return 'unknown';
     default:
       return 'unknown';
   }
