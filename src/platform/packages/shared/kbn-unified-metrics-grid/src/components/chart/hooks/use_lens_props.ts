@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import { useEuiTheme } from '@elastic/eui';
 import { useChartLayers } from './use_chart_layers';
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -63,6 +64,7 @@ export const useLensProps = ({
   chartRef?: React.RefObject<HTMLDivElement>;
   abortController?: AbortController;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
+  const { euiTheme } = useEuiTheme();
   const chartLayers = useChartLayers({
     query,
     seriesType,
@@ -138,7 +140,7 @@ export const useLensProps = ({
     const intersecting$ = new Observable<boolean>((subscriber) => {
       const observer = new IntersectionObserver(
         ([entry]) => subscriber.next(entry.isIntersecting),
-        { threshold: 0.1, rootMargin: ROOT_MARGIN }
+        { threshold: 0.1, rootMargin: euiTheme.size.base }
       );
 
       if (chartRefCurrent) {
@@ -172,7 +174,7 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, updateLensPropsContext, chartRef]);
+  }, [discoverFetch$, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
   return lensPropsContext;
 };

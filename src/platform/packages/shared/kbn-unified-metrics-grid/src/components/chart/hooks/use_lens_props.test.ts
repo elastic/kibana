@@ -39,13 +39,11 @@ describe('useLensProps', () => {
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
-  // Create mock chart ref
   const createMockChartRef = () => {
     const div = document.createElement('div');
     return { current: div };
   };
 
-  // Create mock IntersectionObserver
   const createIntersectionObserverMock = () => {
     const mockObserve = jest.fn();
     const mockDisconnect = jest.fn();
