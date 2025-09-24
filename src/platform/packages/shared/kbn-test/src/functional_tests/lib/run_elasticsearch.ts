@@ -155,7 +155,9 @@ async function startEsNode({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
     esFrom: config.esFrom,
-    esServerlessOptions: config.esServerlessOptions,
+    esServerlessOptions: config.esServerlessOptions
+      ? { ...config.esServerlessOptions, namePrefix: name }
+      : undefined,
     esJavaOpts: config.esJavaOpts,
     license: config.license,
     password: config.password,
@@ -188,6 +190,8 @@ interface EsServerlessOptions {
   kibanaUrl: string;
   tag?: string;
   image?: string;
+  /** Optional prefix for container names to avoid conflicts */
+  namePrefix?: string;
 }
 
 function getESServerlessOptions(
@@ -226,6 +230,8 @@ function getESServerlessOptions(
       hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
+    // Use cluster name as prefix to ensure container uniqueness per config
+    namePrefix: `ftr-${process.pid}`,
   };
 
   if (esServerlessImageUrlOrTag) {

@@ -142,18 +142,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       handle.warmed
         .then(() => {
           activeWarming--;
-          log.info(
-            `✅ Warmed ${i + 1}/${options.configs.length}: ${Path.relative(
-              REPO_ROOT,
-              options.configs[i]
-            )} (activeWarming=${activeWarming}, running=${running})`
-          );
           tryStartRuns();
           fillWarmers();
         })
         .catch((e) => {
           activeWarming--;
-          log.error(`Warm failed for ${Path.relative(REPO_ROOT, options.configs[i])}: ${e}`);
+          log.error(
+            new Error(`Warm failed for ${Path.relative(REPO_ROOT, options.configs[i])}}`, {
+              cause: e,
+            })
+          );
           if (handles[i]) {
             handles[i]!.finished = true;
           }
@@ -326,6 +324,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         });
 
         try {
+          const warmStart = Date.now();
+
           await withProcRunner(log, async (procs) => {
             const abortCtrl = new AbortController();
 
@@ -414,6 +414,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               // Signal that warm phase completed; wait to be scheduled to run
               out.isWarmed = true;
               warmedDeferred.resolve();
+              const ms = Date.now() - warmStart;
+              log.info(
+                `Warmed ${Path.relative(REPO_ROOT, options.configs[index])} in ${Math.round(
+                  ms / 1000
+                )}s`
+              );
               await runGate.promise;
 
               // Ensure tests which rely on kbnTestConfig read the correct Kibana URL/port

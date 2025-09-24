@@ -91,6 +91,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   host?: string;
   /**  Serverless project type */
   projectType: ServerlessProjectType;
+  /** Optional prefix to make container names unique per runner/config */
+  namePrefix?: string;
   /** Product tier for serverless project */
   productTier?: ServerlessProductTier;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
@@ -167,30 +169,32 @@ export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SE
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
-const SHARED_SERVERLESS_PARAMS = [
-  'run',
+function getSharedServerlessParams(nodeNames: string[]) {
+  return [
+    'run',
 
-  '--detach',
+    '--detach',
 
-  '--interactive',
+    '--interactive',
 
-  '--tty',
+    '--tty',
 
-  '--net',
-  'elastic',
+    '--net',
+    'elastic',
 
-  '--env',
-  'path.repo=/objectstore',
+    '--env',
+    'path.repo=/objectstore',
 
-  '--env',
-  'cluster.initial_master_nodes=es01,es02,es03',
+    '--env',
+    `cluster.initial_master_nodes=${nodeNames.join(',')}`,
 
-  '--env',
-  'stateless.enabled=true',
+    '--env',
+    'stateless.enabled=true',
 
-  '--env',
-  'stateless.object_store.type=fs',
-];
+    '--env',
+    'stateless.object_store.type=fs',
+  ] as string[];
+}
 
 // only allow certain ES args to be overwrote by options
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
@@ -266,62 +270,57 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
-  {
-    name: 'es01',
-    params: [
-      '-p',
-      '127.0.0.1:9300:9300',
+function getServerlessNodeNames(prefix?: string): [string, string, string] {
+  const base = ['es01', 'es02', 'es03'] as const;
+  return prefix
+    ? [`${prefix}-${base[0]}`, `${prefix}-${base[1]}`, `${prefix}-${base[2]}`]
+    : ([...base] as unknown as [string, string, string]);
+}
 
-      '--env',
-      'discovery.seed_hosts=es02,es03',
+export function getServerlessNodes(prefix?: string): Array<Omit<ServerlessEsNodeArgs, 'image'>> {
+  const [n1, n2, n3] = getServerlessNodeNames(prefix);
+  return [
+    {
+      name: n1,
+      params: [
+        '--env',
+        `discovery.seed_hosts=${n2},${n3}`,
 
-      '--env',
-      'node.roles=["master","remote_cluster_client","ingest","index"]',
-    ],
-    esArgs: [
-      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
-    ],
-  },
-  {
-    name: 'es02',
-    params: [
-      '-p',
-      '127.0.0.1:9202:9202',
+        '--env',
+        'node.roles=["master","remote_cluster_client","ingest","index"]',
+      ],
+      esArgs: [
+        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+      ],
+    },
+    {
+      name: n2,
+      params: [
+        '--env',
+        `discovery.seed_hosts=${n1},${n3}`,
 
-      '-p',
-      '127.0.0.1:9302:9302',
+        '--env',
+        'node.roles=["master","remote_cluster_client","search"]',
+      ],
+      esArgs: [
+        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ],
+    },
+    {
+      name: n3,
+      params: [
+        '--env',
+        `discovery.seed_hosts=${n1},${n2}`,
 
-      '--env',
-      'discovery.seed_hosts=es01,es03',
-
-      '--env',
-      'node.roles=["master","remote_cluster_client","search"]',
-    ],
-    esArgs: [
-      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-    ],
-  },
-  {
-    name: 'es03',
-    params: [
-      '-p',
-      '127.0.0.1:9203:9203',
-
-      '-p',
-      '127.0.0.1:9303:9303',
-
-      '--env',
-      'discovery.seed_hosts=es01,es02',
-
-      '--env',
-      'node.roles=["master","remote_cluster_client","ml","transform"]',
-    ],
-  },
-];
+        '--env',
+        'node.roles=["master","remote_cluster_client","ml","transform"]',
+      ],
+    },
+  ];
+}
 
 /**
  * Determine the Docker image from CLI options and defaults
@@ -468,16 +467,31 @@ export async function printESImageInfo(log: ToolingLog, image: string) {
   log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
 }
 
-export async function cleanUpDanglingContainers(log: ToolingLog) {
+export async function cleanUpDanglingContainers(
+  log: ToolingLog,
+  options: ServerlessOptions | DockerOptions
+) {
   log.info(chalk.bold('Cleaning up dangling Docker containers.'));
 
   try {
-    const serverlessContainerNames = SERVERLESS_NODES.map(({ name }) => name);
-
-    for (const name of serverlessContainerNames) {
-      await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
-        // Ignore errors if the container doesn't exist
-      });
+    // Prefer removing by ancestor and optional prefix to catch any leftover containers
+    const nameFilter = (() => {
+      if ('namePrefix' in options && options.namePrefix) {
+        const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = `^${escapeRegex(options.namePrefix)}-`;
+        return ['--filter', `name=${pattern}`];
+      }
+      return [] as string[];
+    })();
+    const { stdout } = await execa(
+      'docker',
+      ['ps', '-a', '--quiet', '--filter', `ancestor=${getServerlessImage(options)}`].concat(
+        nameFilter
+      )
+    );
+    const ids = stdout.split(/\r?\n/).filter(Boolean);
+    if (ids.length) {
+      await execa('docker', ['container', 'rm', '--force'].concat(ids)).catch(() => {});
     }
 
     log.success('Cleaned up dangling Docker containers.');
@@ -490,11 +504,16 @@ export async function detectRunningNodes(
   log: ToolingLog,
   options: ServerlessOptions | DockerOptions
 ) {
-  const namesCmd = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
-    acc.push('--filter', `name=${name}`);
-
-    return acc;
-  }, []);
+  const namesCmd: string[] = [];
+  if ('namePrefix' in options && (options as ServerlessOptions).namePrefix) {
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = `^${escapeRegex((options as ServerlessOptions).namePrefix!)}-`;
+    namesCmd.push('--filter', `name=${pattern}`);
+  } else {
+    for (const n of ['es01', 'es02', 'es03']) {
+      namesCmd.push('--filter', `name=${n}`);
+    }
+  }
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
   const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
@@ -527,7 +546,7 @@ async function setupDocker({
 }) {
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
-  await cleanUpDanglingContainers(log);
+  await cleanUpDanglingContainers(log, options);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
   await printESImageInfo(log, image);
@@ -795,11 +814,7 @@ export async function runServerlessEsNode(
   log: ToolingLog,
   { params, name, image }: ServerlessEsNodeArgs
 ) {
-  const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
-    params,
-    ['--name', name, '--env', `node.name=${name}`],
-    image
-  );
+  const dockerCmd = params.concat(['--name', name, '--env', `node.name=${name}`], image);
 
   log.info(chalk.bold(`Running serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
@@ -838,19 +853,23 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
 
+  const nodeNames = getServerlessNodeNames(options.namePrefix);
+  const sharedParams = getSharedServerlessParams(nodeNames);
+  const nodes = getServerlessNodes(options.namePrefix);
+
   // This is where nodes are started
-  const nodeNames = await Promise.all(
-    SERVERLESS_NODES.map(async (node, i) => {
+  await Promise.all(
+    nodes.map(async (node, i) => {
       await runServerlessEsNode(log, {
         ...node,
         image,
-        params: node.params.concat(
+        params: sharedParams.concat(
+          node.params,
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? portCmd : [],
           volumeCmd
         ),
       });
-      return node.name;
     })
   );
 
@@ -921,7 +940,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (!options.background) {
     // The serverless cluster has to be started detached, so we attach a logger afterwards for output
-    await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
+    await execa('docker', ['logs', '-f', nodeNames[0]], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
     }).catch(() => {
