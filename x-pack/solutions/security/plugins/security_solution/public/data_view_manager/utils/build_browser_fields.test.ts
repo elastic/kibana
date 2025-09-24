@@ -32,7 +32,7 @@ const createDataView = (fields: Array<Partial<FieldSpec>>, id = 'test-id'): Data
   return new DataView({ spec, fieldFormats: { getDefaultInstance: () => ({}) } });
 };
 
-describe('browserFieldsManager', () => {
+describe('buildBrowserFields', () => {
   it('returns empty browserFields for empty array', () => {
     const dataView = createDataView([]);
     const result = buildBrowserFields(dataView.fields);

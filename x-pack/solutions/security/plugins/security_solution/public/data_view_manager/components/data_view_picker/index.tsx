@@ -44,7 +44,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, onAppLeave },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
 
   const canEditDataView = useMemo(
@@ -126,18 +126,6 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     },
     [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
   );
-
-  // clearing browser fields cache when user leaves the app
-  // this is to account for any new fields added outside of security solution
-  useEffect(() => {
-    onAppLeave?.((actions) => {
-      browserFieldsManager.clearCache();
-      return actions.default();
-    });
-    return () => {
-      onAppLeave?.((actions) => actions.default());
-    };
-  }, [onAppLeave]);
 
   const getDataViewHelpText = useCallback(
     (dv: DataView) =>
