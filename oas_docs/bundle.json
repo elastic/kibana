@@ -917,8 +917,10 @@
           }
         },
         "summary": "A2A Task Endpoint",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/a2a/{agentId}.json": {
@@ -997,8 +999,10 @@
           }
         },
         "summary": "A2A Agent Card",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/agents": {
@@ -1064,8 +1068,10 @@
           }
         },
         "summary": "List agents",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "post": {
         "description": "Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
@@ -1199,8 +1205,10 @@
           }
         },
         "summary": "Create an agent",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/agents/{id}": {
@@ -1242,8 +1250,10 @@
           }
         },
         "summary": "Delete an agent",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "get": {
         "description": "Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
@@ -1295,8 +1305,10 @@
           }
         },
         "summary": "Get an agent",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "put": {
         "description": "Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
@@ -1427,8 +1439,10 @@
           }
         },
         "summary": "Update an agent",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/conversations": {
@@ -1471,8 +1485,10 @@
           }
         },
         "summary": "List conversations",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/conversations/{conversation_id}": {
@@ -1514,8 +1530,10 @@
           }
         },
         "summary": "Delete conversation by ID",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "get": {
         "description": "Elastic Conversation API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
@@ -1564,8 +1582,10 @@
           }
         },
         "summary": "Get conversation by ID",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/converse": {
@@ -1667,8 +1687,10 @@
           }
         },
         "summary": "Converse with an agent",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/converse/async": {
@@ -1740,8 +1762,10 @@
           }
         },
         "summary": "Converse with an agent and stream events",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/mcp": {
@@ -1768,8 +1792,10 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "get": {
         "description": "Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
@@ -1794,8 +1820,10 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "post": {
         "description": "Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
@@ -1850,8 +1878,10 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/tools": {
@@ -2022,8 +2052,10 @@
           }
         },
         "summary": "List tools",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "post": {
         "description": "Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
@@ -2214,8 +2246,10 @@
           }
         },
         "summary": "Create a tool",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/tools/_execute": {
@@ -2508,8 +2542,10 @@
           }
         },
         "summary": "Execute a Tool",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/tools/{id}": {
@@ -2551,8 +2587,10 @@
           }
         },
         "summary": "Delete a tool",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       },
       "get": {
         "description": "Elastic Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
@@ -2682,8 +2720,10 @@
           }
         },
         "summary": "Get a tool by id",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/agent_builder/tools/{toolId}": {
@@ -2878,8 +2918,10 @@
           }
         },
         "summary": "Update a tool",
-        "tags": [],
-        "x-state": "Technical Preview"
+        "tags": [
+          "elastic agent builder"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/alerting/rule/{id}": {
@@ -69509,6 +69551,9 @@
     },
     {
       "name": "Elastic Agent binary download sources"
+    },
+    {
+      "name": "elastic agent builder"
     },
     {
       "name": "Elastic Agent policies"

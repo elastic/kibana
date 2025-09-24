@@ -917,7 +917,9 @@
           }
         },
         "summary": "A2A Task Endpoint",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -997,7 +999,9 @@
           }
         },
         "summary": "A2A Agent Card",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1064,7 +1068,9 @@
           }
         },
         "summary": "List agents",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "post": {
@@ -1199,7 +1205,9 @@
           }
         },
         "summary": "Create an agent",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1242,7 +1250,9 @@
           }
         },
         "summary": "Delete an agent",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "get": {
@@ -1295,7 +1305,9 @@
           }
         },
         "summary": "Get an agent",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "put": {
@@ -1427,7 +1439,9 @@
           }
         },
         "summary": "Update an agent",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1471,7 +1485,9 @@
           }
         },
         "summary": "List conversations",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1514,7 +1530,9 @@
           }
         },
         "summary": "Delete conversation by ID",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "get": {
@@ -1564,7 +1582,9 @@
           }
         },
         "summary": "Get conversation by ID",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1667,7 +1687,9 @@
           }
         },
         "summary": "Converse with an agent",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1740,7 +1762,9 @@
           }
         },
         "summary": "Converse with an agent and stream events",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -1768,7 +1792,9 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "get": {
@@ -1794,7 +1820,9 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "post": {
@@ -1850,7 +1878,9 @@
           }
         },
         "summary": "MCP server",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -2022,7 +2052,9 @@
           }
         },
         "summary": "List tools",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "post": {
@@ -2214,7 +2246,9 @@
           }
         },
         "summary": "Create a tool",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -2508,7 +2542,9 @@
           }
         },
         "summary": "Execute a Tool",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -2551,7 +2587,9 @@
           }
         },
         "summary": "Delete a tool",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       },
       "get": {
@@ -2682,7 +2720,9 @@
           }
         },
         "summary": "Get a tool by id",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -2878,7 +2918,9 @@
           }
         },
         "summary": "Update a tool",
-        "tags": [],
+        "tags": [
+          "elastic agent builder"
+        ],
         "x-state": "Technical Preview"
       }
     },
@@ -68624,6 +68666,9 @@
     },
     {
       "name": "Elastic Agent binary download sources"
+    },
+    {
+      "name": "elastic agent builder"
     },
     {
       "name": "Elastic Agent policies"
