@@ -69,8 +69,8 @@ if [[ "$GITHUB_PR_TARGET_BRANCH" == " main" ]]; then
   # Expand to get the full SHA
   GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse $GITHUB_SERVERLESS_RELEASE_REV)"
   if [ $? -ne 0 || ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]; then
-    echo "❌ Failed to expand current serverless release SHA (may be an emergency release branch?)."
-    return 1
+    echo "❌ Couldn't expand current serverless release SHA. Ensure your branch is up to date with main."  >&2
+    exit 1
   fi
 
   node scripts/check_saved_objects --baseline $EXISTING_SNAPSHOT_SHA --baseline $GITHUB_SERVERLESS_RELEASE_SHA

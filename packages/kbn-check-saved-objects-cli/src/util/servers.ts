@@ -11,6 +11,7 @@ import * as os from 'os';
 import { resolve } from 'path';
 
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ServerHandles } from '../types';
 
@@ -43,6 +44,9 @@ export async function startServers(): Promise<ServerHandles> {
           console: { type: 'console', layout: { type: 'pattern' } },
           file: { type: 'file', fileName: kibanaLog, layout: { type: 'json' } },
         },
+      },
+      plugins: {
+        [ENABLE_ALL_PLUGINS_CONFIG_PATH]: true,
       },
     },
     { oss: false }
