@@ -20,7 +20,7 @@ run(
     const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
     const moonCommand = ['run', ':eslint'];
     if (IS_CI) {
-      moonCommand.push('--affected');
+      moonCommand.push('--affected', '--remote');
     }
 
     const fullArgs = [...moonCommand, '--', ...eslintArgs].concat(flags._);
