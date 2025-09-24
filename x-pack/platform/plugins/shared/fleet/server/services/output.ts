@@ -474,6 +474,18 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
+            // Allow editing the write_to_logs_streams field
+            if (key === 'write_to_logs_streams') {
+              continue;
+            }
+            // Allow ssl to differ if set to default empty values
+            if (
+              key === 'ssl' &&
+              originalOutput[key] === undefined &&
+              deepEqual(data[key], { certificate: '', certificate_authorities: [] })
+            ) {
+              continue;
+            }
             throw new OutputUnauthorizedError(
               `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
             );

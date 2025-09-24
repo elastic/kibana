@@ -192,7 +192,6 @@ export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
-  write_to_logs_streams: schema.maybe(schema.boolean()),
 };
 
 const LogstashUpdateSchema = {
@@ -201,7 +200,6 @@ const LogstashUpdateSchema = {
   hosts: schema.maybe(
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 })
   ),
-  write_to_logs_streams: schema.maybe(schema.boolean()),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
@@ -307,7 +305,6 @@ export const KafkaSchema = {
       ssl: schema.maybe(schema.object({ key: secretRefSchema })),
     })
   ),
-  write_to_logs_streams: schema.maybe(schema.boolean()),
 };
 
 const KafkaUpdateSchema = {

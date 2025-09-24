@@ -1286,6 +1286,15 @@ describe('Output Service', () => {
       );
     });
 
+    it('should allow to update write_to_logs_streams field in preconfigured output outside from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
+        write_to_logs_streams: true,
+        ssl: { certificate: '', certificate_authorities: [] },
+      });
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Allow to update a preconfigured output from preconfiguration', async () => {
       const soClient = getMockedSoClient();
       await outputService.update(
