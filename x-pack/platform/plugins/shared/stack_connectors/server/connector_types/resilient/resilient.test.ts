@@ -174,6 +174,7 @@ describe('IBM Resilient connector', () => {
       description: 'desc',
       incidentTypes: [1001],
       severityCode: 6,
+      additional_fields: null,
     };
 
     beforeEach(() => {
@@ -238,6 +239,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc',
             incidentTypes: [1001],
             severityCode: 6,
+            additional_fields: '',
           },
           connectorUsageCollector
         )
@@ -263,6 +265,7 @@ describe('IBM Resilient connector', () => {
         description: 'desc',
         incidentTypes: [1001],
         severityCode: 6,
+        additional_fields: '',
       },
     };
     it('updates the incident correctly', async () => {
@@ -288,6 +291,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc_updated',
             incidentTypes: [1001],
             severityCode: 5,
+            additional_fields: null,
           },
         },
         connectorUsageCollector

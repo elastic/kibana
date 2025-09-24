@@ -10,8 +10,12 @@ import type { GetValueTextContentResponse, UpdateIncidentRequest } from './types
 
 export const getValueTextContent = (
   field: string,
-  value: string | number | number[]
+  value: string | number | number[] | undefined
 ): GetValueTextContentResponse => {
+  if (value == null || value === undefined) {
+    return { text: '' };
+  }
+
   if (field === 'description') {
     return {
       textarea: {
@@ -68,7 +72,7 @@ export const formatUpdateRequest = ({
             ? (oldIncident as { description: { content: string } }).description.content
             : (oldIncident[name] as string | number | number[])
         ),
-        new_value: getValueTextContent(key, newIncident[key] as string),
+        new_value: getValueTextContent(key, newIncident[key] as string | undefined),
       };
     }),
   };
