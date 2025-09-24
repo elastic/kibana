@@ -66,7 +66,7 @@ export function ActionBlock({
           : css`
               border: ${euiTheme.border.thin};
               border-radius: ${euiTheme.size.s};
-              padding: ${euiTheme.size.s} ${euiTheme.size.m};
+              padding: ${euiTheme.size.m};
             `
       }
     >
