@@ -38,6 +38,7 @@ import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -78,6 +79,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
   const { appParams, core } = context;
 
+  const { refresh: refreshDefinition } = useStreamDetail();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
@@ -92,10 +94,7 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
-  const { storedFields } = useSchemaFields({
-    definition,
-    refreshDefinition: () => {},
-  });
+  const { storedFields } = useSchemaFields({ definition, refreshDefinition });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
