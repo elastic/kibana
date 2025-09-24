@@ -55,6 +55,10 @@ export const selectHasUnsavedChanges = (
 
   if (!isEqual(persistedTabIds, currentTabsIds)) {
     tabIdsChanged = true;
+    addLog('[DiscoverSession] difference between initial and changed version: tab ids', {
+      before: persistedTabIds,
+      after: currentTabsIds,
+    });
   }
 
   const unsavedTabIds: string[] = [];

@@ -326,7 +326,8 @@ export const initializeTabs = createInternalStateAsyncThunk(
     if (
       unsafeCurrentId &&
       !shouldClearAllTabs &&
-      currentlyPersistedDiscoverSession?.id === discoverSessionId
+      currentlyPersistedDiscoverSession?.id === discoverSessionId &&
+      currentlyPersistedDiscoverSession?.tabs === persistedDiscoverSession?.tabs
     ) {
       // already initialized with the requested discover session via resetDiscoverSession
       return { userId, spaceId, persistedDiscoverSession };
