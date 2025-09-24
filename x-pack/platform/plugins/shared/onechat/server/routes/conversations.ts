@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import type { ListConversationsResponse } from '../../common/http_api/conversations';
+import type {
+  ListConversationsResponse,
+  DeleteConversationResponse,
+} from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
@@ -98,6 +101,49 @@ export function registerConversationRoutes({
 
         return response.ok({
           body: conversation,
+        });
+      })
+    );
+
+  // delete conversation by ID
+  router.versioned
+    .delete({
+      path: `${publicApiPath}/conversations/{conversation_id}`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      access: 'public',
+      summary: 'Delete conversation by ID',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['conversation'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string(),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const status = await client.delete(conversationId);
+
+        return response.ok<DeleteConversationResponse>({
+          body: {
+            success: status,
+          },
         });
       })
     );

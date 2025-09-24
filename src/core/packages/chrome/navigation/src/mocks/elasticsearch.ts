@@ -13,7 +13,7 @@ export const LOGO = {
   href: '/elasticsearch',
   id: 'elasticsearch',
   label: 'Elasticsearch',
-  type: 'logoElasticsearch',
+  iconType: 'logoElasticsearch',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -93,7 +93,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     href: '/developer-tools',
   },
   {
-    id: 'settings',
+    id: 'project-performance',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
@@ -317,3 +317,11 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     ],
   },
 ];
+
+export const elasticsearchMock = {
+  logo: LOGO,
+  navItems: {
+    primaryItems: PRIMARY_MENU_ITEMS,
+    footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+  },
+};

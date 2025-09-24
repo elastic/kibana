@@ -60,7 +60,15 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
       <EuiSpacer size="xl" />
       {selectedDashboard && (
         <EuiPanel>
-          <DashboardRenderer savedObjectId={selectedDashboard} />
+          <DashboardRenderer
+            savedObjectId={selectedDashboard}
+            getCreationOptions={async () => ({
+              getInitialInput: () => ({
+                viewMode: 'view',
+                timeRange: { from: 'now-15m', to: 'now' },
+              }),
+            })}
+          />
         </EuiPanel>
       )}
     </>
