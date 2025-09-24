@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -65,6 +65,18 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
           retryDelay: 1000,
         }
       );
+    },
+
+    async expectStatelessQuickStats() {
+      await testSubjects.existOrFail('quickStats', { timeout: 2000 });
+      const quickStatsElem = await testSubjects.find('quickStats');
+      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
+        'QuickStatsDocumentCount'
+      );
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
+      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0b');
+      await quickStatsDocumentElem.click();
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0b');
     },
 
     async expectQuickStatsToHaveIndexStatus() {
