@@ -55,7 +55,7 @@ export const useAlertsTableConfiguration = ({
         }),
         text: i18n.translate('xpack.responseOpsAlertsTable.saveConfigurationError', {
           defaultMessage:
-            'The saved configuration was invalid and has been reset. Any new table customizations will be saved from now on.',
+            'The saved configuration was invalid and has been reset to default.',
         }),
       });
     }
