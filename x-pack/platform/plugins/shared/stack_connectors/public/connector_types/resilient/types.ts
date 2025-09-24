@@ -16,7 +16,7 @@ export type ResilientActionConnector = UserConfiguredActionConnector<
 export interface ResilientActionParams {
   subAction: string;
   subActionParams: ExecutorSubActionPushParams & {
-    incident: { additional_fields: Record<string, any> | null };
+    incident: { additional_fields: string | null };
   };
 }
 
