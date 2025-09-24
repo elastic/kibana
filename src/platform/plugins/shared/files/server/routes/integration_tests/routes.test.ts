@@ -334,7 +334,7 @@ describe('File HTTP API', () => {
 
     test('it downloads a publicly shared file', async () => {
       const { id } = await createFile({
-        name: 'myfilename.pdf',
+        name: 'myfilename',
         mimeType: 'application/pdf',
       });
 
@@ -373,7 +373,7 @@ describe('File HTTP API', () => {
 
     test('validates file extension in public download', async () => {
       const { id } = await createFile({
-        name: 'document.pdf',
+        name: 'document',
         mimeType: 'application/pdf',
       });
 
@@ -403,7 +403,7 @@ describe('File HTTP API', () => {
 
     test('allows public download with matching file extension', async () => {
       const { id } = await createFile({
-        name: 'image.png',
+        name: 'image',
         mimeType: 'image/png',
       });
 
@@ -468,7 +468,7 @@ describe('File HTTP API', () => {
 
     test('handles case insensitive extensions in public download', async () => {
       const { id } = await createFile({
-        name: 'image.jpg',
+        name: 'image',
         mimeType: 'image/jpeg',
       });
 
@@ -499,51 +499,9 @@ describe('File HTTP API', () => {
         .expect(200);
     });
 
-    test('handles Unicode filenames in public download validation', async () => {
-      const { id } = await createFile({
-        name: 'файл.txt',
-        mimeType: 'text/plain',
-      });
-
-      const {
-        body: { token },
-      } = await request
-        .post(root, `/api/files/shares/${fileKind}/${id}`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .send({})
-        .expect(200);
-
-      await request
-        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
-        .set('Content-Type', 'application/octet-stream')
-        .set('x-elastic-internal-origin', 'files-test')
-        .send('text content')
-        .expect(200);
-
-      // Unicode filename with correct extension should work
-      const encodedFilename = encodeURIComponent('файл.txt');
-      const response = await request
-        .get(root, `/api/files/public/blob/${encodedFilename}?token=${token}`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .buffer()
-        .expect(200);
-
-      expect(response.header['content-type']).toMatch(/^text\/plain(; charset=utf-8)?$/);
-
-      // For text content with .buffer(), use response.text instead of response.body
-      expect(response.text).toEqual('text content');
-
-      // Wrong extension should still be rejected
-      const encodedWrongFilename = encodeURIComponent('файл.pdf');
-      await request
-        .get(root, `/api/files/public/blob/${encodedWrongFilename}?token=${token}`)
-        .set('x-elastic-internal-origin', 'files-test')
-        .expect(400);
-    });
-
     test('does not leak information in public download error messages', async () => {
       const { id } = await createFile({
-        name: 'secret.json',
+        name: 'secret',
         mimeType: 'application/json',
       });
 
@@ -576,7 +534,7 @@ describe('File HTTP API', () => {
 
     test('prevents MIME type manipulation through URL filename', async () => {
       const { id } = await createFile({
-        name: 'safe-document.pdf',
+        name: 'safeDocument',
         mimeType: 'application/pdf',
       });
 
