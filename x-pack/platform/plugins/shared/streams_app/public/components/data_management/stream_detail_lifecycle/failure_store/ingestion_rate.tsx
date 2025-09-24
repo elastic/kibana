@@ -11,7 +11,10 @@ import type { Streams } from '@kbn/streams-schema';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
-import { ChartBarPhasesSeries, ChartBarSeries } from '../common/chart_components';
+import {
+  FailureStoreChartBarPhasesSeries,
+  FailureStoreChartBarSeries,
+} from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
 export function FailureStoreIngestionRate({
@@ -56,20 +59,18 @@ export function FailureStoreIngestionRate({
         gutterSize="xs"
       >
         {isServerless ? (
-          <ChartBarSeries
+          <FailureStoreChartBarSeries
             definition={definition}
             stats={stats}
             timeState={timeState}
             isLoadingStats={isLoadingStats}
-            isFailureStore={true}
           />
         ) : (
-          <ChartBarPhasesSeries
+          <FailureStoreChartBarPhasesSeries
             definition={definition}
             stats={stats}
             timeState={timeState}
             isLoadingStats={isLoadingStats}
-            isFailureStore={true}
           />
         )}
       </EuiFlexGroup>

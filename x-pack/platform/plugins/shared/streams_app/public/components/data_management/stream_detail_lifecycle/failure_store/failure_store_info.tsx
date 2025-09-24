@@ -57,13 +57,11 @@ export const FailureStoreInfo = ({
           <IngestionCard stats={stats} definition={definition} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {definition.privileges.monitor && (
-        <FailureStoreIngestionRate
-          definition={definition}
-          isLoadingStats={isLoadingStats}
-          stats={stats}
-        />
-      )}
+      <FailureStoreIngestionRate
+        definition={definition}
+        isLoadingStats={isLoadingStats}
+        stats={stats}
+      />
     </>
   );
 };

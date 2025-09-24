@@ -74,9 +74,6 @@ export const useIngestionRate = ({
 
       const { interval, intervalType } = intervalData;
 
-      if (!stats) {
-        return { start, end, interval, buckets: {} };
-      }
       const indexName = isFailureStore
         ? getFailureStoreIndexName(definition)
         : definition.stream.name;
@@ -143,7 +140,7 @@ export const useIngestionRate = ({
         interval,
         buckets: aggregations.sampler.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
           key,
-          value: docCount * stats.bytesPerDoc,
+          value: docCount * (stats ? stats.bytesPerDoc : 1),
         })),
       };
     },
@@ -195,9 +192,6 @@ export const useIngestionRatePerTier = ({
 
       const { interval, intervalType } = intervalData;
 
-      if (!stats) {
-        return { start, end, interval, buckets: {} };
-      }
       const indexName = isFailureStore
         ? getFailureStoreIndexName(definition)
         : definition.stream.name;
@@ -299,7 +293,9 @@ export const useIngestionRatePerTier = ({
             const tier = entry[0] as PhaseNameWithoutDelete;
             (acc[tier] = acc[tier] ?? []).push({
               key,
-              value: entry[1] * (stats as DataStreamStats & FailureStoreStats).bytesPerDoc,
+              value: stats
+                ? entry[1] * (stats && stats.bytesPerDoc > 0 ? stats.bytesPerDoc : 1)
+                : entry[1],
             });
           }
 

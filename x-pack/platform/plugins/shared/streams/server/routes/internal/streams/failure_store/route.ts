@@ -39,19 +39,22 @@ export const getFailureStoreStatsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { scopedClusterClient } = await getScopedClients({
+    const { scopedClusterClient, streamsClient } = await getScopedClients({
       request,
     });
 
     const { name } = params.path;
 
-    const failureStore = await getFailureStore({
-      name,
-      scopedClusterClient,
-      isServerless: server.isServerless,
-    });
+    const [privileges, failureStore] = await Promise.all([
+      streamsClient.getPrivileges(name),
+      getFailureStore({
+        name,
+        scopedClusterClient,
+        isServerless: server.isServerless,
+      }),
+    ]);
 
-    if (!failureStore.enabled) {
+    if (!failureStore.enabled || !privileges.manage_failure_store) {
       return { config: failureStore, stats: null };
     }
 

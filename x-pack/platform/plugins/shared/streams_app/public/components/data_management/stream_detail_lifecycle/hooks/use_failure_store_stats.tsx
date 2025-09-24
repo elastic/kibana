@@ -31,10 +31,6 @@ export const useFailureStoreStats = ({
 
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition.privileges?.manage_failure_store) {
-        return undefined;
-      }
-
       const { config, stats } = await streamsRepositoryClient.fetch(
         'GET /internal/streams/{name}/failure_store/stats',
         {
@@ -66,7 +62,7 @@ export const useFailureStoreStats = ({
         },
       };
     },
-    [definition.privileges?.manage_failure_store, definition.stream.name, streamsRepositoryClient],
+    [definition.stream.name, streamsRepositoryClient],
     {
       withTimeRange: false,
       withRefresh: true,
