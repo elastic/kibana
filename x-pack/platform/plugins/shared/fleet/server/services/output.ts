@@ -993,19 +993,27 @@ class OutputService {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
+      if (originalOutput.type === outputType.RemoteElasticsearch) {
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
+      }
+
+      if (
+        originalOutput.type === outputType.Elasticsearch ||
+        originalOutput.type === outputType.RemoteElasticsearch
+      ) {
+        (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+      }
+
       if (data.type === outputType.Logstash) {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
-        delete (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams;
       }
 
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-        delete (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams;
 
         if (!data.version) {
           updateData.version = '1.0.0';

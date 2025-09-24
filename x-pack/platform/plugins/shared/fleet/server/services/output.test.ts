@@ -1515,6 +1515,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        write_to_logs_streams: null,
       });
     });
 
@@ -1870,7 +1871,6 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'kafka',
         hosts: ['test:4343'],
-        write_to_logs_streams: false,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
@@ -1890,6 +1890,7 @@ describe('Output Service', () => {
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
+        write_to_logs_streams: null,
       });
     });
 
