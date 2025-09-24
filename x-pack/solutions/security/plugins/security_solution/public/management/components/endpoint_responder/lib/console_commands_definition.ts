@@ -6,11 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
 import type { SentinelOneRunScriptActionParameters } from '../command_render_components/run_script_action';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
@@ -184,6 +187,7 @@ export const getEndpointConsoleCommands = ({
     responseActionUploadEnabled: isUploadEnabled,
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
+    microsoftDefenderEndpointCancelEnabled,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -207,6 +211,10 @@ export const getEndpointConsoleCommands = ({
     }
 
     return false;
+  };
+
+  const canCancelForCurrentContext = () => {
+    return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
   const consoleCommands: CommandDefinition[] = [
@@ -522,6 +530,45 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
+  if (microsoftDefenderEndpointCancelEnabled) {
+    consoleCommands.push({
+      name: 'cancel',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.cancel.about,
+        isSupported: canCancelForCurrentContext(),
+      }),
+      RenderComponent: CancelActionResult,
+      meta: commandMeta,
+      exampleUsage: 'cancel --action="action-123-456-789"',
+      exampleInstruction: i18n.translate(
+        'xpack.securitySolution.endpointConsoleCommands.cancel.exampleInstruction',
+        { defaultMessage: 'Select a pending action to cancel' }
+      ),
+      mustHaveArgs: true,
+      args: {
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage: 'The response action to cancel',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          selectorShowTextValue: true,
+          SelectorComponent: PendingActionsSelector,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 10,
+      helpDisabled: !canCancelForCurrentContext(),
+      helpHidden: !canCancelForCurrentContext(),
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+    });
+  }
+
   switch (agentType) {
     case 'sentinel_one':
       return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
@@ -813,6 +860,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
+  const microsoftDefenderEndpointCancelEnabled =
+    featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
@@ -827,6 +876,9 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
       disableCommand(command, 'microsoft_defender_endpoint');
     }
 
+    if (command.name === 'cancel' && !microsoftDefenderEndpointCancelEnabled) {
+      disableCommand(command, 'microsoft_defender_endpoint');
+    }
     if (command.name === 'runscript') {
       if (!microsoftDefenderEndpointRunScriptEnabled) {
         disableCommand(command, 'microsoft_defender_endpoint');

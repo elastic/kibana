@@ -708,6 +708,21 @@
       },
       {
         "parentPluginId": "fieldsMetadata",
+        "id": "def-common.FieldSource",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldSource",
+        "description": [],
+        "signature": [
+          "\"unknown\" | \"ecs\" | \"metadata\" | \"integration\" | \"otel\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fields_metadata/common/fields_metadata/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldsMetadata",
         "id": "def-common.IntegrationFieldName",
         "type": "Type",
         "tags": [],
