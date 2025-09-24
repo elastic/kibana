@@ -14,8 +14,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
 import type { TourStep } from './types';
 
-// TODO: Update with actual blog post when available
-const newNavBlogPost = 'https://ela.st/new-kibana-navigation';
+const newNavBlogPost = 'https://ela.st/new-nav';
 
 export const tourSteps: TourStep[] = [
   {
