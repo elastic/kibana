@@ -11,43 +11,12 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const { discover, timePicker, common } = getPageObjects(['discover', 'timePicker', 'common']);
-  const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
+  const { discover } = getPageObjects(['discover']);
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
 
   describe('reopen discover session', function () {
-    before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
-
-    after(async () => {
-      await kibanaServer.importExport.unload(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await kibanaServer.uiSettings.replace({});
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(async function () {
-      await common.navigateToApp('discover');
-      await discover.waitUntilTabIsLoaded();
-    });
-
     it('should reopen discover sessions correctly', async () => {
       const firstSession = 'Session1';
       const secondSession = 'Session2';

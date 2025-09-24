@@ -25,6 +25,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_lens_vis')); // 16 min
-    loadTestFile(require.resolve('./_reopen_session'));
   });
 }
