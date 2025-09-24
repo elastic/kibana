@@ -35,12 +35,16 @@ interface ConversationInputTextAreaProps {
   input: string;
   setInput: (input: string) => void;
   onSubmit: () => void;
+  shouldDisableTextArea: boolean;
+  agentId?: string;
 }
 
 export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps> = ({
   input,
   setInput,
   onSubmit,
+  shouldDisableTextArea,
+  agentId,
 }) => {
   const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -51,6 +55,18 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
       textAreaRef.current?.focus();
     }, 200);
   }, [conversationId]);
+
+  const disabledPlaceholder = i18n.translate(
+    'xpack.onechat.conversationInputForm.disabledPlaceholder',
+    {
+      defaultMessage:
+        'The following agent could not be found: {agentId}. Please start a new conversation.',
+      values: {
+        agentId,
+      },
+    }
+  );
+
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
@@ -70,13 +86,18 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
             onSubmit();
           }
         }}
-        placeholder={i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
-          defaultMessage: 'Ask anything',
-        })}
+        placeholder={
+          shouldDisableTextArea
+            ? disabledPlaceholder
+            : i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
+                defaultMessage: 'Ask anything',
+              })
+        }
         rows={1}
         inputRef={textAreaRef}
         fullWidth
         resize="none"
+        disabled={shouldDisableTextArea}
       />
     </EuiFlexItem>
   );

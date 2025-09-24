@@ -29,12 +29,13 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const [input, setInput] = useState('');
   const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const { agents, isLoading } = useOnechatAgents();
+  const { agents, isLoading, isFetched } = useOnechatAgents();
   const agentId = useAgentId();
   const hasActiveConversation = useHasActiveConversation();
 
   // Find the current agent from the agents array
   const currentAgent = agents?.find((agent) => agent.id === agentId);
+  const shouldDisableTextArea = !currentAgent && isFetched && !!agentId;
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {
@@ -58,9 +59,13 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     }
   `;
 
+  const formContainerDisabledStyles = css`
+    background-color: ${euiTheme.colors.backgroundBaseDisabled};
+  `;
+
   return (
     <EuiFlexGroup
-      css={formContainerStyles}
+      css={[formContainerStyles, shouldDisableTextArea && formContainerDisabledStyles]}
       direction="column"
       gutterSize="s"
       responsive={false}
@@ -70,20 +75,28 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
         defaultMessage: 'Message input form',
       })}
     >
-      <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
-      <ConversationInputActions
+      <ConversationInputTextArea
+        input={input}
+        setInput={setInput}
         onSubmit={handleSubmit}
-        isSubmitDisabled={isSubmitDisabled}
-        resetToPendingMessage={() => {
-          if (pendingMessage) {
-            setInput(pendingMessage);
-          }
-        }}
-        agents={agents}
-        currentAgent={currentAgent}
-        isLoading={isLoading}
-        hasActiveConversation={hasActiveConversation}
+        shouldDisableTextArea={shouldDisableTextArea}
+        agentId={agentId}
       />
+      {!shouldDisableTextArea && (
+        <ConversationInputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              setInput(pendingMessage);
+            }
+          }}
+          agents={agents}
+          currentAgent={currentAgent}
+          isLoading={isLoading}
+          hasActiveConversation={hasActiveConversation}
+        />
+      )}
     </EuiFlexGroup>
   );
 };
