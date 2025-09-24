@@ -109,8 +109,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
-    const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
-      useAnomalyExplorerContext();
+    const {
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      annotationsStateService,
+    } = useAnomalyExplorerContext();
 
     const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
       anomalyTimelineStateService
@@ -122,7 +125,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const timeBuckets = useTimeBuckets(uiSettings);
 
-    const { overallAnnotations } = explorerState;
+    const overallAnnotations = useObservable(
+      annotationsStateService.overallAnnotations$,
+      annotationsStateService.overallAnnotations
+    );
 
     const { filterActive, queryString } = useObservable(
       anomalyExplorerCommonStateService.filterSettings$,
@@ -387,7 +393,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     }, []);
 
     const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-      ({ dashboardId, newTitle, newDescription }) => {
+      async ({ dashboardId, newTitle, newDescription }) => {
         if (!selectedJobs) return;
 
         const stateTransfer = embeddable!.getStateTransfer();

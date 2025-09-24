@@ -63,7 +63,7 @@ const normalizeAlertResponse = (
  * Retrieves all alerts attached to a specific case.
  */
 export const getAllAlertsAttachToCase = async (
-  { caseId }: GetAllAlertsAttachToCase,
+  { caseId, filter }: GetAllAlertsAttachToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
@@ -83,9 +83,12 @@ export const getAllAlertsAttachToCase = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
+    const filterArray = [authorizationFilter];
+    if (filter) filterArray.push(filter);
+
     const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
       caseId: theCase.id,
-      filter: authorizationFilter,
+      filter: combineFilters(filterArray),
     });
 
     ensureSavedObjectsAreAuthorized(

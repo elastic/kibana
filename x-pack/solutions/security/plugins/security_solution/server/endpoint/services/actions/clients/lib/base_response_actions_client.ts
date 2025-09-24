@@ -58,7 +58,6 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
@@ -83,9 +82,12 @@ import type {
   ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  ResponseActionScriptsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -99,6 +101,7 @@ import type {
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
@@ -1045,9 +1048,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('runscript');
   }
 
+  public async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    throw new ResponseActionsNotSupportedError('cancel');
+  }
+
   public async getCustomScripts(
     options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
-  ): Promise<CustomScriptsResponse> {
+  ): Promise<ResponseActionScriptsApiResponse> {
     throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 

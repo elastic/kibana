@@ -162,6 +162,7 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiMarkdownEditorToolbar.editor\\": \\"Editor\\",
     \\"euiMarkdownEditorToolbar.previewMarkdown\\": \\"Preview\\",
     \\"euiModal.closeModal\\": \\"Closes this modal window\\",
+    \\"euiModal.screenReaderModalDialog\\": \\"You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.\\",
     \\"euiErrorBoundary.error\\": \\"Error\\",
     \\"euiPagination.last\\": \\"Last\\",
     \\"euiPagination.page\\": \\"Page\\",

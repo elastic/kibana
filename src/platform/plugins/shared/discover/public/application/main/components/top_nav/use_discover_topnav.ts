@@ -8,19 +8,20 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import {
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
-import { useAdHocDataViews, useCurrentDataView } from '../../state_management/redux';
+import {
+  useAdHocDataViews,
+  useCurrentDataView,
+  useCurrentTabSelector,
+  useInternalStateSelector,
+} from '../../state_management/redux';
+import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -29,10 +30,7 @@ export const useDiscoverTopNav = ({
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
-  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
-  const hasUnsavedChanges = Boolean(
-    hasSavedSearchChanges && stateContainer.savedSearchState.getId()
-  );
+  const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
 
   const topNavBadges = useMemo(
     () =>
@@ -44,9 +42,14 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, hasUnsavedChanges, topNavCustomization]
   );
-  const savedSearchId = useSavedSearch().id;
-  const savedSearchHasChanged = useSavedSearchHasChanged();
-  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
+
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const shouldShowESQLToDataViewTransitionModal =
+    !persistedDiscoverSession || unsavedTabIds.includes(currentTabId);
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
@@ -54,6 +57,7 @@ export const useDiscoverTopNav = ({
     inspector: services.inspector,
     stateContainer,
   });
+  const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({
     dataView,
@@ -64,6 +68,7 @@ export const useDiscoverTopNav = ({
     adHocDataViews,
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
+    hasShareIntegration,
   });
 
   return {

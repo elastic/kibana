@@ -9,9 +9,15 @@
 
 import type { SafeParseReturnType } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { parseWorkflowYamlToJSON } from './yaml_utils';
-import type { ConnectorContract } from '@kbn/workflows';
+import {
+  stringifyWorkflowDefinition,
+  parseWorkflowYamlToJSON,
+  formatValidationError,
+  getStepNodeAtPosition,
+} from './yaml_utils';
+import type { ConnectorContract, WorkflowYaml } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { YAMLMap, parseDocument } from 'yaml';
 
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContract[] = [
@@ -114,5 +120,107 @@ describe('parseWorkflowYamlToJSON', () => {
     );
     expect(result.success).toBe(false);
     expect(result.error?.message).toContain('Invalid key type: map in range');
+  });
+});
+
+describe('getYamlStringFromJSON', () => {
+  it('should sort keys according to the order of the keys in the workflow definition', () => {
+    const json: Partial<WorkflowYaml> = {
+      enabled: true,
+      steps: [
+        {
+          name: 'step1',
+          type: 'noop',
+          with: { message: 'Hello, world!' },
+        },
+      ],
+      description: 'test',
+      name: 'test',
+    };
+    const yaml = stringifyWorkflowDefinition(json);
+    expect(yaml).toBe(`name: test
+description: test
+enabled: true
+steps:
+  - name: step1
+    type: noop
+    with:
+      message: Hello, world!
+`);
+  });
+
+  it('it should throw an error if the input is not a plain object', () => {
+    const json: any = [1, 2, 3];
+    expect(() => stringifyWorkflowDefinition(json)).toThrow();
+  });
+});
+
+describe('formatValidationError', () => {
+  it('should format invalid trigger type', () => {
+    const { error } = z
+      .object({
+        triggers: z.array(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('manual') }),
+            z.object({ type: z.literal('alert') }),
+            z.object({ type: z.literal('scheduled') }),
+          ])
+        ),
+      })
+      .safeParse({
+        triggers: [{ type: 'invalid' }],
+      });
+    const result = formatValidationError(error!);
+    expect(result.message).toBe('Invalid trigger type. Available: manual, alert, scheduled');
+  });
+
+  it('should format invalid connector type', () => {
+    const { error } = z
+      .object({
+        steps: z.array(z.discriminatedUnion('type', [z.object({ type: z.literal('noop') })])),
+      })
+      .safeParse({ steps: [{ type: 'invalid' }] });
+    const result = formatValidationError(error!);
+    expect(result.message).toBe('Invalid connector type. Use Ctrl+Space to see available options.');
+  });
+});
+
+describe('getStepNodeAtPosition', () => {
+  it('should get the step node at the position', () => {
+    const yaml = `steps:
+      - name: noop_step
+        type: noop # cursor is here
+        with:
+          message: Hello, world!`;
+    const result = getStepNodeAtPosition(parseDocument(yaml), 45);
+    expect(result).toEqual(expect.any(YAMLMap));
+    expect(result?.get('name')).toBe('noop_step');
+  });
+  it('should get the step node at the position with nested steps', () => {
+    const yaml = `steps:
+      - name: loop 
+        type: foreach
+        foreach: "{{ context.items }}"
+        steps:
+          - name: noop_step
+            type: noop # cursor is here
+            with:
+              message: Hello, world!
+      - name: log
+        type: console
+        with:
+          message: "{{ steps.noop_step.output.message }}"
+              `;
+    const result = getStepNodeAtPosition(parseDocument(yaml), 153);
+    expect(result).toEqual(expect.any(YAMLMap));
+    expect(result?.get('name')).toBe('noop_step');
+
+    const result2 = getStepNodeAtPosition(parseDocument(yaml), 265);
+    expect(result2).toEqual(expect.any(YAMLMap));
+    expect(result2?.get('name')).toBe('log');
+
+    const result3 = getStepNodeAtPosition(parseDocument(yaml), 48);
+    expect(result3).toEqual(expect.any(YAMLMap));
+    expect(result3?.get('name')).toBe('loop');
   });
 });

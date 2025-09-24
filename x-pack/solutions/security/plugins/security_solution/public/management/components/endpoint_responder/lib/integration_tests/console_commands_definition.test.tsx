@@ -74,7 +74,7 @@ describe('When displaying Endpoint Response Actions', () => {
       );
 
       const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-        (command) => command !== 'runscript'
+        (command) => command !== 'runscript' && command !== 'cancel'
       );
       const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
@@ -95,6 +95,7 @@ describe('When displaying Endpoint Response Actions', () => {
         responseActionsSentinelOneGetFileEnabled: true,
         responseActionsSentinelOneKillProcessEnabled: true,
         responseActionsSentinelOneProcessesEnabled: true,
+        responseActionsSentinelOneRunScriptEnabled: true,
       });
 
       commands = getEndpointConsoleCommands({
@@ -129,6 +130,7 @@ describe('When displaying Endpoint Response Actions', () => {
         'processes',
         'kill-process --processName',
         'get-file --path',
+        'runscript --script',
       ]);
       expect(queryByTestId('sentineloneProcessesWindowsWarningTooltip')).toBeNull();
     });

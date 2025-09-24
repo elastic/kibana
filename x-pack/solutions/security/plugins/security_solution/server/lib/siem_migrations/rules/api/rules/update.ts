@@ -14,11 +14,11 @@ import {
   UpdateRuleMigrationRulesRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/utils/authz';
-import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/api/util/authz';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { transformToInternalUpdateRuleMigrationData } from '../util/update_rules';
-import { withLicense } from '../../../common/utils/with_license';
-import { withExistingMigration } from '../util/with_existing_migration_id';
+import { withLicense } from '../../../common/api/util/with_license';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsUpdateRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -64,7 +64,7 @@ export const registerSiemRuleMigrationsUpdateRulesRoute = (
               const transformedRuleToUpdate = rulesToUpdate.map(
                 transformToInternalUpdateRuleMigrationData
               );
-              await ruleMigrationsClient.data.rules.update(transformedRuleToUpdate);
+              await ruleMigrationsClient.data.items.update(transformedRuleToUpdate);
 
               return res.ok({ body: { updated: true } });
             } catch (error) {

@@ -94,8 +94,16 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
-    "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils"
+    "@kbn/cases-ai",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/licensing-types",
+    "@kbn/cases-ai",
+    "@kbn/lazy-object"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

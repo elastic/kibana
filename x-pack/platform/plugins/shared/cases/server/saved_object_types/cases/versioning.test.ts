@@ -57,4 +57,36 @@ describe('caseSavedObjectType model version transformations', () => {
       });
     });
   });
+
+  describe('Model version 3 to 4', () => {
+    const version4Fields = ['incremental_id'];
+
+    it('by default does not add the new fields to the object', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 3,
+        toVersion: 4,
+      });
+
+      version4Fields.forEach((field) => {
+        expect(migrated.attributes).not.toHaveProperty(field);
+      });
+    });
+  });
+
+  describe('Model version 4 to 5', () => {
+    const version4Fields = ['incremental_id'];
+
+    it('by default does not add the new fields to the object', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 4,
+        toVersion: 5,
+      });
+
+      version4Fields.forEach((field) => {
+        expect(migrated.attributes).not.toHaveProperty(field);
+      });
+    });
+  });
 });

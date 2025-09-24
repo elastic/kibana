@@ -69,34 +69,32 @@ export class OnechatPlugin
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
+      agents: {
+        register: serviceSetups.agents.register.bind(serviceSetups.agents),
+      },
     };
   }
 
   start(
-    { elasticsearch, security }: CoreStart,
-    { actions, inference }: OnechatStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
+    { inference }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
-      actions,
       inference,
+      uiSettings,
+      savedObjects,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-      },
-      agents: {
-        getScopedClient: (args) => agents.getScopedClient(args),
-        execute: async (args) => {
-          return agents.execute(args);
-        },
       },
     };
   }

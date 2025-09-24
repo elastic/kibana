@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Batch } from '@loaders.gl/schema';
 import { JSONLoader, type JSONLoaderOptions } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
-import type { ImportFailure } from '../../../../common/types';
+import type { ImportFailure } from '@kbn/file-upload-common';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];

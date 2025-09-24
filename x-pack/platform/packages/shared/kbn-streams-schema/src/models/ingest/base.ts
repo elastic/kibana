@@ -14,6 +14,8 @@ import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
+import type { IngestStreamSettings } from './settings';
+import { ingestStreamSettingsSchema } from './settings';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -26,6 +28,8 @@ interface IngestStreamPrivileges {
   simulate: boolean;
   // User can get data information using the text structure API (e.g. to detect the structure of a message)
   text_structure: boolean;
+  // User can read from the failure store
+  read_failure_store: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -34,11 +38,13 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   lifecycle: z.boolean(),
   simulate: z.boolean(),
   text_structure: z.boolean(),
+  read_failure_store: z.boolean(),
 });
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: StreamlangDSL;
+  settings: IngestStreamSettings;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -46,6 +52,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
     processing: streamlangDSLSchema,
+    settings: ingestStreamSettingsSchema,
   })
 );
 

@@ -9,11 +9,11 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
-  UploadActionApiRequestBody,
   ActionStatusRequestSchema,
   KillProcessRequestBody,
-  SuspendProcessRequestBody,
   RunScriptActionRequestBody,
+  SuspendProcessRequestBody,
+  UploadActionApiRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -100,6 +100,10 @@ export interface ResponseActionScanOutputContent {
 export interface ResponseActionRunScriptOutputContent {
   stdout: string;
   stderr: string;
+  code: string;
+}
+
+export interface ResponseActionCancelOutputContent {
   code: string;
 }
 
@@ -253,6 +257,10 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+export interface ResponseActionCancelParameters {
+  id: string;
+}
+
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
@@ -262,7 +270,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -274,7 +283,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -611,4 +621,35 @@ export interface ResponseActionUploadOutputContent {
   path: string;
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
+}
+
+/**
+ * A Response Action script
+ */
+export interface ResponseActionScript<TMeta extends {} = {}> {
+  /**
+   * Unique identifier for the script
+   */
+  id: string;
+  /**
+   * Display name of the script
+   */
+  name: string;
+  /**
+   * Description of what the script does
+   */
+  description: string;
+
+  /**
+   * Additional meta info. about the script. Can be used to store EDR specific
+   * information about the script for use in the UI
+   */
+  meta?: TMeta;
+}
+
+/**
+ * API response with list of Response Actions scripts available on the system
+ */
+export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
+  data: ResponseActionScript<TMeta>[];
 }

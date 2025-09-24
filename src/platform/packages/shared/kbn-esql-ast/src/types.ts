@@ -132,7 +132,8 @@ export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
-  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
 }
 
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
@@ -552,7 +553,7 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
-  code?: string;
+  code: string;
   severity: 'error' | 'warning' | number;
 }
 

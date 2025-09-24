@@ -17,6 +17,7 @@ import type { ISearchStartSearchSource } from '../../common/search';
 import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import type { SearchUsageCollector } from './collectors';
 import type { ISessionsClient, ISessionService } from './session';
+import type { BackgroundSearchOpenedHandler } from './session/sessions_mgmt';
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
@@ -70,7 +71,14 @@ export interface ISearchStart {
   /**
    * Shows a flyout with a table to manage search sessions.
    */
-  showSearchSessionsFlyout: () => void;
+  showSearchSessionsFlyout: (attrs?: {
+    appId?: string;
+    onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  }) => void;
+  /**
+   * Feature flag value to make it easier to use in different plugins
+   */
+  isBackgroundSearchEnabled: boolean;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

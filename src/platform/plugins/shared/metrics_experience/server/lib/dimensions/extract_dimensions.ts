@@ -8,49 +8,47 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import type { Dimension } from '../../../common/dimensions/types';
+import type { Dimension } from '../../../common/types';
 import { getEcsFieldDescriptions } from '../fields/get_ecs_field_descriptions';
 
+const INVALID_FIELD_NAME = '_metric_names_hash';
 export function extractDimensions(
-  fields: Record<string, Record<string, FieldCapsFieldCapability>>,
-  filter?: string[]
+  fieldCapsMap: Record<string, Record<string, FieldCapsFieldCapability>>,
+  fieldNamesFilter?: string[]
 ): Array<Dimension> {
-  const dims: Array<Dimension> = [];
+  const result: Map<string, Dimension> = new Map();
+  const filterSet = fieldNamesFilter ? new Set(fieldNamesFilter) : undefined;
 
-  // Get all dimension field names for batch description lookup
-  const dimensionFieldNames = Object.entries(fields)
-    .filter(([fieldName, fieldInfo]) => {
-      if (fieldName === '_metric_names_hash') return false;
-      return Object.values(fieldInfo).some(
-        (typeInfo) =>
-          typeInfo.time_series_dimension === true && (!filter || filter.includes(fieldName))
-      );
-    })
-    .map(([fieldName]) => fieldName);
-
-  // TODO: this needs to be replaed by the FieldsMetadataService
-  const ecsDescriptions = getEcsFieldDescriptions(dimensionFieldNames);
-
-  for (const [fieldName, fieldInfo] of Object.entries(fields)) {
-    if (fieldName === '_metric_names_hash') continue;
+  for (const [fieldName, fieldInfo] of Object.entries(fieldCapsMap)) {
+    if (fieldName === INVALID_FIELD_NAME) {
+      continue;
+    }
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
-      if (typeInfo.time_series_dimension === true && (!filter || filter.includes(fieldName))) {
-        // Get description from various sources (priority: field caps -> metadata service)
-        const fieldCapsDescription = Array.isArray(typeInfo.meta?.description)
-          ? typeInfo.meta.description.join(', ')
-          : typeInfo.meta?.description;
-        const ecsDescription = ecsDescriptions.get(fieldName);
-        const description = fieldCapsDescription || ecsDescription;
-
-        dims.push({
-          name: fieldName,
-          type,
-          description,
-        });
+      if (typeInfo.time_series_dimension !== true || (filterSet && !filterSet.has(fieldName))) {
+        continue;
       }
+
+      const description = Array.isArray(typeInfo.meta?.description)
+        ? typeInfo.meta.description.join(', ')
+        : typeInfo.meta?.description;
+
+      result.set(fieldName, { name: fieldName, type, description });
     }
   }
 
-  return dims;
+  // TODO: this needs to be replaed by the FieldsMetadataService
+  const ecsDescriptions = getEcsFieldDescriptions(Array.from(result.keys()));
+
+  for (const [fieldName, description] of ecsDescriptions) {
+    const currentResult = result.get(fieldName);
+    if (description && currentResult) {
+      result.set(fieldName, {
+        ...currentResult,
+        description: currentResult.description || description,
+      });
+    }
+  }
+
+  return Array.from(result.values());
 }

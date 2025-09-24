@@ -12,7 +12,7 @@ From the Kibana repo root:
 node scripts/mcp_dev
 ```
 
-This starts a [stdio](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#stdio) MCP Server.
+This starts a [stdio](https://modelcontextprotocol.io/specification/2025-06-18/transports#stdio) MCP Server.
 
 ## MCP configuration example
 
@@ -140,3 +140,14 @@ addTool(server, myNewTool);
 ```
 
 By following these steps, you can successfully add and register a new tool to the MCP dev server, making it available for use.
+
+# Available Tools
+
+The following tools are available in the MCP Dev Server.
+
+# Semantic Code Search
+
+For semantic code search, please use the [semantic-code-search-mcp-server](https://github.com/elastic/semantic-code-search-mcp-server). This server provides a suite of tools for exploring and understanding the Kibana codebase.
+
+Contact @simianhacker for details on how to get started.
+

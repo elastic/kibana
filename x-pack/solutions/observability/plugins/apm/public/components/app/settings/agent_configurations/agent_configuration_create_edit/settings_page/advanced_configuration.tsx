@@ -25,16 +25,20 @@ import { AdvancedConfigValueInput } from './advanced_config_value_input';
 export function AdvancedConfiguration({
   newConfig,
   settingsDefinitions,
+  revalidate,
   onChange,
   onDelete,
+  addNewRow,
   addValidationError,
   removeValidationError,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitions: SettingDefinition[];
-  onChange: (key: string, value: string, oldKey?: string) => void;
+  revalidate: boolean;
+  onChange: ({ key, value, oldKey }: { key: string; value?: string; oldKey?: string }) => void;
   onDelete: (key: string, index: number) => void;
-  addValidationError: (key: string) => void;
+  addNewRow: () => void;
+  addValidationError: (key: string, active: boolean) => void;
   removeValidationError: (key: string) => void;
 }) {
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
@@ -52,10 +56,9 @@ export function AdvancedConfiguration({
 
   // Validations
   const checkIfAdvancedConfigKeyExists = useCallback(
-    (newKey: string, oldKey: string) => newKey !== oldKey && unknownAgentConfigs.has(newKey),
+    (key: string) => unknownAgentConfigs.has(key),
     [unknownAgentConfigs]
   );
-
   const checkIfPredefinedConfigKeyExists = useCallback(
     (key: string) => predefinedAgentConfigKeys.has(key),
     [predefinedAgentConfigKeys]
@@ -78,7 +81,7 @@ export function AdvancedConfiguration({
             <p>
               <FormattedMessage
                 id="xpack.apm.agentConfig.settingsPage.advancedConfigurationDescription"
-                defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT collector. Use with caution as incorrect configuration may affect your collector's behavior."
+                defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT SDK. Use with caution as incorrect configuration may affect your SDK's behavior."
               />
             </p>
           </EuiText>
@@ -104,7 +107,7 @@ export function AdvancedConfiguration({
               <EuiButton
                 data-test-subj="apmSettingsAddAdvancedConfigurationButton"
                 iconType="plusInCircle"
-                onClick={() => onChange('', '')}
+                onClick={addNewRow}
               >
                 {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {
                   defaultMessage: 'Add custom setting',
@@ -125,7 +128,8 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 id={index}
                 showLabel={index === 0}
-                onChange={(newKey) => onChange(newKey, configValue, configKey)}
+                revalidate={revalidate}
+                onChange={onChange}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
                 addValidationError={addValidationError}
@@ -135,10 +139,12 @@ export function AdvancedConfiguration({
             <EuiFlexItem>
               <AdvancedConfigValueInput
                 configValue={configValue}
+                configKey={configKey}
                 id={index}
                 showLabel={index === 0}
-                onChange={(newValue) => onChange(configKey, newValue)}
-                onDelete={() => onDelete(configKey, index)}
+                revalidate={revalidate}
+                onChange={onChange}
+                onDelete={onDelete}
                 addValidationError={addValidationError}
                 removeValidationError={removeValidationError}
               />

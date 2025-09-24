@@ -12,7 +12,6 @@ import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
 import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { docLinks } from '../common/doc_links';
 import type {
@@ -120,7 +119,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
@@ -137,7 +136,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/web_crawlers',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/web_crawlers');
         const [coreStart, services] = await core.getStartServices();
@@ -190,7 +189,6 @@ export class ServerlessSearchPlugin
       extendCardNavDefinitions,
     });
 
-    indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     indexManagement?.extensionsService.setIndexOverviewContent(
       createIndexOverviewContent(core, services)
     );

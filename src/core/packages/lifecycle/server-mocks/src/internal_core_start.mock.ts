@@ -24,9 +24,11 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreStartMock() {
-  const startDeps = {
+  const startDeps = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -44,6 +46,7 @@ export function createInternalCoreStartMock() {
     userProfile: userProfileServiceMock.createInternalStart(),
     pricing: pricingServiceMock.createStartContract(),
     injection: injectionServiceMock.createInternalStartContract(),
-  };
+    dataStreams: dataStreamServiceMock.createStartContract(),
+  });
   return startDeps;
 }

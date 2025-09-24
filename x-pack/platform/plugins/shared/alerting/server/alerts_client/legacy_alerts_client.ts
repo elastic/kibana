@@ -283,14 +283,15 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {
+    return;
+  }
+
+  public async updatePersistedAlertsWithMaintenanceWindowIds() {
     return null;
   }
 
   public async setAlertStatusToUntracked() {
     return;
-  }
-  public getTrackedExecutions() {
-    return new Set([]);
   }
 
   private removeExpiredMaintenanceWindows({

@@ -14,13 +14,13 @@ describe('content pack tree helpers', () => {
       const root = testContentPackEntry({
         name: 'root',
         routing: [
-          { destination: 'root.child1', where: { always: {} } },
-          { destination: 'root.child2', where: { always: {} } },
+          { destination: 'root.child1', where: { always: {} }, status: 'enabled' },
+          { destination: 'root.child2', where: { always: {} }, status: 'enabled' },
         ],
       });
       const child1 = testContentPackEntry({
         name: 'root.child1',
-        routing: [{ destination: 'root.child1.nested', where: { always: {} } }],
+        routing: [{ destination: 'root.child1.nested', where: { always: {} }, status: 'enabled' }],
       });
       const child2 = testContentPackEntry({ name: 'root.child2' });
       const child1Nested = testContentPackEntry({ name: 'root.child1.nested' });
@@ -42,13 +42,13 @@ describe('content pack tree helpers', () => {
       const root = testContentPackEntry({
         name: 'root',
         routing: [
-          { destination: 'root.child1', where: { always: {} } },
-          { destination: 'root.child2', where: { always: {} } },
+          { destination: 'root.child1', where: { always: {} }, status: 'enabled' },
+          { destination: 'root.child2', where: { always: {} }, status: 'enabled' },
         ],
       });
       const child1 = testContentPackEntry({
         name: 'root.child1',
-        routing: [{ destination: 'root.child1.nested', where: { always: {} } }],
+        routing: [{ destination: 'root.child1.nested', where: { always: {} }, status: 'enabled' }],
       });
       const child2 = testContentPackEntry({ name: 'root.child2' });
       const child1Nested = testContentPackEntry({
@@ -61,6 +61,7 @@ describe('content pack tree helpers', () => {
         streams: [root, child1, child2, child1Nested],
         include: {
           objects: {
+            mappings: true,
             queries: [],
             routing: [{ destination: 'root.child1', objects: { all: {} } }],
           },
@@ -69,11 +70,11 @@ describe('content pack tree helpers', () => {
 
       expect(tree.children).toHaveLength(1);
       expect(tree.request.stream.ingest.wired.routing).toEqual([
-        { destination: 'root.child1', where: { always: {} } },
+        { destination: 'root.child1', where: { always: {} }, status: 'enabled' },
       ]);
       expect(tree.children[0].name).toEqual('root.child1');
       expect(tree.children[0].request.stream.ingest.wired.routing).toEqual([
-        { destination: 'root.child1.nested', where: { always: {} } },
+        { destination: 'root.child1.nested', where: { always: {} }, status: 'enabled' },
       ]);
       expect(tree.children[0].children).toHaveLength(1);
       expect(tree.children[0].children[0].name).toEqual('root.child1.nested');
@@ -96,6 +97,7 @@ describe('content pack tree helpers', () => {
         streams: [root],
         include: {
           objects: {
+            mappings: true,
             queries: [{ id: 'keep' }],
             routing: [],
           },
@@ -110,7 +112,7 @@ describe('content pack tree helpers', () => {
     it('throws when included stream or query do not exist', () => {
       const root = testContentPackEntry({
         name: 'root',
-        routing: [{ destination: 'root.child1', where: { always: {} } }],
+        routing: [{ destination: 'root.child1', where: { always: {} }, status: 'enabled' }],
       });
       const child1 = testContentPackEntry({ name: 'root.child1' });
 
@@ -120,6 +122,7 @@ describe('content pack tree helpers', () => {
           streams: [root, child1],
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [{ destination: 'root.child2', objects: { all: {} } }],
             },
@@ -133,11 +136,12 @@ describe('content pack tree helpers', () => {
           streams: [root, child1],
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'root.child1',
-                  objects: { queries: [{ id: 'foo' }], routing: [] },
+                  objects: { mappings: true, queries: [{ id: 'foo' }], routing: [] },
                 },
               ],
             },
@@ -154,7 +158,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} } }],
+            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
             fields: { existing: { type: 'keyword' } },
           }),
           testContentPackEntry({ name: 'root.a' }),
@@ -167,7 +171,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            routing: [{ destination: 'root.b', where: { always: {} } }],
+            routing: [{ destination: 'root.b', where: { always: {} }, status: 'enabled' }],
             fields: { custom: { type: 'keyword' } },
           }),
           testContentPackEntry({ name: 'root.b' }),
@@ -177,8 +181,8 @@ describe('content pack tree helpers', () => {
 
       const merged = mergeTrees({ existing, incoming });
       expect(merged.request.stream.ingest.wired.routing).toEqual([
-        { destination: 'root.a', where: { always: {} } },
-        { destination: 'root.b', where: { always: {} } },
+        { destination: 'root.a', where: { always: {} }, status: 'enabled' },
+        { destination: 'root.b', where: { always: {} }, status: 'enabled' },
       ]);
       expect(merged.request.stream.ingest.wired.fields).toEqual({
         existing: { type: 'keyword' },
@@ -192,7 +196,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} } }],
+            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
           }),
           testContentPackEntry({ name: 'root.a' }),
         ],
@@ -203,7 +207,7 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'root',
-            routing: [{ destination: 'root.a', where: { always: {} } }],
+            routing: [{ destination: 'root.a', where: { always: {} }, status: 'enabled' }],
           }),
           testContentPackEntry({ name: 'root.a' }),
         ],

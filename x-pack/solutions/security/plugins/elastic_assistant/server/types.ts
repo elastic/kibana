@@ -21,6 +21,7 @@ import type {
   Logger,
   AuditLogger,
   SavedObjectsClientContract,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -54,6 +55,7 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
@@ -169,11 +171,13 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  userProfile: UserProfileServiceStart;
 }
 /**
  * @internal
@@ -199,8 +203,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexTemplate: {
     alertSummary: string;
@@ -208,8 +213,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   aliases: {
     alertSummary: string;
@@ -217,8 +223,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexPatterns: {
     alertSummary: string;
@@ -226,8 +233,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   pipelines: {
     knowledgeBase: string;
