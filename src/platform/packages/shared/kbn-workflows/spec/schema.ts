@@ -109,6 +109,13 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+export const TriggerTypes = [
+  AlertRuleTriggerSchema.shape.type._def.value,
+  ScheduledTriggerSchema.shape.type._def.value,
+  ManualTriggerSchema.shape.type._def.value,
+];
+export type TriggerType = (typeof TriggerTypes)[number];
+
 /* --- Steps --- */
 export const StepWithTimeoutSchema = z.object({
   timeout: DurationSchema.optional(),
@@ -407,6 +414,16 @@ const StepSchema = z.lazy(() =>
   ])
 );
 
+export const BuiltInStepTypes = [
+  ForEachStepSchema.shape.type._def.value,
+  IfStepSchema.shape.type._def.value,
+  ParallelStepSchema.shape.type._def.value,
+  MergeStepSchema.shape.type._def.value,
+  WaitStepSchema.shape.type._def.value,
+  HttpStepSchema.shape.type._def.value,
+];
+export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
+
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
   version: z.literal('1').default('1').describe('The version of the workflow schema'),
@@ -440,7 +457,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 export const WorkflowContextSchema = z.object({
   event: z.any().optional(),
-  inputs: z.any().optional(),
+  inputs: z.record(z.any()).optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   consts: z.record(z.string(), z.any()).optional(),
@@ -449,14 +466,14 @@ export const WorkflowContextSchema = z.object({
 
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
+export const StepDataSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+export type StepData = z.infer<typeof StepDataSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
-  steps: z.record(
-    z.string(),
-    z.object({
-      output: z.any().optional(),
-      error: z.any().optional(),
-    })
-  ),
+  steps: z.record(z.string(), StepDataSchema),
   foreach: z
     .object({
       items: z.array(z.any()),

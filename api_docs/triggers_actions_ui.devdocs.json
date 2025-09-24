@@ -734,7 +734,7 @@
         "label": "JsonEditorWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, }: Props) => React.JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, readOnly, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
         "deprecated": false,
@@ -745,7 +745,7 @@
             "id": "def-public.JsonEditorWithMessageVariables.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n  readOnly = false,\n}",
             "description": [],
             "signature": [
               "Props"
