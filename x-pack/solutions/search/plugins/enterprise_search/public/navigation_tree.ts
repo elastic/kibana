@@ -35,9 +35,6 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
-const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
-  defaultMessage: 'Agents',
-});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -129,7 +126,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   iconV2: agentsIcon,
                   link: 'agent_builder',
-                  title: AGENTS_TITLE,
                 },
                 {
                   badgeOptions: {
