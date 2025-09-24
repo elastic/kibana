@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 
@@ -22,7 +22,6 @@ describe('createSessionExpirationToast', () => {
       expiresInMs: 60 * 1000,
       canBeExtended: true,
     });
-    const onExtend = jest.fn();
     const onClose = jest.fn();
     const toast = createSessionExpirationToast(coreStart, sessionState$, onClose);
 
@@ -76,7 +75,6 @@ describe('SessionExpirationToast', () => {
       expiresInMs: 60 * 1000,
       canBeExtended: false,
     });
-    const onExtend = jest.fn();
 
     const { queryByRole } = render(
       <I18nProvider>
