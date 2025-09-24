@@ -11,6 +11,7 @@ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import {
+  sendBulkRollbackPackagesForRq,
   sendBulkUninstallPackagesForRq,
   sendBulkUpgradePackagesForRq,
   sendRemovePackageForRq,
@@ -20,12 +21,15 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { ConfirmBulkUninstallModal } from '../components/confirm_bulk_uninstall_modal';
 import { ConfirmBulkUpgradeModal } from '../components/confirm_bulk_upgrade_modal';
 
+import { ConfirmBulkRollbackModal } from '../components/confirm_bulk_rollback_modal';
+
 import { bulkActionsContext } from './use_bulk_actions_context';
 
 export function useInstalledIntegrationsActions() {
   const {
     upgradingIntegrations,
     uninstallingIntegrations,
+    rollingbackIntegrations,
     bulkActions: { setPollingBulkActions },
   } = useContext(bulkActionsContext);
   const queryClient = useQueryClient();
@@ -141,6 +145,81 @@ export function useInstalledIntegrationsActions() {
     [toasts, queryClient, setPollingBulkActions]
   );
 
+  const bulkRollbackIntegrations = useCallback(
+    async (items: InstalledPackageUIPackageListItem[]) => {
+      try {
+        const res = await sendBulkRollbackPackagesForRq({
+          packages: items.map((item) => ({ name: item.name })),
+        });
+
+        setPollingBulkActions((actions) => [
+          ...actions,
+          {
+            taskId: res.taskId,
+            type: 'bulk_rollback',
+            integrations: items,
+          },
+        ]);
+        toasts.addInfo({
+          title: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackInProgressTitle',
+            {
+              defaultMessage: 'Rollback in progress',
+            }
+          ),
+          content: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackInProgressDescription',
+            {
+              defaultMessage:
+                'The integrations and the policies are rolling back to the previous version.',
+            }
+          ),
+        });
+        return true;
+      } catch (error) {
+        toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackErrorTitle',
+            {
+              defaultMessage: 'Error rolling back integrations',
+            }
+          ),
+        });
+        return false;
+      }
+    },
+    [setPollingBulkActions, toasts]
+  );
+
+  const bulkRollbackIntegrationsWithConfirmModal = useCallback(
+    (selectedItems: InstalledPackageUIPackageListItem[]) => {
+      return new Promise<void>((resolve, reject) => {
+        const ref = startServices.overlays.openModal(
+          toMountPoint(
+            <ConfirmBulkRollbackModal
+              onClose={() => {
+                ref.close();
+                resolve();
+              }}
+              onConfirm={async () => {
+                // Error handled in bulkRollbackIntegrations
+                const success = await bulkRollbackIntegrations(selectedItems);
+                if (success) {
+                  resolve();
+                } else {
+                  throw new Error('rollback integrations failed');
+                }
+              }}
+              selectedItems={selectedItems}
+            />,
+            startServices
+          )
+        );
+      });
+    },
+    [startServices, bulkRollbackIntegrations]
+  );
+
   const bulkUninstallIntegrationsWithConfirmModal = useCallback(
     (selectedItems: InstalledPackageUIPackageListItem[]) => {
       return new Promise<void>((resolve, reject) => {
@@ -204,13 +283,19 @@ export function useInstalledIntegrationsActions() {
     () => ({
       bulkUpgradeIntegrationsWithConfirmModal,
       bulkUninstallIntegrationsWithConfirmModal,
+      bulkRollbackIntegrationsWithConfirmModal,
     }),
-    [bulkUpgradeIntegrationsWithConfirmModal, bulkUninstallIntegrationsWithConfirmModal]
+    [
+      bulkUpgradeIntegrationsWithConfirmModal,
+      bulkUninstallIntegrationsWithConfirmModal,
+      bulkRollbackIntegrationsWithConfirmModal,
+    ]
   );
 
   return {
     actions,
     upgradingIntegrations,
     uninstallingIntegrations,
+    rollingbackIntegrations,
   };
 }

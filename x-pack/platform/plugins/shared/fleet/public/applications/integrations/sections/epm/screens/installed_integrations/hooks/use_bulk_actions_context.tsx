@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
+  sendGetBulkRollbackInfoPackagesForRq,
   sendGetOneBulkUninstallPackagesForRq,
   sendGetOneBulkUpgradePackagesForRq,
   useStartServices,
@@ -19,19 +20,21 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 
 interface PollAction {
   taskId: string;
-  type: 'bulk_upgrade' | 'bulk_uninstall';
+  type: 'bulk_upgrade' | 'bulk_uninstall' | 'bulk_rollback';
   integrations: InstalledPackageUIPackageListItem[];
 }
 
 export const bulkActionsContext = React.createContext<{
   upgradingIntegrations: InstalledPackageUIPackageListItem[];
   uninstallingIntegrations: InstalledPackageUIPackageListItem[];
+  rollingbackIntegrations: InstalledPackageUIPackageListItem[];
   bulkActions: {
     setPollingBulkActions: React.Dispatch<React.SetStateAction<PollAction[]>>;
   };
 }>({
   upgradingIntegrations: [],
   uninstallingIntegrations: [],
+  rollingbackIntegrations: [],
   bulkActions: {
     setPollingBulkActions: () => {},
   },
@@ -59,6 +62,12 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
       .flatMap((action) => action.integrations);
   }, [pollingBulkActions]);
 
+  const rollingbackIntegrations = useMemo(() => {
+    return pollingBulkActions
+      .filter((action) => action.type === 'bulk_rollback')
+      .flatMap((action) => action.integrations);
+  }, [pollingBulkActions]);
+
   // Poll for task results
   useQueries({
     queries: pollingBulkActions.map((action) => ({
@@ -67,7 +76,9 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
         const res =
           action.type === 'bulk_upgrade'
             ? await sendGetOneBulkUpgradePackagesForRq(action.taskId)
-            : await sendGetOneBulkUninstallPackagesForRq(action.taskId);
+            : action.type === 'bulk_uninstall'
+            ? await sendGetOneBulkUninstallPackagesForRq(action.taskId)
+            : await sendGetBulkRollbackInfoPackagesForRq(action.taskId);
 
         if (res.status !== 'pending') {
           await queryClient.invalidateQueries(['get-packages']);
@@ -83,10 +94,17 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                         defaultMessage: 'Upgrade succeeded',
                       }
                     )
-                  : i18n.translate(
+                  : action.type === 'bulk_uninstall'
+                  ? i18n.translate(
                       'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
                       {
                         defaultMessage: 'Uninstall succeeded',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackSuccessTitle',
+                      {
+                        defaultMessage: 'Rollback succeeded',
                       }
                     ),
             });
@@ -110,10 +128,17 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                         defaultMessage: 'Upgrade failed',
                       }
                     )
-                  : i18n.translate(
+                  : action.type === 'bulk_uninstall'
+                  ? i18n.translate(
                       'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
                       {
                         defaultMessage: 'Uninstall failed',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkRollbackFailedTitle',
+                      {
+                        defaultMessage: 'Rollback failed',
                       }
                     ),
             });
@@ -136,6 +161,7 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
       value={{
         upgradingIntegrations,
         uninstallingIntegrations,
+        rollingbackIntegrations,
         bulkActions,
       }}
     >

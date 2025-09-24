@@ -12,6 +12,7 @@ import {
   sendRemovePackageForRq,
   sendBulkUninstallPackagesForRq,
   sendBulkUpgradePackagesForRq,
+  sendBulkRollbackPackagesForRq,
 } from '../../../../../../../hooks/use_request/epm';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -24,6 +25,7 @@ jest.mock('../../../../../../../hooks/use_request/epm', () => ({
   sendRemovePackageForRq: jest.fn(),
   sendBulkUninstallPackagesForRq: jest.fn(),
   sendBulkUpgradePackagesForRq: jest.fn(),
+  sendBulkRollbackPackagesForRq: jest.fn(),
 }));
 
 describe('useInstalledIntegrationsActions', () => {
@@ -32,6 +34,7 @@ describe('useInstalledIntegrationsActions', () => {
     jest.mocked(sendBulkUninstallPackagesForRq).mockReset();
     jest.mocked(sendBulkUpgradePackagesForRq).mockReset();
     jest.mocked(toMountPoint).mockReset();
+    jest.mocked(sendBulkRollbackPackagesForRq).mockReset();
   });
   describe('bulkUninstallIntegrationsWithConfirmModal', () => {
     it('should work with single integration', async () => {
