@@ -36,7 +36,7 @@ export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'panelConfi
 export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
 export type DashboardAttributes = Omit<
-  TypeOf<typeof schema.dashboardCreateRequestAttributesSchema>,
+  TypeOf<ReturnType<typeof schema.getDashboardCreateRequestAttributesSchema>>,
   'panels'
 > & {
   panels: Array<DashboardPanel | DashboardSection>;

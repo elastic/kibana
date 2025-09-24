@@ -23,6 +23,7 @@ import {
   dashboardAPICreateResultSchema,
   dashboardListResultAPISchema,
   dashboardUpdateResultSchema,
+  getDashboardCreateRequestAttributesSchema,
 } from '../content_management/v1/schema';
 
 interface RegisterAPIRoutesArgs {
@@ -98,7 +99,7 @@ export function registerAPIRoutes({
   createRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: {
+      validate: () => ({
         request: {
           params: schema.object({
             id: schema.maybe(
@@ -107,14 +108,14 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: dashboardCreateRequestAttributesSchema,
+          body: getDashboardCreateRequestAttributesSchema(),
         },
         response: {
           200: {
             body: () => dashboardAPICreateResultSchema,
           },
         },
-      },
+      }),
     },
     async (ctx, req, res) => {
       const { id } = req.params;

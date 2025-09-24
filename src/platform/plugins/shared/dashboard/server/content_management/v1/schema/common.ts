@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { schema } from '@kbn/config-schema';
+import { ObjectType, schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
@@ -18,6 +18,7 @@ import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../../common/content_management';
+import { embeddableService } from '../../../kibana_services';
 
 const apiError = schema.object({
   error: schema.string(),
@@ -56,15 +57,17 @@ export const panelGridDataSchema = schema.object({
   ),
 });
 
-export const panelSchema = schema.object({
+export const getPanelSchema = () => (schema.object({
+  // @ts-ignore
   panelConfig: schema.oneOf([
+    ...(embeddableService ? embeddableService.getEmbeddableSchemas() : []),
     schema.object(
       {},
       {
         unknowns: 'allow',
       }
     ),
-  ]),
+  ]) as ObjectType<any>[],
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
@@ -81,7 +84,7 @@ export const panelSchema = schema.object({
       },
     })
   ),
-});
+}));
 
 const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
@@ -299,6 +302,35 @@ export const dashboardAdditionalAttributes = {
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
+export const getDashboardAdditionalAttributes = () => ({
+  // Search
+  kibanaSavedObjectMeta: schema.object(
+    {
+      searchSource: schema.maybe(searchSourceSchema),
+    },
+    {
+      meta: {
+        description: 'A container for various metadata',
+      },
+      defaultValue: {},
+    }
+  ),
+  // Time
+  timeFrom: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  timeTo: schema.maybe(
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+  ),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
+
+  // Dashboard Content
+  controlGroupInput: schema.maybe(controlsGroupSchema),
+  panels: schema.arrayOf(schema.oneOf([getPanelSchema(), sectionSchema]), { defaultValue: [] }),
+  options: optionsSchema,
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
+});
+
 export const searchResultsAttributes = {
   title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
@@ -408,10 +440,17 @@ export const dashboardResolveMetaSchema = {
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...getDashboardAdditionalAttributes(),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
+
+export const getDashboardCreateRequestAttributesSchema = () => (schema.object({
+  ...searchResultsAttributes,
+  ...getDashboardAdditionalAttributes(),
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+}));
 
 export const dashboardAttributesSchemaRequest =
   dashboardCreateRequestAttributesSchema.extends(dashboardPanels);
