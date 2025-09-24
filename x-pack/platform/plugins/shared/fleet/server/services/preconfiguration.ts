@@ -325,7 +325,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           return acc;
         },
         [
-          [] as Array<typeof installedPackagePolicies[0]>,
+          [] as Array<(typeof installedPackagePolicies)[0]>,
           [] as Array<{
             namespacedSoClient: SavedObjectsClientContract;
             packagePolicy: PackagePolicy;

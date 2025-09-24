@@ -26,10 +26,10 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 export type PreconfiguredVar = PackagePolicyConfigRecordEntry & { name: string };
 
 export type PreconfiguredInputs = Omit<NewPackagePolicy['inputs'][0], 'vars' | 'streams'> & {
-  vars?: Array<PreconfiguredVar>;
+  vars?: PreconfiguredVar[];
   streams?: Array<
     Omit<NewPackagePolicy['inputs'][0]['streams'][0], 'vars'> & {
-      vars?: Array<PreconfiguredVar>;
+      vars?: PreconfiguredVar[];
     }
   >;
 };
