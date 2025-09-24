@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiForm, EuiFlexGroup, EuiButton, EuiButtonEmpty, EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFlexGroup,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangWhereBlockWithUIAttributes } from '@kbn/streamlang';
 import { isCondition } from '@kbn/streamlang';
@@ -109,7 +116,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent='flexEnd'>
+            <EuiFlexGroup justifyContent="flexEnd">
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
