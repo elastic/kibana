@@ -20,6 +20,8 @@ export interface TypeDescriptionOptions {
   showOptional?: boolean;
   /** Include descriptions from schema */
   includeDescriptions?: boolean;
+  /** Single line description */
+  singleLine?: boolean;
 }
 
 /**
@@ -34,10 +36,18 @@ export function getDetailedTypeDescription(
     maxDepth = 6,
     showOptional = true,
     includeDescriptions = true,
+    singleLine = false,
   } = options;
 
   if (detailed) {
-    return generateDetailedDescription(schema, 0, maxDepth, showOptional, includeDescriptions);
+    return generateDetailedDescription(
+      schema,
+      0,
+      maxDepth,
+      showOptional,
+      includeDescriptions,
+      singleLine
+    );
   } else {
     return getBasicTypeName(schema);
   }
@@ -103,11 +113,15 @@ function generateDetailedDescription(
   currentDepth: number,
   maxDepth: number,
   showOptional: boolean,
-  includeDescriptions: boolean
+  includeDescriptions: boolean,
+  indentSpacesNumber: number = 2,
+  singleLine: boolean = false
 ): string {
   if (currentDepth >= maxDepth) {
     return getBasicTypeName(schema);
   }
+
+  const nl = singleLine ? '' : '\n';
 
   const typedSchema = schema as ZodFirstPartySchemaTypes;
   const def = typedSchema._def;
@@ -141,11 +155,11 @@ function generateDetailedDescription(
         const optionalMarker = showOptional && isOptional ? '?' : '';
 
         // Add proper indentation - always use 2 spaces per level
-        const indent = '  ';
+        const indent = ' '.repeat(indentSpacesNumber);
         properties.push(`${indent}${key}${optionalMarker}: ${fieldType}`);
       }
 
-      const objectBody = properties.length > 0 ? `{\n${properties.join(';\n')}\n}` : '{}';
+      const objectBody = properties.length > 0 ? `{${nl}${properties.join(`;${nl}`)}${nl}}` : '{}';
 
       return `${objectBody}${descriptionSuffix}`;
     }

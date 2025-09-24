@@ -295,9 +295,9 @@ export function useYamlValidation({
                 errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
               } else {
                 const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
-                hoverMessage = `(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-                  refSchema
-                )}`;
+                hoverMessage = `<pre>(property) ${
+                  parsedPath.propertyPath
+                }: ${getDetailedTypeDescription(refSchema)}</pre>`;
                 if (!refSchema) {
                   errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
                 } else if (getZodTypeName(refSchema) === 'unknown') {

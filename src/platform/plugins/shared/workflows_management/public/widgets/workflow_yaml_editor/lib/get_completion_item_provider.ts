@@ -916,7 +916,7 @@ export function getCompletionItemProvider(
 
             for (const key of filteredKeys) {
               const keySchema = context.shape[key];
-              const propertyTypeName = getDetailedTypeDescription(keySchema);
+              const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
 
               suggestions.push(
                 getSuggestion(
@@ -1121,7 +1121,9 @@ export function getCompletionItemProvider(
                 continue;
               }
 
-              const propertyTypeName = getDetailedTypeDescription(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
 
               // Create a YAML key-value snippet suggestion with cursor positioning
               let insertText = `${key}: `;
@@ -1248,7 +1250,9 @@ export function getCompletionItemProvider(
               };
             } else {
               // For key completion, provide a custom "type:" completion that triggers snippet completion
-              const propertyTypeName = getDetailedTypeDescription(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
               const typeKeySuggestion = getSuggestion(
                 key,
                 completionContext,
@@ -1268,7 +1272,9 @@ export function getCompletionItemProvider(
               suggestions.push(typeKeySuggestion);
             }
           } else {
-            const propertyTypeName = getDetailedTypeDescription(currentSchema);
+            const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+              singleLine: true,
+            });
             suggestions.push(
               getSuggestion(
                 key,
