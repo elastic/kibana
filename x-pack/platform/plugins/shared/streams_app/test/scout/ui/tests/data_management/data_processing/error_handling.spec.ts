@@ -46,7 +46,7 @@ test.describe(
         route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
@@ -57,7 +57,7 @@ test.describe(
       await page.route('**/streams/**/_ingest', (route) => {
         route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -72,7 +72,7 @@ test.describe(
       await pageObjects.streams.fillFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
       await pageObjects.streams.closeToasts();
 
       // Edit the processor
@@ -86,7 +86,7 @@ test.describe(
         route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should show error and return to editing state
       await pageObjects.streams.expectToastVisible();
@@ -97,7 +97,7 @@ test.describe(
       await page.route('**/streams/**/_ingest', (route) => {
         route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
       await pageObjects.streams.expectToastVisible();

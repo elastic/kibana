@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-test.describe('Stream data processing - creating processors', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await apiServices.streams.enable();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -34,8 +34,37 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.fillFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
-    await pageObjects.streams.saveProcessorsListChanges();
+    await pageObjects.streams.saveStepsListChanges();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+  });
+
+  test('should create a new condition successfully', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickAddCondition();
+    await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
+    await pageObjects.streams.clickSaveCondition();
+    await pageObjects.streams.saveStepsListChanges();
+    expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+  });
+
+  test('should be able to nest steps under conditions', async ({ page, pageObjects }) => {
+    // Create a condition first
+    await pageObjects.streams.clickAddCondition();
+    await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
+    await pageObjects.streams.clickSaveCondition();
+    expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+    // Add a processor under the condition
+    const addStepButton = await pageObjects.streams.getConditionAddStepMenuButton(0);
+    await addStepButton.click();
+    await pageObjects.streams.clickAddProcessor(false);
+    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.clickSaveProcessor();
+    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+
+    // Check nesting
+    const nestedSteps = await pageObjects.streams.getConditionNestedStepsList(0);
+    expect(nestedSteps).toHaveLength(1);
   });
 
   test('should disable creating new processors while one is in progress', async ({
@@ -109,7 +138,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
 
-    await pageObjects.streams.saveProcessorsListChanges();
+    await pageObjects.streams.saveStepsListChanges();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
