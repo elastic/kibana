@@ -3796,6 +3796,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant-connector-selector-action@link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-cta@link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta":
   version "0.0.0"
   uid ""
