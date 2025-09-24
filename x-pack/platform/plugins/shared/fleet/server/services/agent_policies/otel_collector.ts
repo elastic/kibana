@@ -14,6 +14,7 @@ import type {
 } from '../../../common/types';
 import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 import { FleetError } from '../../errors';
+import { getOutputIdForAgentPolicy } from './full_agent_policy';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
@@ -259,8 +260,9 @@ function attachOtelcolExporter(
 function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorComponentID, any> {
   switch (dataOutput.type) {
     case outputType.Elasticsearch:
+      const name = getOutputIdForAgentPolicy(dataOutput);
       return {
-        [`elasticsearch/${dataOutput.id}`]: {
+        [`elasticsearch/${name}`]: {
           endpoints: dataOutput.hosts,
         },
       };
