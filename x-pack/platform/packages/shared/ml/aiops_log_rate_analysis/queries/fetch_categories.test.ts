@@ -98,19 +98,19 @@ describe('getCategoryRequest', () => {
             ],
           },
         },
-      },
-      aggs: {
-        sample: {
-          random_sampler: { probability: 0.1, seed: 1234 },
-          aggs: {
-            categories: {
-              categorize_text: {
-                field: 'the-field-name',
-                size: 100,
-              },
-              aggs: {
-                examples: {
-                  top_hits: { size: 4, sort: ['the-time-field-name'], _source: 'the-field-name' },
+        aggs: {
+          sample: {
+            random_sampler: { probability: 0.1, seed: 1234 },
+            aggs: {
+              categories: {
+                categorize_text: {
+                  field: 'the-field-name',
+                  size: 100,
+                },
+                aggs: {
+                  examples: {
+                    top_hits: { size: 4, sort: ['the-time-field-name'], _source: 'the-field-name' },
+                  },
                 },
               },
             },
