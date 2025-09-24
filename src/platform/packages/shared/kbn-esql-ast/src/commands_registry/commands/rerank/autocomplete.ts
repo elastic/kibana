@@ -168,11 +168,15 @@ async function handleOnFieldList({
         callbacks.getSuggestedUserDefinedColumnName?.() || ''
       );
 
-      return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => {
+        // if there is already a command, we don't want to override it
+        if (suggestion.command) return suggestion;
+        return {
+          ...suggestion,
+          rangeToReplace,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        };
+      });
     },
     // complete: get next actions suggestions for completed field
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
