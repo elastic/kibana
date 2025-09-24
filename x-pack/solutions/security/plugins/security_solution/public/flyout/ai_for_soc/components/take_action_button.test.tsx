@@ -18,6 +18,8 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../context');
 
+jest.mock('../../../common/hooks/use_experimental_features');
+
 describe('TakeActionButton', () => {
   it('should render component with all options', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });

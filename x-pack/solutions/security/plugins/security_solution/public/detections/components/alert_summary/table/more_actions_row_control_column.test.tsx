@@ -17,6 +17,8 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import userEvent from '@testing-library/user-event';
 
+jest.mock('../../../../common/hooks/use_experimental_features');
+
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 
