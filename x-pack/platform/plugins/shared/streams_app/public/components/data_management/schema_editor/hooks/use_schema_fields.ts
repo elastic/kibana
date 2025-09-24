@@ -154,8 +154,15 @@ export const useSchemaFields = ({
     refreshDataViewFields();
   }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields]);
 
+  const addField = useCallback(
+    (field: SchemaField) => {
+      setFields([...fields, field]);
+    },
+    [fields]
+  );
+
   const updateField = useCallback(
-    async (field: SchemaField) => {
+    (field: SchemaField) => {
       setFields((prevFields) => {
         const index = prevFields.findIndex((f) => f.name === field.name);
         if (index === -1) {
@@ -256,6 +263,7 @@ export const useSchemaFields = ({
     storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,
+    addField,
     updateField,
     pendingChangesCount,
     discardChanges,
