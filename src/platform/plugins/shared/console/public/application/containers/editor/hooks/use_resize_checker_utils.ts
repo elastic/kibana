@@ -32,9 +32,7 @@ export const useResizeCheckerUtils = () => {
   };
 
   const destroyResizeChecker = () => {
-    // TODO: Used to be
-    // resizeChecker.current!.destroy();
-    resizeChecker.current?.destroy();
+    resizeChecker.current!.destroy();
   };
 
   return { setupResizeChecker, destroyResizeChecker };
