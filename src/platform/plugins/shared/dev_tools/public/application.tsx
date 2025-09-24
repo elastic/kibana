@@ -22,10 +22,12 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { css } from '@emotion/react';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import type { DevToolApp } from './dev_tool';
 import type { DevToolsStartServices } from './types';
+import { devAppFlexStyles } from './styles';
 
 export interface AppServices {
   docTitleService: DocTitleService;
@@ -48,6 +50,35 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
+const devAppContainerStyles = css`
+  ${devAppFlexStyles}
+
+  > * {
+    flex-shrink: 0;
+  }
+`;
+
+export const staticStyles = {
+  devAppContainer: devAppContainerStyles,
+
+  devApp: devAppContainerStyles,
+
+  devAppTabBeta: css`
+    vertical-align: middle;
+  `,
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    ...staticStyles,
+    tabs: css`
+      padding-left: ${euiTheme.size.s};
+    `,
+  };
+};
+
 function DevToolsWrapper({
   devTools,
   activeDevTool,
@@ -56,7 +87,7 @@ function DevToolsWrapper({
   location,
   startServices,
 }: DevToolsWrapperProps) {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
@@ -75,8 +106,8 @@ function DevToolsWrapper({
   }, [activeDevTool, docTitleService, breadcrumbService]);
 
   return (
-    <main className="devApp">
-      <EuiTabs css={{ paddingLeft: euiTheme.size.s }} size="l">
+    <main css={styles.devApp}>
+      <EuiTabs css={styles.tabs} size="l">
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}
@@ -94,7 +125,7 @@ function DevToolsWrapper({
                 {currentDevTool.isBeta && (
                   <EuiBetaBadge
                     size="s"
-                    className="devApp__tabBeta"
+                    css={styles.devAppTabBeta}
                     label={i18n.translate('devTools.badge.betaLabel', {
                       defaultMessage: 'Beta',
                     })}
@@ -106,7 +137,7 @@ function DevToolsWrapper({
         ))}
       </EuiTabs>
       <div
-        className="devApp__container"
+        css={styles.devAppContainer}
         role="tabpanel"
         data-test-subj={activeDevTool.id}
         ref={async (element) => {
