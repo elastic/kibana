@@ -74,31 +74,34 @@ export const GraphVisualization: React.FC = memo(() => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
-      const documentData = getSingleDocumentData(node);
+      const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
 
-      if ((docMode === 'single-event' || docMode === 'single-alert') && documentData) {
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: documentData.id,
-            indexName: documentData.index,
+            id: singleDocumentData.id,
+            indexName: singleDocumentData.index,
             scopeId,
             banner: docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
-      } else if (docMode === 'single-entity' && documentData) {
+      } else if (docMode === 'single-entity' && singleDocumentData) {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
-            entityId: documentData.id,
+            entityId: singleDocumentData.id,
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
           },
         });
-      } else if (docMode === 'grouped-entities' || docMode === 'grouped-events') {
+      } else if (
+        (docMode === 'grouped-entities' || docMode === 'grouped-events') &&
+        node.documentsData
+      ) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
