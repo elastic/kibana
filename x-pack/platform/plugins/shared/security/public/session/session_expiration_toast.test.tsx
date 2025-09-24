@@ -24,7 +24,7 @@ describe('createSessionExpirationToast', () => {
     });
     const onExtend = jest.fn();
     const onClose = jest.fn();
-    const toast = createSessionExpirationToast(coreStart, sessionState$, onExtend, onClose);
+    const toast = createSessionExpirationToast(coreStart, sessionState$, onClose);
 
     expect(toast).toEqual(
       expect.objectContaining({
@@ -49,7 +49,7 @@ describe('SessionExpirationToast', () => {
 
     const { getByText } = render(
       <I18nProvider>
-        <SessionExpirationToast sessionState$={sessionState$} onExtend={jest.fn()} />
+        <SessionExpirationToast sessionState$={sessionState$} />
       </I18nProvider>
     );
     getByText(/You will be logged out in [0-9]+ minutes/);
@@ -64,28 +64,10 @@ describe('SessionExpirationToast', () => {
 
     const { getByText } = render(
       <I18nProvider>
-        <SessionExpirationToast sessionState$={sessionState$} onExtend={jest.fn()} />
+        <SessionExpirationToast sessionState$={sessionState$} />
       </I18nProvider>
     );
     getByText(/You will be logged out in [0-9]+ seconds/);
-  });
-
-  it('renders extend button if session can be extended', () => {
-    const sessionState$ = of<SessionState>({
-      lastExtensionTime: Date.now(),
-      expiresInMs: 60 * 1000,
-      canBeExtended: true,
-    });
-    const onExtend = jest.fn().mockReturnValue(new Promise(() => {}));
-
-    const { getByRole } = render(
-      <I18nProvider>
-        <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />
-      </I18nProvider>
-    );
-    fireEvent.click(getByRole('button', { name: 'Stay logged in' }));
-
-    expect(onExtend).toHaveBeenCalled();
   });
 
   it('does not render extend button if session cannot be extended', () => {
@@ -98,7 +80,7 @@ describe('SessionExpirationToast', () => {
 
     const { queryByRole } = render(
       <I18nProvider>
-        <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />
+        <SessionExpirationToast sessionState$={sessionState$} />
       </I18nProvider>
     );
     expect(queryByRole('button', { name: 'Stay logged in' })).toBeNull();
