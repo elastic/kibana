@@ -45,7 +45,6 @@ const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
 export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSettingsProps) => {
   const dashboardApi = useDashboardApi();
-  const controlGroupApi = dashboardApi.controlGroupApi$.value;
 
   const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
 
