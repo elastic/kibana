@@ -74,7 +74,7 @@ describe('When displaying Endpoint Response Actions', () => {
       );
 
       const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-        (command) => command !== 'runscript'
+        (command) => command !== 'runscript' && command !== 'cancel'
       );
       const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
