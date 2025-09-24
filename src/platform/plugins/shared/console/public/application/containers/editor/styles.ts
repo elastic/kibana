@@ -49,7 +49,7 @@ export const useHighlightedLinesClassName = () => {
       bottom: calc(-${euiTheme.size.base} * 0.1);
       left: calc(-${euiTheme.size.base} * 0.5);
       right: 0;
-      background: ${transparentize(euiTheme.colors.primary, 0.95)};
+      background: ${transparentize(euiTheme.colors.primary, 0.05)};
       border: ${euiTheme.border.thin};
       border-color: ${euiTheme.colors.primary};
       pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
