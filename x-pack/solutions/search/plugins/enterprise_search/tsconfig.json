@@ -47,7 +47,6 @@
     "@kbn/expressions-plugin",
     "@kbn/react-field",
     "@kbn/field-types",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/global-search-plugin",
     "@kbn/share-plugin",
@@ -88,6 +87,7 @@
     "@kbn/licensing-types",
     "@kbn/core-http-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-saved-objects-server-mocks"
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ]
 }

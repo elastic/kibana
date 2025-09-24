@@ -67,6 +67,5 @@
     "@kbn/streams-ai",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks"
   ]
 }

@@ -145,8 +145,8 @@
     "@kbn/licensing-types",
     "@kbn/esql-composer",
     "@kbn/discover-shared-plugin",
-    "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

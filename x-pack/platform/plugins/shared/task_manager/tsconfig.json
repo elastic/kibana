@@ -46,6 +46,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }

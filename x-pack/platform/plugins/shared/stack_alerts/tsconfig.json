@@ -27,7 +27,6 @@
     "@kbn/i18n-react",
     "@kbn/charts-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
