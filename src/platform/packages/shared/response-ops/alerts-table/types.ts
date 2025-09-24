@@ -56,6 +56,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -90,23 +91,7 @@ type UseCasesAddToExistingCaseModal = (
   }: {
     getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
-};
-
-type UseRemoveAlertFromCaseModal = ({
-  alertId,
-  caseId,
-  onClose,
-  onSuccess,
-}: {
-  alertId: string[];
-  caseId: string;
-  onClose: () => void;
-  onSuccess: () => void;
-}) => {
-  open: () => void;
   close: () => void;
-  onSuccess: () => void;
-  onClose: () => void;
 };
 
 export interface Ecs {
@@ -132,13 +117,35 @@ export interface CasesService {
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
-    useRemoveAlertFromCaseModal: UseRemoveAlertFromCaseModal;
   };
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
+}
+
+interface AlertsTableEmptyState {
+  /**
+   * The message title for the empty state prompt
+   */
+  messageTitle?: string;
+  /**
+   * The message body for the empty state prompt
+   */
+  messageBody?: string;
+  /**
+   * The height variant for the empty state prompt
+   */
+  height?: 'tall' | 'short' | 'flex';
+  /**
+   * The style variant for the empty state prompt.
+   *
+   * `subdued` shows a subtle background color and with a distinct centered panel.
+   * `transparent` shows a transparent background and a less prominent center panel.
+   * @default `subdued`
+   */
+  variant?: 'subdued' | 'transparent';
 }
 
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
@@ -226,27 +233,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   dynamicRowHeight?: boolean;
 
-  emptyState?: {
-    /**
-     * The message title for the empty state prompt
-     */
-    messageTitle?: string;
-    /**
-     * The message body for the empty state prompt
-     */
-    messageBody?: string;
-    /**
-     * The height variant for the empty state prompt
-     */
-    height?: 'tall' | 'short' | 'flex';
-    /**
-     * The style variant for the empty state prompt.
-     *
-     * `subdued` shows a subtle background color and with a distinct centered panel.
-     * `transparent` shows a transparent background and a less prominent center panel.
-     * @default `subdued`
-     */
-    variant?: 'subdued' | 'transparent';
+  emptyState?: AlertsTableEmptyState;
+
+  errorState?: AlertsTableEmptyState & {
+    onResetToPreviousState?: () => void;
   };
   /**
    * If true, the links in default cells, flyout and row actions will open in a new tab
@@ -555,11 +545,11 @@ export interface BulkActionsConfig {
     clearSelection: () => void,
     refresh: () => void
   ) => void;
-  panel?: number;
+  panel?: EuiContextMenuPanelId;
 }
 
 interface PanelConfig {
-  id: number;
+  id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
@@ -573,12 +563,12 @@ export interface RenderContentPanelProps {
   closePopoverMenu: () => void;
 }
 
-interface ContentPanelConfig extends PanelConfig {
+export interface ContentPanelConfig extends PanelConfig {
   renderContent: (args: RenderContentPanelProps) => JSX.Element;
   items?: never;
 }
 
-interface ItemsPanelConfig extends PanelConfig {
+export interface ItemsPanelConfig extends PanelConfig {
   content?: never;
   items: BulkActionsConfig[];
 }
