@@ -52,7 +52,6 @@ export class DashboardPageControls extends FtrService {
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
-  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   /* -----------------------------------------------------------
      General controls functions
