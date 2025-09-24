@@ -143,7 +143,7 @@ export const WorkflowExecuteEventForm = ({
   const { services } = useKibana<CoreStart & WorkflowsPluginStartDependencies>();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [timeRange, setTimeRage] = useState<{ start: string; end: string }>({
+  const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({
     start: 'now-15m',
     end: 'now',
   });
@@ -299,7 +299,7 @@ export const WorkflowExecuteEventForm = ({
   }, [value, currentUser, setValue]);
 
   const handleTimeRangeChange = (start: string, end: string) => {
-    setTimeRage({ start, end });
+    setTimeRange({ start, end });
   };
 
   const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);

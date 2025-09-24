@@ -37,7 +37,7 @@ export const MANUAL_TRIGGERS_DESCRIPTIONS: Record<string, string> = {
   }),
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
     defaultMessage:
-      'Choose an exited alert directly from an index to use as the test input. This is helpful for verifying workflows against real alerts data.',
+      'Choose an existing alert directly from an index to use as the test input. This is helpful for verifying workflows against real alerts data.',
   }),
   scheduled: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.scheduledTriggerDescription',

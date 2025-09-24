@@ -30,7 +30,6 @@ export const Default: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
   },
 };
@@ -46,7 +45,6 @@ export const Loading: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
   },
 };
@@ -62,7 +60,6 @@ export const Disabled: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
   },
 };
