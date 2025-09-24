@@ -16,7 +16,8 @@ export function validatePipelineId(value: string): string | undefined {
   const pipelineIdPattern = /^[A-Za-z_][A-Za-z0-9\-_]*$/;
   if (!pipelineIdPattern.test(value)) {
     return i18n.translate('xpack.logstash.invalidPipelineIdErrorMessage', {
-      defaultMessage: 'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens and numbers',
+      defaultMessage:
+        'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens and numbers',
     });
   }
   return undefined;
