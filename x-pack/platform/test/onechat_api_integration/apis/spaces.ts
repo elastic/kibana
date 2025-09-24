@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 import type { ListToolsResponse } from '@kbn/onechat-plugin/common/http_api/tools';
+import type { ListAgentResponse } from '@kbn/onechat-plugin/common/http_api/agents';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { spaceUrl } from '../utils/spaces';
 import { createTool, deleteTool } from '../utils/tools';
+import { createAgent, deleteAgent } from '../utils/agents';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,6 +27,14 @@ export default function ({ getService }: FtrProviderContext) {
       { toolId: 'space1-tool-1', spaceId: 'space-1' },
       { toolId: 'space1-tool-2', spaceId: 'space-1' },
       { toolId: 'space2-tool-1', spaceId: 'space-2' },
+    ];
+
+    const testAgents: Array<{ agentId: string; spaceId: string }> = [
+      { agentId: 'default-agent-1', spaceId: 'default' },
+      { agentId: 'default-agent-2', spaceId: 'default' },
+      { agentId: 'space1-agent-1', spaceId: 'space-1' },
+      { agentId: 'space1-agent-2', spaceId: 'space-1' },
+      { agentId: 'space2-agent-1', spaceId: 'space-2' },
     ];
 
     before(async () => {
@@ -60,11 +70,17 @@ export default function ({ getService }: FtrProviderContext) {
       for (const tool of testTools) {
         await createTool({ id: tool.toolId }, { space: tool.spaceId, supertest });
       }
+      for (const agent of testAgents) {
+        await createAgent({ id: agent.agentId }, { space: agent.spaceId, supertest });
+      }
     });
 
     after(async () => {
       for (const tool of testTools) {
         await deleteTool(tool.toolId, { space: tool.spaceId, supertest });
+      }
+      for (const agent of testAgents) {
+        await deleteAgent(agent.agentId, { space: agent.spaceId, supertest });
       }
 
       await es.indices.delete({ index: 'spaces-test-index' });
@@ -73,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
       await spaces.delete('space-2');
     });
 
-    describe('Space support for tools', () => {
+    describe('Space support - Tool APIs', () => {
       for (const spaceId of ['default', 'space-1', 'space-2']) {
         it(`should list the correct tools in the "${spaceId}" space`, async () => {
           const response = await supertest
@@ -89,6 +105,26 @@ export default function ({ getService }: FtrProviderContext) {
             .map((tool) => tool.toolId)
             .sort();
           expect(tools.map((tool) => tool.id).sort()).to.eql(expectedTools);
+        });
+      }
+    });
+
+    describe('Space support - Agent APIs', () => {
+      for (const spaceId of ['default', 'space-1', 'space-2']) {
+        it(`should list the correct tools in the "${spaceId}" space`, async () => {
+          const response = await supertest
+            .get(spaceUrl('/api/agent_builder/agents', spaceId))
+            .set('kbn-xsrf', 'kibana')
+            .expect(200);
+
+          const res = response.body as ListAgentResponse;
+          const agents = res.results.filter((agent) => !agent.readonly);
+
+          const expectedAgents = testAgents
+            .filter((agent) => agent.spaceId === spaceId)
+            .map((agent) => agent.agentId)
+            .sort();
+          expect(agents.map((agent) => agent.id).sort()).to.eql(expectedAgents);
         });
       }
     });
