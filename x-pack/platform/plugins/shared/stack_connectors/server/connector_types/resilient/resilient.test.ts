@@ -203,7 +203,10 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.createIncident(incidentMock, connectorUsageCollector);
+      await connector.createIncident(
+        { ...incidentMock, additional_fields: '{"test_field":"testing"}' },
+        connectorUsageCollector
+      );
 
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -217,6 +220,7 @@ describe('IBM Resilient connector', () => {
           discovered_date: TIMESTAMP,
           incident_type_ids: [{ id: 1001 }],
           severity_code: { id: 6 },
+          properties: { test_field: 'testing' },
         },
         url: `${apiUrl}rest/orgs/${orgId}/incidents?text_content_output_format=objects_convert`,
         headers: {
