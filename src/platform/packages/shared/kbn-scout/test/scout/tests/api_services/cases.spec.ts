@@ -50,7 +50,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       },
     ]);
     expect(updatedResponse.status).toBe(200);
-    expect(updatedResponse.data.length).toBe(1);
+    expect(updatedResponse.data).toHaveLength(1);
     expect(updatedResponse.data[0].severity).toBe('medium');
   });
 });
