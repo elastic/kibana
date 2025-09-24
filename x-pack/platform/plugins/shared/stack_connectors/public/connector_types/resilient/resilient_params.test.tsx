@@ -28,6 +28,7 @@ const actionParams = {
       incidentTypes: [1001],
       severityCode: 6,
       externalId: null,
+      additional_fields: null,
     },
     comments: [],
   },
