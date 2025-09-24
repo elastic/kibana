@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { DashboardUploadSteps } from '../constants';
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
@@ -41,7 +41,9 @@ export const DashboardsUploadStep = ({
               <EuiStepNumber titleSize="xs" number={1} status={dataInputStatus} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <h3>{i18n.DASHBOARDS_UPLOAD_STEP_TITLE}</h3>
+              <EuiTitle size="xs">
+                <b>{i18n.DASHBOARDS_UPLOAD_STEP_TITLE}</b>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
