@@ -10,7 +10,7 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { defaultNavigationTree } from '../../navigation_tree';
 
 import { SecurityPageName } from '../..';
-import { securityLink } from '../../links';
+import { i18nStrings, securityLink } from '../../links';
 
 const LazyIconBulb = lazy(() =>
   import('./v2_icons/bulb').then(({ iconBulb }) => ({ default: iconBulb }))
@@ -23,6 +23,18 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
     id: SecurityPageName.alerts,
     iconV2: 'warning',
     link: securityLink(SecurityPageName.alerts),
+    sideNavVersion: 'v2',
+  },
+  {
+    // TODO: update icon before release
+    iconV2: 'merge',
+    link: 'workflows',
+    withBadge: true,
+    badgeTypeV2: 'techPreview' as const,
+    badgeOptions: {
+      icon: 'beaker',
+      tooltip: i18nStrings.workflows.badgeTooltip,
+    },
     sideNavVersion: 'v2',
   },
   {

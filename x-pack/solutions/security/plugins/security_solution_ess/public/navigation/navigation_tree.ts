@@ -53,6 +53,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                 icon: 'beaker',
                 tooltip: i18nStrings.workflows.badgeTooltip,
               },
+              sideNavVersion: 'v1',
             },
             {
               id: SecurityPageName.attackDiscovery,
