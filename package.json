@@ -1930,7 +1930,6 @@
     "jsdom": "^20.0.1",
     "json-schema-typed": "^8.0.1",
     "json5": "^2.2.3",
-    "jsondiffpatch": "0.4.1",
     "keyv": "^5.3.4",
     "license-checker": "^25.0.1",
     "lighthouse": "^12.6.1",
