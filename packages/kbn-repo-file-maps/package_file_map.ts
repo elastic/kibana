@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import { SetMap } from '@kbn/set-map/set_map';
+import { SetMap } from '@kbn/set-map';
 import type { Package } from '@kbn/repo-packages';
 import type { RepoPath } from '@kbn/repo-path';
 import type { LintTarget } from '@kbn/repo-linter';

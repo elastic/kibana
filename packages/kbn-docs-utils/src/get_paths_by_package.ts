@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
+import { getRepoFiles } from '@kbn/get-repo-files';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { PluginOrPackage as Package } from './types';

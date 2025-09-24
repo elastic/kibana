@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/ci-stats-shipper-cli/ship_ci_stats_cli');
+require('@kbn/ci-stats-shipper-cli');

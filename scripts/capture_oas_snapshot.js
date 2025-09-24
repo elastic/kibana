@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/capture-oas-snapshot-cli/src/run_capture_oas_snapshot_cli');
+require('@kbn/capture-oas-snapshot-cli');

@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/lint-ts-projects-cli/run_lint_ts_projects_cli');
+require('@kbn/lint-ts-projects-cli');

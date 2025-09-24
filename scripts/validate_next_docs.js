@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/validate-next-docs-cli/validate_next_docs_cli');
+require('@kbn/validate-next-docs-cli');

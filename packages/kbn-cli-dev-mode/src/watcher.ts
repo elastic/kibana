@@ -12,7 +12,7 @@ import Pw from '@parcel/watcher';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
-import { makeMatcher } from '@kbn/picomatcher/make_matcher';
+import { makeMatcher } from '@kbn/picomatcher';
 
 import type { Log } from './log';
 

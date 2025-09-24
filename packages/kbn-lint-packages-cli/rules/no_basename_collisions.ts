@@ -10,7 +10,7 @@
 import Path from 'path';
 
 import { PackageRule } from '@kbn/repo-linter';
-import { SetMap } from '@kbn/set-map/set_map';
+import { SetMap } from '@kbn/set-map';
 
 export const noBasenameCollisionsRule = PackageRule.create('noBasenameCollisions', {
   async check() {

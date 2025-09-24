@@ -13,7 +13,7 @@ import { addReferences, removeReferences, removeAllReferences } from '@kbn/json-
 import { TS_PROJECTS, type RefableTsProject } from '@kbn/ts-projects';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 import { TsProjectRule } from '@kbn/repo-linter';
-import { ImportLocator } from '@kbn/import-locator/import_locator';
+import { ImportLocator } from '@kbn/import-locator';
 
 function createCache() {
   const importable = new Map<string, Set<RefableTsProject>>();

@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/whereis-pkg-cli/run_whereis_pkg_cli');
+require('@kbn/whereis-pkg-cli');

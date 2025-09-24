@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
+import { getRepoFiles } from '@kbn/get-repo-files';
 import { countEnzymeImports } from './count_enzyme_imports';
 
 describe('count', () => {
