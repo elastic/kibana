@@ -128,7 +128,7 @@ export const WhereBlock = ({
                       iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                       onClick={toggle}
                       aria-label={i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichment.createStepButtonInlineAriaLabel',
+                        'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
                         {
                           defaultMessage: 'Toggle nested steps',
                         }
