@@ -9,7 +9,7 @@
 
 import { apiTest, expect } from '../../../src/playwright';
 
-apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
+apiTest.describe('Fleet API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest.describe('Integration Management', () => {
     let integrationName: string;
 
@@ -194,9 +194,6 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
       const statusCode = await apiServices.fleet.agent_policies.delete(agentPolicyId);
 
       expect(statusCode).toBe(200);
-
-      // Clear the policyId so afterEach doesn't try to delete again
-      policyId = '';
     });
 
     apiTest('should delete an agent policy with force flag', async ({ apiServices }) => {
@@ -208,9 +205,6 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
       const statusCode = await apiServices.fleet.agent_policies.delete(agentPolicyId, true);
 
       expect(statusCode).toBe(200);
-
-      // Clear the policyId so afterEach doesn't try to delete again
-      policyId = '';
     });
   });
 
@@ -252,7 +246,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
     apiTest('should create an elasticsearch output', async ({ apiServices }) => {
       const outputName = `test-output-${Date.now()}`;
-      const outputHosts = ['https://elasticsearch.example.com:9200'];
+      const outputHosts = ['https://localhost:9200'];
 
       const response = await apiServices.fleet.outputs.create(
         outputName,
@@ -270,7 +264,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
     apiTest('should create an output with additional parameters', async ({ apiServices }) => {
       const outputName = `test-output-params-${Date.now()}`;
-      const outputHosts = ['https://elasticsearch.example.com:9200'];
+      const outputHosts = ['https://localhost:9200'];
 
       const response = await apiServices.fleet.outputs.create(
         outputName,
@@ -295,7 +289,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
       // First create an output
       const createResponse = await apiServices.fleet.outputs.create(
         outputName,
-        ['https://test.example.com:9200'],
+        ['https://localhost:9200'],
         'elasticsearch'
       );
       const deleteOutputId = createResponse.data.item.id;
@@ -333,7 +327,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
     apiTest('should create a fleet server host', async ({ apiServices }) => {
       const hostName = `test-fleet-server-${Date.now()}`;
-      const hostUrls = ['https://fleet-server.example.com:8220'];
+      const hostUrls = ['https://localhost:8220'];
 
       const response = await apiServices.fleet.server_hosts.create(hostName, hostUrls);
 
@@ -346,7 +340,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
     apiTest('should create a fleet server host with parameters', async ({ apiServices }) => {
       const hostName = `test-fleet-server-params-${Date.now()}`;
-      const hostUrls = ['https://fleet-server.example.com:8220'];
+      const hostUrls = ['https://localhost:8220'];
 
       const response = await apiServices.fleet.server_hosts.create(hostName, hostUrls, {
         is_default: false,
@@ -366,16 +360,14 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
       // First create a fleet server host
       const createResponse = await apiServices.fleet.server_hosts.create(hostName, [
-        'https://test-fleet.example.com:8220',
+        'https://localhost:8220',
       ]);
       const deleteHostId = createResponse.data.item.id;
 
       // Then delete it
       const statusCode = await apiServices.fleet.server_hosts.delete(deleteHostId);
 
-      expect(statusCode).toBeGreaterThanOrEqual(200);
-      expect(statusCode).toBeLessThan(300);
-
+      expect(statusCode).toBe(200);
       // Don't set hostId since we already deleted it
     });
   });
@@ -485,11 +477,7 @@ apiTest.describe('Fleet API Service', { tag: ['@svlOblt', '@ess'] }, () => {
 
         // Delete
         const deleteStatus = await apiServices.fleet.agent_policies.delete(policyId);
-        expect(deleteStatus).toBeGreaterThanOrEqual(200);
-        expect(deleteStatus).toBeLessThan(300);
-
-        // Clear policyId to prevent cleanup in finally
-        policyId = '';
+        expect(deleteStatus).toBe(200);
       } finally {
         // Cleanup in case of test failure
         if (policyId) {

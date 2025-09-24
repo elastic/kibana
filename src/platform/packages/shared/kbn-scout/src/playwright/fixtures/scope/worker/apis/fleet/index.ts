@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { err } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/symbols';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type {
@@ -291,7 +292,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           });
         });
       },
-      create: async (hostName: string, hostUrls: string[], params?: FleetServerHostCreateBody) => {
+      create: async (hostName, hostUrls: string[], params?: FleetServerHostCreateBody) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.server_hosts.create [${hostName}]`,
