@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
@@ -96,7 +96,7 @@ const getMockFetchContext = (mockedEsClient: any) => {
 };
 
 const getMockedEsClient = () => {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   esClient.search.mockResponse({
     hits: {
       // @ts-expect-error incomplete definition
@@ -137,7 +137,7 @@ describe('error handling', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     const statusCodes = [401, 402, 403, 404, 500];
     for (const statusCode of statusCodes) {

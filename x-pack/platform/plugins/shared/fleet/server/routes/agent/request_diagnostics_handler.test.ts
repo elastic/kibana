@@ -10,7 +10,7 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
@@ -41,7 +41,7 @@ describe('request diagnostics handler', () => {
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockElasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
     jest.spyOn(AgentService, 'requestDiagnostics').mockResolvedValue({ actionId: '1' });
     mockContext = {

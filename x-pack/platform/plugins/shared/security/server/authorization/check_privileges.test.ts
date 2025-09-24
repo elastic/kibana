@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 import type { HasPrivilegesResponse } from '@kbn/security-plugin-types-server';
@@ -23,10 +23,10 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
   mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchClientMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -2896,7 +2896,7 @@ describe('#checkUserProfilesPrivileges.atSpace', () => {
     kibanaPrivileges: string[];
     esHasPrivilegesResponse: Promise<{ has_privilege_uids: string[]; error_uids?: string[] }>;
   }) => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchClientMock.createClusterClient();
     mockClusterClient.asInternalUser.transport.request.mockImplementation(
       () => options.esHasPrivilegesResponse
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
 import type { IClusterClient } from '@kbn/core/server';
 
@@ -23,7 +23,7 @@ describe('Upgrade Assistant Usage Collector', () => {
   let clusterClient: IClusterClient;
 
   beforeEach(() => {
-    clusterClient = elasticsearchServiceMock.createClusterClient();
+    clusterClient = elasticsearchClientMock.createClusterClient();
     (clusterClient.asInternalUser.cluster.getSettings as jest.Mock).mockResolvedValue({
       persistent: {},
       transient: {

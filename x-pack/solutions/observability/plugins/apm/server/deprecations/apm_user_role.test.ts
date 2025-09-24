@@ -6,7 +6,7 @@
  */
 
 import type { GetDeprecationsContext, IScopedClusterClient, CoreSetup } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getDeprecationsInfo } from './apm_user_role';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -19,7 +19,7 @@ const security = { license: { isEnabled: () => true } } as unknown as SecurityPl
 
 describe('apm_user deprecation', () => {
   beforeEach(async () => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClient = elasticsearchClientMock.createScopedClusterClient();
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
       xyz: { username: 'normal_user', roles: ['data_analyst'] },
     });

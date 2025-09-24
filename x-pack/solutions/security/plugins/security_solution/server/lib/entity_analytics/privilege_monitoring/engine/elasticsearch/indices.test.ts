@@ -6,7 +6,7 @@
  */
 
 import type { AuditLogger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -23,7 +23,7 @@ jest.mock('../../../utils/create_or_update_index', () => ({
 }));
 
 describe('Privileged User Monitoring: Indices Service', () => {
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const clusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();

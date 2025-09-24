@@ -10,7 +10,7 @@ import {
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { RiskScoreDataClient } from './risk_score_data_client';
@@ -37,7 +37,7 @@ jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
 jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 const totalFieldsLimit = 1000;
 
 describe('RiskScoreDataClient', () => {

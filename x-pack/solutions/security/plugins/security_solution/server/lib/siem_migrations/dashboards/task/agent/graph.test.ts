@@ -14,7 +14,7 @@ import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks
 import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 jest.mock(
@@ -44,7 +44,7 @@ let mockRetriever = new MockDashboardMigrationsRetriever();
 let mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
 let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 const esClientMock =
-  elasticsearchServiceMock.createCustomClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
+  elasticsearchClientMock.createCustomClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });

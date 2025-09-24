@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
@@ -70,7 +70,7 @@ beforeEach(async () => {
     basePath: { set: jest.fn() },
   });
   mockPdfExportType.start({
-    esClient: elasticsearchServiceMock.createClusterClient(),
+    esClient: elasticsearchClientMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,

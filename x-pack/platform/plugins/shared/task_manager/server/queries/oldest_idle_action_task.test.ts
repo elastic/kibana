@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getOldestIdleActionTask } from './oldest_idle_action_task';
 
 describe('getOldestIdleActionTask', () => {
   it('calls client.search with provided index name', async () => {
-    const client = elasticsearchServiceMock.createElasticsearchClient();
+    const client = elasticsearchClientMock.createElasticsearchClient();
     await getOldestIdleActionTask(client, '.index-name');
     expect(client.search).toHaveBeenCalled();
     expect(client.search.mock.calls[0][0]?.index).toEqual('.index-name');
   });
 
   it('returns a default of now-24h when no results', async () => {
-    const client = elasticsearchServiceMock.createElasticsearchClient(
+    const client = elasticsearchClientMock.createElasticsearchClient(
       Promise.resolve({ hits: { hits: [], total: 0 } })
     );
 
@@ -26,7 +26,7 @@ describe('getOldestIdleActionTask', () => {
   });
 
   it('returns a default of Date.now-24h when a 404 is returned', async () => {
-    const client = elasticsearchServiceMock.createElasticsearchClient(
+    const client = elasticsearchClientMock.createElasticsearchClient(
       Promise.resolve({
         error: { status: 404 },
       })
@@ -37,7 +37,7 @@ describe('getOldestIdleActionTask', () => {
   });
 
   it("returns the search result's task.runAt-24h field if it exists", async () => {
-    const client = elasticsearchServiceMock.createElasticsearchClient(
+    const client = elasticsearchClientMock.createElasticsearchClient(
       Promise.resolve({
         hits: { hits: [{ _source: { task: { runAt: '2015-01-01T12:10:30Z' } } }], total: 1 },
       })
@@ -48,7 +48,7 @@ describe('getOldestIdleActionTask', () => {
   });
 
   it("fallsback to 0 if the search result's task.runAt field does not exist", async () => {
-    const client1 = elasticsearchServiceMock.createElasticsearchClient(
+    const client1 = elasticsearchClientMock.createElasticsearchClient(
       Promise.resolve({
         hits: { hits: [{ _source: { task: { runAt: undefined } } }], total: 1 },
       })
@@ -57,7 +57,7 @@ describe('getOldestIdleActionTask', () => {
     const ts1 = await getOldestIdleActionTask(client1, '.index-name');
     expect(ts1).toEqual('0');
 
-    const client2 = elasticsearchServiceMock.createElasticsearchClient(
+    const client2 = elasticsearchClientMock.createElasticsearchClient(
       Promise.resolve({
         hits: { hits: [{ _source: { task: undefined } }], total: 1 },
       })

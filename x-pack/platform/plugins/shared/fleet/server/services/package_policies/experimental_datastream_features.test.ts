@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -238,7 +238,7 @@ describe('experimental_datastream_features', () => {
   });
 
   const soClient = savedObjectsClientMock.create();
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   describe('when package policy does not exist (create)', () => {
     beforeEach(() => {

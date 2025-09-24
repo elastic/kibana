@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
@@ -37,7 +37,7 @@ const licensing = Promise.resolve(
   })
 );
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const soClient = savedObjectsClientMock.create();
 
 const SimulateTemplateResponse = {

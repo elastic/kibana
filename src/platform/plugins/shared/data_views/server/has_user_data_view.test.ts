@@ -8,11 +8,11 @@
  */
 
 import { hasUserDataView } from './has_user_data_view';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 describe('hasUserDataView', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => jest.resetAllMocks());

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 describe('fetchGraph', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient();
+  const esClient = elasticsearchClientMock.createScopedClusterClient();
   let logger: Logger;
 
   beforeEach(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
@@ -126,7 +126,7 @@ export function createClientMock() {
     page: 1,
   });
 
-  const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
   // @ts-expect-error
   esClientMock.get.mockResponseImplementation(({ id }) => {
     switch (id) {

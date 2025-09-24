@@ -10,7 +10,7 @@ import type {
   KibanaResponseFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -40,7 +40,7 @@ describe('Change privilege level handlers', () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
       soClientMock = savedObjectsClientMock.create();
       mockContext = {
         core: {

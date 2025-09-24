@@ -18,7 +18,7 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { promiseResult } from '../lib/result_type';
 import sinon from 'sinon';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
@@ -32,7 +32,7 @@ const createServicesMock = () => {
     }
   > = {
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: {
       deleteConnectorTokens: jest.fn(),
     } as unknown as jest.Mocked<Services['connectorTokenClient']>,

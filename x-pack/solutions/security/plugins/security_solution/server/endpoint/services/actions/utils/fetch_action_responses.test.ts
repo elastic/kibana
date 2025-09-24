@@ -6,7 +6,7 @@
  */
 
 import { applyActionListEsSearchMock } from '../mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchActionResponses } from './fetch_action_responses';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
@@ -18,7 +18,7 @@ describe('fetchActionResponses()', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    esClientMock = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
     applyActionListEsSearchMock(esClientMock);
   });
 

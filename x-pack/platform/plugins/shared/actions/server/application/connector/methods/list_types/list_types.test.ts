@@ -19,7 +19,7 @@ import { inMemoryMetricsMock } from '../../../../monitoring/in_memory_metrics.mo
 import { schema } from '@kbn/config-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -61,7 +61,7 @@ describe('listTypes()', () => {
     actionsClient = new ActionsClient({
       logger: loggingSystemMock.create().get(),
       kibanaIndices: ['.kibana'],
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
       actionTypeRegistry,
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],

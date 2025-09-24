@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { asNotificationExecutionSource } from '../lib';
@@ -23,7 +23,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
 const executionEnqueuer = jest.fn();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const clusterClient = elasticsearchServiceMock.createClusterClient();
+const clusterClient = elasticsearchClientMock.createClusterClient();
 const inMemoryConnectors = [
   {
     id: 'testPreconfigured',

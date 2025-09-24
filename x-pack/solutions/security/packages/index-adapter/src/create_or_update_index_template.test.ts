@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
-const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const getIndexTemplate = (namespace: string = 'default', useDataStream: boolean = false) => ({
   name: `.alerts-test.alerts-${namespace}-index-template`,

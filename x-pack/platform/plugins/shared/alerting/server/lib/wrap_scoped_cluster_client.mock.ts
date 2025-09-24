@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 export const createWrappedScopedClusterClientMock = jest.fn().mockImplementation(() => {
   return {
-    client: jest.fn().mockReturnValue(elasticsearchServiceMock.createScopedClusterClient()),
+    client: jest.fn().mockReturnValue(elasticsearchClientMock.createScopedClusterClient()),
     getMetrics: jest.fn(),
   };
 });

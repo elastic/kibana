@@ -11,7 +11,7 @@ jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => 
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -65,7 +65,7 @@ describe('reindexService', () => {
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
       cleanupChanges: jest.fn(),
     };
-    clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    clusterClient = elasticsearchClientMock.createScopedClusterClient();
     log = loggingSystemMock.create().get();
     licensingPluginSetup = licensingMock.createStart();
     licensingPluginSetup.license$ = new BehaviorSubject(

@@ -9,7 +9,7 @@ import { URL } from 'url';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -160,7 +160,7 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
   body: TBody,
   otherProps: Partial<Exclude<TransportResult, 'body'>> = {}
 ): TransportResult => {
-  return elasticsearchServiceMock.createApiResponse({
+  return elasticsearchClientMock.createApiResponse({
     body,
     headers: {
       'content-type': 'application/json',
@@ -205,7 +205,7 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
   });
 };
 
-type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+type EsClientMock = ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 type EsClientMockMethods = keyof Pick<
   EsClientMock,
   'get' | 'create' | 'delete' | 'search' | 'bulk'
@@ -217,7 +217,7 @@ export const setEsClientMethodResponseToError = (
   options?: GenerateEsRequestErrorApiResponseMockProps
 ) => {
   esClientMock[method].mockImplementation(() => {
-    return elasticsearchServiceMock.createErrorTransportRequestPromise(
+    return elasticsearchClientMock.createErrorTransportRequestPromise(
       new errors.ResponseError(generateEsRequestErrorApiResponseMock(options))
     );
   });

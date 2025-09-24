@@ -11,7 +11,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertDeletionClient } from '../alert_deletion_client';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
@@ -19,7 +19,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server/spaces_servic
 import { activeAlertsQuery, inactiveAlertsQuery } from './test_utils';
 
 const auditService = securityServiceMock.createStart().audit;
-const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const eventLogger = eventLoggerMock.create();
 const getAlertIndicesAliasMock = jest.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();

@@ -10,7 +10,7 @@ import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/l
 
 import type { PackageInfo, RegisterDeprecationsConfig } from '@kbn/core/server';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -36,7 +36,7 @@ function getDepsMock() {
 
 function getContextMock() {
   return {
-    esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    esClient: elasticsearchClientMock.createScopedClusterClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
     request: httpServerMock.createKibanaRequest(),
   };

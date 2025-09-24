@@ -8,7 +8,7 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -305,7 +305,7 @@ const createEsSearchStrategy = () => {
 
 const createSearchStrategyDependenciesMock = () => ({
   uiSettingsClient: uiSettingsServiceMock.createClient(),
-  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  esClient: elasticsearchClientMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),

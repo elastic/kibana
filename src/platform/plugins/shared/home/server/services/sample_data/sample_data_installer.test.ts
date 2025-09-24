@@ -12,7 +12,7 @@ import { insertDataIntoIndexMock, findSampleObjectsMock } from './sample_data_in
 import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
@@ -97,14 +97,14 @@ const testDatasets: SampleDatasetSchema[] = [
 ];
 
 describe('SampleDataInstaller', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let soImporter: ReturnType<typeof savedObjectsServiceMock.createImporter>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let installer: SampleDataInstaller;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClient = elasticsearchClientMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
     soImporter = savedObjectsServiceMock.createImporter();
     logger = loggingSystemMock.createLogger();

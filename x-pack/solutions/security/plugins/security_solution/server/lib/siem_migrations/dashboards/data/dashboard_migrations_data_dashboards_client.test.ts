@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -25,7 +25,7 @@ import type { DashboardMigrationFilters } from '../../../../../common/siem_migra
 describe('DashboardMigrationsDataDashboardsClient', () => {
   let dashboardMigrationsDataDashboardsClient: DashboardMigrationsDataDashboardsClient;
   const esClient =
-    elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
+    elasticsearchClientMock.createCustomClusterClient() as unknown as IScopedClusterClient;
   const logger = loggingSystemMock.createLogger();
   const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-dashboard-migrations');
   const currentUser = {

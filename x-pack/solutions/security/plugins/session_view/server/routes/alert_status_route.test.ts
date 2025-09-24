@@ -10,7 +10,7 @@ import {
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { searchAlertByUuid } from './alert_status_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';
@@ -58,7 +58,7 @@ describe('alert_status_route.ts', () => {
 
   describe('searchAlertByUuid(client, alertUuid)', () => {
     it('should return an empty events array for a non existant alert uuid', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+      const esClient = elasticsearchClientMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(esClient);
       const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 
@@ -66,7 +66,7 @@ describe('alert_status_route.ts', () => {
     });
 
     it('returns results for a particular alert uuid', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+      const esClient = elasticsearchClientMock.createElasticsearchClient(getResponse());
       const alertsClient = getAlertsClientMockInstance(esClient);
       const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 

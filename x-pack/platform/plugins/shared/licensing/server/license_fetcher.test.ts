@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { getLicenseFetcher } from './license_fetcher';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 type EsLicense = estypes.XpackInfoMinimalLicenseInformation;
 
@@ -28,11 +28,11 @@ function buildRawLicense(options: Partial<EsLicense> = {}): EsLicense {
 
 describe('LicenseFetcher', () => {
   let logger: MockedLogger;
-  let clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+  let clusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    clusterClient = elasticsearchServiceMock.createClusterClient();
+    clusterClient = elasticsearchClientMock.createClusterClient();
   });
   afterEach(() => {
     jest.useRealTimers();

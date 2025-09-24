@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
@@ -164,7 +164,7 @@ describe('removeInstallation', () => {
 
 describe('deleteESAsset', () => {
   it('should not delete @custom components template', async () => {
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await deleteESAsset(
       {
         id: 'logs@custom',
@@ -177,7 +177,7 @@ describe('deleteESAsset', () => {
   });
 
   it('should delete @package components template', async () => {
-    const esClient = elasticsearchServiceMock.createInternalClient();
+    const esClient = elasticsearchClientMock.createInternalClient();
     await deleteESAsset(
       {
         id: 'logs-nginx.access@package',

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchEventsAndScopedAlerts } from './process_events_route';
 import {
   TEST_PROCESS_INDEX,
@@ -42,7 +42,7 @@ describe('process_events_route.ts', () => {
 
   describe('fetchEventsAndScopedAlerts(client, entityId, cursor, forward)', () => {
     it('should return an empty events array for a non existant entity_id', async () => {
-      const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+      const client = elasticsearchClientMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(client);
 
       const body = await fetchEventsAndScopedAlerts(
@@ -59,7 +59,7 @@ describe('process_events_route.ts', () => {
     });
 
     it('returns results for a particular session entity_id', async () => {
-      const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+      const client = elasticsearchClientMock.createElasticsearchClient(getResponse());
       const alertsClient = getAlertsClientMockInstance();
 
       const body = await fetchEventsAndScopedAlerts(
@@ -85,7 +85,7 @@ describe('process_events_route.ts', () => {
     });
 
     it('returns hits in reverse order when paginating backwards', async () => {
-      const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+      const client = elasticsearchClientMock.createElasticsearchClient(getResponse());
       const alertsClient = getAlertsClientMockInstance();
 
       const body = await fetchEventsAndScopedAlerts(

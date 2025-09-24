@@ -6,7 +6,7 @@
  */
 
 import type { GetDeprecationsContext } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { getPrivilegeDeprecationsService } from '.';
@@ -17,7 +17,7 @@ const application = `kibana-${kibanaIndexName}`;
 
 describe('#getPrivilegeDeprecationsService', () => {
   describe('#getKibanaRolesByFeatureId', () => {
-    const mockAsCurrentUser = elasticsearchServiceMock.createScopedClusterClient();
+    const mockAsCurrentUser = elasticsearchClientMock.createScopedClusterClient();
     const mockGetFeatures = jest.fn().mockResolvedValue([]);
     const mockLicense = licenseMock.create();
     const mockLogger = loggingSystemMock.createLogger();
@@ -220,7 +220,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
     it('unhappy path with status code 400, we should have the attribute errors', async () => {
       mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
-        elasticsearchServiceMock.createErrorTransportRequestPromise({
+        elasticsearchClientMock.createErrorTransportRequestPromise({
           message: 'Test error',
           statusCode: 400,
         })
@@ -252,7 +252,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
     it('unhappy path with status code 403, we should have unauthorized message in the attribute errors', async () => {
       mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
-        elasticsearchServiceMock.createErrorTransportRequestPromise({
+        elasticsearchClientMock.createErrorTransportRequestPromise({
           message: 'Test error',
           statusCode: 403,
         })

@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { lastValueFrom, of, throwError } from 'rxjs';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -287,7 +287,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
 
 const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => ({
   uiSettingsClient: uiSettingsServiceMock.createClient(),
-  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  esClient: elasticsearchClientMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),

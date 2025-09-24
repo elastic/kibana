@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getNodesUsage } from './get_nodes_usage';
 import { TIMEOUT } from './constants';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 const mockedNodesFetchResponse = {
   cluster_name: 'test cluster',
@@ -39,7 +39,7 @@ const mockedNodesFetchResponse = {
 describe('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
     const response = Promise.resolve(mockedNodesFetchResponse);
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     esClient.nodes.usage.mockImplementationOnce(async (_params = { timeout: TIMEOUT }) => {
       return response;
     });

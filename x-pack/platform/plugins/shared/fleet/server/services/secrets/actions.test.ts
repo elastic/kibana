@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -17,7 +17,7 @@ import { deleteActionSecrets, extractAndWriteActionSecrets } from './actions';
 describe('Action Secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
 
-  const esClientMock = elasticsearchServiceMock.createInternalClient();
+  const esClientMock = elasticsearchClientMock.createInternalClient();
   esClientMock.transport.request.mockImplementation(async (req) => {
     return {
       id: uuidv4(),

@@ -11,7 +11,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -90,7 +90,7 @@ describe('stepInstallKibanaAssets', () => {
     });
   });
 
-  esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());
 
   it('Should call installKibanaAssetsAndReferences', async () => {
@@ -122,7 +122,7 @@ describe('stepInstallKibanaAssets', () => {
     await expect(installationPromise).resolves.not.toThrowError();
     expect(installKibanaAssetsAndReferencesMultispace).toBeCalledTimes(1);
   });
-  esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());
 
   it('Should correctly handle errors', async () => {
@@ -165,7 +165,7 @@ describe('stepInstallKibanaAssets', () => {
 describe('stepInstallKibanaAssetsWithStreaming', () => {
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
 
@@ -236,7 +236,7 @@ describe('cleanUpKibanaAssetsStep', () => {
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
@@ -409,7 +409,7 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
 

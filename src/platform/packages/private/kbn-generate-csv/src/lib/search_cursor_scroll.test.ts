@@ -10,7 +10,7 @@
 import * as Rx from 'rxjs';
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ISearchClient } from '@kbn/search-types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
@@ -47,7 +47,7 @@ describe('CSV Export Search Cursor', () => {
       maxConcurrentShardRequests: 5,
     };
 
-    es = elasticsearchServiceMock.createScopedClusterClient();
+    es = elasticsearchClientMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
     jest
       .spyOn(es.asCurrentUser, 'openPointInTime')

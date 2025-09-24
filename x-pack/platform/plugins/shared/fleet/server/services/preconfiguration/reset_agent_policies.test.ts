@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { agentPolicyService } from '../agent_policy';
@@ -67,7 +67,7 @@ jest.mock('../app_context', () => ({
 describe('reset agent policies', () => {
   it('should not unenroll agents or revoke enrollment api keys if there is no existing policies', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     mockedAgentPolicyService.list.mockResolvedValueOnce({
       items: [],
     } as any);
@@ -90,7 +90,7 @@ describe('reset agent policies', () => {
 
   it('should unenroll agents and revoke enrollment api keys if there is policies', async () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     mockedAgentPolicyService.list.mockResolvedValueOnce({
       items: [{ id: 'policy1' }],
     } as any);

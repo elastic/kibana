@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { createPackagePolicyMock } from '../../../common/mocks';
@@ -326,7 +326,7 @@ describe('Upgrade', () => {
         })
       );
 
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const res = await _packagePoliciesBulkUpgrade({
         packagePolicyService,
         soClient,
@@ -373,7 +373,7 @@ describe('Upgrade', () => {
           })),
         })
       );
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const res = await _packagePoliciesUpgrade({
         packagePolicyService,
         soClient,

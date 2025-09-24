@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEndpointMetrics, getUniqueEndpointCount } from './get_metrics';
 import { getUniqueEndpointCountMock } from './get_metrics.mocks';
 import type { EndpointMetrics } from './types';
 
 describe('Endpoint Metrics', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   describe('getEndpointMetrics()', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       logger = loggingSystemMock.createLogger();
     });
 
@@ -34,7 +34,7 @@ describe('Endpoint Metrics', () => {
   });
   describe('getUniqueEndpointCount()', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       logger = loggingSystemMock.createLogger();
     });
 

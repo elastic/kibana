@@ -9,7 +9,7 @@ import { postKnowledgeBaseRoute } from './post_knowledge_base';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostKnowledgeBaseRequest } from '../../__mocks__/request';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Post Knowledge Base Route', () => {
@@ -17,7 +17,7 @@ describe('Post Knowledge Base Route', () => {
   // eslint-disable-next-line prefer-const
   let { clients, context } = requestContextMock.createTools();
 
-  clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+  clients.core.elasticsearch.client = elasticsearchClientMock.createScopedClusterClient();
 
   const mockUser = {
     username: 'elastic',

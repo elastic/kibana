@@ -30,7 +30,7 @@ import type {
 import { CspConfig } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
@@ -69,7 +69,7 @@ describe('AuthenticationService', () => {
     config: ConfigType;
     loggers: LoggerFactory;
     http: jest.Mocked<HttpServiceStart>;
-    clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+    clusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>;
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
     userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
@@ -112,7 +112,7 @@ describe('AuthenticationService', () => {
         { isTLSEnabled: false }
       ),
       http: coreStart.http,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
+      clusterClient: elasticsearchClientMock.createClusterClient(),
       loggers: loggingSystemMock.create(),
       featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
       session: sessionMock.create(),

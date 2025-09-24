@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -124,7 +125,7 @@ type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
   eventLogger: jest.Mocked<IEventLogger>;
   executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
 };
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 const mockAlertsService = alertsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 const elasticsearchAndSOAvailability$ = of(true);

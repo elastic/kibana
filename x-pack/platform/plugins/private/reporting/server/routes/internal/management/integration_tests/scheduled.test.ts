@@ -16,7 +16,7 @@ jest.mock('../../../../lib/content_stream', () => ({
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -156,7 +156,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
   let mockEsClient: ElasticsearchClientMock;
   let stream: jest.Mocked<ContentStream>;
   let soClient: SavedObjectsClientContract;
-  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let taskManager: TaskManagerStartContract;
 
   const mockLogger = loggingSystemMock.createLogger();

@@ -12,7 +12,7 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -71,7 +71,7 @@ describe('CsvESQLGenerator', () => {
   beforeEach(async () => {
     content = '';
     stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
-    mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockEsClient = elasticsearchClientMock.createScopedClusterClient();
     mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
     mockDataClient.search = mockDataClientSearchDefault;
     uiSettingsClient = uiSettingsServiceMock

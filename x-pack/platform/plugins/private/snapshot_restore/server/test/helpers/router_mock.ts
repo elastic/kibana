@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 
 type RequestHandler = (...params: any[]) => any;
@@ -65,7 +65,7 @@ export class RouterMock implements IRouter {
   };
 
   public contextMock = {
-    core: { elasticsearch: { client: elasticsearchServiceMock.createScopedClusterClient() } },
+    core: { elasticsearch: { client: elasticsearchClientMock.createScopedClusterClient() } },
   };
 
   getRoutes = jest.fn();

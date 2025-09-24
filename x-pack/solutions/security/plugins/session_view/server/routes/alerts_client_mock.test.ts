@@ -7,7 +7,7 @@
 
 import type { ConstructorOptions } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -83,7 +83,7 @@ const createAlertsClientParams = () => {
   });
 
   const auditLogger = auditLoggerMock.create();
-  const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient(getResponse());
   const alertsClientParams: jest.Mocked<ConstructorOptions> = {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
@@ -100,7 +100,7 @@ const createAlertsClientParams = () => {
 };
 
 export function getAlertsClientMockInstance(esClient?: ElasticsearchClient) {
-  esClient = esClient || elasticsearchServiceMock.createElasticsearchClient(getResponse());
+  esClient = esClient || elasticsearchClientMock.createElasticsearchClient(getResponse());
 
   const alertsClient = new AlertsClient({ ...createAlertsClientParams(), esClient });
 

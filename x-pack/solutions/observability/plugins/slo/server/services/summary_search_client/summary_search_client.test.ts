@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from '../fixtures/slo';
@@ -34,7 +34,7 @@ describe('Summary Search Client', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     esClientMock = scopedClusterClient.asCurrentUser as ElasticsearchClientMock;
     const soClientMock = {
       getCurrentNamespace: jest.fn().mockReturnValue('default'),

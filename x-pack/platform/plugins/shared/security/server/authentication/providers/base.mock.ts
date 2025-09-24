@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -16,7 +16,7 @@ export type MockAuthenticationProviderOptions = ReturnType<
 export function mockAuthenticationProviderOptions(options?: { name: string }) {
   return {
     getServerBaseURL: () => 'test-protocol://test-hostname:1234',
-    client: elasticsearchServiceMock.createClusterClient(),
+    client: elasticsearchClientMock.createClusterClient(),
     logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(),
     getRequestOriginalURL: jest.fn(),

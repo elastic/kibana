@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { createIndex } from './create_index';
 import { textAnalysisSettings } from './text_analysis';
 
 describe('createApiIndex lib function', () => {
-  const mockClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockClient = elasticsearchClientMock.createScopedClusterClient();
 
   const defaultMappings = {
     dynamic: true,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getXPackUsage } from './get_xpack';
 
 describe('get_xpack', () => {
   describe('getXPackUsage', () => {
     it('uses esClient to get /_xpack/usage API', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       // @ts-expect-error we only care about the response body
       esClient.xpack.usage.mockResponse({});
       const result = await getXPackUsage(esClient);

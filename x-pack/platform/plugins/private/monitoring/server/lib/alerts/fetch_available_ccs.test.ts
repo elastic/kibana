@@ -6,12 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchAvailableCcs } from './fetch_available_ccs';
 
 describe('fetchAvailableCcs', () => {
   it('should call the `cluster.remoteInfo` api', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
     await fetchAvailableCcs(esClient);
     expect(esClient.cluster.remoteInfo).toHaveBeenCalled();
@@ -19,7 +19,7 @@ describe('fetchAvailableCcs', () => {
 
   it('should return clusters that are connected', async () => {
     const connectedRemote = 'myRemote';
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.cluster.remoteInfo.mockImplementation(() =>
       Promise.resolve({
         [connectedRemote]: {
@@ -34,7 +34,7 @@ describe('fetchAvailableCcs', () => {
 
   it('should not return clusters that are connected', async () => {
     const disconnectedRemote = 'myRemote';
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.cluster.remoteInfo.mockImplementation(() =>
       Promise.resolve({
         [disconnectedRemote]: {

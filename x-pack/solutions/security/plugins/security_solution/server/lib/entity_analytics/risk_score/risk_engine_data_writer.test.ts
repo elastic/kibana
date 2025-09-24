@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { riskScoreServiceMock } from './risk_score_service.mock';
 
@@ -18,7 +18,7 @@ describe('RiskEngineDataWriter', () => {
     let loggerMock: Logger;
 
     beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       loggerMock = loggingSystemMock.createLogger();
       writer = new RiskEngineDataWriter({
         esClient: esClientMock,

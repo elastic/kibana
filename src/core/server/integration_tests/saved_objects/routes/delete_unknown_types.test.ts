@@ -8,7 +8,7 @@
  */
 
 import supertest from 'supertest';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
@@ -26,11 +26,11 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
-  let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  let elasticsearchClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
 
   beforeEach(async () => {
     ({ server, createRouter, handlerContext } = await setupServer());
-    elasticsearchClient = elasticsearchServiceMock.createScopedClusterClient();
+    elasticsearchClient = elasticsearchClientMock.createScopedClusterClient();
     typeRegistry = typeRegistryMock.create();
 
     typeRegistry.getAllTypes.mockReturnValue([{ name: 'known-type' } as SavedObjectsType]);

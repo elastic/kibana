@@ -15,7 +15,7 @@ import {
   usageCollectionPluginMock,
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-plugin/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
@@ -30,7 +30,7 @@ function mockGetLocalStats<ClusterInfo, ClusterStats>(
   clusterInfo: ClusterInfo,
   clusterStats: ClusterStats
 ) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   // @ts-expect-error we only care about the response body
   esClient.info.mockResponse({ ...clusterInfo });
   // @ts-expect-error we only care about the response body

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -1173,7 +1173,7 @@ describe('Package policy secrets', () => {
   });
 
   describe('extractAndWriteSecrets', () => {
-    const esClientMock = elasticsearchServiceMock.createInternalClient();
+    const esClientMock = elasticsearchClientMock.createInternalClient();
 
     esClientMock.transport.request.mockImplementation(async (req) => {
       return {
@@ -1422,7 +1422,7 @@ describe('Package policy secrets', () => {
   });
 
   describe('extractAndUpdateSecrets', () => {
-    const esClientMock = elasticsearchServiceMock.createInternalClient();
+    const esClientMock = elasticsearchClientMock.createInternalClient();
 
     esClientMock.transport.request.mockImplementation(async (req) => {
       return {

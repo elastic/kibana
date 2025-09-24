@@ -13,7 +13,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -131,7 +131,7 @@ function createCoreRequestHandlerContextMock() {
       getImporter: savedObjectsServiceMock.createImporter,
     },
     elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+      client: elasticsearchClientMock.createScopedClusterClient(),
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),

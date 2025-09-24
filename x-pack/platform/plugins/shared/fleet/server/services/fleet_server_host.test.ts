@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -137,7 +137,7 @@ describe('migrateSettingsToFleetServerHost', () => {
       canEncrypt: true,
     } as any);
   });
-  const esMock = elasticsearchServiceMock.createInternalClient();
+  const esMock = elasticsearchClientMock.createInternalClient();
 
   it('should not migrate settings if a default fleet server policy config exists', async () => {
     const soClient = getMockedSoClient({ id: DEFAULT_FLEET_SERVER_HOST_ID, findHosts: true });
@@ -222,7 +222,7 @@ describe('create', () => {
 
   it('should throw if encryptedSavedObject is not configured', async () => {
     const soMock = getMockedSoClient();
-    const esMock = elasticsearchServiceMock.createInternalClient();
+    const esMock = elasticsearchClientMock.createInternalClient();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: false,
     } as any);
@@ -254,7 +254,7 @@ describe('delete fleetServerHost', () => {
 
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
     const soMock = getMockedSoClient();
-    const esMock = elasticsearchServiceMock.createInternalClient();
+    const esMock = elasticsearchClientMock.createInternalClient();
     await fleetServerHostService.delete(soMock, esMock, 'test1', {});
 
     expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
@@ -268,7 +268,7 @@ describe('delete fleetServerHost', () => {
   it('should removeFleetServerHostFromAll agent policies with force if deleted from preconfiguration', async () => {
     const soMock = getMockedSoClient();
 
-    const esMock = elasticsearchServiceMock.createInternalClient();
+    const esMock = elasticsearchClientMock.createInternalClient();
     await (fleetServerHostService.delete as jest.Mock)(soMock, esMock, 'test1', {
       fromPreconfiguration: true,
     });

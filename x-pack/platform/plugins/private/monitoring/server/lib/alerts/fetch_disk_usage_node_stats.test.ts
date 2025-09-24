@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchDiskUsageNodeStats } from './fetch_disk_usage_node_stats';
 
 jest.mock('../../static_globals', () => ({
@@ -22,7 +22,7 @@ jest.mock('../../static_globals', () => ({
 import { Globals } from '../../static_globals';
 
 describe('fetchDiskUsageNodeStats', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
   const clusters = [
     {

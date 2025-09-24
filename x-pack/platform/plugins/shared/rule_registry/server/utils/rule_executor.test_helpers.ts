@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type {
@@ -81,7 +82,7 @@ export const createDefaultAlertExecutorOptions = <
     getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
     getSearchSourceClient: async () => searchSourceCommonMock,
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
     share: {} as SharePluginStart,
     shouldStopExecution: () => false,
     shouldWriteAlerts: () => shouldWriteAlerts,

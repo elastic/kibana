@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -68,7 +68,7 @@ const mockUsageCollection = (kibanaUsage: Record<string, unknown> = kibana) => {
  * Instantiate the esClient mock with the common requests
  */
 function mockEsClient() {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   // mock for license should return a basic license
   esClient.license.get.mockResponse(
     // @ts-expect-error we only care about the response body

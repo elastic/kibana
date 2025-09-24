@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { FleetActionsClientError, FleetActionsError } from '../../../common/errors';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -28,11 +28,11 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 describe('actions', () => {
   let fleetActionsClient: FleetActionsClient;
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let esClientMock: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    esClientMock = elasticsearchServiceMock.createInternalClient();
+    esClientMock = elasticsearchClientMock.createInternalClient();
     fleetActionsClient = new FleetActionsClient(esClientMock, 'foo');
   });
 

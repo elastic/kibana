@@ -9,13 +9,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchProvider } from './fetch';
 
 describe('fetchProvider', () => {
   let fetchFn: any;
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let mockLogger: Logger;
 
   beforeEach(async () => {

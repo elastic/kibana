@@ -6,7 +6,7 @@
  */
 
 import type { EventLogStatusMetric } from '../../detections/rules/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getInitialEventLogUsage } from '../../detections/rules/get_initial_usage';
 import {
@@ -21,10 +21,10 @@ import {
 import { getEventLogByTypeAndStatus } from '../get_event_log_by_type_and_status';
 
 describe('get_event_log_by_type_and_status', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   });
 
   test('returns initial event log usage results if there are no rule results', async () => {

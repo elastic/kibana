@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getAgentCountForAgentPolicies } from './agent_policy_agent_count';
 
@@ -29,7 +29,7 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
       },
     ];
 
-    esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClientMock = elasticsearchClientMock.createClusterClient().asInternalUser;
     esClientMock.search.mockImplementation(async () => {
       return {
         took: 3,

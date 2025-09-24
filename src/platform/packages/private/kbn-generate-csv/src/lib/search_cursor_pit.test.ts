@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ISearchClient } from '@kbn/search-types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
@@ -66,7 +66,7 @@ describe('CSV Export Search Cursor', () => {
       taskInstanceFields: { startedAt: null, retryAt: null },
     };
 
-    es = elasticsearchServiceMock.createScopedClusterClient();
+    es = elasticsearchClientMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
 
     openPointInTimeSpy = jest

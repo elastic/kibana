@@ -10,7 +10,6 @@
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -290,7 +289,7 @@ type RouterMethod = Extract<keyof IRouter, RouteMethod>;
 
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   routerMock: RouterMock;
-  scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  scopedEsClusterClientMock: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
   savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   endpointAppContextMock: EndpointAppContext;
   httpResponseMock: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -321,7 +320,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 > => {
   const routerMock = httpServiceMock.createRouter();
   const endpointAppContextMock = createMockEndpointAppContext();
-  const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const scopedEsClusterClientMock = elasticsearchClientMock.createScopedClusterClient();
   const savedObjectClientMock =
     endpointAppContextMock.service.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
   const endpointAuthz = getEndpointAuthzInitialStateMock();

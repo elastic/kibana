@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common/constants';
 
@@ -23,7 +23,7 @@ import {
 } from './mocks';
 
 describe('When using the Fleet Artifacts Client', () => {
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let esClientMock: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   let artifactClient: FleetArtifactsClient;
   const setEsClientGetMock = (withInvalidArtifact?: boolean) => {
     const singleHit = generateArtifactEsGetSingleHitMock();
@@ -39,7 +39,7 @@ describe('When using the Fleet Artifacts Client', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
 
-    esClientMock = elasticsearchServiceMock.createInternalClient();
+    esClientMock = elasticsearchClientMock.createInternalClient();
     artifactClient = new FleetArtifactsClient(esClientMock, 'endpoint');
   });
 

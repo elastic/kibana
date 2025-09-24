@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getLicenseFromLocalOrMaster } from './get_license';
 
 describe('getLicenseFromLocalOrMaster', () => {
   test('return an undefined license if it fails to get the license on the first attempt and it does not have a cached license yet', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     // The local fetch fails
     esClient.license.get.mockRejectedValue(new Error('Something went terribly wrong'));
 
@@ -22,7 +22,7 @@ describe('getLicenseFromLocalOrMaster', () => {
   });
 
   test('returns the license it fetches from Elasticsearch', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     // The local fetch succeeds
     // @ts-expect-error it's enough to test with minimal payload
     esClient.license.get.mockResponse({ license: { type: 'basic' } });
@@ -35,7 +35,7 @@ describe('getLicenseFromLocalOrMaster', () => {
   });
 
   test('after the first successful attempt, if the local request fails, it will try with the master request (failed case)', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const error = new Error('Something went terribly wrong');
     // The requests fail with an error
     esClient.license.get.mockRejectedValue(error);
@@ -48,7 +48,7 @@ describe('getLicenseFromLocalOrMaster', () => {
   });
 
   test('after the first successful attempt, if the local request fails, it will try with the master request (success case)', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     // The local fetch fails
     esClient.license.get.mockRejectedValueOnce(new Error('Something went terribly wrong'));
     // The master fetch succeeds
@@ -64,7 +64,7 @@ describe('getLicenseFromLocalOrMaster', () => {
   });
 
   test('after the first successful attempt, if the local request fails, it will try with the master request (clearing cached license)', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     // The requests fail with 400
     esClient.license.get.mockRejectedValue({ statusCode: 400 });
 

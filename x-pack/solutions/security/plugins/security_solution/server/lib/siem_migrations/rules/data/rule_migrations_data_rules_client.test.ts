@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -26,7 +26,7 @@ import type { RuleMigrationFilters } from '../../../../../common/siem_migrations
 describe('RuleMigrationsDataRulesClient', () => {
   let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
   const esClient =
-    elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
+    elasticsearchClientMock.createCustomClusterClient() as unknown as IScopedClusterClient;
   const logger = loggingSystemMock.createLogger();
   const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');
   const currentUser = {

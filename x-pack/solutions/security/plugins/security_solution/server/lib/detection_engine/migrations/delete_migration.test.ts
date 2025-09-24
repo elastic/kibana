@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { deleteMigration } from './delete_migration';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
@@ -21,7 +21,7 @@ describe('deleteMigration', () => {
   let soClient: SavedObjectsClientContract;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient = elasticsearchClientMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
   });
 

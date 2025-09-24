@@ -9,7 +9,7 @@ import { postEvaluateRoute } from './post_evaluate';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -25,7 +25,7 @@ const defaultBody: PostEvaluateRequestBodyInput = {
 describe('Post Evaluate Route', () => {
   const { clients, context } = requestContextMock.createTools();
   const server: ReturnType<typeof serverMock.create> = serverMock.create();
-  clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+  clients.core.elasticsearch.client = elasticsearchClientMock.createScopedClusterClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (server as any).responseMock.notFound = jest.fn().mockReturnValue({
     status: 404,

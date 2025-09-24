@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { KnowledgeBaseItem } from '../../../../common/types';
 
@@ -33,7 +33,7 @@ describe('knowledge_base_index', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     jest.clearAllMocks();
   });
 

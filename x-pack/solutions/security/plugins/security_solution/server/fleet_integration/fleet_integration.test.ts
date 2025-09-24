@@ -8,7 +8,7 @@
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
@@ -158,7 +158,7 @@ describe('Fleet integrations', () => {
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
     const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     const createNewEndpointPolicyInput = (
       manifest: ManifestSchema,
@@ -402,7 +402,7 @@ describe('Fleet integrations', () => {
 
     beforeEach(() => {
       soClient = savedObjectsClientMock.create();
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       endpointAppContextServiceMock = createMockEndpointAppContextService();
       jest.clearAllMocks();
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
@@ -657,7 +657,7 @@ describe('Fleet integrations', () => {
 
     describe('when the license is below platinum', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       beforeEach(() => {
         licenseEmitter.next(Gold); // set license level to gold
@@ -702,7 +702,7 @@ describe('Fleet integrations', () => {
 
     describe('when the license is at least enterprise', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       beforeEach(() => {
         licenseEmitter.next(Enterprise); // set license level to enterprise
@@ -836,7 +836,7 @@ describe('Fleet integrations', () => {
 
     describe('when the license is at least platinum', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       beforeEach(() => {
         licenseEmitter.next(Platinum); // set license level to platinum
@@ -962,7 +962,7 @@ describe('Fleet integrations', () => {
 
     describe('when meta fields should be updated', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const infoResponse = {
         cluster_name: 'updated-name',
@@ -1061,7 +1061,7 @@ describe('Fleet integrations', () => {
 
     describe('when device control features are disabled', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       beforeEach(() => {
         licenseEmitter.next(Enterprise);
@@ -1183,7 +1183,7 @@ describe('Fleet integrations', () => {
 
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       let callback: PutPackagePolicyUpdateCallback;
       let inputPolicyConfig: PolicyData;
       let inputWindowsConfig: PolicyConfig['windows'];
@@ -1285,7 +1285,7 @@ describe('Fleet integrations', () => {
 
     it('should throw an error if the policy is invalid', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       licenseEmitter.next(Enterprise);
 
       const callback = getPackagePolicyUpdateCallback(
@@ -1312,7 +1312,7 @@ describe('Fleet integrations', () => {
       const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
 
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       licenseEmitter.next(Enterprise);
 
       const callback = getPackagePolicyUpdateCallback(

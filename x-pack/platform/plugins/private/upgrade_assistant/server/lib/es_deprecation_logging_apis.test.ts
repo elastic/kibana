@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
@@ -16,7 +16,7 @@ import {
 
 describe('getDeprecationLoggingStatus', () => {
   it('calls cluster.getSettings', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchClientMock.createScopedClusterClient();
     await getDeprecationLoggingStatus(dataClient);
     expect(dataClient.asCurrentUser.cluster.getSettings).toHaveBeenCalledWith({
       include_defaults: true,
@@ -27,7 +27,7 @@ describe('getDeprecationLoggingStatus', () => {
 describe('setDeprecationLogging', () => {
   describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
-      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      const dataClient = elasticsearchClientMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, true);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
         persistent: {
@@ -44,7 +44,7 @@ describe('setDeprecationLogging', () => {
 
   describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
-      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      const dataClient = elasticsearchClientMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, false);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
         persistent: {
@@ -124,7 +124,7 @@ describe('isDeprecationLogIndexingEnabled', () => {
 
 describe('getRecentEsDeprecationLogs', () => {
   it('returns empty results when index does not exist', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchClientMock.createScopedClusterClient();
     dataClient.asCurrentUser.indices.exists.mockResolvedValue(false as any);
 
     const result = await getRecentEsDeprecationLogs(dataClient);
@@ -133,7 +133,7 @@ describe('getRecentEsDeprecationLogs', () => {
   });
 
   it('returns logs and count when index exists', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchClientMock.createScopedClusterClient();
 
     // Use dynamic dates relative to now
     const now = new Date();
@@ -168,7 +168,7 @@ describe('getRecentEsDeprecationLogs', () => {
   });
 
   it('gracefully handles search errors', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchClientMock.createScopedClusterClient();
     dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
     dataClient.asCurrentUser.search.mockRejectedValue(new Error('Search error'));
 
@@ -177,7 +177,7 @@ describe('getRecentEsDeprecationLogs', () => {
   });
 
   it('uses provided timeframe parameter and only returns logs from the specified timeframe', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchClientMock.createScopedClusterClient();
     dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
 
     // Create a custom timeframe of 1 hour

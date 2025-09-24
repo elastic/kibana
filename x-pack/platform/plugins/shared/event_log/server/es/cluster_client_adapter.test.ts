@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
   IClusterClientAdapter,
@@ -31,12 +31,12 @@ import { getEsNames } from './names';
 type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 let logger: MockedLogger;
-let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+let clusterClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),

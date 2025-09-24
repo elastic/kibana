@@ -15,7 +15,7 @@ import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
@@ -138,8 +138,8 @@ describe('Response actions', () => {
     beforeEach(() => {
       const startContract = createMockEndpointAppContextServiceStartContract();
       const routerMock = httpServiceMock.createRouter();
-      const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
-      const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+      const mockScopedClient = elasticsearchClientMock.createScopedClusterClient();
+      const mockClusterClient = elasticsearchClientMock.createClusterClient();
 
       mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
       mockScopedClient.asInternalUser = startContract.esClient as ElasticsearchClientMock;

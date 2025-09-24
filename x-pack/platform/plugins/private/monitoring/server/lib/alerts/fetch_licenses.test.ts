@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fetchLicenses } from './fetch_licenses';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -30,7 +30,7 @@ describe('fetchLicenses', () => {
   };
 
   it('return a list of licenses', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse({
       hits: {
         hits: [
@@ -56,7 +56,7 @@ describe('fetchLicenses', () => {
   });
 
   it('should only search for the clusters provided', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
@@ -64,14 +64,14 @@ describe('fetchLicenses', () => {
   });
 
   it('should limit the time period in the query', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.query.bool.filter[2].range.timestamp.gte).toBe('now-2m');
   });
   it('should call ES with correct query', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
@@ -119,7 +119,7 @@ describe('fetchLicenses', () => {
   it('should call ES with correct query  when ccs disabled', async () => {
     // @ts-ignore
     Globals.app.config.ui.ccs.enabled = false;
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];

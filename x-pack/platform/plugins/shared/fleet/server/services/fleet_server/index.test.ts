@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -213,7 +212,7 @@ describe('getFleetServerPolicies', () => {
 
 describe('hasActiveFleetServersForPolicies', () => {
   const mockSoClient = savedObjectsClientMock.create();
-  const mockEsClient = elasticsearchServiceMock.createInternalClient();
+  const mockEsClient = elasticsearchClientMock.createInternalClient();
 
   it('returns false when no agent IDs are provided', async () => {
     const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, []);

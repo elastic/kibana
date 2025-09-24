@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
@@ -39,7 +39,7 @@ describe('getESUpgradeStatus', () => {
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: estypes.MigrationDeprecationsResponse = _.cloneDeep(fakeDeprecations);
 
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
   esClient.healthReport.mockResponse({ cluster_name: 'mock', indicators: {} });
 

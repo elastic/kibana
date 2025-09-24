@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { produce } from 'immer';
@@ -327,7 +327,7 @@ describe('Package policy service', () => {
       jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
     });
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
@@ -370,7 +370,7 @@ describe('Package policy service', () => {
     it('should not allow to add a reusable integration policies to an agent policies belonging to multiple spaces', async () => {
       jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
 
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
@@ -408,7 +408,7 @@ describe('Package policy service', () => {
     });
 
     it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.create.mockResolvedValueOnce({
@@ -454,7 +454,7 @@ describe('Package policy service', () => {
     });
 
     it('should handle cloud connector variables when supports_cloud_connector is true', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       const packagePolicyWithCloudConnector = {
@@ -524,7 +524,7 @@ describe('Package policy service', () => {
     });
 
     it('should not process cloud connector variables and create cloud connector when supports_cloud_connector is false', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       const packagePolicyWithoutCloudConnector = {
@@ -924,7 +924,7 @@ describe('Package policy service', () => {
 
   describe('bulkCreate', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.bulkCreate.mockResolvedValueOnce({
@@ -1570,7 +1570,7 @@ describe('Package policy service', () => {
           throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await expect(
         packagePolicyService.update(
           savedObjectsClient,
@@ -1641,7 +1641,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await expect(
         packagePolicyService.update(
           savedObjectsClient,
@@ -1727,7 +1727,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const result = await packagePolicyService.update(
         savedObjectsClient,
         elasticsearchClient,
@@ -1813,7 +1813,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const result = await packagePolicyService.update(
         savedObjectsClient,
         elasticsearchClient,
@@ -1954,7 +1954,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const res = packagePolicyService.update(
         savedObjectsClient,
@@ -2083,7 +2083,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.update(
         savedObjectsClient,
@@ -2214,7 +2214,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.update(
         savedObjectsClient,
@@ -2283,7 +2283,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.update(
         savedObjectsClient,
@@ -2336,7 +2336,7 @@ describe('Package policy service', () => {
           return attrs;
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.update(
         savedObjectsClient,
@@ -2354,7 +2354,7 @@ describe('Package policy service', () => {
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const mockPackagePolicy = createPackagePolicyMock();
 
@@ -2396,7 +2396,7 @@ describe('Package policy service', () => {
 
     it('should run "packagePolicyPostUpdate" external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockPackagePolicy = createPackagePolicyMock();
       const attributes = {
         ...mockPackagePolicy,
@@ -2512,7 +2512,7 @@ describe('Package policy service', () => {
 
       it('should not remove protections if policy_ids is not changed', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, testedPolicyIds);
 
@@ -2536,7 +2536,7 @@ describe('Package policy service', () => {
 
       it('should remove protections if policy_ids is changed, only affected policies', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         const updatedPolicyIds = [...testedPolicyIds].splice(1, 2);
 
@@ -2562,7 +2562,7 @@ describe('Package policy service', () => {
 
       it('should remove protections from all agent policies if updated policy_ids is empty', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, []);
 
@@ -2582,7 +2582,7 @@ describe('Package policy service', () => {
 
       it('should set protections to false on new policy assignment', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         const updatedPolicyIds = [...testedPolicyIds, 'test-agent-policy-4'];
 
@@ -2608,7 +2608,7 @@ describe('Package policy service', () => {
 
       it('should set protections to false on all new policy assignment', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, [], testedPolicyIds);
 
@@ -2628,7 +2628,7 @@ describe('Package policy service', () => {
 
       it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
         const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
 
         // Ensure both old and new policies are NOT endpoint
@@ -2664,7 +2664,7 @@ describe('Package policy service', () => {
 
       it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         // Mock existing package policy
         savedObjectsClient.bulkGet.mockResolvedValue({
@@ -2839,7 +2839,7 @@ describe('Package policy service', () => {
         }
       );
 
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const toUpdate = { ...mockPackagePolicy, inputs: inputsUpdate };
 
@@ -2978,7 +2978,7 @@ describe('Package policy service', () => {
           };
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3117,7 +3117,7 @@ describe('Package policy service', () => {
         }
       );
 
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const result = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3193,7 +3193,7 @@ describe('Package policy service', () => {
         }
       );
 
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const { updatedPolicies } = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3251,7 +3251,7 @@ describe('Package policy service', () => {
         }
       );
 
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const { updatedPolicies } = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3352,7 +3352,7 @@ describe('Package policy service', () => {
           };
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3453,7 +3453,7 @@ describe('Package policy service', () => {
           };
         }
       );
-      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await packagePolicyService.bulkUpdate(
         savedObjectsClient,
@@ -3471,7 +3471,7 @@ describe('Package policy service', () => {
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const mockPackagePolicies = [
         {
@@ -3520,7 +3520,7 @@ describe('Package policy service', () => {
 
     it('should call external callbacks', async () => {
       const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const callbackOne = jest.fn().mockImplementation((p) => p);
       appContextService.addExternalCallback('packagePolicyPostUpdate', callbackOne);
       const callbackTwo = jest.fn().mockImplementation((p) => p);
@@ -3675,7 +3675,7 @@ describe('Package policy service', () => {
 
         setupSOClientMocks(savedObjectsClient);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         await callPackagePolicyServiceBulkUpdate(
           savedObjectsClient,
@@ -3701,7 +3701,7 @@ describe('Package policy service', () => {
 
         setupSOClientMocks(savedObjectsClient);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         const packagePoliciesWithIncompletePolicyIds = testedPackagePolicies.map((policy) => ({
           ...policy,
@@ -3731,7 +3731,7 @@ describe('Package policy service', () => {
 
         setupSOClientMocks(savedObjectsClient);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         const packagePoliciesWithEmptyPolicyIds = testedPackagePolicies.map((policy) => ({
           ...policy,
@@ -3773,7 +3773,7 @@ describe('Package policy service', () => {
           }),
         ]);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         await callPackagePolicyServiceBulkUpdate(
           savedObjectsClient,
@@ -3816,7 +3816,7 @@ describe('Package policy service', () => {
 
         setupSOClientMocks(savedObjectsClient, nonEndpointPoliciesSO);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         await callPackagePolicyServiceBulkUpdate(
           savedObjectsClient,
@@ -3856,7 +3856,7 @@ describe('Package policy service', () => {
 
         setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
 
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         await callPackagePolicyServiceBulkUpdate(
           savedObjectsClient,
@@ -3883,7 +3883,7 @@ describe('Package policy service', () => {
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const mockPackagePolicy = {
         id: 'test-package-policy',
@@ -3938,7 +3938,7 @@ describe('Package policy service', () => {
 
     it('should execute external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await packagePolicyService.runPostDeleteExternalCallbacks(
         deletedPackagePolicies,
@@ -3965,7 +3965,7 @@ describe('Package policy service', () => {
 
     it("should execute all external callbacks even if one throw's", async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       callbackOne.mockImplementation(async (deletedPolicies) => {
         callingOrder.push('one');
@@ -3983,7 +3983,7 @@ describe('Package policy service', () => {
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       let error: FleetError;
       const callbackOneError = new Error('foo 1');
@@ -4033,7 +4033,7 @@ describe('Package policy service', () => {
 
     it('should execute external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await packagePolicyService.runDeleteExternalCallbacks(packagePolicies, soClient, esClient);
 
       expect(callbackOne).toHaveBeenCalledWith(packagePolicies, soClient, esClient);
@@ -4043,7 +4043,7 @@ describe('Package policy service', () => {
 
     it("should execute all external callbacks even if one throw's", async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       callbackOne.mockImplementation(async (deletedPolicies) => {
         callingOrder.push('one');
         throw new Error('foo');
@@ -4056,7 +4056,7 @@ describe('Package policy service', () => {
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
@@ -4156,7 +4156,7 @@ describe('Package policy service', () => {
 
     it('should call external callbacks in expected order', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
@@ -4184,7 +4184,7 @@ describe('Package policy service', () => {
 
     it('should feed package policy returned by last callback', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
       appContextService.addExternalCallback('packagePolicyCreate', callbackTwo);
@@ -4238,7 +4238,7 @@ describe('Package policy service', () => {
 
       it('should fail to execute remaining callbacks after a callback exception', async () => {
         const soClient = createSavedObjectClientMock();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         try {
           await packagePolicyService.runExternalCallbacks(
@@ -4262,7 +4262,7 @@ describe('Package policy service', () => {
 
       it('should fail to return the package policy', async () => {
         const soClient = createSavedObjectClientMock();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
         await expect(
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
@@ -4279,7 +4279,7 @@ describe('Package policy service', () => {
     describe('with validation errors', () => {
       it('should convert ValidationError to PackagePolicyValidationError', async () => {
         const soClient = createSavedObjectClientMock();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
         // Create a callback that returns an invalid package policy (uppercase namespace)
         const invalidCallback: CombinedExternalCallback = jest.fn(async (ds) => {
@@ -4388,7 +4388,7 @@ describe('Package policy service', () => {
 
     it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
@@ -6566,7 +6566,7 @@ describe('Package policy service', () => {
   describe('removeOutputFromAll', () => {
     it('should update policies using deleted output', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
       soClient.find.mockResolvedValue({
         saved_objects: [

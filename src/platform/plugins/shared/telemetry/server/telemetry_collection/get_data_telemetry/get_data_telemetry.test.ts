@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 describe('get_data_telemetry', () => {
   describe('DATA_DATASETS_INDEX_PATTERNS', () => {
@@ -301,7 +301,7 @@ describe('get_data_telemetry', () => {
     });
 
     test('return empty array when there is an error', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       esClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
       esClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
       await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
@@ -313,7 +313,7 @@ function mockEsClient(
   { isECS = false, dataStreamDataset = '', dataStreamType = '', shipper = '' } = {},
   indexStats = {}
 ) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
   // @ts-expect-error
   esClient.indices.getMapping.mockImplementationOnce(async () => {
     const body = Object.fromEntries(

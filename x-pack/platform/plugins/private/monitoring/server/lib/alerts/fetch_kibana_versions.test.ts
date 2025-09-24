@@ -6,7 +6,7 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -22,7 +22,7 @@ jest.mock('../../static_globals', () => ({
 import { Globals } from '../../static_globals';
 
 describe('fetchKibanaVersions', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
     {
       clusterUuid: 'cluster123',

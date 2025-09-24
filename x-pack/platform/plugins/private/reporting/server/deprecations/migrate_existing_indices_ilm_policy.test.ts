@@ -6,22 +6,20 @@
  */
 
 import type { GetDeprecationsContext } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 
-type ScopedClusterClientMock = ReturnType<
-  typeof elasticsearchServiceMock.createScopedClusterClient
->;
+type ScopedClusterClientMock = ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
 
 describe("Migrate existing indices' ILM policy deprecations", () => {
   let esClient: ScopedClusterClientMock;
   let deprecationsCtx: GetDeprecationsContext;
 
   beforeEach(async () => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClient = elasticsearchClientMock.createScopedClusterClient();
     deprecationsCtx = {
       esClient,
       savedObjectsClient: savedObjectsClientMock.create(),

@@ -17,7 +17,7 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { KibanaResponseFactory } from '@kbn/core/server';
@@ -61,7 +61,7 @@ describe('Action List Route', () => {
   ) => Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>>;
 
   beforeEach(() => {
-    const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClient = elasticsearchClientMock.createScopedClusterClient();
     const mockSavedObjectClient = savedObjectsClientMock.create();
     const startContract = createMockEndpointAppContextServiceStartContract();
     const routerMock = httpServiceMock.createRouter();

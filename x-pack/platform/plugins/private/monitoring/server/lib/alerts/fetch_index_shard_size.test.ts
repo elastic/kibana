@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -24,7 +24,7 @@ jest.mock('../../static_globals', () => ({
 import { Globals } from '../../static_globals';
 
 describe('fetchIndexShardSize', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
     {
       clusterUuid: 'cluster123',

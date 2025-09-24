@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { MockAuthenticationProviderOptions } from './base.mock';
@@ -30,15 +30,13 @@ describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   let mockUser: ReturnType<typeof mockAuthenticatedUser>;
-  let mockScopedClusterClient: ReturnType<
-    typeof elasticsearchServiceMock.createScopedClusterClient
-  >;
+  let mockScopedClusterClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'oidc' });
 
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'oidc', name: 'oidc' } });
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(mockUser);
     mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

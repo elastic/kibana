@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
@@ -64,7 +64,7 @@ describe('RiskEngineDataClient', () => {
     let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
     beforeEach(() => {
-      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       logger = loggingSystemMock.createLogger();
       mockSavedObjectClient = savedObjectsClientMock.create();
       const options = {

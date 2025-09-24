@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { MockAuthenticationProviderOptions } from './base.mock';
@@ -22,7 +22,7 @@ import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
 function expectAuthenticateCall(
-  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -46,7 +46,7 @@ describe('KerberosAuthenticationProvider', () => {
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(
         mockAuthenticatedUser()
       );
@@ -62,7 +62,7 @@ describe('KerberosAuthenticationProvider', () => {
     it('does not handle requests if backend does not support Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
@@ -84,7 +84,7 @@ describe('KerberosAuthenticationProvider', () => {
           body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
         })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -106,7 +106,7 @@ describe('KerberosAuthenticationProvider', () => {
         'Unavailable',
         securityMock.createApiResponse({ statusCode: 500, body: {} })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -302,7 +302,7 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'token', refreshToken: 'refresh-token' };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
@@ -348,7 +348,7 @@ describe('KerberosAuthenticationProvider', () => {
       };
 
       const authorization = `Bearer ${tokenPair.accessToken}`;
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -369,7 +369,7 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
@@ -407,7 +407,7 @@ describe('KerberosAuthenticationProvider', () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 503, body: {} })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -424,7 +424,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails with `Negotiate` challenge if both access and refresh tokens from the state are expired and backend supports Kerberos.', async () => {
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         new errors.ResponseError(
           securityMock.createApiResponse({

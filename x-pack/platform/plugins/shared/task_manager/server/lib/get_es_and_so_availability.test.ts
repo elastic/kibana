@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { GetElasticsearchAndSOAvailabilityOpts } from './get_es_and_so_availability';
@@ -16,7 +16,7 @@ import { getElasticsearchAndSOAvailability } from './get_es_and_so_availability'
 import type { ClusterHealthHealthResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 const logger = loggingSystemMock.createLogger();
-const clusterClientMock = elasticsearchServiceMock.createClusterClient();
+const clusterClientMock = elasticsearchClientMock.createClusterClient();
 const getClusterClient = async () => clusterClientMock;
 
 function getOpts(

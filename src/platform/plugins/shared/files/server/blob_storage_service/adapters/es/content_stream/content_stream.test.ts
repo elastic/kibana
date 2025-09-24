@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
 import { encode, decode } from '@kbn/cbor';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import { ContentStream } from './content_stream';
@@ -21,7 +21,7 @@ import type { FileDocument } from '../../../../file_client/file_metadata_client/
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 describe('ContentStream', () => {
-  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: Logger;
   let stream: ContentStream;
 
@@ -42,7 +42,7 @@ describe('ContentStream', () => {
   };
 
   beforeEach(() => {
-    client = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    client = elasticsearchClientMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
     client.get.mockResponse(
       toReadable(set({ found: true }, '_source.data', Buffer.from('some content')))

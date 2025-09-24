@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchClusters } from './fetch_clusters';
 
 jest.mock('../../static_globals', () => ({
@@ -27,7 +27,7 @@ describe('fetchClusters', () => {
   const clusterName = 'monitoring';
 
   it('return a list of clusters', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse({
       hits: {
         hits: [
@@ -47,7 +47,7 @@ describe('fetchClusters', () => {
 
   it('return the metadata name if available', async () => {
     const metadataName = 'custom-monitoring';
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse({
       hits: {
         hits: [
@@ -72,14 +72,14 @@ describe('fetchClusters', () => {
   });
 
   it('should limit the time period in the query', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     await fetchClusters(esClient);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
   });
 
   it('should call ES with correct query', async () => {
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     await fetchClusters(esClient);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
@@ -119,7 +119,7 @@ describe('fetchClusters', () => {
   it('should call ES with correct query when ccs disabled', async () => {
     // @ts-ignore
     Globals.app.config.ui.ccs.enabled = false;
-    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];

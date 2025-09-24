@@ -15,7 +15,7 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -85,7 +85,7 @@ describe('test protection updates note handler', () => {
   describe('test protection updates note handler', () => {
     beforeEach(() => {
       mockEndpointContext = createMockEndpointAppContext();
-      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClient = elasticsearchClientMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();

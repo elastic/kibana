@@ -6,14 +6,14 @@
  */
 
 import { type ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getHealthIndicators } from './health_indicators';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 
 describe('getHealthIndicators', () => {
   let esClient: ElasticsearchClientMock;
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   });
 
   it('returns empty array on green indicators', async () => {

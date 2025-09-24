@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
 import type { Logger, SavedObject } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
@@ -93,7 +93,7 @@ export const createRuleTypeMocks = (
   const services = {
     uiSettingsClient: { get: jest.fn().mockResolvedValue([]) },
     savedObjectsClient: mockSavedObjectsClient,
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions })),
       alertLimit: {

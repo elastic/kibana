@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { set } from '@kbn/safer-lodash-set';
@@ -15,7 +15,7 @@ import { EmailNotificationService } from './email_notification_service';
 
 describe('EmailNotificationService', () => {
   const notifications = notificationsMock.createStart();
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let mockEsClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let emailNotificationService: EmailNotificationService;
   let mockCore: ReportingCore;
 

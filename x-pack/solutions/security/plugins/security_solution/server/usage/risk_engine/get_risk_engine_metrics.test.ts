@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getRiskEngineMetrics } from './get_risk_engine_metrics';
 import { getAggregationResultMock, getStatsResultMock } from './get_risk_engine_metrics.mocks';
@@ -15,12 +15,12 @@ const riskEngineIndexPatterns = {
 };
 
 describe('risk engine metrics', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   describe('risk engine not installed', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       logger = loggingSystemMock.createLogger();
     });
 
@@ -38,7 +38,7 @@ describe('risk engine metrics', () => {
 
   describe('risk engine installed', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       logger = loggingSystemMock.createLogger();
     });
 

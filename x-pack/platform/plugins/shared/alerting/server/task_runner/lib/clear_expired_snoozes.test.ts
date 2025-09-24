@@ -8,7 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RuleSnooze } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -18,7 +18,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 let clock: sinon.SinonFakeTimers;
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 describe('clearExpiredSnoozes()', () => {
   beforeAll(() => {

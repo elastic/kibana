@@ -12,7 +12,7 @@ import {
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
 const mockIsEcsDataMigrationRequired = jest.fn().mockResolvedValue(false);
@@ -33,7 +33,7 @@ const auditLogger = auditLoggerMock.create();
 const getStartServices = jest.fn().mockResolvedValue([
   {
     elasticsearch: {
-      client: elasticsearchServiceMock.createClusterClient(),
+      client: elasticsearchClientMock.createClusterClient(),
     },
   },
   { taskManager: mockTaskManagerStart },

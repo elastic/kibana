@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -34,7 +34,7 @@ describe('updateLatestExecutedState', () => {
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
 

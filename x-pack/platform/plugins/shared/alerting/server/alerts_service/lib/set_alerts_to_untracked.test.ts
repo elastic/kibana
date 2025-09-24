@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
@@ -24,7 +24,7 @@ describe('setAlertsToUntracked()', () => {
     jest.setSystemTime(new Date(date));
 
     logger = loggingSystemMock.createLogger();
-    clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     clusterClient.search.mockResponse({
       took: 1,
       timed_out: false,

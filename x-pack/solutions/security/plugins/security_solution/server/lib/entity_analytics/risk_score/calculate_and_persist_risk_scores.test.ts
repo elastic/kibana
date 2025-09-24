@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
 
@@ -57,7 +57,7 @@ describe('calculateAndPersistRiskScores', () => {
       calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient, false);
 
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       logger = loggingSystemMock.createLogger();
       riskScoreDataClient = riskScoreDataClientMock.create();
     });
@@ -99,7 +99,7 @@ describe('calculateAndPersistRiskScores', () => {
     const calculate = () =>
       calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient, true);
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       logger = loggingSystemMock.createLogger();
       riskScoreDataClient = riskScoreDataClientMock.create();
     });

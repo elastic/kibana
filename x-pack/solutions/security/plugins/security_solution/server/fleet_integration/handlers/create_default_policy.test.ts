@@ -15,7 +15,7 @@ import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
@@ -43,7 +43,7 @@ describe('Create Default Policy tests ', () => {
   const createDefaultPolicyCallback = async (
     config?: AnyPolicyCreateConfig
   ): Promise<PolicyConfig> => {
-    const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
+    const esClientInfo = await elasticsearchClientMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
     return createDefaultPolicy(
@@ -345,7 +345,7 @@ describe('Create Default Policy tests ', () => {
       const createDefaultPolicyCallbackWithDisabledFeature = async (
         config?: AnyPolicyCreateConfig
       ): Promise<PolicyConfig> => {
-        const esClientInfo = await elasticsearchServiceMock
+        const esClientInfo = await elasticsearchClientMock
           .createClusterClient()
           .asInternalUser.info();
         esClientInfo.cluster_name = '';
@@ -379,7 +379,7 @@ describe('Create Default Policy tests ', () => {
       const createDefaultPolicyCallbackWithBothDisabled = async (
         config?: AnyPolicyCreateConfig
       ): Promise<PolicyConfig> => {
-        const esClientInfo = await elasticsearchServiceMock
+        const esClientInfo = await elasticsearchClientMock
           .createClusterClient()
           .asInternalUser.info();
         esClientInfo.cluster_name = '';

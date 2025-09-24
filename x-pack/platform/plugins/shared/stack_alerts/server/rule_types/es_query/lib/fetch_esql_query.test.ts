@@ -11,7 +11,7 @@ import { fetchEsqlQuery, getEsqlQuery, getSourceFields, generateLink } from './f
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -69,7 +69,7 @@ describe('fetchEsqlQuery', () => {
 
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
 
       scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
         new Error(
@@ -113,7 +113,7 @@ describe('fetchEsqlQuery', () => {
         index: 'test-index',
       };
 
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
         values: [],
@@ -172,7 +172,7 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should add a warning when is_partial is true but there is no shard failure', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
         values: [],
@@ -227,7 +227,7 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should not add a warning when is_partial is false', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
         values: [],
@@ -365,7 +365,7 @@ describe('fetchEsqlQuery', () => {
   });
 
   it('should bubble up warnings if there are duplicate alerts', async () => {
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const scopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
       columns: [],
       values: [],

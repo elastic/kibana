@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { searchAlerts } from './alerts_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance } from './alerts_client_mock.test';
@@ -25,7 +25,7 @@ describe('alerts_route.ts', () => {
 
   describe('searchAlerts(client, sessionEntityId)', () => {
     it('should return an empty events array for a non existant entity_id', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
+      const esClient = elasticsearchClientMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(esClient);
       const body = await searchAlerts(alertsClient, 'asdf', 100);
 

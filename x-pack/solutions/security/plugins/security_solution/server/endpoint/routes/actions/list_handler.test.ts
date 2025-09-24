@@ -7,7 +7,7 @@
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
@@ -39,7 +39,7 @@ describe('Action List Handler', () => {
   ) => Promise<jest.Mocked<KibanaResponseFactory>>;
 
   beforeEach(() => {
-    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+    const esClientMock = elasticsearchClientMock.createScopedClusterClient();
     const routerMock = httpServiceMock.createRouter();
     apiTestSetup = createHttpApiTestSetupMock();
 

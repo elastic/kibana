@@ -7,7 +7,7 @@
 
 import { first, take, bufferCount } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
@@ -33,7 +33,7 @@ type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggr
 };
 
 const asApiResponse = (body: ResponseWithAggs) =>
-  elasticsearchServiceMock
+  elasticsearchClientMock
     .createSuccessTransportRequestPromise(body as estypes.SearchResponse<ConcreteTaskInstance>)
     .then((res) => res.body as ResponseWithAggs);
 

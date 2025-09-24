@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
@@ -14,7 +14,7 @@ describe('Accurately answers if index exists', () => {
   let esClient: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
   });
 
   it('Returns FALSE for a non-existent index', async () => {

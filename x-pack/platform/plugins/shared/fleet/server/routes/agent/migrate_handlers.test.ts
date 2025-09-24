@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   KibanaResponseFactory,
@@ -61,7 +61,7 @@ describe('Migrate handlers', () => {
 
       mockResponse = httpServerMock.createResponseFactory();
       mockSavedObjectsClient = savedObjectsClientMock.create();
-      mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockElasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockRequest = {
         params: { agentId },
         body: mockSettings,
@@ -185,7 +185,7 @@ describe('Migrate handlers', () => {
 
       mockResponse = httpServerMock.createResponseFactory();
       mockSavedObjectsClient = savedObjectsClientMock.create();
-      mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockElasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       // Setup the context with correct structure
       mockContext = {

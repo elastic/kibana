@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 
 import type { ScopeableRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { mockAuthenticationProviderOptions } from './base.mock';
@@ -23,7 +23,7 @@ function generateAuthorizationHeader(username: string, password: string) {
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -74,7 +74,7 @@ describe('BasicAuthenticationProvider', () => {
       const authenticationError = new errors.ResponseError(
         securityMock.createApiResponse({ body: {} })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         authenticationError
       );
@@ -158,7 +158,7 @@ describe('BasicAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -176,7 +176,7 @@ describe('BasicAuthenticationProvider', () => {
       const authenticationError = new errors.ResponseError(
         securityMock.createApiResponse({ body: {} })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
         authenticationError
       );

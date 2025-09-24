@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { UpdateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
@@ -18,7 +18,7 @@ import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_disc
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
-clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
+clients.core.elasticsearch.client = elasticsearchClientMock.createScopedClusterClient();
 
 const updateAttackDiscoverySchedule = jest.fn();
 const mockSchedulingDataClient = {

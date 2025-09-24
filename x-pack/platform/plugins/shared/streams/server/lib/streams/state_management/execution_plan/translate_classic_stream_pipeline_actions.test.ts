@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   MANAGED_BY_STREAMS,
   translateClassicStreamPipelineActions,
@@ -34,7 +34,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
@@ -143,7 +143,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
@@ -268,7 +268,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.indices.getIndexTemplate
         .mockImplementationOnce(async () => ({
           index_templates: [
@@ -414,7 +414,7 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
@@ -486,7 +486,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
@@ -592,7 +592,7 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
@@ -675,7 +675,7 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
@@ -766,7 +766,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
@@ -840,7 +840,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
@@ -940,7 +940,7 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const clusterClient = elasticsearchClientMock.createScopedClusterClient();
       clusterClient.asCurrentUser.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {

@@ -18,7 +18,7 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   FieldsObject,
   ResolverNode,
@@ -72,7 +72,7 @@ describe('fetcher test', () => {
     });
   });
   beforeEach(() => {
-    client = elasticsearchServiceMock.createScopedClusterClient();
+    client = elasticsearchClientMock.createScopedClusterClient();
   });
 
   describe('descendants', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getActionAgentType } from './get_action_agent_type';
 import { applyEsClientSearchMock } from '../../../mocks/utils.mock';
@@ -16,7 +16,7 @@ describe('getActionAgentType()', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    esClientMock = elasticsearchClientMock.createScopedClusterClient().asInternalUser;
   });
 
   it('should throw error if action is not found', async () => {

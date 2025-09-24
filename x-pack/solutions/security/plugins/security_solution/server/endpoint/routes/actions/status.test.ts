@@ -9,7 +9,7 @@
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
@@ -51,7 +51,7 @@ describe('Endpoint Pending Action Summary API', () => {
   const setupRouteHandler = (): void => {
     const routerMock = httpServiceMock.createRouter();
     const endpointContextMock = createMockEndpointAppContext();
-    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+    const esClientMock = elasticsearchClientMock.createScopedClusterClient();
 
     esClientMock.asInternalUser =
       endpointContextMock.service.getInternalEsClient() as ElasticsearchClientMock;

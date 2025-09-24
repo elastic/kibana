@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
@@ -45,11 +45,11 @@ import type { NewArtifact } from './types';
 import type { FetchAllArtifactsOptions } from './types';
 
 describe('When using the artifacts services', () => {
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let esClientMock: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    esClientMock = elasticsearchServiceMock.createInternalClient();
+    esClientMock = elasticsearchClientMock.createInternalClient();
   });
 
   describe('and calling `getArtifact()`', () => {
@@ -71,7 +71,7 @@ describe('When using the artifacts services', () => {
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
       esClientMock.get.mockImplementation(() => {
-        return elasticsearchServiceMock.createErrorTransportRequestPromise(
+        return elasticsearchClientMock.createErrorTransportRequestPromise(
           new errors.ResponseError(generateEsRequestErrorApiResponseMock())
         );
       });

@@ -13,6 +13,7 @@ import tls from 'tls';
 
 import { pollEsNodesVersion } from '@kbn/core/server';
 import type { NodesVersionCompatibility } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -47,19 +48,19 @@ describe('ElasticsearchService', () => {
 
   describe('#setup()', () => {
     let mockConnectionStatusClient: ReturnType<
-      typeof elasticsearchServiceMock.createCustomClusterClient
+      typeof elasticsearchClientMock.createCustomClusterClient
     >;
-    let mockEnrollClient: ReturnType<typeof elasticsearchServiceMock.createCustomClusterClient>;
+    let mockEnrollClient: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
     let mockAuthenticateClient: ReturnType<
-      typeof elasticsearchServiceMock.createCustomClusterClient
+      typeof elasticsearchClientMock.createCustomClusterClient
     >;
-    let mockPingClient: ReturnType<typeof elasticsearchServiceMock.createCustomClusterClient>;
+    let mockPingClient: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
     let setupContract: ElasticsearchServiceSetup;
     beforeEach(() => {
-      mockConnectionStatusClient = elasticsearchServiceMock.createCustomClusterClient();
-      mockEnrollClient = elasticsearchServiceMock.createCustomClusterClient();
-      mockAuthenticateClient = elasticsearchServiceMock.createCustomClusterClient();
-      mockPingClient = elasticsearchServiceMock.createCustomClusterClient();
+      mockConnectionStatusClient = elasticsearchClientMock.createCustomClusterClient();
+      mockEnrollClient = elasticsearchClientMock.createCustomClusterClient();
+      mockAuthenticateClient = elasticsearchClientMock.createCustomClusterClient();
+      mockPingClient = elasticsearchClientMock.createCustomClusterClient();
       mockElasticsearchPreboot.createClient.mockImplementation((type) => {
         switch (type) {
           case 'enroll':
@@ -330,7 +331,7 @@ describe('ElasticsearchService', () => {
 
     describe('#enroll()', () => {
       it('fails if enroll call fails', async () => {
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
         mockScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
           new errors.ResponseError(
             interactiveSetupMock.createApiResponse({ statusCode: 401, body: { message: 'oh no' } })
@@ -348,7 +349,7 @@ describe('ElasticsearchService', () => {
       });
 
       it('fails if none of the hosts are accessible', async () => {
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
         mockScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
           new errors.ConnectionError(
             'some-message',
@@ -370,7 +371,7 @@ describe('ElasticsearchService', () => {
       });
 
       it('fails if authenticate call fails', async () => {
-        const mockEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockEnrollScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
         mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
@@ -398,7 +399,7 @@ describe('ElasticsearchService', () => {
       });
 
       it('fails if version is incompatible', async () => {
-        const mockEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockEnrollScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
         mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
@@ -433,7 +434,7 @@ describe('ElasticsearchService', () => {
         mockElasticsearchPreboot.createClient.mockClear();
 
         const mockHostOneEnrollScopedClusterClient =
-          elasticsearchServiceMock.createScopedClusterClient();
+          elasticsearchClientMock.createScopedClusterClient();
         mockHostOneEnrollScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
           new errors.ConnectionError(
             'some-message',
@@ -442,7 +443,7 @@ describe('ElasticsearchService', () => {
         );
 
         const mockHostTwoEnrollScopedClusterClient =
-          elasticsearchServiceMock.createScopedClusterClient();
+          elasticsearchClientMock.createScopedClusterClient();
         mockHostTwoEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
@@ -713,7 +714,7 @@ some weird+ca/with
     });
 
     it('closes connection status check client', async () => {
-      const mockConnectionStatusClient = elasticsearchServiceMock.createCustomClusterClient();
+      const mockConnectionStatusClient = elasticsearchClientMock.createCustomClusterClient();
       mockElasticsearchPreboot.createClient.mockImplementation((type) => {
         switch (type) {
           case 'connectionStatus':

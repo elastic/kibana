@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
@@ -32,7 +32,7 @@ describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
   const kibanaVersion = '8.16.0';
 
-  const esClusterClient = elasticsearchServiceMock.createClusterClient();
+  const esClusterClient = elasticsearchClientMock.createClusterClient();
   const currentUser = securityServiceMock.createMockAuthenticatedUser();
   const loggerFactory = loggingSystemMock.create();
   const logger = loggerFactory.get('siemRuleMigrations');

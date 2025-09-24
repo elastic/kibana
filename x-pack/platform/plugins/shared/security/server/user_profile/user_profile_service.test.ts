@@ -12,7 +12,7 @@ import type {
   SecuritySuggestUserProfilesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -28,14 +28,14 @@ import { sessionMock } from '../session_management/session.mock';
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
   let mockStartParams: {
-    clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+    clusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
   let userProfileService: UserProfileService;
   beforeEach(() => {
     mockStartParams = {
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
+      clusterClient: elasticsearchClientMock.createClusterClient(),
       session: sessionMock.create(),
     };
     mockAuthz = authorizationMock.create();

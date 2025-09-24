@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { AgentPolicy, Agent } from '../../types';
 
@@ -62,7 +62,7 @@ const mockedPolicy: AgentPolicy = {
 };
 
 describe('Agent migration', () => {
-  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let esClientMock: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   const soClientMock = {
     getCurrentNamespace: jest.fn(),
   } as any;
@@ -70,7 +70,7 @@ describe('Agent migration', () => {
   beforeEach(() => {
     // Reset mocks before each test
     jest.resetAllMocks();
-    esClientMock = elasticsearchServiceMock.createInternalClient();
+    esClientMock = elasticsearchClientMock.createInternalClient();
 
     (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
 

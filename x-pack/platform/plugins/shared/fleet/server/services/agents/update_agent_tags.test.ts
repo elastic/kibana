@@ -6,7 +6,7 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -56,7 +56,7 @@ describe('update_agent_tags', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createInternalClient();
+    esClient = elasticsearchClientMock.createInternalClient();
     soClient = savedObjectsClientMock.create();
     esClient.search.mockResolvedValue({
       hits: {

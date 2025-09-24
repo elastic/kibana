@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { MonitoringStats } from '../monitoring';
@@ -23,10 +23,10 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 const createMockClusterClient = (response: SecurityHasPrivilegesResponse) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
   mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchClientMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -49,7 +49,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
     });
 
@@ -81,7 +81,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       },
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
     });
 
@@ -243,7 +243,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: () => Promise.resolve(elasticsearchClientMock.createClusterClient()),
       usageCounter: mockUsageCounter,
     });
 

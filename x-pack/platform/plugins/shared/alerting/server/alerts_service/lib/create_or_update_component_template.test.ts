@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
@@ -13,7 +13,7 @@ import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
-const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const clusterClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const ComponentTemplate: ClusterPutComponentTemplateRequest = {
   name: 'test-mappings',

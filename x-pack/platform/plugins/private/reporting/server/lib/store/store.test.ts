@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportDocument } from '@kbn/reporting-common/types';
@@ -17,7 +17,7 @@ import { createMockReportingCore } from '../../test_helpers';
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();
   let mockCore: ReportingCore;
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let mockEsClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(async () => {
     const reportingConfig = {

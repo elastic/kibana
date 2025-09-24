@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -23,7 +23,7 @@ jest.mock('../../static_globals', () => ({
 import { Globals } from '../../static_globals';
 
 describe('fetchElasticsearchVersions', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
   const clusters = [
     {

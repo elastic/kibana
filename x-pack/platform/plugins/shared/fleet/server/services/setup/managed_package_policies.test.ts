@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { packagePolicyService } from '../package_policy';
@@ -34,7 +34,7 @@ describe('upgradeManagedPackagePolicies', () => {
   });
 
   it('should not upgrade policies for installed package', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
     (getInstallation as jest.Mock).mockResolvedValueOnce(undefined);
@@ -45,7 +45,7 @@ describe('upgradeManagedPackagePolicies', () => {
   });
 
   it('should upgrade policies for managed package', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
     const packagePolicy = {
       id: 'managed-package-id',
@@ -97,7 +97,7 @@ describe('upgradeManagedPackagePolicies', () => {
   });
 
   it('should not upgrade policy if newer than installed package version', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
     (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
@@ -136,7 +136,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
   describe('when dry run reports conflicts', () => {
     it('should return errors + diff without performing upgrade', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = savedObjectsClientMock.create();
 
       (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(

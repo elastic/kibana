@@ -7,7 +7,7 @@
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { MonitoringConfig } from '../../config';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
@@ -60,7 +60,7 @@ jest.mock('./lib/fetch_license_type', () => ({
 }));
 
 describe('getMonitoringUsageCollector', () => {
-  const esClient = elasticsearchServiceMock.createClusterClient();
+  const esClient = elasticsearchClientMock.createClusterClient();
   const getEsClient = () => esClient;
   const config = {
     ui: {

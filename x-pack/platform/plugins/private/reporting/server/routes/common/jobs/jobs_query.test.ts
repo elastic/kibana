@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
@@ -22,7 +22,7 @@ const fakeRawRequest = {
 } as unknown as KibanaRequest;
 
 describe('jobsQuery', () => {
-  let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let jobsQuery: ReturnType<typeof jobsQueryFactory>;
 
   beforeEach(async () => {

@@ -8,7 +8,7 @@
 // eslint-disable-next-line import/order
 import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
@@ -22,10 +22,8 @@ const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;
-  let mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let mockScopedClusterClient: ReturnType<
-    typeof elasticsearchServiceMock.createScopedClusterClient
-  >;
+  let mockClusterClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>;
+  let mockScopedClusterClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let logger: Logger;
   const roleDescriptors: { [key: string]: any } = { foo: true };
@@ -34,8 +32,8 @@ describe('API Keys', () => {
     mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
     mockGetFakeKibanaRequest.mockReset().mockReturnValue(httpServerMock.createKibanaRequest());
 
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient = elasticsearchClientMock.createClusterClient();
+    mockScopedClusterClient = elasticsearchClientMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
     mockLicense = licenseMock.create();

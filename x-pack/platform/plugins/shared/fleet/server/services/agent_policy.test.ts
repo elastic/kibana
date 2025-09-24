@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -187,7 +187,7 @@ describe('Agent policy', () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -204,7 +204,7 @@ describe('Agent policy', () => {
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       await expect(
         agentPolicyService.create(soClient, esClient, {
           name: 'is_managed: true provided',
@@ -218,7 +218,7 @@ describe('Agent policy', () => {
     });
 
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.find.mockResolvedValueOnce({
@@ -259,7 +259,7 @@ describe('Agent policy', () => {
 
     it('should write to the correct saved object-type if user opt-in for space awerness', async () => {
       jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       soClient.find.mockResolvedValueOnce({
@@ -304,7 +304,7 @@ describe('Agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -321,7 +321,7 @@ describe('Agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -339,7 +339,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -360,7 +360,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -384,7 +384,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.find.mockResolvedValueOnce({
         total: 0,
@@ -421,7 +421,7 @@ describe('Agent policy', () => {
       } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.find.mockResolvedValueOnce({
         total: 0,
@@ -460,7 +460,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.find.mockResolvedValueOnce({
         total: 0,
@@ -500,7 +500,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -525,7 +525,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await expect(
         agentPolicyService.create(soClient, esClient, {
@@ -552,7 +552,7 @@ describe('Agent policy', () => {
     });
     it('should create an agent policy with package policies', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockAgentPolicy = {
         name: 'Test Agent Policy',
         namespace: 'default',
@@ -593,7 +593,7 @@ describe('Agent policy', () => {
 
     it('should throw error if a package policy creation fails and delete all policies', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
 
@@ -796,7 +796,7 @@ describe('Agent policy', () => {
 
   describe('delete', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, name: 'Test', package_policies: ['package-1'] });
@@ -805,7 +805,7 @@ describe('Agent policy', () => {
           id: 'package-1',
         },
       ] as any);
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       (getAgentsByKuery as jest.Mock).mockResolvedValue({
         agents: [],
@@ -932,7 +932,7 @@ describe('Agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
@@ -946,7 +946,7 @@ describe('Agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         soClient
       );
@@ -979,7 +979,7 @@ describe('Agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         soClient
       );
@@ -1004,7 +1004,7 @@ describe('Agent policy', () => {
     });
     it('should update policies using deleted output', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -1093,7 +1093,7 @@ describe('Agent policy', () => {
 
     it('should update policies using deleted download source host', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedDownloadSourceService.getDefaultDownloadSourceId.mockResolvedValue(
         'default-download-source-id'
       );
@@ -1142,7 +1142,7 @@ describe('Agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         soClient
       );
@@ -1157,7 +1157,7 @@ describe('Agent policy', () => {
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1191,7 +1191,7 @@ describe('Agent policy', () => {
     it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1215,7 +1215,7 @@ describe('Agent policy', () => {
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1248,7 +1248,7 @@ describe('Agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1276,7 +1276,7 @@ describe('Agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1309,7 +1309,7 @@ describe('Agent policy', () => {
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1340,7 +1340,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
           {
@@ -1370,7 +1370,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: true, isCloudEnabled: false } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
           {
@@ -1400,7 +1400,7 @@ describe('Agent policy', () => {
         .mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -1424,7 +1424,7 @@ describe('Agent policy', () => {
 
     it('should run external "agentPolicyPostUpdate" callbacks when update is successful', async () => {
       const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const postUpdateCallback = jest.fn(async (policy) => policy);
       mockedAppContextService.getExternalCallbacks.mockImplementation((type) => {
@@ -1461,11 +1461,11 @@ describe('Agent policy', () => {
 
   describe('copy', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
 
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     });
 
     it('should throw error for agent policy which has managed package policy', async () => {
@@ -1591,7 +1591,7 @@ describe('Agent policy', () => {
     });
     it('should not create a .fleet-policy document if we cannot get the full policy', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue(null);
@@ -1635,7 +1635,7 @@ describe('Agent policy', () => {
 
     it('should create a .fleet-policy document if we can get the full policy', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
@@ -1711,7 +1711,7 @@ describe('Agent policy', () => {
     });
 
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
@@ -1739,7 +1739,7 @@ describe('Agent policy', () => {
   describe('ensurePreconfiguredAgentPolicy', () => {
     it('should use preconfigured id if provided for policy', async () => {
       const soClient = createSavedObjectClientMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
         id: 'my-unique-id',
@@ -2123,7 +2123,7 @@ describe('Agent policy', () => {
 
   describe('deleteFleetServerPoliciesForPolicyId', () => {
     it('should call audit logger', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.deleteByQuery.mockResolvedValueOnce({} as any);
 
@@ -2135,7 +2135,7 @@ describe('Agent policy', () => {
     });
 
     it('should call deleteByQuery multiple time if there is more than 10000 .fleet-policies', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
       esClient.deleteByQuery.mockResolvedValueOnce({
         deleted: SO_SEARCH_LIMIT,

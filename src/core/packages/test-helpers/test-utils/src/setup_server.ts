@@ -15,7 +15,7 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
@@ -31,7 +31,7 @@ function createCoreServerRequestHandlerContextMock() {
       getImporter: savedObjectsServiceMock.createImporter,
     },
     elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+      client: elasticsearchClientMock.createScopedClusterClient(),
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),

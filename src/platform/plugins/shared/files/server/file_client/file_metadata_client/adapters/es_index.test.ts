@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EsIndexFilesMetadataClient } from '../..';
@@ -15,7 +15,7 @@ import type { FileMetadata } from '@kbn/shared-ux-file-types';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('EsIndexFilesMetadataClient', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: Logger;
 
   const generateMetadata = (): FileMetadata => {
@@ -32,7 +32,7 @@ describe('EsIndexFilesMetadataClient', () => {
   };
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
   });
 

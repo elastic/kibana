@@ -10,7 +10,7 @@ import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClusterClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import type { CoreStatus, IClusterClient, ServiceStatusLevel } from '@kbn/core/server';
@@ -53,7 +53,7 @@ function createCoreSetupWith(esClient: IClusterClient) {
 
 describe('licensing plugin', () => {
   const createEsClient = (response?: Record<string, any>) => {
-    const client = elasticsearchServiceMock.createClusterClient();
+    const client = elasticsearchClientMock.createClusterClient();
     if (response) {
       client.asInternalUser.xpack.info.mockResponse(response as any);
     }

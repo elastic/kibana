@@ -6,7 +6,7 @@
  */
 
 import type { IBasePath, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
@@ -35,7 +35,7 @@ export const createRuleTypeMocks = () => {
   const getUuid = jest.fn();
 
   const services = {
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient(),
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },

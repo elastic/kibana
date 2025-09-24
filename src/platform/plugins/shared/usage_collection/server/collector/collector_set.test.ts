@@ -13,7 +13,7 @@ import type { CollectorSetConfig } from './collector_set';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
@@ -36,7 +36,7 @@ describe('CollectorSet', () => {
     beforeEach(() => {
       fetch = noop;
     });
-    const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const mockSoClient = savedObjectsClientMock.create();
 
     it('should throw an error if non-Collector type of object is registered', () => {
@@ -385,7 +385,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
@@ -475,7 +475,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
@@ -546,7 +546,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
@@ -568,7 +568,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
       await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
@@ -596,7 +596,7 @@ describe('CollectorSet', () => {
         )
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
       await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
@@ -636,7 +636,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
 
       // Call bulkFetch twice concurrently
@@ -663,7 +663,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       const mockSoClient = savedObjectsClientMock.create();
 
       // Call bulkFetch twice sequentially

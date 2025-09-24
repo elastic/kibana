@@ -7,7 +7,7 @@
 
 import type { DetectionMetrics } from './types';
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
@@ -52,13 +52,13 @@ jest.mock(
 );
 
 describe('Detections Usage and Metrics', () => {
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let mlClient: ReturnType<typeof mlServicesMock.createSetupContract>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   describe('getRuleMetrics()', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
@@ -1351,7 +1351,7 @@ describe('Detections Usage and Metrics', () => {
 
   describe('getDetectionsMetrics()', () => {
     beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectResponse());

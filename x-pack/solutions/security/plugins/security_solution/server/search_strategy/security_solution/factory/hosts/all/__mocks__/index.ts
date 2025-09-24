@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { HostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { HostsFields } from '../../../../../../../common/api/search_strategy/hosts/model/sort';
@@ -704,7 +704,7 @@ export const expectedDsl = {
 };
 
 export const mockDeps = {
-  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  esClient: elasticsearchClientMock.createScopedClusterClient(),
   savedObjectsClient: {} as SavedObjectsClientContract,
   endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,

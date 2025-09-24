@@ -6,7 +6,7 @@
  */
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   updateDataStreams,
@@ -15,7 +15,7 @@ import {
 } from './create_or_update_data_stream';
 
 const logger = loggingSystemMock.createLogger();
-const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 esClient.indices.putMapping.mockResolvedValue({ acknowledged: true });
 esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });

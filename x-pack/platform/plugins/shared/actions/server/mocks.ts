@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   savedObjectsClientMock,
@@ -87,7 +87,7 @@ const createServicesMock = () => {
     }
   > = lazyObject({
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
@@ -104,7 +104,7 @@ const createUnsecuredServicesMock = () => {
     }
   > = lazyObject({
     savedObjectsClient: savedObjectsRepositoryMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    scopedClusterClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
       unsecuredSavedObjectsClient: savedObjectsRepositoryMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),

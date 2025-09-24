@@ -6,7 +6,7 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { AGENTS_INDEX } from '../../../common';
 
@@ -238,7 +238,7 @@ describe('getAgentStatusForAgentPolicy', () => {
 
 describe('getIncomingDataByAgentsId', () => {
   it('should work with a large set of datastream patterns', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
 

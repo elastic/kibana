@@ -8,7 +8,6 @@
 import type { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery, generateLink } from './fetch_es_query';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
@@ -41,7 +40,7 @@ const defaultParams: OnlyEsQueryRuleParams = {
 };
 
 const logger = loggerMock.create();
-const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+const scopedClusterClientMock = elasticsearchClientMock.createScopedClusterClient();
 const mockRuleResultService = publicRuleResultServiceMock.create();
 
 describe('fetchEsQuery', () => {
