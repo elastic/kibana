@@ -8,7 +8,8 @@
  */
 
 import type { WorkflowYaml, ForEachContextSchema } from '@kbn/workflows';
-import { StepContextSchema, isForeachStep } from '@kbn/workflows';
+import { DynamicStepContextSchema } from '@kbn/workflows';
+import { isForeachStep } from '@kbn/workflows';
 import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import _ from 'lodash';
@@ -23,8 +24,8 @@ export function getContextSchemaForPath(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>
-): typeof StepContextSchema {
-  let schema = StepContextSchema.merge(getWorkflowContextSchema(definition));
+): typeof DynamicStepContextSchema {
+  let schema = DynamicStepContextSchema.merge(getWorkflowContextSchema(definition));
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
@@ -61,7 +62,7 @@ export function getContextSchemaForPath(
 }
 
 function getStepContextSchemaEnrichmentEntries(
-  stepContextSchema: typeof StepContextSchema,
+  stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   stepId: string

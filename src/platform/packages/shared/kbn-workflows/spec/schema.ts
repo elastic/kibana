@@ -15,10 +15,6 @@ export const RetryPolicySchema = z.object({
   'timeout-seconds': z.number().int().min(1).optional(),
 });
 
-export const TemplatingOptionsSchema = z.object({
-  engine: z.enum(['mustache', 'nunjucks']),
-});
-
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   delay: z
@@ -56,7 +52,6 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
-  templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
@@ -493,14 +488,19 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  // using object instead of record to avoid type mismatch when
+  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
+});
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
   // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
-  now: z.date().optional(),
 });
-
-export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
 export const StepDataSchema = z.object({
   output: z.any().optional(),
@@ -517,9 +517,14 @@ export const ForEachContextSchema = z.object({
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
 export const StepContextSchema = WorkflowContextSchema.extend({
-  // using object instead of record to avoid type mismatch when
-  // extending with actual step ids and different output types
-  steps: z.object({}),
+  steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
+
+export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual step ids and different output types
+  steps: z.object({}),
+});
+export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;

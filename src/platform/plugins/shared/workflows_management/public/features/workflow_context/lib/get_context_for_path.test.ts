@@ -170,8 +170,9 @@ describe('getContextSchemaForPath', () => {
       name: z.string(),
       surname: z.string(),
     });
+    expect((context.shape as any).foreach).toBeDefined();
     expectZodSchemaEqual(
-      context.shape.foreach,
+      (context.shape as any).foreach,
       ForEachContextSchema.extend({
         items: z.array(itemSchema),
         item: itemSchema,

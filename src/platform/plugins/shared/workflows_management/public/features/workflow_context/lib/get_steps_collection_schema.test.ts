@@ -9,7 +9,7 @@
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
-import { ForEachContextSchema, StepContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
 import { z } from '@kbn/zod';
 
@@ -37,7 +37,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
-      StepContextSchema,
+      DynamicStepContextSchema,
       workflowGraph,
       definition,
       'step-name'
@@ -81,7 +81,7 @@ describe('getStepsCollectionSchema', () => {
     };
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
     const stepsCollectionSchema = getStepsCollectionSchema(
-      StepContextSchema,
+      DynamicStepContextSchema,
       workflowGraph,
       definition,
       'step-1-foreach-1'

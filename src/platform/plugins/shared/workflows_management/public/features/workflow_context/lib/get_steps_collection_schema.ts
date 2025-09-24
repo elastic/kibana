@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepContextSchema } from '@kbn/workflows';
+import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId, isForeachStep, type WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
@@ -16,7 +16,7 @@ import { getOutputSchemaForStepType } from '../../../../common/schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 
 export function getStepsCollectionSchema(
-  stepContextSchema: typeof StepContextSchema,
+  stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   stepName: string

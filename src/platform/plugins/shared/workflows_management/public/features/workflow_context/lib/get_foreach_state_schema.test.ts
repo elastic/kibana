@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ForEachContextSchema, StepContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
 import { z } from '@kbn/zod';
 
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
-    const stepContext = StepContextSchema;
+    const stepContext = DynamicStepContextSchema;
     const foreachStateSchema = getForeachStateSchema(stepContext, {
       foreach: '{{some.path.to.items}}',
       type: 'foreach',
@@ -26,7 +26,7 @@ describe('getForeachStateSchema', () => {
 
   it('should return foreach state with item type if it is possible to infer from previous step output', () => {
     const itemSchema = z.object({ name: z.string(), surname: z.string() });
-    const stepContext = StepContextSchema.extend({
+    const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
         'previous-step': z.object({
           output: z.array(itemSchema),
@@ -50,7 +50,7 @@ describe('getForeachStateSchema', () => {
 
   it('should return foreach state with item type if it is possible to infer from consts items', () => {
     const itemSchema = z.object({ name: z.string(), surname: z.string() });
-    const stepContext = StepContextSchema.extend({
+    const stepContext = DynamicStepContextSchema.extend({
       consts: z.object({
         items: z.array(itemSchema),
       }),
@@ -71,7 +71,7 @@ describe('getForeachStateSchema', () => {
   });
 
   it('should throw if inferred type is not an array', () => {
-    const stepContext = StepContextSchema.extend({
+    const stepContext = DynamicStepContextSchema.extend({
       consts: z.object({
         items: z.object({ name: z.string(), surname: z.string() }),
       }),

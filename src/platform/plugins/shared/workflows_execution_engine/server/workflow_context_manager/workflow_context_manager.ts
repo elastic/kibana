@@ -160,7 +160,7 @@ export class WorkflowContextManager {
       stepContext.event = {
         ...stepContext.event,
         ...(contextOverride.event || {}),
-      };
+      } as StepContext['event'];
 
       stepContext.execution = {
         ...stepContext.execution,
