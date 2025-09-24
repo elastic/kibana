@@ -310,9 +310,11 @@ export async function getDefaultRetentionValue({
 export async function getFailureStore({
   name,
   scopedClusterClient,
+  isServerless,
 }: {
   name: string;
   scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
 }): Promise<FailureStore> {
   // TODO: remove DataStreamWithFailureStore here and in streams-schema once failure store is added to the IndicesDataStream type
   const dataStream = (await getDataStream({
@@ -323,6 +325,8 @@ export async function getFailureStore({
   const defaultRetentionPeriod =
     dataStream.failure_store?.lifecycle?.retention_determined_by === 'default_failures_retention'
       ? dataStream.failure_store?.lifecycle?.effective_retention
+      : isServerless
+      ? undefined
       : await getDefaultRetentionValue({ scopedClusterClient });
 
   return {
@@ -337,11 +341,15 @@ export async function getFailureStore({
 export async function getFailureStoreStats({
   name,
   scopedClusterClient,
+  isServerless,
 }: {
   name: string;
   scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
 }): Promise<FailureStoreStatsResponse> {
-  const failureStoreDocs = await getFailureStoreSize({ name, scopedClusterClient });
+  const failureStoreDocs = isServerless
+    ? await getFailureStoreMeteringSize({ name, scopedClusterClient })
+    : await getFailureStoreSize({ name, scopedClusterClient });
   const creationDate = await getFailureStoreCreationDate({ name, scopedClusterClient });
 
   return {
@@ -371,7 +379,35 @@ export async function getFailureStoreSize({
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
-      // fall through and throw not found
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreMeteringSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asSecondaryAuthUser.transport.request<{
+      _total: { num_docs: number; size_in_bytes: number };
+    }>({
+      method: 'GET',
+      path: `/_metering/stats/${name}${FAILURE_STORE_SELECTOR}`,
+    });
+
+    return {
+      count: response._total?.num_docs || 0,
+      total_size_in_bytes: response._total?.size_in_bytes || 0,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return undefined;
     } else {
       throw e;
     }
@@ -400,7 +436,7 @@ export async function getFailureStoreCreationDate({
     return age || undefined;
   } catch (e) {
     if (e.meta?.statusCode === 404) {
-      // fall through and throw not found
+      return undefined;
     } else {
       throw e;
     }

@@ -38,14 +38,18 @@ export const getFailureStoreStatsRoute = createServerRoute({
       name: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
     const { scopedClusterClient } = await getScopedClients({
       request,
     });
 
     const { name } = params.path;
 
-    const failureStore = await getFailureStore({ name, scopedClusterClient });
+    const failureStore = await getFailureStore({
+      name,
+      scopedClusterClient,
+      isServerless: server.isServerless,
+    });
 
     if (!failureStore.enabled) {
       return { config: failureStore, stats: null };
@@ -54,6 +58,7 @@ export const getFailureStoreStatsRoute = createServerRoute({
     const stats = await getFailureStoreStats({
       name,
       scopedClusterClient,
+      isServerless: server.isServerless,
     });
 
     return { config: failureStore, stats };
