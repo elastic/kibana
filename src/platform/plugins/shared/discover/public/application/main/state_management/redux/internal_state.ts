@@ -359,21 +359,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     ),
   });
 
-  // TODO: Delete updateDiscoverSessionIdLocally
-
-  // startListening({
-  //   predicate: (_, currentState, previousState) => {
-  //     return (
-  //       currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
-  //     );
-  //   },
-  //   effect: (_, listenerApi) => {
-  //     const { tabsStorageManager } = listenerApi.extra;
-  //     const { persistedDiscoverSession } = listenerApi.getState();
-  //     tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
-  //   },
-  // });
-
   startListening({
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
     effect: () => {
