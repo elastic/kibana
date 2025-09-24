@@ -62,6 +62,7 @@ import {
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
+import { NewAgentActionSchema } from '@kbn/fleet-plugin/server/types';
 
 const DEFAULT_AGENTLESS_LIMIT = 5;
 
@@ -143,41 +144,46 @@ export const updateAgentlessCloudConnectorConfig = (
   setNewAgentPolicy: (policy: NewAgentPolicy) => void,
   setPackagePolicy: (policy: NewPackagePolicy) => void
 ) => {
-  const input = packagePolicy.inputs?.filter(
+  const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  )[0];
+  );
 
-  const targetCsp = input?.type.match(/aws|azure|gcp/)?.[0];
+  const targetCsp = input?.type.match(/aws|azure/)?.[0];
 
-  const enabled = input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
+  // Making sure that the cloud connector is disabled when switching to GCP
+  if (
+    !targetCsp &&
+    (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
+  ) {
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: undefined,
+      },
+    });
+
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: false,
+    });
+    return;
+  }
+
+  const cloudConnectorEnabled =
+    input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
   if (
     targetCsp &&
     newAgentPolicy?.supports_agentless &&
-    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled ||
+    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorEnabled ||
       newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
   ) {
-    if (targetCsp === 'gcp' && newAgentPolicy.agentless?.cloud_connectors) {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
-        },
-      });
-
-      setPackagePolicy({
-        ...packagePolicy,
-        supports_cloud_connector: false,
-      });
-      return;
-    }
-
     setNewAgentPolicy({
       ...newAgentPolicy,
       agentless: {
         ...newAgentPolicy.agentless,
         cloud_connectors: {
-          enabled,
+          enabled: cloudConnectorEnabled,
           target_csp: targetCsp,
         },
       },
@@ -185,7 +191,7 @@ export const updateAgentlessCloudConnectorConfig = (
 
     setPackagePolicy({
       ...packagePolicy,
-      supports_cloud_connector: true,
+      supports_cloud_connector: cloudConnectorEnabled,
     });
   }
 };
