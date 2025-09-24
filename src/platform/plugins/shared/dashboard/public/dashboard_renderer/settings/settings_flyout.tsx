@@ -35,7 +35,6 @@ import type { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
-import { EditControlGroupButton } from './edit_control_group_button';
 
 interface DashboardSettingsProps {
   onClose: () => void;
