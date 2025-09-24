@@ -470,7 +470,10 @@ export const SettingsPage: React.FC<Props> = memo(
                         <EuiFlexItem grow={false}>
                           <div>
                             <BulkActionContextProvider>
-                              <RollbackButton packageInfo={packageInfo} />
+                              <RollbackButton
+                                packageInfo={packageInfo}
+                                isCustomPackage={isCustomPackage}
+                              />
                             </BulkActionContextProvider>
                           </div>
                         </EuiFlexItem>

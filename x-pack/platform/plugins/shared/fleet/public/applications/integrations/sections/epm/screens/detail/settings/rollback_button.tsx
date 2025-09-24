@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,11 +17,14 @@ import { useInstalledIntegrationsActions } from '../../installed_integrations/ho
 
 interface RollbackButtonProps {
   packageInfo: PackageInfo & { installationInfo?: InstallationInfo };
+  isCustomPackage: boolean;
 }
-export function RollbackButton({ packageInfo }: RollbackButtonProps) {
+export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonProps) {
   const canRollbackPackages = useAuthz().integrations.installPackages;
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
-
+  const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
+  const isDisabled =
+    !canRollbackPackages || !hasPreviousVersion || isUploadedPackage || isCustomPackage;
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
@@ -30,23 +33,57 @@ export function RollbackButton({ packageInfo }: RollbackButtonProps) {
     return bulkRollbackIntegrationsWithConfirmModal([packageInfo as any]);
   }, [packageInfo, bulkRollbackIntegrationsWithConfirmModal]);
 
+  const rollbackButton = (
+    <EuiButton
+      data-test-subj="rollbackButton"
+      iconType={'returnKey'}
+      onClick={openRollbackModal}
+      color="primary"
+      disabled={isDisabled}
+    >
+      <FormattedMessage
+        id="xpack.fleet.integrations.rollbackPackage.rollbackPackageButtonLabel"
+        defaultMessage="Rollback {title}"
+        values={{
+          title: packageInfo.title,
+        }}
+      />
+    </EuiButton>
+  );
+
   return (
     <>
-      <EuiButton
-        data-test-subj="rollbackButton"
-        iconType={'returnKey'}
-        onClick={openRollbackModal}
-        color="primary"
-        disabled={!canRollbackPackages || !hasPreviousVersion}
-      >
-        <FormattedMessage
-          id="xpack.fleet.integrations.uninstallPackage.rollbackPackageButtonLabel"
-          defaultMessage="Rollback {title}"
-          values={{
-            title: packageInfo.title,
-          }}
-        />
-      </EuiButton>
+      {isDisabled ? (
+        <EuiToolTip
+          content={
+            !hasPreviousVersion ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.noVersionTooltip"
+                defaultMessage="You can't rollback this integration because it does not have a previous version saved."
+              />
+            ) : !canRollbackPackages ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.noPermissionTooltip"
+                defaultMessage="You don't have permissions to rollback integrations. Contact your administrator."
+              />
+            ) : isUploadedPackage ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.uploadedTooltip"
+                defaultMessage="This integration was installed by upload and cannot be rolled back."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.customTooltip"
+                defaultMessage="This integration type cannot be rolled back."
+              />
+            )
+          }
+        >
+          {rollbackButton}
+        </EuiToolTip>
+      ) : (
+        rollbackButton
+      )}
     </>
   );
 }

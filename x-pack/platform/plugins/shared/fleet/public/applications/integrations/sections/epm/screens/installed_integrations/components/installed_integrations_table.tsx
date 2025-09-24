@@ -332,7 +332,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
                       {
                         defaultMessage: !hasPreviousVersion(item)
-                          ? "You can't rollback this integration because it does not have a previous version saved"
+                          ? "You can't rollback this integration because it does not have a previous version saved."
                           : 'Rollback integration',
                       }
                     ),

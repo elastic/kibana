@@ -82,12 +82,12 @@ export const ConfirmBulkRollbackModal: React.FunctionComponent<{
         {isSingleItem ? (
           <FormattedMessage
             id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContentSingleItem"
-            defaultMessage="All Kibana and Elasticsearch assets created by this integration will be also rolled back."
+            defaultMessage="The integration will be rolled back to the previous version including assets and integration policies. Agents using the integration will receive the policy change."
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContent"
-            defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also rolled back. Review and edit your selection if needed."
+            defaultMessage="All integrations will be rolled back to the previous version including assets and integration policies. Agents using the integrations will receive the policy change."
           />
         )}
       </EuiCallOut>
