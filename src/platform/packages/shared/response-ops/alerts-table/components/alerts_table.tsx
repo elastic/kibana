@@ -338,12 +338,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -351,6 +353,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded(alerts, columns);
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError, queryParams]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -437,6 +449,32 @@ const AlertsTableContent = typedForwardRef(
       },
       [id, visibleColumns]
     );
+
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
+      if (fieldWithSortingError) {
+        const newSort = queryParams.sort.filter(
+          (sortField) => !deepEqual(sortField, fieldWithSortingError)
+        );
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        storageAlertsTable.current = {
+          columns: DEFAULT_COLUMNS,
+          sort: DEFAULT_SORT,
+          visibleColumns: DEFAULT_COLUMNS.map((c) => c.id),
+        };
+        storageRef.current.set(id, storageAlertsTable.current);
+        setSort(DEFAULT_SORT);
+        onResetColumns();
+      }
+    }, [setSort, storageRef, queryParams, id, fieldWithSortingError, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -628,6 +666,9 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}
