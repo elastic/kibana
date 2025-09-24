@@ -21,6 +21,7 @@ describe('fromEs', () => {
       _source: {
         id: 'id',
         type: ToolType.esql,
+        space: 'space',
         description: 'description',
         configuration: {
           configProp: 'dolly',
@@ -61,12 +62,14 @@ describe('createAttributes', () => {
 
     const properties = createAttributes({
       createRequest,
+      space: 'some-space',
       creationDate: actualCreationDate,
     });
 
     expect(properties).toEqual({
       id: 'id',
       type: ToolType.esql,
+      space: 'some-space',
       description: 'foo',
       configuration: {
         hello: 'world',
@@ -85,6 +88,7 @@ describe('updateDocument', () => {
     const currentProps: ToolProperties = {
       id: 'id',
       type: ToolType.esql,
+      space: 'some-space',
       description: 'foo',
       configuration: {
         hello: 'world',
@@ -112,6 +116,7 @@ describe('updateDocument', () => {
     expect(merged).toEqual({
       id: 'id',
       type: ToolType.esql,
+      space: 'some-space',
       description: 'new desc',
       configuration: {
         anotherProp: 'foo',
