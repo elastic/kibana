@@ -31,9 +31,9 @@ export TEST_TYPE
 # Adjust default MAX_PARALLEL after TEST_TYPE is known unless user overrode.
 if [[ -z "${JEST_MAX_PARALLEL:-}" ]]; then
   if [[ "$TEST_TYPE" == "unit" ]]; then
-    MAX_PARALLEL=3
+    JEST_MAX_PARALLEL=3 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
   else
-    MAX_PARALLEL=1
+    JEST_MAX_PARALLEL=1 # integration tests should not run in parallel by default.
   fi
 fi
 
