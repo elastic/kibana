@@ -11,10 +11,11 @@ import * as i18n from './translations';
 
 const MAX_ADDITIONAL_FIELDS_LENGTH = 10;
 
-export const validateJSON =
-  (maxAdditionalFields = MAX_ADDITIONAL_FIELDS_LENGTH) =>
+export const generateJSONValidator =
+  (options?: { maxAdditionalFields?: number }) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value }] = args;
+    const maxAdditionalFields = options?.maxAdditionalFields ?? MAX_ADDITIONAL_FIELDS_LENGTH;
 
     try {
       if (typeof value === 'string' && !isEmpty(value)) {

@@ -20,7 +20,7 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import { validateJSON } from '../validate_json';
+import { generateJSONValidator } from '../validate_json';
 import { JsonEditorField } from '../json_editor_field';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
@@ -138,7 +138,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           label: i18n.ADDITIONAL_FIELDS_LABEL,
           validations: [
             {
-              validator: validateJSON(Infinity),
+              validator: generateJSONValidator({ maxAdditionalFields: 200 }),
             },
           ],
         }}

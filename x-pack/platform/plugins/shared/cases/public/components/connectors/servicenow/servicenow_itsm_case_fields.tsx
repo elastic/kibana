@@ -22,7 +22,7 @@ import { useGetChoices } from './use_get_choices';
 import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 import { DeprecatedCallout } from '../deprecated_callout';
-import { validateJSON } from '../validate_json';
+import { generateJSONValidator } from '../validate_json';
 import { JsonEditorField } from '../json_editor_field';
 
 const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
@@ -33,6 +33,8 @@ const defaultFields: Fields = {
   category: [],
   subcategory: [],
 };
+
+const validateJSON = generateJSONValidator();
 
 const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   connector,
@@ -216,7 +218,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
                 label: i18n.ADDITIONAL_FIELDS_LABEL,
                 validations: [
                   {
-                    validator: validateJSON(),
+                    validator: validateJSON,
                   },
                 ],
               }}

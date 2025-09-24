@@ -23,7 +23,7 @@ import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
 import { DeprecatedCallout } from '../deprecated_callout';
-import { validateJSON } from '../validate_json';
+import { generateJSONValidator } from '../validate_json';
 import { JsonEditorField } from '../json_editor_field';
 
 const choicesToGet = ['category', 'subcategory', 'priority'];
@@ -32,6 +32,8 @@ const defaultFields: Fields = {
   subcategory: [],
   priority: [],
 };
+
+const validateJSON = generateJSONValidator();
 
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   connector,
@@ -234,7 +236,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                 label: i18n.ADDITIONAL_FIELDS_LABEL,
                 validations: [
                   {
-                    validator: validateJSON(),
+                    validator: validateJSON,
                   },
                 ],
               }}
