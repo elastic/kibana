@@ -71,7 +71,7 @@ export class StreamsApp {
       await expect(
         this.page.getByTestId(`streamsNameLink-${name}`),
         `Stream ${name} should not be present in the table`
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
   }
 
@@ -281,6 +281,10 @@ export class StreamsApp {
       .click();
   }
 
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+  }
+
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
   }
@@ -482,9 +486,8 @@ export class StreamsApp {
   }
 
   async setFieldMappingType(type: FieldTypeOption) {
-    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
-    await expect(typeSelector).toBeVisible();
-    await typeSelector.selectOption(type);
+    await this.page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await this.page.getByTestId(`option-type-${type}`).click();
   }
 
   async stageFieldMappingChanges() {
@@ -510,6 +513,10 @@ export class StreamsApp {
 
   async submitSchemaChanges() {
     await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+  }
+
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
   /**
