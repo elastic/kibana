@@ -25,7 +25,7 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe.only('Search Solution Navigation', () => {
+  describe('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
