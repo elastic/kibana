@@ -141,6 +141,8 @@ export async function autocomplete(
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
+            // if there is already a command, we don't want to override it
+            if (suggestion.command) return suggestion;
             return {
               ...suggestion,
               text: `${suggestion.text} `,
