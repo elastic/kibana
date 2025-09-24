@@ -9,9 +9,7 @@
 
 import type { WorkflowYaml, ForEachContextSchema } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import { isForeachStep } from '@kbn/workflows';
-import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
 import _ from 'lodash';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
@@ -36,12 +34,7 @@ export function getContextSchemaForPath(
     return schema;
   }
 
-  const stepsCollectionSchema = getStepsCollectionSchema(
-    schema,
-    workflowGraph,
-    definition,
-    nearestStep.name
-  );
+  const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
 
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
     schema = schema.extend({ steps: stepsCollectionSchema });
@@ -50,7 +43,6 @@ export function getContextSchemaForPath(
   const enrichments = getStepContextSchemaEnrichmentEntries(
     schema,
     workflowGraph,
-    definition,
     nearestStep.name
   );
 
@@ -64,21 +56,15 @@ export function getContextSchemaForPath(
 function getStepContextSchemaEnrichmentEntries(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  workflowDefinition: WorkflowYaml,
   stepId: string
 ) {
   const enrichments: { key: 'foreach'; value: typeof ForEachContextSchema }[] = [];
   const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
   for (const node of predecessors) {
-    if (node.stepType === 'foreach') {
-      // if one of the predecessors is a foreach, we need to enrich the step context with the foreach state
-      const foreachStep = getStepByNameFromNestedSteps(workflowDefinition.steps, node.stepId);
-      if (!foreachStep || !isForeachStep(foreachStep)) {
-        continue;
-      }
+    if (isEnterForeach(node)) {
       enrichments.push({
         key: 'foreach',
-        value: getForeachStateSchema(stepContextSchema, foreachStep),
+        value: getForeachStateSchema(stepContextSchema, node.configuration),
       });
     }
   }

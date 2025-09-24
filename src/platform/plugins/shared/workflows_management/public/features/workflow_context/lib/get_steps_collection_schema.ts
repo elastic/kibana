@@ -8,17 +8,15 @@
  */
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
-import { getStepId, isForeachStep, type WorkflowYaml } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { getStepId } from '@kbn/workflows';
+import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
-import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
 import { getOutputSchemaForStepType } from '../../../../common/schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  workflowDefinition: WorkflowYaml,
   stepName: string
 ) {
   // reverse predecessors so the earliest steps are first and will be available when we reach the later ones
@@ -37,7 +35,7 @@ export function getStepsCollectionSchema(
       continue;
     }
 
-    if (node.stepType !== 'foreach') {
+    if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
           output: getOutputSchemaForStepType(node.stepType).optional(),
@@ -45,15 +43,11 @@ export function getStepsCollectionSchema(
         }),
       });
     } else {
-      const foreachStep = getStepByNameFromNestedSteps(workflowDefinition.steps, node.stepId);
-      if (!foreachStep || !isForeachStep(foreachStep)) {
-        continue;
-      }
       // if the step is a foreach, add the foreach schema to the step state schema
       stepsSchema = stepsSchema.extend({
         [node.stepId]: getForeachStateSchema(
           stepContextSchema.merge(z.object({ steps: stepsSchema })),
-          foreachStep
+          node.configuration
         ),
       });
     }

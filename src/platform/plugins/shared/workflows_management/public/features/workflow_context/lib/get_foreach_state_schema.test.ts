@@ -19,7 +19,6 @@ describe('getForeachStateSchema', () => {
       foreach: '{{some.path.to.items}}',
       type: 'foreach',
       name: 'foreach-step',
-      steps: [],
     });
     expectZodSchemaEqual(foreachStateSchema, ForEachContextSchema);
   });
@@ -37,7 +36,6 @@ describe('getForeachStateSchema', () => {
       foreach: 'steps.previous-step.output',
       type: 'foreach',
       name: 'foreach-step',
-      steps: [],
     });
     expectZodSchemaEqual(
       foreachStateSchema,
@@ -59,7 +57,6 @@ describe('getForeachStateSchema', () => {
       foreach: 'consts.items',
       type: 'foreach',
       name: 'foreach-step',
-      steps: [],
     });
     expectZodSchemaEqual(
       foreachStateSchema,
@@ -81,7 +78,6 @@ describe('getForeachStateSchema', () => {
         foreach: 'consts.items',
         type: 'foreach',
         name: 'foreach-step',
-        steps: [],
       })
     ).toThrow('Foreach configuration must be an array');
   });

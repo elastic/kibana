@@ -39,7 +39,6 @@ describe('getStepsCollectionSchema', () => {
     const stepsCollectionSchema = getStepsCollectionSchema(
       DynamicStepContextSchema,
       workflowGraph,
-      definition,
       'step-name'
     );
     expectZodSchemaEqual(stepsCollectionSchema, z.object({}));
@@ -83,7 +82,6 @@ describe('getStepsCollectionSchema', () => {
     const stepsCollectionSchema = getStepsCollectionSchema(
       DynamicStepContextSchema,
       workflowGraph,
-      definition,
       'step-1-foreach-1'
     );
     expectZodSchemaEqual(
