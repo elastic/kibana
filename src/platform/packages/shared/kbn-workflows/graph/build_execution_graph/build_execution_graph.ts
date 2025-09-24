@@ -86,17 +86,6 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
 }
 
 function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
-  if ((currentStep as StepWithTimeout).timeout) {
-    const step = currentStep as BaseStep & StepWithTimeout;
-    return handleStepTimeout(
-      getStepId(step, context),
-      step.type,
-      step.timeout!,
-      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
-      context
-    );
-  }
-
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -127,6 +116,17 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): g
 
   if ((currentStep as StepWithForeach).foreach) {
     return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
+  }
+
+  if ((currentStep as StepWithTimeout).timeout) {
+    const step = currentStep as BaseStep & StepWithTimeout;
+    return handleStepTimeout(
+      getStepId(step, context),
+      step.type,
+      step.timeout!,
+      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
+      context
+    );
   }
 
   if ((currentStep as WaitStep).type === 'wait') {

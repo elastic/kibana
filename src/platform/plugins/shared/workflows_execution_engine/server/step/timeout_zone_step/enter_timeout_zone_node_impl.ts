@@ -27,7 +27,7 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
 
   public async run(): Promise<void> {
     await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
+    this.wfExecutionRuntimeManager.enterScope('timeout-zone');
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
@@ -39,11 +39,12 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
     if (currentStepDuration > timeoutMs) {
+      const currentStepDurationInSeconds = currentStepDuration / 1000;
       this.workflowLogger.logDebug(
-        `Step timeout happened because it ran for ${currentStepDuration / 1000}ms`
+        `Step timeout happened because it ran for ${currentStepDurationInSeconds}ms`
       );
       monitoredContext.abortController.abort();
-      throw new Error(`Step timeout happened because it ran for ${currentStepDuration / 1000}ms`);
+      throw new Error(`Step timeout happened because it ran for ${currentStepDurationInSeconds}ms`);
     }
 
     return Promise.resolve();
