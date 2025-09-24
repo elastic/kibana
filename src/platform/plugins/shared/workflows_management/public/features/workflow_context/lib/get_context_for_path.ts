@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import type { WorkflowYaml, StepContext, ForEachStep } from '@kbn/workflows';
+import type { WorkflowYaml, ForEachStep } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import { getStepByNameFromNestedSteps } from '@kbn/workflows/definition';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
@@ -24,8 +24,7 @@ export function getContextSchemaForPath(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>
-): z.ZodType<StepContext> {
-  // Build the schema step by step using Zod's built-in methods
+): typeof StepContextSchema {
   let schema = StepContextSchema.merge(getWorkflowContextSchema(definition));
 
   const nearestStepPath = getNearestStepPath(path);
@@ -45,31 +44,30 @@ export function getContextSchemaForPath(
   );
 
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    // Use Zod's merge instead of extend for better type inference
-    schema = (schema as any).extend({ steps: stepsCollectionSchema });
+    schema = schema.extend({ steps: stepsCollectionSchema });
   }
 
-  const enrichments = getStepContextSchemaEnrichments(
+  const enrichments = getStepContextSchemaEnrichmentEntries(
     schema,
     workflowGraph,
     definition,
     nearestStep.name
   );
 
-  if (Object.keys(enrichments).length > 0) {
-    schema = (schema as any).extend(enrichments);
+  for (const enrichment of enrichments) {
+    schema = schema.extend({ [enrichment.key]: enrichment.value });
   }
 
-  return schema satisfies z.ZodType<StepContext>;
+  return schema;
 }
 
-function getStepContextSchemaEnrichments(
-  stepContextSchema: z.ZodType,
+function getStepContextSchemaEnrichmentEntries(
+  stepContextSchema: typeof StepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   stepId: string
 ) {
-  const enrichments: { foreach?: z.ZodType } = {};
+  const enrichments: { key: string; value: z.ZodType }[] = [];
   const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
   for (const node of predecessors) {
     if (node.stepType === 'foreach') {
@@ -78,7 +76,10 @@ function getStepContextSchemaEnrichments(
       if (!foreachStep || foreachStep.type !== 'foreach') {
         continue;
       }
-      enrichments.foreach = getForeachStateSchema(stepContextSchema, foreachStep as ForEachStep);
+      enrichments.push({
+        key: 'foreach',
+        value: getForeachStateSchema(stepContextSchema, foreachStep as ForEachStep),
+      });
     }
   }
   return enrichments;

@@ -477,8 +477,8 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z.record(z.string(), z.any()).optional(),
-  consts: z.record(z.string(), z.any()).optional(),
+  inputs: z.object({}),
+  consts: z.object({}),
   now: z.date().optional(),
 });
 
@@ -492,14 +492,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const StepStateSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+
 export const StepContextSchema = WorkflowContextSchema.extend({
-  steps: z.record(
-    z.string(),
-    z.object({
-      output: z.any().optional(),
-      error: z.any().optional(),
-    })
-  ),
+  // using object instead of record to avoid type mismatch when
+  // extending with actual step ids and different output types
+  steps: z.object({}),
   foreach: ForEachContextSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;

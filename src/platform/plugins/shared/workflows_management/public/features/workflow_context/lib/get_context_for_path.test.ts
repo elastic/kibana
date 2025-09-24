@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { getContextSchemaForPath } from './get_context_for_path';
 import { z } from '@kbn/zod';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
@@ -152,7 +152,7 @@ describe('getContextSchemaForPath', () => {
               with: {
                 message: 'Hello, {{foreach.item.name}} {{foreach.item.surname}}',
               },
-            },
+            } as Step,
           ],
         },
       ],
