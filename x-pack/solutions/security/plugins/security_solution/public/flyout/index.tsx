@@ -14,6 +14,8 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
+import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
+import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -84,6 +86,12 @@ import {
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 
+const GraphGroupedNodePreviewPanel = React.lazy(() =>
+  import('@kbn/cloud-security-posture-graph').then((module) => ({
+    default: module.GraphGroupedNodePreviewPanel,
+  }))
+);
+
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -120,6 +128,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <AlertReasonPanel />
       </AlertReasonPanelProvider>
     ),
+  },
+  {
+    key: GraphGroupedNodePreviewPanelKey,
+    component: (props) => {
+      const params = props.params as Partial<GraphGroupedNodePreviewPanelProps>;
+      return <GraphGroupedNodePreviewPanel {...params} />;
+    },
   },
   {
     key: RulePanelKey,

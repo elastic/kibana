@@ -13,6 +13,8 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
   getNodeDocumentMode,
   getSingleDocumentData,
   type NodeViewModel,
@@ -73,25 +75,20 @@ export const GraphVisualization: React.FC = memo(() => {
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
       const documentData = getSingleDocumentData(node);
-      if (
-        (getNodeDocumentMode(node) === 'single-event' ||
-          getNodeDocumentMode(node) === 'single-alert') &&
-        documentData
-      ) {
+      const docMode = getNodeDocumentMode(node);
+
+      if ((docMode === 'single-event' || docMode === 'single-alert') && documentData) {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
             id: documentData.id,
             indexName: documentData.index,
             scopeId,
-            banner:
-              getNodeDocumentMode(node) === 'single-alert'
-                ? ALERT_PREVIEW_BANNER
-                : EVENT_PREVIEW_BANNER,
+            banner: docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
-      } else if (getNodeDocumentMode(node) === 'single-entity' && documentData) {
+      } else if (docMode === 'single-entity' && documentData) {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
@@ -99,6 +96,74 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          },
+        });
+      } else if (docMode === 'grouped-entities' || docMode === 'grouped-events') {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            items: [
+              {
+                type: 'entity',
+                id: `${node.id}-entity`,
+                icon: node.icon || 'storage',
+                tag: node.tag || 'host',
+                label: node.label || node.id,
+                timestamp: new Date().toISOString(), // TODO where do I get it?
+                risk: 80,
+                ip: '10.200.0.202',
+                countryCode: 'US',
+              },
+              {
+                type: 'entity',
+                id: `${node.id}-entity-long`,
+                icon: node.icon || 'storage',
+                tag:
+                  node.tag ||
+                  'super long name here to prove that ellipsis is rendered fine or else we are screwed so fix it and dont forget a tooltip',
+                label: node.label || node.id,
+                timestamp: new Date().toISOString(), // TODO where do I get it?
+                risk: 80,
+                ip: '10.200.0.202',
+                countryCode: 'US',
+              },
+              {
+                type: 'event',
+                id: `${node.id}-event`,
+                actor: {
+                  id: 'actor-id',
+                  icon: 'user',
+                  label: 'tin@elastic.co',
+                },
+                target: {
+                  id: 'target-id',
+                  icon: 'storage',
+                  label: 'esd-security',
+                },
+                action: 'user.authentication',
+                timestamp: new Date().toISOString(), // TODO where do I get it?
+              },
+              {
+                type: 'alert',
+                id: `${node.id}-alert`,
+                actor: {
+                  id: 'actor-id',
+                  icon: 'user',
+                  label: 'tin@elastic.co',
+                },
+                target: {
+                  id: 'target-id',
+                  icon: 'storage',
+                  label: 'esd-security',
+                },
+                action: 'user.authentication',
+                timestamp: new Date().toISOString(), // TODO where do I get it?
+              },
+            ],
           },
         });
       } else {
