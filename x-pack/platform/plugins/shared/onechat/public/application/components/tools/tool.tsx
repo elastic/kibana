@@ -26,7 +26,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
+import { FormProvider, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../common/doc_links';
@@ -110,7 +110,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [urlToolType]);
 
   const form = useToolForm(tool, initialToolType);
-  const { reset, formState, watch, handleSubmit, getValues } = form;
+  const { control, reset, formState, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [isCancelling, setIsCancelling] = useState(false);
   const {
@@ -127,7 +127,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     appParams: { history },
   } = services;
 
-  const currentToolId = watch('toolId');
+  const currentToolId = useWatch({ name: 'toolId', control });
+  const toolType = useWatch({ name: 'type', control });
 
   // Handle opening test tool flyout on navigation
   useEffect(() => {
@@ -194,10 +195,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   // Switching tool types clears tool-specific fields
   useEffect(() => {
-    if (!urlToolType) return;
+    if (!toolType) return;
     if (mode !== ToolFormMode.Create) return;
     const currentValues = getValues();
-    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
+    const newDefaultValues = getToolTypeDefaultValues(toolType);
 
     const mergedValues: ToolFormData = {
       ...newDefaultValues,
@@ -207,7 +208,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     };
 
     reset(mergedValues);
-  }, [urlToolType, initialToolType, mode, getValues, reset]);
+  }, [toolType, mode, getValues, reset]);
 
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
