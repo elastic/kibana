@@ -46,7 +46,7 @@ describe('CrowdStrike Host CLI', () => {
             'apiKey',
             'version',
           ]),
-          boolean: ['forceFleetServer', 'forceNewHost'],
+          boolean: ['forceFleetServer', 'forceNewCrowdStrikeHost', 'forceNewAgentlessHost'],
           default: expect.objectContaining({
             apiUrl: 'https://api.crowdstrike.com',
             kibanaUrl: 'http://127.0.0.1:5601',

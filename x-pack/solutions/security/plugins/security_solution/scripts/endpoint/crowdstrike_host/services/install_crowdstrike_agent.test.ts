@@ -14,7 +14,6 @@ import * as spaces from '../../common/spaces';
 
 jest.mock('../../common/vm_services');
 jest.mock('../../common/spaces');
-jest.mock('../common/crowdstrike_client');
 
 const mockedVmServices = vmServices as jest.Mocked<typeof vmServices>;
 const mockedSpaces = spaces as jest.Mocked<typeof spaces>;
@@ -55,11 +54,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
-      platform: 'linux',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
       customerId: 'test-customer-id',
-      apiUrl: 'https://api.crowdstrike.com',
     };
 
     const result = await onboardVmHostWithCrowdStrike(options);
@@ -87,11 +82,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
-      platform: 'linux',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
       customerId: 'test-customer-id',
-      apiUrl: 'https://api.crowdstrike.com',
       forceNewHost: false,
     };
 
@@ -110,11 +101,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       kbnClient: mockKbnClient,
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
-      platform: 'linux',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
       customerId: 'test-customer-id',
-      apiUrl: 'https://api.crowdstrike.com',
       forceNewHost: true,
     };
 

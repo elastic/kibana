@@ -56,7 +56,6 @@ for response actions to be performed on hosts.`,
         'customerId',
         'apiUrl',
         'sensorInstaller',
-        'platform',
         'kibanaUrl',
         'username',
         'password',
@@ -66,10 +65,9 @@ for response actions to be performed on hosts.`,
         'version',
         'policy',
       ],
-      boolean: ['forceFleetServer', 'forceNewHost'],
+      boolean: ['forceFleetServer', 'forceNewCrowdStrikeHost', 'forceNewAgentlessHost'],
       default: {
         apiUrl: DEFAULT_API_URL,
-        platform: 'ubuntu',
         kibanaUrl: 'http://127.0.0.1:5601',
         username: 'elastic',
         password: 'changeme',
@@ -78,15 +76,12 @@ for response actions to be performed on hosts.`,
         policy: '',
       },
       help: `
-      --sensorInstaller   Optional. The local path to the CrowdStrike Falcon sensor installer package. If not provided,
-                          the sensor will be downloaded automatically from CrowdStrike based on the specified platform.
-      --platform          Optional. The target platform for the sensor installation: windows, ubuntu, or macos.
-                          (Default: ubuntu)
+      --sensorInstaller   Required. The local path to the CrowdStrike Falcon sensor installer package.
       --clientId          Required. The CrowdStrike Falcon API client ID with privileges to access the Falcon API.
       --clientSecret      Required. The client secret created for the registered application's API access.
       --customerId        Required. The CrowdStrike Customer ID (CID) used for sensor enrollment. This is different from
                           clientId and can be found in your CrowdStrike Falcon console under "Host Setup and Management".
-      --apiUrl:           Optional. The URL for making API calls to CrowdStrike Falcon management system.
+      --apiUrl            Required. The URL for making API calls to CrowdStrike Falcon management system.
                           Must match your CrowdStrike cloud region (e.g., https://api.us-2.crowdstrike.com for US-2,
                           https://api.eu-1.crowdstrike.com for EU-1, https://api.us-gov-1.crowdstrike.com for GovCloud).
                           (Default: https://api.crowdstrike.com)
@@ -95,12 +90,15 @@ for response actions to be performed on hosts.`,
       --policy            Optional. The UUID of the Fleet Agent Policy that should be used to setup
                           the CrowdStrike Integration
                           Default: re-uses existing dev policy (if found) or creates a new one
-      --forceFleetServer  Optional. If fleet server should be started/configured even if it seems
-                          like it is already setup. (Default: false)
-      --forceNewHost      Optional. Force a new VM host to be created and enrolled with CrowdStrike.
-                          By default, a check is done to see if a host running CrowdStrike is
-                          already running and if so, a new one will not be created - unless this
-                          option is used (Default: false)
+      --forceFleetServer        Optional. If fleet server should be started/configured even if it seems
+                                like it is already setup. (Default: false)
+      --forceNewCrowdStrikeHost Optional. Force a new VM host to be created and enrolled with CrowdStrike.
+                                By default, a check is done to see if a host running CrowdStrike is
+                                already running and if so, a new one will not be created - unless this
+                                option is used (Default: false)
+      --forceNewAgentlessHost   Optional. Force a new agentless integrations VM to be created for Fleet.
+                                By default, existing agentless VMs are reused - use this flag to create
+                                a fresh VM if the existing one has issues (Default: false)
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
@@ -120,7 +118,6 @@ for response actions to be performed on hosts.`,
 
 const runCli: RunFn = async ({ log, flags }) => {
   const sensorInstaller = flags.sensorInstaller as string;
-  const platform = flags.platform as string;
   const clientId = flags.clientId as string;
   const clientSecret = flags.clientSecret as string;
   const customerId = flags.customerId as string;
@@ -130,7 +127,8 @@ const runCli: RunFn = async ({ log, flags }) => {
   const kibanaUrl = flags.kibanaUrl as string;
   const spaceId = flags.spaceId as string;
   const apiKey = flags.apiKey as string;
-  const forceNewHost = flags.forceNewHost as boolean;
+  const forceNewCrowdStrikeHost = flags.forceNewCrowdStrikeHost as boolean;
+  const forceNewAgentlessHost = flags.forceNewAgentlessHost as boolean;
   const forceFleetServer = flags.forceFleetServer as boolean;
   const policy = flags.policy as string;
   const version = flags.version as string | undefined;
@@ -140,22 +138,17 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
+  ok(sensorInstaller, getRequiredArgMessage('sensorInstaller'));
   ok(clientId, getRequiredArgMessage('clientId'));
   ok(clientSecret, getRequiredArgMessage('clientSecret'));
   ok(customerId, getRequiredArgMessage('customerId'));
   ok(apiUrl, getRequiredArgMessage('apiUrl'));
 
-  // Validate platform
-  const validPlatforms = ['windows', 'ubuntu', 'macos'];
-  ok(validPlatforms.includes(platform), `platform must be one of: ${validPlatforms.join(', ')}`);
-
-  // Validate sensor installer if provided
-  if (sensorInstaller) {
-    ok(
-      fileExistsSync(sensorInstaller),
-      `sensorInstaller file path does not exist! [${sensorInstaller}]`
-    );
-  }
+  // Validate sensor installer file exists
+  ok(
+    fileExistsSync(sensorInstaller),
+    `sensorInstaller file path does not exist! [${sensorInstaller}]`
+  );
 
   const kbnClient = createKbnClient({
     log,
@@ -178,13 +171,9 @@ const runCli: RunFn = async ({ log, flags }) => {
     kbnClient,
     log,
     vmName,
-    forceNewHost,
+    forceNewHost: forceNewCrowdStrikeHost,
     sensorInstaller,
-    platform,
-    clientId,
-    clientSecret,
     customerId,
-    apiUrl,
   });
 
   // Get or create agent policy for CrowdStrike integration
@@ -222,13 +211,16 @@ const runCli: RunFn = async ({ log, flags }) => {
       new RegExp(`^${agentVmName.substring(0, agentVmName.lastIndexOf('-'))}`)
     );
 
-    if (existingAgentVms.data.length > 0) {
+    if (existingAgentVms.data.length > 0 && !forceNewAgentlessHost) {
       log.info(
-        `A Fleet agent VM already exists - will reuse it: ${existingAgentVms.data[0]}.\nTIP: Use 'multipass delete ${existingAgentVms.data[0]}' to force creation of a new one`
+        `A Fleet agent VM already exists - will reuse it: ${existingAgentVms.data[0]}.\nTIP: Use '--forceNewAgentlessHost' to force creation of a new one`
       );
 
       agentPolicyVm = await createMultipassHostVmClient(existingAgentVms.data[0], log);
     } else {
+      if (forceNewAgentlessHost && existingAgentVms.data.length > 0) {
+        log.info(`Forcing creation of new agentless VM (--forceNewAgentlessHost specified)`);
+      }
       log.info(`Creating VM and enrolling it with Fleet using policy [${agentPolicyName}]`);
 
       agentPolicyVm = await createVm({

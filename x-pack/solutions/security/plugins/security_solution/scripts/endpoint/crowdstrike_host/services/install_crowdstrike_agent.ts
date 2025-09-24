@@ -19,16 +19,11 @@ import {
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import type { HostVm } from '../../common/types';
 import { dump } from '../../common/utils';
-import { CrowdStrikeClient } from '../common/crowdstrike_client';
 
 export interface OnboardVmHostWithCrowdStrikeOptions {
   kbnClient: KbnClient;
-  sensorInstaller?: string;
-  platform: string;
-  clientId: string;
-  clientSecret: string;
+  sensorInstaller: string;
   customerId: string;
-  apiUrl: string;
   log?: ToolingLog;
   vmName?: string;
   forceNewHost?: boolean;
@@ -40,11 +35,7 @@ export const onboardVmHostWithCrowdStrike = async ({
   vmName: _vmName,
   forceNewHost,
   sensorInstaller,
-  platform,
-  clientId,
-  clientSecret,
   customerId,
-  apiUrl,
 }: OnboardVmHostWithCrowdStrikeOptions): Promise<HostVm> => {
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
   const vmName = _vmName || generateVmName(`crowdstrike-${activeSpaceId}`);
@@ -71,27 +62,10 @@ export const onboardVmHostWithCrowdStrike = async ({
     image: 'release:22.04',
   });
 
-  // Create CrowdStrike client for API calls and sensor downloads
-  const crowdStrikeClient = new CrowdStrikeClient({
-    url: apiUrl,
-    clientId,
-    clientSecret,
-    log,
-  });
-
-  let finalSensorInstaller = sensorInstaller;
-
-  // Download sensor if not provided
-  if (!finalSensorInstaller) {
-    log.info(
-      `No sensor installer provided, downloading from CrowdStrike for platform: ${platform}`
-    );
-    const { tmpdir } = await import('os');
-    finalSensorInstaller = await crowdStrikeClient.downloadSensorInstaller(platform, tmpdir());
-  }
+  log.info(`Using sensor installer: ${sensorInstaller}`);
 
   const vmSensorFile = await hostVm.upload(
-    finalSensorInstaller,
+    sensorInstaller,
     '/home/ubuntu/crowdstrike-falcon-sensor.deb'
   );
 
