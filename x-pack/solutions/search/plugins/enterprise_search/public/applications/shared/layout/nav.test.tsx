@@ -97,11 +97,6 @@ const mockNavLinks = [
     url: '/app/elasticsearch/index_management',
   },
   {
-    id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web Crawlers',
-    url: '/app/elasticsearch/content/crawlers',
-  },
-  {
     id: 'searchPlayground',
     title: 'Playground',
     url: '/app/search_playground',

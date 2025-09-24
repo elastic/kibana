@@ -22,18 +22,18 @@ describe('generateSideNavItems', () => {
   const deepLinksMap = {
     enterpriseSearch: {
       id: 'searchHomepage',
-      url: '/app/elasticsearch/home',
       title: 'Home',
+      url: '/app/elasticsearch/home',
+    },
+    'enterpriseSearchApplications:searchApplications': {
+      id: 'enterpriseSearchApplications:searchApplications',
+      title: 'Search Applications',
+      url: '/app/elasticsearch/content/search_applications',
     },
     'enterpriseSearchContent:searchIndices': {
       id: 'enterpriseSearchContent:searchIndices',
       title: 'Indices',
       url: '/app/elasticsearch/content/search_indices',
-    },
-    'enterpriseSearchContent:webCrawlers': {
-      id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web Crawlers',
-      url: '/app/elasticsearch/content/crawlers',
     },
   } as unknown as Record<string, ChromeNavLink | undefined>;
   beforeEach(() => {
