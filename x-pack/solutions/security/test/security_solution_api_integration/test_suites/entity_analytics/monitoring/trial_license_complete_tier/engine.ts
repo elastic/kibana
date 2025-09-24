@@ -22,6 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const privmonUtils = PrivMonUtils(getService);
   const log = getService('log');
+  const es = getService('es');
   const spaces = getService('spaces');
   const supertest = getService('supertest');
 
