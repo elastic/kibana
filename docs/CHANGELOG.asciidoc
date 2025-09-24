@@ -132,6 +132,8 @@ Kibana security::
 * Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names ({kibana-pull}234083[#234083]).
 Search solution::
 * Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML ({kibana-pull}234079[#234079]).
+Observability solution::
+* Fixes an issue in synthetics where multiple package policies are being created if user have monitors in multiple spaces ({kibana-pull}235021[#235021]).
 
 [[release-notes-8.19.3]]
 == {kib} 8.19.3

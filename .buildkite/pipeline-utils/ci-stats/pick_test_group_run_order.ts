@@ -127,7 +127,15 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
 
   const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    if (mappedSolutions && !mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`))) {
+    if (
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
+    ) {
       continue;
     }
     try {
@@ -332,8 +340,16 @@ export async function pickTestGroupRunOrder() {
       return patterns;
     }
 
-    return LIMIT_SOLUTIONS.flatMap((solution: string) =>
-      patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+    );
+
+    return (
+      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+      )
+        // When applying the solution filter, still allow platform tests
+        .concat(platformPatterns)
     );
   };
 
