@@ -8,8 +8,9 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNode } from '../types';
+import type { GraphNodeUnion } from '../types';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
+import { createTypedGraph } from './create_typed_graph';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -26,7 +27,7 @@ import { convertToWorkflowGraph } from '../build_execution_graph/build_execution
  * ```
  */
 export class WorkflowGraph {
-  private graph: graphlib.Graph | null = null;
+  private graph: graphlib.Graph<GraphNodeUnion> | null = null;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
 
@@ -43,8 +44,8 @@ export class WorkflowGraph {
     return this.__topologicalOrder;
   }
 
-  public getNode(nodeId: string): GraphNode {
-    return this.graph!.node(nodeId) as unknown as GraphNode;
+  public getNode(nodeId: string): GraphNodeUnion {
+    return this.graph!.node(nodeId);
   }
 
   public getNodeStack(nodeId: string): string[] {
@@ -63,8 +64,8 @@ export class WorkflowGraph {
     return stack;
   }
 
-  public getAllNodes(): GraphNode[] {
-    return this.graph!.nodes().map((nodeId) => this.graph!.node(nodeId) as unknown as GraphNode);
+  public getAllNodes(): GraphNodeUnion[] {
+    return this.graph!.nodes().map((nodeId) => this.graph!.node(nodeId));
   }
 
   public getEdges(): Array<{ v: string; w: string }> {
@@ -105,7 +106,7 @@ export class WorkflowGraph {
 
     // Extract all nodes between begin and end (inclusive) - this includes child steps
     const subGraphNodeIds = this.topologicalOrder.slice(beginNodeIndex, endNodeIndex + 1);
-    const subGraph = new graphlib.Graph({ directed: true });
+    const subGraph = createTypedGraph({ directed: true });
 
     // Add all nodes in the range to subgraph
     for (const nodeId of subGraphNodeIds) {
@@ -129,12 +130,12 @@ export class WorkflowGraph {
     return workflowGraph;
   }
 
-  public getDirectSuccessors(nodeId: string): GraphNode[] {
+  public getDirectSuccessors(nodeId: string): GraphNodeUnion[] {
     const successors = this.graph!.successors(nodeId) || [];
-    return successors.map((id) => this.graph!.node(id) as unknown as GraphNode);
+    return successors.map((id) => this.graph!.node(id));
   }
 
-  public getAllPredecessors(nodeId: string): GraphNode[] {
+  public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
       if (visited.has(predNodeId)) {
@@ -149,6 +150,6 @@ export class WorkflowGraph {
 
     const directPredecessors = this.graph!.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
-    return Array.from(visited).map((id) => this.graph!.node(id) as unknown as GraphNode);
+    return Array.from(visited).map((id) => this.graph!.node(id));
   }
 }
