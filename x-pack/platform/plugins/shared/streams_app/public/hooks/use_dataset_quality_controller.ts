@@ -102,6 +102,8 @@ export const useDatasetQualityController = (
     urlStateStorageContainer,
     definition.stream.name,
     saveStateInUrl,
+    timeState.timeRange.from,
+    timeState.timeRange.to,
   ]);
 
   return controller;
