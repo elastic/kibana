@@ -183,4 +183,4 @@
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
 data.search.sessions.enabled: true
 feature_flags.overrides.search.backgroundSearchEnabled: true
-feature_flags.overrides.discover.tabsEnabled: true
+feature_flags.overrides.discover.tabsEnabled: false
