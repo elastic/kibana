@@ -8,7 +8,14 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiIcon,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  transparentize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -1416,11 +1423,11 @@ const componentStyles = {
       minHeight: 0,
       // css classes for the monaco editor
       '.template-variable-valid': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
         borderRadius: '2px',
       },
       '.template-variable-error': {
-        backgroundColor: euiTheme.colors.vis.euiColorVisWarning1,
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.12),
         color: euiTheme.colors.severity.danger,
         borderRadius: '2px',
       },
