@@ -6,13 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
-export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
+export function SearchHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   return {
+    async expectSearchHomePageIsLoaded() {
+      await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
+    },
+
     async expectToBeOnHomepage() {
       expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/home');
     },
