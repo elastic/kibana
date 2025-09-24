@@ -51,6 +51,7 @@ export const validateKafkaHost = (input: string): string | undefined => {
 const secretRefSchema = schema.oneOf([
   schema.object({
     id: schema.string(),
+    hash: schema.maybe(schema.string()),
   }),
   schema.string(),
 ]);
