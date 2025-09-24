@@ -564,7 +564,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       >
                         <EuiFieldText
                           fullWidth
-                          data-test-subj="migrateAgentFlyoutReplaceTokenInput" 
+                          data-test-subj="migrateAgentFlyoutReplaceTokenInput"
                           onChange={(e) => {
                             if ('id' in formContent) {
                               setFormContent({
