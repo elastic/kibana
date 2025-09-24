@@ -289,6 +289,9 @@ export class StreamsApp {
       .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
       .click();
   }
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+  }
 
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
