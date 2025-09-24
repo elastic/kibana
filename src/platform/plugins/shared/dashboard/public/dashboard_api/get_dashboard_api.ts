@@ -66,6 +66,7 @@ export function getDashboardApi({
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
+    initialState.controlGroupInput,
     trackPanel,
     getReferences
   );
@@ -100,13 +101,17 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
+    const {
+      panels,
+      controlGroupInput,
+      references: panelReferences,
+    } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      controlGroupInput: initialState.controlGroupInput,
+      controlGroupInput,
     };
 
     return {

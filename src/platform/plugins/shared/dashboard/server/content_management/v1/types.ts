@@ -17,10 +17,11 @@ import type {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { WithRequiredProperty } from '@kbn/utility-types';
-import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
+import type * as schema from './schema';
 
 export type DashboardFilter = TypeOf<typeof schema.filterSchema>;
 export type DashboardQuery = TypeOf<typeof schema.querySchema>;
@@ -37,9 +38,12 @@ export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
 export type DashboardAttributes = Omit<
   TypeOf<typeof schema.dashboardCreateRequestAttributesSchema>,
-  'panels'
+  'panels' | 'controlGroupInput'
 > & {
   panels: Array<DashboardPanel | DashboardSection>;
+  controlGroupInput: Omit<ControlsGroupState, 'controls'> & {
+    controls: Array<WithRequiredProperty<ControlsGroupState['controls'][number], 'id'>>;
+  };
 };
 
 export type FindDashboardsByIdResponseAttributes = Omit<

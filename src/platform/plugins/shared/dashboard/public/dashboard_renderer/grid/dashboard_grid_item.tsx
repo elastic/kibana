@@ -130,7 +130,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           })}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
+          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
     }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);

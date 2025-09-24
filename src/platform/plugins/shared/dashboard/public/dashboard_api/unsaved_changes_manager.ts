@@ -82,7 +82,6 @@ export function initializeUnsavedChangesManager({
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
         const childApi = layoutManager.api.children$.value[uuid];
         if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-
         layoutManager.internalApi.setChildState(uuid, childApi.serializeState());
       }
     }),
@@ -126,14 +125,17 @@ export function initializeUnsavedChangesManager({
         dashboardBackupState.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
         if (hasChildrenUnsavedChanges || hasLayoutChanges) {
-          const { panels, references } = layoutManager.internalApi.serializeLayout();
+          const { panels, controlGroupInput, references } =
+            layoutManager.internalApi.serializeLayout();
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
           dashboardBackupState.references = references ?? [];
-          if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
+          if (hasChildrenUnsavedChanges) {
+            dashboardBackupState.panels = panels;
+            dashboardBackupState.controlGroupInput = controlGroupInput;
+          }
         }
-
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });

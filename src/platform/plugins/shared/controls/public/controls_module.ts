@@ -8,8 +8,6 @@
  */
 
 export { ClearControlAction } from './actions/clear_control_action';
-export { DeleteControlAction } from './actions/delete_control_action';
-export { EditControlAction } from './actions/edit_control_action';
 
 export { getOptionsListControlFactory } from './controls/data_controls/options_list_control/get_options_list_control_factory';
 export { getRangesliderControlFactory } from './controls/data_controls/range_slider/get_range_slider_control_factory';

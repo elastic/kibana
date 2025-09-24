@@ -12,7 +12,6 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
@@ -52,7 +51,7 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlsGroupState;
+  controlGroupInput?: DashboardAttributes['controlGroupInput'];
 }
 
 export type DashboardLocatorParams = Partial<

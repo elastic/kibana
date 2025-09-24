@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+
+import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import type { PublishesTitle } from '@kbn/presentation-publishing';
@@ -16,13 +19,11 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { usePanelErrorCss } from './use_panel_error_css';
-import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -43,7 +44,6 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -145,17 +145,7 @@ export const PresentationPanelInternal = <
             panelDescription={panelDescription ?? defaultPanelDescription}
           />
         )}
-        {blockingError && api && (
-          <EuiFlexGroup
-            alignItems="center"
-            css={panelErrorCss}
-            className="eui-fullHeight"
-            data-test-subj="embeddableError"
-            justifyContent="center"
-          >
-            <PresentationPanelErrorInternal api={api} error={blockingError} />
-          </EuiFlexGroup>
-        )}
+        {blockingError && api && <PresentationPanelErrorInternal api={api} error={blockingError} />}
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}

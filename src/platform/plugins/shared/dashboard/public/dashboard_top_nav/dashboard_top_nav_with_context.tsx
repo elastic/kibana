@@ -8,16 +8,23 @@
  */
 
 import React from 'react';
+
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
 import type { InternalDashboardTopNavProps } from './internal_dashboard_top_nav';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import type { DashboardApi } from '../dashboard_api/types';
+import { uiActionsService } from '../services/kibana_services';
+
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardApi: DashboardApi;
 }
 
 export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
-  <DashboardContext.Provider value={props.dashboardApi}>
-    <InternalDashboardTopNav {...props} />
-  </DashboardContext.Provider>
+  <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+    <DashboardContext.Provider value={props.dashboardApi}>
+      <InternalDashboardTopNav {...props} />
+    </DashboardContext.Provider>
+  </KibanaContextProvider>
 );

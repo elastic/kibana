@@ -61,10 +61,11 @@ export const DashboardGrid = () => {
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
-      const currLayout = dashboardInternalApi.layout$.getValue();
+      const currLayout = dashboardApi.layout$.getValue();
       const updatedLayout: DashboardLayout = {
         sections: {},
         panels: {},
+        controls: currLayout.controls,
       };
       Object.values(newLayout).forEach((widget) => {
         if (widget.type === 'section') {
@@ -94,15 +95,15 @@ export const DashboardGrid = () => {
         }
       });
       if (!areLayoutsEqual(currLayout, updatedLayout)) {
-        dashboardInternalApi.layout$.next(updatedLayout);
+        dashboardApi.layout$.next(updatedLayout);
       }
     },
-    [dashboardInternalApi.layout$, viewMode]
+    [dashboardApi.layout$, viewMode]
   );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const panels = dashboardInternalApi.layout$.getValue().panels;
+      const panels = dashboardApi.layout$.getValue().panels;
       if (!panels[id]) return;
 
       if (!panelRefs.current[id]) {
@@ -122,7 +123,7 @@ export const DashboardGrid = () => {
         />
       );
     },
-    [appFixedViewport, dashboardInternalApi.layout$]
+    [appFixedViewport, dashboardApi.layout$]
   );
 
   const styles = useMemoCss(dashboardGridStyles);

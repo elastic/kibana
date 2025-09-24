@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
-import deepEqual from 'fast-deep-equal';
 
 import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -21,6 +21,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ControlsRenderer } from '@kbn/controls-renderer';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -403,6 +404,9 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
+
+      <ControlsRenderer parentApi={dashboardApi} />
+
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />

@@ -4492,6 +4492,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/controls-renderer@link:src/platform/packages/private/kbn-controls-renderer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls-schemas":
   version "0.0.0"
   uid ""

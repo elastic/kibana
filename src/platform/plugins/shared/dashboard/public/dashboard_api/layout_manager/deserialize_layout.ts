@@ -15,13 +15,22 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
+  controls: DashboardState['controlGroupInput'],
   getReferences: (id: string) => Reference[]
 ) {
+  const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
+    controls: Object.values((controls ?? { controls: {} }).controls).reduce(
+      (prev, control, index) => {
+        const { width, grow, ...rest } = control;
+        childState[control.id] = { rawState: rest }; // push to child state
+        return { ...prev, [control.id]: { type: control.type, width, grow, order: index } };
+      },
+      {}
+    ),
   };
-  const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
     const panelId = panel.panelIndex ?? v4();

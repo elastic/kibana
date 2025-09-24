@@ -11,7 +11,11 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
-export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
+export {
+  PanelNotFoundError,
+  PanelIncompatibleError,
+  ERROR_API_TYPE,
+} from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
   cellValueTrigger,

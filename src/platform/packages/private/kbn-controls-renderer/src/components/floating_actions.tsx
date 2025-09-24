@@ -8,45 +8,70 @@
  */
 
 import classNames from 'classnames';
-import type { FC, ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { v4 } from 'uuid';
+import { omit } from 'lodash';
+import React, { useEffect, useState, type FC, type ReactElement } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 
-import type { ViewMode } from '@kbn/presentation-publishing';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { uiActionsService } from '../../services/kibana_services';
-import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+
+import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
 
-  className?: string;
-  isEnabled?: boolean;
   api?: unknown;
+  uuid: string;
   viewMode?: ViewMode;
   disabledActions?: string[];
-  isTwoLine?: boolean;
 }
 
-export type FloatingActionItem = AnyApiAction & {
-  MenuItem: React.FC<{ context: unknown }>;
+export type FloatingActionItem = Omit<AnyApiAction, 'MenuItem'> & {
+  MenuItem: FC<{}>;
 };
+
+const getFloatingActionItem = (
+  uuid: string,
+  action: Action,
+  context: ActionExecutionContext<EmbeddableApiContext>
+): FloatingActionItem => ({
+  ...omit(action, 'MenuItem'),
+  MenuItem: () => {
+    const MenuItem = action.MenuItem;
+    return MenuItem ? (
+      <MenuItem key={action.id} context={context} />
+    ) : (
+      <EuiToolTip
+        key={`control-action-${uuid}-${action.id}`}
+        content={action.getDisplayNameTooltip?.(context) || action.getDisplayName(context)}
+      >
+        <EuiButtonIcon
+          iconType={action.getIconType(context) ?? 'empty'}
+          color="text"
+          onClick={() => action.execute(context)}
+        />
+      </EuiToolTip>
+    );
+  },
+});
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
-  isEnabled,
   api,
-  className = '',
+  uuid,
   disabledActions,
-  isTwoLine,
 }) => {
+  const {
+    services: { uiActions },
+  } = useKibana<ControlRendererServices>();
+
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
   useEffect(() => {
@@ -55,22 +80,20 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     let canceled = false;
     const context = {
       embeddable: api,
-      trigger: controlHoverTrigger,
+      trigger: uiActions.getTrigger(CONTROL_HOVER_TRIGGER_ID),
     };
 
-    const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
-      return (a.order || 0) - (b.order || 0);
+    const sortByOrder = (a: FloatingActionItem, b: FloatingActionItem) => {
+      return (b.order || 0) - (a.order || 0);
     };
 
     const getActions: () => Promise<FloatingActionItem[]> = async () => {
-      const actions = (
-        await uiActionsService.getTriggerCompatibleActions(CONTROL_HOVER_TRIGGER, context)
-      )
+      return (await uiActions.getTriggerCompatibleActions(CONTROL_HOVER_TRIGGER_ID, context))
         .filter((action) => {
-          return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
+          return (disabledActions ?? []).indexOf(action.id) === -1;
         })
+        .map((action) => getFloatingActionItem(uuid, action, context))
         .sort(sortByOrder);
-      return actions as FloatingActionItem[];
     };
 
     const subscriptions = new Subscription();
@@ -78,11 +101,11 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
       if (canceled) return;
       setFloatingActions((currentActions) => {
-        const newActions: FloatingActionItem[] = currentActions
-          ?.filter((current) => current.id !== action.id)
-          .sort(sortByOrder) as FloatingActionItem[];
+        const newActions: FloatingActionItem[] = currentActions?.filter(
+          (current) => current.id !== action.id
+        );
         if (isCompatible) {
-          return [action as FloatingActionItem, ...newActions];
+          return [getFloatingActionItem(uuid, action, context), ...newActions].sort(sortByOrder);
         }
         return newActions;
       });
@@ -92,12 +115,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       const actions = await getActions();
       if (canceled) return;
       setFloatingActions(actions);
-
-      const frequentlyChangingActions =
-        await uiActionsService.getFrequentlyChangingActionsForTrigger(
-          CONTROL_HOVER_TRIGGER,
-          context
-        );
+      const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
+        CONTROL_HOVER_TRIGGER_ID,
+        context
+      );
       if (canceled) return;
 
       for (const action of frequentlyChangingActions) {
@@ -119,33 +140,22 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [api, viewMode, disabledActions]);
+  }, [api, uuid, viewMode, disabledActions, uiActions]);
 
   const styles = useMemoCss(floatingActionsStyles);
-
   return (
     <div css={styles.wrapper}>
       {children}
-      {isEnabled && floatingActions.length > 0 && (
+      {floatingActions.length > 0 && (
         <div
-          data-test-subj={`presentationUtil__floatingActions__${
-            apiHasUniqueId(api) ? api.uuid : v4()
-          }`}
-          className={classNames(
-            'presentationUtil__floatingActions',
-            'controlFrameFloatingActions',
-            `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
-            className
-          )}
+          data-test-subj={`presentationUtil__floatingActions__${uuid}`}
+          className={classNames('presentationUtil__floatingActions', `controlFrameFloatingActions`)}
           css={styles.floatingActions}
         >
           <>
-            {floatingActions.map((action) =>
-              React.createElement(action.MenuItem, {
-                key: action.id,
-                context: { embeddable: api },
-              })
-            )}
+            {floatingActions.map(({ MenuItem, id }) => (
+              <MenuItem key={`${uuid}-${id}`} />
+            ))}
           </>
         </div>
       )}
@@ -175,14 +185,11 @@ const floatingActionsStyles = {
       right: euiTheme.size.xs,
       top: `-${euiTheme.size.l}`,
       zIndex: euiTheme.levels.toast,
-      '&.controlFrameFloatingActions--oneLine': {
+      '&.controlFrameFloatingActions': {
         padding: euiTheme.size.xs,
         borderRadius: euiTheme.border.radius.medium,
         backgroundColor: euiTheme.colors.emptyShade,
         boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
-      },
-      '&.controlFrameFloatingActions--twoLine': {
-        top: `-${euiTheme.size.xs} !important`,
       },
     }),
 };

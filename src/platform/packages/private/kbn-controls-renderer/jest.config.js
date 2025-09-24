@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ACTION_CLEAR_CONTROL = 'clearControl';
-export const ACTION_CREATE_CONTROL = 'createControl';
-export const OPTIONS_LIST_ACTION = 'addOptionsList';
-export const RANGE_SLIDER_ACTION = 'addRangeSlider';
-export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-controls-renderer'],
+};

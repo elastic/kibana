@@ -7,58 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon, euiFontSize } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
-import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '../../controls/types';
 import { controlWidthStyles } from './control_panel.styles';
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
- * the title, because individual controls can be any size, and dragging a wide item
- * can be quite cumbersome.
+ * the title so that we don't recreate the embeddable API on drag.
  */
 export const ControlClone = ({
-  labelPosition,
-  controlApi,
+  state,
+  width,
 }: {
-  labelPosition: string;
-  controlApi: DefaultControlApi | undefined;
+  state: SerializedPanelState<object> | undefined;
+  width: number | undefined;
 }) => {
-  const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
-    controlApi ? controlApi.width$ : new BehaviorSubject(DEFAULT_CONTROL_GROW),
-    controlApi?.title$ ? controlApi.title$ : new BehaviorSubject(undefined),
-    controlApi?.defaultTitle$ ? controlApi.defaultTitle$ : new BehaviorSubject('')
-  );
-  const isTwoLine = labelPosition === 'twoLine';
-
   const styles = useMemoCss(controlCloneStyles);
+  const panelTitle = (state?.rawState as { title?: string }).title;
+
+  const widthStyle = useMemo(() => {
+    return width ? css({ width: `${width}px` }) : undefined;
+  }, [width]);
 
   return (
-    <EuiFlexItem
-      css={styles.container}
-      className={classNames({
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--large': width === 'large',
-      })}
-    >
-      {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
+    <EuiFlexItem css={[styles.container, widthStyle]}>
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
         </EuiFlexItem>
-        {!isTwoLine && (
+        {panelTitle?.length && (
           <EuiFlexItem>
-            <label>{panelTitle ?? defaultPanelTitle}</label>
+            <label>{panelTitle}</label>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
