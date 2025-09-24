@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -23,15 +21,12 @@ import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 
 export interface SessionExpirationToastProps {
   sessionState$: Observable<SessionState>;
-  onExtend: () => Promise<any>;
 }
 
 export const SessionExpirationToast: FunctionComponent<SessionExpirationToastProps> = ({
   sessionState$,
-  onExtend,
 }) => {
   const state = useObservable(sessionState$);
-  const [{ loading }, extend] = useAsyncFn(onExtend);
 
   if (!state || !state.expiresInMs) {
     return null;
@@ -49,32 +44,12 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
     />
   );
 
-  if (state.canBeExtended) {
-    return (
-      <>
-        {expirationWarning}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" color="warning" isLoading={loading} onClick={extend} autoFocus>
-              <FormattedMessage
-                id="xpack.security.sessionExpirationToast.extendButton"
-                defaultMessage="Stay logged in"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-
   return expirationWarning;
 };
 
 export const createSessionExpirationToast = (
   services: StartServices,
   sessionState$: Observable<SessionState>,
-  onExtend: () => Promise<any>,
   onClose: () => void
 ): ToastInput => {
   return {
@@ -83,10 +58,7 @@ export const createSessionExpirationToast = (
     title: i18n.translate('xpack.security.sessionExpirationToast.title', {
       defaultMessage: 'Session timeout',
     }),
-    text: toMountPoint(
-      <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />,
-      services
-    ),
+    text: toMountPoint(<SessionExpirationToast sessionState$={sessionState$} />, services),
     onClose,
     toastLifeTimeMs: 0x7fffffff, // Toast is hidden based on observable so using maximum possible timeout
   };
