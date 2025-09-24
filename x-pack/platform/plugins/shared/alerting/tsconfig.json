@@ -78,7 +78,8 @@
     "@kbn/elastic-assistant-common",
     "@kbn/response-ops-recurring-schedule-form",
     "@kbn/licensing-types",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*"
