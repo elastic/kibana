@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
@@ -16,12 +17,14 @@ import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;
   cloud?: CloudSetup;
+  spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
 }
 
 export interface OnechatStartDependencies {
   inference: InferenceServerStart;
   cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
