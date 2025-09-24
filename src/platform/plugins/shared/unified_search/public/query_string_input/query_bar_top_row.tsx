@@ -39,7 +39,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
+import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -320,11 +320,7 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground =
-      props.isDirty ||
-      backgroundSearchState === SearchSessionState.Loading ||
-      backgroundSearchState === SearchSessionState.Completed;
+    const canSendToBackground = props.isLoading;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
