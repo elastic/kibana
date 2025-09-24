@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import type { Client as ESClient } from 'elasticsearch'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { SCOUT_TEST_EVENTS_DATA_STREAM_NAME } from '@kbn/scout-info';
 import type { ScoutReportEvent } from '../event';
 import * as componentTemplates from './component_templates';
