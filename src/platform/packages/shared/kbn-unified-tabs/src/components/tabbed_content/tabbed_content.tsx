@@ -28,7 +28,8 @@ import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT } from '../../constants';
 
-export interface TabbedContentProps extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed'> {
+export interface TabbedContentProps
+  extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed'> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: TabItem[];
