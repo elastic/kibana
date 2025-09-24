@@ -226,6 +226,7 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the tabs bar menu to close', async () => {
       return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
     });
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip if it is open
   }
 
   public async getRecentlyClosedTabLabels() {

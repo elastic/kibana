@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const monacoEditor = getService('monacoEditor');
   const dataViews = getService('dataViews');
+  const testSubjects = getService('testSubjects');
 
   const untitledTabLabel = 'Untitled';
   const firstTabLabel = 'My first tab';
@@ -341,6 +342,82 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           secondTabLabel,
           testTabLabel,
         ]);
+      });
+    });
+
+    it('should push previous tabs to recently closed list after reopening a discover session', async () => {
+      const firstSession = 'Session1';
+      const secondSession = 'Session2';
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([]);
+        expect(await discover.getHitCount()).to.be('14,004');
+      });
+
+      await discover.saveSearch(firstSession);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([]);
+        expect(await discover.getHitCount()).to.be('14,004');
+        expect(await discover.getSavedSearchTitle()).to.be(firstSession);
+        await testSubjects.missingOrFail('unsavedChangesBadge');
+      });
+
+      const query = 'machine.os: "ios"';
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([]);
+        expect(await discover.getHitCount()).to.be('2,784');
+        await testSubjects.existOrFail('unsavedChangesBadge');
+      });
+
+      await discover.saveSearch(secondSession, true);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([untitledTabLabel]);
+        expect(await discover.getHitCount()).to.be('2,784');
+        expect(await queryBar.getQueryString()).to.be(query);
+        expect(await discover.getSavedSearchTitle()).to.be(secondSession);
+        await testSubjects.missingOrFail('unsavedChangesBadge');
+      });
+
+      await discover.loadSavedSearch(firstSession);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel]);
+        expect(await discover.getHitCount()).to.be('14,004');
+        expect(await queryBar.getQueryString()).to.be('');
+        expect(await discover.getSavedSearchTitle()).to.be(firstSession);
+        await testSubjects.missingOrFail('unsavedChangesBadge');
+      });
+
+      await discover.loadSavedSearch(secondSession);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabLabels();
+        expect(recentlyClosedTabs).to.eql([untitledTabLabel, untitledTabLabel, untitledTabLabel]);
+        expect(await discover.getHitCount()).to.be('2,784');
+        expect(await queryBar.getQueryString()).to.be(query);
+        expect(await discover.getSavedSearchTitle()).to.be(secondSession);
+        await testSubjects.missingOrFail('unsavedChangesBadge');
       });
     });
   });
