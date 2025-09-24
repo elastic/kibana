@@ -736,8 +736,8 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.G
 
   if (workflowSchema.settings?.timeout) {
     finalGraph = handleStepTimeout(
-      'workflow_timeout_handler',
-      'workflow_timeout_handler',
+      'workflow_level_timeout',
+      'workflow_level_timeout',
       workflowSchema.settings.timeout,
       finalGraph,
       context
