@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
@@ -70,7 +71,10 @@ const SamplePreviewTableContent = ({
     if (onValidate) {
       onValidate({
         isValid: value?.status === 'failure' || error ? false : true,
-        isIgnored: value?.ignoredFields ? true : false,
+        isIgnored:
+          value?.documentsWithIgnoredFields && value?.documentsWithIgnoredFields?.length > 0
+            ? true
+            : false,
       });
     }
   }, [value, error, onValidate]);
@@ -121,6 +125,40 @@ const SamplePreviewTableContent = ({
       >
         <PreviewTable
           documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
+          renderCellValue={(doc, columnId) => {
+            const emptyCell = <>&nbsp;</>;
+            const docValue = doc[columnId];
+
+            let renderedValue = emptyCell as ReactNode;
+
+            if (typeof docValue === 'object') {
+              renderedValue = JSON.stringify(docValue);
+            } else {
+              renderedValue = String(docValue) || emptyCell;
+            }
+
+            const ignoredFields = value.documentsWithIgnoredFields?.find((field) => {
+              return field[columnId] === docValue;
+            });
+
+            if (ignoredFields?.[columnId] === docValue) {
+              renderedValue = (
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiToolTip
+                    position="bottom"
+                    content={i18n.translate('xpack.streams.samplePreviewTable.ignoredField', {
+                      defaultMessage: 'This value caused an issue and was ignored',
+                    })}
+                  >
+                    <EuiIcon type="warning" color="warning" />
+                  </EuiToolTip>
+                  {renderedValue}
+                </EuiFlexGroup>
+              );
+            }
+
+            return renderedValue;
+          }}
           displayColumns={columns}
         />
       </div>

@@ -117,7 +117,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     status: 'unknown' | 'success' | 'failure';
     simulationError: string | null;
     documentsWithRuntimeFieldsApplied: SampleDocument[] | null;
-    ignoredFields: string[] | null;
+    documentsWithIgnoredFields: SampleDocument[] | null;
   }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -173,7 +173,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         status: 'unknown',
         simulationError: null,
         documentsWithRuntimeFieldsApplied: null,
-        ignoredFields: null,
+        documentsWithIgnoredFields: null,
       };
     }
 
@@ -217,7 +217,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           documentWithError.doc.error
         ),
         documentsWithRuntimeFieldsApplied: null,
-        ignoredFields: null,
+        documentsWithIgnoredFields: null,
       };
     }
 
@@ -252,17 +252,21 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       ...runtimeFieldsSearchBody,
     });
 
-    const documentsWithIgnoredFields = simulation.docs.filter((doc: any) => {
-      return doc.doc.ignored_fields !== undefined;
-    });
-
-    const uniqueIgnoredFields = Array.from(
-      new Set(
-        documentsWithIgnoredFields.flatMap((doc: any) =>
-          doc.doc.ignored_fields.map((ignoredField: any) => ignoredField.field)
-        )
-      )
-    ) as string[];
+    const documentsWithIgnoredFields = simulation.docs
+      .filter((doc: any) => doc.doc.ignored_fields !== undefined)
+      .map((doc: any) => {
+        const ignoredFields = doc.doc.ignored_fields.map(
+          (ignored: { field: string }) => ignored.field
+        );
+        const source = getFlattenedObject(doc.doc._source);
+        return Object.entries(source).reduce<SampleDocument>((acc, [key, value]) => {
+          if (ignoredFields.includes(key)) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {});
+      })
+      .filter((doc: SampleDocument) => Object.keys(doc).length > 0);
 
     return {
       status: 'success',
@@ -278,7 +282,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           }, {});
         })
         .filter((doc) => Object.keys(doc).length > 0),
-      ignoredFields: uniqueIgnoredFields.length > 0 ? uniqueIgnoredFields : null,
+      documentsWithIgnoredFields,
     };
   },
 });
