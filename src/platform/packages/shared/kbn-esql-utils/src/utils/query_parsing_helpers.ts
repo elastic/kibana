@@ -41,11 +41,6 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   return indices?.map((index) => index.name).join(',');
 }
 
-/**
- * Extracts remote cluster names from an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of remote cluster names, or undefined if none found
- */
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
   const { root } = Parser.parse(esql);
@@ -95,11 +90,6 @@ export function hasTransformationalCommand(esql?: string) {
   return hasAtLeastOneTransformationalCommand;
 }
 
-/**
- * Extracts the limit value from an ES|QL query
- * @param esql - The ES|QL query string
- * @returns The limit value, or default limit if none specified
- */
 export function getLimitFromESQLQuery(esql: string): number {
   const { ast } = parse(esql);
   const limitCommands = ast.filter(({ name }) => name === 'limit');
@@ -210,11 +200,6 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return columnName;
 };
 
-/**
- * Extracts KQL search queries from KQL functions in an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of KQL query strings
- */
 export const getKqlSearchQueries = (esql: string) => {
   const { ast } = parse(esql);
   const functions: ESQLFunction[] = [];
@@ -235,11 +220,6 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-/**
- * Checks if a query is properly wrapped with pipe separators
- * @param query - The query string to check
- * @returns True if the query is properly wrapped by pipes
- */
 export const isQueryWrappedByPipes = (query: string): boolean => {
   const { ast } = parse(query);
   const numberOfCommands = ast.length;
@@ -247,21 +227,11 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-/**
- * Formats an ES|QL query with proper indentation and line breaks
- * @param src - The source query string
- * @returns The prettified query string
- */
 export const prettifyQuery = (src: string): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
   return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
-/**
- * Retrieves metadata column names from an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of metadata column names
- */
 export const retrieveMetadataColumns = (esql: string): string[] => {
   const { ast } = parse(esql);
   const options: ESQLCommandOption[] = [];
@@ -273,11 +243,6 @@ export const retrieveMetadataColumns = (esql: string): string[] => {
   return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };
 
-/**
- * Extracts all column names referenced in an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of column names
- */
 export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   const { root } = parse(esql);
   const columns: ESQLColumn[] = [];
@@ -289,11 +254,6 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   return columns.map((column) => column.name);
 };
 
-/**
- * Extracts variable names used in an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of variable names (without ? prefixes)
- */
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root);
@@ -412,12 +372,6 @@ export function findClosestColumn(
   return closestColumn;
 }
 
-/**
- * Extracts field values from a query at a specific cursor position
- * @param queryString - The query string
- * @param cursorPosition - The cursor position
- * @returns The field name at the cursor position, or undefined
- */
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
 
@@ -474,11 +428,6 @@ export const fixESQLQueryWithVariables = (
   return queryString;
 };
 
-/**
- * Extracts CATEGORIZE column names from STATS BY commands in an ES|QL query
- * @param esql - The ES|QL query string
- * @returns Array of categorize column names
- */
 export const getCategorizeColumns = (esql: string): string[] => {
   const { root } = parse(esql);
   const statsCommand = root.commands.find(({ name }) => name === 'stats');
