@@ -38,10 +38,12 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
 export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
-    system: z.object({
-      name: NonEmptyString,
-      filter: conditionSchema,
-    }),
+    system: z
+      .object({
+        name: NonEmptyString,
+        filter: conditionSchema,
+      })
+      .optional(),
     kql: z.object({
       query: z.string(),
     }),
@@ -56,12 +58,12 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
-  system: z.optional(
-    z.object({
+  system: z
+    .object({
       name: NonEmptyString,
       filter: conditionSchema,
     })
-  ),
+    .optional(),
   kql: z.object({
     query: z.string(),
   }),

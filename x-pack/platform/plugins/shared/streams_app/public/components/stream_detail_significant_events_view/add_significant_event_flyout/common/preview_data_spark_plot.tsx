@@ -164,7 +164,6 @@ export function PreviewDataSparkPlot({
                 )}
               </EuiText>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 aria-label={openInDiscoverLabel}

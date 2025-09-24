@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { badRequest } from '@hapi/boom';
 import type {
   SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
@@ -12,9 +12,8 @@ import type {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
-import { NonEmptyString } from '@kbn/zod-helpers';
 import { conditionSchema } from '@kbn/streamlang';
-import { badRequest } from '@hapi/boom';
+import { NonEmptyString } from '@kbn/zod-helpers';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -33,12 +32,12 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        system: z.optional(
-          z.object({
+        system: z
+          .object({
             name: NonEmptyString,
             filter: conditionSchema,
           })
-        ),
+          .optional(),
         kql: z.object({
           query: z.string(),
         }),

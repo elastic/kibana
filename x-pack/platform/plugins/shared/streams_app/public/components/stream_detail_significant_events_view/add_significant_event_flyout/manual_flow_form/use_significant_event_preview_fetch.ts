@@ -14,6 +14,7 @@ import moment from 'moment';
 import type { Condition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { NO_SYSTEM } from '../utils/default_query';
 
 export function useSignificantEventPreviewFetch({
   name,
@@ -49,6 +50,8 @@ export function useSignificantEventPreviewFetch({
         .near(10, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
 
+      const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
+
       return streams.streamsRepositoryClient.fetch(
         `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
         {
@@ -71,13 +74,14 @@ export function useSignificantEventPreviewFetch({
                     }
                   : undefined,
                 kql: { query: kqlQuery },
+                system: effectiveSystem,
               },
             },
           },
         }
       );
     },
-    [isQueryValid, timeState.timeRange, streams.streamsRepositoryClient, name, system, kqlQuery]
+    [timeState, name, system, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
   );
 
   return previewFetch;
