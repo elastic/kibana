@@ -725,7 +725,15 @@
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
-              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; esqlEditorInitialState?: Partial<",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; esqlVariablesConfig?: { esqlVariables: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; esqlEditorInitialState?: Partial<",
               {
                 "pluginId": "@kbn/esql-editor",
                 "scope": "public",
@@ -741,7 +749,7 @@
                 "section": "def-public.ESQLEditorRestorableState",
                 "text": "ESQLEditorRestorableState"
               },
-              ">) => void) | undefined; timeHistory?: ",
+              ">) => void) | undefined; useBackgroundSearchButton?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",

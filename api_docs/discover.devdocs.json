@@ -2545,7 +2545,39 @@
                 "section": "def-public.UnifiedHistogramVisContext",
                 "text": "UnifiedHistogramVisContext"
               },
-              " | undefined; }>, \"internalState/setOverriddenVisContextAfterInvalidation\">; setIsESQLToDataViewTransitionModalVisible: ",
+              " | undefined; }>, \"internalState/setOverriddenVisContextAfterInvalidation\">; setControlGroupState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ controlGroupState: ",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlPanelsState",
+                "text": "ControlPanelsState"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlState",
+                "text": "ESQLControlState"
+              },
+              "> | undefined; }>, \"internalState/setControlGroupState\">; setEsqlVariables: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ esqlVariables: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }>, \"internalState/setEsqlVariables\">; setIsESQLToDataViewTransitionModalVisible: ",
               "ActionCreatorWithPayload",
               "<boolean, \"internalState/setIsESQLToDataViewTransitionModalVisible\">; setResetDefaultProfileState: ",
               "ActionCreatorWithPreparedPayload",
