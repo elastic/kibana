@@ -11,40 +11,43 @@ import type { Observable } from 'rxjs';
 
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
 import type { StickyControlState } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas/src/types';
 import type { StoredControlGroupInput } from '@kbn/dashboard-plugin/server/dashboard_saved_object';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { AppliesFilters, PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
-export type ControlGroupRendererApi = ControlsRendererParentApi & {
-  reload: () => void;
+export type ControlGroupRendererApi = ControlsRendererParentApi &
+  Pick<AppliesFilters, 'appliedFilters$'> &
+  PublishesESQLVariables & {
+    reload: () => void;
 
-  /**
-   * @deprecated
-   * Calling `updateInput` will cause the entire control group to be re-initialized.
-   *
-   * Therefore, to update state without `updateInput`, you should add public setters to the
-   * relavant API (`ControlGroupApi` or the individual control type APIs) for the state you wish to update
-   * and call those setters instead.
-   */
-  updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
+    /**
+     * @deprecated
+     * Calling `updateInput` will cause the entire control group to be re-initialized.
+     *
+     * Therefore, to update state without `updateInput`, you should add public setters to the
+     * relavant API (`ControlGroupApi` or the individual control type APIs) for the state you wish to update
+     * and call those setters instead.
+     */
+    updateInput: (input: Partial<ControlGroupRuntimeState>) => void;
 
-  /**
-   * @deprecated
-   * Instead of subscribing to the whole runtime state, it is more efficient to subscribe to the individual
-   * publishing subjects of the control group API.
-   */
-  getInput$: () => Observable<ControlGroupRuntimeState>;
+    /**
+     * @deprecated
+     * Instead of subscribing to the whole runtime state, it is more efficient to subscribe to the individual
+     * publishing subjects of the control group API.
+     */
+    getInput$: () => Observable<ControlGroupRuntimeState>;
 
-  /**
-   * @deprecated
-   */
-  getInput: () => ControlGroupRuntimeState;
+    /**
+     * @deprecated
+     */
+    getInput: () => ControlGroupRuntimeState;
 
-  appliedFilters$: PublishingSubject<Filter[]>;
-};
+    timeslice$: PublishingSubject<TimeSlice | undefined>;
+  };
 
 /**
  * ----------------------------------------------------------------

@@ -9,13 +9,13 @@ import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs';
 
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import {
   ControlGroupRenderer,
   type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
-} from '@kbn/controls-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 
 import type { Timeslice } from '../../../common/descriptor_types';
 
@@ -69,10 +69,8 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
           setApi(nextApi);
         }}
         dataLoading={dataLoading}
-        getCreationOptions={async (
-          initialState: Partial<ControlGroupRuntimeState>,
-          builder: ControlGroupStateBuilder
-        ) => {
+        getCreationOptions={async (builder: ControlGroupStateBuilder) => {
+          const initialState = {};
           builder.addTimeSliderControl(initialState);
           return {
             initialState,

@@ -38,3 +38,5 @@ export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
 
 export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
+
+export type TimeSlice = [number, number];

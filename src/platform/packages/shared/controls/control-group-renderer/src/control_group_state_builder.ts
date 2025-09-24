@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  // TIME_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type {
   // ControlsGroupState,
@@ -86,19 +86,19 @@ export const controlGroupStateBuilder = {
       },
     };
   },
-  // addTimeSliderControl: (
-  //   controlGroupState: Partial<ControlGroupRuntimeState>,,
-  //   controlId?: string
-  // ) => {
-  //   controlGroupState.initialChildControlState = {
-  //     ...(controlGroupState.initialChildControlState ?? {}),
-  //     [controlId ?? uuidv4()]: {
-  //       type: TIME_SLIDER_CONTROL,
-  //       order: getNextControlOrder(controlGroupState.initialChildControlState),
-  //       width: 'large',
-  //     },
-  //   };
-  // },
+  addTimeSliderControl: (
+    controlGroupState: Partial<ControlGroupRuntimeState>,
+    controlId?: string
+  ) => {
+    controlGroupState.initialChildControlState = {
+      ...(controlGroupState.initialChildControlState ?? {}),
+      [controlId ?? uuidv4()]: {
+        type: TIME_SLIDER_CONTROL,
+        order: getNextControlOrder(controlGroupState.initialChildControlState),
+        width: 'large',
+      },
+    };
+  },
 };
 
 // async function getCompatibleControlType(

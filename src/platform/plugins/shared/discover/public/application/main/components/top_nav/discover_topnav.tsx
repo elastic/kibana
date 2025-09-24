@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -284,12 +284,10 @@ export const DiscoverTopNav = ({
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupApi}
                     timeRange={timeRange}
-                    getCreationOptions={async (initialState) => {
-                      const initialChildControlState =
-                        getActivePanels() ?? initialState.initialChildControlState ?? {};
+                    getCreationOptions={async () => {
+                      const initialChildControlState = getActivePanels() ?? {};
                       return {
                         initialState: {
-                          ...initialState,
                           initialChildControlState,
                         },
                       };
