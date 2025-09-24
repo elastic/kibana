@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationStats } from '../../../../../../types';
 import type { OnMigrationCreated } from '../../../../types';
 import { RulesFileUpload } from './rules_file_upload';
 import {
@@ -18,7 +18,7 @@ import * as i18n from './translations';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats: RuleMigrationTaskStats | undefined;
+  migrationStats: RuleMigrationStats | undefined;
   migrationName: string | undefined;
   onMigrationCreated: OnMigrationCreated;
   onRulesFileChanged: (files: FileList | null) => void;

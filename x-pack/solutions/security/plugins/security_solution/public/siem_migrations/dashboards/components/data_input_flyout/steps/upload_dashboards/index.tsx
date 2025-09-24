@@ -9,14 +9,14 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber } from '@elastic/eui';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { DashboardUploadSteps } from '../constants';
-import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from '../translations';
 import { DashboardsUploadSubSteps } from './sub_steps';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
+import type { DashboardMigrationStats } from '../../../../types';
 
 interface DashboardsUploadStepProps {
   dataInputStep?: number;
-  migrationStats?: DashboardMigrationTaskStats;
+  migrationStats?: DashboardMigrationStats;
   onMigrationCreated: OnMigrationCreated;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }

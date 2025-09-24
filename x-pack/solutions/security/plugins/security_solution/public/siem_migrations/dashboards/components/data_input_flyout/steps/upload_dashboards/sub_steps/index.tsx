@@ -7,15 +7,15 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
+import type { DashboardMigrationStats } from '../../../../../types';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
-import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { SubSteps, useMigrationNameStep } from '../../../../../../common/components';
 import { useCopyExportQueryStep } from './copy_export_query';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
 import { useCheckResourcesStep } from './check_resources';
 interface DashboardsUploadSubStepsProps {
-  migrationStats?: DashboardMigrationTaskStats;
+  migrationStats?: DashboardMigrationStats;
   onMissingResourcesFetched: OnMissingResourcesFetched;
   onMigrationCreated: OnMigrationCreated;
 }
