@@ -56,6 +56,7 @@ export const NoDataCard = ({
 }: Props) => {
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
   const docsLink = link || 'https://www.elastic.co/kibana';
+  const isButtonDisabled = buttonIsDisabled || !!disabledButtonTooltipText;
 
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -74,7 +75,7 @@ export const NoDataCard = ({
       body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
       actions={
         canAccessFleet && href ? (
-          buttonIsDisabled ? (
+          isButtonDisabled ? (
             disabledButtonTooltipText ? (
               <EuiToolTip position="right" content={disabledButtonTooltipText}>
                 <EuiButton disabled data-test-subj="noDataDefaultActionButton">
