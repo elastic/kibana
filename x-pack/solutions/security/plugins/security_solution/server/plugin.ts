@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import { ReplaySubject, takeUntil, type Observable, type Subject, type Subscription } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/common/constants';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -146,6 +147,10 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import {
+  setEsqlRecommendedQueries,
+  unsetMetricsExperienceEsqlRecommendedQueries,
+} from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -178,6 +183,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
 
   private isServerless: boolean;
+
+  private metricExperienceEnabled$?: Subscription;
+  private pluginStop$: Subject<void>;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -223,6 +231,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('plugin initialized');
 
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
+
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -559,6 +569,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         });
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
+
+        setEsqlRecommendedQueries(plugins.esql);
+
+        this.metricExperienceEnabled$ = coreStart.featureFlags
+          .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false)
+          .pipe(takeUntil(this.pluginStop$))
+          .subscribe((isMetricsExperienceEnabled) => {
+            if (!isMetricsExperienceEnabled) {
+              unsetMetricsExperienceEsqlRecommendedQueries(plugins.esql);
+            }
+          });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -884,7 +905,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+
+    if (this.metricExperienceEnabled$ !== undefined) {
+      this.metricExperienceEnabled$.unsubscribe();
+    }
   }
 }
