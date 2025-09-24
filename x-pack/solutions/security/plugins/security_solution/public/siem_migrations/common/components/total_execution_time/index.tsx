@@ -26,7 +26,13 @@ export const TotalExecutionTime: React.FC<{ milliseconds: number }> = ({ millise
   }, [milliseconds]);
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false} wrap={false}>
+    <EuiFlexGroup
+      data-test-subj="migrationExecutionTime"
+      gutterSize="s"
+      alignItems="flexStart"
+      responsive={false}
+      wrap={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiIconTip
           aria-label={i18n.TOTAL_EXECUTION_TIME_TOOLTIP}
