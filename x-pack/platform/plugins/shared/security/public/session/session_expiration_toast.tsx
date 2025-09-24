@@ -11,7 +11,6 @@ import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { take } from 'rxjs';
 
 import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -57,7 +56,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" color="warning" isLoading={loading} onClick={extend}>
+            <EuiButton size="s" color="warning" isLoading={loading} onClick={extend} autoFocus>
               <FormattedMessage
                 id="xpack.security.sessionExpirationToast.extendButton"
                 defaultMessage="Stay logged in"
@@ -78,11 +77,6 @@ export const createSessionExpirationToast = (
   onExtend: () => Promise<any>,
   onClose: () => void
 ): ToastInput => {
-  let currentState: SessionState | undefined;
-  sessionState$.pipe(take(1)).subscribe((state) => {
-    currentState = state;
-  });
-
   return {
     color: 'warning',
     iconType: 'clock',
@@ -94,7 +88,6 @@ export const createSessionExpirationToast = (
       services
     ),
     onClose,
-    autoFocus: currentState?.canBeExtended ?? false,
     toastLifeTimeMs: 0x7fffffff, // Toast is hidden based on observable so using maximum possible timeout
   };
 };
