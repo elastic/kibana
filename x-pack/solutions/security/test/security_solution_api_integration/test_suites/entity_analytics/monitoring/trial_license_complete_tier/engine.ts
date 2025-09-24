@@ -426,8 +426,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         privMonUtils.assertIsPrivileged(user1After, true);
         expect(user1After?.user?.name).toEqual(user1.name);
-        // eslint-disable-next-line no-console
-        console.log(`User1 sources: ${JSON.stringify(user1After, null, 2)}`);
         expect(user1After?.labels?.sources).toEqual(['api', 'index']);
         privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
