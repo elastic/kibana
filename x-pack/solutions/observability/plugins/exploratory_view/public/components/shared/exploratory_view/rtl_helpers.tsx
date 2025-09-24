@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 
 import type { RenderOptions, MatcherFunction } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -238,7 +238,7 @@ export const getHistoryFromUrl = (url: Url) => {
   }
 
   return createMemoryHistory({
-    initialEntries: [url.path + stringify(url.queryParams)],
+    initialEntries: [url.path + queryString.stringify(url.queryParams)],
   });
 };
 

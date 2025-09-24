@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 import type { PackagePolicy, OnSaveQueryParamKeys } from '../../../../types';
 
@@ -13,8 +13,8 @@ import { appendOnSaveQueryParamsToPath } from '.';
 const mockPolicy: PackagePolicy = { policy_id: '1234', policy_ids: ['1234'] } as PackagePolicy;
 
 function parseHref(href: string) {
-  const [basePath, queryString] = href.split('?');
-  const parsedQueryString = parse(queryString);
+  const [basePath, qs] = href.split('?');
+  const parsedQueryString = queryString.parse(qs);
 
   return [basePath, parsedQueryString];
 }

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { stringify, parse } from 'query-string';
+import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
@@ -329,8 +329,8 @@ export const AgentBasedPackagePoliciesTable = ({
         <AgentEnrollmentFlyout
           onClose={() => {
             setFlyoutOpenForPolicyId(null);
-            const { addAgentToPolicyId, ...rest } = parse(search);
-            history.replace({ search: stringify(rest) });
+            const { addAgentToPolicyId, ...rest } = queryString.parse(search);
+            history.replace({ search: queryString.stringify(rest) });
           }}
           agentPolicy={flyoutPolicy}
           selectedAgentPolicies={selectedAgentPolicies}

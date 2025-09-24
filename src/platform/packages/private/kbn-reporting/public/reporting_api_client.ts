@@ -27,7 +27,7 @@ import type {
 } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import type { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
@@ -89,7 +89,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getKibanaAppHref(job: Job): string {
-    const searchParams = stringify({
+    const searchParams = queryString.stringify({
       jobId: job.id,
       ...(job.scheduled_report_id ? { scheduledReportId: job.scheduled_report_id } : {}),
     });
@@ -191,7 +191,7 @@ export class ReportingAPIClient implements IReportingAPI {
    * This string must be shown when the user selects the option to view/copy the POST URL
    */
   public getReportingPublicJobPath(exportType: string, jobParams: BaseParams) {
-    const params = stringify({
+    const params = queryString.stringify({
       jobParams: rison.encode(jobParams),
     });
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;

@@ -8,7 +8,7 @@
 import React, { createContext, useState, useMemo, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPublicPluginsStart } from '../..';
 import { fromQuery, toQuery } from '../..';
@@ -78,7 +78,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
     rangeTo = sharedTimeRange.to ?? defaultTimeRange.to,
     refreshInterval = sharedRefreshInterval.value || defaultRefreshInterval.value || 10000, // we want to override a default of 0
     refreshPaused = sharedRefreshInterval.pause ?? defaultRefreshInterval.pause,
-  } = parse(location.search, {
+  } = queryString.parse(location.search, {
     sort: false,
   });
 

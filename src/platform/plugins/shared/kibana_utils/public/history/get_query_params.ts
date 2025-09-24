@@ -8,11 +8,11 @@
  */
 
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { Location } from 'history';
 
 export function getQueryParams(location: Location): ParsedQuery {
   const search = (location.search || '').replace(/^\?/, '');
-  const query = parse(search, { sort: false });
+  const query = queryString.parse(search, { sort: false });
   return query;
 }

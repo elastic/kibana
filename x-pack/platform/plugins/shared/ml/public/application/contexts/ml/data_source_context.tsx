@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -48,7 +48,7 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
     },
   } = useMlKibana();
 
-  const { index: dataViewId, savedSearchId } = parse(location.search, {
+  const { index: dataViewId, savedSearchId } = queryString.parse(location.search, {
     sort: false,
   }) as { index: string; savedSearchId: string };
 

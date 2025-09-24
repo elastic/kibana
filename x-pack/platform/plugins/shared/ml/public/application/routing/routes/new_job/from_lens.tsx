@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
 import type { MlRoute, PageProps } from '../../router';
@@ -23,7 +23,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = queryString.parse(
     location.search,
     {
       sort: false,

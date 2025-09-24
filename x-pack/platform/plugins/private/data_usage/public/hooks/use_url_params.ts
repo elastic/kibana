@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -21,10 +21,10 @@ export function useUrlParams<T = Record<string, string | number | null | undefin
 } {
   const { search } = useLocation();
   return useMemo(() => {
-    const urlParams = parse(search) as unknown as T;
+    const urlParams = queryString.parse(search) as unknown as T;
     return {
       urlParams,
-      toUrlParams: (params: T = urlParams) => stringify(params as unknown as object),
+      toUrlParams: (params: T = urlParams) => queryString.stringify(params as unknown as object),
     };
   }, [search]);
 }
