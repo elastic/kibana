@@ -7,15 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { NodesFactory } from './step/nodes_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import type { NodeWithErrorCatching, MonitorableNode } from './step/node_implementation';
 import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
+import type { NodesFactory } from './step/nodes_factory';
+import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
+
+export interface WorkflowExecutionLoopParams {
+  workflowExecutionGraph: WorkflowGraph;
+  workflowRuntime: WorkflowExecutionRuntimeManager;
+  workflowExecutionState: WorkflowExecutionState;
+  workflowLogger: WorkflowEventLogger;
+  nodesFactory: NodesFactory;
+  esClient: any; // TODO: properly type it
+  fakeRequest: any; // TODO: properly type it
+  coreStart: any; // TODO: properly type it
+}
 
 /**
  * Executes a workflow by continuously processing its steps until completion.
@@ -40,57 +51,48 @@ import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_st
  * continue or terminate based on the error handling logic in the catchError function.
  * State is saved after each step to ensure workflow can be resumed if interrupted.
  */
-export async function workflowExecutionLoop(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  workflowExecutionState: WorkflowExecutionState,
-  workflowLogger: WorkflowEventLogger,
-  nodesFactory: NodesFactory,
-  workflowGraph: WorkflowGraph
-) {
-  while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (
-      workflowRuntime.getWorkflowExecution().cancelRequested ||
-      workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
+      params.workflowRuntime.getWorkflowExecution().cancelRequested ||
+      params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
     ) {
-      await markWorkflowCancelled(workflowExecutionState);
+      await markWorkflowCancelled(params.workflowExecutionState);
       break;
     }
 
-    await runStep(workflowRuntime, nodesFactory, workflowLogger, workflowGraph);
-    await workflowLogger.flushEvents();
+    await runStep(params);
+    await params.workflowLogger.flushEvents();
   }
 }
 
-async function runStep(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  nodesFactory: NodesFactory,
-  workflowLogger: WorkflowEventLogger,
-  workflowGraph: WorkflowGraph
-): Promise<void> {
-  const currentNode = workflowRuntime.getCurrentNode();
-  const nodeImplementation = nodesFactory.create(currentNode as any);
+async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
+  const currentNode = params.workflowRuntime.getCurrentNode();
+  const nodeImplementation = params.nodesFactory.create(
+    new WorkflowContextManager({
+      workflowExecutionGraph: params.workflowExecutionGraph,
+      workflowExecutionState: params.workflowExecutionState,
+      esClient: params.esClient,
+      fakeRequest: params.fakeRequest,
+      coreStart: params.coreStart,
+      node: currentNode as UnionExecutionGraphNode,
+      stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+    })
+  );
   const stepAbortController = new AbortController();
   const monitorAbortController = new AbortController();
 
   try {
-    await Promise.race([
-      runStackMonitor(
-        workflowRuntime.getCurrentNodeScope(),
-        workflowGraph,
-        nodesFactory,
-        monitorAbortController
-      ),
-      nodeImplementation.run(),
-    ]);
+    await Promise.race([runStackMonitor(params, monitorAbortController), nodeImplementation.run()]);
     monitorAbortController.abort();
   } catch (error) {
     stepAbortController.abort();
-    workflowRuntime.setWorkflowError(error);
-    await workflowRuntime.failStep(error);
+    params.workflowRuntime.setWorkflowError(error);
+    await params.workflowRuntime.failStep(error);
   } finally {
     monitorAbortController.abort();
-    await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
-    await workflowRuntime.saveState(); // Ensure state is updated after each step
+    await catchError(params);
+    await params.workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }
 
@@ -120,11 +122,11 @@ async function runStep(
  * recreates the node stack from the original frames to ensure consistency.
  */
 async function runStackMonitor(
-  nodeStackFrames: StackFrame[],
-  workflowGraph: WorkflowGraph,
-  nodesFactory: NodesFactory,
+  params: WorkflowExecutionLoopParams,
   monitorAbortController: AbortController
 ): Promise<void> {
+  const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
+
   while (!monitorAbortController.signal.aborted) {
     await new Promise((resolve) => {
       const timeout = setTimeout(resolve, 500);
@@ -135,10 +137,20 @@ async function runStackMonitor(
 
     while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
       const scopeData = nodeStack.getCurrentScope()!;
-      const node = workflowGraph.getNode(scopeData.nodeId);
+      const node = params.workflowExecutionGraph.getNode(scopeData.nodeId);
       nodeStack = nodeStack.exitScope();
 
-      const nodeImplementation = nodesFactory.create(node as UnionExecutionGraphNode);
+      const nodeImplementation = params.nodesFactory.create(
+        new WorkflowContextManager({
+          workflowExecutionGraph: params.workflowExecutionGraph,
+          workflowExecutionState: params.workflowExecutionState,
+          esClient: params.esClient,
+          fakeRequest: params.fakeRequest,
+          coreStart: params.coreStart,
+          node: node as UnionExecutionGraphNode,
+          stackFrames: nodeStack.stackFrames,
+        })
+      );
 
       if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
         const monitored = nodeImplementation as unknown as MonitorableNode;
@@ -192,12 +204,7 @@ async function markWorkflowCancelled(
  * @param workflowLogger - Logger for workflow events
  * @param nodesFactory - Factory for creating step implementations
  */
-async function catchError(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  workflowLogger: WorkflowEventLogger,
-  nodesFactory: NodesFactory,
-  workflowGraph: WorkflowGraph
-) {
+async function catchError(params: WorkflowExecutionLoopParams) {
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
@@ -206,22 +213,32 @@ async function catchError(
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
     while (
-      workflowRuntime.getWorkflowExecution().error &&
-      workflowRuntime.getWorkflowExecution().scopeStack.length
+      params.workflowRuntime.getWorkflowExecution().error &&
+      params.workflowRuntime.getWorkflowExecution().scopeStack.length
     ) {
       // exit the whole node scope
-      const scopeEntry = workflowRuntime
+      const scopeEntry = params.workflowRuntime
         .getWorkflowExecution()
         .scopeStack.at(-1)!
         .nestedScopes.at(-1)!;
-      workflowRuntime.navigateToNode(scopeEntry.nodeId);
-      workflowRuntime.exitScope();
+      params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
+      params.workflowRuntime.exitScope();
 
-      const node = workflowGraph.getNode(scopeEntry.nodeId);
+      const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
 
       if (node) {
-        workflowRuntime.navigateToNode(node.id);
-        const stepImplementation = nodesFactory.create(node as any);
+        params.workflowRuntime.navigateToNode(node.id);
+        const stepImplementation = params.nodesFactory.create(
+          new WorkflowContextManager({
+            workflowExecutionGraph: params.workflowExecutionGraph,
+            workflowExecutionState: params.workflowExecutionState,
+            esClient: params.esClient,
+            fakeRequest: params.fakeRequest,
+            coreStart: params.coreStart,
+            node: node as UnionExecutionGraphNode,
+            stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+          })
+        );
 
         if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
           const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
@@ -229,18 +246,20 @@ async function catchError(
           try {
             await stepErrorCatcher.catchError();
           } catch (error) {
-            workflowRuntime.setWorkflowError(error);
+            params.workflowRuntime.setWorkflowError(error);
           }
         }
 
-        if (workflowRuntime.getWorkflowExecution().error) {
-          await workflowRuntime.failStep(workflowRuntime.getWorkflowExecution().error!);
+        if (params.workflowRuntime.getWorkflowExecution().error) {
+          await params.workflowRuntime.failStep(
+            params.workflowRuntime.getWorkflowExecution().error!
+          );
         }
       }
     }
   } catch (error) {
-    workflowRuntime.setWorkflowError(error);
-    workflowLogger.logError(
+    params.workflowRuntime.setWorkflowError(error);
+    params.workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
   }

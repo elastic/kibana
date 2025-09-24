@@ -24,7 +24,6 @@ import type {
   ExitRetryNode,
   GraphNode,
   HttpGraphNode,
-  UnionExecutionGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
@@ -62,7 +61,6 @@ import { KibanaActionStepImpl } from './kibana_action_step';
 
 export class NodesFactory {
   constructor(
-    private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowExecutionState: WorkflowExecutionState,
@@ -72,7 +70,8 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph
   ) {}
 
-  public create<TStep extends UnionExecutionGraphNode>(node: TStep): NodeImplementation {
+  public create(contextManager: WorkflowContextManager): NodeImplementation {
+    const node = contextManager.node;
     const stepLogger = this.workflowLogger.createStepLogger(
       this.workflowRuntime.getCurrentStepExecutionId(),
       node.stepId,
@@ -88,7 +87,7 @@ export class NodesFactory {
       });
       return new ElasticsearchActionStepImpl(
         node as any,
-        this.contextManager,
+        contextManager,
         this.workflowRuntime,
         this.workflowLogger
       );
@@ -101,7 +100,7 @@ export class NodesFactory {
       });
       return new KibanaActionStepImpl(
         node as any,
-        this.contextManager,
+        contextManager,
         this.workflowRuntime,
         this.workflowLogger
       );
@@ -112,7 +111,7 @@ export class NodesFactory {
         return new EnterForeachNodeImpl(
           node as EnterForeachNode,
           this.workflowRuntime,
-          this.contextManager,
+          contextManager,
           stepLogger
         );
       case 'exit-foreach':
@@ -164,7 +163,7 @@ export class NodesFactory {
           node as EnterIfNode,
           this.workflowRuntime,
           this.workflowGraph,
-          this.contextManager,
+          contextManager,
           stepLogger
         );
       case 'enter-then-branch':
@@ -193,7 +192,7 @@ export class NodesFactory {
         // Default atomic step (connector-based)
         return new AtomicStepImpl(
           node as AtomicGraphNode,
-          this.contextManager,
+          contextManager,
           this.connectorExecutor,
           this.workflowRuntime,
           stepLogger
@@ -201,7 +200,7 @@ export class NodesFactory {
       case 'http':
         return new HttpStepImpl(
           node as HttpGraphNode,
-          this.contextManager,
+          contextManager,
           stepLogger,
           this.urlValidator,
           this.workflowRuntime
