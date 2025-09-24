@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -28,10 +29,6 @@ const VISUALIZATION_HEIGHT = 240;
 
 const editVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.edit', {
   defaultMessage: 'Edit visualization',
-});
-
-const saveVisualizationLabel = i18n.translate('xpack.onechat.conversation.visualization.save', {
-  defaultMessage: 'Save visualization',
 });
 
 const saveToDashboardLabel = i18n.translate(
@@ -85,39 +82,71 @@ export function VisualizeESQL({
 
   const isLoading = !lensInput;
 
+  const { euiTheme } = useEuiTheme();
+
+  const visualizationWrapperStyles = useMemo(
+    () =>
+      css({
+        position: 'relative',
+        height: VISUALIZATION_HEIGHT,
+        overflow: 'visible',
+        // Reveal actions on hover or when any child gains focus (keyboard a11y)
+        '&:hover [data-test-subj="visualizationButtonActions"], &:focus-within [data-test-subj="visualizationButtonActions"]':
+          {
+            opacity: 1,
+            pointerEvents: 'auto',
+          },
+      }),
+    []
+  );
+
+  const actionsStyles = useMemo(
+    () =>
+      css({
+        position: 'absolute',
+        top: `-${euiTheme.size.xs}`,
+        right: `-${euiTheme.size.xs}`,
+        zIndex: 2,
+        opacity: 0,
+        pointerEvents: 'none',
+        transition: `opacity ${euiTheme.animation.fast} ease-in-out`,
+        display: 'inline-flex',
+        gap: 0,
+        // Optional: visually collapse adjacent borders
+        // '& > :not(:first-of-type)': { marginLeft: '-1px' },
+      }),
+    [euiTheme]
+  );
+
   return (
     <>
-      <EditVisualization
-        uiActions={uiActions}
-        lensInput={lensInput}
-        lensLoadEvent={lensLoadEvent}
-        setLensInput={setLensInput}
-        onApply={() => setIsSaveModalOpen(true)}
-      />
-
-      <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
-        <EuiButtonIcon
-          size="xs"
-          iconType="save"
-          onClick={() => setIsSaveModalOpen(true)}
-          aria-label={saveVisualizationLabel}
-        />
-      </EuiToolTip>
-
-      <div style={{ height: VISUALIZATION_HEIGHT }}>
+      <div data-test-subj="lensVisualization" css={visualizationWrapperStyles}>
+        {!isLoading && (
+          <div css={actionsStyles} data-test-subj="visualizationButtonActions">
+            <EditVisualization
+              uiActions={uiActions}
+              lensInput={lensInput}
+              lensLoadEvent={lensLoadEvent}
+              setLensInput={setLensInput}
+              onApply={() => setIsSaveModalOpen(true)}
+            />
+            <EuiButtonIcon
+              display="base"
+              css={css({ marginLeft: '-1px' })} // avoid double border
+              color="text"
+              iconType="save"
+              size="s"
+              aria-label={saveToDashboardLabel}
+              onClick={() => setIsSaveModalOpen(true)}
+            />
+          </div>
+        )}
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
-          <lens.EmbeddableComponent
-            {...lensInput}
-            style={{
-              height: VISUALIZATION_HEIGHT,
-            }}
-            onLoad={onLoad}
-          />
+          <lens.EmbeddableComponent {...lensInput} style={{ height: '100%' }} onLoad={onLoad} />
         )}
       </div>
-
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
           initialInput={lensInput}
@@ -165,7 +194,9 @@ function EditVisualization({
   return (
     <EuiToolTip content={editVisualizationLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        size="xs"
+        display="base"
+        color="text"
+        size="s"
         iconType="pencil"
         onClick={() => {
           if (triggerOptions) {
