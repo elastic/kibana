@@ -26,9 +26,3 @@ export interface ParsedMapStateJSON {
   filters: Filter[];
   settings: MapSettings;
 }
-
-// parsed contents of uiStateJSON
-export interface ParsedUiStateJSON {
-  isLayerTOCOpen: boolean;
-  openTOCDetails: string[];
-}

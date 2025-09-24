@@ -29,9 +29,10 @@ import type {
   MapsUpdateOut,
 } from './schema/v1/types';
 import type { MapAttributes } from './schema/v1/map_attributes_schema';
-import { savedObjectToItem, transformMapIn } from './schema/v1/transform_utils';
+import { savedObjectToItem } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
 import type { StoredMapAttributes } from '../saved_objects/types';
+import { transformMapAttributesIn } from '../../common/content_management/transform_map_attributes_in';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -151,7 +152,8 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
+    const { attributes: soAttributes, references: soReferences } =
+      transformMapAttributesIn(dataToLatest);
 
     // Save data in DB
     const savedObject = await soClient.create<StoredMapAttributes>(
@@ -218,7 +220,8 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = transformMapIn(dataToLatest);
+    const { attributes: soAttributes, references: soReferences } =
+      transformMapAttributesIn(dataToLatest);
 
     // Save data in DB
     const partialSavedObject = await soClient.update<StoredMapAttributes>(

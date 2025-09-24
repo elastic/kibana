@@ -55,7 +55,7 @@ import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import type { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
+import type { ParsedMapStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -194,30 +194,16 @@ export class SavedMap {
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
     if (this._mapEmbeddableState?.isLayerTOCOpen !== undefined) {
       isLayerTOCOpen = this._mapEmbeddableState.isLayerTOCOpen;
-    } else if (this._attributes?.uiStateJSON) {
-      try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
-        if ('isLayerTOCOpen' in uiState) {
-          isLayerTOCOpen = uiState.isLayerTOCOpen;
-        }
-      } catch (e) {
-        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
-      }
+    } else if (this._attributes?.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._attributes.isLayerTOCOpen;
     }
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
     let openTOCDetails: string[] = [];
     if (this._mapEmbeddableState?.openTOCDetails !== undefined) {
       openTOCDetails = this._mapEmbeddableState.openTOCDetails;
-    } else if (this._attributes?.uiStateJSON) {
-      try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
-        if ('openTOCDetails' in uiState) {
-          openTOCDetails = uiState.openTOCDetails;
-        }
-      } catch (e) {
-        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
-      }
+    } else if (this._attributes?.openTOCDetails !== undefined) {
+      openTOCDetails = this._attributes.openTOCDetails;
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
@@ -597,11 +583,8 @@ export class SavedMap {
         }),
       },
     } as ParsedMapStateJSON);
-
-    this._attributes!.uiStateJSON = JSON.stringify({
-      isLayerTOCOpen: getIsLayerTOCOpen(state),
-      openTOCDetails: getOpenTOCDetails(state),
-    } as ParsedUiStateJSON);
+    this._attributes!.isLayerTOCOpen = getIsLayerTOCOpen(state);
+    this._attributes!.openTOCDetails = getOpenTOCDetails(state);
   }
 
   private async _getAdHocDataViews() {

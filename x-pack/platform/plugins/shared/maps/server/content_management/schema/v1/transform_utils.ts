@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { extractReferences, injectReferences } from '../../../../common/migrations/references';
+import { injectReferences } from '../../../../common/migrations/references';
 import type { MapItem } from '../../../../common/content_management';
 import type { MapAttributes } from './map_attributes_schema';
 import type { StoredMapAttributes } from '../../../saved_objects/types';
@@ -49,13 +49,4 @@ function transformMapOut(storedMapState: StoredMapAttributes, references: SavedO
   });
   // TODO convert stringified JSON to objects
   return attributes;
-}
-
-export function transformMapIn(mapState: MapAttributes) {
-  const { attributes, references } = extractReferences({ attributes: mapState });
-  // TODO convert API state to stringified JSON
-  return {
-    attributes,
-    references,
-  };
 }

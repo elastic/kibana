@@ -16,7 +16,23 @@ export const mapAttributesSchema = schema.object(
     description: schema.maybe(schema.string()),
     mapStateJSON: schema.maybe(schema.string()),
     layerListJSON: schema.maybe(schema.string()),
-    uiStateJSON: schema.maybe(schema.string()),
+    isLayerTOCOpen: schema.maybe(
+      schema.boolean({
+        defaultValue: true,
+        meta: {
+          description: 'Set to false to display map with collapsed legend.',
+        },
+      })
+    ),
+    openTOCDetails: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description: 'Add layer id to array to expand layer details in legend',
+          },
+        })
+      )
+    ),
   },
   { unknowns: 'forbid' }
 );
