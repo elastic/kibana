@@ -251,7 +251,6 @@ export function MonacoEditor({
       }
 
       const model = editor.current.getModel();
-
       __prevent_trigger_change_event.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
