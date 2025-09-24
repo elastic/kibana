@@ -165,4 +165,6 @@ export interface DashboardInternalApi {
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
+  setDashboardContainerRef: (ref: HTMLElement | null) => void;
 }

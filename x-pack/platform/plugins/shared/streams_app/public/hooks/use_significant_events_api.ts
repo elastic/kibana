@@ -9,6 +9,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQueryKql } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { NO_SYSTEM } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -28,7 +29,15 @@ interface SignificantEventsApi {
   generate: (connectorId: string) => SignificantEventsGenerateResponse;
 }
 
-export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
+export function useSignificantEventsApi({
+  name,
+  start,
+  end,
+}: {
+  name: string;
+  start: number;
+  end: number;
+}): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -40,7 +49,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal } = useAbortController();
 
   return {
-    upsertQuery: async ({ kql, title, id }) => {
+    upsertQuery: async ({ system, kql, title, id }) => {
+      const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -51,6 +61,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
           body: {
             kql,
             title,
+            system: effectiveSystem,
           },
         },
       });
@@ -93,6 +104,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             },
             query: {
               connectorId,
+              from: new Date(start).toString(),
+              to: new Date(end).toString(),
             },
           },
         }

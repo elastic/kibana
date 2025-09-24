@@ -279,6 +279,8 @@ export function createSearchBar({
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             hasDirtyState={props.hasDirtyState}
+            esqlVariablesConfig={props.esqlVariablesConfig}
+            useBackgroundSearchButton={props.useBackgroundSearchButton}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

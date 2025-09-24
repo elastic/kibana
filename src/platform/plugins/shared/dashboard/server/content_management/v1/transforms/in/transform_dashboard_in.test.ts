@@ -12,7 +12,7 @@ import type { DashboardAttributes } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
 describe('transformDashboardIn', () => {
-  test('should transform dashboard state to saved object', async () => {
+  test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardAttributes = {
       controlGroupInput: {
         labelPosition: 'twoLine',
@@ -64,7 +64,7 @@ describe('transformDashboardIn', () => {
       timeTo: 'now',
     };
 
-    const output = await transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn({ dashboardState });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -95,7 +95,7 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', async () => {
+  it('should handle missing optional state keys', () => {
     const dashboardState: DashboardAttributes = {
       title: 'title',
       description: 'my description',
@@ -105,7 +105,7 @@ describe('transformDashboardIn', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = await transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn({ dashboardState });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
