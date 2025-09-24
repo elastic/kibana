@@ -13,6 +13,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { StreamSystemConfiguration } from './stream_system_configuration';
 import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
+import { ImportExportPanel } from './advanced_view/import_export';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 
 export function WiredAdvancedView({
   definition,
@@ -21,8 +23,19 @@ export function WiredAdvancedView({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    features: { contentPacks },
+  } = useStreamsPrivileges();
+
   return (
     <>
+      {contentPacks?.enabled && (
+        <>
+          <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
+          <EuiSpacer />
+        </>
+      )}
+
       <StreamSystemConfiguration definition={definition.stream} />
       <EuiSpacer size="m" />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
