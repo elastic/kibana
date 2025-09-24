@@ -1212,41 +1212,43 @@ class OutputService {
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
     const lastUpdateTime = await this.getOutputLastUpdateTime(id);
+    const dateFilter = lastUpdateTime ? `AND @timestamp >= "${lastUpdateTime}"` : ``;
 
-    const mustFilter = [];
-    if (lastUpdateTime) {
-      mustFilter.push({
-        range: {
-          '@timestamp': {
-            gte: lastUpdateTime,
-          },
-        },
+    try {
+      const esqlQuery = `FROM ${OUTPUT_HEALTH_DATA_STREAM} 
+   | WHERE output == \"${id}\" ${dateFilter}
+  | SORT @timestamp DESC 
+  | KEEP state, message, @timestamp
+  | LIMIT 1`;
+
+      const response = await esClient.esql.query({
+        query: esqlQuery,
       });
-    }
 
-    const response = await esClient.search(
-      {
-        index: OUTPUT_HEALTH_DATA_STREAM,
-        query: { bool: { filter: { term: { output: id } }, must: mustFilter } },
-        sort: { '@timestamp': 'desc' },
-        size: 1,
-      },
-      { ignore: [404] }
-    );
-
-    if (!response.hits || response.hits.hits.length === 0) {
+      if (response.values.length === 0) {
+        return {
+          state: 'UNKNOWN',
+          message: '',
+          timestamp: '',
+        };
+      }
+      const value = response.values[0];
       return {
-        state: 'UNKNOWN',
-        message: '',
-        timestamp: '',
+        state: value[0] as string,
+        message: value[1] as string,
+        timestamp: value[2] as string,
       };
+    } catch (err) {
+      if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+        return {
+          state: 'UNKNOWN',
+          message: '',
+          timestamp: '',
+        };
+      } else {
+        throw err;
+      }
     }
-    const latestHit = response.hits.hits[0]._source as any;
-    return {
-      state: latestHit.state,
-      message: latestHit.message ?? '',
-      timestamp: latestHit['@timestamp'],
-    };
   }
 
   async getOutputLastUpdateTime(id: string): Promise<string | undefined> {

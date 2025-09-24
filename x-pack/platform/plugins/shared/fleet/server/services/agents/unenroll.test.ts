@@ -147,32 +147,24 @@ describe('unenroll', () => {
     it('force unenroll updates in progress unenroll actions', async () => {
       const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
       esClient.search.mockReset();
-
       esClient.search.mockImplementation(async (request) => {
-        if (request?.index === AGENT_ACTIONS_INDEX) {
+        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } } as any;
+      });
+      esClient.esql.query.mockImplementation(({ query }) => {
+        if (query.includes(AGENT_ACTIONS_INDEX) && !query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
           return {
-            hits: {
-              hits: [
+            values: [
+              [
+                '',
                 {
-                  _source: {
-                    agents: ['agent-in-regular-policy'],
-                    action_id: 'other-action',
-                  },
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action',
                 },
               ],
-            },
+            ],
           } as any;
         }
-
-        if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
-          return {
-            hits: {
-              hits: [],
-            },
-          };
-        }
-
-        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+        return { values: [] } as any;
       });
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -192,32 +184,23 @@ describe('unenroll', () => {
       const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
       esClient.search.mockReset();
       esClient.search.mockImplementation(async (request) => {
-        if (request?.index === AGENT_ACTIONS_INDEX) {
+        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } } as any;
+      });
+      esClient.esql.query.mockImplementation(({ query }) => {
+        if (query.includes(AGENT_ACTIONS_INDEX) && !query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
           return {
-            hits: {
-              hits: [
+            values: [
+              [
+                '',
                 {
-                  _source: {
-                    agents: ['agent-in-regular-policy'],
-                    action_id: 'other-action1',
-                  },
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action1',
                 },
               ],
-            },
+            ],
           } as any;
         }
-
-        if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
-          return {
-            hits: {
-              hits: [
-                { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-              ],
-            },
-          };
-        }
-
-        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+        return { values: [['agent-in-regular-policy']] } as any;
       });
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];

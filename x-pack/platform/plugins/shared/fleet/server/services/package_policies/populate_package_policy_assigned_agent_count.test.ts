@@ -18,39 +18,12 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClientMock.search.mockImplementation(async () => {
-      return {
-        took: 3,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 100,
-          max_score: 0,
-          hits: [],
-        },
-        aggregations: {
-          agent_counts: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'agent-policy-id-a',
-                doc_count: 100,
-              },
-              {
-                key: 'agent-policy-id-b',
-                doc_count: 50,
-              },
-            ],
-          },
-        },
-      };
-    });
+    esClientMock.esql.query.mockResolvedValue({
+      values: [
+        [100, 'agent-policy-id-a'],
+        [50, 'agent-policy-id-b'],
+      ],
+    } as any);
 
     packagePolicies = Array.from({ length: 15 }, (_, n) => {
       const now = new Date().toISOString();

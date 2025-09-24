@@ -211,6 +211,18 @@ export function createClientMock() {
     })
   );
 
+  esClientMock.esql.query.mockImplementation(() =>
+    Promise.resolve({
+      values: [
+        [agentInHostedDoc._id, agentInHostedDoc._source],
+        [agentInRegularDoc._id, agentInRegularDoc._source],
+        [agentInRegularDoc2._id, agentInRegularDoc2._source],
+        [agentInRegularDocNewer._id, agentInRegularDocNewer._source],
+        [agentInRegularDocNewer2._id, agentInRegularDocNewer2._source],
+      ],
+    } as any)
+  );
+
   return {
     soClient: soClientMock,
     esClient: esClientMock,
