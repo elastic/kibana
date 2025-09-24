@@ -37,6 +37,7 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
+import { EventsTableForCases } from '../components/case_events/table';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -152,6 +153,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            events: { enabled: true },
           },
           refreshRef,
           actionsNavigation: {
@@ -189,6 +191,7 @@ const CaseContainerComponent: React.FC = () => {
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
           renderAlertsTable,
+          renderEventsTable: EventsTableForCases,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />
