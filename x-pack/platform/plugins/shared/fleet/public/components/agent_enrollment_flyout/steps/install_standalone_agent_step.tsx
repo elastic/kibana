@@ -24,6 +24,7 @@ export const InstallStandaloneAgentStep = ({
   fullCopyButton,
   onCopy,
   rootIntegrations,
+  nonFipsIntegrations,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
@@ -32,6 +33,7 @@ export const InstallStandaloneAgentStep = ({
   fullCopyButton?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
+  nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
@@ -46,6 +48,7 @@ export const InstallStandaloneAgentStep = ({
         fullCopyButton={fullCopyButton}
         isManaged={false}
         rootIntegrations={rootIntegrations}
+        nonFipsIntegrations={nonFipsIntegrations}
       />
     ),
     status: isComplete ? 'complete' : undefined,

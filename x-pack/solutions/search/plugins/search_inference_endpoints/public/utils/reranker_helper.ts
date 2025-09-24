@@ -31,7 +31,7 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
     (modelId === 'elser_model_2' &&
       inferenceId.startsWith('.') &&
       service === ServiceProviderKeys.elastic) ||
-    (modelId === 'multilingual-embed-v1' &&
+    ((modelId === 'multilingual-embed-v1' || modelId === 'rerank-v1') &&
       inferenceId.startsWith('.') &&
       service === ServiceProviderKeys.elastic)
   ) {
