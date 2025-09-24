@@ -9,25 +9,37 @@
 
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from './constants';
 
 interface CreateESQLQueryParams {
-  metricField: string;
-  index?: string;
-  instrument?: string;
+  metric: MetricField;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
 }
 
 const separator = '\u203A'.normalize('NFC');
 
-export function createESQLQuery({
-  index = 'metrics-*',
-  instrument,
-  dimensions = [],
-  metricField,
-  filters,
-}: CreateESQLQueryParams) {
+function needsStringCasting(fieldType: string): boolean {
+  const typesNeedingCast = new Set([
+    'ip',
+    'long',
+    'integer',
+    'short',
+    'byte',
+    'unsigned_long',
+    'boolean',
+  ]);
+  return typesNeedingCast.has(fieldType);
+}
+
+export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
+  const {
+    name: metricField,
+    index = 'metrics-*',
+    instrument,
+    dimensions: metricDimensions,
+  } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
@@ -49,6 +61,8 @@ export function createESQLQuery({
       );
     });
   }
+
+  const dimensionTypeMap = new Map(metricDimensions.map((dim) => [dim.name, dim.type]));
 
   const queryPipeline = source.pipe(
     ...whereConditions,
@@ -76,7 +90,14 @@ export function createESQLQuery({
       ? dimensions.length === 1
         ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
         : [
-            evaluate(`${DIMENSIONS_COLUMN} = CONCAT(${dimensions.join(`, " ${separator} ", `)})`),
+            evaluate(
+              `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
+                .map((dim) => {
+                  const dimType = dimensionTypeMap.get(dim);
+                  return dimType && needsStringCasting(dimType) ? `${dim}::STRING` : dim;
+                })
+                .join(`, " ${separator} ", `)})`
+            ),
             drop(`${dimensions.join(',')}`),
           ]
       : [])

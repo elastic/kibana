@@ -6,12 +6,32 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 
+const mockMetric: MetricField = {
+  name: 'cpu.usage',
+  type: 'gauge',
+  index: 'metrics-*',
+  dimensions: [
+    { name: 'host.name', type: 'keyword' },
+    { name: 'container.id', type: 'keyword' },
+    { name: 'host.ip', type: 'ip' },
+    { name: 'cpu.cores', type: 'long' },
+    { name: 'region', type: 'keyword' },
+  ],
+};
+
+const mockCounterMetric: MetricField = {
+  ...mockMetric,
+  name: 'requests.count',
+  instrument: 'counter',
+};
+
 describe('createESQLQuery', () => {
   it('should generate a basic AVG query for a metric field', () => {
-    const query = createESQLQuery({ metricField: 'cpu.usage' });
+    const query = createESQLQuery({ metric: mockMetric });
     expect(query).toBe(
       `
 TS metrics-*
@@ -22,8 +42,7 @@ TS metrics-*
 
   it('should generate a SUM query for counter instrument', () => {
     const query = createESQLQuery({
-      metricField: 'requests.count',
-      instrument: 'counter',
+      metric: mockCounterMetric,
     });
     expect(query).toBe(
       `
@@ -35,7 +54,7 @@ TS metrics-*
 
   it('should handle single dimension', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       dimensions: ['host.name'],
     });
     expect(query).toBe(
@@ -48,9 +67,9 @@ TS metrics-*
     );
   });
 
-  it('should handle multiple dimensions', () => {
+  it('should handle multiple keyword dimensions without casting', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       dimensions: ['host.name', 'container.id'],
     });
     expect(query).toBe(
@@ -64,9 +83,57 @@ TS metrics-*
     );
   });
 
+  it('should cast non-keyword fields in multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['host.ip', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name)
+  | DROP host.ip, host.name
+`.trim()
+    );
+  });
+
+  it('should cast numeric fields in multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['cpu.cores', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE cpu.cores IS NOT NULL AND host.name IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), cpu.cores, host.name
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(cpu.cores::STRING, " › ", host.name)
+  | DROP cpu.cores, host.name
+`.trim()
+    );
+  });
+
+  it('should handle a mix of cast and non-cast fields', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['host.ip', 'host.name', 'cpu.cores'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL AND cpu.cores IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name, cpu.cores
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name, " › ", cpu.cores::STRING)
+  | DROP host.ip, host.name, cpu.cores
+`.trim()
+    );
+  });
+
   it('should handle filters', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       filters: [
         { field: 'host.name', value: 'host-1' },
         { field: 'host.name', value: 'host-2' },
@@ -84,8 +151,10 @@ TS metrics-*
     );
   });
 
-  it('should apply default index if none is provided', () => {
-    const query = createESQLQuery({ metricField: 'cpu.usage' });
+  it('should apply default index if none is provided in metric', () => {
+    const query = createESQLQuery({
+      metric: { ...mockMetric, index: undefined as any },
+    });
     expect(query).toBe(
       `
 TS metrics-*
@@ -94,10 +163,9 @@ TS metrics-*
     );
   });
 
-  it('should override index if provided', () => {
+  it('should override index if provided in metric', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
-      index: 'custom-metrics-*',
+      metric: { ...mockMetric, index: 'custom-metrics-*' },
     });
     expect(query).toBe(
       `
