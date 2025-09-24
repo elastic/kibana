@@ -55,6 +55,7 @@ module.exports = {
         // when tsconfig.json is defined in 'scout/test/ui|api' folders
         'parallel_tests/**/*',
         'tests/**/*',
+        'fixtures/**/*',
       ],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
