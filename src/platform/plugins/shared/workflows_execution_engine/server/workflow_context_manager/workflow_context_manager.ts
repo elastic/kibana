@@ -37,6 +37,8 @@ export class WorkflowContextManager {
 
   private stackFrames: StackFrame[];
   public readonly node: UnionExecutionGraphNode;
+  public readonly stepExecutionId: string;
+  public readonly abortController = new AbortController();
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
@@ -46,6 +48,11 @@ export class WorkflowContextManager {
     this.coreStart = init.coreStart;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
+    this.stepExecutionId = buildStepExecutionId(
+      this.workflowExecutionState.getWorkflowExecution().id,
+      this.node.stepId,
+      this.stackFrames
+    );
   }
 
   public getContext(): StepContext {

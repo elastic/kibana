@@ -11,17 +11,18 @@ import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import type { NodeImplementation, MonitorableNode } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 
-import { buildStepExecutionId, parseDuration } from '../../utils';
+import { parseDuration } from '../../utils';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class EnterTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private wfExecutionState: WorkflowExecutionState,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private stepContext: WorkflowContextManager
   ) {}
 
   public async run(): Promise<void> {
@@ -30,15 +31,9 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public async monitor(stack: WorkflowScopeStack): Promise<void> {
+  monitor(monitoredContext: WorkflowContextManager): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
-    const stepExecution = this.wfExecutionState.getStepExecution(
-      buildStepExecutionId(
-        this.wfExecutionState.getWorkflowExecution().id,
-        this.node.stepId,
-        stack.stackFrames
-      )
-    )!;
+    const stepExecution = this.wfExecutionState.getStepExecution(this.stepContext.stepExecutionId)!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
@@ -47,7 +42,10 @@ export class EnterTimeoutZoneNodeImpl implements NodeImplementation, Monitorable
       this.workflowLogger.logDebug(
         `Step timeout happened because it ran for ${currentStepDuration / 1000}ms`
       );
+      monitoredContext.abortController.abort();
       throw new Error(`Step timeout happened because it ran for ${currentStepDuration / 1000}ms`);
     }
+
+    return Promise.resolve();
   }
 }

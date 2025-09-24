@@ -10,7 +10,6 @@
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
-import { parseDuration } from '../../utils/parse-duration/parse-duration';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -26,7 +25,6 @@ export interface HttpStep extends BaseStep {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: HttpHeaders;
     body?: any;
-    timeout?: string;
   };
 }
 
@@ -54,14 +52,13 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
   public getInput() {
     const context = this.contextManager.getContext();
-    const { url, method = 'GET', headers = {}, body, timeout = '30s' } = this.step.with;
+    const { url, method = 'GET', headers = {}, body } = this.step.with;
 
     return {
       url: typeof url === 'string' ? this.templatingEngine.render(url, context) : url,
       method,
       headers: this.renderHeaders(headers, context),
       body: this.renderBody(body, context),
-      timeout: parseDuration(timeout),
     };
   }
 
@@ -113,7 +110,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
-    const { url, method, headers, body, timeout } = input;
+    const { url, method, headers, body } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
@@ -141,7 +138,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       url,
       method,
       headers,
-      timeout,
+      signal: this.contextManager.abortController.signal,
     };
 
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -169,13 +166,27 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    const errorMessage = axios.isAxiosError(error)
-      ? error.response
-        ? `HTTP Error: ${error.response.status} ${error.response.statusText}`
-        : `HTTP Error: ${error.message ? error.message : error.name}`
-      : error instanceof Error
-      ? error.message
-      : String(error);
+    let errorMessage: string;
+    let isAborted = false;
+
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ERR_CANCELED' || error.message?.includes('aborted')) {
+        errorMessage = 'HTTP request was cancelled';
+        isAborted = true;
+      } else if (error.response) {
+        errorMessage = `HTTP Error: ${error.response.status} ${error.response.statusText}`;
+      } else {
+        errorMessage = `HTTP Error: ${error.message ? error.message : error.name}`;
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+      // Check if this is an AbortError
+      if (error.name === 'AbortError') {
+        isAborted = true;
+      }
+    } else {
+      errorMessage = String(error);
+    }
 
     this.workflowLogger.logError(
       `HTTP request failed: ${errorMessage}`,
@@ -183,7 +194,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       {
         workflow: { step_id: this.step.name },
         event: { action: 'http_request', outcome: 'failure' },
-        tags: ['http', 'error'],
+        tags: isAborted ? ['http', 'cancelled'] : ['http', 'error'],
       }
     );
 

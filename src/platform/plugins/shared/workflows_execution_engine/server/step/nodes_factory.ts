@@ -154,7 +154,8 @@ export class NodesFactory {
           node as EnterTimeoutZoneNode,
           this.workflowRuntime,
           this.workflowExecutionState,
-          stepLogger
+          stepLogger,
+          contextManager
         );
       case 'exit-timeout-zone':
         return new ExitTimeoutZoneNodeImpl(this.workflowRuntime);

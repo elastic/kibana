@@ -68,25 +68,25 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
 async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
   const currentNode = params.workflowRuntime.getCurrentNode();
-  const nodeImplementation = params.nodesFactory.create(
-    new WorkflowContextManager({
-      workflowExecutionGraph: params.workflowExecutionGraph,
-      workflowExecutionState: params.workflowExecutionState,
-      esClient: params.esClient,
-      fakeRequest: params.fakeRequest,
-      coreStart: params.coreStart,
-      node: currentNode as UnionExecutionGraphNode,
-      stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-    })
-  );
-  const stepAbortController = new AbortController();
+  const stepContext = new WorkflowContextManager({
+    workflowExecutionGraph: params.workflowExecutionGraph,
+    workflowExecutionState: params.workflowExecutionState,
+    esClient: params.esClient,
+    fakeRequest: params.fakeRequest,
+    coreStart: params.coreStart,
+    node: currentNode as UnionExecutionGraphNode,
+    stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+  });
+  const nodeImplementation = params.nodesFactory.create(stepContext);
   const monitorAbortController = new AbortController();
 
   try {
-    await Promise.race([runStackMonitor(params, monitorAbortController), nodeImplementation.run()]);
+    await Promise.race([
+      runStackMonitor(params, stepContext, monitorAbortController),
+      nodeImplementation.run(),
+    ]);
     monitorAbortController.abort();
   } catch (error) {
-    stepAbortController.abort();
     params.workflowRuntime.setWorkflowError(error);
     await params.workflowRuntime.failStep(error);
   } finally {
@@ -123,6 +123,7 @@ async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
  */
 async function runStackMonitor(
   params: WorkflowExecutionLoopParams,
+  monitoredContext: WorkflowContextManager,
   monitorAbortController: AbortController
 ): Promise<void> {
   const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
@@ -154,7 +155,7 @@ async function runStackMonitor(
 
       if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
         const monitored = nodeImplementation as unknown as MonitorableNode;
-        await monitored.monitor(nodeStack);
+        await monitored.monitor(monitoredContext);
       }
     }
   }
