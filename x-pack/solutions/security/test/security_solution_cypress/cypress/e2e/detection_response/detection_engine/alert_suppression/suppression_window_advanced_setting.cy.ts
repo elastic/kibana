@@ -118,11 +118,13 @@ describe(
       const closeFirstAlert = () => {
         expandFirstAlertActions();
         cy.get(CLOSE_ALERT_BTN).click();
+        selectAndConfirmClosingReason();
       };
 
       const closeAlertFromStatusBadge = () => {
         cy.get(ALERT_STATUS_BADGE_BUTTON).click();
         cy.get(CLOSE_ALERT_BTN).click();
+        selectAndConfirmClosingReason();
       };
 
       describe(`when set to ${SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow}`, () => {
@@ -137,7 +139,6 @@ describe(
         it('should display a modal telling the user about the current setting. Pressing cancel should not close the alert', () => {
           expandFirstAlertActions();
           closeFirstAlert();
-          selectAndConfirmClosingReason();
           cy.get('[data-test-subj="confirmModalCancelButton"]').click();
           cy.get('[data-test-subj="actions-context-menu"]').should('be.visible');
         });
@@ -176,7 +177,6 @@ describe(
 
         it('should display a modal telling the user about the current setting. Pressing cancel should not close the alert', () => {
           closeFirstAlert();
-          selectAndConfirmClosingReason();
           cy.get('[data-test-subj="confirmModalCancelButton"]').click();
           cy.get('[data-test-subj="actions-context-menu"]').should('be.visible');
         });
