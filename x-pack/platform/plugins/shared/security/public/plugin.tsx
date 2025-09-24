@@ -200,7 +200,14 @@ export class SecurityPlugin
 
     const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(core, notifications, overlays, sessionExpired, http, tenant);
+    this.sessionTimeout = new SessionTimeout(
+      core,
+      notifications,
+      overlays,
+      sessionExpired,
+      http,
+      tenant
+    );
 
     this.sessionTimeout.start();
     this.securityCheckupService.start(core);
