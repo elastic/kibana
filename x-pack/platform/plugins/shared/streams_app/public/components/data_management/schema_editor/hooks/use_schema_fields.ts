@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
@@ -109,10 +110,10 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    const nextStoredFields = [...definitionFields, ...unmanagedFields, ...unmappedFields];
-    setFields(nextStoredFields);
-    return nextStoredFields;
+    return [...definitionFields, ...unmanagedFields, ...unmappedFields];
   }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
+
+  useEffect(() => setFields(storedFields), [storedFields]);
 
   const refreshFields = useCallback(() => {
     refreshDefinition();
