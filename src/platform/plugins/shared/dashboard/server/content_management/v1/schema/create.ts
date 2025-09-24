@@ -11,7 +11,7 @@ import { createOptionsSchemas } from '@kbn/content-management-utils';
 
 import {
   searchResultsAttributes,
-  dashboardAdditionalAttributes,
+  dashboardState,
   referenceSchema,
   dashboardDataAttributesSchema,
   dashboardMetaSchema,
@@ -27,7 +27,7 @@ export const dashboardCreateOptionsSchema = schema.object({
 
 export const dashboardCreateSchema = schema
   .object(searchResultsAttributes)
-  .extends(dashboardAdditionalAttributes);
+  .extends(dashboardState);
 
 export const dashboardStorageCreateResultSchema = schema.object(
   {

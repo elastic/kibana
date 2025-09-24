@@ -268,7 +268,7 @@ export const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-export const dashboardAdditionalAttributes = {
+export const dashboardState = {
   // Search
   kibanaSavedObjectMeta: schema.object(
     {
@@ -311,9 +311,10 @@ export const searchResultsAttributes = {
   ),
 };
 
+// 
 export const dashboardAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -340,7 +341,7 @@ export const dashboardAPICreateResultSchema = schema.object(
 
 export const dashboardResponseAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
@@ -406,7 +407,7 @@ export const dashboardResolveMetaSchema = {
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
