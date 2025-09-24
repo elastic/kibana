@@ -26,9 +26,13 @@ describe('HttpStepImpl', () => {
   let mockUrlValidator: UrlValidator;
   let mockStep: HttpGraphNode;
 
+  let stepContextAbortController: AbortController;
+
   beforeEach(() => {
+    stepContextAbortController = new AbortController();
     mockContextManager = {
       getContext: jest.fn(),
+      abortController: stepContextAbortController,
     } as any;
 
     mockWorkflowRuntime = {
@@ -148,7 +152,6 @@ describe('HttpStepImpl', () => {
       const input = httpStep.getInput();
 
       expect(input.method).toBe('GET');
-      expect(input.timeout).toBe(30000);
     });
   });
 
@@ -171,12 +174,13 @@ describe('HttpStepImpl', () => {
 
       const result = await (httpStep as any)._run(input);
 
-      expect(mockedAxios).toHaveBeenCalledWith({
-        url: 'https://api.example.com/data',
-        method: 'GET',
-        headers: {},
-        timeout: 30000,
-      });
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api.example.com/data',
+          method: 'GET',
+          headers: {},
+        })
+      );
 
       expect(result).toEqual({
         input,
@@ -188,6 +192,25 @@ describe('HttpStepImpl', () => {
         },
         error: undefined,
       });
+    });
+
+    it('should make successful with abort controller from step context', async () => {
+      (mockedAxios as any).mockResolvedValueOnce({});
+
+      const input = {
+        url: 'https://api.example.com/data',
+        method: 'GET',
+        headers: {},
+        timeout: 30000,
+      };
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signal: stepContextAbortController.signal,
+        })
+      );
     });
 
     it('should make successful POST request with body', async () => {
@@ -204,21 +227,41 @@ describe('HttpStepImpl', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: { name: 'John Doe' },
-        timeout: 30000,
       };
 
       const result = await (httpStep as any)._run(input);
 
-      expect(mockedAxios).toHaveBeenCalledWith({
-        url: 'https://api.example.com/users',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: { name: 'John Doe' },
-        timeout: 30000,
-      });
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://api.example.com/users',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          data: { name: 'John Doe' },
+        })
+      );
 
       expect(result.output?.status).toBe(201);
       expect(result.output?.data).toEqual({ id: 123 });
+    });
+
+    it('should make successful POST request abort signal from step context', async () => {
+      (mockedAxios as any).mockResolvedValueOnce({});
+
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+        timeout: 30000,
+      };
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signal: stepContextAbortController.signal,
+        })
+      );
     });
   });
 
@@ -319,18 +362,19 @@ describe('HttpStepImpl', () => {
 
       // Should start the step, set the error result, finish the step, but not go to next step
       expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalledWith({
-        input: {
-          url: 'https://malicious.com/test',
-          method: 'GET',
-          headers: {},
-          body: undefined,
-          timeout: 30000,
-        },
-        output: undefined,
-        error:
-          'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
-      });
+      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            url: 'https://malicious.com/test',
+            method: 'GET',
+            headers: {},
+            body: undefined,
+          },
+          output: undefined,
+          error:
+            'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
+        })
+      );
       expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
@@ -372,71 +416,6 @@ describe('HttpStepImpl', () => {
           method: 'GET',
         })
       );
-    });
-  });
-
-  describe('timeout duration parsing', () => {
-    it('should parse timeout duration strings correctly', () => {
-      const testCases = [
-        { input: '1s', expected: 1000 },
-        { input: '30s', expected: 30000 },
-        { input: '1m', expected: 60000 },
-        { input: '5m', expected: 300000 },
-        { input: '1h', expected: 3600000 },
-        { input: '2h30m', expected: 9000000 },
-        { input: '1000ms', expected: 1000 },
-      ];
-
-      testCases.forEach(({ input, expected }) => {
-        mockStep.configuration.with.timeout = input;
-        const httpStepInstance = new HttpStepImpl(
-          mockStep,
-          mockContextManager,
-          mockWorkflowLogger,
-          mockUrlValidator,
-          mockWorkflowRuntime
-        );
-
-        const result = httpStepInstance.getInput();
-        expect(result.timeout).toBe(expected);
-      });
-    });
-
-    it('should handle default timeout when not specified', () => {
-      const stepWithoutTimeout = {
-        ...mockStep,
-        configuration: {
-          ...mockStep.configuration,
-          with: {
-            ...mockStep.configuration.with,
-          },
-        },
-      };
-      delete (stepWithoutTimeout.configuration.with as any).timeout;
-
-      const httpStepInstance = new HttpStepImpl(
-        stepWithoutTimeout,
-        mockContextManager,
-        mockWorkflowLogger,
-        mockUrlValidator,
-        mockWorkflowRuntime
-      );
-
-      const result = httpStepInstance.getInput();
-      expect(result.timeout).toBe(30000); // 30s default
-    });
-
-    it('should throw error for invalid duration format', () => {
-      mockStep.configuration.with.timeout = 'invalid';
-      const httpStepInstance = new HttpStepImpl(
-        mockStep,
-        mockContextManager,
-        mockWorkflowLogger,
-        mockUrlValidator,
-        mockWorkflowRuntime
-      );
-
-      expect(() => httpStepInstance.getInput()).toThrow(/Invalid duration format/);
     });
   });
 });
