@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-  DataControlApi,
-} from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+} from '@kbn/control-group-renderer';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -56,7 +55,6 @@ export const ControlsContent = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
-      chainingSystem: 'HIERARCHICAL',
       labelPosition: 'oneLine',
       initialChildControlState: controlPanels,
     };
@@ -105,7 +103,7 @@ export const ControlsContent = ({
       });
 
       subscriptions.current.add(
-        controlGroup.filters$.subscribe((newFilters = []) => {
+        controlGroup.appliedFilters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );

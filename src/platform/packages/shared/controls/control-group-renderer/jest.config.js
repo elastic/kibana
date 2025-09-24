@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import type { ControlGroupRendererProps } from './control_group_renderer';
-
-const Component = dynamic(async () => {
-  const { ControlGroupRenderer } = await import('../../controls_module');
-  return {
-    default: ControlGroupRenderer,
-  };
-});
-
-export function LazyControlGroupRenderer(props: ControlGroupRendererProps) {
-  return <Component {...props} />;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/controls/control-group-renderer'],
+};

@@ -10,7 +10,8 @@
     "public/**/*.json",
     "server/**/*",
     "../../../../../typings/**/*",
-    "./jest_setup.ts"
+    "./jest_setup.ts",
+    "../../../packages/private/kbn-controls-renderer/src/control_group_renderer"
   ],
   "kbn_references": [
     "@kbn/core",

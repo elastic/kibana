@@ -28,7 +28,6 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 
 import { ControlClone } from './components/control_clone';
@@ -42,6 +41,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   }, []);
 
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
+
   const controlsInOrder: Array<DashboardLayout['controls'][string] & { id: string }> =
     useMemo(() => {
       return Object.entries(controlState)
@@ -116,14 +116,10 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
         <EuiFlexGroup
           component="ul"
-          className={'controlGroup'}
+          className="controlGroup"
           alignItems="center"
           gutterSize="s"
           wrap={true}
-          css={css({
-            padding: '8px',
-            paddingTop: '0',
-          })}
           data-test-subj="controls-group-wrapper"
         >
           {controlsInOrder.map(({ id, type }) => (

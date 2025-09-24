@@ -82,7 +82,6 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
 
   return (
     <AlertFilterControls
-      chainingSystem="HIERARCHICAL"
       ControlGroupRenderer={ControlGroupRenderer}
       controlsUrlState={filterControlsUrlState}
       dataViewSpec={customDataViewSpec}

@@ -7,20 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
-
+export { ControlGroupRenderer } from './src';
 export type {
-  ControlState,
-  ControlsGroupState,
-  DataControlState,
-  OptionsListControlState,
-  OptionsListDSLControlState,
-  OptionsListESQLControlState,
-  OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-  RangeSliderControlState,
-  RangeSliderValue,
-  StickyControlState,
+  ControlGroupRendererApi,
+  ControlGroupCreationOptions,
+  ControlGroupRuntimeState,
+  ControlGroupStateBuilder,
 } from './src/types';

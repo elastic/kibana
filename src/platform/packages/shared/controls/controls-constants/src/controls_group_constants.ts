@@ -12,6 +12,7 @@ export const CONTROLS_GROUP_TYPE = 'control_group';
 
 export const DEFAULT_USE_GLOBAL_FILTERS = true;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
+export const DEFAULT_IGNORE_VALIDATIONS = false;
 
 /** This state is only relevant for sticky controls */
 export const CONTROL_WIDTH_SMALL = 'small';

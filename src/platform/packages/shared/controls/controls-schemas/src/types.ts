@@ -21,6 +21,7 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
+export type StickyControlState = ControlsGroupState['controls'][number];
 export type ControlState = TypeOf<typeof controlSchema>;
 
 export type DataControlState = TypeOf<typeof dataControlSchema>;

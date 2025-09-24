@@ -24,6 +24,7 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...titleComparators,
@@ -69,7 +70,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
     {
       dataViewId: '',
       fieldName: '',
-      useGlobalFilters: true,
+      useGlobalFilters: DEFAULT_USE_GLOBAL_FILTERS,
+      ignoreValidations: DEFAULT_IGNORE_VALIDATIONS,
     },
     defaultDataControlComparators
   );

@@ -33,7 +33,13 @@ export function fetchAndValidate$({
 }: {
   api: Pick<
     OptionsListControlApi,
-    'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi' | 'uuid' | 'useGlobalFilters$'
+    | 'dataViews$'
+    | 'field$'
+    | 'setBlockingError'
+    | 'parentApi'
+    | 'uuid'
+    | 'useGlobalFilters$'
+    | 'ignoreValidations$'
   > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -44,7 +50,8 @@ export function fetchAndValidate$({
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-}): Observable<OptionsListSuccessResponse | { error: Error }> {
+  ignoreValidations$: PublishingSubject<boolean | undefined>;
+}): Observable<OptionsListSuccessResponse | { error: Error | unknown }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
@@ -54,6 +61,7 @@ export function fetchAndValidate$({
     fetchContext: fetch$(api),
     useGlobalFilters: api.useGlobalFilters$,
     searchString: api.debouncedSearchString,
+    ignoreValidations: api.ignoreValidations$,
     sort: sort$,
     searchTechnique: searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
@@ -72,7 +80,16 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        { dataViews, field, fetchContext, useGlobalFilters, searchString, sort, searchTechnique },
+        {
+          dataViews,
+          field,
+          fetchContext,
+          useGlobalFilters,
+          ignoreValidations,
+          searchString,
+          sort,
+          searchTechnique,
+        },
         requestSize,
         runPastTimeout,
         selectedOptions,
@@ -99,10 +116,10 @@ export function fetchAndValidate$({
           selectedOptions,
           field: field.toSpec(),
           size: requestSize,
+          ignoreValidations,
 
           // TODO get expensive queries setting and ignore validations
           allowExpensiveQueries: true,
-          ignoreValidations: false,
           ...fetchContext,
         };
 

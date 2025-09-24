@@ -54,7 +54,7 @@ export const EditExample = () => {
           (value, key) => value && key !== WITH_CUSTOM_PLACEHOLDER
         )
       );
-      controlGroupAPI.setDisabledActionIds(disabledActions);
+      controlGroupAPI.setDisabledActionIds?.(disabledActions);
     }
   }, [controlGroupAPI, toggleIconIdToSelectedMapIcon]);
 
@@ -66,7 +66,7 @@ export const EditExample = () => {
       INPUT_KEY,
       JSON.stringify({
         ...controlGroupAPI.getInput(),
-        disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
+        disabledActions: controlGroupAPI.disabledActionIds$?.getValue(), // not part of runtime
       })
     );
 

@@ -92,7 +92,7 @@ export interface EmbeddableSetup {
 export interface EmbeddableStart {
   getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
+  getTransforms: (type: string) => EmbeddableTransforms | undefined;
   hasTransforms: (type: string) => boolean;
   getEnhancement: (enhancementId: string) => PersistableState;
 }
