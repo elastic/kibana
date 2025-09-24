@@ -16,6 +16,7 @@ export const PanelBody = (props: CommonPropsWithChildren) => {
   return (
     <div
       css={css`
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.s};

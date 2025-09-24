@@ -132,7 +132,8 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
-      const params = props.params as Partial<GraphGroupedNodePreviewPanelProps>;
+      // TODO Fix typing issue here
+      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
       return <GraphGroupedNodePreviewPanel {...params} />;
     },
   },

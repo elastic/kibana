@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 
-export const Title = ({ icon, count, text }: { icon?: string; count: number; text: string }) => {
+export const Title = ({ icon, count, text }: { icon?: string; count?: number; text: string }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       {icon && (

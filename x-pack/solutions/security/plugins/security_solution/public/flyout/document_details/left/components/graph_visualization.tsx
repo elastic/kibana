@@ -19,6 +19,7 @@ import {
   getSingleDocumentData,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
+import type { NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -58,6 +59,7 @@ export const GraphVisualization: React.FC = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
@@ -109,64 +111,21 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
-            items: [
-              {
-                type: 'entity',
-                id: `${node.id}-entity`,
-                icon: node.icon || 'storage',
-                tag: node.tag || 'host',
-                label: node.label || node.id,
-                timestamp: new Date().toISOString(), // TODO where do I get it?
-                risk: 80,
-                ip: '10.200.0.202',
-                countryCode: 'US',
-              },
-              {
-                type: 'entity',
-                id: `${node.id}-entity-long`,
-                icon: node.icon || 'storage',
-                tag:
-                  node.tag ||
-                  'super long name here to prove that ellipsis is rendered fine or else we are screwed so fix it and dont forget a tooltip',
-                label: node.label || node.id,
-                timestamp: new Date().toISOString(), // TODO where do I get it?
-                risk: 80,
-                ip: '10.200.0.202',
-                countryCode: 'US',
-              },
-              {
-                type: 'event',
-                id: `${node.id}-event`,
-                actor: {
-                  id: 'actor-id',
-                  icon: 'user',
-                  label: 'tin@elastic.co',
-                },
-                target: {
-                  id: 'target-id',
-                  icon: 'storage',
-                  label: 'esd-security',
-                },
-                action: 'user.authentication',
-                timestamp: new Date().toISOString(), // TODO where do I get it?
-              },
-              {
-                type: 'alert',
-                id: `${node.id}-alert`,
-                actor: {
-                  id: 'actor-id',
-                  icon: 'user',
-                  label: 'tin@elastic.co',
-                },
-                target: {
-                  id: 'target-id',
-                  icon: 'storage',
-                  label: 'esd-security',
-                },
-                action: 'user.authentication',
-                timestamp: new Date().toISOString(), // TODO where do I get it?
-              },
-            ],
+            dataViewId: dataViewIndexPattern,
+            documentIds: node.documentsData
+              ? (node.documentsData as NodeDocumentDataModel[]).map((doc) =>
+                  docMode === 'grouped-entities' ? doc.entity?.name : doc.event?.id
+                )
+              : [],
+
+            // documentIds: [
+            //   'b9234a06-f1df-4da8-bd44-2b77c05afc32',
+            //   'fd61302f-0f1a-4f96-8cf3-1545b98b339f',
+            //   '6b02aa78-decd-431b-88c3-d96cd17a8e28',
+            // ],
+
+            //  Map documentsData to expeced input
+            // items: node.documentsData.map(doc => ({ ...doc, label: doc})),
           },
         });
       } else {
@@ -180,7 +139,7 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId]
+    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
