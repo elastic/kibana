@@ -62,7 +62,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
-    validateType(type, this.accessControlEnabled);
+
+    type.supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+
+    validateType(type);
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
   }
 
@@ -147,10 +150,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = (
-  { name, management, hidden, hiddenFromHttpApis, supportsAccessControl }: SavedObjectsType,
-  accessControlEnabled: boolean
-) => {
+const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -167,12 +167,6 @@ const validateType = (
   if (hidden === true && hiddenFromHttpApis === false) {
     throw new Error(
       `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
-    );
-  }
-
-  if (supportsAccessControl === true && accessControlEnabled === false) {
-    throw new Error(
-      `Type ${name}: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration`
     );
   }
 };
