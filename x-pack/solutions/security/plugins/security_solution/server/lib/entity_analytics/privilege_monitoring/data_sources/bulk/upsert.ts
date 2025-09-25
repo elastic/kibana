@@ -163,10 +163,9 @@ export const bulkUpsertOperationsFactoryShared =
   ): object[] => {
     const { buildUpdateParams, buildCreateDoc, shouldCreate = () => true } = opts;
     const ops: object[] = [];
-    dataClient.log('info', `Building bulk operations for ${users.length} users`);
+    dataClient.log('debug', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
-        dataClient.log(`info`, `UPDATING: ${JSON.stringify(user, null, 2)}`);
         ops.push(
           { update: { _index: dataClient.index, _id: user.existingUserId } },
           { script: { source: updateScriptSource, params: buildUpdateParams(user, sourceLabel) } } // user should have latestDoc and labels
@@ -202,7 +201,7 @@ export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) =
       usersChunk,
       INDEX_SCRIPT,
       {
-        // make sure index_sync matches up everywhere. Right now index is used instead.
+        // TODO: https://github.com/elastic/security-team/issues/14071 - index -> index_sync label
         buildUpdateParams: (user) => ({ source_id: user.sourceId }),
         buildCreateDoc: (user, sourceLabel) => ({
           user: { name: user.username, is_privileged: true },
