@@ -334,19 +334,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
-      before(async () => {
-        toggleIntegrationsSyncFlag(kibanaServer, true);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
-          { useCreate: true }
-        );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
-        );
-      });
 
       beforeEach(async () => {
         await indexSyncUtils.createIndex();
@@ -393,7 +380,6 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.createEntitySourceForIndex();
 
         const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
-
         const user1Before = privMonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
         await indexSyncUtils.deleteUserFromIndex('user1');
