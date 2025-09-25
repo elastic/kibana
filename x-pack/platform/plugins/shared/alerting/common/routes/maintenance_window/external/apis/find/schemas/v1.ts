@@ -14,30 +14,41 @@ import {
 } from '../../../../shared/schemas/v1';
 import { validatePagination } from '../../../../shared/validation/v1';
 
-export const findMaintenanceWindowsRequestQuerySchema = schema.object(
+export const findMaintenanceWindowsQuerySchema = schema.object(
   {
-    page: maintenanceWindowPageSchema,
-    per_page: maintenanceWindowPerPageSchema,
-    search: schema.maybe(
+    title: schema.maybe(
       schema.string({
         meta: {
-          description:
-            'An Elasticsearch simple_query_string query that filters the objects in the response.',
+          description: 'The title of the maintenance window.',
+        },
+      })
+    ),
+    created_by: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'The user who created the maintenance window.',
         },
       })
     ),
     status: schema.maybe(
-      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)])
+      schema.oneOf([maintenanceWindowStatusSchema, schema.arrayOf(maintenanceWindowStatusSchema)], {
+        meta: {
+          description:
+            'The status of the maintenance window. One of "running", "upcoming", "finished" or "archived".',
+        },
+      })
     ),
+    page: maintenanceWindowPageSchema,
+    per_page: maintenanceWindowPerPageSchema,
   },
   {
     validate: validatePagination,
   }
 );
 
-export const findMaintenanceWindowsResponseBodySchema = schema.object({
+export const findMaintenanceWindowsResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),
-  data: schema.arrayOf(maintenanceWindowResponseSchemaV1),
+  maintenanceWindows: schema.arrayOf(maintenanceWindowResponseSchemaV1),
 });
