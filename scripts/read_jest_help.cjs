@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fsp from 'fs/promises';
-import Path from 'path';
+require('../src/setup_node_env');
 
-import { createFailError } from '@kbn/dev-cli-errors';
-import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/repo-info';
+const Fsp = require('fs/promises');
+const Path = require('path');
+
+const { createFailError } = require('@kbn/dev-cli-errors');
+const { run } = require('@kbn/dev-cli-runner');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const FLAGS_FILE = 'src/platform/packages/shared/kbn-test/src/jest/jest_flags.json';
 
@@ -21,7 +23,7 @@ function readStdin() {
     let buffer = '';
     let timer = setTimeout(() => {
       reject(
-        createFailError('you must pipe the output of `yarn jest --help` to this script', {
+        new Error('you must pipe the output of `yarn jest --help` to this script', {
           showHelp: true,
         })
       );
@@ -113,7 +115,7 @@ run(
     log.warning('make sure you bootstrap to rebuild @kbn/test');
   },
   {
-    usage: `yarn jest --help | node scripts/read_jest_help.mjs`,
+    usage: `yarn jest --help | node scripts/read_jest_help.cjs`,
     description: `
       Jest no longer exposes the ability to parse CLI flags externally, so we use this
       script to read the help output and convert it into parameters we can pass to getopts()
