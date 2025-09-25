@@ -126,6 +126,7 @@ export {
   OTEL_METRICS_COMPONENT_TEMPLATES,
   OTEL_LOGS_COMPONENT_TEMPLATES,
   OTEL_TRACES_COMPONENT_TEMPLATES,
+  OTEL_COMPONENT_TEMPLATES,
 } from './fleet_es_assets';
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
