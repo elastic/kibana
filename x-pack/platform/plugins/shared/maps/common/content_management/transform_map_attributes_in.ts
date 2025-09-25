@@ -18,7 +18,7 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   };
 
   if (mapState.description) storedMapAttributes.description = mapState.description;
-  if (mapState.layerListJSON) storedMapAttributes.layerListJSON = mapState.layerListJSON;
+  if (mapState.layers) storedMapAttributes.layerListJSON = JSON.stringify(mapState.layers);
   if (mapState.mapStateJSON) storedMapAttributes.mapStateJSON = mapState.mapStateJSON;
 
   const uiStateJSON = getUiStateJSON(mapState);

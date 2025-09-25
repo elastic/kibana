@@ -230,14 +230,8 @@ export class SavedMap {
       }
     }
 
-    let layerList: LayerDescriptor[] = [];
-    if (this._attributes.layerListJSON) {
-      try {
-        layerList = JSON.parse(this._attributes.layerListJSON) as LayerDescriptor[];
-      } catch (e) {
-        throw new Error('Malformed saved object: unable to parse layerListJSON');
-      }
-    } else {
+    const layerList: LayerDescriptor[] = this._attributes.layers ?? [];
+    if (layerList.length === 0) {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {
         layerList.push(basemapLayerDescriptor);
@@ -262,18 +256,11 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
-    const savedLayerList = this._attributes.layerListJSON
-      ? JSON.parse(this._attributes.layerListJSON)
-      : null;
+    const savedLayerList = this._attributes.layers;
     const layerListConfigOnly = getLayerListConfigOnly(this._store.getState());
     return !savedLayerList
       ? !_.isEqual(layerListConfigOnly, this._initialLayerListConfig)
-      : // savedMap stores layerList as a JSON string using JSON.stringify.
-        // JSON.stringify removes undefined properties from objects.
-        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-        // Need to perform the same process for layerListConfigOnly to compare apples to apples
-        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-        !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
+      : !_.isEqual(layerListConfigOnly, savedLayerList);
   };
 
   private _getStateTransfer() {
@@ -560,7 +547,7 @@ export class SavedMap {
     const state: MapStoreState = this._store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
-    this._attributes!.layerListJSON = JSON.stringify(layerListConfigOnly);
+    this._attributes!.layers = layerListConfigOnly;
 
     const mapSettings = getMapSettings(state);
 

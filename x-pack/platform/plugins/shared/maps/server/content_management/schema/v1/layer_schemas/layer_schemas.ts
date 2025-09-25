@@ -180,3 +180,11 @@ export const vectorLayerSchema = layerSchema.extends({
     schema.literal(LAYER_TYPE.MVT_VECTOR),
   ]),
 });
+
+export const layersSchema = schema.oneOf([
+  EMSVectorTileLayerSchema,
+  heatmapLayerSchema,
+  layerGroupSchema,
+  rasterLayerSchema,
+  vectorLayerSchema,
+]);

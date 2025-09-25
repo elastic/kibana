@@ -16,6 +16,37 @@ describe('transformMapOut', () => {
     `);
   });
 
+  test('layerListJSON', () => {
+    expect(
+      transformMapAttributesOut(
+        {
+          title: 'my map',
+          layerListJSON:
+            '[{"sourceDescriptor":{"type":"ES_GEO_GRID","indexPatternRefName":"layer_0_source_index_pattern"}}]',
+        },
+        [
+          {
+            id: 'c698b940-e149-11e8-a35a-370a8516603a',
+            name: 'layer_0_source_index_pattern',
+            type: 'index-pattern',
+          },
+        ]
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "layers": Array [
+          Object {
+            "sourceDescriptor": Object {
+              "indexPatternId": "c698b940-e149-11e8-a35a-370a8516603a",
+              "type": "ES_GEO_GRID",
+            },
+          },
+        ],
+        "title": "my map",
+      }
+    `);
+  });
+
   test('uiStateJSON', () => {
     expect(
       transformMapAttributesOut(

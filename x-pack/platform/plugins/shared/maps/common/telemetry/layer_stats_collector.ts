@@ -36,16 +36,7 @@ export class LayerStatsCollector {
   private _sourceIds: Set<string> = new Set();
 
   constructor(attributes: MapAttributes) {
-    if (!attributes || !attributes.layerListJSON) {
-      return;
-    }
-
-    let layerList: LayerDescriptor[] = [];
-    try {
-      layerList = JSON.parse(attributes.layerListJSON);
-    } catch (e) {
-      return;
-    }
+    const layerList: LayerDescriptor[] = attributes?.layers ?? [];
 
     this._layerCount = layerList.length;
     layerList.forEach((layerDescriptor) => {

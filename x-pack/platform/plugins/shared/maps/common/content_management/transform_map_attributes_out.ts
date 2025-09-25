@@ -8,6 +8,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
+import type { LayerDescriptor } from '../descriptor_types';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
@@ -19,6 +20,9 @@ export function transformMapAttributesOut(
   });
   return {
     title: injectedAttributes.title,
+    ...(injectedAttributes.layerListJSON
+      ? { layers: parseJSON<Partial<LayerDescriptor[]>>([], injectedAttributes.layerListJSON) }
+      : {}),
     ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.uiStateJSON),
   };
 }

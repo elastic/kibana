@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SOURCE_TYPES } from '../constants';
 import { transformMapAttributesIn } from './transform_map_attributes_in';
 
 describe('transformMapIn', () => {
@@ -15,6 +16,36 @@ describe('transformMapIn', () => {
           "title": "my map",
         },
         "references": Array [],
+      }
+    `);
+  });
+
+  test('layerListJSON', () => {
+    expect(
+      transformMapAttributesIn({
+        title: 'my map',
+        layers: [
+          {
+            sourceDescriptor: {
+              type: SOURCE_TYPES.ES_GEO_GRID,
+              indexPatternId: 'c698b940-e149-11e8-a35a-370a8516603a',
+            },
+          } as any,
+        ],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "layerListJSON": "[{\\"sourceDescriptor\\":{\\"type\\":\\"ES_GEO_GRID\\",\\"indexPatternRefName\\":\\"layer_0_source_index_pattern\\"}}]",
+          "title": "my map",
+        },
+        "references": Array [
+          Object {
+            "id": "c698b940-e149-11e8-a35a-370a8516603a",
+            "name": "layer_0_source_index_pattern",
+            "type": "index-pattern",
+          },
+        ],
       }
     `);
   });
