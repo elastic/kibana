@@ -29,8 +29,8 @@ pageLoadAssetSize:
   dashboardEnhanced: 12500
   dashboardMarkdown: 5134
   data: 453742
-  dataQuality: 10387
-  datasetQuality: 30094
+  dataQuality: 11469
+  datasetQuality: 49315
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -49,7 +49,7 @@ pageLoadAssetSize:
   enterpriseSearch: 38494
   esql: 13323
   esqlDataGrid: 10209
-  esUiShared: 100338
+  esUiShared: 101220
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -150,8 +150,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79987
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
+  securitySolutionEss: 43319
+  securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 67975
   streams: 8494
-  streamsApp: 15200
+  streamsApp: 15500
   streamsAppWrapper: 5787
   synthetics: 31571
   telemetry: 25755
