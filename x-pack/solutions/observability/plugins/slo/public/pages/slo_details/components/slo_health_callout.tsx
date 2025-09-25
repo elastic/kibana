@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
+import { SloHealthIssuesList } from '../../slos/components/health_callout/slo_health_issues_list';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { http } = useKibana().services;
@@ -34,7 +28,19 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     return null;
   }
 
-  const count = health.rollup === 'unhealthy' && health.summary === 'unhealthy' ? 2 : 1;
+  const unhealthyRollup = health.rollup === 'unhealthy';
+  const unhealthySummary = health.summary === 'unhealthy';
+  const missingRollup = health.rollup === 'missing';
+  const missingSummary = health.summary === 'missing';
+
+  const count = [unhealthyRollup, unhealthySummary, missingRollup, missingSummary].filter(
+    Boolean
+  ).length;
+
+  const stateText = getSloHealthStateText(
+    unhealthyRollup || unhealthySummary,
+    missingRollup || missingSummary
+  );
 
   return (
     <EuiCallOut
@@ -48,50 +54,10 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         <EuiFlexItem>
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
-            defaultMessage="The following {count, plural, one {transform is} other {transforms are}
-          } in an unhealthy state:"
-            values={{ count }}
+            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state:"
+            values={{ count, stateText }}
           />
-          <ul>
-            {health.rollup === 'unhealthy' && (
-              <li>
-                {getSLOTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOTransformId(slo.id, slo.revision)}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      data-test-subj="sloSloHealthCalloutCopyButton"
-                      aria-label={i18n.translate(
-                        'xpack.slo.sloDetails.healthCallout.copyToClipboard',
-                        { defaultMessage: 'Copy to clipboard' }
-                      )}
-                      color="text"
-                      iconType="copy"
-                      onClick={copy}
-                    />
-                  )}
-                </EuiCopy>
-              </li>
-            )}
-            {health.summary === 'unhealthy' && (
-              <li>
-                {getSLOSummaryTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOSummaryTransformId(slo.id, slo.revision)}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      data-test-subj="sloSloHealthCalloutCopyButton"
-                      aria-label={i18n.translate(
-                        'xpack.slo.sloDetails.healthCallout.copyToClipboard',
-                        { defaultMessage: 'Copy to clipboard' }
-                      )}
-                      color="text"
-                      iconType="copy"
-                      onClick={copy}
-                    />
-                  )}
-                </EuiCopy>
-              </li>
-            )}
-          </ul>
+          <SloHealthIssuesList results={data} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

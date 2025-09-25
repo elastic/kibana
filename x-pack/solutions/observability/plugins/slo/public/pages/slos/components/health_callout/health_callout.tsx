@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { getSloHealthStateText } from '../../../../lib/slo_health_helpers';
+import { SloHealthIssuesList } from './slo_health_issues_list';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
@@ -45,11 +37,11 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     return null;
   }
 
-  const unhealthyRollupTransforms = results.filter(
-    (result) => result.health.rollup === 'unhealthy'
+  const hasUnhealthy = unhealthySloList.some(
+    (result) => result.health.rollup === 'unhealthy' || result.health.summary === 'unhealthy'
   );
-  const unhealthySummaryTransforms = results.filter(
-    (result) => result.health.summary === 'unhealthy'
+  const hasMissing = unhealthySloList.some(
+    (result) => result.health.rollup === 'missing' || result.health.summary === 'missing'
   );
 
   const dismiss = () => {
@@ -57,8 +49,11 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     sessionStorage.setItem('slo_health_callout_hidden', 'true');
   };
 
+  const stateText = getSloHealthStateText(hasUnhealthy, hasMissing);
+
   return (
     <EuiCallOut
+      data-test-subj="sloHealthCallout"
       color="danger"
       iconType={isOpen ? 'arrowDown' : 'arrowRight'}
       size="s"
@@ -81,55 +76,17 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
           }}
         >
           <EuiFlexItem>
-            <FormattedMessage
-              id="xpack.slo.sloList.healthCallout.description"
-              defaultMessage="The following {count, plural, one {transform is} other {transforms are}
-          } in an unhealthy state:"
-              values={{
-                count: unhealthyRollupTransforms.length + unhealthySummaryTransforms.length,
-              }}
-            />
-            <ul>
-              {unhealthyRollupTransforms.map((result) => (
-                <li>
-                  {getSLOTransformId(result.sloId, result.sloRevision)}
-                  <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        data-test-subj="sloHealthCalloutCopyButton"
-                        aria-label={i18n.translate(
-                          'xpack.slo.sloList.healthCallout.copyToClipboard',
-                          { defaultMessage: 'Copy to clipboard' }
-                        )}
-                        color="text"
-                        iconType="copy"
-                        onClick={copy}
-                      />
-                    )}
-                  </EuiCopy>
-                </li>
-              ))}
-
-              {unhealthySummaryTransforms.map((result) => (
-                <li>
-                  {getSLOSummaryTransformId(result.sloId, result.sloRevision)}
-                  <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        data-test-subj="sloHealthCalloutCopyButton"
-                        aria-label={i18n.translate(
-                          'xpack.slo.sloList.healthCallout.copyToClipboard',
-                          { defaultMessage: 'Copy to clipboard' }
-                        )}
-                        color="text"
-                        iconType="copy"
-                        onClick={copy}
-                      />
-                    )}
-                  </EuiCopy>
-                </li>
-              ))}
-            </ul>
+            <span data-test-subj="sloHealthCalloutDescription">
+              <FormattedMessage
+                id="xpack.slo.sloList.healthCallout.description"
+                defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state:"
+                values={{
+                  count: unhealthySloList.length,
+                  stateText,
+                }}
+              />
+            </span>
+            <SloHealthIssuesList results={unhealthySloList} />
           </EuiFlexItem>
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={false}>

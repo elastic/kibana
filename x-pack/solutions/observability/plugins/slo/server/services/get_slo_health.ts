@@ -92,22 +92,32 @@ export class GetSLOHealth {
   private async getTransformStats(
     sloList: SLODefinition[]
   ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const transformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+    const rollupTransformIds = sloList.map((slo) => getSLOTransformId(slo.id, slo.revision));
+    const summaryTransformIds = sloList.map((slo) =>
+      getSLOSummaryTransformId(slo.id, slo.revision)
+    );
+
+    const [rollupStats, summaryStats] = await Promise.all([
+      this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: sloList
-            .map((slo: SLODefinition) => [
-              getSLOTransformId(slo.id, slo.revision),
-              getSLOSummaryTransformId(slo.id, slo.revision),
-            ])
-            .flat(),
+          transform_id: rollupTransformIds,
           allow_no_match: true,
-          size: sloList.length * 2,
+          size: sloList.length,
         },
         { ignore: [404] }
-      );
+      ),
+      this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: summaryTransformIds,
+          allow_no_match: true,
+          size: sloList.length,
+        },
+        { ignore: [404] }
+      ),
+    ]);
 
-    return keyBy(transformStats.transforms, (transform) => transform.id);
+    const allTransforms = [...rollupStats.transforms, ...summaryStats.transforms];
+    return keyBy(allTransforms, (transform) => transform.id);
   }
 }
 
@@ -152,7 +162,10 @@ function computeState(
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
-  return transformStat?.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  if (!transformStat) {
+    return 'missing';
+  }
+  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
 }
 
 function computeHealth(
