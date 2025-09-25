@@ -1830,12 +1830,16 @@ components:
       description: The basis of an interrupt resume value
       type: object
       properties:
+        interruptId:
+          description: ID that corresponds to the InterruptValue
+          type: string
         type:
           $ref: '#/components/schemas/InterruptType'
           description: Type of the resume value
           example: SELECT_OPTION
       required:
         - type
+        - interruptId
     BaseInterruptValue:
       description: The basis of an agent interrupt
       type: object
@@ -1844,6 +1848,9 @@ components:
           description: Whether the interrupt has expired and can no longer be resumed.
           example: false
           type: boolean
+        id:
+          description: ID of the interrupt
+          type: string
         threadId:
           description: Thread ID of the graph execution that produced this message.
           example: <UUID>
@@ -1855,6 +1862,7 @@ components:
       required:
         - type
         - threadId
+        - id
     BulkCrudActionSummary:
       type: object
       properties:
@@ -1908,6 +1916,11 @@ components:
         conversationId:
           $ref: '#/components/schemas/NonEmptyString'
           description: Existing conversation ID to continue.
+        interruptResumeValue:
+          $ref: '#/components/schemas/InterruptResumeValue'
+          description: >-
+            Value that should be used when resuming graph execution following an
+            intterupt.
         isStream:
           description: If true, the response will be streamed in chunks.
           example: true
@@ -1940,6 +1953,11 @@ components:
         responseLanguage:
           description: ISO language code for the assistant's response.
           example: en
+          type: string
+        threadId:
+          description: >-
+            Thread ID of a graph execution. Only required when resuming graph
+            execution for a particular thread ID.
           type: string
       required:
         - messages
