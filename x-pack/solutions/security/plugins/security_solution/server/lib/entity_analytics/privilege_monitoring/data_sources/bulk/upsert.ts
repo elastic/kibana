@@ -32,8 +32,8 @@ if (params.new_privileged_status == false) {
     ctx._source.user.is_privileged = true;
   }
 
-  if (!ctx._source.labels.sources.contains(params.labels.sources)) {
-    ctx._source.labels.sources.add(params.labels.sources);
+  if (!ctx._source.labels.sources.contains(params.labels.sources[0])) {
+    ctx._source.labels.sources.add(params.labels.sources[0]);
   }
 }
 `;
