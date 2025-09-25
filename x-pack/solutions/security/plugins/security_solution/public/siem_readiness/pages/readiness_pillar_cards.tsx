@@ -133,11 +133,11 @@ const PillarLevelProgress: React.FC<Pillar> = ({ pillarProps, pillarStats }) => 
   };
 
   const commonStyle = {
-    position: 'absolute',
+    position: 'absolute' as const,
     top: '-5px',
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
   };
 
   const shields = [

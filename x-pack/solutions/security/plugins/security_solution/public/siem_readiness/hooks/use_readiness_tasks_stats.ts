@@ -35,7 +35,7 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
       latestTasksData.filter((task) => task.status === 'completed').map((task) => task.task_id)
     );
 
-    const pillarStatsMap: PillarStatsMap = {
+    const pillarStatsMap: PillarsStatsMap = {
       visibility: { completed: 0, total: 0 },
       detection: { completed: 0, total: 0 },
       response: { completed: 0, total: 0 },
@@ -49,7 +49,7 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
     });
 
     const totalTasks = READINESS_TASKS.length;
-    const totalCompleted = Object.values(pillarStatsMap).reduce(
+    const totalCompleted: number = Object.values(pillarStatsMap).reduce(
       (sum, stat) => sum + stat.completed,
       0
     );

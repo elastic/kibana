@@ -24,7 +24,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
-import { usePillarsProps } from '../hooks/use_pillar_props';
+import { usePillarsProps, type PillarKey } from '../hooks/use_pillar_props';
 
 const PieChartSize = 200;
 const siemReadinessPieChartChartId = 'siem-readiness-pie-chart';
@@ -86,7 +86,7 @@ const PillarsPieChart: React.FC = () => {
           layers={[
             {
               groupByRollup: (d: PieChartDataItem) => d.pillarKey,
-              nodeLabel: (pillarKey) => {
+              nodeLabel: (pillarKey: PillarKey) => {
                 if (pillarKey === 'incomplete') {
                   return i18n.translate(
                     'xpack.securitySolution.siemReadiness.incompleteTasksLabel',
@@ -125,8 +125,8 @@ const PillarsPieChart: React.FC = () => {
           width: '50%',
         }}
       >
-        <EuiTitle className="eui-textCenter" size="m" css={{ fontWeight: 700 }}>
-          <h1>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
+        <EuiTitle className="eui-textCenter" size="m">
+          <h1 style={{ fontWeight: 700 }}>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
         </EuiTitle>
         <EuiTitle className="eui-textCenter" size="xxs">
           <h3>
@@ -149,7 +149,7 @@ const PillarsMiniSummaryTable: React.FC = () => {
   ).map(([pillarKey, pillarStats]) => {
     return {
       pillarKey,
-      pillarName: pillarPropsMap[pillarKey].displayName,
+      pillarName: pillarPropsMap[pillarKey as PillarKey].displayName,
       ...pillarStats,
     };
   });
@@ -161,7 +161,7 @@ const PillarsMiniSummaryTable: React.FC = () => {
         defaultMessage: 'Readiness Section',
       }),
       render: (pillarName: string, record: LegendTableDataItem) => (
-        <EuiHealth color={pillarPropsMap[record.pillarKey].color}>{pillarName}</EuiHealth>
+        <EuiHealth color={pillarPropsMap[record.pillarKey as PillarKey].color}>{pillarName}</EuiHealth>
       ),
     },
     {

@@ -134,7 +134,7 @@ export const ReadinessTasksTable: React.FC = () => {
 
   const readinessTasksAddOnsMap: Record<
     ReadinessTaskId,
-    { action?: () => void; actionButtonLabel?: string }
+    { action?: () => void; actionButtonLabel?: string; illustration?: string; learnMoreLink?: string }
   > = useMemo(
     () => ({
       'lets-get-started': {

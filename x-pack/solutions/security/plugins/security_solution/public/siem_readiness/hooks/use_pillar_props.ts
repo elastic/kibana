@@ -31,7 +31,7 @@ export interface PillarProps {
 export const usePillarsProps = (): UsePillarsProps => {
   const { euiTheme } = useEuiTheme();
 
-  const pillarPropsMap = {
+  const pillarPropsMap: PillarsProps = {
     visibility: {
       pillarKey: 'visibility',
       displayName: i18n.translate('xpack.securitySolution.siemReadiness.visibility.displayName', {
