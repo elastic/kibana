@@ -23,7 +23,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
   variant = 'full',
   showOnlyWhenExceeded = false,
   onManageDataSources,
-}) => {
+}: UserLimitCallOutProps) => {
   const { userStats, isLoading, isLimitExceeded, isNearLimit, utilizationPercentage } =
     useUserLimitStatus();
 
@@ -47,7 +47,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userLimit.exceeded.title"
-            defaultMessage="User limit exceeded"
+            defaultMessage="Performance may be degraded"
           />
         }
         color="warning"

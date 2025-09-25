@@ -142,7 +142,7 @@ export const IndexSelectorModal = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.description"
-            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users (max number allowed: {maxPrivilegedUsersAllowed})."
+            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users (maximum number allowed: {maxPrivilegedUsersAllowed})."
             values={{
               nameField: <EuiCode>{'user.name'}</EuiCode>,
               maxPrivilegedUsersAllowed: maxUsersAllowed,
