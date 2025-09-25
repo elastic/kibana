@@ -955,12 +955,14 @@ x-pack/platform/packages/shared/ml/kibana_context @elastic/ml-ui
 x-pack/platform/packages/shared/ml/license @elastic/ml-ui
 x-pack/platform/packages/shared/ml/locator @elastic/ml-ui
 x-pack/platform/packages/shared/ml/ml_client @elastic/ml-ui
+x-pack/platform/packages/shared/ml/node_checks @elastic/ml-ui
 x-pack/platform/packages/shared/ml/plugin_contracts @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/saved_objects @elastic/ml-ui
 x-pack/platform/packages/shared/ml/server_api_schemas @elastic/ml-ui
+x-pack/platform/packages/shared/ml/server_services @elastic/ml-ui
 x-pack/platform/packages/shared/ml/services @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/ui_actions @elastic/ml-ui
