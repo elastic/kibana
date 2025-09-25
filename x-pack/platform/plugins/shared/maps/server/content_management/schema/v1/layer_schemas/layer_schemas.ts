@@ -15,7 +15,7 @@ import {
   XYZTMSSourceSchema,
   kibanaTilemapSourceSchema,
 } from '../source_schemas/source_schemas';
-import { joinSourceSchema, querySchema } from '../source_schemas/es_join_source_schemas';
+import { joinSourceSchema } from '../source_schemas/es_join_source_schemas';
 import { EMSVectorTileStyleSchema, heatmapStyleSchema } from '../style_schemas/style_schemas';
 import { vectorStyleSchema } from '../style_schemas/vector_style_schemas/vector_style_schemas';
 import {
@@ -24,6 +24,7 @@ import {
   ESPewPewSourceSchema,
 } from '../source_schemas/es_agg_source_schemas';
 import { ESQLSourceSchema, ESSearchSourceSchema } from '../source_schemas/es_source_schemas';
+import { querySchema } from '@kbn/es-query-server';
 
 export const attributionSchema = schema.object({
   label: schema.string(),
