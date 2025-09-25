@@ -19,13 +19,12 @@ import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
 import { HomePage } from './home';
 import { AlertDetailsRedirect } from '../detections/pages/alerts/alert_details_redirect';
+import { CASES_FEATURES } from '../cases';
 
 interface RouterProps {
   children: React.ReactNode;
   history: History;
 }
-
-const features = { observables: { enabled: true, autoExtract: true } } as const;
 
 const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
@@ -53,7 +52,11 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
               component={AlertDetailsRedirect}
             />
             <Route path="/">
-              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions} features={features}>
+              <CasesContext
+                owner={[APP_ID]}
+                permissions={userCasesPermissions}
+                features={CASES_FEATURES}
+              >
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>

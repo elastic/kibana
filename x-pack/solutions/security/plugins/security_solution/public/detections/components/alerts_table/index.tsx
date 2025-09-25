@@ -144,7 +144,7 @@ const casesConfiguration = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
-  extractObservables: true,
+  extractObservables: false,
 };
 const emptyInputFilters: Filter[] = [];
 

@@ -665,7 +665,7 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: false }, observables: { enabled: true, autoExtract: false } },
+          features: { alerts: { sync: true }, observables: { enabled: true, autoExtract: false } },
         },
         {}
       );
