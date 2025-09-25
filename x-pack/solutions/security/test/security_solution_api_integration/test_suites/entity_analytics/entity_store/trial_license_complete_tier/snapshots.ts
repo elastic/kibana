@@ -54,6 +54,7 @@ export default function (providerContext: FtrProviderContext) {
         // Create a test index matching transform's pattern to store test documents
         await es.indices.createDataStream({ name: DATASTREAM_NAME });
         await enableEntityStore(providerContext);
+        await ensureTransformStarted(providerContext);
       });
 
       after(async () => {
@@ -224,6 +225,14 @@ function buildHostTransformDocument(
   return document;
 }
 
+async function ensureTransformStarted(providerContext: FtrProviderContext): Promise<void> {
+  const es = providerContext.getService('es');
+  const { acknowledged } = await es.transform.startTransform({
+    transform_id: HOST_TRANSFORM_ID,
+  });
+  expect(acknowledged).to.be(true);
+}
+
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
   docs: (EcsHost & { timestamp?: string })[],
@@ -253,15 +262,7 @@ async function createDocumentsAndTriggerTransform(
   expect(acknowledged).to.be(true);
 
   const startedWaiting: number = new Date().valueOf();
-  let transformReTriggered: boolean = false;
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-    if (!transformReTriggered && new Date().valueOf() - startedWaiting > TIMEOUT_MS / 2.0) {
-      transformReTriggered = true;
-      const { acknowledged: acknowledged2nd } = await es.transform.scheduleNowTransform({
-        transform_id: HOST_TRANSFORM_ID,
-      });
-      expect(acknowledged2nd).to.be(true);
-    }
     const response = await es.transform.getTransformStats({
       transform_id: HOST_TRANSFORM_ID,
     });
