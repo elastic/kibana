@@ -7,22 +7,22 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart } from './types';
+import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
 
-export class ChatDataRegistryPlugin
-  implements Plugin<ChatDataRegistryPluginSetup, ChatDataRegistryPluginStart>
+export class DataSourcesRegistryPlugin
+  implements Plugin<DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart>
 {
-  public setup(core: CoreSetup): ChatDataRegistryPluginSetup {
+  public setup(core: CoreSetup): DataSourcesRegistryPluginSetup {
     const isPluginEnabled = core.settings.client.get<boolean>(
-      'chat_data_registry.enableChatDataRegistry', // unregistered ff, just to make sure the UI is hidden
+      'data_sources_registry.enableDataSourcesRegistry', // unregistered ff, just to make sure the UI is hidden
       false
     );
 
     if (isPluginEnabled) {
       core.application.register({
-        id: 'chatDataRegistry',
-        title: 'Chat Data Registry',
-        appRoute: '/app/chat-data-registry',
+        id: 'dataSourcesRegistry',
+        title: 'Data Sources Registry',
+        appRoute: '/app/data-sources-registry',
         category: DEFAULT_APP_CATEGORIES.chat,
         visibleIn: [],
         async mount(params: AppMountParameters) {
@@ -35,7 +35,7 @@ export class ChatDataRegistryPlugin
     return {};
   }
 
-  public start(core: CoreStart): ChatDataRegistryPluginStart {
+  public start(core: CoreStart): DataSourcesRegistryPluginStart {
     return {};
   }
 
