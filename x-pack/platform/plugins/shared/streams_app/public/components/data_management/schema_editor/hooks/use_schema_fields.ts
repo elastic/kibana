@@ -77,8 +77,8 @@ export const useSchemaFields = ({
 
   const [fields, setFields] = useState<SchemaField[]>([]);
 
-  const definitionFields = useMemo(() => getDefinitionFields(definition), [definition]);
   const storedFields = useMemo(() => {
+    const definitionFields = getDefinitionFields(definition);
     const allManagedFieldsSet = new Set([...definitionFields.map((field) => field.name)]);
 
     const unmanagedFields: SchemaField[] = dataViewFields
@@ -110,7 +110,7 @@ export const useSchemaFields = ({
         })) ?? [];
 
     return [...definitionFields, ...unmanagedFields, ...unmappedFields];
-  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields, definitionFields]);
+  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
 
   useEffect(() => setFields(storedFields), [storedFields]);
 
@@ -153,7 +153,7 @@ export const useSchemaFields = ({
     });
 
     return addedOrChanged.length;
-  }, [fields, definitionFields, storedFields]);
+  }, [fields, storedFields]);
 
   const discardChanges = useCallback(() => {
     setFields(storedFields);
