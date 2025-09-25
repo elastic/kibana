@@ -146,9 +146,7 @@ export const updateAgentlessCloudConnectorConfig = (
   const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   );
-
   const targetCsp = input?.type.match(/aws|azure/)?.[0];
-
 
   // Making sure that the cloud connector is disabled when switching to GCP
   if (
@@ -163,7 +161,6 @@ export const updateAgentlessCloudConnectorConfig = (
       },
     });
 
-
     setPackagePolicy({
       ...packagePolicy,
       supports_cloud_connector: false,
@@ -171,13 +168,14 @@ export const updateAgentlessCloudConnectorConfig = (
     return;
   }
 
+  const cloudConnectorPolicyEnabled: boolean = !!packagePolicy.supports_cloud_connector;
+  const cloudConnectorPolicyMismatch =
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorPolicyEnabled;
 
-  const cloudConnectorEnabled =
-    input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
   if (
     targetCsp &&
     newAgentPolicy?.supports_agentless &&
-    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorEnabled ||
+    (cloudConnectorPolicyMismatch ||
       newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
   ) {
     setNewAgentPolicy({
@@ -185,7 +183,7 @@ export const updateAgentlessCloudConnectorConfig = (
       agentless: {
         ...newAgentPolicy.agentless,
         cloud_connectors: {
-          enabled: cloudConnectorEnabled,
+          enabled: cloudConnectorPolicyEnabled,
           target_csp: targetCsp,
         },
       },
@@ -193,7 +191,7 @@ export const updateAgentlessCloudConnectorConfig = (
 
     setPackagePolicy({
       ...packagePolicy,
-      supports_cloud_connector: cloudConnectorEnabled,
+      supports_cloud_connector: cloudConnectorPolicyEnabled,
     });
   }
 };

@@ -40,7 +40,6 @@ import {
   getTemplateUrlFromPackageInfo,
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
-  getAwsCredentialsType,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -48,7 +47,7 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
-import type { UpdatePolicy } from '../types';
+import type { AwsInputFieldMapping, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
@@ -63,6 +62,39 @@ interface AwsAgentlessFormProps {
   setupTechnology: SetupTechnology;
   hasInvalidRequiredVars: boolean;
 }
+
+// This should only set the credentials after the initial render
+const updateCloudConnectorSupport = (
+  awsCredentialsType: string | undefined,
+  newPolicy: NewPackagePolicy,
+  updatePolicy: UpdatePolicy
+) => {
+  const cloudConnectorSelected = awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+  const currentPackagePolicySupportsCloudConnector = newPolicy.supports_cloud_connector;
+  if (awsCredentialsType && cloudConnectorSelected !== currentPackagePolicySupportsCloudConnector) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: cloudConnectorSelected,
+      },
+    });
+  }
+};
+
+const getSelectorOptions = (
+  isEditPage: boolean | undefined,
+  awsCredentialsType: string | undefined,
+  isAwsCloudConnectorEnabled: boolean,
+  awsInputFieldMapping: AwsInputFieldMapping | undefined
+) => {
+  if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
+    return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
+  }
+  if (isAwsCloudConnectorEnabled) {
+    return getAwsCredentialsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
+  }
+  return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
+};
 
 // TODO: Extract cloud connector logic into separate component
 export const AwsCredentialsFormAgentless = ({
@@ -87,30 +119,9 @@ export const AwsCredentialsFormAgentless = ({
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
-
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  // This should ony set the credentials after the initial render
-  if (!getAwsCredentialsType(input)) {
-    const newPackagePolicy = {
-      ...newPolicy,
-      supports_cloud_connector: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-    };
-    updatePolicy({
-      updatedPolicy: {
-        ...updatePolicyWithInputs(newPackagePolicy, awsPolicyType, {
-          'aws.credentials.type': {
-            value: awsCredentialsType,
-            type: 'text',
-          },
-          'aws.supports_cloud_connectors': {
-            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-            type: 'bool',
-          },
-        }),
-      },
-    });
-  }
+  updateCloudConnectorSupport(awsCredentialsType, newPolicy, updatePolicy);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
@@ -145,16 +156,12 @@ export const AwsCredentialsFormAgentless = ({
     agentlessCredentialFormGroups[awsCredentialsType as keyof typeof agentlessCredentialFormGroups];
   const fields = getInputVarsFields(input, group.fields);
 
-  const selectorOptions = () => {
-    if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
-      return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
-    }
-    if (isAwsCloudConnectorEnabled) {
-      return getAwsCredentialsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
-    }
-
-    return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
-  };
+  const selectorOptions = getSelectorOptions(
+    isEditPage,
+    awsCredentialsType,
+    isAwsCloudConnectorEnabled,
+    awsInputFieldMapping
+  );
 
   const disabled =
     isEditPage &&
@@ -218,7 +225,7 @@ export const AwsCredentialsFormAgentless = ({
           }
         )}
         type={awsCredentialsType}
-        options={selectorOptions()}
+        options={selectorOptions}
         disabled={!!disabled}
         onChange={(optionId) => {
           const newPackagePolicy = {
