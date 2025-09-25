@@ -554,7 +554,7 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
     let actualSchema = connector.paramsSchema;
     if (typeof connector.paramsSchema === 'function') {
       try {
-        actualSchema = connector.paramsSchema();
+        actualSchema = (connector.paramsSchema as any)();
       } catch (error) {
         // If function execution fails, cache null and return
         connectorSchemaCache.set(connectorType, null);
@@ -576,22 +576,33 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       const unionOptions = actualSchema._def.options;
       const commonProperties: Record<string, any> = {};
       
+      // Helper function to extract properties from any schema type
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+      
       // Get properties that exist in ALL union options
       if (unionOptions.length > 0) {
-        const firstOption = unionOptions[0];
-        if (firstOption instanceof z.ZodObject) {
-          const firstShape = firstOption.shape;
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+        
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
           
-          // Check each property in the first option
-          for (const [key, schema] of Object.entries(firstShape)) {
-            // Check if this property exists in ALL other options
-            const existsInAll = unionOptions.every((option: any) => {
-              return option instanceof z.ZodObject && option.shape[key];
-            });
-            
-            if (existsInAll) {
-              commonProperties[key] = schema;
-            }
+          if (existsInAll) {
+            commonProperties[key] = schema;
           }
         }
       }
@@ -605,21 +616,21 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
 
     // Handle ZodIntersection schemas (from complex union handling)
     if (actualSchema instanceof z.ZodIntersection) {
-      // For intersection schemas, try to extract properties from both sides
-      const leftSchema = actualSchema._def.left;
-      const rightSchema = actualSchema._def.right;
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
       
-      const allProperties: Record<string, any> = {};
-      
-      // Extract properties from left side
-      if (leftSchema instanceof z.ZodObject) {
-        Object.assign(allProperties, leftSchema.shape);
-      }
-      
-      // Extract properties from right side
-      if (rightSchema instanceof z.ZodObject) {
-        Object.assign(allProperties, rightSchema.shape);
-      }
+      // For intersection schemas, extract properties from both sides
+      const allProperties = extractPropertiesFromSchema(actualSchema);
       
       if (Object.keys(allProperties).length > 0) {
         connectorSchemaCache.set(connectorType, allProperties);
@@ -633,21 +644,32 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       const unionOptions = Array.from(actualSchema._def.options.values());
       const commonProperties: Record<string, any> = {};
       
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+      
       if (unionOptions.length > 0) {
-        const firstOption = unionOptions[0];
-        if (firstOption instanceof z.ZodObject) {
-          const firstShape = firstOption.shape;
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+        
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
           
-          // Check each property in the first option
-          for (const [key, schema] of Object.entries(firstShape)) {
-            // Check if this property exists in ALL other options
-            const existsInAll = unionOptions.every((option: any) => {
-              return option instanceof z.ZodObject && option.shape[key];
-            });
-            
-            if (existsInAll) {
-              commonProperties[key] = schema;
-            }
+          if (existsInAll) {
+            commonProperties[key] = schema;
           }
         }
       }

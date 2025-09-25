@@ -675,7 +675,8 @@ function checkSchemaExists(schemaName) {
     }
     const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
     const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const schemaRegex = new RegExp(`export const ${escapedSchemaName} = `, 'm');
+    // Updated regex to handle type annotations like ": z.ZodType<any> ="
+    const schemaRegex = new RegExp(`export const ${escapedSchemaName}(?:\\s*:[^=]+)?\\s*=`, 'm');
     return schemaRegex.test(schemasContent);
   } catch (error) {
     console.warn(`⚠️ Error checking if schema ${schemaName} exists:`, error.message);
@@ -1116,7 +1117,7 @@ function copyClientAsSchemas() {
     // These schemas exceed TypeScript's serialization limits and need explicit typing
     const complexUnionSchemas = [
       'Security_Detections_API_RuleResponse',
-      'Security_Detections_API_RulePatchProps', 
+      'Security_Detections_API_RulePatchProps',
       'Security_Detections_API_RuleCreateProps',
       'Security_Detections_API_RuleUpdateProps',
       'RulePreview_Body',
@@ -1127,9 +1128,9 @@ function copyClientAsSchemas() {
       'SLOs_create_slo_request',
       'SLOs_update_slo_request',
       'SLOs_slo_definition_response',
-      'SLOs_find_slo_definitions_response'
+      'SLOs_find_slo_definitions_response',
     ];
-    
+
     complexUnionSchemas.forEach((schemaName) => {
       // Handle both single-line and multi-line schema definitions
       const exportPattern = new RegExp(`^export const ${schemaName} = z`);
@@ -1292,7 +1293,9 @@ function generateKibanaConnectors() {
     // Read the schemas file to verify which schemas actually exist
     const schemasFileContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
     const existingSchemas = actualUsedSchemas.filter((schemaName) => {
-      return schemasFileContent.includes(`export const ${schemaName} =`);
+      const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const schemaRegex = new RegExp(`export const ${escapedSchemaName}(?:\\s*:[^=]+)?\\s*=`, 'm');
+      return schemaRegex.test(schemasFileContent);
     });
 
     const missingSchemas = actualUsedSchemas.filter(
@@ -1329,7 +1332,7 @@ function generateKibanaConnectors() {
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';${schemaImportsSection}
+import type { InternalConnectorContract } from '@kbn/workflows';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];

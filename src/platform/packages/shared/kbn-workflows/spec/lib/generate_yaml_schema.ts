@@ -77,7 +77,7 @@ function createRecursiveStepSchema(
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
-    
+
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
@@ -94,7 +94,7 @@ function createRecursiveStepSchema(
       ...connectorSchemas,
     ]);
   });
-  
+
   return stepSchema;
 }
 
@@ -144,7 +144,7 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   visited.add(obj);
 
   if (Array.isArray(obj)) {
-    obj.forEach((item, index) => 
+    obj.forEach((item, index) =>
       fixAdditionalPropertiesInSchema(item, `${path}[${index}]`, visited)
     );
     return;
@@ -160,8 +160,47 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
     obj.additionalProperties = false;
   }
 
+  // CRITICAL FIX: Remove additionalProperties: false from objects inside allOf arrays
+  // In allOf, each schema should be permissive to allow the union of all properties
+  if (obj.type === 'object' && obj.additionalProperties === false) {
+    // More aggressive fix: remove additionalProperties from any object that might be in an allOf
+    // This includes checking for allOf in the path or if the object has specific patterns
+    const pathParts = path.split('.');
+    const isInAllOf = pathParts.some((part, index) => {
+      return part === 'allOf' && pathParts[index + 1] && /^\d+$/.test(pathParts[index + 1]);
+    });
+
+    // Also check if this looks like a connector schema object (has properties like invocationCount, timeframeEnd, etc.)
+    const hasConnectorProps =
+      obj.properties &&
+      (obj.properties.invocationCount ||
+        obj.properties.timeframeEnd ||
+        obj.properties.enable_logged_requests ||
+        obj.properties.actions ||
+        obj.properties.description ||
+        obj.properties.name ||
+        obj.properties.type);
+
+    if (isInAllOf || (hasConnectorProps && path.includes('with'))) {
+      delete obj.additionalProperties;
+    }
+  }
+
+  // ADDITIONAL FIX: Remove additionalProperties: false from broken reference fallback objects
+  // These are empty objects with descriptions like "Complex schema intersection (simplified...)"
+  if (
+    obj.type === 'object' &&
+    obj.additionalProperties === false &&
+    obj.properties &&
+    Object.keys(obj.properties).length === 0 &&
+    obj.description &&
+    obj.description.includes('simplified')
+  ) {
+    delete obj.additionalProperties;
+  }
+
   // Recursively process all properties
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     fixAdditionalPropertiesInSchema(obj[key], path ? `${path}.${key}` : key, visited);
   });
 }
@@ -171,27 +210,24 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   let fixedSchemaString = schemaString;
 
   // Fix 1: Remove duplicate enum values (the main issue causing validation failure)
-  fixedSchemaString = fixedSchemaString.replace(
-    /"enum":\s*\[([^\]]+)\]/g,
-    (match, enumValues) => {
-      try {
-        const values = JSON.parse(`[${enumValues}]`);
-        const uniqueValues = [...new Set(values)];
-        return `"enum":${JSON.stringify(uniqueValues)}`;
-      } catch (e) {
-        return match;
-      }
+  fixedSchemaString = fixedSchemaString.replace(/"enum":\s*\[([^\]]+)\]/g, (match, enumValues) => {
+    try {
+      const values = JSON.parse(`[${enumValues}]`);
+      const uniqueValues = [...new Set(values)];
+      return `"enum":${JSON.stringify(uniqueValues)}`;
+    } catch (e) {
+      return match;
     }
-  );
+  });
 
   // Fix 2: Handle intersections with unions properly
   // The main issue is that z.union().and(z.object()) creates allOf: [Union, Object]
   // but sometimes the Object part is missing from the JSON schema generation
   // We need to ensure both parts of the allOf are present
-  
+
   // TODO: Fix incomplete allOf structures from .and() operations
   // The real fix should be in the connector generation, not hardcoded post-processing
-  
+
   // Break only the most deeply nested references that cause infinite loops
   fixedSchemaString = fixedSchemaString.replace(
     /"\$ref":"#\/definitions\/WorkflowSchema\/properties\/settings\/properties\/on-failure\/properties\/fallback\/items\/anyOf\/\d+\/properties\/with\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+\/allOf\/\d+"/g,
@@ -249,6 +285,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
+  // BUT: Don't force additionalProperties: false on simplified broken reference objects
 
   // First, replace any existing "additionalProperties": true with false
   fixedSchemaString = fixedSchemaString.replace(
