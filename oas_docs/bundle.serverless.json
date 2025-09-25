@@ -21609,6 +21609,9 @@
                           {
                             "additionalProperties": false,
                             "properties": {
+                              "deferred": {
+                                "type": "boolean"
+                              },
                               "id": {
                                 "type": "string"
                               },
@@ -22114,6 +22117,9 @@
                                   "items": {
                                     "additionalProperties": true,
                                     "properties": {
+                                      "deferred": {
+                                        "type": "boolean"
+                                      },
                                       "id": {
                                         "type": "string"
                                       },
@@ -22252,6 +22258,9 @@
                                 "items": {
                                   "additionalProperties": true,
                                   "properties": {
+                                    "deferred": {
+                                      "type": "boolean"
+                                    },
                                     "id": {
                                       "type": "string"
                                     },
@@ -22629,6 +22638,9 @@
                           {
                             "additionalProperties": false,
                             "properties": {
+                              "deferred": {
+                                "type": "boolean"
+                              },
                               "id": {
                                 "type": "string"
                               },
@@ -22848,6 +22860,9 @@
                                         {
                                           "additionalProperties": false,
                                           "properties": {
+                                            "deferred": {
+                                              "type": "boolean"
+                                            },
                                             "id": {
                                               "type": "string"
                                             },
@@ -22990,7 +23005,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -23020,7 +23036,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Bulk install packages",
@@ -23101,7 +23118,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -23131,7 +23149,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Bulk uninstall packages",
@@ -23214,7 +23233,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -23244,7 +23264,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Get Bulk uninstall packages details",
@@ -23331,7 +23352,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -23361,7 +23383,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Bulk upgrade packages",
@@ -23444,7 +23467,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -23474,7 +23498,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Get Bulk upgrade packages details",
@@ -23917,6 +23942,9 @@
                           {
                             "additionalProperties": false,
                             "properties": {
+                              "deferred": {
+                                "type": "boolean"
+                              },
                               "id": {
                                 "type": "string"
                               },
@@ -24275,6 +24303,9 @@
                                 "items": {
                                   "additionalProperties": true,
                                   "properties": {
+                                    "deferred": {
+                                      "type": "boolean"
+                                    },
                                     "id": {
                                       "type": "string"
                                     },
@@ -24413,6 +24444,9 @@
                               "items": {
                                 "additionalProperties": true,
                                 "properties": {
+                                  "deferred": {
+                                    "type": "boolean"
+                                  },
                                   "id": {
                                     "type": "string"
                                   },
@@ -24874,6 +24908,9 @@
                           {
                             "additionalProperties": false,
                             "properties": {
+                              "deferred": {
+                                "type": "boolean"
+                              },
                               "id": {
                                 "type": "string"
                               },
@@ -24956,7 +24993,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -24986,7 +25024,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Install a package from the registry",
@@ -25229,6 +25268,9 @@
                                 "items": {
                                   "additionalProperties": true,
                                   "properties": {
+                                    "deferred": {
+                                      "type": "boolean"
+                                    },
                                     "id": {
                                       "type": "string"
                                     },
@@ -25367,6 +25409,9 @@
                               "items": {
                                 "additionalProperties": true,
                                 "properties": {
+                                  "deferred": {
+                                    "type": "boolean"
+                                  },
                                   "id": {
                                     "type": "string"
                                   },
@@ -25855,7 +25900,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -25885,7 +25931,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Delete Kibana assets for a package",
@@ -25965,7 +26012,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -25995,10 +26043,117 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Install Kibana assets for a package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion-rule-assets",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgVersion",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Install Kibana alert rule for a package",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
