@@ -674,10 +674,43 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
 
     // Extract the shape from the Zod schema
     if (connector.paramsSchema instanceof z.ZodObject) {
-      // Found paramsSchema for connector
+      // Found paramsSchema for connector (simple object)
       const result = connector.paramsSchema.shape;
       connectorSchemaCache.set(connectorType, result);
       return result;
+    }
+    
+    // Handle ZodUnion schemas (from our generic intersection fix)
+    if (connector.paramsSchema instanceof z.ZodUnion) {
+      // For union schemas, extract common properties from all options
+      const unionOptions = connector.paramsSchema._def.options;
+      const commonProperties: Record<string, any> = {};
+      
+      // Get properties that exist in ALL union options
+      if (unionOptions.length > 0) {
+        const firstOption = unionOptions[0];
+        if (firstOption instanceof z.ZodObject) {
+          const firstShape = firstOption.shape;
+          
+          // Check each property in the first option
+          for (const [key, schema] of Object.entries(firstShape)) {
+            // Check if this property exists in ALL other options
+            const existsInAll = unionOptions.every((option: any) => {
+              return option instanceof z.ZodObject && option.shape[key];
+            });
+            
+            if (existsInAll) {
+              commonProperties[key] = schema;
+            }
+          }
+        }
+      }
+      
+      if (Object.keys(commonProperties).length > 0) {
+        // Found common properties in union schema
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
     }
 
     connectorSchemaCache.set(connectorType, null);

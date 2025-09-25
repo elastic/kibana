@@ -3,7 +3,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-09-24T09:05:21.862Z
+ * Generated at: 2025-09-25T08:28:20.100Z
  * Source: Kibana OpenAPI spec (456 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
@@ -198,8 +198,6 @@ import {
   SLOs_bulk_purge_rollup_request,
   SLOs_delete_slo_instances_request,
   SLOs_update_slo_request,
-  APM_UI_service_object,
-  APM_UI_settings_object,
   Security_Entity_Analytics_API_AssetCriticalityRecordIdParts,
   Security_Entity_Analytics_API_IdField,
   Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload,
@@ -219,13 +217,6 @@ import {
   Cases_case_tags,
   Cases_case_title,
   Cases_owner,
-  Cases_update_alert_comment_request_properties,
-  Cases_alert_identifiers,
-  Cases_alert_indices,
-  Cases_rule,
-  Cases_update_user_comment_request_properties,
-  Cases_add_alert_comment_request_properties,
-  Cases_add_user_comment_request_properties,
   Cases_closure_types,
   Cases_connector_types,
   Cases_templates,
@@ -388,53 +379,6 @@ import {
   Security_Detections_API_MachineLearningRuleUpdateProps,
   Security_Detections_API_NewTermsRuleUpdateProps,
   Security_Detections_API_EsqlRuleUpdateProps,
-  Security_Detections_API_BulkDeleteRules,
-  Security_Detections_API_BulkDisableRules,
-  Security_Detections_API_BulkEnableRules,
-  Security_Detections_API_BulkExportRules,
-  Security_Detections_API_BulkDuplicateRules,
-  Security_Detections_API_BulkManualRuleRun,
-  Security_Detections_API_BulkManualRuleFillGaps,
-  Security_Detections_API_BulkEditRules,
-  Security_Detections_API_BulkActionEditPayload,
-  Security_Detections_API_BulkActionEditPayloadTags,
-  Security_Detections_API_BulkActionEditPayloadIndexPatterns,
-  Security_Detections_API_BulkActionEditPayloadInvestigationFields,
-  Security_Detections_API_BulkActionEditPayloadTimeline,
-  Security_Detections_API_BulkActionEditPayloadRuleActions,
-  Security_Detections_API_NormalizedRuleAction,
-  Security_Detections_API_ThrottleForBulkActions,
-  Security_Detections_API_BulkActionEditPayloadSchedule,
-  Security_Detections_API_BulkActionEditPayloadAlertSuppression,
-  Security_Detections_API_BulkActionEditPayloadSetAlertSuppression,
-  Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold,
-  Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression,
-  Security_Exceptions_API_CreateRuleExceptionListItemProps,
-  Security_Exceptions_API_CreateRuleExceptionListItemCommentArray,
-  Security_Exceptions_API_CreateRuleExceptionListItemComment,
-  Security_Exceptions_API_NonEmptyString,
-  Security_Exceptions_API_ExceptionListItemDescription,
-  Security_Exceptions_API_ExceptionListItemEntryArray,
-  Security_Exceptions_API_ExceptionListItemEntry,
-  Security_Exceptions_API_ExceptionListItemEntryMatch,
-  Security_Exceptions_API_ExceptionListItemEntryOperator,
-  Security_Exceptions_API_ExceptionListItemEntryMatchAny,
-  Security_Exceptions_API_ExceptionListItemEntryList,
-  Security_Exceptions_API_ListId,
-  Security_Exceptions_API_ListType,
-  Security_Exceptions_API_ExceptionListItemEntryExists,
-  Security_Exceptions_API_ExceptionListItemEntryNested,
-  Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem,
-  Security_Exceptions_API_ExceptionListItemEntryMatchWildcard,
-  Security_Exceptions_API_ExceptionListItemHumanId,
-  Security_Exceptions_API_ExceptionListItemMeta,
-  Security_Exceptions_API_ExceptionListItemName,
-  Security_Exceptions_API_ExceptionNamespaceType,
-  Security_Exceptions_API_ExceptionListItemOsTypeArray,
-  Security_Exceptions_API_ExceptionListOsType,
-  Security_Exceptions_API_ExceptionListItemTags,
-  Security_Exceptions_API_ExceptionListItemType,
-  Security_Detections_API_RulePreviewParams,
   Security_Detections_API_AlertAssignees,
   Security_Detections_API_AlertIds,
   Security_Detections_API_AlertsSort,
@@ -487,14 +431,36 @@ import {
   Security_Exceptions_API_ExceptionListHumanId,
   Security_Exceptions_API_ExceptionListMeta,
   Security_Exceptions_API_ExceptionListName,
+  Security_Exceptions_API_ExceptionNamespaceType,
   Security_Exceptions_API_ExceptionListOsTypeArray,
+  Security_Exceptions_API_ExceptionListOsType,
   Security_Exceptions_API_ExceptionListTags,
   Security_Exceptions_API_ExceptionListType,
   Security_Exceptions_API_ExceptionListVersion,
   Security_Exceptions_API_ExceptionListId,
   Security_Exceptions_API_CreateExceptionListItemCommentArray,
   Security_Exceptions_API_CreateExceptionListItemComment,
+  Security_Exceptions_API_NonEmptyString,
+  Security_Exceptions_API_ExceptionListItemDescription,
+  Security_Exceptions_API_ExceptionListItemEntryArray,
+  Security_Exceptions_API_ExceptionListItemEntry,
+  Security_Exceptions_API_ExceptionListItemEntryMatch,
+  Security_Exceptions_API_ExceptionListItemEntryOperator,
+  Security_Exceptions_API_ExceptionListItemEntryMatchAny,
+  Security_Exceptions_API_ExceptionListItemEntryList,
+  Security_Exceptions_API_ListId,
+  Security_Exceptions_API_ListType,
+  Security_Exceptions_API_ExceptionListItemEntryExists,
+  Security_Exceptions_API_ExceptionListItemEntryNested,
+  Security_Exceptions_API_ExceptionListItemEntryNestedEntryItem,
+  Security_Exceptions_API_ExceptionListItemEntryMatchWildcard,
   Security_Exceptions_API_ExceptionListItemExpireTime,
+  Security_Exceptions_API_ExceptionListItemHumanId,
+  Security_Exceptions_API_ExceptionListItemMeta,
+  Security_Exceptions_API_ExceptionListItemName,
+  Security_Exceptions_API_ExceptionListItemOsTypeArray,
+  Security_Exceptions_API_ExceptionListItemTags,
+  Security_Exceptions_API_ExceptionListItemType,
   Security_Exceptions_API_UpdateExceptionListItemCommentArray,
   Security_Exceptions_API_UpdateExceptionListItemComment,
   Security_Exceptions_API_ExceptionListItemId,
@@ -544,17 +510,13 @@ import {
   Security_Osquery_API_Shards,
   Security_Osquery_API_SavedQueryDescriptionOrUndefined,
   Security_Osquery_API_Interval,
-  Security_Osquery_API_IntervalOrUndefined,
   Security_AI_Assistant_API_AnonymizationFieldCreateProps,
   Security_AI_Assistant_API_AnonymizationFieldUpdateProps,
-  Security_AI_Assistant_API_NonEmptyString,
-  Security_AI_Assistant_API_ChatMessage,
-  Security_AI_Assistant_API_MessageData,
-  Security_AI_Assistant_API_ChatMessageRole,
   Security_AI_Assistant_API_ApiConfig,
   Security_AI_Assistant_API_Provider,
   Security_AI_Assistant_API_ConversationCategory,
   Security_AI_Assistant_API_Message,
+  Security_AI_Assistant_API_NonEmptyString,
   Security_AI_Assistant_API_MessageMetadata,
   Security_AI_Assistant_API_ContentReferences,
   Security_AI_Assistant_API_KnowledgeBaseEntryContentReference,
@@ -602,26 +564,7 @@ import {
   Security_Timeline_API_Note,
   Security_Timeline_API_PinnedEvent,
   Security_Timeline_API_BarePinnedEvent,
-  Security_Timeline_API_ImportTimelines,
-  SLOs_budgeting_method,
-  SLOs_group_by,
-  SLOs_indicator_properties_custom_kql,
-  SLOs_kql_with_filters,
-  SLOs_filter,
-  SLOs_filter_meta,
-  SLOs_kql_with_filters_good,
-  SLOs_kql_with_filters_total,
-  SLOs_indicator_properties_apm_availability,
-  SLOs_indicator_properties_apm_latency,
-  SLOs_indicator_properties_custom_metric,
-  SLOs_indicator_properties_histogram,
-  SLOs_indicator_properties_timeslice_metric,
-  SLOs_timeslice_metric_basic_metric_with_field,
-  SLOs_timeslice_metric_percentile_metric,
-  SLOs_timeslice_metric_doc_count_metric,
-  SLOs_objective,
-  SLOs_settings,
-  SLOs_time_window
+  Security_Timeline_API_ImportTimelines
 } from './generated_kibana_schemas';
 
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
@@ -693,9 +636,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_actions_connector_id_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_actions_connector_id_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_actions_connector_id API')
   },
   {
@@ -711,9 +680,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_actions_connector_id_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_actions_connector_id_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_actions_connector_id API')
   },
   {
@@ -729,9 +724,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_actions_connector_id_execute_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_actions_connector_id_execute_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_actions_connector_id_execute API')
   },
   {
@@ -838,9 +859,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_alerting_rule_id_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_alerting_rule_id_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_alerting_rule_id API')
   },
   {
@@ -856,9 +903,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_alerting_rule_id_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_alerting_rule_id_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_alerting_rule_id API')
   },
   {
@@ -969,9 +1042,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_alerting_rule_id_snooze_schedule_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_alerting_rule_id_snooze_schedule_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_alerting_rule_id_snooze_schedule API')
   },
   {
@@ -1066,9 +1165,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(APM_UI_agent_keys_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = APM_UI_agent_keys_object;
+          const additionalFields = z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createAgentKey API')
   },
   {
@@ -1103,10 +1228,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(APM_UI_create_annotation_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = APM_UI_create_annotation_object;
+          const additionalFields = z.object({
     serviceName: z.string().describe('Path parameter: serviceName (required)'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createAnnotation API')
   },
   {
@@ -1181,10 +1332,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["overwrite","elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(APM_UI_agent_configuration_intake_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = APM_UI_agent_configuration_intake_object;
+          const additionalFields = z.object({
     overwrite: z.any().optional().describe('Query parameter: overwrite'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createUpdateAgentConfiguration API')
   },
   {
@@ -1238,9 +1415,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(APM_UI_search_agent_configuration_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = APM_UI_search_agent_configuration_object;
+          const additionalFields = z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from searchSingleConfiguration API')
   },
   {
@@ -1296,9 +1499,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["elastic-api-version"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(APM_UI_upload_source_map_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = APM_UI_upload_source_map_object;
+          const additionalFields = z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from uploadSourceMap API')
   },
   {
@@ -1554,9 +1783,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Cases_update_case_comment_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Cases_update_case_comment_request;
+          const additionalFields = z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from updateCaseCommentDefaultSpace API')
   },
   {
@@ -1572,9 +1827,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Cases_add_case_comment_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Cases_add_case_comment_request;
+          const additionalFields = z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from addCaseCommentDefaultSpace API')
   },
   {
@@ -1669,9 +1950,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Cases_add_case_file_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Cases_add_case_file_request;
+          const additionalFields = z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from addCaseFileDefaultSpace API')
   },
   {
@@ -1760,9 +2067,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Cases_update_case_configuration_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Cases_update_case_configuration_request;
+          const additionalFields = z.object({
     configurationId: z.string().describe('Path parameter: configurationId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from updateCaseConfigurationDefaultSpace API')
   },
   {
@@ -1903,9 +2236,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Data_views_update_data_view_request_object, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Data_views_update_data_view_request_object;
+          const additionalFields = z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from updateDataViewDefault API')
   },
   {
@@ -1940,9 +2299,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(createRuntimeFieldDefault_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = createRuntimeFieldDefault_Body;
+          const additionalFields = z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createRuntimeFieldDefault API')
   },
   {
@@ -1958,9 +2343,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(createRuntimeFieldDefault_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = createRuntimeFieldDefault_Body;
+          const additionalFields = z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createUpdateRuntimeFieldDefault API')
   },
   {
@@ -2259,9 +2670,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["dry_run"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(PerformRulesBulkAction_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = PerformRulesBulkAction_Body;
+          const additionalFields = z.object({
     dry_run: z.any().optional().describe('Query parameter: dry_run'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from PerformRulesBulkAction API')
   },
   {
@@ -2338,9 +2775,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(CreateRuleExceptionListItems_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = CreateRuleExceptionListItems_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from CreateRuleExceptionListItems API')
   },
   {
@@ -2392,9 +2855,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["enable_logged_requests"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(RulePreview_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = RulePreview_Body;
+          const additionalFields = z.object({
     enable_logged_requests: z.any().optional().describe('Query parameter: enable_logged_requests'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from RulePreview API')
   },
   {
@@ -3155,9 +3644,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_Entity_Analytics_API_MonitoredUserUpdateDoc, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_Entity_Analytics_API_MonitoredUserUpdateDoc;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from UpdatePrivMonUser API')
   },
   {
@@ -3298,9 +3813,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(InitEntityEngine_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = InitEntityEngine_Body;
+          const additionalFields = z.object({
     entityType: z.string().describe('Path parameter: entityType (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from InitEntityEngine API')
   },
   {
@@ -3767,9 +4308,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_agent_download_sources_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_agent_download_sources_Body;
+          const additionalFields = z.object({
     sourceId: z.string().describe('Path parameter: sourceId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_agent_download_sources_sourceid API')
   },
   {
@@ -3805,9 +4372,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["sys_monitoring"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_agent_policies_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_agent_policies_Body;
+          const additionalFields = z.object({
     sys_monitoring: z.any().optional().describe('Query parameter: sys_monitoring'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies API')
   },
   {
@@ -3858,9 +4451,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_agent_policies_agentpolicyid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_agent_policies_agentpolicyid_Body;
+          const additionalFields = z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_agent_policies_agentpolicyid API')
   },
   {
@@ -3895,9 +4514,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_agent_policies_agentpolicyid_copy_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_agent_policies_agentpolicyid_copy_Body;
+          const additionalFields = z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_agentpolicyid_copy API')
   },
   {
@@ -4126,9 +4771,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_agents_agentid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_agents_agentid_Body;
+          const additionalFields = z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_agents_agentid API')
   },
   {
@@ -4144,9 +4815,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_agents_agentid_actions_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_agents_agentid_actions_Body;
+          const additionalFields = z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_actions API')
   },
   {
@@ -4219,9 +4916,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_agents_agentid_upgrade_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_agents_agentid_upgrade_Body;
+          const additionalFields = z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_upgrade API')
   },
   {
@@ -4683,9 +5406,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_epm_custom_integrations_pkgname_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_epm_custom_integrations_pkgname_Body;
+          const additionalFields = z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_epm_custom_integrations_pkgname API')
   },
   {
@@ -4760,9 +5509,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["prerelease"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_epm_packages_bulk_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_epm_packages_bulk_Body;
+          const additionalFields = z.object({
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk API')
   },
   {
@@ -5014,11 +5789,37 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["prerelease"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body;
+          const additionalFields = z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize API')
   },
   {
@@ -5198,9 +5999,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_fleet_server_hosts_itemid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_fleet_server_hosts_itemid_Body;
+          const additionalFields = z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_fleet_server_hosts_itemid API')
   },
   {
@@ -5382,9 +6209,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_outputs_outputid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_outputs_outputid_Body;
+          const additionalFields = z.object({
     outputId: z.string().describe('Path parameter: outputId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_outputs_outputid API')
   },
   {
@@ -5509,9 +6362,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_package_policies_packagepolicyid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_package_policies_packagepolicyid_Body;
+          const additionalFields = z.object({
     packagePolicyId: z.string().describe('Path parameter: packagePolicyId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_package_policies_packagepolicyid API')
   },
   {
@@ -5646,9 +6525,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_fleet_proxies_itemid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_fleet_proxies_itemid_Body;
+          const additionalFields = z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_fleet_proxies_itemid API')
   },
   {
@@ -6207,9 +7112,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_logstash_pipeline_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_logstash_pipeline_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_logstash_pipeline API')
   },
   {
@@ -6296,9 +7227,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(patch_maintenance_window_id_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = patch_maintenance_window_id_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from patch_maintenance_window_id API')
   },
   {
@@ -6598,9 +7555,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_Osquery_API_UpdatePacksRequestBody, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_Osquery_API_UpdatePacksRequestBody;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from OsqueryUpdatePacks API')
   },
   {
@@ -6689,9 +7672,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_Osquery_API_UpdateSavedQueryRequestBody, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_Osquery_API_UpdateSavedQueryRequestBody;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from OsqueryUpdateSavedQuery API')
   },
   {
@@ -6812,10 +7821,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["compatibilityMode","createNewCopies"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(resolveImportErrors_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = resolveImportErrors_Body;
+          const additionalFields = z.object({
     compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
     createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from resolveImportErrors API')
   },
   {
@@ -6866,9 +7901,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["content_references_disabled"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_AI_Assistant_API_ChatCompleteProps, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_AI_Assistant_API_ChatCompleteProps;
+          const additionalFields = z.object({
     content_references_disabled: z.any().optional().describe('Query parameter: content_references_disabled'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from ChatComplete API')
   },
   {
@@ -6974,9 +8035,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_AI_Assistant_API_ConversationUpdateProps, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_AI_Assistant_API_ConversationUpdateProps;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from UpdateConversation API')
   },
   {
@@ -7120,9 +8207,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps, z.object({
+    paramsSchema: (() => {
+          const baseSchema = Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from UpdateKnowledgeBaseEntry API')
   },
   {
@@ -7244,10 +8357,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["createOnly"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_security_role_name_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_security_role_name_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
     createOnly: z.any().optional().describe('Query parameter: createOnly'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_security_role_name API')
   },
   {
@@ -7518,9 +8657,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_spaces_space_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_spaces_space_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_spaces_space_id API')
   },
   {
@@ -7658,9 +8823,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_streams_name_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_streams_name_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name API')
   },
   {
@@ -7676,9 +8867,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_streams_name_fork_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_streams_name_fork_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_streams_name_fork API')
   },
   {
@@ -7713,9 +8930,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_streams_name_group_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_streams_name_group_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name_group API')
   },
   {
@@ -7750,9 +8993,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_streams_name_ingest_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_streams_name_ingest_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name_ingest API')
   },
   {
@@ -7768,9 +9037,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_streams_name_content_export_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_streams_name_content_export_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_streams_name_content_export API')
   },
   {
@@ -7824,9 +9119,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_streams_name_dashboards_bulk_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_streams_name_dashboards_bulk_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_streams_name_dashboards_bulk API')
   },
   {
@@ -7861,10 +9182,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(get_streams_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = get_streams_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
     dashboardId: z.string().describe('Path parameter: dashboardId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name_dashboards_dashboardid API')
   },
   {
@@ -7899,9 +9246,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_streams_name_queries_bulk_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_streams_name_queries_bulk_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_streams_name_queries_bulk API')
   },
   {
@@ -7936,10 +9309,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_streams_name_queries_queryid_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_streams_name_queries_queryid_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
     queryId: z.string().describe('Path parameter: queryId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name_queries_queryid API')
   },
   {
@@ -7993,10 +9392,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(get_streams_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = get_streams_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
     ruleId: z.string().describe('Path parameter: ruleId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_streams_name_rules_ruleid API')
   },
   {
@@ -8055,12 +9480,38 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["from","to","bucketSize"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_streams_name_significant_events_preview_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_streams_name_significant_events_preview_Body;
+          const additionalFields = z.object({
     name: z.string().describe('Path parameter: name (required)'),
     from: z.any().optional().describe('Query parameter: from'),
     to: z.any().optional().describe('Query parameter: to'),
     bucketSize: z.any().optional().describe('Query parameter: bucketSize'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from post_streams_name_significant_events_preview API')
   },
   {
@@ -8189,9 +9640,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(post_synthetic_monitors_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = post_synthetic_monitors_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_synthetic_monitor API')
   },
   {
@@ -8296,9 +9773,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(put_parameter_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = put_parameter_Body;
+          const additionalFields = z.object({
     id: z.string().describe('Path parameter: id (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from put_parameter API')
   },
   {
@@ -8543,9 +10046,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: ["file_name"],
       bodyParams: []
     },
-    paramsSchema: z.intersection(ExportTimelines_Body, z.object({
+    paramsSchema: (() => {
+          const baseSchema = ExportTimelines_Body;
+          const additionalFields = z.object({
     file_name: z.any().optional().describe('Query parameter: file_name'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from ExportTimelines API')
   },
   {
@@ -8721,9 +10250,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(SLOs_create_slo_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = SLOs_create_slo_request;
+          const additionalFields = z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from createSloOp API')
   },
   {
@@ -8739,9 +10294,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(SLOs_bulk_delete_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = SLOs_bulk_delete_request;
+          const additionalFields = z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from bulkDeleteOp API')
   },
   {
@@ -8777,9 +10358,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(SLOs_bulk_purge_rollup_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = SLOs_bulk_purge_rollup_request;
+          const additionalFields = z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from deleteRollupDataOp API')
   },
   {
@@ -8795,9 +10402,35 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(SLOs_delete_slo_instances_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = SLOs_delete_slo_instances_request;
+          const additionalFields = z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from deleteSloInstancesOp API')
   },
   {
@@ -8852,10 +10485,36 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       urlParams: [],
       bodyParams: []
     },
-    paramsSchema: z.intersection(SLOs_update_slo_request, z.object({
+    paramsSchema: (() => {
+          const baseSchema = SLOs_update_slo_request;
+          const additionalFields = z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     sloId: z.string().describe('Path parameter: sloId (required)'),
-        })),
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })(),
     outputSchema: z.any().describe('Response from updateSloOp API')
   },
   {

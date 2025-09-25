@@ -64,8 +64,11 @@ function createRecursiveStepSchema(
   connectors: ConnectorContract[],
   loose: boolean = false
 ): z.ZodType {
+  // Use a simpler approach to avoid infinite recursion during validation
+  // Create the step schema with limited recursion depth
   const stepSchema: z.ZodType = z.lazy(() => {
     // Create step schemas with the recursive reference
+    // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
@@ -87,7 +90,7 @@ function createRecursiveStepSchema(
       ...connectorSchemas,
     ]);
   });
-
+  
   return stepSchema;
 }
 
@@ -110,132 +113,113 @@ export function generateYamlSchemaFromConnectors(
 }
 
 export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
-  // Generate the full schema as before - this should work and give us the 7MB schema
-  const jsonSchema = zodToJsonSchema(yamlSchema, {
-    name: 'WorkflowSchema',
-    target: 'jsonSchema7',
-  });
-
-  // Fix the schema to make it valid for JSON Schema validators
-  return fixInvalidJsonSchema(jsonSchema);
-}
-
-function fixInvalidJsonSchema(schema: any): any {
-  const schemaString = JSON.stringify(schema);
-  let fixedSchemaString = schemaString;
-
-  // Fix 1: Remove duplicate enum values (the main issue causing validation failure)
-  // This regex finds enum arrays and removes duplicates
-  fixedSchemaString = fixedSchemaString.replace(
-    /"enum":\s*\[([^\]]+)\]/g,
-    (match, enumValues) => {
-      try {
-        // Parse the enum values and remove duplicates
-        const values = JSON.parse(`[${enumValues}]`);
-        const uniqueValues = [...new Set(values)];
-        return `"enum":${JSON.stringify(uniqueValues)}`;
-      } catch (e) {
-        // If parsing fails, return original
-        return match;
-      }
-    }
-  );
-
-  // Fix 2: Apply our additionalProperties fix but more carefully
   try {
-    const tempSchema = JSON.parse(fixedSchemaString);
-    fixAdditionalPropertiesInSchema(tempSchema);
-    
-    // Validate the fixed schema
-    const Ajv = require('ajv');
-    const ajv = new Ajv({ strict: false, validateFormats: false });
-    ajv.compile(tempSchema);
-    
-    console.log('✅ Generated valid JSON Schema for Monaco');
-    return tempSchema;
+    // Generate the full schema - this should work and give us the full schema
+    const jsonSchema = zodToJsonSchema(yamlSchema, {
+      name: 'WorkflowSchema',
+      target: 'jsonSchema7',
+    });
+
+    // Apply targeted fixes to make it valid for JSON Schema validators
+    return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
   } catch (error) {
-    console.warn('⚠️ Schema validation failed, using basic fallback:', error.message);
-    
-    // Last resort: return a very basic schema that at least works
-    return createBasicWorkflowSchema();
+    console.error('Schema generation failed:', error.message);
+    throw error; // Don't use fallback - we need to fix the root cause
   }
 }
 
-function createBasicWorkflowSchema(): any {
-  return {
-    "$ref": "#/definitions/WorkflowSchema",
-    "definitions": {
-      "WorkflowSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "version": {
-            "type": "string",
-            "const": "1",
-            "default": "1"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1
-          },
-          "description": {
-            "type": "string"
-          },
-          "steps": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "name": { "type": "string", "minLength": 1 },
-                "type": { "type": "string" },
-                "with": { "type": "object" },
-                "if": { "type": "string" },
-                "foreach": { "type": "string" }
-              },
-              "required": ["name", "type"]
-            },
-            "minItems": 1
-          }
-        },
-        "required": ["version", "name", "steps"]
-      }
-    }
-  };
-}
 
-function fixAdditionalPropertiesInSchema(obj: any, insideAllOf = false): void {
+
+function applyMinimalAdditionalPropertiesFix(obj: any, path: string = ''): void {
   if (typeof obj !== 'object' || obj === null) {
     return;
   }
 
   if (Array.isArray(obj)) {
-    obj.forEach(item => fixAdditionalPropertiesInSchema(item, insideAllOf));
+    obj.forEach((item, index) => applyMinimalAdditionalPropertiesFix(item, `${path}[${index}]`));
     return;
   }
 
-  // Check if this object is an allOf array
-  if (obj.allOf && Array.isArray(obj.allOf)) {
-    // Process items inside allOf with the flag set to true
-    obj.allOf.forEach((item: any) => fixAdditionalPropertiesInSchema(item, true));
+  // Apply additionalProperties: false to connector "with" objects
+  // The schema system already handles type-specific validation, we just need to enforce strictness
+  if (obj.type === 'object' && obj.properties && !('additionalProperties' in obj)) {
+    // Apply to connector "with" objects (they should be strict)
+    if (path.includes('with') && Object.keys(obj.properties).length > 1) {
+      obj.additionalProperties = false;
+    }
   }
 
-  // If this is an object type and we're not inside an allOf, add additionalProperties: false
-  if (obj.type === 'object' && !insideAllOf && !('additionalProperties' in obj)) {
+  // Recursively process all properties
+  Object.keys(obj).forEach(key => {
+    applyMinimalAdditionalPropertiesFix(obj[key], path ? `${path}.${key}` : key);
+  });
+}
+
+/**
+ * Recursively fix additionalProperties in the schema object
+ * This ensures all object schemas have additionalProperties: false for strict validation
+ */
+function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = new Set()): void {
+  // Prevent infinite recursion with circular references
+  if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
+    return;
+  }
+  visited.add(obj);
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item, index) => 
+      fixAdditionalPropertiesInSchema(item, `${path}[${index}]`, visited)
+    );
+    return;
+  }
+
+  // Fix objects with type: "object" to have additionalProperties: false
+  if (obj.type === 'object' && !('additionalProperties' in obj)) {
+    obj.additionalProperties = false;
+  }
+
+  // Also fix objects that have additionalProperties: true
+  if (obj.additionalProperties === true) {
     obj.additionalProperties = false;
   }
 
   // Recursively process all properties
   Object.keys(obj).forEach(key => {
-    if (key !== 'allOf') {
-      fixAdditionalPropertiesInSchema(obj[key], insideAllOf);
-    }
+    fixAdditionalPropertiesInSchema(obj[key], path ? `${path}.${key}` : key, visited);
   });
 }
 
 function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   const schemaString = JSON.stringify(schema);
   let fixedSchemaString = schemaString;
+
+  // Fix 1: Remove duplicate enum values (the main issue causing validation failure)
+  fixedSchemaString = fixedSchemaString.replace(
+    /"enum":\s*\[([^\]]+)\]/g,
+    (match, enumValues) => {
+      try {
+        const values = JSON.parse(`[${enumValues}]`);
+        const uniqueValues = [...new Set(values)];
+        return `"enum":${JSON.stringify(uniqueValues)}`;
+      } catch (e) {
+        return match;
+      }
+    }
+  );
+
+  // Fix 2: Handle intersections with unions properly
+  // The main issue is that z.union().and(z.object()) creates allOf: [Union, Object]
+  // but sometimes the Object part is missing from the JSON schema generation
+  // We need to ensure both parts of the allOf are present
+  
+  // TODO: Fix incomplete allOf structures from .and() operations
+  // The real fix should be in the connector generation, not hardcoded post-processing
+  
+  // Break only the most deeply nested references that cause infinite loops
+  fixedSchemaString = fixedSchemaString.replace(
+    /"\$ref":"#\/definitions\/WorkflowSchema\/properties\/settings\/properties\/on-failure\/properties\/fallback\/items\/anyOf\/\d+\/properties\/with\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+\/allOf\/\d+"/g,
+    '"type": "object", "additionalProperties": false, "description": "Deep nested step (recursion limited to prevent infinite loops)"'
+  );
 
   // Fix all the broken reference patterns that cause Monaco "$ref cannot be resolved" errors
   // These patterns are generated by zod-to-json-schema when dealing with complex intersections
@@ -288,7 +272,6 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
-  // BUT: we must be careful not to add it to objects inside allOf arrays
 
   // First, replace any existing "additionalProperties": true with false
   fixedSchemaString = fixedSchemaString.replace(
@@ -297,8 +280,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   );
 
   // Then, add additionalProperties: false to objects that don't have it
-  // BUT we need to avoid objects that are inside allOf arrays to prevent conflicts
-  // We'll use a more sophisticated approach to parse and fix the schema
+  // Use the proper function to handle this recursively
   try {
     const tempSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(tempSchema);

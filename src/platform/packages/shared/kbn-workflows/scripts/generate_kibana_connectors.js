@@ -917,10 +917,43 @@ function convertToConnectorDefinition(endpoint, index, tagDocs) {
 ${allFields.join(',\n')}
         })`;
       } else {
-        // Use intersection for all cases to avoid .merge() issues with ZodUnion types
-        paramsSchemaSection = `paramsSchema: z.intersection(${schemaName}, z.object({
+        // For union schemas, manually create a union where each option includes the additional fields
+        // This generates better JSON schemas than .and() which creates problematic allOf structures
+        if (nonBodyFields.length > 0) {
+          // Check if this is a union schema by examining the schema structure
+          // We'll use a runtime check to determine if it's a union and handle accordingly
+          paramsSchemaSection = `paramsSchema: (() => {
+          const baseSchema = ${schemaName};
+          const additionalFields = z.object({
 ${nonBodyFields.join('\n')}
-        }))`;
+          });
+          
+          // If it's a union, extend each option with the additional fields
+          if (baseSchema._def && baseSchema._def.options) {
+            // Check if this is a discriminated union by looking for a common 'type' field
+            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+              option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
+            );
+            
+            const extendedOptions = baseSchema._def.options.map((option: any) => 
+              option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
+            );
+            
+            if (hasTypeDiscriminator) {
+              // Use discriminated union for better JSON schema generation
+              return z.discriminatedUnion('type', extendedOptions);
+            } else {
+              // Use regular union
+              return z.union(extendedOptions);
+            }
+          }
+          
+          // If it's not a union, use intersection
+          return z.intersection(baseSchema, additionalFields);
+        })()`;
+        } else {
+          paramsSchemaSection = `paramsSchema: ${schemaName}`;
+        }
       }
     } else {
       // Use the schema directly
