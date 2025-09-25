@@ -34,8 +34,8 @@ export interface ConnectorContract {
 export interface InternalConnectorContract extends ConnectorContract {
   /** HTTP method(s) for this API endpoint */
   methods?: string[];
-   /** Summary for this API endpoint */
-   summary?: string;
+  /** Summary for this API endpoint */
+  summary?: string;
   /** URL pattern(s) for this API endpoint */
   patterns?: string[];
   /** Whether this is an internal connector with hardcoded endpoint details */
