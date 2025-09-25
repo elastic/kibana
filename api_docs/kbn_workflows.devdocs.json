@@ -590,6 +590,39 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.isBuiltInStepType",
+        "type": "Function",
+        "tags": [],
+        "label": "isBuiltInStepType",
+        "description": [],
+        "signature": [
+          "(stepType: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.isBuiltInStepType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "stepType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.isDangerousStatus",
         "type": "Function",
         "tags": [],
@@ -625,6 +658,39 @@
                 "section": "def-common.ExecutionStatus",
                 "text": "ExecutionStatus"
               }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.isTriggerType",
+        "type": "Function",
+        "tags": [],
+        "label": "isTriggerType",
+        "description": [],
+        "signature": [
+          "(triggerType: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.isTriggerType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "triggerType",
+            "description": [],
+            "signature": [
+              "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
             "deprecated": false,
@@ -740,6 +806,20 @@
             "type": "string",
             "tags": [],
             "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.ConnectorContract.summary",
+            "type": "string",
+            "tags": [],
+            "label": "summary",
             "description": [],
             "signature": [
               "string | undefined"
@@ -881,13 +961,36 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.EsWorkflowExecution.stack",
+            "id": "def-common.EsWorkflowExecution.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [
+              "If specified, the only this step and its children will be executed"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.scopeStack",
             "type": "Array",
             "tags": [],
-            "label": "stack",
+            "label": "scopeStack",
             "description": [],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StackFrame",
+                "text": "StackFrame"
+              },
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1106,15 +1209,22 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.EsWorkflowStepExecution.path",
+            "id": "def-common.EsWorkflowStepExecution.scopeStack",
             "type": "Array",
             "tags": [],
-            "label": "path",
+            "label": "scopeStack",
             "description": [
-              "Current step's scope path"
+              "Current step's stack frames."
             ],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StackFrame",
+                "text": "StackFrame"
+              },
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1207,18 +1317,35 @@
             "type": "number",
             "tags": [],
             "label": "topologicalIndex",
-            "description": [],
+            "description": [
+              "Topological index of step in workflow graph."
+            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.EsWorkflowStepExecution.executionIndex",
+            "id": "def-common.EsWorkflowStepExecution.globalExecutionIndex",
             "type": "number",
             "tags": [],
-            "label": "executionIndex",
-            "description": [],
+            "label": "globalExecutionIndex",
+            "description": [
+              "Overall execution index in the entire workflow."
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowStepExecution.stepExecutionIndex",
+            "type": "number",
+            "tags": [],
+            "label": "stepExecutionIndex",
+            "description": [
+              "\nExecution index within specific stepId.\nThere might be several instances of the same stepId if it's inside loops, retries, etc."
+            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1271,7 +1398,9 @@
             "type": "Object",
             "tags": [],
             "label": "state",
-            "description": [],
+            "description": [
+              "Specific step execution instance state. Used by loops, retries, etc to track execution context."
+            ],
             "signature": [
               "Record<string, any> | undefined"
             ],
@@ -1321,6 +1450,22 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.InternalConnectorContract.summary",
+            "type": "string",
+            "tags": [],
+            "label": "summary",
+            "description": [
+              "Summary for this API endpoint"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
             "deprecated": false,
@@ -1517,6 +1662,50 @@
             "description": [],
             "signature": [
               "string | number | boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StackFrame",
+        "type": "Interface",
+        "tags": [],
+        "label": "StackFrame",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StackFrame.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [
+              "Step that created this frame"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StackFrame.nestedScopes",
+            "type": "Array",
+            "tags": [],
+            "label": "nestedScopes",
+            "description": [
+              "Scope entries within this frame"
+            ],
+            "signature": [
+              "ScopeEntry",
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -1880,6 +2069,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowExecutionDto.stepExecutions",
             "type": "Array",
             "tags": [],
@@ -1971,6 +2174,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionEngineModel.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2535,21 +2752,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.AtomicGraphNode",
-        "type": "Type",
-        "tags": [],
-        "label": "AtomicGraphNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"atomic\"; configuration?: any; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
         "id": "def-common.BaseStep",
         "type": "Type",
         "tags": [],
@@ -2557,6 +2759,36 @@
         "description": [],
         "signature": [
           "{ type: string; name: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BuiltInStepType",
+        "type": "Type",
+        "tags": [],
+        "label": "BuiltInStepType",
+        "description": [],
+        "signature": [
+          "\"merge\" | \"http\" | \"parallel\" | \"foreach\" | \"if\" | \"wait\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BuiltInStepTypes",
+        "type": "Array",
+        "tags": [],
+        "label": "BuiltInStepTypes",
+        "description": [],
+        "signature": [
+          "(\"merge\" | \"http\" | \"parallel\" | \"foreach\" | \"if\" | \"wait\")[]"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -2604,126 +2836,6 @@
           "{ type: string; name: string; with: { request: { path: string; method: \"GET\" | \"DELETE\" | \"HEAD\" | \"POST\" | \"PUT\" | \"PATCH\"; body?: any; }; } | ({ id?: string | undefined; sort?: any[] | undefined; aggs?: Record<string, any> | undefined; index?: string | undefined; size?: number | undefined; query?: Record<string, any> | undefined; body?: Record<string, any> | undefined; aggregations?: Record<string, any> | undefined; from?: number | undefined; _source?: string | boolean | string[] | undefined; } & Record<string, any>); }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterConditionBranchNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterConditionBranchNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterContinueNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterContinueNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-continue\"; exitNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterFallbackPathNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterFallbackPathNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-fallback-path\"; enterZoneNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterForeachNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterForeachNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-foreach\"; configuration: { type: \"foreach\"; name: string; foreach: string; if?: string | undefined; }; exitNodeId: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/loop_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterIfNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterIfNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-if\"; configuration: { type: \"if\"; name: string; condition: string; }; exitNodeId: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterNormalPathNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterNormalPathNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-normal-path\"; enterZoneNodeId: string; enterFailurePathNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterRetryNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterRetryNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-retry\"; configuration: { 'max-attempts': number; delay?: string | undefined; }; exitNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterTryBlockNode",
-        "type": "Type",
-        "tags": [],
-        "label": "EnterTryBlockNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"enter-try-block\"; exitNodeId: string; enterNormalPathNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2819,126 +2931,6 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitConditionBranchNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitConditionBranchNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitContinueNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitContinueNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-continue\"; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitFallbackPathNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitFallbackPathNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-fallback-path\"; enterNodeId: string; exitOnFailureZoneNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitForeachNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitForeachNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-foreach\"; startNodeId: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/loop_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitIfNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitIfNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-if\"; startNodeId: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitNormalPathNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitNormalPathNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-normal-path\"; enterNodeId: string; exitOnFailureZoneNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitRetryNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitRetryNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-retry\"; startNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitTryBlockNode",
-        "type": "Type",
-        "tags": [],
-        "label": "ExitTryBlockNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"exit-try-block\"; enterNodeId: string; stepId?: string | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/on_failure_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
         "id": "def-common.ForEachStep",
         "type": "Type",
         "tags": [],
@@ -2948,36 +2940,6 @@
           "{ type: \"foreach\"; name: string; steps: { type: string; name: string; }[]; foreach: string; if?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.GraphNode",
-        "type": "Type",
-        "tags": [],
-        "label": "GraphNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.HttpGraphNode",
-        "type": "Type",
-        "tags": [],
-        "label": "HttpGraphNode",
-        "description": [],
-        "signature": [
-          "{ id: string; type: \"http\"; configuration: { type: \"http\"; name: string; with: { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3059,6 +3021,21 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.RunStepCommand",
+        "type": "Type",
+        "tags": [],
+        "label": "RunStepCommand",
+        "description": [],
+        "signature": [
+          "{ stepId: string; workflowYaml: string; contextOverride?: Record<string, any> | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.RunWorkflowCommand",
         "type": "Type",
         "tags": [],
@@ -3095,7 +3072,22 @@
         "label": "StepContext",
         "description": [],
         "signature": [
-          "{ steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }"
+          "{ steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StepData",
+        "type": "Type",
+        "tags": [],
+        "label": "StepData",
+        "description": [],
+        "signature": [
+          "{ error?: any; output?: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -3164,30 +3156,30 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.UnionExecutionGraphNode",
+        "id": "def-common.TriggerType",
         "type": "Type",
         "tags": [],
-        "label": "UnionExecutionGraphNode",
+        "label": "TriggerType",
         "description": [],
         "signature": [
-          "{ id: string; type: \"atomic\"; configuration?: any; } | { id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; } | { id: string; type: \"enter-foreach\"; configuration: { type: \"foreach\"; name: string; foreach: string; if?: string | undefined; }; exitNodeId: string; } | { id: string; type: \"enter-if\"; configuration: { type: \"if\"; name: string; condition: string; }; exitNodeId: string; } | { id: string; type: \"enter-retry\"; configuration: { 'max-attempts': number; delay?: string | undefined; }; exitNodeId: string; stepId?: string | undefined; } | { id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; } | { id: string; type: \"exit-foreach\"; startNodeId: string; } | { id: string; type: \"exit-if\"; startNodeId: string; } | { id: string; type: \"exit-retry\"; startNodeId: string; stepId?: string | undefined; } | { id: string; type: \"enter-continue\"; exitNodeId: string; stepId?: string | undefined; } | { id: string; type: \"exit-continue\"; stepId?: string | undefined; } | { id: string; type: \"wait\"; configuration: { type: \"wait\"; name: string; with: { duration: string; }; }; } | { id: string; type: \"http\"; configuration: { type: \"http\"; name: string; with: { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }; } | { id: string; type: \"enter-try-block\"; exitNodeId: string; enterNormalPathNodeId: string; stepId?: string | undefined; } | { id: string; type: \"exit-try-block\"; enterNodeId: string; stepId?: string | undefined; } | { id: string; type: \"enter-normal-path\"; enterZoneNodeId: string; enterFailurePathNodeId: string; stepId?: string | undefined; } | { id: string; type: \"exit-normal-path\"; enterNodeId: string; exitOnFailureZoneNodeId: string; stepId?: string | undefined; } | { id: string; type: \"enter-fallback-path\"; enterZoneNodeId: string; stepId?: string | undefined; } | { id: string; type: \"exit-fallback-path\"; enterNodeId: string; exitOnFailureZoneNodeId: string; stepId?: string | undefined; }"
+          "\"alert\" | \"manual\" | \"scheduled\""
         ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/union.ts",
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.WaitGraphNode",
-        "type": "Type",
+        "id": "def-common.TriggerTypes",
+        "type": "Array",
         "tags": [],
-        "label": "WaitGraphNode",
+        "label": "TriggerTypes",
         "description": [],
         "signature": [
-          "{ id: string; type: \"wait\"; configuration: { type: \"wait\"; name: string; with: { duration: string; }; }; }"
+          "(\"alert\" | \"manual\" | \"scheduled\")[]"
         ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3215,7 +3207,7 @@
         "label": "WorkflowContext",
         "description": [],
         "signature": [
-          "{ execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; }"
+          "{ execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -3268,7 +3260,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3383,7 +3375,15 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; path: string[]; input?: Record<string, any> | null | undefined; output?: Record<string, any> | null | undefined; startedAt: string; stepId: string; stepType?: string | undefined; workflowRunId: string; workflowId: string; completedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; executionIndex: number; }"
+          "; input?: Record<string, any> | null | undefined; output?: Record<string, any> | null | undefined; startedAt: string; stepId: string; stepType?: string | undefined; scopeStack: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.StackFrame",
+            "text": "StackFrame"
+          },
+          "[]; workflowRunId: string; workflowId: string; completedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3484,36 +3484,6 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.EnterConditionBranchNodeSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "EnterConditionBranchNodeSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodUnion<[Zod.ZodLiteral<\"enter-then-branch\">, Zod.ZodLiteral<\"enter-else-branch\">]>; condition: Zod.ZodUnion<[Zod.ZodString, Zod.ZodUndefined]>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }, { id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ExitConditionBranchNodeSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "ExitConditionBranchNodeSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodUnion<[Zod.ZodLiteral<\"exit-then-branch\">, Zod.ZodLiteral<\"exit-else-branch\">]>; startNodeId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }, { id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
         "id": "def-common.ForEachStepSchema",
         "type": "Object",
         "tags": [],
@@ -3523,21 +3493,6 @@
           "Zod.ZodObject<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<{ name: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"foreach\">; foreach: Zod.ZodString; steps: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; name: string; }, { type: string; name: string; }>, \"many\">; }>, { if: Zod.ZodOptional<Zod.ZodString>; }>, \"strip\", Zod.ZodTypeAny, { type: \"foreach\"; name: string; steps: { type: string; name: string; }[]; foreach: string; if?: string | undefined; }, { type: \"foreach\"; name: string; steps: { type: string; name: string; }[]; foreach: string; if?: string | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.HttpGraphNodeSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "HttpGraphNodeSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"http\">; configuration: Zod.ZodObject<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<{ name: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"http\">; with: Zod.ZodObject<{ url: Zod.ZodString; method: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEnum<[\"GET\", \"POST\", \"PUT\", \"DELETE\", \"PATCH\"]>>>; headers: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>>>; body: Zod.ZodOptional<Zod.ZodAny>; timeout: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; }, \"strip\", Zod.ZodTypeAny, { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }, { url: string; timeout?: string | undefined; body?: any; method?: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\" | undefined; headers?: Record<string, string | number | boolean> | undefined; }>; }>, { if: Zod.ZodOptional<Zod.ZodString>; }>, { foreach: Zod.ZodOptional<Zod.ZodString>; }>, { timeout: Zod.ZodOptional<Zod.ZodNumber>; }>, { 'on-failure': Zod.ZodOptional<Zod.ZodObject<{ retry: Zod.ZodOptional<Zod.ZodObject<{ 'max-attempts': Zod.ZodNumber; delay: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { 'max-attempts': number; delay?: string | undefined; }, { 'max-attempts': number; delay?: string | undefined; }>>; fallback: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { type: string; name: string; }, { type: string; name: string; }>, \"many\">>; continue: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; }, { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; }>>; }>, \"strip\", Zod.ZodTypeAny, { type: \"http\"; name: string; with: { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }, { type: \"http\"; name: string; with: { url: string; timeout?: string | undefined; body?: any; method?: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\" | undefined; headers?: Record<string, string | number | boolean> | undefined; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"http\"; configuration: { type: \"http\"; name: string; with: { timeout: string; url: string; method: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\"; headers: Record<string, string | number | boolean>; body?: any; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }; }, { id: string; type: \"http\"; configuration: { type: \"http\"; name: string; with: { url: string; timeout?: string | undefined; body?: any; method?: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | \"PATCH\" | undefined; headers?: Record<string, string | number | boolean> | undefined; }; timeout?: number | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; foreach?: string | undefined; if?: string | undefined; }; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3685,7 +3640,22 @@
         "label": "StepContextSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<Zod.objectUtil.extendShape<{ event: Zod.ZodOptional<Zod.ZodAny>; inputs: Zod.ZodOptional<Zod.ZodAny>; execution: Zod.ZodObject<{ id: Zod.ZodString; isTestRun: Zod.ZodBoolean; startedAt: Zod.ZodDate; }, \"strip\", Zod.ZodTypeAny, { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodString; enabled: Zod.ZodBoolean; spaceId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; now: Zod.ZodOptional<Zod.ZodDate>; }, { steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ items: Zod.ZodArray<Zod.ZodAny, \"many\">; index: Zod.ZodNumber; item: Zod.ZodAny; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { index: number; total: number; items: any[]; item?: any; }, { index: number; total: number; items: any[]; item?: any; }>>; }>, \"strip\", Zod.ZodTypeAny, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }>"
+          "Zod.ZodObject<Zod.objectUtil.extendShape<{ event: Zod.ZodOptional<Zod.ZodAny>; inputs: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; execution: Zod.ZodObject<{ id: Zod.ZodString; isTestRun: Zod.ZodBoolean; startedAt: Zod.ZodDate; }, \"strip\", Zod.ZodTypeAny, { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodString; enabled: Zod.ZodBoolean; spaceId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; now: Zod.ZodOptional<Zod.ZodDate>; }, { steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ items: Zod.ZodArray<Zod.ZodAny, \"many\">; index: Zod.ZodNumber; item: Zod.ZodAny; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { index: number; total: number; items: any[]; item?: any; }, { index: number; total: number; items: any[]; item?: any; }>>; }>, \"strip\", Zod.ZodTypeAny, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; foreach?: { index: number; total: number; items: any[]; item?: any; } | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StepDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "StepDataSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -3754,21 +3724,6 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
-        "id": "def-common.WaitGraphNodeSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "WaitGraphNodeSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"wait\">; configuration: Zod.ZodObject<Zod.objectUtil.extendShape<{ name: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"wait\">; with: Zod.ZodObject<{ duration: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { duration: string; }, { duration: string; }>; }>, \"strip\", Zod.ZodTypeAny, { type: \"wait\"; name: string; with: { duration: string; }; }, { type: \"wait\"; name: string; with: { duration: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"wait\"; configuration: { type: \"wait\"; name: string; with: { duration: string; }; }; }, { id: string; type: \"wait\"; configuration: { type: \"wait\"; name: string; with: { duration: string; }; }; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
         "id": "def-common.WaitStepSchema",
         "type": "Object",
         "tags": [],
@@ -3805,7 +3760,7 @@
         "label": "WorkflowContextSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ event: Zod.ZodOptional<Zod.ZodAny>; inputs: Zod.ZodOptional<Zod.ZodAny>; execution: Zod.ZodObject<{ id: Zod.ZodString; isTestRun: Zod.ZodBoolean; startedAt: Zod.ZodDate; }, \"strip\", Zod.ZodTypeAny, { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodString; enabled: Zod.ZodBoolean; spaceId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; }, { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: any; consts?: Record<string, any> | undefined; }>"
+          "Zod.ZodObject<{ event: Zod.ZodOptional<Zod.ZodAny>; inputs: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; execution: Zod.ZodObject<{ id: Zod.ZodString; isTestRun: Zod.ZodBoolean; startedAt: Zod.ZodDate; }, \"strip\", Zod.ZodTypeAny, { id: string; startedAt: Date; isTestRun: boolean; }, { id: string; startedAt: Date; isTestRun: boolean; }>; workflow: Zod.ZodObject<{ id: Zod.ZodString; name: Zod.ZodString; enabled: Zod.ZodBoolean; spaceId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; spaceId: string; name: string; enabled: boolean; }, { id: string; spaceId: string; name: string; enabled: boolean; }>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; }, { execution: { id: string; startedAt: Date; isTestRun: boolean; }; workflow: { id: string; spaceId: string; name: string; enabled: boolean; }; event?: any; now?: Date | undefined; inputs?: Record<string, any> | undefined; consts?: Record<string, any> | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,

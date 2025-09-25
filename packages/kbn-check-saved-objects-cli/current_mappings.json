@@ -624,6 +624,9 @@
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "text": {
+            "type": "text"
           }
         },
         "type": "unsigned_long"
@@ -718,6 +721,9 @@
             "type": "keyword"
           }
         }
+      },
+      "eventId": {
+        "type": "keyword"
       },
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"

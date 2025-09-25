@@ -82,7 +82,10 @@ export const useAlertExceptionActions = ({
   if (!canWriteEndpointExceptions) {
     return {
       exceptionActionItems: exceptionActionItems.map((item) => {
-        return { ...item, disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION };
+        return {
+          ...item,
+          disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION,
+        } as AlertTableContextMenuItem;
       }),
     };
   }

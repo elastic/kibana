@@ -9,6 +9,7 @@
   },
   "kbn_references": [
     "@kbn/core-custom-branding-server-internal",
+    "@kbn/lazy-object",
   ],
   "include": [
     "**/*.ts",

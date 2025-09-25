@@ -1650,7 +1650,10 @@ export function getReferenceRoot(layer: FormBasedLayer, columnId: string): strin
   return currentId;
 }
 
-export function getReferencedColumnIds(layer: FormBasedLayer, columnId: string): string[] {
+export function getReferencedColumnIds(
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  columnId: string
+): string[] {
   const referencedIds: string[] = [];
   function collect(id: string) {
     const column = layer.columns[id];

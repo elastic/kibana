@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
-import type { Condition, FilterCondition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import {
-  getFilterOperator,
-  getFilterValue,
-  isFilterConditionObject,
-  isWhereBlock,
-  operatorToHumanReadableNameMap,
-} from '@kbn/streamlang';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { isWhereBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
@@ -22,6 +16,7 @@ import type { StreamEnrichmentContextType } from '../../../state_management/stre
 import { StepContextMenu } from '../context_menu';
 import type { RootLevelMap } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { ConditionDisplay } from '../../../../shared';
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -35,11 +30,8 @@ export const WhereBlockSummary = ({
   level: number;
 }) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
-  const { euiTheme } = useEuiTheme();
 
   if (!isWhereBlock(step)) return null;
-
-  const isFilterCondition = isFilterConditionObject(step.where);
 
   return (
     <EuiFlexGroup
@@ -60,29 +52,7 @@ export const WhereBlockSummary = ({
           overflow: hidden;
         `}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              // Facilitates text truncation for the condition summary
-              flex-shrink: 0;
-            `}
-          >
-            <EuiText
-              size="s"
-              style={{
-                fontWeight: euiTheme.font.weight.bold,
-              }}
-            >
-              {'WHERE'}
-            </EuiText>
-          </EuiFlexItem>
-          {isFilterCondition ? (
-            <FilterSummary condition={step.where as FilterCondition} />
-          ) : (
-            <ComplexSummary condition={step.where} />
-          )}
-        </EuiFlexGroup>
+        <ConditionDisplay condition={step.where} showKeyword={true} keyword="WHERE" />
       </EuiFlexItem>
 
       <EuiFlexItem
@@ -98,39 +68,5 @@ export const WhereBlockSummary = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
-
-const FilterSummary = ({ condition }: { condition: FilterCondition }) => {
-  const operator = getFilterOperator(condition);
-  const value = getFilterValue(condition);
-  const field = condition.field;
-
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{field}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap]}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{value?.toString()}</EuiBadge>
-      </EuiFlexItem>
-    </>
-  );
-};
-
-const ComplexSummary = ({ condition }: { condition: Condition }) => {
-  const summary = JSON.stringify(condition);
-  return (
-    <EuiFlexItem
-      css={css`
-        // Facilitates text truncation
-        overflow: hidden;
-      `}
-    >
-      <span className="eui-textTruncate">{summary}</span>
-    </EuiFlexItem>
   );
 };

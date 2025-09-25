@@ -7,11 +7,11 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -78,7 +78,8 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
 
   if (isInstalled && indexName) {
     const button = (
-      <EuiButtonEmpty
+      <EuiButton
+        color="text"
         data-test-subj="viewDataBtn"
         size="s"
         iconType="arrowDown"
@@ -86,7 +87,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
         onClick={onViewButtonClick}
       >
         <FormattedMessage id="xpack.searchHomepage.sampleData.view" defaultMessage="View Data" />
-      </EuiButtonEmpty>
+      </EuiButton>
     );
 
     return (
@@ -156,8 +157,8 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
   }
 
   return (
-    <EuiButtonEmpty
-      color="primary"
+    <EuiButton
+      color="text"
       iconSide="left"
       iconType="download"
       size="s"
@@ -167,8 +168,8 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
     >
       <FormattedMessage
         id="xpack.searchHomepage.sampleData.btn"
-        defaultMessage="Install a sample dataset"
+        defaultMessage="Sample knowledge base"
       />
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };

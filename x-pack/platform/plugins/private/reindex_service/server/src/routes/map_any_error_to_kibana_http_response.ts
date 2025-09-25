@@ -10,6 +10,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   AccessForbidden,
   CannotCreateIndex,
+  IndexAlreadyExists,
   IndexNotFound,
   MultipleReindexJobsFound,
   ReindexAlreadyInProgress,
@@ -26,13 +27,17 @@ export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.forbidden({ body: e.message });
       case IndexNotFound:
         return kibanaResponseFactory.notFound({ body: e.message });
+      case IndexAlreadyExists:
+        return kibanaResponseFactory.conflict({ body: e.message });
       case CannotCreateIndex:
+        return kibanaResponseFactory.customError({ body: e.message, statusCode: 500 });
       case ReindexTaskCannotBeDeleted:
         throw e;
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
       case ReindexAlreadyInProgress:
+        return kibanaResponseFactory.conflict({ body: e.message });
       case MultipleReindexJobsFound:
       case ReindexCannotBeCancelled:
         return kibanaResponseFactory.badRequest({ body: e.message });

@@ -7,26 +7,26 @@
 
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiFlexGroup,
   EuiPageHeader,
   useEuiTheme,
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
-import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
-import { ExportContentPackFlyout } from '../content/export_flyout';
-import { ImportContentPackFlyout } from '../content/import_flyout';
+import {
+  ClassicStreamBadge,
+  DiscoverBadgeButton,
+  LifecycleBadge,
+  WiredStreamBadge,
+} from '../../stream_badges';
 import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
@@ -47,20 +47,10 @@ export function Wrapper({
   tab: string;
 }) {
   const router = useStreamsAppRouter();
-  const { definition, refresh: refreshDefinition } = useStreamDetail();
-  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
-  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
-  const {
-    core: { featureFlags },
-  } = useKibana();
+  const { definition } = useStreamDetail();
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
-
-  const renderContentPackItems = featureFlags.getBooleanValue(
-    FeatureFlagStreamsContentPackUIEnabled,
-    false
-  );
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -111,38 +101,12 @@ export function Wrapper({
                     <DiscoverBadgeButton definition={definition} />
                   )}
                   {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <LifecycleBadge lifecycle={definition.effective_lifecycle} />
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
-
-              {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiButton
-                      size="s"
-                      iconType="importAction"
-                      onClick={() => setIsImportFlyoutOpen(true)}
-                      data-test-subj="streamsAppImportButton"
-                    >
-                      {i18n.translate('xpack.streams.importButton', {
-                        defaultMessage: 'Import',
-                      })}
-                    </EuiButton>
-                    <EuiButton
-                      size="s"
-                      iconType="exportAction"
-                      onClick={() => setIsExportFlyoutOpen(true)}
-                      data-test-subj="streamsAppExportButton"
-                    >
-                      {i18n.translate('xpack.streams.exportButton', {
-                        defaultMessage: 'Export',
-                      })}
-                    </EuiButton>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
 
               {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
                 <GroupStreamControls />
@@ -156,32 +120,9 @@ export function Wrapper({
           isSelected: tab === tabKey,
         }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
-
-      {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
-        <>
-          {isExportFlyoutOpen && (
-            <ExportContentPackFlyout
-              onClose={() => setIsExportFlyoutOpen(false)}
-              definition={definition}
-              onExport={() => {
-                setIsExportFlyoutOpen(false);
-              }}
-            />
-          )}
-
-          {isImportFlyoutOpen && (
-            <ImportContentPackFlyout
-              onClose={() => setIsImportFlyoutOpen(false)}
-              definition={definition}
-              onImport={() => {
-                setIsImportFlyoutOpen(false);
-                refreshDefinition();
-              }}
-            />
-          )}
-        </>
-      )}
+      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {tabs[tab]?.content}
+      </StreamsAppPageTemplate.Body>
     </>
   );
 }

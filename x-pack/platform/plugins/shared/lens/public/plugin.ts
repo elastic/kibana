@@ -74,7 +74,6 @@ import type { EditorFrameService as EditorFrameServiceType } from './editor_fram
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
   FormBasedDatasourceSetupPlugins,
-  FormulaPublicApi,
 } from './datasources/form_based';
 import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/form_based/esql_layer';
 
@@ -275,7 +274,6 @@ export interface LensPublicStart {
    * API which returns state helpers keeping this async as to not impact page load bundle
    */
   stateHelperApi: () => Promise<{
-    formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
     suggestions: LensSuggestionsApi;
   }>;
@@ -776,13 +774,10 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const [
-          { createFormulaPublicApi, createChartInfoApi, suggestionsApi },
-          { visualizationMap, datasourceMap },
-        ] = await Promise.all([import('./async_services'), this.initEditorFrameService()]);
+        const [{ createChartInfoApi, suggestionsApi }, { visualizationMap, datasourceMap }] =
+          await Promise.all([import('./async_services'), this.initEditorFrameService()]);
 
         return {
-          formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(
             startDependencies.dataViews,
             visualizationMap,

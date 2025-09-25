@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -61,6 +61,7 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
+  EventAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -94,6 +95,7 @@ export interface CasesPublicStartDependencies {
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  toastNotifications: IToasts;
 }
 
 /**
@@ -177,6 +179,7 @@ export interface CasesPublicStart {
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
+  | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload

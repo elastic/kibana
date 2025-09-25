@@ -26,6 +26,7 @@ import { getFunctionDefinition } from './functions';
 import { isArrayType } from './operators';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
+import { TIME_SYSTEM_PARAMS } from './literals';
 import { Walker } from '../../walker';
 import { isMarkerNode } from './ast';
 
@@ -50,6 +51,9 @@ export function getExpressionType(
   }
 
   if (isLiteral(root)) {
+    if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
+      return 'keyword';
+    }
     return root.literalType;
   }
 
@@ -61,8 +65,6 @@ export function getExpressionType(
       case 'bool':
         return 'boolean';
       case 'string':
-        return 'keyword';
-      case 'text':
         return 'keyword';
       case 'datetime':
         return 'date';
@@ -166,8 +168,8 @@ export function getExpressionType(
 
 // #region signature matching
 
-// THESE types are types that now do not need implicit casting to string
-// ToDo: Check where it is being used and fix the usage to remove the need for this
+// ES implicitly casts string literal arguments to these types when passed to functions that expect these types
+// e.g. EXPECTS_DATE('2020-01-01') is valid because the string literal is implicitly cast to a date
 export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
   'date',
   'date_nanos',
@@ -210,7 +212,7 @@ export function getMatchingSignatures(
  * @param expectedType
  * @param givenIsLiteral
  */
-function argMatchesParamType(
+export function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
   expectedType: FunctionParameterType,
   givenIsLiteral: boolean,
@@ -223,6 +225,8 @@ function argMatchesParamType(
     // all ES|QL functions accept null, but this is not reflected
     // in our function definitions so we let it through here
     givenType === 'null' ||
+    // Check array types
+    givenType === unwrapArrayOneLevel(expectedType) ||
     // all functions accept keywords for text parameters
     bothStringTypes(givenType, expectedType)
   ) {

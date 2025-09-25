@@ -210,7 +210,7 @@ const buildIdentifierTypeAggregation = ({
   };
 };
 
-const processScores = async ({
+export const processScores = async ({
   assetCriticalityService,
   buckets,
   identifierField,

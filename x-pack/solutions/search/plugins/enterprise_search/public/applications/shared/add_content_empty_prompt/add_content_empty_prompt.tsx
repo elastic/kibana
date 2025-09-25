@@ -28,8 +28,6 @@ import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
 
 import { docLinks } from '../doc_links';
 
-import './add_content_empty_prompt.scss';
-
 import { KibanaLogic } from '../kibana';
 import { EuiLinkTo } from '../react_router_helpers';
 

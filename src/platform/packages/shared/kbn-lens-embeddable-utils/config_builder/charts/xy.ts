@@ -9,7 +9,6 @@
 
 import type {
   FormBasedPersistedState,
-  FormulaPublicApi,
   XYState,
   XYReferenceLineLayerConfig,
   XYDataLayerConfig,
@@ -147,18 +146,39 @@ function buildVisualizationState(config: LensXYConfig): XYState {
   };
 }
 
+function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
+  return (
+    yAxis.format &&
+    (yAxis.suffix || yAxis.compactValues || yAxis.decimals || yAxis.fromUnit || yAxis.toUnit)
+  );
+}
+
 function getValueColumns(layer: LensSeriesLayer, i: number) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('`breakdown` must be a field name when not using index source');
   }
+
   return [
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
     getXValueColumn(layer.xAxis, i),
-    ...layer.yAxis.map((yAxis, index) =>
-      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number')
-    ),
+    ...layer.yAxis.map((yAxis, index) => {
+      const params = hasFormatParams(yAxis)
+        ? {
+            id: yAxis.format as string,
+            params: {
+              compact: yAxis.compactValues,
+              decimals: yAxis.decimals ?? 0,
+              suffix: yAxis.suffix,
+              fromUnit: yAxis.fromUnit,
+              toUnit: yAxis.toUnit,
+            },
+          }
+        : undefined;
+
+      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
+    }),
   ];
 }
 
@@ -183,15 +203,13 @@ function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
 function buildAllFormulasInLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): PersistedIndexPatternLayer {
   return layer.yAxis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
       `${ACCESSOR}${i}_${valueIndex}`,
       mapToFormula(curr),
       dataView,
-      formulaAPI,
       valueIndex > 0 ? acc : undefined
     );
     return { ...acc, ...formulaColumn };
@@ -201,11 +219,10 @@ function buildAllFormulasInLayer(
 function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
-    const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
 
     if (layer.xAxis) {
       const columnName = `x_${ACCESSOR}${i}`;
@@ -229,7 +246,7 @@ function buildFormulaLayer(
   } else if (layer.type === 'annotation') {
     // nothing ?
   } else if (layer.type === 'reference') {
-    return buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    return buildAllFormulasInLayer(layer, i, dataView);
   }
 
   return {
@@ -240,11 +257,11 @@ function buildFormulaLayer(
 
 export async function buildXY(
   config: LensXYConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: any, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

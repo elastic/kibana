@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const retry = getService('retry');
-  const spaces = getService('spaces');
+  const searchSpace = getService('searchSpace');
 
   const indexName = 'test-my-index';
 
@@ -33,28 +33,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/227104
   describe.skip('Search onboarding API keys', () => {
-    let cleanUpSpace: () => Promise<unknown>;
+    let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
     before(async () => {
-      // Navigate to the spaces management page which will log us in Kibana
-      await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-        name: 'search-onboarding-apikeys-ftr',
-        solution: 'es',
-      }));
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+        'search-onboarding-apikeys-ftr'
+      ));
 
       await pageObjects.searchApiKeys.deleteAPIKeys();
       await deleteAllTestIndices();
 
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await searchSpace.navigateTo(spaceCreated.id);
     });
     after(async () => {
       // Clean up space created
-      await cleanUpSpace();
+      await cleanUp();
       await pageObjects.searchApiKeys.deleteAPIKeys();
       await deleteAllTestIndices();
     });

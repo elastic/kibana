@@ -24,6 +24,7 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
+import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -61,8 +62,11 @@ export const riskScoreServiceFactory = ({
   spaceId,
   experimentalFeatures,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
-  calculateScores: (params) =>
-    calculateRiskScores({
+  calculateScores: (params) => {
+    const calculate = experimentalFeatures.disableESQLRiskScoring
+      ? calculateRiskScores
+      : calculateScoresWithESQL;
+    return calculate({
       ...params,
       assetCriticalityService,
       esClient,
@@ -70,6 +74,7 @@ export const riskScoreServiceFactory = ({
       experimentalFeatures,
       filters: params.filters || [],
     }),
+  },
   calculateAndPersistScores: (params) =>
     calculateAndPersistRiskScores({
       ...params,

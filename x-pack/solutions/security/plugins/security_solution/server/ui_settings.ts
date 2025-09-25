@@ -473,32 +473,28 @@ export const initUiSettings = (
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
     },
-    ...(experimentalFeatures.privilegedUserMonitoringDisabled
-      ? {}
-      : {
-          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
-              {
-                defaultMessage: 'Privileged user monitoring',
-              }
-            ),
-            value: false,
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
-              {
-                defaultMessage:
-                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            category: [APP_ID],
-            requiresPageReload: true,
-            schema: schema.boolean(),
-            solutionViews: ['classic', 'security'],
-          },
-        }),
+    [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+        {
+          defaultMessage: 'Privileged user monitoring',
+        }
+      ),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+        {
+          defaultMessage:
+            '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+    },
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {

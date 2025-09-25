@@ -21,6 +21,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiPaletteWarm } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsChartTooltip } from '../streams_chart_tooltip';
 
@@ -40,6 +41,8 @@ export function SparkPlot({
   annotations,
   compressed,
   xFormatter: givenXFormatter,
+  hideXAxis = false,
+  height,
 }: {
   id: string;
   name?: string;
@@ -48,6 +51,8 @@ export function SparkPlot({
   annotations?: SparkPlotAnnotation[];
   compressed?: boolean;
   xFormatter?: TickFormatter;
+  hideXAxis?: boolean;
+  height?: number;
 }) {
   const {
     dependencies: {
@@ -60,11 +65,19 @@ export function SparkPlot({
   const defaultTheme = charts.theme.chartsDefaultBaseTheme;
 
   const sparkplotChartTheme: PartialTheme = {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    chartPaddings: {
-      top: 12,
-      bottom: 12,
+    colors: {
+      vizColors: euiPaletteWarm(1),
     },
+    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+    chartPaddings: hideXAxis
+      ? {
+          top: 0,
+          bottom: 0,
+        }
+      : {
+          top: 12,
+          bottom: 12,
+        },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
@@ -75,10 +88,16 @@ export function SparkPlot({
       color: `rgba(0,0,0,0)`,
     },
     axes: {
+      axisLine: {
+        visible: false,
+      },
       tickLine: {
         visible: false,
       },
       gridLine: {
+        vertical: {
+          dash: [5],
+        },
         horizontal: {
           visible: false,
         },
@@ -99,7 +118,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: '100%',
-        height: !compressed ? 144 : 48,
+        height: height ? height : !compressed ? 144 : 48,
       }}
     >
       <Tooltip
@@ -107,8 +126,8 @@ export function SparkPlot({
           return xFormatter(data.value);
         }}
       />
-      <Axis id="y_axis" position="left" hide domain={{ min: 0, max: NaN }} />
-      <Axis id="x_axis" position="bottom" hide={compressed} />
+      <Axis id="y_axis" position="left" hide={compressed} domain={{ min: 0, max: NaN }} />
+      <Axis id="x_axis" position="bottom" hide={compressed || hideXAxis} />
       <Settings
         theme={[sparkplotChartTheme, baseTheme]}
         baseTheme={defaultTheme}

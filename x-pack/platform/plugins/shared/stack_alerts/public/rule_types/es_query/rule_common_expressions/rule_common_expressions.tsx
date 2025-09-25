@@ -21,8 +21,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { builtInGroupByTypes } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { SourceFields } from '../../components/source_fields_select';
-import type { CommonRuleParams, SourceField } from '../types';
+import type { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import type { TestQueryRowProps } from '../test_query_row';
 import { TestQueryRow } from '../test_query_row';
@@ -48,7 +47,6 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onCopyQuery?: TestQueryRowProps['copyQuery'];
   onChangeExcludeHitsFromPreviousRun: (exclude: boolean) => void;
   canSelectMultiTerms?: boolean;
-  onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
 }
 
 const SIZE_VALUE_TOOLTIP_CONTENT = i18n.translate(
@@ -78,7 +76,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   termField,
   termSize,
   size,
-  sourceFields,
   errors,
   hasValidationErrors,
   onChangeSelectedAggField,
@@ -96,7 +93,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   excludeHitsFromPreviousRun,
   onChangeExcludeHitsFromPreviousRun,
   canSelectMultiTerms,
-  onChangeSourceFields,
 }) => {
   const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
 
@@ -212,13 +208,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
           })}
         />
       </EuiFormRow>
-
-      <SourceFields
-        onChangeSourceFields={onChangeSourceFields}
-        esFields={esFields}
-        sourceFields={sourceFields}
-        errors={errors.sourceFields}
-      />
       <EuiSpacer size="m" />
       <TestQueryRow
         fetch={onTestFetch}

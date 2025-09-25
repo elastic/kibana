@@ -29,6 +29,8 @@ import type {
   QueryCommandTagParametrized,
 } from './types';
 import { Walker } from '../walker';
+import { isColumn, isFunctionExpression } from '../ast/is';
+import { replaceProperties } from '../walker/helpers';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -729,6 +731,120 @@ export class ComposerQuery {
     }
 
     this.params.set(name, value);
+    return this;
+  }
+
+  /**
+   * Inlines a parameter by replacing its placeholder with its actual value.
+   * This operation modifies the query AST to include the literal value
+   * instead of the parameter reference. See {@linkcode inlineParams} for
+   * more details.
+   *
+   * @param name The name of the parameter to inline.
+   * @returns The updated ComposerQuery instance.
+   * @throws Error if the parameter does not exist or has an unsupported type.
+   */
+  public inlineParam(name: string): this {
+    const value = this.params.get(name);
+
+    if (value === undefined) {
+      throw new Error(`Parameter "${name}" does not exist in the query.`);
+    }
+
+    Walker.replaceAll(this.ast, { type: 'literal', literalType: 'param', value: name }, (node) => {
+      const param = node as ESQLNamedParamLiteral;
+      const parent = Walker.parent(this.ast, node);
+
+      if (parent && isFunctionExpression(parent) && parent.operator === node) {
+        return Builder.identifier(String(value));
+      } else if (
+        parent &&
+        isColumn(parent) &&
+        parent.args.length === 1 &&
+        parent.args[0] === node
+      ) {
+        replaceProperties(parent, synth.exp(String(value)));
+
+        return { ...node };
+      } else if (param.paramKind === '??') {
+        if (parent && isColumn(parent)) {
+          return Builder.identifier(String(value));
+        }
+
+        return synth.exp(String(value));
+      } else {
+        if (parent && isColumn(parent)) {
+          return Builder.identifier(String(value));
+        }
+        switch (typeof value) {
+          case 'string': {
+            return synth.str(value);
+          }
+          case 'number': {
+            return synth.num(value);
+          }
+          case 'boolean': {
+            return synth.bool(value);
+          }
+        }
+      }
+
+      throw new Error(`Cannot inline parameter "${name}" of unsupported type.`);
+    });
+
+    this.params.delete(name);
+
+    return this;
+  }
+
+  /**
+   * Inlines all parameters in the query by replacing parameter placeholders with
+   * their actual values directly in the AST. This operation modifies the query
+   * to contain literal values instead of parameter references and clears the
+   * parameter map.
+   *
+   * This method is useful when you want to convert a parameterized query into
+   * a static query with all values embedded directly in the query text.
+   *
+   * ```typescript
+   * // Create a parameterized query
+   * const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{ limit: 100 }}`;
+   *
+   * console.log(query.print());
+   * // FROM logs | WHERE user == ?userName | LIMIT ?limit
+   *
+   * console.log(query.getParams());
+   * // { userName: 'admin', limit: 100 }
+   *
+   * // Inline all parameters
+   * query.inlineParams();
+   *
+   * console.log(query.print());
+   * // FROM logs | WHERE user == "admin" | LIMIT 100
+   *
+   * console.log(query.getParams());
+   * // {} (empty - all parameters have been inlined)
+   * ```
+   *
+   * **Note:** This operation is irreversible. Once parameters are inlined,
+   * they cannot be extracted back into parameter form. The parameter map
+   * will be empty after this operation.
+   *
+   * **Supported parameter types:**
+   * - `string` - Converted to string literals
+   * - `number` - Converted to numeric literals
+   * - `boolean` - Converted to boolean literals
+   * - Column (field) names (when used with `??` param syntax)
+   * - Nested column name parts (both, `?` and `??` param syntax)
+   * - Function names (both, `?` and `??` param syntax)
+   *
+   * @returns The updated ComposerQuery instance with all parameters inlined.
+   * @throws Error if any parameter has an unsupported type that cannot be inlined.
+   */
+  public inlineParams(): this {
+    for (const name of [...this.params.keys()]) {
+      this.inlineParam(name);
+    }
     return this;
   }
 

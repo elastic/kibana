@@ -26,6 +26,7 @@ export const assetStorageSettings = {
       [STREAM_NAME]: types.keyword(),
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
+      experimental: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;

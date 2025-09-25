@@ -25,6 +25,7 @@ import type { TimelineEvent } from './timeline';
 import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
+import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -53,6 +54,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
+    start,
+    end,
   });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
@@ -205,7 +208,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             response={significantEventsFetchState}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
-              setQueryToEdit(item.query);
+              setQueryToEdit({
+                ...item.query,
+                system: item.query.system ?? NO_SYSTEM,
+              });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {

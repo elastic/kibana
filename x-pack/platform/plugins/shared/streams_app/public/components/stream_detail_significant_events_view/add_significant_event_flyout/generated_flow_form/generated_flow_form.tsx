@@ -19,6 +19,7 @@ import { AIConnectorSelector } from './ai_connector_selector';
 import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -32,8 +33,11 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
+  const {
+    timeState: { start, end },
+  } = useTimefilter();
   const aiFeatures = useAIFeatures();
-  const { generate } = useSignificantEventsApi({ name: definition.name });
+  const { generate } = useSignificantEventsApi({ name: definition.name, start, end });
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -91,7 +95,12 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                       if (!validation.kql.isInvalid) {
                         setGeneratedQueries((prev) => [
                           ...prev,
-                          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                          {
+                            id: v4(),
+                            kql: { query: result.query.kql },
+                            title: result.query.title,
+                            system: result.query.system,
+                          },
                         ]);
                       }
                     },

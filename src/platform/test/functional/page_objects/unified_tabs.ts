@@ -27,10 +27,11 @@ export class UnifiedTabsPageObject extends FtrService {
     for (const tabElement of tabElements) {
       const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
       if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const labelTextElement = await tabElement.findByTestSubject('fullText');
         return {
           element: tabElement,
           index: tabElements.indexOf(tabElement),
-          label: await tabElement.getVisibleText(),
+          label: await labelTextElement.getVisibleText(),
         };
       }
     }
@@ -49,7 +50,8 @@ export class UnifiedTabsPageObject extends FtrService {
     const tabElements = await this.getTabElements();
     return await Promise.all(
       tabElements.map(async (tabElement) => {
-        return await tabElement.getVisibleText();
+        const labelTextElement = await tabElement.findByTestSubject('fullText');
+        return await labelTextElement.getVisibleText();
       })
     );
   }

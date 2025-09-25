@@ -44,6 +44,7 @@ export interface SchemaEditorProps {
   defaultColumns?: TableColumnName[];
   fields: SchemaField[];
   isLoading?: boolean;
+  onAddField?: (field: SchemaField) => void;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
   stream: Streams.ingest.all.Definition;

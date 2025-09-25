@@ -266,7 +266,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         tableId,
       };
 
-      return groupTakeActionItems?.(takeActionParams) ?? [];
+      return groupTakeActionItems?.(takeActionParams) ?? { items: [], panels: [] };
     },
     [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
   );

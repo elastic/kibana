@@ -85,6 +85,7 @@ export async function getTotalCountAggregations({
   try {
     const query = {
       index: alertIndex,
+      track_total_hits: true,
       size: 0,
       query: {
         bool: {
@@ -507,6 +508,7 @@ export async function getTotalCountInUse({
   try {
     const query = {
       index: alertIndex,
+      track_total_hits: true,
       size: 0,
       query: {
         bool: {

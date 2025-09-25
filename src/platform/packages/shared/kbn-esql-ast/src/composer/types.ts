@@ -99,7 +99,7 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
   dpar: (value: unknown, name?: string) => DoubleParameterHole;
 
   /**
-   * Creates a new {@link ComposerQuery} instance with a `FROM` command with
+   * Creates a new {@linkcode ComposerQuery} instance with a `FROM` command with
    * the specified list of sources.
    *
    * Example:
@@ -109,14 +109,48 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    * // FROM kibana_ecommerce_index, kibana_logs_index
    * ```
    *
+   * or with metadata fields:
+   *
+   * ```typescript
+   * const query = esql.from(
+   *   ['kibana_ecommerce_index', 'kibana_logs_index'],
+   *   ['_id', '_index']
+   * );
+   * // FROM kibana_ecommerce_index, kibana_logs_index WITH METADATA _id, _index
+   * ```
+   *
    * @param source The source to use in the `FROM` command, at least one source
    *     is required.
    * @param moreSources Additional sources to include in the `FROM` command.
    */
-  from: (
-    source: ComposerSourceShorthand,
-    ...moreSources: ComposerSourceShorthand[]
-  ) => ComposerQuery;
+  from: FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter;
+
+  /**
+   * Creates a new {@linkcode ComposerQuery} instance with a `TS` command with
+   * the specified list of sources.
+   *
+   * Example:
+   *
+   * ```typescript
+   * const query = esql.ts('kibana_ecommerce_index', 'kibana_logs_index');
+   * // TS kibana_ecommerce_index, kibana_logs_index
+   * ```
+   *
+   * or with metadata fields:
+   *
+   * ```typescript
+   * const query = esql.from(
+   *   ['kibana_ecommerce_index', 'kibana_logs_index'],
+   *   ['_id', '_index']
+   * );
+   * // FROM kibana_ecommerce_index, kibana_logs_index WITH METADATA _id, _index
+   * ```
+   *
+   * @param source The source to use in the `TS` command, at least one source
+   *     is required.
+   * @param moreSources Additional sources to include in the `TS` command.
+   */
+  ts: FromSourcesQueryStarter & FromSourcesAndMetadataQueryStarter;
 
   /**
    * An AST no-op command that can be used in the query, for example in
@@ -137,6 +171,16 @@ export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par' | 'dpa
    */
   nop: ESQLCommand;
 }
+
+export type FromSourcesQueryStarter = (
+  source: ComposerSourceShorthand,
+  ...moreSources: ComposerSourceShorthand[]
+) => ComposerQuery;
+
+export type FromSourcesAndMetadataQueryStarter = (
+  sources: ComposerSourceShorthand[],
+  metadataFields?: ComposerColumnShorthand[]
+) => ComposerQuery;
 
 export type ComposerSourceShorthand = string | ESQLSource;
 

@@ -99,6 +99,7 @@ describe('ClassicStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          read_failure_store: true,
         },
         data_stream_exists: true,
         ...emptyAssets,

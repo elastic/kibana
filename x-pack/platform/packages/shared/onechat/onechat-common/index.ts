@@ -75,9 +75,10 @@ export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,
-  type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
   agentIdRegexp,
 } from './agents';
 export {

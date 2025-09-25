@@ -52,7 +52,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  protectedAndFleetAgents: Agent[];
+  unsupportedMigrateAgents: Agent[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -67,7 +67,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   agentPolicies,
   sortField,
   sortOrder,
-  protectedAndFleetAgents,
+  unsupportedMigrateAgents,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
@@ -373,7 +373,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           <AgentMigrateFlyout
             agents={agents}
             agentCount={agentCount}
-            protectedAndFleetAgents={protectedAndFleetAgents}
+            unsupportedMigrateAgents={unsupportedMigrateAgents}
             onClose={() => {
               setIsMigrateModalOpen(false);
             }}

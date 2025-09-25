@@ -15,6 +15,7 @@ import {
   appendToESQLQuery,
   isESQLColumnSortable,
   hasTransformationalCommand,
+  getCategorizeField,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -239,7 +240,26 @@ export class LensVisService {
 
     if (queryParams.isPlainRecord) {
       if (isOfAggregateQueryType(queryParams.query)) {
-        if (hasTransformationalCommand(queryParams.query.esql)) {
+        if (getCategorizeField(queryParams.query.esql).length) {
+          // query uses categorize, override the chart to be a simple doc count histogram
+          const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+            queryParams: {
+              ...queryParams,
+              query: {
+                esql: `FROM ${queryParams.dataView.getIndexPattern()}`,
+              },
+            },
+            breakdownField,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
+        } else if (hasTransformationalCommand(queryParams.query.esql)) {
           // appends the first lens suggestion if available
           const allSuggestions = this.getAllSuggestions({
             queryParams,

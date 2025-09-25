@@ -6,7 +6,16 @@
  */
 
 import { buildFiltersForEntityType } from './calculate_risk_scores';
-import type { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/search_strategy';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { assetCriticalityServiceMock } from '../asset_criticality/asset_criticality_service.mock';
+
+import { calculateRiskScores } from './calculate_risk_scores';
+import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
+
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { allowedExperimentalValues } from '../../../../common';
 
 describe('buildFiltersForEntityType', () => {
   const mockUserFilter = { term: { 'user.name': 'test-user' } };
@@ -179,5 +188,52 @@ describe('buildFiltersForEntityType', () => {
         }),
       })
     );
+  });
+});
+
+describe('calculateRiskScores()', () => {
+  let params: Parameters<typeof calculateRiskScores>[0];
+  let esClient: ElasticsearchClient;
+  let logger: Logger;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    logger = loggingSystemMock.createLogger();
+    params = {
+      afterKeys: {},
+      assetCriticalityService: assetCriticalityServiceMock.create(),
+      esClient,
+      logger,
+      index: 'index',
+      pageSize: 500,
+      range: { start: 'now - 15d', end: 'now' },
+      runtimeMappings: {},
+      experimentalFeatures: allowedExperimentalValues,
+    };
+  });
+
+  describe('inputs', () => {
+    it('builds a filter on @timestamp based on the provided range', async () => {
+      await calculateRiskScores(params);
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            range: { '@timestamp': { gte: 'now - 15d', lt: 'now' } },
+          },
+        ])
+      );
+    });
+
+    it('drops an empty object filter if specified by the caller', async () => {
+      params.filter = {};
+      await calculateRiskScores(params);
+
+      expect(
+        (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+      ).toEqual(expect.not.arrayContaining([{}]));
+    });
   });
 });

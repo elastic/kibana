@@ -30,6 +30,7 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
+  disabled?: boolean;
   titleHelpText?: ReactNode | string;
 }
 
@@ -146,6 +147,7 @@ export const TitleField = ({
   matchedIndices$,
   rollupIndicesCapabilities,
   indexPatternValidationProvider,
+  disabled,
   titleHelpText,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
@@ -188,6 +190,7 @@ export const TitleField = ({
           >
             <EuiFieldText
               isInvalid={isInvalid}
+              disabled={disabled}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 let query = e.target.value;

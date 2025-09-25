@@ -31,7 +31,6 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
       <ProcessorFieldSelector
         helpText={processor.fieldOptions.fieldHelpText}
         fieldKey={processor.fieldOptions.fieldKey}
-        processorType={type}
       />
       {processor.fieldConfigurations
         .filter((fieldConfiguration) => fieldConfiguration.required)

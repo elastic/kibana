@@ -6,7 +6,8 @@
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { FleetUnauthorizedError } from '../../errors';
+import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 
 import type { AgentPolicy, Agent } from '../../types';
 
@@ -26,11 +27,24 @@ export async function migrateSingleAgent(
   agentId: string,
   agentPolicy: AgentPolicy | undefined,
   agent: Agent,
-  options: any
+  options: {
+    policyId?: string;
+    enrollment_token: string;
+    uri: string;
+    settings?: Record<string, any>;
+  }
 ) {
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
-  if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
+  if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
+  }
+  if (agent.components?.some((c) => c.type === 'fleet-server')) {
+    throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
+  }
+  if (!isAgentMigrationSupported(agent)) {
+    throw new FleetError(
+      `Agent cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
+    );
   }
   const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
@@ -38,10 +52,12 @@ export async function migrateSingleAgent(
     type: 'MIGRATE',
     policyId: options.policyId,
     data: {
-      enrollment_token: options.enrollment_token,
       target_uri: options.uri,
       settings: options.settings,
     },
+    ...(options.enrollment_token && {
+      secrets: { enrollment_token: options.enrollment_token },
+    }),
   });
   return { actionId: response.id };
 }

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -34,6 +35,7 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  EventAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -57,6 +59,7 @@ export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean };
+  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -104,6 +107,7 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
   latestAttachments: AttachmentUI[];
@@ -349,4 +353,8 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CaseViewEventsTableProps {
+  events: { eventId: string | string[]; index: string | string[] }[];
 }

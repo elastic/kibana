@@ -10,7 +10,7 @@ import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
 import { DatasetQualityIndicator, calculatePercentage } from '@kbn/dataset-quality-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import type { StreamHistogramFetch } from '../../hooks/use_doc_count_fetch';
 
 export function DataQualityColumn({
   histogramQueryFetch,

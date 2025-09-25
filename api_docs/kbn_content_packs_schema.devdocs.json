@@ -946,7 +946,7 @@
             "section": "def-common.ContentPackIncludeAll",
             "text": "ContentPackIncludeAll"
           },
-          " | { objects: { queries: { id: string; }[]; routing: ({ destination: string; } & ",
+          " | { objects: { mappings: boolean; queries: { id: string; }[]; routing: ({ destination: string; } & ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",

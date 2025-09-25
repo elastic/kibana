@@ -41,6 +41,11 @@ export function registerChatRoutes({
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
+    capabilities: schema.maybe(
+      schema.object({
+        visualizations: schema.maybe(schema.boolean()),
+      })
+    ),
   });
 
   const callConverse = ({
@@ -59,12 +64,14 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      capabilities,
     } = payload;
 
     return chatService.converse({
       agentId,
       connectorId,
       conversationId,
+      capabilities,
       abortSignal,
       nextInput: { message: input },
       request,
@@ -136,7 +143,6 @@ export function registerChatRoutes({
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-
       access: 'public',
       summary: 'Converse with an agent and stream events',
       description: TECHNICAL_PREVIEW_WARNING,

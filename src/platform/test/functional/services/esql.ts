@@ -18,6 +18,7 @@ export class ESQLService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
@@ -156,6 +157,24 @@ export class ESQLService extends FtrService {
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
+  }
+
+  public async createEsqlControl(query: string) {
+    await this.waitESQLEditorLoaded();
+    await this.retry.waitFor('control flyout to open', async () => {
+      await this.typeEsqlEditorQuery(query);
+      // Wait until suggestions are loaded
+      await this.common.sleep(1000);
+      // Create control is the first suggestion
+      await this.browser.pressKeys(this.browser.keys.ENTER);
+
+      return await this.testSubjects.exists('create_esql_control_flyout');
+    });
+
+    // create the control
+    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.waitESQLEditorLoaded();
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {

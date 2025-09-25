@@ -47,6 +47,11 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
 export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
+export interface ToolSourceGetClientArgs {
+  request: KibanaRequest;
+  space: string;
+}
+
 /**
  * Defines a provider for a given tool type
  */
@@ -62,11 +67,11 @@ export type ToolSource<T extends ToolType = ToolType> = {
 } & (
   | {
       readonly?: false | undefined;
-      getClient(opts: { request: KibanaRequest }): MaybePromise<ToolTypeClient>;
+      getClient(opts: ToolSourceGetClientArgs): MaybePromise<ToolTypeClient>;
     }
   | {
       readonly: true;
-      getClient(opts: { request: KibanaRequest }): MaybePromise<ReadonlyToolTypeClient>;
+      getClient(opts: ToolSourceGetClientArgs): MaybePromise<ReadonlyToolTypeClient>;
     }
 );
 

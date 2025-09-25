@@ -38,6 +38,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -70,7 +71,7 @@ interface CreateAgentFormProps {
 
 type AgentFormProps = EditingAgentFormProps | CreateAgentFormProps;
 
-export type AgentFormData = Omit<AgentDefinition, 'type'>;
+export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();
@@ -410,9 +411,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href="#"
+                    href={docLinks.agentBuilderAgents}
                     target="_blank"
-                    external
                     aria-label={i18n.translate(
                       'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
                       {
