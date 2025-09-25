@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +22,7 @@ import {
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ConditionPanel } from '../../shared';
 import { SystemEventsData } from './system_events_data';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 
@@ -85,9 +85,7 @@ export const StreamSystemDetailsFlyout = ({
               })}
             </h3>
           </EuiTitle>
-          <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
-            {JSON.stringify(system.filter)}
-          </EuiCodeBlock>
+          <ConditionPanel condition={system.filter} />
           <EuiSpacer size="m" />
           <SystemEventsData system={system} />
         </div>

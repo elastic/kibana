@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -14,7 +15,6 @@ import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { ConditionPanel } from '../data_management/shared';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
@@ -128,10 +128,11 @@ export function SignificantEventsTable({
         defaultMessage: 'Query',
       }),
       render: (query: StreamQuery) => {
-        if (!query.system?.filter) {
+        if (!query.kql.query) {
           return '--';
         }
-        return <ConditionPanel condition={query.system.filter} />;
+
+        return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
       },
     },
     {
