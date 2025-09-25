@@ -44,6 +44,7 @@ import { useUrl } from './hooks/use_url';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
+import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -248,7 +249,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+        <DiscoverTopNavMenuProvider>
+          {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+        </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
   );
