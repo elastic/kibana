@@ -122,6 +122,7 @@ export class ProductDocBasePlugin
         updateAll: documentationManager.updateAll.bind(documentationManager),
         uninstall: documentationManager.uninstall.bind(documentationManager),
         getStatus: documentationManager.getStatus.bind(documentationManager),
+        getStatuses: documentationManager.getStatuses.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
     };

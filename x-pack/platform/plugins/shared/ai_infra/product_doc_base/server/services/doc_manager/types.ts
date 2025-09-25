@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
+import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
 /**
  * APIs to manage the product documentation.
@@ -38,6 +39,15 @@ export interface DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for.
    */
   getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
+  /**
+   * Returns the installation status of the documentation for the given inference IDs.
+   * @param inferenceIds - The inference IDs to get the status for.
+   */
+  getStatuses({
+    inferenceIds,
+  }: {
+    inferenceIds: string[];
+  }): Promise<Record<string, PerformUpdateResponse>>;
 }
 
 /**

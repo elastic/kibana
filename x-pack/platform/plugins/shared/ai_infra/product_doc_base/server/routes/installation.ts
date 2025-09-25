@@ -22,7 +22,6 @@ import {
   UPDATE_ALL_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
-import type { ProductInstallState } from '../../common/install_status';
 
 export const registerInstallationRoutes = ({
   router,
@@ -139,66 +138,22 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { forceUpdate, inferenceIds: requestedInferenceIdsToUpdate } = req.body ?? {};
+      const inferenceIds: string[] = req.body.inferenceIds ?? [];
+      const { forceUpdate } = req.body ?? {};
+
       const { documentationManager } = getServices();
 
-      const resp = await documentationManager.updateAll({
+      await documentationManager.updateAll({
         request: req,
         forceUpdate,
-        inferenceIds: requestedInferenceIdsToUpdate,
+        inferenceIds,
       });
-      const inferenceIds = resp.inferenceIds ?? [];
 
       // check status after installation in case of failure
-      const statuses = await Promise.allSettled(
-        inferenceIds.map((inferenceId) =>
-          documentationManager.getStatus({
-            inferenceId,
-          })
-        )
-      );
-      const body = statuses.reduce<Record<string, PerformUpdateResponse>>(
-        (acc, installationStatus, index) => {
-          const inferenceId = inferenceIds[index];
-          // Handle internal server error
-          if (installationStatus.status === 'rejected') {
-            const failureReason = installationStatus.reason;
-            return {
-              ...acc,
-              [inferenceId]: {
-                installed: status === 'uninstalled',
-                ...(failureReason ? { failureReason: JSON.stringify(failureReason) } : {}),
-              },
-            };
-          }
-          if (installationStatus.status === 'fulfilled') {
-            const { status, installStatus } = installationStatus.value;
-
-            let failureReason = null;
-            // Check for real reason of previous installation failure
-            if (status === 'error' && installStatus) {
-              failureReason = Object.values(installStatus)
-                .filter(
-                  (product: ProductInstallState) =>
-                    product.status === 'error' && product.failureReason
-                )
-                .map((product: ProductInstallState) => product.failureReason)
-                .join('\n');
-            }
-            return {
-              ...acc,
-              [inferenceId]: {
-                installed: status === 'installed',
-                ...(failureReason ? { failureReason } : {}),
-              } as PerformUpdateResponse,
-            };
-          }
-          return acc;
-        },
-        {}
-      );
+      const statuses: Record<string, PerformUpdateResponse> =
+        await documentationManager.getStatuses({ inferenceIds });
       return res.ok<Record<string, PerformUpdateResponse>>({
-        body,
+        body: statuses,
       });
     }
   );
