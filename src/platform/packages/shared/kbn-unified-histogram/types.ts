@@ -246,6 +246,11 @@ export interface ChartSectionProps {
    * Observable for fetching the histogram data
    */
   input$: UnifiedHistogramInput$;
+
+  /**
+   * Flag indicating that the chart is currently loading
+   */
+  isChartLoading?: boolean;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
