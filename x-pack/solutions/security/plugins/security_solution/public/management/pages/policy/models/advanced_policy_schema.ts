@@ -2314,7 +2314,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.firewall_anti_tamper',
-    first_supported_version: '9.2.0',
+    first_supported_version: '9.2',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
       {
