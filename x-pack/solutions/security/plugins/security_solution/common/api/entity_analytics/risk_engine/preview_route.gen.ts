@@ -64,17 +64,17 @@ export const RiskScoresPreviewRequest = z.object({
    */
   exclude_alert_tags: z.array(z.string()).optional(),
   /**
-   * Entity-specific filters to apply during risk score calculation
+   * Custom KQL filters to apply to risk scoring queries, allowing more targeted risk analysis.
    */
   filters: z
     .array(
       z.object({
         /**
-         * List of entity types this filter applies to
+         * The entity types this filter applies to
          */
         entity_types: z.array(z.enum(['host', 'user', 'service'])),
         /**
-         * KQL filter string to apply to the specified entity types
+         * KQL filter expression to apply
          */
         filter: z.string(),
       })

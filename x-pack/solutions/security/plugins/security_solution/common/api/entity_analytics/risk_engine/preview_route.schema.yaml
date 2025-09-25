@@ -69,7 +69,7 @@ components:
           items:
             type: string
         filters:
-          description: Entity-specific filters to apply during risk score calculation
+          description: Custom KQL filters to apply to risk scoring queries, allowing more targeted risk analysis.
           type: array
           items:
             type: object
@@ -79,10 +79,10 @@ components:
                 items:
                   type: string
                   enum: [host, user, service]
-                description: List of entity types this filter applies to
+                description: The entity types this filter applies to
               filter:
                 type: string
-                description: KQL filter string to apply to the specified entity types
+                description: KQL filter expression to apply
             required:
               - entity_types
               - filter
