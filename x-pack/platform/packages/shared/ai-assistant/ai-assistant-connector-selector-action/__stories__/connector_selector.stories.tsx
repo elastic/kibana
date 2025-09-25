@@ -73,7 +73,9 @@ export default {
 } as Meta<ConnectorSelectableProps>;
 
 // Uncontrolled example (no value prop, component manages its own state)
-export const UncontrolledContextMenu: StoryFn<ConnectorSelectableProps> = (args) => <Component {...args} />;
+export const UncontrolledContextMenu: StoryFn<ConnectorSelectableProps> = (args) => (
+  <Component {...args} />
+);
 
 UncontrolledContextMenu.args = {
   defaultConnectorId: '3',
