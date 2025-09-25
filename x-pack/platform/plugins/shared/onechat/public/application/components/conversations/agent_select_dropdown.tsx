@@ -21,7 +21,6 @@ import {
   EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -31,17 +30,11 @@ const agentSelectId = 'agentBuilderAgentSelect';
 
 interface AgentSelectButtonProps {
   selectedAgentName?: string;
-  isLoading: boolean;
   onClick: () => void;
 }
 
-const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({
-  selectedAgentName,
-  isLoading,
-  onClick,
-}) => (
+const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
   <EuiButtonEmpty
-    isLoading={isLoading}
     iconSide="right"
     iconType="arrowDown"
     onClick={onClick}
@@ -56,14 +49,12 @@ interface AgentSelectDropdownProps {
   selectedAgentId?: string;
   onAgentChange: (agentId: string) => void;
   agents?: AgentDefinition[];
-  isLoading?: boolean;
 }
 
 export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
-  selectedAgentId = oneChatDefaultAgentId,
+  selectedAgentId,
   onAgentChange,
   agents = [],
-  isLoading = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { createOnechatUrl } = useNavigation();
@@ -107,7 +98,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       button={
         <AgentSelectButton
           selectedAgentName={selectedAgent?.name}
-          isLoading={isLoading}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
@@ -122,7 +112,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         options={options}
         onChange={handleAgentChange}
         singleSelection
-        isLoading={isLoading}
       >
         {(list) => (
           <>
