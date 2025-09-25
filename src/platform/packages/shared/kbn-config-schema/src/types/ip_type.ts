@@ -17,13 +17,18 @@ export type IpOptions = TypeOptions<string> & {
   /**
    * IP versions to accept, defaults to ['ipv4', 'ipv6'].
    */
-  versions: IpVersion[];
+  versions?: IpVersion[];
 };
 
 export class IpType extends Type<string> {
-  constructor(options: IpOptions = { versions: ['ipv4', 'ipv6'] }) {
-    const schema = internals.string().ip({ version: options.versions, cidr: 'forbidden' });
+  constructor(options: IpOptions = {}) {
+    const versions = options.versions ?? ['ipv4', 'ipv6'];
+    const schema = internals.string().ip({ version: versions, cidr: 'forbidden' });
     super(schema, options);
+  }
+
+  protected getDefault(defaultValue?: string): string | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value, version }: Record<string, any>) {

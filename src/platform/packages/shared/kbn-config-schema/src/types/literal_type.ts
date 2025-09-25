@@ -18,6 +18,10 @@ export class LiteralType<T> extends Type<T> {
     this.expectedValue = value;
   }
 
+  protected getDefault(defaultValue?: T): T | undefined {
+    return defaultValue;
+  }
+
   protected handleError(type: string) {
     switch (type) {
       case 'any.required':

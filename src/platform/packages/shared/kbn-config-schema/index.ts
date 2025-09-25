@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Duration } from 'moment';
 import type { Stream } from 'stream';
 
-import type { ByteSizeValue } from './src/byte_size_value';
 import type { Reference } from './src/references';
 import { ContextReference, SiblingReference } from './src/references';
 import type {
@@ -18,21 +16,16 @@ import type {
   ByteSizeOptions,
   ConditionalTypeValue,
   DurationOptions,
-  IntersectionTypeOptions,
   IpOptions,
   MapOfOptions,
   NumberOptions,
   ObjectTypeOptions,
-  ObjectResultType,
-  Props,
-  NullableProps,
   RecordOfOptions,
-  SchemaStructureEntry,
   StringOptions,
-  TypeOf,
   TypeOptions,
   URIOptions,
   UnionTypeOptions,
+  Type,
 } from './src/types';
 import {
   AnyType,
@@ -52,26 +45,36 @@ import {
   ObjectType,
   RecordOfType,
   StringType,
-  Type,
   UnionType,
   URIType,
   StreamType,
   Lazy,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
-export type { SchemaValidationOptions } from './src/types';
+import type { SomeType } from './src/types/type';
+import type {
+  ObjectInputType,
+  ObjectOutputType,
+  ObjectProps,
+  SomeObjectType,
+} from './src/types/object_type';
+import type { IntersectionInput, IntersectionOutput } from './src/types/intersection_type';
+
+// bucket export to avoid naming collisions
+export type * from './deprecated';
+
+export type { SomeType, SomeObjectType, ObjectProps };
+export type { SchemaOf, TypeOf, TypeOfOutput, TypeOfInput } from './src/helpers/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
-function any(options?: TypeOptions<any>) {
+function any(options?: TypeOptions<any>): Type<any> {
   return new AnyType(options);
 }
 
-function boolean(options?: TypeOptions<boolean>): Type<boolean> {
+function boolean(options?: TypeOptions<boolean>): BooleanType {
   return new BooleanType(options);
 }
 
@@ -91,19 +94,55 @@ function uri(options?: URIOptions): Type<string> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean | null>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null>(value: T): LiteralType<T> {
   return new LiteralType(value);
+}
+
+/**
+ * Creates a literal union type from an array of string literals.
+ *
+ * @example
+ * ```ts
+ * const myEnums = ['foo', 'bar', 'baz'] as const;
+ * const myEnumType = schema.enum(myEnums);
+ * ```
+ * @example
+ * ```ts
+ * enum status {
+ *   PENDING = 'pending',
+ *   WAITING = 'waiting',
+ *   COMPLETED = 'completed',
+ * }
+ * const myEnumType = schema.enum(status);
+ * ```
+ */
+function enumeration<U extends string>(
+  enumObj: Record<string, U>,
+  options?: TypeOptions<U>
+): Type<U>;
+function enumeration<U extends string>(
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  values: [U, ...U[]] | readonly [U, ...U[]] | U[] | readonly U[],
+  options?: TypeOptions<U>
+): Type<U>;
+function enumeration<U extends string>(
+  enumObj: Record<string, U> | U[],
+  options?: TypeOptions<U>
+): Type<U> {
+  const values = Array.isArray(enumObj) ? enumObj : Object.values(enumObj);
+  const literalTypes = values.map((value) => literal(value)) as any;
+  return union(literalTypes, options);
 }
 
 function number(options?: NumberOptions): Type<number> {
   return new NumberType(options);
 }
 
-function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
+function byteSize(options?: ByteSizeOptions): ByteSizeType {
   return new ByteSizeType(options);
 }
 
-function duration(options?: DurationOptions): Type<Duration> {
+function duration(options?: DurationOptions): DurationType {
   return new DurationType(options);
 }
 
@@ -116,299 +155,135 @@ function ip(options?: IpOptions): Type<string> {
 }
 
 /**
- * Create an optional type
+ * Creates an optional type
+ *
+ * @note wrapping with `maybe` ignores the `defaultValue` on `type` when validating.
  */
-function maybe<V>(type: Type<V>): Type<V | undefined> {
+function maybe<T extends SomeType>(
+  type: T
+): Type<T['_output'] | undefined, T['_input'] | undefined> {
   return new MaybeType(type);
 }
 
-function nullable<V>(type: Type<V>): Type<V | null> {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+/**
+ * Creates an nullable type, defaults to `null`.
+ *
+ * @note wrapping with `nullable` ignores the `defaultValue` from the `type` when validating.
+ */
+function nullable<T extends SomeType>(type: T) {
+  return union([type, literal(null)]).default(null);
 }
 
-function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
+function object<P extends ObjectProps>(
+  props: P,
+  options?: ObjectTypeOptions<ObjectOutputType<P>, ObjectInputType<P>>
+): ObjectType<P, ObjectOutputType<P>, ObjectInputType<P>> {
   return new ObjectType(props, options);
 }
 
-function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
+function arrayOf<T extends SomeType>(
+  itemType: T,
+  options?: ArrayOptions<T>
+): Type<T['_output'][], T['_input'][]> {
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V>(
+function mapOf<K, T extends SomeType>(
   keyType: Type<K>,
-  valueType: Type<V>,
-  options?: MapOfOptions<K, V>
-): Type<Map<K, V>> {
+  valueType: T,
+  options?: MapOfOptions<K, T>
+): Type<Map<K, T['_output']>, Map<K, T['_input']>> {
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<K extends string, V>(
+function recordOf<K extends string, T extends SomeType>(
   keyType: Type<K>,
-  valueType: Type<V>,
-  options?: RecordOfOptions<K, V>
-): Type<Record<K, V>> {
+  valueType: T,
+  options?: RecordOfOptions<K, T['_input']>
+): Type<Record<K, T['_output']>, Record<K, T['_input']>> {
   return new RecordOfType(keyType, valueType, options);
 }
 
-function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>,
-    Type<J>,
-    Type<K>,
-    Type<L>
-  ],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
-): Type<A | B | C | D | E | F | G | H | I | J | K | L>;
-function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
-  types: [
-    Type<A>,
-    Type<B>,
-    Type<C>,
-    Type<D>,
-    Type<E>,
-    Type<F>,
-    Type<G>,
-    Type<H>,
-    Type<I>,
-    Type<J>,
-    Type<K>
-  ],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
-): Type<A | B | C | D | E | F | G | H | I | J | K>;
-function oneOf<A, B, C, D, E, F, G, H, I, J>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
-): Type<A | B | C | D | E | F | G | H | I | J>;
-function oneOf<A, B, C, D, E, F, G, H, I>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
-): Type<A | B | C | D | E | F | G | H | I>;
-function oneOf<A, B, C, D, E, F, G, H>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
-): Type<A | B | C | D | E | F | G | H>;
-function oneOf<A, B, C, D, E, F, G>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
-  options?: UnionTypeOptions<A | B | C | D | E | F | G>
-): Type<A | B | C | D | E | F | G>;
-function oneOf<A, B, C, D, E, F>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>],
-  options?: UnionTypeOptions<A | B | C | D | E | F>
-): Type<A | B | C | D | E | F>;
-function oneOf<A, B, C, D, E>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
-  options?: UnionTypeOptions<A | B | C | D | E>
-): Type<A | B | C | D | E>;
-function oneOf<A, B, C, D>(
-  types: [Type<A>, Type<B>, Type<C>, Type<D>],
-  options?: UnionTypeOptions<A | B | C | D>
-): Type<A | B | C | D>;
-function oneOf<A, B, C>(
-  types: [Type<A>, Type<B>, Type<C>],
-  options?: UnionTypeOptions<A | B | C>
-): Type<A | B | C>;
-function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
-function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<Type<any>>>(
-  types: RTS,
-  options?: UnionTypeOptions<any>
-): Type<any> {
+function union<T extends Readonly<[SomeType, ...SomeType[]]>>(
+  types: T,
+  options?: UnionTypeOptions<T>
+): Type<T[number]['_output'], T[number]['_input']> {
   return new UnionType(types, options);
 }
 
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props,
-  G extends Props,
-  H extends Props,
-  I extends Props,
-  J extends Props,
-  K extends Props
+/**
+ * Create intersection schema from multiple object schemas, max 4 object types.
+ *
+ * @example
+ * ```ts
+ * const mySchema = schema.allOf([
+ *   schema.object({ str: schema.string() }),
+ *   schema.object({ num: schema.number() }}),
+ * ]);
+ * ```
+ */
+function intersection<
+  T1 extends SomeObjectType,
+  T2 extends SomeObjectType,
+  T3 extends SomeObjectType,
+  T4 extends SomeObjectType
 >(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>,
-    ObjectType<J>,
-    ObjectType<K>
-  ],
-  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J & K>
-): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J & K>>;
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props,
-  G extends Props,
-  H extends Props,
-  I extends Props,
-  J extends Props
+  types: [T1, T2, T3, T4],
+  options?: ObjectTypeOptions<
+    T1['_output'] & T2['_output'] & T3['_output'] & T4['_output'],
+    T1['_input'] & T2['_input'] & T3['_input'] & T4['_input']
+  >
+): IntersectionType<[T1, T2, T3, T4]>;
+function intersection<
+  T1 extends SomeObjectType,
+  T2 extends SomeObjectType,
+  T3 extends SomeObjectType
 >(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>,
-    ObjectType<J>
-  ],
-  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I & J>
-): Type<ObjectResultType<A & B & C & D & E & F & G & H & I & J>>;
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props,
-  G extends Props,
-  H extends Props,
-  I extends Props
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>,
-    ObjectType<I>
-  ],
-  options?: UnionTypeOptions<A & B & C & D & E & F & G & H & I>
-): Type<ObjectResultType<A & B & C & D & E & F & G & H & I>>;
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props,
-  G extends Props,
-  H extends Props
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>,
-    ObjectType<H>
-  ],
-  options?: UnionTypeOptions<A & B & C & D & E & F & G & H>
-): Type<ObjectResultType<A & B & C & D & E & F & G & H>>;
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props,
-  G extends Props
->(
-  types: [
-    ObjectType<A>,
-    ObjectType<B>,
-    ObjectType<C>,
-    ObjectType<D>,
-    ObjectType<E>,
-    ObjectType<F>,
-    ObjectType<G>
-  ],
-  options?: UnionTypeOptions<A & B & C & D & E & F & G>
-): Type<ObjectResultType<A & B & C & D & E & F & G>>;
-function allOf<
-  A extends Props,
-  B extends Props,
-  C extends Props,
-  D extends Props,
-  E extends Props,
-  F extends Props
->(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
-  options?: UnionTypeOptions<A & B & C & D & E & F>
-): Type<ObjectResultType<A & B & C & D & E & F>>;
-function allOf<A extends Props, B extends Props, C extends Props, D extends Props, E extends Props>(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
-  options?: UnionTypeOptions<A & B & C & D & E>
-): Type<ObjectResultType<A & B & C & D & E>>;
-function allOf<A extends Props, B extends Props, C extends Props, D extends Props>(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
-  options?: UnionTypeOptions<A & B & C & D>
-): Type<ObjectResultType<A & B & C & D>>;
-function allOf<A extends Props, B extends Props, C extends Props>(
-  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
-  options?: UnionTypeOptions<A & B & C>
-): Type<ObjectResultType<A & B & C>>;
-function allOf<A extends Props, B extends Props>(
-  types: [ObjectType<A>, ObjectType<B>],
-  options?: UnionTypeOptions<A & B>
-): Type<ObjectResultType<A & B>>;
-function allOf<A extends Props>(
-  types: [ObjectType<A>],
-  options?: UnionTypeOptions<A>
-): Type<ObjectResultType<A>>;
-function allOf<RTS extends Array<ObjectType<any>>>(
-  types: RTS,
-  options?: IntersectionTypeOptions<any>
-): Type<any> {
+  types: [T1, T2, T3],
+  options?: ObjectTypeOptions<
+    T1['_output'] & T2['_output'] & T3['_output'],
+    T1['_input'] & T2['_input'] & T3['_input']
+  >
+): IntersectionType<[T1, T2, T3]>;
+function intersection<T1 extends SomeObjectType, T2 extends SomeObjectType>(
+  types: [T1, T2],
+  options?: ObjectTypeOptions<T1['_output'] & T2['_output'], T1['_input'] & T2['_input']>
+): IntersectionType<[T1, T2]>;
+function intersection<T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>>(
+  types: T,
+  options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>>
+): IntersectionType<T> {
   return new IntersectionType(types, options);
 }
 
-function contextRef<T>(key: string): ContextReference<T> {
+function contextRef<T = any>(key: string): ContextReference<T> {
   return new ContextReference(key);
 }
 
-function siblingRef<T>(key: string): SiblingReference<T> {
+function siblingRef<T = any>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A extends ConditionalTypeValue, B, C>(
-  leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A | Type<unknown>,
-  equalType: Type<B>,
-  notEqualType: Type<C>,
-  options?: TypeOptions<B | C>
-) {
+function conditional<T extends ConditionalTypeValue, A extends SomeType, B extends SomeType>(
+  leftOperand: Reference<T>,
+  rightOperand: Reference<T> | T | Type<unknown>,
+  equalType: A,
+  notEqualType: B,
+  options?: ConditionalTypeOptions<A, B>
+): Type<A['_output'] | B['_output'], A['_input'] | B['_input']> {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
 /**
  * Useful for creating recursive schemas.
  */
-function lazy<T>(id: string) {
+function lazy<T>(id: string): Type<T> {
   return new Lazy<T>(id);
 }
 
 export const schema = {
-  allOf,
+  allOf: intersection,
+  enum: enumeration,
   any,
   arrayOf,
   boolean,
@@ -417,7 +292,7 @@ export const schema = {
   conditional,
   contextRef,
   duration,
-  intersection: allOf,
+  intersection,
   ip,
   lazy,
   literal,
@@ -427,7 +302,8 @@ export const schema = {
   never,
   number,
   object,
-  oneOf,
+  union,
+  oneOf: union,
   recordOf,
   stream,
   siblingRef,
@@ -446,6 +322,7 @@ import {
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
 } from './src/oas_meta_fields';
+import type { ConditionalTypeOptions } from './src/types/conditional_type';
 
 export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DISCONTINUED,

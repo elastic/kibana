@@ -18,6 +18,10 @@ export class AnyType extends Type<any> {
     super(internals.any().meta({ [META_FIELD_X_OAS_ANY]: true }), options);
   }
 
+  protected getDefault(defaultValue?: any): any {
+    return defaultValue;
+  }
+
   protected handleError(type: string, { value }: Record<string, any>) {
     if (type === 'any.required') {
       return `expected value of type [any] but got [${typeDetect(value)}]`;

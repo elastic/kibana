@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO: fix the odd TS error
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
@@ -16,20 +15,15 @@ import {
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../endpoint/constants';
 import { agentTypesSchema } from '../common/base';
 
-const commandsSchema = schema.oneOf(
-  // @ts-expect-error TS2769: No overload matches this call
-  RESPONSE_ACTION_API_COMMANDS_NAMES.map((command) => schema.literal(command))
-);
+const commandsSchema = schema.enum(RESPONSE_ACTION_API_COMMANDS_NAMES);
 
 const statusesSchema = {
-  // @ts-expect-error TS2769: No overload matches this call
-  schema: schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status))),
+  schema: schema.enum(RESPONSE_ACTION_STATUS),
   options: { minSize: 1, maxSize: RESPONSE_ACTION_STATUS.length },
 };
 
 const actionTypesSchema = {
-  // @ts-expect-error TS2769: No overload matches this call
-  schema: schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type))),
+  schema: schema.enum(RESPONSE_ACTION_TYPE),
   options: { minSize: 1, maxSize: RESPONSE_ACTION_TYPE.length },
 };
 

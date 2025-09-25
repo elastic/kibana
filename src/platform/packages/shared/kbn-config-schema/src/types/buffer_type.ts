@@ -17,6 +17,10 @@ export class BufferType extends Type<Buffer> {
     super(internals.binary(), options);
   }
 
+  protected getDefault(defaultValue?: Buffer): Buffer | undefined {
+    return defaultValue;
+  }
+
   protected handleError(type: string, { value }: Record<string, any>) {
     if (type === 'any.required' || type === 'binary.base') {
       return `expected value of type [Buffer] but got [${typeDetect(value)}]`;

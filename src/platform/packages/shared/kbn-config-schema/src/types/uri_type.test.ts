@@ -87,20 +87,20 @@ describe('#scheme', () => {
 
 describe('#defaultValue', () => {
   test('returns default when URI is undefined', () => {
-    expect(schema.uri({ defaultValue: 'http://localhost:9200' }).validate(undefined)).toBe(
+    expect(schema.uri().default('http://localhost:9200').validate(undefined)).toBe(
       'http://localhost:9200'
     );
   });
 
   test('returns value when specified', () => {
     expect(
-      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://kibana.local')
+      schema.uri().default('http://localhost:9200').validate('http://kibana.local')
     ).toBe('http://kibana.local');
   });
 
   test('returns value from context when context reference is specified', () => {
     expect(
-      schema.uri({ defaultValue: schema.contextRef('some_uri') }).validate(undefined, {
+      schema.uri().default(schema.contextRef('some_uri')).validate(undefined, {
         some_uri: 'http://kibana.local',
       })
     ).toBe('http://kibana.local');

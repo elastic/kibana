@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema/src/types/type';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import {
@@ -53,13 +54,14 @@ const apmConfigSchema = schema.object({
 function createProductTiersSchema() {
   return Object.entries(KIBANA_PRODUCT_TIERS).reduce<Type<KibanaProductTier> | Type<never>>(
     (acc, [productType, tiers]) => {
-      const tiersSchema = tiers.length
-        ? schema.oneOf(
-            tiers.map((tier) => schema.literal(tier)) as [Type<KibanaProductTier>] // This cast is needed because it's different to Type<T>[] :sight:
-          )
-        : schema.never();
+      const tiersSchema = tiers.length ? schema.enum<KibanaProductTier>(tiers) : schema.never();
 
-      return schema.conditional(schema.siblingRef('project_type'), productType, tiersSchema, acc);
+      return schema.conditional(
+        schema.siblingRef<string>('project_type'),
+        productType,
+        tiersSchema,
+        acc
+      );
     },
     schema.never()
   );
@@ -92,13 +94,7 @@ const configSchema = schema.object({
       {
         project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
-        project_type: schema.maybe(
-          schema.oneOf(
-            KIBANA_SOLUTIONS.map((solution) => schema.literal(solution)) as [
-              Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
-            ]
-          )
-        ),
+        project_type: schema.maybe(schema.enum<KibanaSolution>(KIBANA_SOLUTIONS)),
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
         in_trial: schema.maybe(schema.boolean()),

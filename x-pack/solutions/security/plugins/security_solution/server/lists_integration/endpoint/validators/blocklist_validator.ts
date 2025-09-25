@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -23,13 +23,9 @@ import { EndpointArtifactExceptionValidationError } from './errors';
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
 
-const FileHashField = schema.oneOf(
-  allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]
-);
+const FileHashField = schema.enum(allowedHashes);
 
-const FilePath = schema.oneOf(
-  allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
-);
+const FilePath = schema.enum(allowedFilePaths);
 
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 

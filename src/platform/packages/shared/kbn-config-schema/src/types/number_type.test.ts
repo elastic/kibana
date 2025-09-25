@@ -87,11 +87,23 @@ describe('#unsafe', () => {
 
 describe('#defaultValue', () => {
   test('returns default when number is undefined', () => {
-    expect(schema.number({ defaultValue: 2 }).validate(undefined)).toBe(2);
+    expect(schema.number().default(2).validate(undefined)).toBe(2);
   });
 
   test('returns value when specified', () => {
-    expect(schema.number({ defaultValue: 2 }).validate(3)).toBe(3);
+    expect(schema.number().default(2).validate(3)).toBe(3);
+  });
+
+  test('should allow only number defaults', () => {
+    schema.number().default(123);
+    // @ts-expect-error
+    schema.number().default(undefined);
+    // @ts-expect-error
+    schema.number().default('some-string');
+    // @ts-expect-error
+    schema.number().default(false);
+    // @ts-expect-error
+    schema.number().default(null);
   });
 });
 

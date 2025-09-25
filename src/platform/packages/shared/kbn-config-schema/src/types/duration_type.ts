@@ -12,35 +12,27 @@ import type { Duration } from '../duration';
 import { ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
+import { Type, type DefaultValue } from './type';
 import type { Reference } from '../references';
-import { Type } from './type';
 
 export type DurationValueType = Duration | string | number;
 
+export type DurationDefaultValue =
+  | DurationValueType
+  | (() => DurationValueType)
+  | Reference<Duration>; // references must only be a Duration
+
 export interface DurationOptions {
-  // we need to special-case defaultValue as we want to handle string inputs too
-  defaultValue?: DurationValueType | Reference<DurationValueType> | (() => DurationValueType);
+  defaultValue?: DurationDefaultValue;
   validate?: (value: Duration) => string | void;
   min?: DurationValueType;
   max?: DurationValueType;
 }
 
-export class DurationType extends Type<Duration> {
+export class DurationType extends Type<Duration, Duration, DurationDefaultValue> {
   constructor(options: DurationOptions = {}) {
-    let defaultValue;
-    if (typeof options.defaultValue === 'function') {
-      const originalDefaultValue = options.defaultValue;
-      defaultValue = () => ensureDuration(originalDefaultValue());
-    } else if (
-      typeof options.defaultValue === 'string' ||
-      typeof options.defaultValue === 'number'
-    ) {
-      defaultValue = ensureDuration(options.defaultValue);
-    } else {
-      defaultValue = options.defaultValue;
-    }
-
     let schema = internals.duration();
+
     if (options.min) {
       schema = schema.min(options.min);
     }
@@ -48,7 +40,19 @@ export class DurationType extends Type<Duration> {
       schema = schema.max(options.max);
     }
 
-    super(schema, { validate: options.validate, defaultValue });
+    super(schema, {
+      validate: options.validate,
+      defaultValue: options.defaultValue,
+    });
+  }
+
+  getDefault(defaultValue?: DurationDefaultValue): DefaultValue<Duration> | undefined {
+    if (typeof defaultValue === 'function') {
+      return () => ensureDuration(defaultValue());
+    } else if (typeof defaultValue === 'string' || typeof defaultValue === 'number') {
+      return ensureDuration(defaultValue);
+    }
+    return defaultValue;
   }
 
   protected handleError(

@@ -27,11 +27,8 @@ export const RUNTIME_FIELD_TYPES2 = [
   'geo_point',
 ] as const;
 
-export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
-  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
-  ]
-);
+export const runtimeFieldNonCompositeFieldsSpecTypeSchema =
+  schema.enum<RuntimeType>(RUNTIME_FIELD_TYPES2);
 
 const primitiveRuntimeFieldSchemaShared = {
   script: schema.maybe(

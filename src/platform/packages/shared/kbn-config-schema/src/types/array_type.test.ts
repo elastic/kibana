@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
 import { schema } from '../..';
 
 test('returns value if it matches the type', () => {
@@ -108,7 +110,7 @@ test('fails for null values if optional', () => {
 });
 
 test('returns empty array if input is empty but type has default value', () => {
-  const type = schema.arrayOf(schema.string({ defaultValue: 'test' }));
+  const type = schema.arrayOf(schema.string().default('test'));
   expect(type.validate([])).toEqual([]);
 });
 
@@ -139,7 +141,7 @@ test('array within array', () => {
 test('object within array', () => {
   const type = schema.arrayOf(
     schema.object({
-      foo: schema.string({ defaultValue: 'foo' }),
+      foo: schema.string().default('foo'),
     })
   );
 
@@ -187,6 +189,36 @@ describe('#maxSize', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { maxSize: 1 }).validate(['foo', 'bar'])
     ).toThrowErrorMatchingInlineSnapshot(`"array size is [2], but cannot be greater than [1]"`);
+  });
+});
+
+describe('#validate', () => {
+  test('should validate with correct type', () => {
+    schema.arrayOf(
+      schema.object({
+        foo: schema.string(),
+      }),
+      {
+        validate: (value) => {
+          expectType<typeof value>([{ foo: 'test' }]);
+        },
+      }
+    );
+  });
+});
+
+describe('#defaultValue', () => {
+  test('should validate with correct defaultValue', () => {
+    const defaultValue = [{ foo: 'test' }];
+    const type = schema.arrayOf(
+      schema.object({
+        foo: schema.string(),
+      }),
+      {
+        defaultValue,
+      }
+    );
+    expect(type.validate(undefined)).toEqual(defaultValue);
   });
 });
 

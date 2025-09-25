@@ -10,18 +10,31 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type {
+  TypeOptions,
+  ExtendsDeepOptions,
+  UnknownOptions,
+  SomeType,
+  DefaultValue,
+} from './type';
 import { Type } from './type';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
-export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>> & UnknownOptions;
+export type RecordOfOptions<K extends string, T extends SomeType> = TypeOptions<
+  Record<K, T['_output']>,
+  Record<K, T['_input']>
+> &
+  UnknownOptions;
 
-export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
+export class RecordOfType<K extends string, T extends SomeType> extends Type<
+  Record<K, T['_output']>,
+  Record<K, T['_input']>
+> {
   private readonly keyType: Type<K>;
-  private readonly valueType: Type<V>;
-  private readonly options: RecordOfOptions<K, V>;
+  private readonly valueType: T;
+  private readonly options: RecordOfOptions<K, T>;
 
-  constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
+  constructor(keyType: Type<K>, valueType: T, options: RecordOfOptions<K, T> = {}) {
     let schema = internals
       .record()
       .entries(keyType.getSchema(), valueType.getSchema())
@@ -41,12 +54,18 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
     this.options = options;
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
+  public extendsDeep(options: ExtendsDeepOptions): RecordOfType<K, T> {
     return new RecordOfType(
       this.keyType.extendsDeep(options),
-      this.valueType.extendsDeep(options),
+      this.valueType.extendsDeep(options) as T,
       this.options
     );
+  }
+
+  protected getDefault(
+    defaultValue?: DefaultValue<Record<K, T['_input']>>
+  ): DefaultValue<Record<K, T['_input']>> | undefined {
+    return defaultValue;
   }
 
   protected handleError(

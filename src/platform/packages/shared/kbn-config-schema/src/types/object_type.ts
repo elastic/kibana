@@ -10,39 +10,80 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type {
+  TypeOptions,
+  ExtendsDeepOptions,
+  UnknownOptions,
+  SomeType,
+  TypeOrLazyType,
+  DefaultValue,
+} from './type';
 import { Type } from './type';
 import { ValidationError } from '../errors';
+import type { OptionalizeObject } from '../helpers/types';
 
-export type Props = Record<string, Type<any>>;
+/**
+ * Generic type for inferring `schema.object` type.
+ *
+ * @example
+ * ```ts
+ * function generateSchema<T extends SomeObjectType>(type: T) {
+ *   return schema.object({
+ *     id: schema.string(),
+ *     type, // built up from type of T
+ *   });
+ * }
+ * ```
+ */
+export type SomeObjectType = ObjectType<any, any, any>;
 
-export type NullableProps = Record<string, Type<any> | undefined | null>;
+/**
+ * Used to define props to pass to `schema.object`.
+ *
+ * @note should *only* be used with `satisfies` to ensure the correct type is inferred.
+ *
+ * @example
+ * ```ts
+ * const mySchemaProps = {
+ *   name: schema.string(),
+ *   age: schema.number(),
+ * } satisfies ObjectProps;
+ * const mySchema = schema.object(mySchemaProps);
+ * ```
+ */
+export type ObjectProps = Record<string, SomeType>;
 
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
+export type ObjectOutputType<Props extends ObjectProps> = OptionalizeObject<{
+  [k in keyof Props]: Props[k]['_output'];
+}>;
 
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
+export type ObjectInputType<Props extends ObjectProps> = OptionalizeObject<{
+  [k in keyof Props]: Props[k]['_input'];
+}>;
+
+export type NullableProps = Record<string, SomeType | undefined | null>;
+
+type TypeOf<RT extends TypeOrLazyType> = RT extends () => SomeType
   ? ReturnType<RT>['type']
-  : RT extends Type<any>
+  : RT extends SomeType
   ? RT['type']
   : never;
 
-type OptionalProperties<Base extends Props> = Pick<
+type OptionalProperties<Base extends ObjectProps> = Pick<
   Base,
   {
     [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? Key : never;
   }[keyof Base]
 >;
 
-type RequiredProperties<Base extends Props> = Pick<
+type RequiredProperties<Base extends ObjectProps> = Pick<
   Base,
   {
     [Key in keyof Base]: undefined extends TypeOf<Base[Key]> ? never : Key;
   }[keyof Base]
 >;
 
-// Because of https://github.com/Microsoft/TypeScript/issues/14041
-// this might not have perfect _rendering_ output, but it will be typed.
-export type ObjectResultType<P extends Props> = Readonly<
+export type ObjectResultType<P extends ObjectProps> = Readonly<
   { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } & {
     [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
   }
@@ -55,17 +96,9 @@ type DefinedProperties<Base extends NullableProps> = Pick<
   }[keyof Base]
 >;
 
-type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> & {
+type ExtendedProps<P extends ObjectProps, NP extends NullableProps> = Omit<P, keyof NP> & {
   [K in keyof DefinedProperties<NP>]: NP[K];
 };
-
-type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
-  ExtendedProps<P, NP>
->;
-
-type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = ObjectTypeOptions<
-  ExtendedProps<P, NP>
->;
 
 interface ObjectTypeOptionsMeta {
   /**
@@ -75,15 +108,19 @@ interface ObjectTypeOptionsMeta {
   id?: string;
 }
 
-export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
-  UnknownOptions & { meta?: TypeOptions<ObjectResultType<P>>['meta'] & ObjectTypeOptionsMeta };
+export type ObjectTypeOptions<Output, Input = Output> = TypeOptions<Output, Input> &
+  UnknownOptions & { meta?: TypeOptions<Output, Input>['meta'] & ObjectTypeOptionsMeta };
 
-export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
-  private props: P;
-  private options: ObjectTypeOptions<P>;
-  private propSchemas: Record<string, AnySchema>;
+export class ObjectType<
+  P extends ObjectProps,
+  Output = ObjectOutputType<P>,
+  Input = ObjectInputType<P>
+> extends Type<Output, Input> {
+  #props: P;
+  #options: ObjectTypeOptions<Output, Input>;
+  #propSchemas: Record<string, AnySchema>;
 
-  constructor(props: P, options: ObjectTypeOptions<P> = {}) {
+  constructor(props: P, options: ObjectTypeOptions<Output, Input> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     const { unknowns, ...typeOptions } = options;
     for (const [key, value] of Object.entries(props)) {
@@ -107,9 +144,9 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     }
 
     super(schema, typeOptions);
-    this.props = props;
-    this.propSchemas = schemaKeys;
-    this.options = options;
+    this.#props = props;
+    this.#propSchemas = schemaKeys;
+    this.#options = options;
   }
 
   /**
@@ -144,11 +181,12 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
    * ```ts
    * const origin = schema.object({
    *   initial: schema.string(),
-   * }, { defaultValue: { initial: 'foo' }});
+   * }).default({ initial: 'foo' });
    *
    * const extended = origin.extends({
    *   added: schema.number(),
-   * }, { defaultValue: { initial: 'foo', added: 'bar' }});
+   * }).default({ initial: 'foo', added: 'bar' });
+   * ```
    *
    * @remarks
    * `extends` only support extending first-level properties. It's currently not possible to perform deep/nested extensions.
@@ -168,15 +206,25 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
    *   }),
    * });
    *
-   * // TypeOf<typeof extended> is `{ foo: string; nested: { c: string } }`
+   * // TypeOf<typeof extended> -> { foo: string; nested: { c: string } }
    * ```
    */
-  public extends<NP extends NullableProps>(
+  public extends<
+    T extends SomeObjectType,
+    NP extends T['props'] // must derive props from general type to infer precise types
+  >(
     newProps: NP,
-    newOptions?: ExtendedObjectTypeOptions<P, NP>
-  ): ExtendedObjectType<P, NP> {
+    newOptions?: ObjectTypeOptions<
+      ObjectOutputType<ExtendedProps<P, NP>>,
+      ObjectInputType<ExtendedProps<P, NP>>
+    >
+  ): ObjectType<
+    ExtendedProps<P, NP>,
+    ObjectOutputType<ExtendedProps<P, NP>>,
+    ObjectInputType<ExtendedProps<P, NP>>
+  > {
     const extendedProps = Object.entries({
-      ...this.props,
+      ...this.#props,
       ...newProps,
     }).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
@@ -186,15 +234,18 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     }, {} as ExtendedProps<P, NP>);
 
     const extendedOptions = {
-      ...this.options,
+      ...this.#options,
       ...newOptions,
-    } as ExtendedObjectTypeOptions<P, NP>;
+    } as ObjectTypeOptions<
+      ObjectOutputType<ExtendedProps<P, NP>>,
+      ObjectInputType<ExtendedProps<P, NP>>
+    >;
 
     return new ObjectType(extendedProps, extendedOptions);
   }
 
-  public extendsDeep(options: ExtendsDeepOptions) {
-    const extendedProps = Object.entries(this.props).reduce((memo, [key, value]) => {
+  public extendsDeep(options: ExtendsDeepOptions): Type<Output, Input> {
+    const extendedProps = Object.entries(this.#props).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
         return {
           ...memo,
@@ -204,12 +255,16 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       return memo;
     }, {} as P);
 
-    const extendedOptions: ObjectTypeOptions<P> = {
-      ...this.options,
+    const extendedOptions: ObjectTypeOptions<Output, Input> = {
+      ...this.#options,
       ...(options.unknowns ? { unknowns: options.unknowns } : {}),
     };
 
     return new ObjectType(extendedProps, extendedOptions);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<Input>): DefaultValue<Input> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { reason, value }: Record<string, any>) {
@@ -228,16 +283,36 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
   /**
    * Return the schema for this object's underlying properties
+   *
+   * @example
+   * ```ts
+   * const schema1 = schema.object({
+   *   str: schema.string(),
+   *   num: schema.number(),
+   * });
+   *
+   * const schema2 = schema.object({
+   *   ...schema1.props,
+   *   bool: schema.boolean(),
+   * });
+   * ```
+   */
+  public get props(): P {
+    return { ...this.#props };
+  }
+
+  /**
+   * @deprecated use `schema.props` instead
    */
   public getPropSchemas(): P {
-    return { ...this.props };
+    return { ...this.#props };
   }
 
   validateKey(key: string, value: any) {
-    if (!this.propSchemas[key]) {
+    if (!this.#propSchemas[key]) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    const { value: validatedValue, error } = this.propSchemas[key].validate(value);
+    const { value: validatedValue, error } = this.#propSchemas[key].validate(value);
     if (error) {
       throw new ValidationError(error as any, key);
     }

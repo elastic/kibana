@@ -9,7 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
 export type NumberOptions = TypeOptions<number> & {
@@ -37,6 +37,10 @@ export class NumberType extends Type<number> {
     }
 
     super(schema, options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<number>): DefaultValue<number> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { limit, value }: Record<string, any>) {

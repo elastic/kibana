@@ -7,27 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Props, ObjectTypeOptions } from './object_type';
+import type { ObjectTypeOptions, SomeObjectType } from './object_type';
 import { ObjectType } from './object_type';
+import type { SomeType } from './type';
 
-export type IntersectionTypeOptions<T extends Props = any> = ObjectTypeOptions<T>;
+export type IntersectionInput<T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>> =
+  T extends readonly [infer First, ...infer Rest]
+    ? First extends SomeObjectType
+      ? Rest extends readonly [SomeObjectType, ...SomeObjectType[]]
+        ? First['_input'] & IntersectionInput<Rest>
+        : First['_input']
+      : never
+    : never;
+
+export type IntersectionOutput<T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>> =
+  T extends readonly [infer First, ...infer Rest]
+    ? First extends SomeObjectType
+      ? Rest extends readonly [SomeObjectType, ...SomeObjectType[]]
+        ? First['_output'] & IntersectionOutput<Rest>
+        : First['_output']
+      : never
+    : never;
 
 export class IntersectionType<
-  RTS extends Array<ObjectType<any>>,
-  T extends Props
-> extends ObjectType<T> {
-  constructor(types: RTS, options?: IntersectionTypeOptions<T>) {
+  T extends Readonly<[SomeObjectType, ...SomeObjectType[]]>
+> extends ObjectType<IntersectionOutput<T>, IntersectionInput<T>> {
+  constructor(types: T, options?: ObjectTypeOptions<IntersectionOutput<T>, IntersectionInput<T>>) {
     const props = types.reduce((mergedProps, type) => {
-      Object.entries(type.getPropSchemas() as Record<string, any>).forEach(([key, value]) => {
+      const typeProps = type.props as Record<string, SomeType>;
+      Object.entries(typeProps).forEach(([key, value]) => {
         if (mergedProps[key] !== undefined) {
           throw new Error(`Duplicate key found in intersection: '${key}'`);
         }
-        mergedProps[key as keyof T] = value;
+        mergedProps[key] = value;
       });
 
       return mergedProps;
-    }, {} as T);
+    }, {} as Record<string, SomeType>) as IntersectionOutput<T>;
 
-    super(props, options);
+    super(props, options as any);
   }
 }

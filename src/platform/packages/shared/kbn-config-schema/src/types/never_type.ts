@@ -15,6 +15,10 @@ export class NeverType extends Type<never> {
     super(internals.any().forbidden());
   }
 
+  protected getDefault() {
+    return undefined;
+  }
+
   protected handleError(type: string) {
     switch (type) {
       case 'any.unknown':

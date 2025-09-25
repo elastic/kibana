@@ -11,8 +11,8 @@ import { schema } from '../..';
 
 test('required by default', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
-    schema.contextRef('context_value_2'),
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
     schema.string(),
     schema.string()
   );
@@ -27,8 +27,8 @@ test('required by default', () => {
 
 test('returns default', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
-    schema.contextRef('context_value_2'),
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
     schema.string(),
     schema.string(),
     {
@@ -46,10 +46,10 @@ test('returns default', () => {
 
 test('properly handles nested types with defaults', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
-    schema.contextRef('context_value_2'),
-    schema.string({ defaultValue: 'equal' }),
-    schema.string({ defaultValue: 'not equal' })
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
+    schema.string().default('equal'),
+    schema.string().default('not equal')
   );
 
   expect(
@@ -67,10 +67,26 @@ test('properly handles nested types with defaults', () => {
   ).toEqual('not equal');
 });
 
+test('properly handles oneOf types with defaults', () => {
+  const type = schema.conditional(
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
+    schema.never(),
+    schema.oneOf([schema.literal('good'), schema.literal('bad')], { defaultValue: 'good' })
+  );
+
+  expect(
+    type.validate(undefined, {
+      context_value_1: 0,
+      context_value_2: 1,
+    })
+  ).toEqual('good');
+});
+
 test('properly validates types according chosen schema', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
-    schema.contextRef('context_value_2'),
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
     schema.string({ minLength: 2 }),
     schema.string({ maxLength: 1 })
   );
@@ -110,7 +126,7 @@ test('properly validates types according chosen schema', () => {
 
 test('properly validates when compares with Schema', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
+    schema.contextRef<number | string>('context_value_1'),
     schema.number(),
     schema.string({ minLength: 2 }),
     schema.string({ minLength: 3 })
@@ -184,8 +200,8 @@ test('properly validates when compares with "null" literal Schema', () => {
 
 test('properly handles schemas with incompatible types', () => {
   const type = schema.conditional(
-    schema.contextRef('context_value_1'),
-    schema.contextRef('context_value_2'),
+    schema.contextRef<number>('context_value_1'),
+    schema.contextRef<number>('context_value_2'),
     schema.string(),
     schema.boolean()
   );
@@ -267,7 +283,7 @@ test('works with both context and sibling references', () => {
     key: schema.string(),
     value: schema.conditional(
       schema.siblingRef('key'),
-      schema.contextRef('context_key'),
+      schema.contextRef<number>('context_key'),
       schema.number(),
       schema.string()
     ),
@@ -370,8 +386,8 @@ describe('#validate', () => {
         value: schema.conditional(
           schema.siblingRef('key'),
           'number',
-          schema.number({ defaultValue: 100 }),
-          schema.string({ defaultValue: 'some-string' })
+          schema.number().default(100),
+          schema.string().default('some-string')
         ),
       },
       {

@@ -10,12 +10,16 @@
 import typeDetect from 'type-detect';
 import type { Stream } from 'stream';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
 export class StreamType extends Type<Stream> {
   constructor(options?: TypeOptions<Stream>) {
     super(internals.stream(), options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<Stream>): DefaultValue<Stream> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

@@ -40,11 +40,11 @@ test('includes namespace in failure', () => {
 
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
-    expect(schema.boolean({ defaultValue: true }).validate(undefined)).toBe(true);
+    expect(schema.boolean().default(true).validate(undefined)).toBe(true);
   });
 
   test('returns value when specified', () => {
-    expect(schema.boolean({ defaultValue: true }).validate(false)).toBe(false);
+    expect(schema.boolean().default(true).validate(false)).toBe(false);
   });
 });
 

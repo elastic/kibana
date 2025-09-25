@@ -9,7 +9,7 @@
 
 import { Reference } from './reference';
 
-export class ContextReference<T> extends Reference<T> {
+export class ContextReference<T = any> extends Reference<T> {
   constructor(key: string) {
     super(`$${key}`);
   }

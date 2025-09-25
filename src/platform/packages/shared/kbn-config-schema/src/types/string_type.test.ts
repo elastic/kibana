@@ -152,19 +152,31 @@ describe('#hostname', () => {
 
 describe('#defaultValue', () => {
   test('returns default when string is undefined', () => {
-    expect(schema.string({ defaultValue: 'foo' }).validate(undefined)).toBe('foo');
+    expect(schema.string().default('foo').validate(undefined)).toBe('foo');
   });
 
   test('returns value when specified', () => {
-    expect(schema.string({ defaultValue: 'foo' }).validate('bar')).toBe('bar');
+    expect(schema.string().default('foo').validate('bar')).toBe('bar');
   });
 
   test('returns value from context when context reference is specified', () => {
     expect(
-      schema.string({ defaultValue: schema.contextRef('some_value') }).validate(undefined, {
+      schema.string().default(schema.contextRef('some_value')).validate(undefined, {
         some_value: 'some',
       })
     ).toBe('some');
+  });
+
+  test('should allow only string defaults', () => {
+    schema.string().default('some-string');
+    // @ts-expect-error
+    schema.string().default(undefined);
+    // @ts-expect-error
+    schema.string().default(123);
+    // @ts-expect-error
+    schema.string().default(false);
+    // @ts-expect-error
+    schema.string().default(null);
   });
 });
 

@@ -17,6 +17,10 @@ export class BooleanType extends Type<boolean> {
     super(internals.boolean(), options);
   }
 
+  protected getDefault(defaultValue?: boolean): boolean | undefined {
+    return defaultValue;
+  }
+
   protected handleError(type: string, { value }: Record<string, any>) {
     if (type === 'any.required' || type === 'boolean.base') {
       return `expected value of type [boolean] but got [${typeDetect(value)}]`;

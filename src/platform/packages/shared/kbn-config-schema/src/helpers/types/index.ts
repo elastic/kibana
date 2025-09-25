@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reference } from './reference';
-
-export class SiblingReference<T = any> extends Reference<T> {}
+export * from './utils';
+export * from './type_of';
+export * from './schema_of';

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ToolType } from '@kbn/onechat-common';
 import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -122,8 +123,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string(),
-              // @ts-expect-error schema.oneOf expects at least one element, and `map` returns a list
-              type: schema.oneOf(editableToolTypes.map((type) => schema.literal(type))),
+              type: schema.enum<ToolType>(editableToolTypes),
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
               // actual config validation is done in the tool service

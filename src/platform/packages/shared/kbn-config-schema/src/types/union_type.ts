@@ -10,18 +10,24 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import type { ExtendsDeepOptions } from './type';
+import type { DefaultValue, ExtendsDeepOptions, SomeType } from './type';
 import { Type, type TypeOptions, type TypeMeta } from './type';
 
-export type UnionTypeOptions<T> = TypeOptions<T> & {
+export type UnionTypeOptions<T extends Readonly<[SomeType, ...SomeType[]]>> = TypeOptions<
+  T[number]['_output'],
+  T[number]['_input']
+> & {
   meta?: Omit<TypeMeta, 'id'>;
 };
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
-  private readonly unionTypes: RTS;
+export class UnionType<T extends Readonly<[SomeType, ...SomeType[]]>> extends Type<
+  T[number]['_output'],
+  T[number]['_input']
+> {
+  private readonly unionTypes: T;
   private readonly typeOptions?: UnionTypeOptions<T>;
 
-  constructor(types: RTS, options?: UnionTypeOptions<T>) {
+  constructor(types: T, options?: UnionTypeOptions<T>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
     super(schema, options);
@@ -30,10 +36,14 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
-    return new UnionType(
-      this.unionTypes.map((t) => t.extendsDeep(options)),
-      this.typeOptions
-    );
+    const newTypes = this.unionTypes.map((t) => t.extendsDeep(options)) as any;
+    return new UnionType(newTypes, this.typeOptions);
+  }
+
+  protected getDefault(
+    defaultValue?: DefaultValue<T[number]['_input']>
+  ): DefaultValue<T[number]['_input']> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {

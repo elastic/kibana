@@ -17,4 +17,8 @@ export class Lazy<T> extends Type<T> {
   constructor(id: string) {
     super(internals.link(`#${id}`));
   }
+
+  protected getDefault(defaultValue?: T): T | undefined {
+    return defaultValue;
+  }
 }

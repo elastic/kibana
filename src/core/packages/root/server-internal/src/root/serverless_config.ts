@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema, type Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-groups';
 
@@ -20,13 +20,7 @@ import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-gro
 // BWC can be ensured by adding the object definition as another alternative to `schema.oneOf`.
 
 // BOOKMARK - List of Kibana project types
-const serverlessConfigSchema = schema.maybe(
-  schema.oneOf(
-    KIBANA_PROJECTS.map((projectName) => schema.literal(projectName)) as [
-      Type<KibanaProject> // This cast is needed because it's different to Type<T>[] :sight:
-    ]
-  )
-);
+const serverlessConfigSchema = schema.maybe(schema.enum<KibanaProject>(KIBANA_PROJECTS));
 
 export type ServerlessConfigType = TypeOf<typeof serverlessConfigSchema>;
 

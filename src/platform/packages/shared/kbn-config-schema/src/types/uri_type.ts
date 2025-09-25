@@ -9,7 +9,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import type { TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
 import { Type } from './type';
 
 export type URIOptions = TypeOptions<string> & {
@@ -19,6 +19,10 @@ export type URIOptions = TypeOptions<string> & {
 export class URIType extends Type<string> {
   constructor(options: URIOptions = {}) {
     super(internals.string().uri({ scheme: options.scheme }), options);
+  }
+
+  protected getDefault(defaultValue?: DefaultValue<string>): DefaultValue<string> | undefined {
+    return defaultValue;
   }
 
   protected handleError(type: string, { value, scheme }: Record<string, unknown>) {

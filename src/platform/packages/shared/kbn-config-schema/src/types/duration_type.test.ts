@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Duration } from 'moment';
 import { duration as momentDuration } from 'moment';
 import { schema } from '../..';
 import { ensureDuration } from '../duration';
+import { expectType } from 'tsd';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
@@ -111,9 +113,9 @@ describe('#defaultValue', () => {
   test('can be a reference to a moment.Duration', () => {
     expect(
       object({
-        source: duration({ defaultValue: 600 }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default(600),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(700, 'ms') })
     ).toMatchInlineSnapshot(`
       Object {
@@ -125,9 +127,9 @@ describe('#defaultValue', () => {
 
     expect(
       object({
-        source: duration({ defaultValue: '1h' }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default('1h'),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
       Object {
@@ -139,9 +141,9 @@ describe('#defaultValue', () => {
 
     expect(
       object({
-        source: duration({ defaultValue: momentDuration(1, 'hour') }),
-        target: duration({ defaultValue: siblingRef('source') }),
-        fromContext: duration({ defaultValue: contextRef('val') }),
+        source: duration().default(momentDuration(1, 'hour')),
+        target: duration().default(siblingRef('source')),
+        fromContext: duration().default(contextRef('val')),
       }).validate({}, { val: momentDuration(2, 'hour') })
     ).toMatchInlineSnapshot(`
       Object {
@@ -150,6 +152,29 @@ describe('#defaultValue', () => {
         "target": "PT1H",
       }
     `);
+  });
+});
+
+describe('#validate', () => {
+  test('should pass only Duration to validate', () => {
+    duration({
+      defaultValue: momentDuration(1, 'second'),
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
+    duration({
+      defaultValue: 123,
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
+    duration({
+      defaultValue: '1h',
+      validate(value) {
+        expectType<Duration>(value);
+      },
+    });
   });
 });
 

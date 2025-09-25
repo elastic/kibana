@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
 import { schema } from '../..';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
@@ -211,6 +213,27 @@ describe('#extendsDeep', () => {
   });
 });
 
+describe('#validate', () => {
+  test('should validate with correct type', () => {
+    schema.recordOf(schema.string(), schema.string(), {
+      validate: (value) => {
+        const expected: Record<string, string> = { foo: 'test' };
+        expectType<typeof value>(expected);
+      },
+    });
+  });
+});
+
+describe('#defaultValue', () => {
+  test('should validate with correct defaultValue', () => {
+    const defaultValue = { foo: 'test' };
+    const type = schema.recordOf(schema.string(), schema.string(), {
+      defaultValue,
+    });
+    expect(type.validate(undefined)).toEqual(defaultValue);
+  });
+});
+
 describe('nested unknowns', () => {
   // we don't allow strip unknowns in oneOf for now because joi
   // doesn't allow it in joi.alternatives and we use that for oneOf
@@ -370,12 +393,12 @@ test('handles references', () => {
       schema.contextRef('scenario'),
       'context',
       schema.object({
-        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
-        sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string().default(schema.contextRef('context_value')),
+        sibling: schema.string().default('sibling#1'),
       }),
       schema.object({
-        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
-        sibling: schema.string({ defaultValue: 'sibling#1' }),
+        value: schema.string().default(schema.siblingRef('sibling')),
+        sibling: schema.string().default('sibling#1'),
       })
     )
   );

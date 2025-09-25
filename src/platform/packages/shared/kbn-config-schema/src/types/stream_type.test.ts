@@ -47,12 +47,12 @@ test('includes namespace in failure', () => {
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = new Stream();
-    expect(schema.stream({ defaultValue: value }).validate(undefined)).toBeInstanceOf(Stream);
+    expect(schema.stream().default(value).validate(undefined)).toBeInstanceOf(Stream);
   });
 
   test('returns value when specified', () => {
     const value = new Stream();
-    expect(schema.stream({ defaultValue: new PassThrough() }).validate(value)).toStrictEqual(value);
+    expect(schema.stream().default(new PassThrough()).validate(value)).toStrictEqual(value);
   });
 });
 
