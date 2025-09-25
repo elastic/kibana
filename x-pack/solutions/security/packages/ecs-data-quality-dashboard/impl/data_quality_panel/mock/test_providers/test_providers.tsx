@@ -20,6 +20,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiThemeProvider } from '@elastic/eui';
 
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataQualityProviderProps } from '../../data_quality_context';
 import { DataQualityProvider } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
@@ -35,7 +36,6 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -66,7 +66,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => { },
+      error: () => {},
     },
   });
 
@@ -91,11 +91,13 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               productDocBase={{
                 installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
               }}
-              settings={{
-                client: {
-                  get: jest.fn(),
-                },
-              } as unknown as SettingsStart}
+              settings={
+                {
+                  client: {
+                    get: jest.fn(),
+                  },
+                } as unknown as SettingsStart
+              }
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
               getUrlForApp={jest.fn()}

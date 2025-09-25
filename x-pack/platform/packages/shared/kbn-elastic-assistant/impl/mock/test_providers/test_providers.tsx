@@ -66,7 +66,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => { },
+      error: () => {},
     },
   });
 
@@ -88,11 +88,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
             http={mockHttp}
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
-            settings={{
-              client: {
-                get: jest.fn(),
-              },
-            } as unknown as SettingsStart}
+            settings={
+              {
+                client: {
+                  get: jest.fn(),
+                },
+              } as unknown as SettingsStart
+            }
             {...providerContext}
             currentAppId={'test'}
             productDocBase={{

@@ -64,7 +64,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     assistantAvailability: { isAssistantEnabled },
     baseConversations,
     getLastConversationId,
-    settings
+    settings,
   } = useAssistantContext();
 
   const defaultConnector = useMemo(

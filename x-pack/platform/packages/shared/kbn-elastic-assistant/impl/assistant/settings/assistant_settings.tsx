@@ -75,8 +75,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     conversations,
     conversationsLoaded,
   }) => {
-    const { http, toasts, selectedSettingsTab, setSelectedSettingsTab,       settings,
- } = useAssistantContext();
+    const { http, toasts, selectedSettingsTab, setSelectedSettingsTab, settings } =
+      useAssistantContext();
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
