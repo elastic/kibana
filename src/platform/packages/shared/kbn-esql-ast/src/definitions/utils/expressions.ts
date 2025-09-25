@@ -66,8 +66,6 @@ export function getExpressionType(
         return 'boolean';
       case 'string':
         return 'keyword';
-      case 'text':
-        return 'keyword';
       case 'datetime':
         return 'date';
       default:
