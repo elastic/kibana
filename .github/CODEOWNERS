@@ -1997,8 +1997,11 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects @elastic/kibana-core
 /src/platform/test/interpreter_functional @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/blob/main/test/interpreter_functional/plugins/kbn_tp_run_pipeline/kibana.jsonc#L4
 /src/platform/test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
+x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/response-ops # Shared files across test suites owned by Core and Response Ops
 /x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
+x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
+x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/status_page.ts @elastic/kibana-core
@@ -2008,8 +2011,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @
 /x-pack/platform/test/api_integration/services/usage_api.ts @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
-x-pack/platform/test/plugin_api_integration/test_suites/platform/elasticsearch_client.ts @elastic/kibana-core
-x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 /x-pack/platform/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /src/platform/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
 /src/platform/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
