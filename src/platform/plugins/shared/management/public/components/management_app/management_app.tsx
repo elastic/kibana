@@ -23,6 +23,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { AppContextProvider } from './management_context';
 import type { ManagementSection } from '../../utils';
 import { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from '../../utils';
@@ -40,6 +41,8 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  licensing?: LicensingPluginStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
@@ -111,6 +114,8 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     kibanaVersion: dependencies.kibanaVersion,
     coreStart,
     chromeStyle,
+    cloud: dependencies.cloud,
+    licensing: dependencies.licensing,
   };
 
   return (

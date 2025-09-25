@@ -8,9 +8,13 @@
  */
 
 import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 
-import { EuiPageBody } from '@elastic/eui';
+import { EuiPageBody, useEuiTheme } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
+import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 
 import { useAppContext } from '../management_app/management_context';
 import { ClassicEmptyPrompt } from './classic_empty_prompt';
@@ -25,9 +29,18 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
+  const { euiTheme } = useEuiTheme();
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart, cloud, licensing } =
     useAppContext();
   setBreadcrumbs();
+
+  // Check if cloud services are available
+  const isCloudEnabled = cloud?.isCloudEnabled || false;
+  const cloudBaseUrl = cloud?.baseUrl;
+
+  // Check license information
+  const license = useObservable(licensing?.license$ ?? of(undefined));
+  const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
 
   useEffect(() => {
     onAppMounted('');
@@ -52,5 +65,18 @@ export const ManagementLandingPage = ({
     return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
   }
 
-  return <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />;
+  return (
+    <EuiPageBody restrictWidth={true}>
+      {isCloudEnabled && hasEnterpriseLicense && (
+        <div css={css`max-width: 600px;`} >
+          <AutoOpsPromotionCallout
+            cloudBaseUrl={cloudBaseUrl}
+            docsLink="https://www.elastic.co/guide/en/cloud/current/ec-cloud-autoops.html"
+            style={{ margin: `0 ${euiTheme.size.base}`}}
+          />
+        </div>
+      )}
+      <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />
+    </EuiPageBody>
+  );
 };

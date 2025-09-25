@@ -19,6 +19,7 @@ import type {
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -111,6 +112,8 @@ export interface AppDependencies {
   cardsNavigationConfig?: NavigationCardsSubject;
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  licensing?: LicensingPluginStart;
 }
 
 export interface ConfigSchema {

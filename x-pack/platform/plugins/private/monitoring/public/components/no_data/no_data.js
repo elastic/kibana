@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
@@ -75,47 +76,11 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.monitoring.noData.cloud.autoOps.title"
-                defaultMessage="This cluster is connected to AutoOps, our advanced cluster monitoring"
-              />
-            }
-            color="accent"
-            iconType="alert"
+          <AutoOpsPromotionCallout
+            cloudBaseUrl={Legacy.shims.cloudBaseUrl}
+            docsLink="https://www.elastic.co/guide/en/cloud/current/ec-cloud-autoops.html"
             style={{ margin: `0 ${euiTheme.size.l}` }}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.monitoring.noData.cloud.autoOps.description"
-                defaultMessage="Simplify cluster management with insights tailored to your Elasticsearch operations and configuration. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FormattedMessage
-                        id="xpack.monitoring.noData.cloud.autoOps.learnMore"
-                        defaultMessage="Learn more"
-                      />
-                    </a>
-                  ),
-                }}
-              />
-            </p>
-            <EuiButton
-              color="accent"
-              fill
-              size="s"
-              href={`${Legacy.shims.cloudBaseUrl || ''}/connect-cluster-services-portal`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FormattedMessage
-                id="xpack.monitoring.noData.cloud.autoOps.openButton"
-                defaultMessage="Open AutoOps"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}

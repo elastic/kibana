@@ -38,7 +38,7 @@ export const LoadingPage = ({ staticLoadingState }: { staticLoadingState?: boole
 
 const renderRedirections = (clusters: any) => {
   if (!clusters || !clusters.length) {
-    return <Redirect to="/no-data" />;
+    // return <Redirect to="/no-data" />;
   }
   if (clusters.length === 1) {
     // Bypass the cluster listing if there is just 1 cluster

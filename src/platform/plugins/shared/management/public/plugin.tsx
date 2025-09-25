@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -40,11 +41,14 @@ import type { ManagementSection } from './utils';
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
   share: SharePluginSetup;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
 }
 
 interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  licensing?: LicensingPluginStart;
 }
 
 export class ManagementPlugin
@@ -88,7 +92,7 @@ export class ManagementPlugin
 
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
-    { home, share }: ManagementSetupDependencies
+    { home, share, cloud }: ManagementSetupDependencies
   ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
@@ -129,6 +133,8 @@ export class ManagementPlugin
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           coreStart,
+          cloud: deps.cloud,
+          licensing: deps.licensing,
           setBreadcrumbs: (newBreadcrumbs) => {
             if (deps.serverless) {
               // drop the root management breadcrumb in serverless because it comes from the navigation tree

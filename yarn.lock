@@ -4212,6 +4212,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/autoops-promotion-callout@link:src/platform/packages/shared/kbn-management/autoops_promotion_callout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
