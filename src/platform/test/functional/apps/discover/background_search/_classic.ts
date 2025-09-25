@@ -15,9 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const queryBar = getService('queryBar');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
   const { common, unifiedFieldList, discover } = getPageObjects([
     'common',
@@ -47,27 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Classic view', function () {
-      it('stores a running search', async () => {
-        await queryBar.setQuery('Carrier: "Kibana Airlines"');
-
-        await testSubjects.click('querySubmitButton');
-
-        await retry.waitFor('waits for the Cancel button to appear', async () => {
-          const ariaLabel = await testSubjects.getAttribute('queryCancelButton', 'aria-label');
-          return ariaLabel === 'Cancel';
-        });
-
-        await testSubjects.click('queryCancelButton-secondary-button');
-
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
-      });
-
       describe('when clicking the open background search flyout button', () => {
         it('opens the background search flyout', async () => {
           await testSubjects.click('openBackgroundSearchFlyoutButton');

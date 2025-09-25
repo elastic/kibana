@@ -60,9 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('querySubmitButton');
 
-        await retry.waitFor('waits for the Cancel button to appear', async () => {
-          const ariaLabel = await testSubjects.getAttribute('queryCancelButton', 'aria-label');
-          return ariaLabel === 'Cancel';
+        await retry.waitFor('waits for the send to background button to be enabled', async () => {
+          const disabled = await testSubjects.getAttribute(
+            'queryCancelButton-secondary-button',
+            'disabled'
+          );
+          return disabled !== 'true';
         });
 
         await testSubjects.click('queryCancelButton-secondary-button');
