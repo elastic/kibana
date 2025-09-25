@@ -255,6 +255,8 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]step_about_rule[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]step_define_rule[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]step_schedule_rule[\/\\]index.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]pages[\/\\]ai_assisted_rule_creation[\/\\]index.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]pages[\/\\]ai_assisted_rule_creation[\/\\]rule_create_form.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]pages[\/\\]rule_creation[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_details_ui[\/\\]pages[\/\\]rule_details[\/\\]execution_log_table[\/\\]execution_log_table.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_details_ui[\/\\]pages[\/\\]rule_details[\/\\]index.tsx/,
