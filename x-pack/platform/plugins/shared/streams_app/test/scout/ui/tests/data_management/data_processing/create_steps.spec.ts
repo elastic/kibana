@@ -57,7 +57,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     const addStepButton = await pageObjects.streams.getConditionAddStepMenuButton(0);
     await addStepButton.click();
     await pageObjects.streams.clickAddProcessor(false);
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
     await pageObjects.streams.clickSaveProcessor();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
