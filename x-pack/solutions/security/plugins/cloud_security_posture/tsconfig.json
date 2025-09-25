@@ -71,6 +71,7 @@
     "@kbn/licensing-types",
     "@kbn/shared-ux-page-no-data",
     "@kbn/shared-ux-card-no-data",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": ["target/**/*"]
 }

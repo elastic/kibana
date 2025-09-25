@@ -35,6 +35,7 @@ async function fetchIndicesCall(
       '*.settings.index.number_of_replicas',
       '*.settings.index.frozen',
       '*.settings.index.hidden',
+      '*.settings.index.mode',
       '*.data_stream',
     ],
     // for better performance only compute aliases and settings of indices but not mappings
@@ -66,6 +67,7 @@ async function fetchIndicesCall(
         aliases: aliases.length ? aliases : 'none',
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
+        mode: indexData.settings?.index?.mode,
       };
 
       if (indicesStats) {
@@ -107,6 +109,7 @@ async function fetchIndicesCall(
         aliases: aliases.length ? aliases : 'none',
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
+        mode: indexData.settings?.index?.mode,
       };
 
       if (indicesStats) {
@@ -137,6 +140,7 @@ async function fetchIndicesCall(
       aliases: aliases.length ? aliases : 'none',
       hidden: indexData.settings?.index?.hidden === 'true',
       data_stream: indexData.data_stream,
+      mode: indexData.settings?.index?.mode,
     };
   });
 }

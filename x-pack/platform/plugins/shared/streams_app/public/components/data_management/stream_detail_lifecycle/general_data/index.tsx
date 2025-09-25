@@ -134,11 +134,9 @@ export const StreamDetailGeneralData = ({
           <IlmSummary definition={definition} stats={stats} />
         </EuiPanel>
       ) : null}
-      {definition.privileges.monitor && (
-        <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
-        </EuiPanel>
-      )}
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
+        <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
+      </EuiPanel>
     </>
   );
 };
