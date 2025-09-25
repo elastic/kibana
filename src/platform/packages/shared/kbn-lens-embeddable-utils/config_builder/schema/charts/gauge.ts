@@ -33,21 +33,24 @@ import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
-    schema.oneOf([
-      schema.object({
-        type: schema.literal('bullet'),
-        direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
-          defaultValue: 'horizontal',
+    schema.oneOf(
+      [
+        schema.object({
+          type: schema.literal('bullet'),
+          direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+            defaultValue: 'horizontal',
+          }),
         }),
-      }),
-      schema.object({
-        type: schema.oneOf([
-          schema.literal('circle'),
-          schema.literal('semiCircle'),
-          schema.literal('arc'),
-        ]),
-      }),
-    ], defaultValue: { type: "bullet", direction: "horizontal" })
+        schema.object({
+          type: schema.oneOf([
+            schema.literal('circle'),
+            schema.literal('semiCircle'),
+            schema.literal('arc'),
+          ]),
+        }),
+      ],
+      { defaultValue: { type: 'bullet', direction: 'horizontal' } }
+    )
   ),
 };
 
