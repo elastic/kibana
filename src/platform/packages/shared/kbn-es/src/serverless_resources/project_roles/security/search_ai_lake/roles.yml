@@ -43,6 +43,10 @@ _search_ai_lake_analyst:
       privileges:
         - "read"
     - names:
+        - "logs-*"
+      privileges:
+        - "read"
+    - names:
         - "synthetics-*-"
         - "metrics-*-"
         - "logs-*-"
