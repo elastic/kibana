@@ -17,6 +17,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
         '--feature_flags.overrides.core.chrome.projectSideNav=v2',
+        '--uiSettings.overrides.agentBuilder:enabled=true',
+        '--uiSettings.overrides.hideAnnouncements=true',
       ],
     },
     testFiles: [require.resolve('../tests/solution_navigation')],

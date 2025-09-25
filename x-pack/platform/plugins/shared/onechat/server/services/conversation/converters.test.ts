@@ -24,6 +24,7 @@ describe('conversation model converters', () => {
           title: 'conv_title',
           user_id: 'user_id',
           user_name: 'user_name',
+          space: 'space',
           rounds: [
             {
               id: 'round-1',
@@ -59,7 +60,6 @@ describe('conversation model converters', () => {
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
-
         rounds: [
           {
             id: 'round-1',
@@ -149,13 +149,14 @@ describe('conversation model converters', () => {
 
     it('serializes the conversation', () => {
       const conversation = conversationBase();
-      const serialized = toEs(conversation);
+      const serialized = toEs(conversation, 'another-space');
 
       expect(serialized).toEqual({
         agent_id: 'agent_id',
         title: 'conv_title',
         user_id: 'user_id',
         user_name: 'user_name',
+        space: 'another-space',
         rounds: [
           {
             id: 'round-1',
@@ -190,7 +191,7 @@ describe('conversation model converters', () => {
           reasoning: 'reasoning',
         },
       ];
-      const serialized = toEs(conversation);
+      const serialized = toEs(conversation, 'space');
 
       expect(serialized.rounds[0].steps).toEqual([
         {

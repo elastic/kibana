@@ -40,12 +40,9 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
-    processing: {
-      steps: [],
-    },
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
   },
 };
 
@@ -83,6 +80,12 @@ export const SomeThings: StoryFn<{}> = () => {
               title: 'Match everything',
               kql: {
                 query: '*',
+              },
+              system: {
+                name: 'System',
+                filter: {
+                  always: {},
+                },
               },
             },
             change_points: {

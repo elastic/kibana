@@ -140,51 +140,58 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
-  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void,
+  setPackagePolicy: (policy: NewPackagePolicy) => void
 ) => {
-  const input = packagePolicy.inputs?.filter(
+  const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  )[0];
+  );
 
-  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
+  const targetCsp = input?.type.match(/aws|azure/)?.[0];
+
+  // Making sure that the cloud connector is disabled when switching to GCP
   if (
-    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
-    newAgentPolicy?.supports_agentless
+    !targetCsp &&
+    (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
   ) {
-    let targetCsp;
-    if (input?.type.includes('aws')) {
-      targetCsp = 'aws';
-    }
-    if (input?.type.includes('gcp')) {
-      targetCsp = 'gcp';
-    }
-    if (input?.type.includes('azure')) {
-      targetCsp = 'azure';
-    }
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: undefined,
+      },
+    });
 
-    if (targetCsp !== 'aws') {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
-        },
-      });
-      return;
-    }
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: false,
+    });
+    return;
+  }
 
-    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
-      setNewAgentPolicy({
-        ...newAgentPolicy,
-        agentless: {
-          ...newAgentPolicy.agentless,
-          cloud_connectors: {
-            enabled,
-            target_csp: targetCsp,
-          },
+  const cloudConnectorEnabled =
+    input?.streams?.[0]?.vars?.[`${targetCsp}.supports_cloud_connectors`]?.value;
+  if (
+    targetCsp &&
+    newAgentPolicy?.supports_agentless &&
+    (newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorEnabled ||
+      newAgentPolicy.agentless?.cloud_connectors?.target_csp !== targetCsp)
+  ) {
+    setNewAgentPolicy({
+      ...newAgentPolicy,
+      agentless: {
+        ...newAgentPolicy.agentless,
+        cloud_connectors: {
+          enabled: cloudConnectorEnabled,
+          target_csp: targetCsp,
         },
-      });
-    }
+      },
+    });
+
+    setPackagePolicy({
+      ...packagePolicy,
+      supports_cloud_connector: cloudConnectorEnabled,
+    });
   }
 };
 
@@ -430,7 +437,12 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
-  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
+  updateAgentlessCloudConnectorConfig(
+    packagePolicy,
+    newAgentPolicy,
+    setNewAgentPolicy,
+    setPackagePolicy
+  );
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,

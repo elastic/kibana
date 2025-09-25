@@ -134,7 +134,7 @@ describe('addLayerColumn', () => {
 
 describe('buildDatasourceStates', () => {
   test('correctly builds esql layer', async () => {
-    const results = await buildDatasourceStates(
+    const results = buildDatasourceStates(
       {
         type: 'metric',
         title: 'test',
@@ -152,27 +152,35 @@ describe('buildDatasourceStates', () => {
         sampling: 1,
         ignore_global_filters: false,
       },
-      {},
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
     );
     expect(results).toMatchInlineSnapshot(`
       Object {
-        "textBased": Object {
-          "layers": Object {
-            "layer_0": Object {
-              "columns": Array [
-                Object {
-                  "columnId": "test",
-                  "fieldName": "test",
+        "layers": Object {
+          "textBased": Object {
+            "layers": Object {
+              "layer_0": Object {
+                "columns": Array [
+                  Object {
+                    "columnId": "test",
+                    "fieldName": "test",
+                  },
+                ],
+                "index": "test",
+                "query": Object {
+                  "esql": "from test | limit 10",
                 },
-              ],
-              "index": "test",
-              "query": Object {
-                "esql": "from test | limit 10",
+                "timeField": "@timestamp",
               },
-              "timeField": "@timestamp",
             },
+          },
+        },
+        "usedDataviews": Object {
+          "layer_0": Object {
+            "index": "test",
+            "timeFieldName": "@timestamp",
+            "type": "adHocDataView",
           },
         },
       }
@@ -257,7 +265,19 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(textBasedLayer);
+    const result = buildDatasetState(
+      textBasedLayer,
+      {},
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-index',
+          name: 'indexpattern-datasource-layer-layer_0',
+        },
+      ],
+      'layer_0'
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "query": "from my-index | limit 10",
@@ -266,17 +286,51 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds dataView dataset state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer);
+    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-dataview-id",
+        "id": "my-dataview-id",
+        "type": "dataView",
+      }
+    `);
+  });
+
+  test('builds index dataset state', () => {
+    const formBasedLayer = {
+      indexPatternId: 'my-adhoc-dataview-id',
+      columns: {},
+      columnOrder: [],
+    } as FormBasedLayer;
+
+    const result = buildDatasetState(
+      formBasedLayer,
+      {
+        'my-adhoc-dataview-id': {
+          id: 'test-id',
+          title: 'my-adhoc-dataview-id',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ],
+      'layer_1'
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "index": "my-adhoc-dataview-id",
         "time_field": "@timestamp",
         "type": "index",
       }
