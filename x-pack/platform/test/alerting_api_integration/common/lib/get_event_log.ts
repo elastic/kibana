@@ -6,6 +6,7 @@
  */
 
 import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getUrlPrefix } from '.';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -30,6 +31,7 @@ interface GetEventLogParams {
   provider: string;
   actions: Map<string, { gte: number } | { equal: number }>;
   filter?: string;
+  log?: ToolingLog;
 }
 
 // Return event log entries given the specified parameters; for the `actions`
@@ -55,6 +57,10 @@ export async function getEventLog(
     .filter((event) => event?.event?.provider === provider)
     .filter((event) => event?.event?.action)
     .filter((event) => actions.has(event?.event?.action!));
+
+  if (params.log) {
+    params.log.info(`getEventLog events ${JSON.stringify(events)}`);
+  }
 
   const foundActions = events
     .map((event) => event?.event?.action)

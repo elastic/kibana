@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const log = getService('log');
 
   const authorizationIndex = '.kibana-test-authorization';
 
@@ -629,6 +630,7 @@ export default function ({ getService }: FtrProviderContext) {
               );
               // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value > 0).to.be(true);
+              log.info(`Getting event log events for connector ${createdConnector.id}`);
 
               const events: IValidatedEvent[] = await retry.try(async () => {
                 return await getEventLog({
@@ -641,6 +643,7 @@ export default function ({ getService }: FtrProviderContext) {
                     ['execute-start', { equal: 1 }],
                     ['execute', { equal: 1 }],
                   ]),
+                  log,
                 });
               });
               const executeEvent = events[1];
