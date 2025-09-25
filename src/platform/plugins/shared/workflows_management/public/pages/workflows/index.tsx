@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useState } from 'react';
+import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { useWorkflows } from '../../entities/workflows/model/use_workflows';
@@ -46,7 +47,7 @@ steps:
 `;
 
 export function WorkflowsPage() {
-  const { application, chrome, notifications } = useKibana().services;
+  const { application, chrome, notifications, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
   const { createWorkflow } = useWorkflowActions();
@@ -59,6 +60,10 @@ export function WorkflowsPage() {
   const { data: workflows, refetch } = useWorkflows(search);
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
+  const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
+    WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
+    false
+  );
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
@@ -217,7 +222,7 @@ export function WorkflowsPage() {
             </EuiFlexGroup>
 
             <EuiSpacer size="l" />
-            <WorkflowExecutionStatsBar height={140} />
+            {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
             <EuiHorizontalRule />
           </>
         )}
