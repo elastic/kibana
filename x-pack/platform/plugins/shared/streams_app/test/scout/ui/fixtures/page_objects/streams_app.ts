@@ -20,6 +20,10 @@ export class StreamsApp {
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
+  async gotoStreamMainPage() {
+    await this.page.gotoApp(`streams`);
+  }
+
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
   }
@@ -46,6 +50,55 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  // Streams table utility methods
+  async expectStreamsTableVisible() {
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should not be present in the table`
+      ).toBeHidden();
+    }
+  }
+
+  async expandAllStreams() {
+    const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
+    await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();
+    await expandAllButton.click();
+  }
+
+  async collapseAllStreams() {
+    const collapseAllButton = this.page.getByTestId('streamsCollapseAllButton');
+    await expect(collapseAllButton, 'Collapse all button should be visible').toBeVisible();
+    await collapseAllButton.click();
+  }
+
+  async collapseExpandStream(streamName: string, collapse: boolean) {
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
   }
 
   // Routing-specific utility methods
@@ -110,7 +163,7 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
+      await this.fillConditionFieldInput(field);
     }
     if (value) {
       await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
@@ -228,6 +281,10 @@ export class StreamsApp {
       .click();
   }
 
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+  }
+
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
   }
@@ -277,9 +334,24 @@ export class StreamsApp {
     await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
   }
 
-  async fillFieldInput(value: string) {
-    const comboBoxInput = this.page.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
+  async fillProcessorFieldInput(value: string) {
+    await this.fillFieldInput('streamsAppProcessorFieldSelectorComboFieldText', value);
+  }
+
+  async fillConditionFieldInput(value: string) {
+    await this.fillFieldInput('streamsAppConditionEditorFieldText', value);
+  }
+
+  // Utility function to fill eui combobox inputs
+  async fillFieldInput(dataTestSubj: string, value: string) {
+    const comboBoxInput = this.page.getByTestId(dataTestSubj);
     await comboBoxInput.click();
+    // Clear the combo box input
+    // We need the below check for headed tests on MacOS to work around a Playwright issue
+    await this.page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
+    await this.page.keyboard.press('Backspace');
+
+    // Now type new stuff
     await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
@@ -429,9 +501,8 @@ export class StreamsApp {
   }
 
   async setFieldMappingType(type: FieldTypeOption) {
-    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
-    await expect(typeSelector).toBeVisible();
-    await typeSelector.selectOption(type);
+    await this.page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await this.page.getByTestId(`option-type-${type}`).click();
   }
 
   async stageFieldMappingChanges() {
@@ -457,6 +528,10 @@ export class StreamsApp {
 
   async submitSchemaChanges() {
     await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+  }
+
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
   /**
