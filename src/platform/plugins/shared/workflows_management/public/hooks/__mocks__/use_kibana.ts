@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MONITORING_APP_ID,
-  STACK_MANAGEMENT_NAV_ID,
-  INGEST_AND_MANAGE_DATA_NAV_ID,
-} from './constants';
+import { createStartServicesMock } from '../../mocks';
 
-export type { AppId, LinkId, DeepLinkId } from './deep_links';
+export const useKibana = jest.fn(() => ({ services: createStartServicesMock() }));

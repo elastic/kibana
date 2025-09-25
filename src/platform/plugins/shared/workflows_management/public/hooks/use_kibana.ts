@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MONITORING_APP_ID,
-  STACK_MANAGEMENT_NAV_ID,
-  INGEST_AND_MANAGE_DATA_NAV_ID,
-} from './constants';
+import { useKibana as useKibanaGeneric } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowsServices } from '../types';
 
-export type { AppId, LinkId, DeepLinkId } from './deep_links';
+/*
+ * This is a simple wrapper around the generic `useKibana` hook that
+ * provides the correct type for the `services` object.
+ */
+export const useKibana = useKibanaGeneric<WorkflowsServices>;
