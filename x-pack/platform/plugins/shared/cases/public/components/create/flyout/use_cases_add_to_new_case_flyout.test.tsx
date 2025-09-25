@@ -40,6 +40,7 @@ describe('use cases add to new case flyout hook', () => {
               alerts: { sync: true, enabled: true, isExperimental: false },
               metrics: [],
               observables: { enabled: true },
+              events: { enabled: true },
             },
             releasePhase: 'ga',
           }}
