@@ -19,6 +19,7 @@ import {
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
@@ -40,6 +41,11 @@ export function registerChatRoutes({
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
+    capabilities: schema.maybe(
+      schema.object({
+        visualizations: schema.maybe(schema.boolean()),
+      })
+    ),
   });
 
   const callConverse = ({
@@ -58,12 +64,14 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      capabilities,
     } = payload;
 
     return chatService.converse({
       agentId,
       connectorId,
       conversationId,
+      capabilities,
       abortSignal,
       nextInput: { message: input },
       request,
@@ -72,7 +80,7 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse',
+      path: `${publicApiPath}/converse`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -131,11 +139,10 @@ export function registerChatRoutes({
 
   router.versioned
     .post({
-      path: '/api/chat/converse/async',
+      path: `${publicApiPath}/converse/async`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-
       access: 'public',
       summary: 'Converse with an agent and stream events',
       description: TECHNICAL_PREVIEW_WARNING,

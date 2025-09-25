@@ -14,12 +14,12 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { getTechnicalPreviewWarning } from './utils';
+import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server');
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/chat/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -70,10 +70,12 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           // Expose tools scoped to the request
           for (const tool of tools) {
+            const toolSchema =
+              typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,
-              tool.schema.shape,
+              toolSchema.shape,
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
                 return {

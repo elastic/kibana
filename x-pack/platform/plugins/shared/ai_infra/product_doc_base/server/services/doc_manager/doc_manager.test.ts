@@ -55,6 +55,12 @@ describe('DocumentationManager', () => {
 
     docInstallClient = {
       getInstallationStatus: jest.fn(),
+      getPreviouslyInstalledInferenceIds: jest
+        .fn()
+        .mockResolvedValue([
+          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+          defaultInferenceEndpoints.ELSER,
+        ]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
     docManager = new DocumentationManager({

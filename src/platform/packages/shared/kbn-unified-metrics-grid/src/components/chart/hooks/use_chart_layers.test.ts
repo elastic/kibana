@@ -40,7 +40,7 @@ describe('useChartLayers', () => {
     services: servicesMock as UnifiedHistogramServices,
   };
 
-  const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
+  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,7 +58,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         query: 'FROM metrics-*',
-        timeRange,
+        getTimeRange,
         seriesType: 'line',
         color: 'red',
         services: mockServices.services,
@@ -66,14 +66,8 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current).toHaveLength(0);
     });
-
-    const layer = result.current[0];
-    expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
-    expect(layer.yAxis).toEqual([]);
-    expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toBeUndefined();
   });
 
   it('maps columns correctly to yAxis and uses dimensions for breakdown', async () => {
@@ -92,7 +86,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         query: 'FROM metrics-*',
-        timeRange,
+        getTimeRange,
         seriesType: 'area',
         color: 'blue',
         services: mockServices.services,
@@ -128,7 +122,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         query: 'FROM metrics-*',
-        timeRange,
+        getTimeRange,
         seriesType: 'bar',
         services: mockServices.services,
       })

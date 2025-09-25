@@ -23,6 +23,10 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
 
 const registry: Map<string, RegistryItem<any>> = new Map();
 
+/**
+ * Register saved object type in AddFromLibrary registry
+ * Registered saved objects types are displayed in "Add from library" UIs
+ */
 export const registerAddFromLibraryType = <TSavedObjectAttributes extends FinderAttributes>({
   onAdd,
   savedObjectType,
@@ -56,6 +60,10 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   });
 };
 
+/**
+ * React use hook for accessing saved object types from AddFromLibrary registry
+ * @returns Array of saved object types from AddFromLibrary registry
+ */
 export function useAddFromLibraryTypes() {
   return useMemo(() => {
     return [...registry.entries()]
@@ -64,6 +72,11 @@ export function useAddFromLibraryTypes() {
   }, []);
 }
 
+/**
+ * Getter for accessing saved object type from AddFromLibrary registry
+ * @param type string
+ * @returns registry item for saved object type
+ */
 export const getAddFromLibraryType = (type: string) => {
   return registry.get(type);
 };
