@@ -8,8 +8,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+
+// Define ES|QL plugin interface locally to match the plugin implementation
+export interface ESQLExtensionsRegistry {
+  setRecommendedQueries(
+    queries: Array<{
+      name: string;
+      query: string;
+      description?: string;
+    }>,
+    solutionId: string
+  ): void;
+}
+
+export interface ESQLSetup {
+  getExtensionsRegistry(): ESQLExtensionsRegistry;
+}
 
 const METRICS_INDEX_PATTERN = 'metrics-*';
 const solutions: SolutionId[] = ['security', 'oblt', 'es'];

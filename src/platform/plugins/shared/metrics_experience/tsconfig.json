@@ -18,6 +18,5 @@
     "@kbn/zod-helpers",
     "@kbn/core-feature-flags-server",
     "@kbn/otel-semantic-conventions",
-    "@kbn/esql",
   ]
 }

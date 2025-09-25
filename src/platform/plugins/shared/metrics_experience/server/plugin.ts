@@ -15,9 +15,9 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { ReplaySubject, takeUntil, type Subject, type Subscription } from 'rxjs';
 import { routeRepository } from './routes';
+import type { ESQLSetup } from './lib/esql_extensions/set_esql_recommended_queries';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
 
