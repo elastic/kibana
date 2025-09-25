@@ -72,6 +72,7 @@ import type {
   PolicySecretReference,
   AssetsMap,
   AgentPolicy,
+  PreconfiguredInputs,
 } from '../../common/types';
 import {
   FleetError,
@@ -925,7 +926,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
@@ -1126,12 +1132,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ((assignedInOldPolicy && !assignedInNewPolicy) ||
           (!assignedInOldPolicy && assignedInNewPolicy));
 
-      bumpPromises.push(
-        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        })
-      );
+      if (options?.bumpRevision !== false) {
+        bumpPromises.push(
+          agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          })
+        );
+      }
     }
 
     const assetRemovePromise = removeOldAssets({
@@ -2961,7 +2969,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 
