@@ -15,17 +15,17 @@ import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface Props {
-  docId: string;
+  id: string;
 }
 
-interface GetTransactionParams {
-  docId: string;
+interface GetLogParams {
+  id: string;
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
 }
 
-async function fetchLogDocument({ docId, indexPattern, data, signal }: GetTransactionParams) {
+async function fetchLogDocument({ id, indexPattern, data, signal }: GetLogParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -42,7 +42,7 @@ async function fetchLogDocument({ docId, indexPattern, data, signal }: GetTransa
             ],
             query: {
               term: {
-                _id: docId,
+                _id: id,
               },
             },
           },
@@ -53,7 +53,7 @@ async function fetchLogDocument({ docId, indexPattern, data, signal }: GetTransa
   );
 }
 
-export function useFetchLog({ docId }: Props) {
+export function useFetchLog({ id }: Props) {
   const { indexes } = useDataSourcesContext();
   const { data, core } = getUnifiedDocViewerServices();
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ export function useFetchLog({ docId }: Props) {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await fetchLogDocument({ docId, indexPattern, data, signal })
+          ? await fetchLogDocument({ id, indexPattern, data, signal })
           : undefined;
         setIndex(result?.rawResponse.hits.hits[0]?._index ?? null);
         setLogDoc(result?.rawResponse.hits.hits[0]?.fields ?? null);
@@ -94,7 +94,7 @@ export function useFetchLog({ docId }: Props) {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, docId, indexPattern]);
+  }, [core.notifications.toasts, data, id, indexPattern]);
 
   return { loading, logDoc, index };
 }
