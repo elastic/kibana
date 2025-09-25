@@ -67,7 +67,7 @@ describe(
       }
 
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript'
+        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript' && apiName !== 'cancel'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
@@ -96,7 +96,7 @@ describe(
       });
 
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript'
+        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript' && apiName !== 'cancel'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);

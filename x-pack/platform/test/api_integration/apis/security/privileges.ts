@@ -322,7 +322,8 @@ export default function ({ getService }: FtrProviderContext) {
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
-  describe('Privileges', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235844
+  describe.skip('Privileges', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!

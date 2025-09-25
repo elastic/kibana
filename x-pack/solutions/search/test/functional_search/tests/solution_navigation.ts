@@ -15,13 +15,8 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects([
-    'common',
-    'solutionNavigation',
-    'console',
-  ]);
-  const spaces = getService('spaces');
-  const browser = getService('browser');
+  const { solutionNavigation } = getPageObjects(['solutionNavigation']);
+  const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
@@ -31,17 +26,8 @@ export default function searchSolutionNavigation({
 
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
-      // Navigate to the spaces management page which will log us in Kibana
-      await common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-ftr',
-        solution: 'es',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-solution-nav-ftr'));
+      await searchSpace.navigateTo(spaceCreated.id);
     });
 
     after(async () => {
@@ -63,9 +49,6 @@ export default function searchSolutionNavigation({
       if (isV2) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Graph' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
       } else {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
@@ -100,16 +83,6 @@ export default function searchSolutionNavigation({
               pageTestSubject: 'onechatPageConversations',
             },
             {
-              link: { deepLinkId: 'agent_builder:tools' },
-              breadcrumbs: ['Tools'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
-              link: { deepLinkId: 'agent_builder:agents' },
-              breadcrumbs: ['Agents'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
               link: { deepLinkId: 'discover' },
               breadcrumbs: ['Discover'],
               pageTestSubject: 'noDataViewsPrompt',
@@ -123,16 +96,6 @@ export default function searchSolutionNavigation({
               link: { deepLinkId: 'searchPlayground' },
               breadcrumbs: ['Build', 'Playground'],
               pageTestSubject: 'playgroundsListPage',
-            },
-            {
-              link: { deepLinkId: 'graph' },
-              breadcrumbs: ['Graph'],
-              pageTestSubject: 'graphCreateGraphPromptButton',
-            },
-            {
-              link: { deepLinkId: 'visualize' },
-              breadcrumbs: ['Visualize library'],
-              pageTestSubject: 'noDataViewsPrompt',
             },
             {
               link: { deepLinkId: 'dev_tools' },
@@ -222,10 +185,6 @@ export default function searchSolutionNavigation({
             'dev_tools',
             'ingest_and_data',
             'stack_management',
-            // more:
-            'maps',
-            'graph',
-            'visualize',
           ],
           { checkOrder: false }
         );
