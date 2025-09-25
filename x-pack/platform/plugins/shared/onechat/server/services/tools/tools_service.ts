@@ -7,6 +7,7 @@
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
+import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
@@ -42,7 +43,15 @@ export class ToolsService {
     registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
-      register: (reg) => this.builtinRegistry.register(reg),
+      register: (reg) => {
+        if (!isAllowedBuiltinTool(reg.id)) {
+          throw new Error(
+            `Built-in tool with id "${reg.id}" is not in the list of allowed built-in tools.
+             Please add it to the list of allowed built-in tools in the "@kbn/onechat-server/allow_lists.ts" file.`
+          );
+        }
+        return this.builtinRegistry.register(reg);
+      },
     };
   }
 
