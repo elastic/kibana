@@ -28,9 +28,9 @@ interface ReadinessTasksStats {
 
 export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksStats } => {
   const { getLatestTasks } = useReadinessTasks();
-  const latestTasksData = getLatestTasks.data || [];
 
   const readinessTasksStats = useMemo((): ReadinessTasksStats => {
+    const latestTasksData = getLatestTasks.data || [];
     const completedTaskIds = new Set(
       latestTasksData.filter((task) => task.status === 'completed').map((task) => task.task_id)
     );
@@ -61,7 +61,7 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
       totalTasks,
       totalIncomplete,
     };
-  }, [latestTasksData]);
+  }, [getLatestTasks]);
 
   return {
     readinessTasksStats,

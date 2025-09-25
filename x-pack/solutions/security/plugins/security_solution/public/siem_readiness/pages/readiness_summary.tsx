@@ -55,16 +55,16 @@ const PillarsPieChart: React.FC = () => {
   };
 
   const pieChartData: PieChartDataItem[] = Object.entries(readinessTasksStats.pillarStatsMap).map(
-    ([pillarKey, pillarStats]) => {
+    ([pillarKey, pillarStats]): PieChartDataItem => {
       return {
-        pillarKey,
+        pillarKey: pillarKey as PillarKey,
         completedTasksCount: pillarStats.completed,
       };
     }
   );
 
   pieChartData.push({
-    pillarKey: 'incomplete',
+    pillarKey: 'incomplete' as const,
     completedTasksCount: readinessTasksStats.totalIncomplete,
   });
 
@@ -80,7 +80,7 @@ const PillarsPieChart: React.FC = () => {
           layers={[
             {
               groupByRollup: (d: PieChartDataItem) => d.pillarKey,
-              nodeLabel: (pillarKey: PillarIncludingIncomplete) => {
+              nodeLabel: (pillarKey) => {
                 if (pillarKey === 'incomplete') {
                   return i18n.translate(
                     'xpack.securitySolution.siemReadiness.incompleteTasksLabel',
@@ -90,15 +90,15 @@ const PillarsPieChart: React.FC = () => {
                   );
                 }
 
-                return pillarPropsMap[pillarKey].displayName;
+                return pillarPropsMap[pillarKey as PillarKey].displayName;
               },
               shape: {
-                fillColor: (pillarKey: PillarIncludingIncomplete) => {
+                fillColor: (pillarKey) => {
                   if (pillarKey === 'incomplete') {
                     return euiTheme.colors.lightShade;
                   }
 
-                  return pillarPropsMap[pillarKey].color;
+                  return pillarPropsMap[pillarKey as PillarKey].color;
                 },
               },
             },
