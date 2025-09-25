@@ -7,9 +7,9 @@
 
 // createLoghubGenerator.test.ts
 import { ToolingLog } from '@kbn/tooling-log';
-import type { LoghubSystem } from '../src/read_loghub_system_files';
-import type { LoghubParser } from '../src/types';
 import { createLoghubGenerator } from './create_loghub_generator';
+import type { LoghubSystem } from './read_loghub_system_files';
+import type { LoghubParser } from './types';
 
 describe('createLoghubGenerator', () => {
   let system: LoghubSystem;

@@ -6,11 +6,11 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { LoghubSystem } from '../src/read_loghub_system_files';
-import type { LoghubParser } from '../src/types';
-import type { StreamLogDocument, StreamLogGenerator } from './types';
 import { parseDataset } from './parse_dataset';
-import type { LoghubQuery } from '../src/validate_queries';
+import type { LoghubSystem } from './read_loghub_system_files';
+import type { LoghubQuery } from './validate_queries';
+import type { LoghubParser } from './types';
+import type { StreamLogDocument, StreamLogGenerator } from '../types';
 
 export function createLoghubGenerator({
   system,
@@ -42,8 +42,6 @@ export function createLoghubGenerator({
 
   return {
     name: system.name,
-    filepath,
-    queries,
     next: (timestamp) => {
       if (index === 0) {
         start = timestamp;

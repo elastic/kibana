@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import type { LoghubSystem } from './read_loghub_system_files';
-import { getFileOrThrow, getQueriesFilename } from './utils';
+import { getFileOrThrow } from '../utils';
+import { getQueriesFilename } from './utils';
 
 interface DslQuery {
   bool: {

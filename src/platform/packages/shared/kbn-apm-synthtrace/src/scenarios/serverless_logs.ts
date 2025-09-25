@@ -14,7 +14,7 @@
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { Serializable } from '@kbn/apm-synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
-import type { WiredIngest, WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
+import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
@@ -27,52 +27,13 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const generators = await client.getLogGenerators({
     rpm,
     systems: {
-      loghub: true,
+      serverless: castArray(runOptions.scenarioOpts.systems ?? []),
     },
   });
 
   return {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
-
-      try {
-        // Setting linux child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.linux' },
-          where: { field: 'attributes.filepath', eq: 'Linux.log' },
-        });
-
-        // Setting windows child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.windows' },
-          where: { field: 'attributes.filepath', eq: 'Windows.log' },
-        });
-
-        // Setting android child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.android' },
-          where: { field: 'attributes.filepath', eq: 'Android.log' },
-        });
-
-        await streamsClient.enableFailureStore('logs.android');
-        await streamsClient.putIngestStream('logs.android', {
-          ingest: {
-            lifecycle: { inherit: {} },
-            settings: {},
-            processing: {
-              steps: [],
-            },
-            wired: {
-              fields: {
-                'attributes.process.name': { type: 'keyword', ignore_above: 18 },
-              },
-              routing: [],
-            },
-          } as WiredIngest,
-        } as WiredStream.Definition);
-      } catch (error) {
-        logger.error(`Error occurred while forking streams: ${error.message}`);
-      }
     },
     generate: ({ range, clients: { streamsClient } }) => {
       return withClient(

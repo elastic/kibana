@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export interface StreamLogDocument extends Record<string, any> {
-  '@timestamp': number;
-}
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-export interface StreamLogGenerator {
-  name: string;
-  next: (timestamp: number) => StreamLogDocument[];
-}
+export const SERVERLESS_LOGS_DIR = Path.join(REPO_ROOT, '../observability-ai-poc');
+export const SERVERLESS_REPO = 'elastic/observability-ai-poc';
