@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_AI_ASSISTED_CREATE_RULE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 
 import { getRuleCreationAgent } from '../../ai_assisted_rule_creation/agent';
 import { getIterativeRuleCreationAgent } from '../../ai_assisted_rule_creation/iterative_agent';
-import { getToolAgent } from '../../ai_assisted_rule_creation/agent/with_tools';
-import type { StartPlugins } from '../../../../plugin';
-import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 import type { AIAssistedCreateRuleResponse } from '../../../../../common/api/detection_engine/ai_assisted/index.gen';
 import { AIAssistedCreateRuleRequestBody } from '../../../../../common/api/detection_engine/ai_assisted/index.gen';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({

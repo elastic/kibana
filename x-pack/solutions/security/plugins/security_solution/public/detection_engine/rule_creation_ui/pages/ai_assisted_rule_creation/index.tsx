@@ -6,10 +6,7 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiAccordion,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -18,77 +15,21 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
 // import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { ChatActions } from '@kbn/elastic-assistant/impl/assistant/chat_actions';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import {
-  isMlRule,
-  isThreatMatchRule,
-  isEsqlRule,
-} from '../../../../../common/detection_engine/utils';
-import { useCreateRule } from '../../../rule_management/logic';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
-import {
-  getDetectionEngineUrl,
-  getRuleDetailsUrl,
-  getRulesUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { AccordionTitle } from '../../components/accordion_title';
-import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
-import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
-import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
-import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
-import {
-  stepActionsDefaultValue,
-  StepRuleActions,
-  StepRuleActionsReadOnly,
-} from '../../../rule_creation/components/step_rule_actions';
-import * as RuleI18n from '../../../common/translations';
-import {
-  redirectToDetections,
-  getActionMessageParams,
-  MaxWidthEuiFlexItem,
-} from '../../../common/helpers';
-import type { DefineStepRule } from '../../../common/types';
-import { RuleStep } from '../../../common/types';
-import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
-import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
-import { formatRule } from '../rule_creation/helpers';
-import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
-import * as i18n from '../rule_creation/translations';
+import { MaxWidthEuiFlexItem } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
-import {
-  defaultSchedule,
-  defaultThreatMatchSchedule,
-  ruleStepsOrder,
-  stepAboutDefaultValue,
-  stepDefineDefaultValue,
-} from '../../../common/utils';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { RulePreview } from '../../components/rule_preview';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
-import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
-import { NextStep } from '../../components/next_step';
-import { useRuleForms, useRuleIndexPattern } from '../form';
-import { CustomHeaderPageMemo } from '..';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { PromptTextArea } from './prompt_textarea';
 import { useAiRuleCreation } from './hooks/use_ai_rule_creation';

@@ -30,7 +30,6 @@ import { useCreateRule } from '../../../rule_management/logic';
 import type {
   RuleCreateProps,
   RuleResponse,
-  RuleUpdateProps,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -81,7 +80,6 @@ import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/c
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { CustomHeaderPageMemo } from '..';
 const MyEuiPanel = EuiPanel;
 
 // styled(EuiPanel)<{

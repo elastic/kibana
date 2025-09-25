@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { RuleCreationState } from '../iterative_agent/state';
 import { RuleCreationAnnotation } from '../iterative_agent/state';
 import { createEsqlRuleNode } from './create_esql_rule';
