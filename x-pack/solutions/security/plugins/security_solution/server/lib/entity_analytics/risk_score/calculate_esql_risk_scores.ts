@@ -15,7 +15,6 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
