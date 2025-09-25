@@ -22,7 +22,7 @@ import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { isEmpty } from 'lodash';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
-import { registerCleanUpTask } from './private_location/clean_up_task';
+import { registerCleanUpTask, scheduleCleanUpTask } from './private_location/clean_up_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -114,6 +114,7 @@ export class SyntheticsService {
       void this.scheduleSyncTask(taskManager);
     }
     void this.setupIndexTemplates();
+    void scheduleCleanUpTask(this.server);
   }
 
   public async setupIndexTemplates() {

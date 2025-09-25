@@ -190,6 +190,7 @@ export interface PackagePolicyClient {
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
       asyncDeploy?: boolean;
+      spaceIds?: string[];
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest

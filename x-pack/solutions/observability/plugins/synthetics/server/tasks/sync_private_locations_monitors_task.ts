@@ -16,10 +16,12 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import pRetry from 'p-retry';
-import { syntheticsParamType } from '../../common/types/saved_objects';
+import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
+import { syntheticsMonitorSOTypes, syntheticsParamType } from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type {
+  EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitorWithSecretsAttributes,
@@ -32,9 +34,10 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../synthetics_service/formatters/public_formatters/format_configs';
+import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
-const TASK_ID = `${TASK_TYPE}-single-instance`;
+export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
 const TASK_SCHEDULE = '5m';
 
 interface TaskState extends Record<string, unknown> {
@@ -86,11 +89,15 @@ export class SyncPrivateLocationMonitorsTask {
     const startedAt = taskInstance.startedAt || new Date();
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
+
     try {
       this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
+
+      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient);
+
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       const { totalMWs, totalParams, hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
@@ -98,7 +105,7 @@ export class SyncPrivateLocationMonitorsTask {
       });
       lastTotalParams = totalParams;
       lastTotalMWs = totalMWs;
-      if (hasDataChanged) {
+      if (hasDataChanged || performSync) {
         this.debugLog(`Syncing private location monitors because data has changed`);
 
         if (allPrivateLocations.length > 0) {
@@ -141,7 +148,7 @@ export class SyncPrivateLocationMonitorsTask {
     } = this.serverSetup;
     logger.debug(`Scheduling private location task`);
     await taskManager.ensureScheduled({
-      id: TASK_ID,
+      id: PRIVATE_LOCATIONS_SYNC_TASK_ID,
       state: {},
       schedule: {
         interval: TASK_SCHEDULE,
@@ -200,7 +207,6 @@ export class SyncPrivateLocationMonitorsTask {
         config: HeartbeatConfig;
         globalParams: Record<string, string>;
       }> = [];
-
       const monitors = configsBySpaces[spaceId];
       this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
       if (!monitors) {
@@ -393,6 +399,84 @@ export class SyncPrivateLocationMonitorsTask {
   debugLog = (message: string) => {
     this.serverSetup.logger.debug(`[syncGlobalParams] ${message} `);
   };
+
+  async cleanUpDuplicatedPackagePolicies(soClient: SavedObjectsClientContract) {
+    const { fleet } = this.serverSetup.pluginsStart;
+    const { logger } = this.serverSetup;
+    let performSync = false;
+
+    try {
+      const esClient = this.serverSetup.coreStart?.elasticsearch?.client.asInternalUser;
+
+      const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorSOTypes,
+        fields: ['id', 'name', 'locations', 'origin'],
+        namespaces: ['*'],
+      });
+
+      const privateLocationAPI = new SyntheticsPrivateLocation(this.serverSetup);
+
+      const expectedPackagePolicies = new Set<string>();
+      for await (const result of finder.find()) {
+        result.saved_objects.forEach((monitor) => {
+          monitor.attributes.locations?.forEach((location) => {
+            const spaceId = monitor.namespaces?.[0];
+            if (!location.isServiceManaged && spaceId) {
+              const policyId = privateLocationAPI.getPolicyId(
+                {
+                  origin: monitor.attributes.origin,
+                  id: monitor.id,
+                },
+                location.id,
+                spaceId
+              );
+              expectedPackagePolicies.add(policyId);
+            }
+          });
+        });
+      }
+
+      finder.close().catch(() => {});
+
+      const packagePoliciesKuery = getFilterForTestNowRun(true);
+
+      const policiesIterator = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
+        kuery: packagePoliciesKuery,
+        spaceIds: ['*'],
+        perPage: 100,
+      });
+      const packagePoliciesToDelete: string[] = [];
+
+      for await (const packagePoliciesIds of policiesIterator) {
+        for (const packagePolicyId of packagePoliciesIds) {
+          if (!expectedPackagePolicies.has(packagePolicyId)) {
+            packagePoliciesToDelete.push(packagePolicyId);
+          }
+          // remove it from the set to mark it as found
+          expectedPackagePolicies.delete(packagePolicyId);
+        }
+      }
+
+      // if we have any to delete or any expected that were not found we need to perform a sync
+      performSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
+
+      if (packagePoliciesToDelete.length > 0) {
+        logger.info(
+          ` [PrivateLocationCleanUpTask] Found ${
+            packagePoliciesToDelete.length
+          } package policies to delete: ${packagePoliciesToDelete.join(', ')}`
+        );
+        await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
+          force: true,
+          spaceIds: ['*'],
+        });
+      }
+      return { performSync };
+    } catch (e) {
+      logger.error(e);
+      return { performSync };
+    }
+  }
 }
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
@@ -410,7 +494,7 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
           pluginsStart: { taskManager },
         } = server;
         logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
-        await taskManager.runSoon(TASK_ID);
+        await taskManager.runSoon(PRIVATE_LOCATIONS_SYNC_TASK_ID);
         logger.debug(`Synthetics sync private location task scheduled successfully`);
       },
       {

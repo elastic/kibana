@@ -42,6 +42,7 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
   FILTERS = '/internal/synthetics/monitor/filters',
+  TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
 
