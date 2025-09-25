@@ -86,6 +86,11 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_rule_template": [
+    "name",
+    "ruleTypeId",
+    "tags"
+  ],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt"
@@ -202,6 +207,7 @@
     "created_at",
     "created_by",
     "created_by.username",
+    "eventId",
     "externalReferenceAttachmentTypeId",
     "owner",
     "persistableStateAttachmentTypeId",
@@ -530,6 +536,15 @@
     "updated_at",
     "updated_by"
   ],
+  "fleet-cloud-connector": [
+    "cloudProvider",
+    "created_at",
+    "name",
+    "namespace",
+    "packagePolicyCount",
+    "updated_at",
+    "vars"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
@@ -541,6 +556,7 @@
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
     "bump_agent_policy_revision",
+    "cloud_connector_id",
     "created_at",
     "created_by",
     "description",
@@ -564,6 +580,7 @@
     "secret_references",
     "secret_references.id",
     "supports_agentless",
+    "supports_cloud_connector",
     "updated_at",
     "updated_by",
     "vars"
@@ -602,10 +619,7 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [
-    "guideId",
-    "isActive"
-  ],
+  "guided-onboarding-guide-state": [],
   "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
@@ -727,6 +741,7 @@
   ],
   "ingest-package-policies": [
     "bump_agent_policy_revision",
+    "cloud_connector_id",
     "created_at",
     "created_by",
     "description",
@@ -750,11 +765,13 @@
     "secret_references",
     "secret_references.id",
     "supports_agentless",
+    "supports_cloud_connector",
     "updated_at",
     "updated_by",
     "vars"
   ],
   "ingest_manager_settings": [
+    "action_secret_storage_requirements_met",
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
@@ -849,13 +866,6 @@
     "state",
     "type"
   ],
-  "onechat_workflow": [
-    "access_control",
-    "access_control.public",
-    "categories",
-    "user_id",
-    "workflow_id"
-  ],
   "osquery-manager-usage-metric": [
     "count",
     "errors"
@@ -913,9 +923,7 @@
   "privilege-monitoring-status": [
     "status"
   ],
-  "privmon-api-key": [
-    "apiKey"
-  ],
+  "privmon-api-key": [],
   "product-doc-install-status": [
     "index_name",
     "inference_id",
@@ -1252,50 +1260,6 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
-  ],
-  "workchat_agent": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "agent_name",
-    "configuration",
-    "description",
-    "last_updated",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_conversation": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "conversation_id",
-    "events",
-    "last_updated",
-    "title",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_integration": [
-    "configuration",
-    "created_at",
-    "created_by",
-    "description",
-    "integration_id",
-    "name",
-    "type",
-    "updated_at"
-  ],
-  "workflow": [
-    "createdBy",
-    "definition",
-    "deleted_at",
-    "description",
-    "enabled",
-    "lastUpdatedBy",
-    "name",
-    "tags",
-    "valid",
-    "yaml"
   ],
   "workplace_search_telemetry": []
 }

@@ -12,8 +12,9 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
+import type { ValueFormatConfig } from '../../../../../common/types';
 import type { OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { FieldBasedIndexPatternColumn } from './column_types';
 
 import {
   getFormatFromPreviousColumn,

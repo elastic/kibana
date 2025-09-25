@@ -20,24 +20,28 @@ export class StreamsApp {
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
+  async gotoStreamMainPage() {
+    await this.page.gotoApp(`streams`);
+  }
+
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
   }
 
   async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'route');
+    await this.gotoStreamManagementTab(streamName, 'partitioning');
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+    await this.gotoStreamManagementTab(streamName, 'retention');
   }
 
   async gotoProcessingTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'enrich');
+    await this.gotoStreamManagementTab(streamName, 'processing');
   }
 
   async gotoSchemaEditorTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+    await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
   async gotoSignificantEventsTab(streamName: string) {
@@ -46,6 +50,55 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  // Streams table utility methods
+  async expectStreamsTableVisible() {
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      await expect(
+        this.page.getByTestId(`streamsNameLink-${name}`),
+        `Stream ${name} should not be present in the table`
+      ).toBeHidden();
+    }
+  }
+
+  async expandAllStreams() {
+    const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
+    await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();
+    await expandAllButton.click();
+  }
+
+  async collapseAllStreams() {
+    const collapseAllButton = this.page.getByTestId('streamsCollapseAllButton');
+    await expect(collapseAllButton, 'Collapse all button should be visible').toBeVisible();
+    await collapseAllButton.click();
+  }
+
+  async collapseExpandStream(streamName: string, collapse: boolean) {
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
   }
 
   // Routing-specific utility methods
@@ -86,6 +139,14 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
+  async confirmStreamDeleteInModal(streamName: string) {
+    await this.getModal()
+      .getByTestId('streamsAppDeleteStreamModalStreamNameInput')
+      .fill(streamName);
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
+  }
+
   async cancelDeleteInModal() {
     await this.getModal().getByRole('button', { name: 'Cancel' }).click();
     await expect(this.getModal()).toBeHidden();
@@ -102,7 +163,7 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
+      await this.fillConditionFieldInput(field);
     }
     if (value) {
       await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
@@ -214,7 +275,14 @@ export class StreamsApp {
    * Utility for data processing
    */
   async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+      .click();
+  }
+
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
   }
 
   async clickSaveProcessor() {
@@ -246,7 +314,14 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    return targetProcessor.getByRole('button', { name: 'Edit' });
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorContextMenuButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Step context menu' });
   }
 
   async confirmDiscardInModal() {
@@ -259,8 +334,25 @@ export class StreamsApp {
     await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
   }
 
-  async fillFieldInput(value: string) {
-    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+  async fillProcessorFieldInput(value: string) {
+    await this.fillFieldInput('streamsAppProcessorFieldSelectorComboFieldText', value);
+  }
+
+  async fillConditionFieldInput(value: string) {
+    await this.fillFieldInput('streamsAppConditionEditorFieldText', value);
+  }
+
+  // Utility function to fill eui combobox inputs
+  async fillFieldInput(dataTestSubj: string, value: string) {
+    const comboBoxInput = this.page.getByTestId(dataTestSubj);
+    await comboBoxInput.click();
+    // Clear the combo box input
+    // We need the below check for headed tests on MacOS to work around a Playwright issue
+    await this.page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
+    await this.page.keyboard.press('Backspace');
+
+    // Now type new stuff
+    await comboBoxInput.pressSequentially(value, { delay: 50 });
   }
 
   async fillGrokPatternInput(value: string) {
@@ -286,7 +378,7 @@ export class StreamsApp {
 
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
-    await this.page.getByRole('button', { name: 'Delete' }).click();
+    await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
   async saveProcessorsListChanges() {
@@ -295,14 +387,14 @@ export class StreamsApp {
 
   async getProcessorsListItems() {
     try {
-      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+      await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
         timeout: 15_000,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+    return this.page.getByTestId('streamsAppProcessorBlock').all();
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
@@ -339,15 +431,22 @@ export class StreamsApp {
     columnName,
     rowIndex,
     value,
+    invertCondition = false,
   }: {
     columnName: string;
     rowIndex: number;
     value: string;
+    invertCondition?: boolean;
   }) {
     const cellContent = this.page.locator(
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
-    await expect(cellContent).toContainText(value);
+
+    if (invertCondition) {
+      await expect(cellContent).not.toContainText(value);
+    } else {
+      await expect(cellContent).toContainText(value);
+    }
   }
 
   /**
@@ -402,19 +501,37 @@ export class StreamsApp {
   }
 
   async setFieldMappingType(type: FieldTypeOption) {
-    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
-    await expect(typeSelector).toBeVisible();
-    await typeSelector.selectOption(type);
+    await this.page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await this.page.getByTestId(`option-type-${type}`).click();
   }
 
-  async saveFieldMappingChanges() {
-    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  async stageFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
 
   async unmapField() {
     await this.openFieldActionsMenu();
     await this.clickFieldAction('Unmap field');
-    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
+  }
+
+  async discardStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorDiscardChangesButton').click();
+  }
+
+  async reviewStagedFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorReviewStagedChangesButton').click();
+  }
+
+  async closeSchemaReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalCancelButton').click();
+  }
+
+  async submitSchemaChanges() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+  }
+
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
   /**

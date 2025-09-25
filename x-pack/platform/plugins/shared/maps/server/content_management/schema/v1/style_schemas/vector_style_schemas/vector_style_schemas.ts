@@ -29,11 +29,24 @@ import {
   symbolizeAsSchema,
 } from './marker_schemas';
 
-export const fieldMetaOptions = schema.object({
-  isEnabled: schema.boolean(),
-  sigma: schema.maybe(schema.number()),
-  percentiles: schema.maybe(schema.arrayOf(schema.number())),
-});
+export const fieldMetaOptions = schema.object(
+  {
+    isEnabled: schema.boolean({
+      meta: {
+        description:
+          'When set to true, dynamic style domain range and categories are calculated from entire data. Domain range and categories are fetched in seperate Elasticsearch aggregation request. Styling is consistent as users pan, zoom, and filter map. When set to false, dynamic style domain range and categories are calculated from local data and recalculated when local data changes. Styling maybe inconsistent as users pan, zoom, and filter.',
+      },
+    }),
+    sigma: schema.maybe(schema.number()),
+    percentiles: schema.maybe(schema.arrayOf(schema.number())),
+  },
+  {
+    meta: {
+      description:
+        'Use to configure how dynamic styling domain ranges and categories are calculated and mapped to feature values.',
+    },
+  }
+);
 
 export const styleField = schema.object({
   name: schema.string(),
@@ -59,6 +72,14 @@ export const vectorStylePropertiesSchema = schema.object({
 
 export const vectorStyleSchema = schema.object({
   properties: vectorStylePropertiesSchema,
-  isTimeAware: schema.boolean(),
+  isTimeAware: schema.maybe(
+    schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          'Set to true to apply global time to style metadata requests. When set to true, style metadata will be re-fetched when global time changes.',
+      },
+    })
+  ),
   type: schema.literal(LAYER_STYLE_TYPE.VECTOR),
 });

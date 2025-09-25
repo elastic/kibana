@@ -356,6 +356,22 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  forkTooFewBranches: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

@@ -20,7 +20,10 @@ exports[`renders control with warning 1`] = `
         >
           <span
             data-euiicon-type="warning"
-          />
+            tabindex="0"
+          >
+            Info
+          </span>
         </span>
         test control
       </label>

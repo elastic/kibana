@@ -13,6 +13,8 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -163,6 +165,8 @@ describe('Network Details', () => {
   });
 
   test('it renders ipv6 headline', async () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
+
     const ip = 'fe80--24ce-f7ff-fede-a571';
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
@@ -196,6 +200,7 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
+
     render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>

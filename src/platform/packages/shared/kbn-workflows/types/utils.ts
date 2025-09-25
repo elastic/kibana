@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '../spec/schema';
-import type { EsWorkflow } from './v1';
+import type { BuiltInStepType, TriggerType } from '../spec/schema';
+import { BuiltInStepTypes, TriggerTypes, type WorkflowYaml } from '../spec/schema';
+import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -27,4 +28,16 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     deleted_at: null,
     valid: true,
   };
+}
+
+export function isDangerousStatus(status: ExecutionStatus) {
+  return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
+}
+
+export function isBuiltInStepType(stepType: string): stepType is BuiltInStepType {
+  return BuiltInStepTypes.includes(stepType as BuiltInStepType);
+}
+
+export function isTriggerType(triggerType: string): triggerType is TriggerType {
+  return TriggerTypes.includes(triggerType as TriggerType);
 }
