@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -23,37 +20,69 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
-import { useStreamSystems } from './common/use_steam_systems';
+import { v4 } from 'uuid';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { SystemSelector } from '../system_selector';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useAIFeatures } from './generated_flow_form/use_ai_features';
+import { validateQuery } from './common/validate_query';
 
 interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (data: SaveData) => Promise<void>;
+  systems: System[];
   query?: StreamQueryKql;
+  initialFlow?: Flow;
+  initialSelectedSystems?: System[];
 }
 
-export function AddSignificantEventFlyout({ query, onClose, definition, onSave }: Props) {
+export function AddSignificantEventFlyout({
+  query,
+  onClose,
+  definition,
+  onSave,
+  initialFlow = undefined,
+  initialSelectedSystems = [],
+  systems,
+}: Props) {
   const { euiTheme } = useEuiTheme();
+  const {
+    core: { notifications },
+    services: { telemetryClient },
+  } = useKibana();
+  const {
+    timeState: { start, end },
+  } = useTimefilter();
+  const aiFeatures = useAIFeatures();
+  const { generate, abort } = useSignificantEventsApi({ name: definition.name, start, end });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
-    isEditMode ? 'manual' : undefined
+    isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
   const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSystem, setSelectedSystem] = useState<EuiComboBoxOptionOption<string>[]>([]);
+
+  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [stopGeneration, setStopGeneration] = useState<() => void>(() => () => {});
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -68,20 +97,85 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
     }
   }, [selectedFlow]);
 
-  const { value: systemsData, loading: systemsLoading } = useStreamSystems(definition);
+  const generateQueries = useCallback(() => {
+    if (!aiFeatures?.enabled) {
+      return;
+    }
 
-  const systems =
-    systemsData?.systems.map((system) => ({
-      name: system.name,
-      filter: system.filter,
-    })) || [];
+    const startTime = Date.now();
+
+    setIsGenerating(true);
+    setGeneratedQueries([]);
+
+    const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
+    generation$.subscribe({
+      next: (result) => {
+        const validation = validateQuery({
+          title: result.query.title,
+          kql: { query: result.query.kql },
+        });
+
+        if (!validation.kql.isInvalid) {
+          setGeneratedQueries((prev) => [
+            ...prev,
+            {
+              id: v4(),
+              kql: { query: result.query.kql },
+              title: result.query.title,
+              system: result.query.system,
+            },
+          ]);
+        }
+      },
+      error: (error) => {
+        setIsGenerating(false);
+        if (error.name === 'AbortError') {
+          return;
+        }
+
+        notifications.showErrorDialog({
+          title: i18n.translate('xpack.streams.addSignificantEventFlyout.generateErrorToastTitle', {
+            defaultMessage: `Could not generate significant events queries`,
+          }),
+          error,
+        });
+      },
+      complete: () => {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
+            { defaultMessage: `Generated significant events queries successfully` }
+          ),
+        });
+        telemetryClient.trackSignificantEventsSuggestionsGenerate({
+          duration_ms: Date.now() - startTime,
+          stream_type: getStreamTypeFromDefinition(definition),
+        });
+        setIsGenerating(false);
+      },
+    });
+
+    setStopGeneration(() => {
+      return () => {
+        setIsGenerating(false);
+        setGeneratedQueries([]);
+        abort();
+      };
+    });
+  }, [aiFeatures, definition, generate, notifications, telemetryClient, abort]);
+
+  useEffect(() => {
+    if (initialFlow === 'ai' && initialSelectedSystems.length > 0) {
+      generateQueries();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiFeatures?.enabled]);
 
   return (
     <EuiFlyout
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
-      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -131,34 +225,39 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                 <FlowSelector
                   isSubmitting={isSubmitting}
                   selected={selectedFlow}
-                  updateSelected={(flow) => setSelectedFlow(flow)}
+                  updateSelected={(flow) => {
+                    setSelectedFlow(flow);
+                    setSelectedSystems([]);
+                  }}
                 />
                 <EuiSpacer size="m" />
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.euiFormRow.systemsLabel',
-                    { defaultMessage: 'Systems' }
-                  )}
-                >
-                  <EuiComboBox
-                    singleSelection={true}
-                    isLoading={systemsLoading}
-                    aria-label={i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.euiComboBox.selectSystemsLabel',
-                      { defaultMessage: 'Select systems' }
-                    )}
-                    placeholder={i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.euiComboBox.selectSystemsLabel',
-                      { defaultMessage: 'Select systems' }
-                    )}
-                    options={systems.map((system) => ({ label: system.name, value: system.name }))}
-                    selectedOptions={selectedSystem}
-                    onChange={(newOpts) => {
-                      setSelectedSystem(newOpts);
-                    }}
-                    isClearable={true}
-                  />
-                </EuiFormRow>
+                {selectedFlow === 'ai' && (
+                  <>
+                    <SystemSelector
+                      systems={systems}
+                      selectedSystems={selectedSystems}
+                      onSystemsChange={setSelectedSystems}
+                    />
+                    <EuiButton
+                      iconType="sparkles"
+                      fill
+                      isLoading={isGenerating}
+                      disabled={
+                        isSubmitting ||
+                        selectedSystems.length === 0 ||
+                        !aiFeatures?.genAiConnectors?.selectedConnector
+                      }
+                      onClick={generateQueries}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
+                        {
+                          defaultMessage: 'Generate suggestions',
+                        }
+                      )}
+                    </EuiButton>
+                  </>
+                )}
               </EuiPanel>
             </EuiFlexItem>
           )}
@@ -171,32 +270,47 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
             >
               <EuiFlexItem grow={1}>
                 <EuiPanel hasShadow={false} paddingSize="l">
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false} />
-                    <EuiFlexItem grow={false}>
-                      <StreamsAppSearchBar showDatePicker />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-
                   {selectedFlow === 'manual' && (
-                    <ManualFlowForm
-                      isSubmitting={isSubmitting}
-                      setQuery={(next: StreamQueryKql) => setQueries([next])}
-                      query={queries[0]}
-                      setCanSave={(next: boolean) => {
-                        setCanSave(next);
-                      }}
-                      definition={definition}
-                      systems={systems}
-                    />
+                    <>
+                      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText>
+                            <h4>
+                              {i18n.translate(
+                                'xpack.streams.streamDetailView.addSignificantEventFlyout.previewSignificantEventsLabel',
+                                { defaultMessage: 'Preview significant events' }
+                              )}
+                            </h4>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <StreamsAppSearchBar showDatePicker />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="m" />
+                      <ManualFlowForm
+                        isSubmitting={isSubmitting}
+                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        query={queries[0]}
+                        setCanSave={(next: boolean) => {
+                          setCanSave(next);
+                        }}
+                        definition={definition}
+                        systems={
+                          systems.map((system) => ({
+                            name: system.name,
+                            filter: system.filter,
+                          })) || []
+                        }
+                      />
+                    </>
                   )}
 
                   {selectedFlow === 'ai' && (
                     <GeneratedFlowForm
-                      selectedSystem={systemsData?.systems.find(
-                        (s) => s.name === selectedSystem[0]?.value
-                      )}
+                      isGenerating={isGenerating}
+                      generatedQueries={generatedQueries}
+                      stopGeneration={stopGeneration}
                       isSubmitting={isSubmitting}
                       definition={definition}
                       setQueries={(next: StreamQueryKql[]) => {
@@ -218,15 +332,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
-                      { defaultMessage: 'Cancel' }
-                    )}
-                    color="primary"
-                    onClick={() => onClose()}
-                    disabled={isSubmitting}
-                  >
+                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }

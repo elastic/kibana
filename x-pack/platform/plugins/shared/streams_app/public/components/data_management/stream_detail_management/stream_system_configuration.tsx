@@ -50,6 +50,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              // Disable the button if no GenAI connector is selected
               iconType="sparkles"
               onClick={() => {
                 setIsLoading(true);
@@ -63,8 +64,8 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
                   });
               }}
             >
-              {i18n.translate('xpack.streams.streamDetailView.systemDetection', {
-                defaultMessage: 'System detection',
+              {i18n.translate('xpack.streams.streamDetailView.systemDetectionButtonLabel', {
+                defaultMessage: 'Detect systems',
               })}
             </EuiButton>
           </EuiFlexItem>
