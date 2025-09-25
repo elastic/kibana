@@ -27,6 +27,8 @@ interface FormTestProviderProps {
   defaultValue?: Record<string, unknown>;
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
   connectorServices?: ConnectorServices;
+  serializer?: (formData: ConnectorFormSchema) => ConnectorFormSchema;
+  deserializer?: (formData: ConnectorFormSchema) => ConnectorFormSchema;
 }
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
@@ -38,12 +40,16 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
   connector,
   onSubmit,
   connectorServices,
+  serializer,
+  deserializer,
 }) => {
   return (
     <FormTestProviderComponent
       defaultValue={connector}
       onSubmit={onSubmit}
       connectorServices={connectorServices}
+      serializer={serializer}
+      deserializer={deserializer}
     >
       <ConnectorFormFieldsGlobal canSave={true} />
       {children}
@@ -78,8 +84,10 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
     isWebhookSslWithPfxEnabled: true,
     enabledEmailServices: ['*'],
   },
+  serializer,
+  deserializer,
 }) => {
-  const { form } = useForm({ defaultValue });
+  const { form } = useForm({ defaultValue, serializer, deserializer });
   const { submit } = form;
 
   const onClick = useCallback(async () => {
