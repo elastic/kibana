@@ -81,7 +81,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
     try {
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
-          index: source.indexPattern, // Time range relies on sync markers: https://github.com/elastic/security-team/issues/13985
+          index: source.indexPattern, // TODO: Time range relies on sync markers: https://github.com/elastic/security-team/issues/13985
           ...buildPrivilegedSearchBody(script, 'now-10y', afterKey, pageSize),
         });
 
@@ -139,7 +139,8 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
   };
 
   const generateLabels = (matchers: Matcher, topHit: PrivTopHit): Record<string, unknown> => {
-    // Implement label generation logic based on matchers and topHit (latest document for user)
+    // TODO: Implement label generation logic based on matchers and topHit (latest document for user)
+    // https://github.com/elastic/security-team/issues/13986
     dataClient.log('debug', `Generating labels for user ${JSON.stringify(topHit, null, 2)}`);
     return { sources: ['entity_analytics_integration'] }; // Placeholder implementation
   };
