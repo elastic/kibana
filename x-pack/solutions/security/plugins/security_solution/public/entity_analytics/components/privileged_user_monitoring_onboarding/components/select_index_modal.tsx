@@ -31,6 +31,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { CreateIndexModal } from './create_index_modal';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
@@ -73,6 +74,9 @@ export const IndexSelectorModal = ({
   const debouncedSetSearchQuery = useDebounceFn(setSearchQuery, DEBOUNCE_OPTIONS);
   const { registerPrivMonMonitoredIndices, updatePrivMonMonitoredIndices } =
     useEntityAnalyticsRoutes();
+  const { services } = useKibana();
+  const maxUsersAllowed =
+    services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
   const options = useMemo(
     () =>
       indices?.map((index) => ({
@@ -138,16 +142,19 @@ export const IndexSelectorModal = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.description"
-            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users."
+            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users (max number allowed: {maxPrivilegedUsersAllowed})."
             values={{
               nameField: <EuiCode>{'user.name'}</EuiCode>,
+              maxPrivilegedUsersAllowed: maxUsersAllowed,
             }}
           />
         </EuiText>
         <EuiSpacer size="m" />
         {error ? (
           <>
-            <EuiCallOut color="danger">{LOADING_ERROR_MESSAGE}</EuiCallOut>
+            <EuiCallOut announceOnMount color="danger">
+              {LOADING_ERROR_MESSAGE}
+            </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         ) : null}
