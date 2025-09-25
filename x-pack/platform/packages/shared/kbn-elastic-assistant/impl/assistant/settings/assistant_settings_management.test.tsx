@@ -24,7 +24,6 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
