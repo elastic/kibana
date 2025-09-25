@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
+import { test } from '../../../fixtures';
 
 test.describe(
   'Stream data retention - updating data retention',
