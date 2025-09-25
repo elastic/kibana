@@ -25,6 +25,8 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
@@ -38,6 +40,7 @@ import type {
   RunScriptActionRequestBody,
   ScanActionRequestBody,
   SuspendProcessRequestBody,
+  CancelActionRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
@@ -180,6 +183,15 @@ export interface ResponseActionsClient {
   ) => Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   >;
+  /**
+   * Cancel a response action
+   * @param actionRequest
+   * @param options
+   */
+  cancel: (
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>>;
 }
 
 /**
