@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
@@ -17,15 +17,17 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
-import type { SaveData } from './add_significant_event_flyout/types';
+import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
-import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
+import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
 import type { TimelineEvent } from './timeline';
 import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { NoSystemsEmptyState } from './empty_state/no_systems';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -35,6 +37,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     core: { notifications },
     services: { telemetryClient },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -45,6 +52,23 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const xFormatter = useMemo(() => {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
+
+  const systemsFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      const { systems } = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/systems',
+        {
+          params: {
+            path: { name: definition.stream.name },
+          },
+          signal,
+        }
+      );
+
+      return systems;
+    },
+    [definition.stream.name, streamsRepositoryClient]
+  );
 
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -59,7 +83,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [initialFlow, setInitialFlow] = useState<Flow | undefined>(undefined);
 
+  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const events = useMemo(() => {
@@ -84,7 +110,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     );
   }, [significantEventsFetchState.value, theme, xFormatter]);
 
-  if (!significantEventsFetchState.value) {
+  if (systemsFetch.loading || significantEventsFetchState.loading) {
     return <LoadingPanel />;
   }
 
@@ -155,18 +181,52 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       onClose={() => {
         setIsEditFlyoutOpen(false);
         setQueryToEdit(undefined);
+        setSelectedSystems([]);
       }}
+      initialFlow={initialFlow}
+      initialSelectedSystems={selectedSystems}
+      systems={systemsFetch.value ?? []}
     />
   ) : null;
 
-  if (significantEventsFetchState.value.length === 0) {
+  const noSystems = systemsFetch.value && systemsFetch.value.length === 0;
+  const noSignificantEvents =
+    significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
+
+  if (noSystems && noSignificantEvents) {
     return (
       <>
-        <SignificantEventsViewEmptyState
-          onAddClick={() => {
-            setIsEditFlyoutOpen(true);
-            setQueryToEdit(undefined);
+        <NoSystemsEmptyState
+          onSystemDetectionClick={() => {
+            // Pull from main
           }}
+          onManualEntryClick={() => {
+            setQueryToEdit(undefined);
+            setInitialFlow('manual');
+            setIsEditFlyoutOpen(true);
+          }}
+        />
+        {editFlyout}
+      </>
+    );
+  }
+
+  if (noSignificantEvents) {
+    return (
+      <>
+        <NoSignificantEventsEmptyState
+          onGenerateSuggestionsClick={() => {
+            setInitialFlow('ai');
+            setIsEditFlyoutOpen(true);
+          }}
+          onManualEntryClick={() => {
+            setQueryToEdit(undefined);
+            setInitialFlow('manual');
+            setIsEditFlyoutOpen(true);
+          }}
+          systems={systemsFetch.value ?? []}
+          selectedSystems={selectedSystems}
+          onSystemsChange={setSelectedSystems}
         />
         {editFlyout}
       </>
