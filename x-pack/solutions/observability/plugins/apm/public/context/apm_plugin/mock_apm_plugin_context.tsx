@@ -186,7 +186,7 @@ const mlManagementLocator = new MlManagementLocatorInternal(
 
 const mockPlugin = {
   ml: {
-    getLocator: () => Promise.resolve(locator),
+    locator,
     getManagementLocator: () => Promise.resolve(mlManagementLocator),
   },
   data: {
