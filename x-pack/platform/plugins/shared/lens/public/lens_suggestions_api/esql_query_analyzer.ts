@@ -10,11 +10,15 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
 /**
- * Analyzes an ES|QL query to determine if it contains STATS operations with AVG() functions
- * combined with BY BUCKET(@timestamp, ...) groupings.
+ * Analyzes an ES|QL query to determine if it contains STATS operations with continuous metric 
+ * aggregations (like AVG, SUM, RATE, etc.) combined with BY BUCKET(@timestamp, ...) groupings.
  * 
- * This is used to suggest line charts instead of the default bar charts for time series
- * aggregations that are not simple COUNT(*) operations.
+ * Uses an exclusion-based approach: only histogram-style aggregations (COUNT, COUNT_DISTINCT, 
+ * CARDINALITY) keep the default bar chart behavior. All other aggregation functions suggest 
+ * line charts as they represent continuous metrics over time.
+ * 
+ * This approach is future-proof - new aggregation functions automatically get line chart 
+ * preference without code changes.
  * 
  * @param query - The query to analyze (can be ES|QL or regular query)
  * @returns true if the query matches the pattern for line chart preference
@@ -43,13 +47,27 @@ export function shouldPreferLineChartForESQLQuery(
 
       Walker.walk(statsCommand, {
         visitFunction: (fn) => {
-          // Check for aggregation functions that are not COUNT(*)
-          if (['avg', 'sum', 'min', 'max', 'median', 'percentile'].includes(fn.name.toLowerCase())) {
+          const functionName = fn.name.toLowerCase();
+          
+          // Define histogram-style aggregations that should keep default behavior (bar charts)
+          // These are typically counting operations that represent discrete events
+          const histogramFunctions = ['count', 'count_distinct', 'cardinality'];
+          
+          // Define non-aggregation functions to exclude from aggregation detection
+          const nonAggregationFunctions = ['bucket', '=', 'and', 'or', 'not', 'like', 'in', 'is', 'null'];
+          
+          // Check if this is an aggregation function that's NOT histogram-style
+          // Only consider functions with arguments that aren't known non-aggregation functions
+          const hasArgs = fn.args && fn.args.length > 0;
+          const isNotExcludedFunction = !nonAggregationFunctions.includes(functionName);
+          const isAggregationFunction = hasArgs && isNotExcludedFunction;
+          
+          if (isAggregationFunction && !histogramFunctions.includes(functionName)) {
             hasNonCountAggregation = true;
           }
           
           // Check for BUCKET function with @timestamp
-          if (fn.name.toLowerCase() === 'bucket') {
+          if (functionName === 'bucket') {
             // Check if first argument is @timestamp or a timestamp field
             if (fn.args && fn.args.length > 0) {
               const firstArg = fn.args[0];
@@ -108,12 +126,22 @@ export function analyzeESQLTimeSeriesPattern(
         visitFunction: (fn) => {
           const functionName = fn.name.toLowerCase();
           
-          // Track aggregation functions
-          if (['avg', 'sum', 'min', 'max', 'median', 'percentile', 'count'].includes(functionName)) {
+          // Define histogram-style aggregations that should keep default behavior (bar charts)
+          const histogramFunctions = ['count', 'count_distinct', 'cardinality'];
+          
+          // Define non-aggregation functions to exclude from aggregation detection
+          const nonAggregationFunctions = ['bucket', '=', 'and', 'or', 'not', 'like', 'in', 'is', 'null'];
+          
+          // Track aggregation functions (exclude non-aggregation functions)
+          const hasArgs = fn.args && fn.args.length > 0;
+          const isNotExcludedFunction = !nonAggregationFunctions.includes(functionName);
+          const isAggregationFunction = hasArgs && isNotExcludedFunction;
+          
+          if (isAggregationFunction) {
             result.aggregationTypes.push(functionName);
             
-            // Mark as non-count aggregation if it's not count(*)
-            if (functionName !== 'count') {
+            // Mark as non-count aggregation if it's not in the histogram functions list
+            if (!histogramFunctions.includes(functionName)) {
               result.hasNonCountAggregation = true;
             }
           }

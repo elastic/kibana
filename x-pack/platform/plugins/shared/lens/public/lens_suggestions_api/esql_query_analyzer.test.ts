@@ -92,6 +92,38 @@ describe('esql_query_analyzer', () => {
 
       expect(shouldPreferLineChartForESQLQuery(query)).toBe(true);
     });
+
+    it('should return true for RATE function (future function)', () => {
+      const query = {
+        esql: 'FROM metrics | STATS request_rate = RATE(requests) BY BUCKET(@timestamp, 1m)',
+      };
+
+      expect(shouldPreferLineChartForESQLQuery(query)).toBe(true);
+    });
+
+    it('should return true for STDDEV function (statistical function)', () => {
+      const query = {
+        esql: 'FROM metrics | STATS cpu_stddev = STDDEV(cpu.percent) BY BUCKET(@timestamp, 5m)',
+      };
+
+      expect(shouldPreferLineChartForESQLQuery(query)).toBe(true);
+    });
+
+    it('should return false for COUNT_DISTINCT (histogram-style)', () => {
+      const query = {
+        esql: 'FROM logs | STATS unique_users = COUNT_DISTINCT(user.id) BY BUCKET(@timestamp, 1h)',
+      };
+
+      expect(shouldPreferLineChartForESQLQuery(query)).toBe(false);
+    });
+
+    it('should return false for CARDINALITY (histogram-style)', () => {
+      const query = {
+        esql: 'FROM logs | STATS unique_ips = CARDINALITY(client.ip) BY BUCKET(@timestamp, 1h)',
+      };
+
+      expect(shouldPreferLineChartForESQLQuery(query)).toBe(false);
+    });
   });
 
   describe('analyzeESQLTimeSeriesPattern', () => {
@@ -152,6 +184,36 @@ describe('esql_query_analyzer', () => {
       expect(result.isTimeSeries).toBe(true);
       expect(result.timestampFields).toContain('created_timestamp');
       expect(result.timestampFields).toContain('updated_timestamp');
+    });
+
+    it('should correctly identify new aggregation functions as non-count', () => {
+      const query = {
+        esql: 'FROM metrics | STATS rate_value = RATE(requests), std_value = STDDEV(latency) BY BUCKET(@timestamp, 1h)',
+      };
+
+      const result = analyzeESQLTimeSeriesPattern(query);
+
+      expect(result).toEqual({
+        isTimeSeries: true,
+        hasNonCountAggregation: true,
+        aggregationTypes: ['rate', 'stddev'],
+        timestampFields: ['@timestamp'],
+      });
+    });
+
+    it('should correctly identify histogram functions as count-like', () => {
+      const query = {
+        esql: 'FROM logs | STATS unique_count = COUNT_DISTINCT(user.id), cardinality_val = CARDINALITY(session.id) BY BUCKET(@timestamp, 1h)',
+      };
+
+      const result = analyzeESQLTimeSeriesPattern(query);
+
+      expect(result).toEqual({
+        isTimeSeries: true,
+        hasNonCountAggregation: false, // Both functions are histogram-style
+        aggregationTypes: ['count_distinct', 'cardinality'],
+        timestampFields: ['@timestamp'],
+      });
     });
   });
 });
