@@ -10,11 +10,10 @@
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
-import type { GraphNode } from '@kbn/workflows/graph';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest
@@ -90,11 +89,23 @@ describe('WorkflowExecutionRuntimeManager', () => {
     workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
       switch (nodeId) {
         case 'node1':
-          return { id: 'node1', stepId: 'fakeStepId1', stepType: 'fakeStepType1' } as GraphNode;
+          return {
+            id: 'node1',
+            stepId: 'fakeStepId1',
+            stepType: 'fakeStepType1',
+          } as GraphNodeUnion;
         case 'node2':
-          return { id: 'node2', stepId: 'fakeStepId2', stepType: 'fakeStepType2' } as GraphNode;
+          return {
+            id: 'node2',
+            stepId: 'fakeStepId2',
+            stepType: 'fakeStepType2',
+          } as GraphNodeUnion;
         case 'node3':
-          return { id: 'node3', stepId: 'fakeStepId3', stepType: 'fakeStepType3' } as GraphNode;
+          return {
+            id: 'node3',
+            stepId: 'fakeStepId3',
+            stepType: 'fakeStepType3',
+          } as GraphNodeUnion;
       }
     });
 

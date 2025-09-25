@@ -10,12 +10,13 @@ import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { uniq } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
 import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
-import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 
@@ -30,12 +31,13 @@ const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => co
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
   const { loading } = useStreamDetail();
+  const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
 
   const {
     fields,
-    storedFields,
     isLoadingFields,
     refreshFields,
+    addField,
     updateField,
     pendingChangesCount,
     discardChanges,
@@ -44,6 +46,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     definition,
     refreshDefinition,
   });
+  const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: pendingChangesCount > 0,
@@ -64,8 +67,8 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={fields}
-            stream={definition.stream.name}
-            storedFields={storedFields}
+            definition={definition}
+            storedFields={definitionFields}
             submitChanges={submitChanges}
             onClose={() => overlay.close()}
           />
@@ -77,6 +80,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       }
     );
   };
+
+  const isRootStream = isRootStreamDefinition(definition.stream);
+  const handleAddField = !isRootStream && definition.privileges.manage ? addField : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
@@ -90,13 +96,22 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
               : classicDefaultColumns
           }
           stream={definition.stream}
+          onAddField={handleAddField}
           onFieldUpdate={updateField}
           onRefreshData={refreshFields}
+          onFieldSelection={(names, checked) => {
+            setSelectedFields((selection) => {
+              if (checked) {
+                return uniq([...selection, ...names]);
+              } else {
+                return selection.filter((name) => !names.includes(name));
+              }
+            });
+          }}
+          fieldSelection={selectedFields}
           withControls
           withFieldSimulation
-          withTableActions={
-            !isRootStreamDefinition(definition.stream) && definition.privileges.manage
-          }
+          withTableActions={!isRootStream && definition.privileges.manage}
         />
       </EuiFlexItem>
       {pendingChangesCount > 0 && (
