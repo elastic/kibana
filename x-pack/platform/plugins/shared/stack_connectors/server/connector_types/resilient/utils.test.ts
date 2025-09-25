@@ -62,7 +62,7 @@ describe('utils', () => {
         description: 'desc_updated',
         severityCode: '6',
         incidentTypes: [12, 16, 1001],
-        additionalFields: '{"customField1":"customValue1"}',
+        additionalFields: { customField1: 'customValue1' },
       };
       expect(formatUpdateRequest({ oldIncident, newIncident })).toEqual({
         changes: [
@@ -122,7 +122,7 @@ describe('utils', () => {
         description: 'desc_updated',
         severityCode: '6',
         incidentTypes: [12, 16, 1001],
-        additionalFields: '{"customField1":"customValue1"}',
+        additionalFields: { customField1: 'customValue1' },
       };
       expect(formatUpdateRequest({ oldIncident, newIncident })).toEqual({
         changes: [

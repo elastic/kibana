@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isObject, isString } from 'lodash';
+import { isArray, isObject } from 'lodash';
 import type { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
 
 export const getValueTextContent = (
@@ -45,6 +45,12 @@ export const getValueTextContent = (
   };
 };
 
+function additionalFieldsAreSpecified(
+  additionalFields: unknown
+): additionalFields is Record<string, unknown> {
+  return isObject(additionalFields) && Object.keys(additionalFields).length > 0;
+}
+
 export const formatUpdateRequest = ({
   oldIncident,
   newIncident,
@@ -58,20 +64,17 @@ export const formatUpdateRequest = ({
   // In the update request, we do not need to add them under `properties`. They're added at the top level.
   // We only need to make sure we merge them correctly with the old incident properties.
   let mergedAdditionalFields: UpdateIncidentRequest['changes'] = [];
-  const additionalFieldsObj: Record<string, unknown> = isString(newIncident.additionalFields)
-    ? JSON.parse(newIncident.additionalFields)
-    : {};
-  if (additionalFieldsObj && isObject(additionalFieldsObj)) {
-    mergedAdditionalFields = Object.keys(additionalFieldsObj)
+  if (additionalFieldsAreSpecified(additionalFields)) {
+    mergedAdditionalFields = Object.keys(additionalFields)
       .map((key) => {
-        if (additionalFieldsObj[key]) {
+        if (additionalFields[key]) {
           return {
             field: { name: key },
             old_value:
               oldIncident.properties && isObject(oldIncident.properties)
                 ? (oldIncident.properties as Record<string, unknown>)[key]
                 : null,
-            new_value: additionalFieldsObj[key] ?? null,
+            new_value: additionalFields[key] ?? null,
           };
         }
       })
