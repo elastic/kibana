@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
 import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { StoredMapAttributes } from '..';
 
 export async function findMaps(
   savedObjectsClient: Pick<ISavedObjectsRepository, 'find'>,
-  callback: (savedObject: SavedObject<StoredMapAttributes>) => Promise<void>
+  callback: (savedObject: SavedObject<StoredMapAttributes>) => void
 ) {
   let nextPage = 1;
   let hasMorePages = false;
@@ -21,9 +20,7 @@ export async function findMaps(
       type: MAP_SAVED_OBJECT_TYPE,
       page: nextPage,
     });
-    await asyncForEach(results.saved_objects, async (savedObject) => {
-      await callback(savedObject);
-    });
+    results.saved_objects.forEach((savedObject) => callback(savedObject));
     nextPage++;
     hasMorePages = results.page * results.per_page <= results.total;
   } while (hasMorePages);
