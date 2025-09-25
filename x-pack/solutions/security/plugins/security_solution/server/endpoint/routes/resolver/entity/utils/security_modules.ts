@@ -63,7 +63,7 @@
  *
  * For a security module to work with Resolver:
  *
- * - **Must set `event.kind`**: Either `"event"` or `"alert"`
+ * - **Must set `event.kind`**: Either `"event"` or `"signal"`
  * - **Must set `event.module`**: The module name (e.g., 'crowdstrike')
  * - **Process events**: Should include process tree fields for correlation
  * - **Index patterns**: Should be included in the appropriate Kibana index patterns
@@ -83,6 +83,12 @@
  *
  * These modules correspond to the integrations that can provide security events
  * for resolver analysis and need to be consistently filtered across queries.
+ *
+ * Note: The native 'endpoint' module is intentionally excluded because it provides
+ * foundational event data (event.kind: "event") that's essential for process tree
+ * integrity. Native endpoint events are included unconditionally in resolver queries,
+ * while this list is used to filter security signals (event.kind: "signal") from
+ * third-party integrations to reduce noise.
  */
 export const CORE_SECURITY_MODULES = [
   'crowdstrike',
