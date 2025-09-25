@@ -214,38 +214,66 @@ describe('SavedObjectTypeRegistry', () => {
       }).not.toThrow();
     });
 
-    it('throws when `supportsAccessControl` is true and access control feature is disabled', () => {
-      registry.setAccessControlEnabled(false);
+    describe(`supports access control`, () => {
+      it('sets `supportsAccessControl` when access control feature is enabled', () => {
+        registry.setAccessControlEnabled(true);
 
-      expect(() => {
-        registry.registerType(
-          createType({
-            name: 'typeAC1',
-            supportsAccessControl: true,
-          })
-        );
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Type typeAC1: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration"`
-      );
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeAC',
+              supportsAccessControl: true,
+            })
+          );
+        }).not.toThrow();
 
-      expect(() => {
-        registry.registerType(
-          createType({
-            name: 'typeAC1',
-            supportsAccessControl: false,
-          })
-        );
-      }).not.toThrow();
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeNAC',
+              supportsAccessControl: false,
+            })
+          );
+        }).not.toThrow();
 
-      registry.setAccessControlEnabled(true);
-      expect(() => {
-        registry.registerType(
-          createType({
-            name: 'typeAC2',
-            supportsAccessControl: true,
-          })
-        );
-      }).not.toThrow();
+        let readback = registry.getType('typeAC');
+        expect(readback).toBeDefined();
+        expect(readback?.supportsAccessControl).toBe(true);
+
+        readback = registry.getType('typeNAC');
+        expect(readback).toBeDefined();
+        expect(readback?.supportsAccessControl).toBe(false);
+      });
+
+      it('overwrites `supportsAccessControl` to false when access control feature is disabled', () => {
+        registry.setAccessControlEnabled(false);
+
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeAC',
+              supportsAccessControl: true,
+            })
+          );
+        }).not.toThrow();
+
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeNAC',
+              supportsAccessControl: false,
+            })
+          );
+        }).not.toThrow();
+
+        let readback = registry.getType('typeAC');
+        expect(readback).toBeDefined();
+        expect(readback?.supportsAccessControl).toBe(false);
+
+        readback = registry.getType('typeNAC');
+        expect(readback).toBeDefined();
+        expect(readback?.supportsAccessControl).toBe(false);
+      });
     });
 
     // TODO: same test with 'onImport'

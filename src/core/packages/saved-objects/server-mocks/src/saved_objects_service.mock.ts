@@ -72,7 +72,7 @@ const createSetupContractMock = () => {
     setSecurityExtension: jest.fn(),
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
-    getDefaultIndex: jest.fn(),
+    getDefaultIndex: jest.fn().mockReturnValue(MAIN_SAVED_OBJECT_INDEX),
     isAccessControlEnabled: jest.fn(),
   });
 

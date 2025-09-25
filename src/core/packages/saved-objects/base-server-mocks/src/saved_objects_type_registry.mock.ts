@@ -55,6 +55,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isImportableAndExportable.mockReturnValue(true);
   mock.getVisibleToHttpApisTypes.mockReturnValue(false);
   mock.getNameAttribute.mockReturnValue(undefined);
+  mock.supportsAccessControl.mockReturnValue(false);
   mock.isAccessControlEnabled.mockReturnValue(true);
   mock.supportsAccessControl.mockReturnValue(false);
 
