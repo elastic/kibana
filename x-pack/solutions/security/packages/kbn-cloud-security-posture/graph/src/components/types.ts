@@ -53,6 +53,8 @@ export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
     BaseNodeDataViewModel {
+  uniqueEventsCount?: number;
+  uniqueAlertsCount?: number;
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }

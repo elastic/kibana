@@ -45,7 +45,8 @@ export interface SavedObjectsManagementPluginStart {
   getRelationships: (
     type: string,
     id: string,
-    savedObjectTypes: string[]
+    savedObjectTypes: string[],
+    size?: number
   ) => Promise<v1.RelationshipsResponseHTTP>;
   getSavedObjectLabel: typeof getSavedObjectLabel;
   getDefaultTitle: typeof getDefaultTitle;
@@ -133,8 +134,8 @@ export class SavedObjectsManagementPlugin
 
     return {
       getAllowedTypes: () => getAllowedTypes(_core.http),
-      getRelationships: (type: string, id: string, savedObjectTypes: string[]) =>
-        getRelationships(_core.http, type, id, savedObjectTypes),
+      getRelationships: (type: string, id: string, savedObjectTypes: string[], size?: number) =>
+        getRelationships(_core.http, type, id, savedObjectTypes, size),
       getSavedObjectLabel,
       getDefaultTitle,
       parseQuery,

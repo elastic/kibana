@@ -7,11 +7,17 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
+const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
+const archiveDenseVectorIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-national-parks';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'embeddedConsole',
-    'svlSearchIndexDetailPage',
+    'searchIndexDetailsPage',
     'svlApiKeys',
     'header',
     'common',
@@ -19,324 +25,287 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
-  const security = getService('security');
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const indexName = 'test-my-index';
 
-  // Failing: See https://github.com/elastic/kibana/issues/203508
-  // Failing: See https://github.com/elastic/kibana/issues/203508
-  describe.skip('index details page - search solution', function () {
+  const indexWithDataName = 'search-books';
+  const indexWithoutDataName = 'search-empty-index';
+  const indexWithDenseVectorName = 'search-national-parks';
+  const indexDoesNotExistName = 'search-not-found';
+
+  const createIndices = async () => {
+    await esArchiver.load(archivedBooksIndex);
+    await esArchiver.load(archiveDenseVectorIndex);
+    await esArchiver.load(archiveEmptyIndex);
+  };
+  const deleteIndices = async () => {
+    await esArchiver.unload(archivedBooksIndex);
+    await esArchiver.unload(archiveDenseVectorIndex);
+    await esArchiver.unload(archiveEmptyIndex);
+    await esDeleteAllIndices([indexDoesNotExistName]);
+  };
+
+  describe('index details page - search solution', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/233476
+    this.tags(['failsOnMKI']);
+
+    before(async () => {
+      await createIndices();
+    });
+
+    after(async () => {
+      await deleteIndices();
+    });
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
         await pageObjects.svlApiKeys.deleteAPIKeys();
       });
-      after(async () => {
-        await esDeleteAllIndices(indexName);
-      });
       describe('search index details page', () => {
         before(async () => {
-          await es.indices.create({ index: indexName });
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-        });
-        after(async () => {
-          await esDeleteAllIndices(indexName);
+          await svlSearchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
         });
         it('can load index detail page', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-          await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
-          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
-          await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkMissingInMoreOptions();
+          await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+          await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
+          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
+          await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
+          await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkMissingInMoreOptions();
         });
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
+
+        it('should have breadcrumb navigation', async () => {
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
+            indexWithoutDataName
+          );
+          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
+          await svlSearchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
+        });
+
         it('should have connection details', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
+          await pageObjects.searchIndexDetailsPage.expectConnectionDetails();
         });
 
-        describe('check code example texts', () => {
-          const indexNameCodeExample = 'test-my-index2';
-          before(async () => {
-            await es.indices.create({ index: indexNameCodeExample });
-            await svlSearchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
-          });
-
-          after(async () => {
-            await esDeleteAllIndices(indexNameCodeExample);
-          });
-
-          it('should have basic example texts', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectHasSampleDocuments();
-          });
-        });
-
-        describe('API key details', () => {
-          // see details: https://github.com/elastic/kibana/issues/208695
-          this.tags(['failsOnMKI']);
-          it('should show api key', async () => {
-            await pageObjects.svlApiKeys.deleteAPIKeys();
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-            // sometimes the API key exists in the cluster and its lost in sessionStorage
-            // if fails we retry to delete the API key and refresh the browser
-            await retry.try(
-              async () => {
-                await pageObjects.svlApiKeys.expectAPIKeyExists();
-              },
-              async () => {
-                await pageObjects.svlApiKeys.deleteAPIKeys();
-                await browser.refresh();
-              }
-            );
-            await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-            const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-            await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
-          });
+        it('should have basic example texts', async () => {
+          await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
         });
 
         it('should have quick stats', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectQuickStats();
-          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
-          await es.indices.putMapping({
-            index: indexName,
-            properties: {
-              my_field: {
-                type: 'dense_vector',
-                dims: 3,
-              },
-            },
-          });
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
-        });
-
-        it('should have breadcrumb navigation', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectBreadcrumbNavigationWithIndexName(
-            indexName
-          );
-          await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
-          await pageObjects.indexManagement.expectToBeOnIndexManagement();
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchIndexDetailsPage.expectStatelessQuickStats();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
         });
 
         it('should show code examples for adding documents', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
-          await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
-          await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
+          await pageObjects.searchIndexDetailsPage.expectSelectedLanguage('python');
+          await pageObjects.searchIndexDetailsPage.codeSampleContainsValue(
             'installCodeExample',
             'pip install'
           );
-          await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('javascript');
-          await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          await pageObjects.searchIndexDetailsPage.selectCodingLanguage('javascript');
+          await pageObjects.searchIndexDetailsPage.codeSampleContainsValue(
             'installCodeExample',
             'npm install'
           );
-          await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('curl');
-          await pageObjects.svlSearchIndexDetailPage.openConsoleCodeExample();
+          await pageObjects.searchIndexDetailsPage.selectCodingLanguage('curl');
+          await pageObjects.searchIndexDetailsPage.openConsoleCodeExample();
           await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
           await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
         });
 
         describe('With data', () => {
           before(async () => {
-            await es.index({
-              index: indexName,
-              refresh: true,
-              body: {
-                my_field: [1, 0, 1],
-              },
-            });
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            await svlSearchNavigation.navigateToIndexDetailPage(indexWithDataName);
           });
           it('should have index documents', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+            await pageObjects.searchIndexDetailsPage.expectHasIndexDocuments();
           });
           it('menu action item should be replaced with playground', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectActionItemReplacedWhenHasDocs();
+            await pageObjects.searchIndexDetailsPage.expectActionItemReplacedWhenHasDocs();
           });
           it('should have link to API reference doc link in options menu', async () => {
-            await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
-            await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExistsInMoreOptions();
+            await pageObjects.searchIndexDetailsPage.clickMoreOptionsActionsButton();
+            await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExistsInMoreOptions();
           });
-          it('should have one document in quick stats', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
+          it('should have documents in quick stats', async () => {
+            await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(46);
           });
           it('should have with data tabs', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectTabsExists();
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
+            await pageObjects.searchIndexDetailsPage.expectTabsExists();
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
           });
           it('should be able to change tabs to mappings and mappings is shown', async () => {
-            await pageObjects.svlSearchIndexDetailPage.changeTab('mappingsTab');
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
-            await pageObjects.svlSearchIndexDetailPage.expectMappingsComponentIsVisible();
+            await pageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
+            await pageObjects.searchIndexDetailsPage.expectMappingsComponentIsVisible();
           });
           it('should be able to change tabs to settings and settings is shown', async () => {
-            await pageObjects.svlSearchIndexDetailPage.changeTab('settingsTab');
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
-            await pageObjects.svlSearchIndexDetailPage.expectSettingsComponentIsVisible();
+            await pageObjects.searchIndexDetailsPage.changeTab('settingsTab');
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('settings');
+            await pageObjects.searchIndexDetailsPage.expectSettingsComponentIsVisible();
           });
           it('should be able to delete document', async () => {
-            await pageObjects.svlSearchIndexDetailPage.changeTab('dataTab');
-            await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
-            await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
-            await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
+            await pageObjects.searchIndexDetailsPage.changeTab('dataTab');
+            await pageObjects.searchIndexDetailsPage.clickFirstDocumentDeleteAction();
+
+            // re-open page to refresh queries for test (these will auto-refresh,
+            // but waiting for that will make this test flakey)
+            await browser.refresh();
+            await retry.tryWithRetries(
+              'Wait for document count to update',
+              async () => {
+                await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(45);
+              },
+              {
+                retryCount: 5,
+                retryDelay: 1000,
+              },
+              async () => {
+                await browser.refresh();
+              }
+            );
           });
         });
-        describe('has index actions enabled', () => {
-          before(async () => {
-            await es.index({
-              index: indexName,
-              body: {
-                my_field: [1, 0, 1],
-              },
-            });
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        describe('With dense vectors', () => {
+          it('should have ai quick stats for index with semantic mappings', async () => {
+            await svlSearchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
+            await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
+        });
 
+        describe('has index actions enabled', () => {
           beforeEach(async () => {
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            await svlSearchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
 
           it('delete document button is enabled', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionToBeEnabled();
+            await pageObjects.searchIndexDetailsPage.expectDeleteDocumentActionToBeEnabled();
           });
           it('add field button is enabled', async () => {
-            await pageObjects.svlSearchIndexDetailPage.changeTab('mappingsTab');
-            await pageObjects.svlSearchIndexDetailPage.expectAddFieldToBeEnabled();
+            await pageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+            await pageObjects.searchIndexDetailsPage.expectAddFieldToBeEnabled();
           });
           it('edit settings button is enabled', async () => {
-            await pageObjects.svlSearchIndexDetailPage.changeTab('settingsTab');
-            await pageObjects.svlSearchIndexDetailPage.expectEditSettingsToBeEnabled();
+            await pageObjects.searchIndexDetailsPage.changeTab('settingsTab');
+            await pageObjects.searchIndexDetailsPage.expectEditSettingsToBeEnabled();
           });
           it('delete index button is enabled', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
-            await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
-            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
-            await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
-            await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeEnabled();
+            await pageObjects.searchIndexDetailsPage.expectMoreOptionsActionButtonExists();
+            await pageObjects.searchIndexDetailsPage.clickMoreOptionsActionsButton();
+            await pageObjects.searchIndexDetailsPage.expectMoreOptionsOverviewMenuIsShown();
+            await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonExistsInMoreOptions();
+            await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonToBeEnabled();
           });
         });
 
-        describe('page loading error', () => {
+        describe.skip('page loading error', () => {
           before(async () => {
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-            await esDeleteAllIndices(indexName);
+            // manually navigate to index detail page for an index that doesn't exist
+            await pageObjects.common.navigateToApp(
+              `elasticsearch/indices/index_details/${indexDoesNotExistName}`,
+              {
+                shouldLoginIfPrompted: false,
+              }
+            );
           });
           it('has page load error section', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
-            await pageObjects.svlSearchIndexDetailPage.expectIndexNotFoundErrorExists();
+            await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
+            await pageObjects.searchIndexDetailsPage.expectIndexNotFoundErrorExists();
           });
           it('reload button shows details page again', async () => {
-            await es.indices.create({ index: indexName });
-            await pageObjects.svlSearchIndexDetailPage.clickPageReload();
-            await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+            await es.indices.create({ index: indexDoesNotExistName });
+            await retry.tryForTime(
+              30 * 1000,
+              async () => {
+                if (await pageObjects.searchIndexDetailsPage.pageReloadButtonIsVisible()) {
+                  await pageObjects.searchIndexDetailsPage.clickPageReload();
+                }
+                await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+              },
+              undefined,
+              1000
+            );
           });
         });
         describe('Index more options menu', () => {
           before(async () => {
-            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            await svlSearchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
           it('shows action menu in actions popover', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
-            await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
-            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
+            await pageObjects.searchIndexDetailsPage.expectMoreOptionsActionButtonExists();
+            await pageObjects.searchIndexDetailsPage.clickMoreOptionsActionsButton();
+            await pageObjects.searchIndexDetailsPage.expectMoreOptionsOverviewMenuIsShown();
           });
           it('should delete index', async () => {
-            await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
-            await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
-            await pageObjects.svlSearchIndexDetailPage.clickConfirmingDeleteIndex();
+            await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonExistsInMoreOptions();
+            await pageObjects.searchIndexDetailsPage.clickDeleteIndexButton();
+            await pageObjects.searchIndexDetailsPage.clickConfirmingDeleteIndex();
           });
         });
       });
       describe('index management index list page', () => {
-        before(async () => {
-          await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
-        });
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('indexManagement');
           // Navigate to the indices tab
           await pageObjects.indexManagement.changeTabs('indicesTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
         });
-        after(async () => {
-          await esDeleteAllIndices(indexName);
-        });
         describe('manage index action', () => {
           beforeEach(async () => {
-            await pageObjects.indexManagement.manageIndex(indexName);
+            await pageObjects.indexManagement.manageIndex(indexWithoutDataName);
             await pageObjects.indexManagement.manageIndexContextMenuExists();
           });
           it('navigates to overview tab', async () => {
             await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
-            await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
+            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
           });
 
           it('navigates to settings tab', async () => {
             await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
-            await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('settings');
           });
           it('navigates to mappings tab', async () => {
             await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
-            await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-            await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
-          });
-        });
-        describe('can view search index details', function () {
-          it('renders search index details with no documents', async () => {
-            await pageObjects.svlSearchIndexDetailPage.openIndicesDetailFromIndexManagementIndicesListTable(
-              0
-            );
-            await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
-            await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
-            await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
+            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
           });
         });
       });
     });
 
     describe('viewer', function () {
-      before(async () => {
-        await esDeleteAllIndices(indexName);
-        await es.index({
-          index: indexName,
-          body: {
-            my_field: [1, 0, 1],
-          },
-        });
-      });
-      after(async () => {
-        await esDeleteAllIndices(indexName);
-      });
       describe('search index details page', function () {
         before(async () => {
           await pageObjects.svlCommonPage.loginAsViewer();
         });
         beforeEach(async () => {
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await svlSearchNavigation.navigateToIndexDetailPage(indexWithDataName);
         });
         it('delete document button is disabled', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionIsDisabled();
+          await pageObjects.searchIndexDetailsPage.expectDeleteDocumentActionIsDisabled();
         });
         it('add field button is disabled', async () => {
-          await pageObjects.svlSearchIndexDetailPage.changeTab('mappingsTab');
-          await pageObjects.svlSearchIndexDetailPage.expectAddFieldToBeDisabled();
+          await pageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+          await pageObjects.searchIndexDetailsPage.expectAddFieldToBeDisabled();
         });
         it('edit settings button is disabled', async () => {
-          await pageObjects.svlSearchIndexDetailPage.changeTab('settingsTab');
-          await pageObjects.svlSearchIndexDetailPage.expectEditSettingsIsDisabled();
+          await pageObjects.searchIndexDetailsPage.changeTab('settingsTab');
+          await pageObjects.searchIndexDetailsPage.expectEditSettingsIsDisabled();
         });
         it('delete index button is disabled', async () => {
-          await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
-          await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
-          await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
-          await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
-          await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeDisabled();
+          await pageObjects.searchIndexDetailsPage.expectMoreOptionsActionButtonExists();
+          await pageObjects.searchIndexDetailsPage.clickMoreOptionsActionsButton();
+          await pageObjects.searchIndexDetailsPage.expectMoreOptionsOverviewMenuIsShown();
+          await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonExistsInMoreOptions();
+          await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonToBeDisabled();
         });
         it('show no privileges to create api key', async () => {
           await pageObjects.svlApiKeys.expectAPIKeyNoPrivileges();

@@ -12,7 +12,7 @@ import { FunctionDefinitionTypes, getNoValidCallSignatureError } from '@kbn/esql
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation/function';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/expressions';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -296,10 +296,10 @@ describe('function validation', () => {
           const { expectErrors } = await setup();
 
           expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
-            'Unknown column [missingColumn]',
+            'Unknown column "missingColumn"',
           ]);
 
-          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column [missingColumn]']);
+          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column "missingColumn"']);
         });
 
         describe('inline casts', () => {
@@ -391,6 +391,24 @@ describe('function validation', () => {
             ]);
           });
         });
+
+        it('skips column validation for left assignment arg', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL lolz = 2', []);
+          await expectErrors('FROM a_index | EVAL lolz = nonexistent', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
+
+        it('skips column validation for right arg to AS', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | RENAME keywordField AS lolz', []);
+          await expectErrors('FROM a_index | RENAME nonexistent AS lolz', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
       });
     });
 
@@ -471,24 +489,24 @@ describe('function validation', () => {
 
       // several signatures, different arities
       await expectErrors('FROM a_index | EVAL TEST()', [
-        '[test] expected 1, 2, or 3 arguments, but got 0.',
+        'TEST expected 1, 2, or 3 arguments, but got 0.',
       ]);
       await expectErrors('FROM a_index | EVAL TEST(1, 1, 1, 1)', [
-        '[test] expected 1, 2, or 3 arguments, but got 4.',
+        'TEST expected 1, 2, or 3 arguments, but got 4.',
       ]);
 
       // exact number of arguments
       await expectErrors('FROM a_index | EVAL EXPECTS_1_ARG_FN(1, 1, 2)', [
-        '[expects_1_arg_fn] expected one argument, but got 3.',
+        'EXPECTS_1_ARG_FN expected one argument, but got 3.',
       ]);
 
       await expectErrors('FROM a_index | EVAL EXPECTS_2_ARGS_FN(1, 1, 2)', [
-        '[expects_2_args_fn] expected 2 arguments, but got 3.',
+        'EXPECTS_2_ARGS_FN expected 2 arguments, but got 3.',
       ]);
 
       // minimum number of arguments
       await expectErrors(`FROM a_index | EVAL VARIADIC_FN(1)`, [
-        '[variadic_fn] expected at least 2 arguments, but got 1.',
+        'VARIADIC_FN expected at least 2 arguments, but got 1.',
       ]);
       await expectErrors(
         `FROM a_index | EVAL VARIADIC_FN(${new Array(100).fill(1).join(', ')})`,
@@ -689,18 +707,14 @@ describe('function validation', () => {
       await expectErrors('ROW ROW_FN()', []);
       await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
 
-      await expectErrors('FROM a_index | EVAL SORT_FN()', [
-        'Function [sort_fn] not allowed in [eval]',
-      ]);
+      await expectErrors('FROM a_index | EVAL SORT_FN()', ['Function SORT_FN not allowed in EVAL']);
       await expectErrors('FROM a_index | SORT STATS_FN()', [
-        'Function [stats_fn] not allowed in [sort]',
+        'Function STATS_FN not allowed in SORT',
       ]);
-      await expectErrors('FROM a_index | STATS ROW_FN()', [
-        'Function [row_fn] not allowed in [stats]',
-      ]);
-      await expectErrors('ROW WHERE_FN()', ['Function [where_fn] not allowed in [row]']);
+      await expectErrors('FROM a_index | STATS ROW_FN()', ['Function ROW_FN not allowed in STATS']);
+      await expectErrors('ROW WHERE_FN()', ['Function WHERE_FN not allowed in ROW']);
       await expectErrors('FROM a_index | WHERE EVAL_FN()', [
-        'Function [eval_fn] not allowed in [where]',
+        'Function EVAL_FN not allowed in WHERE',
       ]);
     });
 
@@ -747,7 +761,7 @@ describe('function validation', () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
       await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
-        'Function [does_not_support_by_option] not allowed in [by]',
+        'Function DOES_NOT_SUPPORT_BY_OPTION not allowed in BY',
       ]);
     });
 
@@ -783,7 +797,7 @@ describe('function validation', () => {
 
       await expectErrors('TS a_index | STATS AGG_FUNCTION(TS_FUNCTION())', []);
       await expectErrors('FROM a_index | STATS AGG_FUNCTION(TS_FUNCTION())', [
-        'Function [ts_function] not allowed in [stats]',
+        'Function TS_FUNCTION not allowed in STATS',
       ]);
     });
   });
@@ -936,7 +950,7 @@ describe('function validation', () => {
           'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
           [
             'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-            '[platinum_function_mock] expected one argument, but got 0.',
+            'PLATINUM_FUNCTION_MOCK expected one argument, but got 0.',
           ]
         );
 
@@ -1033,7 +1047,7 @@ describe('function validation', () => {
         await expectErrors(
           'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
           [
-            "platinum_partial_function_mock with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+            "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
           ]
         );
       });
@@ -1046,7 +1060,7 @@ describe('function validation', () => {
         }));
 
         await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
-          '[platinum_partial_function_mock] expected one argument, but got 0.',
+          'PLATINUM_PARTIAL_FUNCTION_MOCK expected one argument, but got 0.',
         ]);
 
         await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
@@ -1055,7 +1069,7 @@ describe('function validation', () => {
 
         await expectErrors(
           'FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)',
-          ['Unknown column [WrongField]']
+          ['Unknown column "WrongField"']
         );
       });
     });

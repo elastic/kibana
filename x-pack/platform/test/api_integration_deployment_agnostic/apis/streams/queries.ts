@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -30,9 +31,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: {
-        steps: [],
-      },
+      processing: { steps: [] },
+      settings: {},
       wired: {
         routing: [],
         fields: {
@@ -65,8 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     beforeEach(async () => {
       await putStream(apiClient, STREAM_NAME, {
         stream,
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       });
       await alertingApi.deleteRules({ roleAuthc });
     });
@@ -89,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const updateStreamResponse = await putStream(apiClient, STREAM_NAME, {
         stream,
-        dashboards: [],
+        ...emptyAssets,
         queries,
       });
       expect(updateStreamResponse).to.have.property('acknowledged', true);
@@ -145,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [query],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
@@ -187,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [query],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
@@ -226,7 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const queryId = v4();
       await putStream(apiClient, STREAM_NAME, {
         stream,
-        dashboards: [],
+        ...emptyAssets,
         queries: [
           {
             id: queryId,
@@ -278,7 +277,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
-        dashboards: [],
+        ...emptyAssets,
         queries: [firstQuery, secondQuery, thirdQuery],
       });
       const initialRules = await alertingApi.searchRules(roleAuthc, '');

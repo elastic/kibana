@@ -8,7 +8,6 @@
 import type {
   ConversationCategory,
   ConversationCreateProps,
-  ConversationResponse,
   Provider,
 } from '@kbn/elastic-assistant-common';
 import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
@@ -28,16 +27,6 @@ export const getMockConversation = (body?: Partial<ConversationCreateProps>) => 
   replacements: {},
   category: 'assistant' as ConversationCategory,
   ...body,
-});
-
-export const getMockConversationResponse = (
-  body?: Partial<ConversationCreateProps>
-): ConversationResponse => ({
-  id: 'test-conversation-id',
-  createdAt: '2023-10-31T00:00:00.000Z',
-  users: [{ id: 'elastic', name: 'elastic@elastic.co' }],
-  namespace: 'default',
-  ...getMockConversation(body),
 });
 
 export const getMockCreatePrompt = (body?: Partial<PromptCreateProps>): PromptCreateProps => ({

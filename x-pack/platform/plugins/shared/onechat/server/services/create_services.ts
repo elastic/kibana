@@ -28,14 +28,14 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger }),
+      tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
     };
 
@@ -45,8 +45,11 @@ export class ServiceManager {
   startServices({
     logger,
     security,
+    spaces,
     elasticsearch,
     inference,
+    uiSettings,
+    savedObjects,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -63,10 +66,12 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      spaces,
       elasticsearch,
     });
 
     const agents = this.services.agents.start({
+      spaces,
       security,
       elasticsearch,
       getRunner,
@@ -87,6 +92,7 @@ export class ServiceManager {
       logger: logger.get('conversations'),
       security,
       elasticsearch,
+      spaces,
     });
 
     const chat = createChatService({
@@ -94,6 +100,8 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      uiSettings,
+      savedObjects,
     });
 
     this.internalStart = {

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a comprehensive set of correlated logs, APM traces, and host metrics.
+ */
+
 import type { ApmFields, InfraDocument, Instance, LogDocument } from '@kbn/apm-synthtrace-client';
 import { apm, generateShortId, infra, log } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

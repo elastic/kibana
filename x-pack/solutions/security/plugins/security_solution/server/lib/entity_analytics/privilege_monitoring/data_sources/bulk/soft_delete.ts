@@ -30,12 +30,15 @@ export const bulkSoftDeleteOperationsFactory =
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
     dataClient.log('debug', `Building bulk operations for soft delete users`);
+    const now = new Date().toISOString();
     for (const user of users) {
       ops.push(
         { update: { _index: userIndexName, _id: user.existingUserId } },
         {
           script: {
             source: `
+            ctx._source['@timestamp'] = params.now;
+            ctx._source.event.ingested = params.now;
             if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
               ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
             }
@@ -52,6 +55,7 @@ export const bulkSoftDeleteOperationsFactory =
           `,
             params: {
               source_id: user.sourceId,
+              now,
             },
           },
         }

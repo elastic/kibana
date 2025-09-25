@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 import type { EmotionFn } from '../types';
 
@@ -16,8 +17,8 @@ const root: EmotionFn = ({ euiTheme }) => css`
   grid-area: navigation;
   align-self: start;
   height: 100%;
-  width: var(--kbn-layout--navigation-width);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
+  width: ${layoutVar('navigation.width')};
+  z-index: ${layoutLevels.navigation};
   display: flex;
 `;
 

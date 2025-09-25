@@ -26,6 +26,7 @@ import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { getCaseSummaryRoute } from './cases_ai/get_case_summary';
+import { findCasesContainingAllAlertsRoute } from './internal/find_cases_containing_all_alerts';
 import type { ConfigType } from '../../config';
 
 export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
@@ -48,6 +49,7 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
+    findCasesContainingAllAlertsRoute,
   ].concat(
     config.unsafe?.enableCaseSummary ? [getCaseSummaryRoute as CaseRoute] : []
   ) as CaseRoute[];
