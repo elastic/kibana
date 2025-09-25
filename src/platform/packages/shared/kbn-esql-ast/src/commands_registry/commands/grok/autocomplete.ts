@@ -56,9 +56,13 @@ export async function autocomplete(
 
   // GROK /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
-  return fieldSuggestions.map((sug) => ({
-    ...sug,
-    text: `${sug.text} `,
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
+  return fieldSuggestions.map((sug) => {
+    // if there is already a command, we don't want to override it
+    if (sug.command) return sug;
+    return {
+      ...sug,
+      text: `${sug.text} `,
+      command: TRIGGER_SUGGESTION_COMMAND,
+    };
+  });
 }
