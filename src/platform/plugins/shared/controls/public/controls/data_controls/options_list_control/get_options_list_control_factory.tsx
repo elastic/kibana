@@ -72,7 +72,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
-
+      console.log({ initialState });
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);

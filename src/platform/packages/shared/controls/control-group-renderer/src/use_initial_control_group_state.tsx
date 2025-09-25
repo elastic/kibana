@@ -9,13 +9,17 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { controlGroupStateBuilder } from './control_group_state_builder';
 import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './types';
 
 export const useInitialControlGroupState = (
-  getCreationOptions: ControlGroupRendererProps['getCreationOptions']
+  getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
+  lastState$Ref: React.MutableRefObject<
+    BehaviorSubject<ControlGroupRuntimeState['initialChildControlState']>
+  >
 ) => {
   const [initialState, setInitialState] = useState<ControlGroupCreationOptions | undefined>();
 
@@ -35,10 +39,12 @@ export const useInitialControlGroupState = (
             order: rest.order ?? index,
             useGlobalFilters:
               !ignoreParentSettings?.ignoreFilters || !ignoreParentSettings?.ignoreQuery,
-            // ignoreValidations: ignoreParentSettings?.ignoreValidations, // this won't come from parent
+            ignoreValidations: ignoreParentSettings?.ignoreValidations,
           },
         };
       }, {} as ControlGroupRuntimeState['initialChildControlState']);
+
+      lastState$Ref.current.next(controls);
       setInitialState({
         ...creationOptions,
         initialState: { ...creationOptions.initialState, initialChildControlState: controls },

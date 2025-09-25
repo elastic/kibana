@@ -22,6 +22,7 @@ import type { OptionsListSuccessResponse } from '../../../../common/options_list
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { getFetchContextFilters } from '../utils';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
@@ -31,16 +32,8 @@ export function fetchAndValidate$({
   searchTechnique$,
   sort$,
 }: {
-  api: Pick<
-    OptionsListControlApi,
-    | 'dataViews$'
-    | 'field$'
-    | 'setBlockingError'
-    | 'parentApi'
-    | 'uuid'
-    | 'useGlobalFilters$'
-    | 'ignoreValidations$'
-  > &
+  api: DataControlStateManager['api'] &
+    Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -50,7 +43,6 @@ export function fetchAndValidate$({
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-  ignoreValidations$: PublishingSubject<boolean | undefined>;
 }): Observable<OptionsListSuccessResponse | { error: Error | unknown }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;

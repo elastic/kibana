@@ -25,8 +25,9 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
 import { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
+import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -51,10 +52,12 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
-  const lastState$Ref = useRef(new BehaviorSubject<ControlGroupRuntimeState>({}));
+  const lastState$Ref = useRef(
+    new BehaviorSubject<ControlGroupRuntimeState['initialChildControlState']>({})
+  );
 
-  const initialState = useInitialControlGroupState(getCreationOptions);
-  const childrenApi = useChildrenApi(initialState);
+  const initialState = useInitialControlGroupState(getCreationOptions, lastState$Ref);
+  const childrenApi = useChildrenApi(initialState, lastState$Ref);
   const layoutApi = useLayoutApi(initialState, childrenApi);
   const searchApi = useSearchApi({
     filters,
@@ -77,6 +80,14 @@ export const ControlGroupRenderer = ({
     if (!parentApi) return;
 
     const reload$ = new Subject<void>();
+
+    const hasUnsavedChanges$ = combineLatest([
+      parentApi.layout$,
+      childrenUnsavedChanges$(parentApi.children$),
+    ]).subscribe((changes) => {
+      console.log('changes', changes);
+    });
+
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),

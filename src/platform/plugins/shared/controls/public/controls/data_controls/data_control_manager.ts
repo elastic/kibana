@@ -20,17 +20,25 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...titleComparators,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => (a ?? true) === (b ?? true),
+  ignoreValidations: (a, b) => Boolean(a) === Boolean(b),
+};
+
+export const defaultDataControlState = {
+  dataViewId: '',
+  fieldName: '',
+  useGlobalFilters: DEFAULT_USE_GLOBAL_FILTERS,
+  ignoreValidations: DEFAULT_IGNORE_VALIDATIONS,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
@@ -65,16 +73,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
   const dataControlStateManager = initializeStateManager<
     Omit<DataControlState, 'title' | 'description'>
-  >(
-    state,
-    {
-      dataViewId: '',
-      fieldName: '',
-      useGlobalFilters: DEFAULT_USE_GLOBAL_FILTERS,
-      ignoreValidations: DEFAULT_IGNORE_VALIDATIONS,
-    },
-    defaultDataControlComparators
-  );
+  >(state, defaultDataControlState, defaultDataControlComparators);
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
