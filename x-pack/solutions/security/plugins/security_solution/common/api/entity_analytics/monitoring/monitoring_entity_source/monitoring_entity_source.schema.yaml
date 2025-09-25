@@ -169,11 +169,7 @@ components:
                 lastUpdateProcessed: 
                   type: string
                   format: date-time
-                  description: Timestamp of the last update lastUpdateProcessed
-                lastError: 
-                  type: string
-                  description: Details of the last error encountered during sync operations
-            
+                  description: Timestamp of the last update lastUpdateProcessed               
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -233,9 +229,6 @@ components:
                   type: string
                   format: date-time
                   description: Timestamp of the last update lastUpdateProcessed
-                lastError: 
-                  type: string
-                  description: Details of the last error encountered during sync operations
 
     MonitoringEntitySourceProperties:
       type: object
@@ -293,9 +286,6 @@ components:
                   type: string
                   format: date-time
                   description: Timestamp of the last update lastUpdateProcessed
-                lastError: 
-                  type: string
-                  description: Details of the last error encountered during sync operations
               
 
     MonitoringEntitySourceNoId:

@@ -58,10 +58,6 @@ export const CreateMonitoringEntitySource = z.object({
            * Timestamp of the last update lastUpdateProcessed
            */
           lastUpdateProcessed: z.string().datetime().optional(),
-          /**
-           * Details of the last error encountered during sync operations
-           */
-          lastError: z.string().optional(),
         })
         .optional(),
     })
@@ -109,10 +105,6 @@ export const UpdatedMonitoringEntitySource = z.object({
            * Timestamp of the last update lastUpdateProcessed
            */
           lastUpdateProcessed: z.string().datetime().optional(),
-          /**
-           * Details of the last error encountered during sync operations
-           */
-          lastError: z.string().optional(),
         })
         .optional(),
     })
@@ -159,10 +151,6 @@ export const MonitoringEntitySourceProperties = z.object({
            * Timestamp of the last update lastUpdateProcessed
            */
           lastUpdateProcessed: z.string().datetime().optional(),
-          /**
-           * Details of the last error encountered during sync operations
-           */
-          lastError: z.string().optional(),
         })
         .optional(),
     })
