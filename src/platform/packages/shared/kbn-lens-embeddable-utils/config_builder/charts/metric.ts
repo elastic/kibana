@@ -29,7 +29,6 @@ import {
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
-import type { LensApiState } from '../schema';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -223,20 +222,4 @@ export async function buildMetric(
       adHocDataViews: getAdhocDataviews(dataviews),
     },
   };
-}
-
-export function fromMetricLegacyToAPI(
-  config: LensAttributes,
-  { dataViewsAPI }: BuildDependencies
-): Extract<LensApiState, { type: 'metric' }> {
-  return {
-    type: 'metric',
-    dataset: {
-      type: 'dataView',
-      name: '',
-    },
-    metric: {
-      operation: 'count',
-    },
-  } as Extract<LensApiState, { type: 'metric' }>;
 }
