@@ -70,20 +70,20 @@ export default {
       );
     },
   ],
-} as Meta<typeof Component>;
+} as Meta<ConnectorSelectableProps>;
 
-// Uncontrolled example (optionally uses defaultValue)
-export const UncontrolledContextMenu: StoryFn<typeof Component> = (args) => <Component {...args} />;
+// Uncontrolled example (no value prop, component manages its own state)
+export const UncontrolledContextMenu: StoryFn<ConnectorSelectableProps> = (args) => <Component {...args} />;
 
 UncontrolledContextMenu.args = {
-  defaultValue: '2',
   defaultConnectorId: '3',
-} as Partial<ConnectorSelectableProps>;
+  preConfiguredConnectors,
+  customConnectors,
+};
 
-export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
-  const [value, setValue] = React.useState<string | undefined>(
-    (args as ConnectorSelectableProps).value
-  );
+// Controlled example (value prop controls the selected state)
+export const ControlledContextMenu: StoryFn<ConnectorSelectableProps> = (args) => {
+  const [value, setValue] = React.useState<string | undefined>(args.value);
 
   return (
     <Component
@@ -100,4 +100,6 @@ export const ControlledContextMenu: StoryFn<typeof Component> = (args) => {
 ControlledContextMenu.args = {
   value: '3',
   defaultConnectorId: '4',
-} as Partial<ConnectorSelectableProps>;
+  preConfiguredConnectors,
+  customConnectors,
+};
