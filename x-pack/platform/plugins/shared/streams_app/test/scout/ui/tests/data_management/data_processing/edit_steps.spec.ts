@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-test.describe('Stream data processing - editing processors', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await apiServices.streams.enable();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -19,7 +19,15 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
     await browserAuth.loginAsAdmin();
     // Clear existing processors before each test
     await apiServices.streams.updateStreamProcessors('logs-generic-default', {
-      steps: [{ action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] }],
+      steps: [
+        {
+          where: {
+            field: 'test_field',
+            contains: 'logs',
+            steps: [{ action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] }],
+          },
+        },
+      ],
     });
 
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
@@ -36,12 +44,25 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
 
     await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
     await pageObjects.streams.clickSaveProcessor();
-    await pageObjects.streams.saveProcessorsListChanges();
+    await pageObjects.streams.saveStepsListChanges();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
     await expect(page.getByText('%{WORD:attributes.hostname}')).toBeVisible();
   });
 
-  test('should not let edit other processors while one is in progress', async ({ pageObjects }) => {
+  test('should edit an existing condition', async ({ page, pageObjects }) => {
+    await expect(page.getByTestId('streamsAppConditionBlock')).toBeVisible();
+    await pageObjects.streams.clickEditCondition(0);
+
+    await pageObjects.streams.fillCondition('test_field', 'contains', 'new_value_text');
+    await pageObjects.streams.clickSaveCondition();
+    await pageObjects.streams.saveStepsListChanges();
+    expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+    await expect(page.getByText('new_value_text')).toBeVisible();
+  });
+
+  test('should not let other processors be edited while one is in progress', async ({
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickAddProcessor();
     await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeDisabled();
 
