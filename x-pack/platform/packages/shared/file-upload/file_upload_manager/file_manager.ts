@@ -421,14 +421,6 @@ export class FileUploadManager {
     this.updateSettingsOrMappings('settings', settings);
   }
 
-  public hasPermissionToImport(indexName?: string) {
-    return this.fileUpload.hasImportPermission({
-      checkCreateDataView: false,
-      checkHasManagePipeline: true,
-      indexName,
-    });
-  }
-
   private updateSettingsOrMappings(
     mode: 'settings' | 'mappings',
     config: IndicesIndexSettings | MappingTypeMapping | string
