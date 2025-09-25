@@ -2093,6 +2093,14 @@ x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elasti
 /x-pack/platform/test/serverless/api_integration/test_suites/core/ @elastic/kibana-core
 /x-pack/platform/test/serverless/api_integration/test_suites/telemetry/ @elastic/kibana-core
 
+#CC# /src/core/server/csp/ @elastic/kibana-core
+#CC# /src/plugins/saved_objects/ @elastic/kibana-core
+#CC# /x-pack/platform/plugins/shared/cloud/ @elastic/kibana-core
+#CC# /x-pack/platform/plugins/shared/features/ @elastic/kibana-core
+#CC# /x-pack/plugins/global_search/ @elastic/kibana-core
+#CC# /src/platform/plugins/shared/newsfeed @elastic/kibana-core
+#CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
+
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
 !src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
 # Exclude usage collection schema from @elastic/kibana-core ownership
@@ -2108,6 +2116,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
+#CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # AppEx AI Infra
 /x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
