@@ -180,8 +180,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           const stateStorage = stateContainer.stateStorage;
           const currentTabId = stateContainer.getCurrentTab().id;
           const dataView = useObservable(
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId]!.currentDataView$,
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId]!.currentDataView$.getValue()
           );
 
           useEffect(() => {
