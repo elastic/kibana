@@ -20,6 +20,7 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { AIAssistedCreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/ai_assisted/index.gen';
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
@@ -240,6 +241,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * AI assisted rule creation
+     */
+    aiAssistedCreateRule(props: AIAssistedCreateRuleProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/internal/detection_engine/ai_assisted/_create', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     /**
       * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
 the migration process. A successful migration will result in both the old and new indices being present.
@@ -2396,6 +2408,9 @@ If the specified entity already exists, it is updated with the provided values. 
   };
 }
 
+export interface AIAssistedCreateRuleProps {
+  body: AIAssistedCreateRuleRequestBodyInput;
+}
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
