@@ -494,9 +494,13 @@ apiTest.describe(
         const validEsqlDocs = processedEsqlDocs.filter((doc) => !!doc['source.ip']);
 
         // Check that all valid documents have the required tags
-        expect(validEsqlDocs.every((doc) => doc.tags.includes('web-server'))).toBe(true);
-        expect(validEsqlDocs.every((doc) => doc.tags.includes('production'))).toBe(true);
-        expect(validEsqlDocs.every((doc) => doc.tags.includes('nginx'))).toBe(true);
+        expect(validEsqlDocs.every((doc) => (doc.tags as string[]).includes('web-server'))).toBe(
+          true
+        );
+        expect(validEsqlDocs.every((doc) => (doc.tags as string[]).includes('production'))).toBe(
+          true
+        );
+        expect(validEsqlDocs.every((doc) => (doc.tags as string[]).includes('nginx'))).toBe(true);
 
         // Check that all valid documents have @timestamp defined
         expect(validEsqlDocs.every((doc) => doc['@timestamp'] !== undefined)).toBe(true);

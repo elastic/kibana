@@ -137,7 +137,7 @@ apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svl
 
       const mappingDoc = { host: { original: '', renamed: '' } };
       await testBed.ingest('esql-rename-fail', [mappingDoc, ...docs]);
-      const esqlResult = await esql.queryOnIndex('esql-rename-fail', query);
+      await esql.queryOnIndex('esql-rename-fail', query);
 
       expect(ingestResult).toHaveLength(0); // Did not ingest, errored out
     }
