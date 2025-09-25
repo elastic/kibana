@@ -14,7 +14,7 @@ interface AgentDisplayProps {
 }
 
 export const AgentDisplay: React.FC<AgentDisplayProps> = ({ selectedAgentId }) => {
-  const { agent, isLoading } = useOnechatAgentById(selectedAgentId!);
+  const { agent, isLoading } = useOnechatAgentById(selectedAgentId);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;

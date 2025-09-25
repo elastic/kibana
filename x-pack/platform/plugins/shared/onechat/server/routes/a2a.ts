@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
@@ -43,9 +44,10 @@ export function registerA2ARoutes({
       summary: 'A2A Agent Card',
       description: 'Provides agent discovery metadata for A2A protocol',
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:elastic agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -55,9 +57,16 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to get A2A metadata for.',
+                },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_agent_card.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -75,10 +84,11 @@ export function registerA2ARoutes({
       summary: 'A2A Task Endpoint',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:elastic agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -88,10 +98,23 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to send the A2A task to.',
+                },
+              }),
             }),
-            body: schema.object({}, { unknowns: 'allow' }),
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for A2A communication.' },
+              }
+            ),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import { Streams, isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isRoot } from '@kbn/streams-schema';
@@ -26,79 +25,68 @@ export const RetentionCard = ({
   const { euiTheme } = useEuiTheme();
   const lifecycle = definition.effective_lifecycle;
 
-  const isInheritingFromParent = isInheritLifecycle(definition.stream.ingest.lifecycle);
   const isRootStream = isRoot(definition.stream.name);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
-  const overrideParent =
-    !isInheritingFromParent &&
-    isWiredStream &&
-    !isRootStream &&
-    i18n.translate('xpack.streams.streamDetailLifecycle.overrideParent', {
-      defaultMessage: 'Override parent',
-    });
+  const isInheritingLifecycle = isInheritLifecycle(definition.stream.ingest.lifecycle);
 
-  const getDslMetrics = () => {
-    const subtitles = [];
-
-    const isForeverRetention =
-      isDslLifecycle(lifecycle) &&
-      getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention) === undefined;
-
-    const canHaveCustomRetention = !isWiredStream || isRootStream;
-
-    if (isForeverRetention) {
-      subtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.forever', {
-          defaultMessage: 'Forever',
-        })
-      );
+  const getRetentionOrigin = () => {
+    if (isWiredStream) {
+      if (isInheritingLifecycle) {
+        return i18n.translate('xpack.streams.streamDetailLifecycle.inheritingFromParent', {
+          defaultMessage: 'Inherit from parent',
+        });
+      } else if (!isRootStream) {
+        return i18n.translate('xpack.streams.streamDetailLifecycle.overrideParent', {
+          defaultMessage: 'Override parent',
+        });
+      }
+      return null;
     }
 
-    if (
-      !isInheritingFromParent &&
-      canHaveCustomRetention &&
-      !(isRootStream && isForeverRetention)
-    ) {
-      subtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
-          defaultMessage: 'Custom period',
+    return isInheritingLifecycle
+      ? i18n.translate('xpack.streams.streamDetailLifecycle.inheritingIndexTemplate', {
+          defaultMessage: 'Inherit from index template',
         })
-      );
-    } else if (isInheritingFromParent && !isForeverRetention) {
-      subtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.default', {
-          defaultMessage: 'Default period',
-        })
-      );
-    }
-
-    if (overrideParent) {
-      subtitles.push(overrideParent);
-    }
-
-    return [
-      {
-        data:
-          (isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention)) ??
-          '∞',
-        subtitle: subtitles,
-        'data-test-subj': 'retention',
-      },
-    ];
+      : i18n.translate('xpack.streams.streamDetailLifecycle.overrideIndexTemplate', {
+          defaultMessage: 'Override index template',
+        });
   };
 
-  const getIlmMetrics = () => {
-    const subtitles = [
-      i18n.translate('xpack.streams.streamDetailLifecycle.retention.ilmPolicy', {
-        defaultMessage: 'ILM policy',
-      }),
-    ];
-    if (overrideParent) {
-      subtitles.push(overrideParent);
+  const retentionOrigin = getRetentionOrigin();
+
+  const getMetrics = () => {
+    const baseSubtitles: string[] = [];
+    let data: React.ReactNode;
+
+    if (isIlmLifecycle(lifecycle)) {
+      baseSubtitles.push(
+        i18n.translate('xpack.streams.streamDetailLifecycle.retention.ilmPolicy', {
+          defaultMessage: 'ILM policy',
+        })
+      );
+      data = <IlmLink lifecycle={lifecycle} />;
+    } else {
+      const formattedRetention =
+        isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
+      const isForeverRetention = formattedRetention === undefined;
+
+      baseSubtitles.push(
+        isForeverRetention
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.forever', {
+              defaultMessage: 'Forever',
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
+              defaultMessage: 'Custom period',
+            })
+      );
+      data = formattedRetention ?? '∞';
     }
+
+    const subtitles = retentionOrigin ? [...baseSubtitles, retentionOrigin] : baseSubtitles;
+
     return [
       {
-        data: isIlmLifecycle(lifecycle) ? <IlmLink lifecycle={lifecycle} /> : '',
+        data,
         subtitle: subtitles,
         'data-test-subj': 'retention',
       },
@@ -109,7 +97,7 @@ export const RetentionCard = ({
     defaultMessage: 'Retention',
   });
 
-  const metrics = isIlmLifecycle(lifecycle) ? getIlmMetrics() : getDslMetrics();
+  const metrics = getMetrics();
 
   return (
     <BaseMetricCard
@@ -121,6 +109,12 @@ export const RetentionCard = ({
           onClick={openEditModal}
           disabled={!definition.privileges.lifecycle}
           iconType="pencil"
+          aria-label={i18n.translate(
+            'xpack.streams.entityDetailViewWithoutParams.editDataRetentionAriaLabel',
+            {
+              defaultMessage: 'Edit data retention',
+            }
+          )}
           css={css`
             margin-bottom: -${euiTheme.size.s};
           `}
