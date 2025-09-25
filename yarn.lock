@@ -4308,10 +4308,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/chat-data-registry-plugin@link:x-pack/platform/plugins/shared/chat_data_registry":
-  version "0.0.0"
-  uid ""
-
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
@@ -5561,6 +5557,10 @@
   uid ""
 
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-sources-registry-plugin@link:x-pack/platform/plugins/shared/data_sources_registry":
   version "0.0.0"
   uid ""
 
