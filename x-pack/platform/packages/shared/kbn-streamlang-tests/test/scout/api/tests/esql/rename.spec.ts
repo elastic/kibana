@@ -69,7 +69,7 @@ streamlangApiTest.describe(
         // ES|QL filters out documents failing the ignore_missing and override checks
         expect(esqlResult.documents).toHaveLength(1);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documents[0]['host.renamed']).toEqual('new-host-2'); // Should rename as host.original existed
+        expect(esqlResult.documents[0]['host.renamed']).toBe('new-host-2'); // Should rename as host.original existed
       }
     );
 
@@ -107,7 +107,7 @@ streamlangApiTest.describe(
 
         expect(esqlResult.documents).toHaveLength(2);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documentsOrdered[0]['host.renamed']).toEqual('new-host-2'); // renamed
+        expect(esqlResult.documentsOrdered[0]['host.renamed']).toBe('new-host-2'); // renamed
         expect(esqlResult.documentsOrdered[1]['host.renamed']).toBeNull(); // source field is missing
       }
     );
@@ -146,7 +146,7 @@ streamlangApiTest.describe(
 
         expect(esqlResult.documents).toHaveLength(2);
         expect(esqlResult.columnNames).not.toContain('host.original'); // Should have been dropped/renamed
-        expect(esqlResult.documentsOrdered[1]['host.renamed']).toEqual('new-host'); // Should rename as host.original exists
+        expect(esqlResult.documentsOrdered[1]['host.renamed']).toBe('new-host'); // Should rename as host.original exists
       }
     );
 

@@ -207,7 +207,7 @@ streamlangApiTest.describe(
         ],
       };
 
-      await expect(() => transpile(streamlangDSL)).toThrowError();
+      expect(() => transpile(streamlangDSL)).toThrowError();
     });
 
     streamlangApiTest('should throw error if value and copy_from are both present', async () => {
@@ -222,7 +222,7 @@ streamlangApiTest.describe(
         ],
       };
 
-      await expect(() => transpile(streamlangDSL)).toThrowError();
+      expect(() => transpile(streamlangDSL)).toThrowError();
     });
   }
 );

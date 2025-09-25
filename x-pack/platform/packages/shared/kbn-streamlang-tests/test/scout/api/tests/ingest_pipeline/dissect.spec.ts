@@ -40,7 +40,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('log.level', 'info');
         expect(source).toHaveProperty('client.ip', '127.0.0.1');
@@ -72,7 +72,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).not.toHaveProperty('client.ip');
       }
@@ -122,7 +122,7 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
       expect(source).toHaveProperty('field1', 'value1,value2');
     });

@@ -108,7 +108,7 @@ streamlangApiTest.describe(
         const result = await esql.queryOnIndex(indexName, query);
 
         // Both documents should be returned since the manual processor (and its condition) is ignored
-        expect(result.documents.length).toBe(2);
+        expect(result.documents).toHaveLength(2);
 
         // Neither document should have the conditional field applied
         result.documents.forEach((doc) => {

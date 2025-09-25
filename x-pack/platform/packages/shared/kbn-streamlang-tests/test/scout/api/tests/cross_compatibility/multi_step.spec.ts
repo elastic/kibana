@@ -314,7 +314,7 @@ streamlangApiTest.describe(
           expect(ingestResult).toHaveLength(8);
 
           // Both transpilers should return same number of valid documents
-          expect(esqlResult.documentsOrdered.length).toEqual(7); // 7 documents with log_type='access'
+          expect(esqlResult.documentsOrdered).toHaveLength(7); // 7 documents with log_type='access'
 
           // Helper to find docs in results
           const findIngestDoc = (ip: string) => ingestResult.find((doc) => doc['source.ip'] === ip);
@@ -329,52 +329,52 @@ streamlangApiTest.describe(
           expect(doc1Esql).toBeDefined();
 
           // Verify GROK extraction
-          expect(doc1Ingest!['http.request.method']).toEqual('GET');
-          expect(doc1Esql!['http.request.method']).toEqual('GET');
+          expect(doc1Ingest!['http.request.method']).toBe('GET');
+          expect(doc1Esql!['http.request.method']).toBe('GET');
 
           // Verify operators: lt (status < 400)
-          expect(doc1Ingest!['error.type']).toEqual('success');
-          expect(doc1Esql!['error.type']).toEqual('success');
+          expect(doc1Ingest!['error.type']).toBe('success');
+          expect(doc1Esql!['error.type']).toBe('success');
 
           // Verify operators: lte (response_time <= 200)
-          expect(doc1Ingest!['performance.category']).toEqual('fast');
-          expect(doc1Esql!['performance.category']).toEqual('fast');
+          expect(doc1Ingest!['performance.category']).toBe('fast');
+          expect(doc1Esql!['performance.category']).toBe('fast');
 
           // Verify traffic source (not bot/crawler)
-          expect(doc1Ingest!['traffic.source']).toEqual('human');
-          expect(doc1Esql!['traffic.source']).toEqual('human');
+          expect(doc1Ingest!['traffic.source']).toBe('human');
+          expect(doc1Esql!['traffic.source']).toBe('human');
 
           // Test Document 2: Slow server error (10.0.0.50)
           const doc2Ingest = findIngestDoc('10.0.0.50');
           const doc2Esql = findEsqlDoc('10.0.0.50');
 
           // Verify operators: gte (status >= 500)
-          expect(doc2Ingest!['error.type']).toEqual('server_error');
-          expect(doc2Esql!['error.type']).toEqual('server_error');
+          expect(doc2Ingest!['error.type']).toBe('server_error');
+          expect(doc2Esql!['error.type']).toBe('server_error');
 
           // Verify operators: gt (response_time > 1000)
-          expect(doc2Ingest!['performance.category']).toEqual('slow');
-          expect(doc2Esql!['performance.category']).toEqual('slow');
+          expect(doc2Ingest!['performance.category']).toBe('slow');
+          expect(doc2Esql!['performance.category']).toBe('slow');
 
           // Test Document 3: Client error with medium response time (203.0.113.42)
           const doc3Ingest = findIngestDoc('203.0.113.42');
           const doc3Esql = findEsqlDoc('203.0.113.42');
 
           // Verify operators: range (400 <= status < 500)
-          expect(doc3Ingest!['error.type']).toEqual('client_error');
-          expect(doc3Esql!['error.type']).toEqual('client_error');
+          expect(doc3Ingest!['error.type']).toBe('client_error');
+          expect(doc3Esql!['error.type']).toBe('client_error');
 
           // Verify operators: range (200 < response_time <= 1000)
-          expect(doc3Ingest!['performance.category']).toEqual('medium');
-          expect(doc3Esql!['performance.category']).toEqual('medium');
+          expect(doc3Ingest!['performance.category']).toBe('medium');
+          expect(doc3Esql!['performance.category']).toBe('medium');
 
           // Test Document 4: Bot traffic accessing admin (172.16.0.10)
           const doc4Ingest = findIngestDoc('172.16.0.10');
           const doc4Esql = findEsqlDoc('172.16.0.10');
 
           // Verify operators: startsWith (user_agent starts with 'bot')
-          expect(doc4Ingest!['traffic.source']).toEqual('bot');
-          expect(doc4Esql!['traffic.source']).toEqual('bot');
+          expect(doc4Ingest!['traffic.source']).toBe('bot');
+          expect(doc4Esql!['traffic.source']).toBe('bot');
 
           // Verify operators: startsWith (path starts with '/admin') - should have security-alert tag
           expect(doc4Ingest!.tags).toContain('security-alert');
@@ -385,16 +385,16 @@ streamlangApiTest.describe(
           const doc5Esql = findEsqlDoc('66.249.66.1');
 
           // Verify operators: startsWith (user_agent starts with 'GoogleBot')
-          expect(doc5Ingest!['traffic.source']).toEqual('crawler');
-          expect(doc5Esql!['traffic.source']).toEqual('crawler');
+          expect(doc5Ingest!['traffic.source']).toBe('crawler');
+          expect(doc5Esql!['traffic.source']).toBe('crawler');
 
           // Test Document 6: Mobile device request (198.51.100.25) - testing exact eq operator
           const doc6Ingest = findIngestDoc('198.51.100.25');
           const doc6Esql = findEsqlDoc('198.51.100.25');
 
           // Verify operators: eq (exact user_agent match)
-          expect(doc6Ingest!['device.type']).toEqual('mobile');
-          expect(doc6Esql!['device.type']).toEqual('mobile');
+          expect(doc6Ingest!['device.type']).toBe('mobile');
+          expect(doc6Esql!['device.type']).toBe('mobile');
 
           // Test Document 7: Image request (203.0.113.99) - testing exact path eq operator
           const doc7Ingest = findIngestDoc('203.0.113.99');
@@ -417,9 +417,9 @@ streamlangApiTest.describe(
           );
 
           // Verify device type logic: 1 mobile, 6+ desktop (or similar)
-          expect(mobileIngestDocs.length).toEqual(mobileEsqlDocs.length);
-          expect(desktopIngestDocs.length).toEqual(desktopEsqlDocs.length);
-          expect(mobileIngestDocs.length).toEqual(1); // One iPhone device
+          expect(mobileIngestDocs).toHaveLength(mobileEsqlDocs.length);
+          expect(desktopIngestDocs).toHaveLength(desktopEsqlDocs.length);
+          expect(mobileIngestDocs).toHaveLength(1); // One iPhone device
           expect(desktopIngestDocs.length).toBeGreaterThan(5); // Multiple desktop devices
 
           // Test eq operator: Document 1 should have api-request tag (path equals '/api/users')
@@ -454,9 +454,9 @@ streamlangApiTest.describe(
           );
 
           // Verify size categorization logic works (gt: >5000, lte: <=1000, range: 1000<x<=5000)
-          expect(largeIngestDocs.length).toEqual(largeEsqlDocs.length);
-          expect(smallIngestDocs.length).toEqual(smallEsqlDocs.length);
-          expect(mediumIngestDocs.length).toEqual(mediumEsqlDocs.length);
+          expect(largeIngestDocs).toHaveLength(largeEsqlDocs.length);
+          expect(smallIngestDocs).toHaveLength(smallEsqlDocs.length);
+          expect(mediumIngestDocs).toHaveLength(mediumEsqlDocs.length);
 
           // Verify common fields across all processed documents
           const processedIngestDocs = ingestResult.filter((doc) => doc['source.ip']);

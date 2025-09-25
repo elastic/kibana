@@ -39,7 +39,7 @@ streamlangApiTest.describe(
           await testBed.ingest('esql-rename-override', docs);
           const esqlResult = await esql.queryOnIndex('esql-rename-override', query);
 
-          expect(ingestResult[0]['host.renamed']).toEqual('test-host');
+          expect(ingestResult[0]['host.renamed']).toBe('test-host');
           expect(esqlResult.documentsOrdered[0]).toEqual(
             expect.objectContaining({ 'host.renamed': 'test-host' })
           );
@@ -134,14 +134,14 @@ streamlangApiTest.describe(
           const docs = [{ message: 'some_value' }];
 
           const { errors } = await testBed.ingest('ingest-rename-fail', docs, processors);
-          expect(errors[0].type).toEqual('illegal_argument_exception');
+          expect(errors[0].type).toBe('illegal_argument_exception');
           const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-rename-fail');
 
           const mappingDoc = { host: { original: '', renamed: '' } };
           await testBed.ingest('esql-rename-fail', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-rename-fail', query);
 
-          expect(ingestResult.length).toBe(0); // Did not ingest, errored out
+          expect(ingestResult).toHaveLength(0); // Did not ingest, errored out
 
           // Es|QL too should have filtered out the actual doc as 'host.original' is missing and ignore_missing is false
           expect(esqlResult.documents).toHaveLength(0); // Mapping doc also filtered out because host.rename is non null

@@ -312,7 +312,7 @@ streamlangApiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         const dissected = esqlResult.documents.filter((d) => d.case === 'both');
-        expect(dissected.length).toBe(1);
+        expect(dissected).toHaveLength(1);
         expect(dissected[0]['log.level']).toBe('info');
         expect(dissected[0]['client.ip']).toBe('10.1.1.1');
 
@@ -438,7 +438,7 @@ streamlangApiTest.describe(
               expect(doc['client.ip']).toBeNull();
               expect(doc.path).toBeNull();
               expect(doc.elapsed).toBeNull();
-              expect(doc.status).toEqual(203); // Non operand field remains number
+              expect(doc.status).toBe(203); // Non operand field remains number
               break;
           }
         }

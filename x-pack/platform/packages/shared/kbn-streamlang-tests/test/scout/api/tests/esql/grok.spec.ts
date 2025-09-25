@@ -430,7 +430,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Collect only docs with a case label (exclude mapping doc)
       const resultDocs = esqlResult.documents.filter((d) => d.case);
-      expect(resultDocs.length).toBe(4);
+      expect(resultDocs).toHaveLength(4);
 
       for (const doc of resultDocs) {
         switch (doc.case) {

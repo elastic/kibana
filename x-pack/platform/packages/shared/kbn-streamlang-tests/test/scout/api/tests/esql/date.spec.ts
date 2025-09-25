@@ -29,7 +29,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
+      expect(esqlResult.documents[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
     }
   );
 
@@ -57,12 +57,8 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documentsOrdered[0]['event.created_date']).toEqual(
-        '2025-01-01T12:34:56.000Z'
-      );
-      expect(esqlResult.documentsOrdered[1]['event.created_date']).toEqual(
-        '2025-01-02T12:34:56.789Z'
-      );
+      expect(esqlResult.documentsOrdered[0]['event.created_date']).toBe('2025-01-01T12:34:56.000Z');
+      expect(esqlResult.documentsOrdered[1]['event.created_date']).toBe('2025-01-02T12:34:56.789Z');
     }
   );
 
@@ -85,7 +81,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]['custom.time']).toEqual('2025-01-01T12:34:56.789Z');
+      expect(esqlResult.documents[0]['custom.time']).toBe('2025-01-01T12:34:56.789Z');
     }
   );
 
@@ -108,7 +104,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]['@timestamp']).toEqual('2025/01/01');
+      expect(esqlResult.documents[0]['@timestamp']).toBe('2025/01/01');
     }
   );
 
@@ -140,7 +136,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       ];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documentsOrdered[1]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
+      expect(esqlResult.documentsOrdered[1]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
       expect(esqlResult.documentsOrdered[2]['@timestamp']).toBeNull();
     }
   );
@@ -163,7 +159,7 @@ streamlangApiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       const docs = [{ log: { time: '01-01-2025' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documents[0]['log.time']).toEqual('01-01-2025');
+      expect(esqlResult.documents[0]['log.time']).toBe('01-01-2025');
       expect(esqlResult.documents[0]['@timestamp']).toBeNull();
     }
   );

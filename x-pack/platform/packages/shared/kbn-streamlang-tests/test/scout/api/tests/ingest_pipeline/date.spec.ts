@@ -33,7 +33,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('@timestamp', '2025-01-01T12:34:56.789Z');
     }
   );
@@ -62,7 +62,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('event.created', '2025-01-01');
     }
   );
@@ -90,7 +90,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01T12:34:56.000Z');
     }
   );
@@ -120,7 +120,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
     await testBed.ingest(indexName, docs, processors);
 
     const ingestedDocs = await testBed.getDocsOrdered(indexName);
-    expect(ingestedDocs.length).toBe(2);
+    expect(ingestedDocs).toHaveLength(2);
     expect(ingestedDocs[0]).toHaveProperty('event.created_date', '01 01 2025 12:34');
     expect(ingestedDocs[1]).toHaveProperty('event.created_date', '01 01 2025 12:35');
   });
@@ -149,7 +149,7 @@ streamlangApiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () 
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01');
     }
   );

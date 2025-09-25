@@ -33,7 +33,7 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
     });
 
@@ -56,7 +56,7 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       expect(ingestedDocs[0]).toHaveProperty('tags', ['new_tag']);
     });
 
@@ -82,7 +82,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag']);
       }
     );
@@ -109,7 +109,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'existing_tag']);
       }
     );

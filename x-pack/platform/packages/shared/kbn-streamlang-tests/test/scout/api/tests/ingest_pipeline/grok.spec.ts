@@ -37,7 +37,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('client.ip', '55.3.244.1');
         expect(source).toHaveProperty('http.request.method', 'GET');
@@ -69,7 +69,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).not.toHaveProperty('client.ip');
       }

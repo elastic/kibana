@@ -36,8 +36,8 @@ streamlangApiTest.describe('Cross-compatibility - Date Processor', () => {
         await testBed.ingest('esql-date-single-format', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-single-format', query);
 
-        expect(ingestResult[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
-        expect(esqlResult.documentsOrdered[0]['@timestamp']).toEqual('2025-01-01T12:34:56.789Z');
+        expect(ingestResult[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
+        expect(esqlResult.documentsOrdered[0]['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
       }
     );
 
@@ -70,12 +70,12 @@ streamlangApiTest.describe('Cross-compatibility - Date Processor', () => {
         await testBed.ingest('esql-date-multiple-formats', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-multiple-formats', query);
 
-        expect(ingestResult[0].event.created_date).toEqual('2025-01-01T12:34:56.000Z');
-        expect(ingestResult[1].event.created_date).toEqual('2025-01-02T12:34:56.789Z');
-        expect(esqlResult.documentsOrdered[0]['event.created_date']).toEqual(
+        expect(ingestResult[0].event.created_date).toBe('2025-01-01T12:34:56.000Z');
+        expect(ingestResult[1].event.created_date).toBe('2025-01-02T12:34:56.789Z');
+        expect(esqlResult.documentsOrdered[0]['event.created_date']).toBe(
           '2025-01-01T12:34:56.000Z'
         );
-        expect(esqlResult.documentsOrdered[1]['event.created_date']).toEqual(
+        expect(esqlResult.documentsOrdered[1]['event.created_date']).toBe(
           '2025-01-02T12:34:56.789Z'
         );
       }
@@ -106,8 +106,8 @@ streamlangApiTest.describe('Cross-compatibility - Date Processor', () => {
         await testBed.ingest('esql-date-output-format', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-output-format', query);
 
-        expect(ingestResult[0]['@timestamp']).toEqual('2025/01/01');
-        expect(esqlResult.documentsOrdered[0]['@timestamp']).toEqual('2025/01/01');
+        expect(ingestResult[0]['@timestamp']).toBe('2025/01/01');
+        expect(esqlResult.documentsOrdered[0]['@timestamp']).toBe('2025/01/01');
       }
     );
 
@@ -181,15 +181,15 @@ streamlangApiTest.describe('Cross-compatibility - Date Processor', () => {
         const esqlResult = await esql.queryOnIndex('esql-date-multiple-patterns', query);
 
         // Verify that all formats were parsed correctly by both transpilers
-        expect(ingestResult[0].parsed_timestamp).toEqual('2024-12-31T23:59:59.000Z'); // dd/MM/yyyy format
-        expect(ingestResult[1].parsed_timestamp).toEqual('2025-01-01T12:34:56.000Z'); // yyyy-MM-dd format
-        expect(ingestResult[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z'); // ISO8601 format
-        expect(ingestResult[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z'); // epoch_millis format
+        expect(ingestResult[0].parsed_timestamp).toBe('2024-12-31T23:59:59.000Z'); // dd/MM/yyyy format
+        expect(ingestResult[1].parsed_timestamp).toBe('2025-01-01T12:34:56.000Z'); // yyyy-MM-dd format
+        expect(ingestResult[2].parsed_timestamp).toBe('2025-01-15T08:30:00.123Z'); // ISO8601 format
+        expect(ingestResult[3].parsed_timestamp).toBe('2024-01-01T00:00:00.000Z'); // epoch_millis format
 
-        expect(esqlResult.documentsOrdered[0].parsed_timestamp).toEqual('2024-12-31T23:59:59.000Z');
-        expect(esqlResult.documentsOrdered[1].parsed_timestamp).toEqual('2025-01-01T12:34:56.000Z');
-        expect(esqlResult.documentsOrdered[2].parsed_timestamp).toEqual('2025-01-15T08:30:00.123Z');
-        expect(esqlResult.documentsOrdered[3].parsed_timestamp).toEqual('2024-01-01T00:00:00.000Z');
+        expect(esqlResult.documentsOrdered[0].parsed_timestamp).toBe('2024-12-31T23:59:59.000Z');
+        expect(esqlResult.documentsOrdered[1].parsed_timestamp).toBe('2025-01-01T12:34:56.000Z');
+        expect(esqlResult.documentsOrdered[2].parsed_timestamp).toBe('2025-01-15T08:30:00.123Z');
+        expect(esqlResult.documentsOrdered[3].parsed_timestamp).toBe('2024-01-01T00:00:00.000Z');
       }
     );
   });
@@ -224,8 +224,8 @@ streamlangApiTest.describe('Cross-compatibility - Date Processor', () => {
 
         await testBed.ingest('esql-date-fail', docs);
         const esqlResult = await esql.queryOnIndex('esql-date-fail', query);
-        expect(esqlResult.documentsOrdered.length).toEqual(1);
-        expect(esqlResult.documentsOrdered[0]['log.time']).toEqual('01-01-2025'); // Unchanged
+        expect(esqlResult.documentsOrdered).toHaveLength(1);
+        expect(esqlResult.documentsOrdered[0]['log.time']).toBe('01-01-2025'); // Unchanged
       }
     );
   });

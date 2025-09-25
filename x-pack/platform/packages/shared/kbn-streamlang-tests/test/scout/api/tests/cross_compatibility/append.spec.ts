@@ -129,7 +129,7 @@ streamlangApiTest.describe(
           const esqlResult = await esql.queryOnIndex('esql-append-scalar', query);
 
           expect(ingestResult[0].tags).toEqual(['new_tag']); // Ingest creates an array
-          expect(esqlResult.documentsOrdered[1].tags).toEqual('new_tag'); // ES|QL creates a scalar
+          expect(esqlResult.documentsOrdered[1].tags).toBe('new_tag'); // ES|QL creates a scalar
         }
       );
 
@@ -158,7 +158,7 @@ streamlangApiTest.describe(
           const esqlResult = await esql.queryOnIndex('esql-append-dedupe', query);
 
           expect(ingestResult[0].tags).toEqual(['existing_tag']); // Ingest results in an array
-          expect(esqlResult.documentsOrdered[0].tags).toEqual('existing_tag'); // ES|QL results in a scalar
+          expect(esqlResult.documentsOrdered[0].tags).toBe('existing_tag'); // ES|QL results in a scalar
         }
       );
     });

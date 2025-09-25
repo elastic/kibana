@@ -149,7 +149,7 @@ streamlangApiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // Note how an ES|QL single element multi-valued field outputs a non-array value
-        expect(esqlResult.documents[0].tags).toEqual('existing_tag');
+        expect(esqlResult.documents[0].tags).toBe('existing_tag');
       }
     );
 
@@ -177,7 +177,7 @@ streamlangApiTest.describe(
       ];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documentsOrdered[0].tags).toEqual('existing_tag');
+      expect(esqlResult.documentsOrdered[0].tags).toBe('existing_tag');
       expect(esqlResult.documentsOrdered[1].tags).toEqual([
         'existing_tag_01',
         'existing_tag_02',

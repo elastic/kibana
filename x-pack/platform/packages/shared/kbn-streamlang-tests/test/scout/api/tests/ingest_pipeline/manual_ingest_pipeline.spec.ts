@@ -47,7 +47,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('status', 'processed');
         expect(source).toHaveProperty('message', 'test message');
@@ -93,7 +93,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('processor_type', 'manual');
         expect(source).toHaveProperty('renamed_field', 'test_value');
@@ -140,7 +140,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocsOrdered(indexName);
-        expect(ingestedDocs.length).toBe(2);
+        expect(ingestedDocs).toHaveLength(2);
 
         const processedDoc = ingestedDocs.find((doc) => doc.message === 'should be processed');
         const skippedDoc = ingestedDocs.find((doc) => doc.message === 'should NOT be processed');
@@ -180,7 +180,7 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
       expect(source).toHaveProperty('tagged_field', 'tagged_value');
       expect(source).toHaveProperty('message', 'test message with tag');
@@ -223,7 +223,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('client_ip', '192.168.1.1');
         expect(source).toHaveProperty('method', 'GET');

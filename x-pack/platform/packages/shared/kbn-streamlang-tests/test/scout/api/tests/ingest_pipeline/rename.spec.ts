@@ -33,7 +33,7 @@ streamlangApiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs.length).toBe(1);
+      expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
       expect(source).toHaveProperty('host.renamed', 'test-host');
       expect(source).not.toHaveProperty('host.original');
@@ -89,7 +89,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).not.toHaveProperty('host.renamed');
       }
@@ -116,7 +116,7 @@ streamlangApiTest.describe(
         const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
         const { errors } = await testBed.ingest(indexName, docs, processors);
         expect(JSON.stringify(errors[0].reason)).toContain('host.original');
-        expect(errors[0].type).toEqual('illegal_argument_exception');
+        expect(errors[0].type).toBe('illegal_argument_exception');
       }
     );
 
@@ -142,7 +142,7 @@ streamlangApiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs.length).toBe(1);
+        expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
         expect(source).toHaveProperty('host.renamed', 'test-host');
       }
@@ -169,7 +169,7 @@ streamlangApiTest.describe(
         const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
         const { errors } = await testBed.ingest(indexName, docs, processors);
         expect(JSON.stringify(errors[0].reason)).toContain('host.renamed');
-        expect(errors[0].type).toEqual('illegal_argument_exception');
+        expect(errors[0].type).toBe('illegal_argument_exception');
       }
     );
 
@@ -194,14 +194,14 @@ streamlangApiTest.describe(
         const docsMissingSource = [{ host: { renamed: 'old-host' } }];
         const { errors } = await testBed.ingest(indexName, docsMissingSource, processors);
         expect(JSON.stringify(errors[0].reason)).toContain('host.original');
-        expect(errors[0].type).toEqual('illegal_argument_exception');
+        expect(errors[0].type).toBe('illegal_argument_exception');
 
         // Case 2: Target field exists, default value of override is false
         await testBed.clean(indexName);
         const docsExistingTarget = [{ host: { original: 'new-host', renamed: 'old-host' } }];
         const { errors: errors2 } = await testBed.ingest(indexName, docsExistingTarget, processors);
         expect(JSON.stringify(errors2[0].reason)).toContain('host.renamed');
-        expect(errors2[0].type).toEqual('illegal_argument_exception');
+        expect(errors2[0].type).toBe('illegal_argument_exception');
       }
     );
   }

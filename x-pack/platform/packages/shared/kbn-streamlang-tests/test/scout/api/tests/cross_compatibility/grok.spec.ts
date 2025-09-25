@@ -87,8 +87,8 @@ streamlangApiTest.describe(
           expect(ingestResult[1]['client.ip']).toBeUndefined();
           expect(missingDoc['client.ip']).toBeNull();
 
-          expect(ingestResult[0]['client.ip']).toEqual('55.3.244.1');
-          expect(grokedDoc['client.ip']).toEqual('55.3.244.1');
+          expect(ingestResult[0]['client.ip']).toBe('55.3.244.1');
+          expect(grokedDoc['client.ip']).toBe('55.3.244.1');
         }
       );
 
@@ -436,7 +436,7 @@ streamlangApiTest.describe(
           const mappingDoc = { message: '' };
           await testBed.ingest('esql-grok-fail', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-grok-fail', query);
-          expect(esqlResult.documents.length).toBe(1); // only mapping doc
+          expect(esqlResult.documents).toHaveLength(1); // only mapping doc
         }
       );
     });
@@ -513,7 +513,7 @@ streamlangApiTest.describe(
           // ES|QL: groked fields are returned as null
           expect(esqlResult.documentsWithoutKeywordsOrdered[0].ip).toBeNull();
           expect(esqlResult.documentsWithoutKeywordsOrdered[0].method).toBeNull();
-          expect(esqlResult.documentsWithoutKeywordsOrdered[0].message).toEqual(
+          expect(esqlResult.documentsWithoutKeywordsOrdered[0].message).toBe(
             'no match here at all'
           );
         }

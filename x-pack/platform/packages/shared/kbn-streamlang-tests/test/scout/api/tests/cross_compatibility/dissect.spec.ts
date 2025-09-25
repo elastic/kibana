@@ -239,7 +239,7 @@ streamlangApiTest.describe(
           const mappingDoc = { message: '' };
           await testBed.ingest('esql-dissect-fail', [mappingDoc, ...docs]);
           const esqlResult = await esql.queryOnIndex('esql-dissect-fail', query);
-          expect(esqlResult.documentsWithoutKeywords.length).toBe(1); // Only the mapping doc
+          expect(esqlResult.documentsWithoutKeywords).toHaveLength(1); // Only the mapping doc
         }
       );
     });
@@ -288,7 +288,7 @@ streamlangApiTest.describe(
                 expect(doc['log.level']).toBeNull();
                 break;
               case 'dissected':
-                expect(ingestResult[0]['log.level']).toEqual('info');
+                expect(ingestResult[0]['log.level']).toBe('info');
                 expect(doc['log.level']).toBe('info');
                 break;
             }
