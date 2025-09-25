@@ -10,8 +10,10 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
-
-import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import {
+  isAgentMigrationSupported,
+  isAgentRequestDiagnosticsSupported,
+} from '../../../../../../../common/services';
 
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
@@ -59,7 +61,13 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-  if (!agentPolicy?.is_protected && !isFleetServerAgent && agentMigrationsEnabled) {
+  if (
+    authz.fleet.allAgents &&
+    !agentPolicy?.is_protected &&
+    !isFleetServerAgent &&
+    agentMigrationsEnabled &&
+    isAgentMigrationSupported(agent)
+  ) {
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"

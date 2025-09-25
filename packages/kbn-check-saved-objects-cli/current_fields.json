@@ -207,6 +207,7 @@
     "created_at",
     "created_by",
     "created_by.username",
+    "eventId",
     "externalReferenceAttachmentTypeId",
     "owner",
     "persistableStateAttachmentTypeId",
@@ -817,6 +818,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",
