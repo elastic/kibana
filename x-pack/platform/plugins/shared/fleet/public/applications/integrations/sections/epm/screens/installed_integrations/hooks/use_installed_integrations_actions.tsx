@@ -30,7 +30,7 @@ export function useInstalledIntegrationsActions() {
     upgradingIntegrations,
     uninstallingIntegrations,
     rollingbackIntegrations,
-    bulkActions: { setPollingBulkActions },
+    bulkActions: { setPollingBulkActions, setActionCompletedCallback },
   } = useContext(bulkActionsContext);
   const queryClient = useQueryClient();
   const startServices = useStartServices();
@@ -146,8 +146,13 @@ export function useInstalledIntegrationsActions() {
   );
 
   const bulkRollbackIntegrations = useCallback(
-    async (items: InstalledPackageUIPackageListItem[]) => {
+    async (
+      items: InstalledPackageUIPackageListItem[],
+      onActionCompleted?: (status: string) => void
+    ) => {
       try {
+        setActionCompletedCallback(() => onActionCompleted);
+
         const res = await sendBulkRollbackPackagesForRq({
           packages: items.map((item) => ({ name: item.name })),
         });
@@ -188,24 +193,27 @@ export function useInstalledIntegrationsActions() {
         return false;
       }
     },
-    [setPollingBulkActions, toasts]
+    [setPollingBulkActions, toasts, setActionCompletedCallback]
   );
 
   const bulkRollbackIntegrationsWithConfirmModal = useCallback(
-    (selectedItems: InstalledPackageUIPackageListItem[]) => {
-      return new Promise<void>((resolve, reject) => {
+    (
+      selectedItems: InstalledPackageUIPackageListItem[],
+      onActionCompleted?: (status: string) => void
+    ) => {
+      return new Promise<string>((resolve, reject) => {
         const ref = startServices.overlays.openModal(
           toMountPoint(
             <ConfirmBulkRollbackModal
               onClose={() => {
                 ref.close();
-                resolve();
+                resolve('cancelled');
               }}
               onConfirm={async () => {
                 // Error handled in bulkRollbackIntegrations
-                const success = await bulkRollbackIntegrations(selectedItems);
+                const success = await bulkRollbackIntegrations(selectedItems, onActionCompleted);
                 if (success) {
-                  resolve();
+                  resolve('confirmed');
                 } else {
                   throw new Error('rollback integrations failed');
                 }

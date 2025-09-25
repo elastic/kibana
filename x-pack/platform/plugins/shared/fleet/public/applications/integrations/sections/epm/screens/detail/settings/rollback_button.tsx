@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstallationInfo } from '../../../../../../../../server/types';
 
-import type { PackageInfo } from '../../../../../types';
-import { useAuthz } from '../../../../../hooks';
+import { InstallStatus, type PackageInfo } from '../../../../../types';
+import { useAuthz, useGetPackageInstallStatus, useRollbackPackage } from '../../../../../hooks';
 import { useInstalledIntegrationsActions } from '../../installed_integrations/hooks/use_installed_integrations_actions';
 
 interface RollbackButtonProps {
@@ -28,15 +28,20 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
+  const rollbackPackage = useRollbackPackage();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+  const { status: installationStatus } = getPackageInstallStatus(packageInfo.name);
+  const isRollingBack = installationStatus === InstallStatus.rollingBack;
 
   const openRollbackModal = useCallback(async () => {
-    return bulkRollbackIntegrationsWithConfirmModal([packageInfo as any]);
-  }, [packageInfo, bulkRollbackIntegrationsWithConfirmModal]);
+    await rollbackPackage(packageInfo, bulkRollbackIntegrationsWithConfirmModal);
+  }, [packageInfo, rollbackPackage, bulkRollbackIntegrationsWithConfirmModal]);
 
   const rollbackButton = (
     <EuiButton
       data-test-subj="rollbackButton"
       iconType={'returnKey'}
+      isLoading={isRollingBack}
       onClick={openRollbackModal}
       color="primary"
       disabled={isDisabled}

@@ -30,6 +30,7 @@ export const bulkActionsContext = React.createContext<{
   rollingbackIntegrations: InstalledPackageUIPackageListItem[];
   bulkActions: {
     setPollingBulkActions: React.Dispatch<React.SetStateAction<PollAction[]>>;
+    setActionCompletedCallback: React.Dispatch<React.SetStateAction<Function | undefined>>;
   };
 }>({
   upgradingIntegrations: [],
@@ -37,6 +38,7 @@ export const bulkActionsContext = React.createContext<{
   rollingbackIntegrations: [],
   bulkActions: {
     setPollingBulkActions: () => {},
+    setActionCompletedCallback: () => {},
   },
 });
 
@@ -49,6 +51,7 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
 
   const queryClient = useQueryClient();
   const [pollingBulkActions, setPollingBulkActions] = useState<PollAction[]>([]);
+  const [actionCompletedCallback, setActionCompletedCallback] = useState<Function | undefined>();
 
   const upgradingIntegrations = useMemo(() => {
     return pollingBulkActions
@@ -108,6 +111,9 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     ),
             });
+            if (actionCompletedCallback) {
+              actionCompletedCallback('success');
+            }
           } else if (res.status === 'failed') {
             const errorMessage = res.error?.message
               ? res.error?.message
@@ -142,6 +148,9 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                       }
                     ),
             });
+            if (actionCompletedCallback) {
+              actionCompletedCallback('failed');
+            }
           }
         }
       },
@@ -152,8 +161,9 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
   const bulkActions = useMemo(
     () => ({
       setPollingBulkActions,
+      setActionCompletedCallback,
     }),
-    [setPollingBulkActions]
+    [setPollingBulkActions, setActionCompletedCallback]
   );
 
   return (
