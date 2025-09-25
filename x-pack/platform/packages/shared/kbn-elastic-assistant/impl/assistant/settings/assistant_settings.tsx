@@ -75,7 +75,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     conversations,
     conversationsLoaded,
   }) => {
-    const { http, toasts, selectedSettingsTab, setSelectedSettingsTab } = useAssistantContext();
+    const { http, toasts, selectedSettingsTab, setSelectedSettingsTab, settings } = useAssistantContext();
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
@@ -89,6 +89,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
 
     const {

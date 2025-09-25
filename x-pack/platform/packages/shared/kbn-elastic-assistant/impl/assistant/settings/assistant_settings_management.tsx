@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -37,7 +36,6 @@ import { SettingsTabs } from './types';
 interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
-  settings: SettingsStart;
   onTabChange?: (tabId: string) => void;
   currentTab: SettingsTabs;
 }
@@ -52,18 +50,22 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onTabChange,
     currentTab: selectedSettingsTab,
-    settings,
   }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       assistantAvailability: { isAssistantManagementEnabled },
       navigateToApp,
+      settings,
     } = useAssistantContext();
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
