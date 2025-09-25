@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  keys,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -41,41 +40,25 @@ export const RightSideActions = ({
   requestParams,
 }: RightSideActionsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { onShowSearch, showSearchInput, isFullscreen, onToggleFullscreen, onClearSearch } =
-    useToolbarActions({
-      fields,
-      indexPattern,
-      renderToggleActions,
-      requestParams,
-    });
+  const {
+    onShowSearch,
+    showSearchInput,
+    isFullscreen,
+    onToggleFullscreen,
+    onClearSearch,
+    onKeyDown,
+  } = useToolbarActions({
+    fields,
+    indexPattern,
+    renderToggleActions,
+    requestParams,
+  });
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onSearchTermChange(e.target.value);
     },
     [onSearchTermChange]
-  );
-
-  const onExitFullscreen = useCallback(
-    (e: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (e.key === keys.ESCAPE && isFullscreen) {
-        onToggleFullscreen();
-      }
-    },
-    [onToggleFullscreen, isFullscreen]
-  );
-
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === keys.ESCAPE) {
-        if (!isFullscreen) {
-          onClearSearch();
-        } else {
-          onToggleFullscreen();
-        }
-      }
-    },
-    [onClearSearch, isFullscreen, onToggleFullscreen]
   );
 
   const onBlur = useCallback(() => {
@@ -149,7 +132,6 @@ export const RightSideActions = ({
               aria-label={fullscreenButtonLabel}
               title={fullscreenButtonLabel}
               onClick={onToggleFullscreen}
-              onKeyDown={onExitFullscreen}
               data-test-subj="metricsExperienceToolbarFullScreen"
               size="s"
               css={css`
