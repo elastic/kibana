@@ -22,6 +22,7 @@ import type { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
 import type { Client } from '@elastic/elasticsearch';
 
 const TEST_INDEX_NAME = 'test_index';
+const TEST_CONCRETE_INDEX_NAME = `${TEST_INDEX_NAME}-000001`;
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -315,41 +316,85 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
-  describe('when writing/bootstrapping with an legacy index', () => {
-    const storageSettingsV2 = {
-      ...storageSettings,
-      version: 2,
-    } satisfies StorageSettings;
-
-    beforeAll(async () => {
+  describe('when writing/bootstrapping with an n-1 version index', () => {
+    beforeEach(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
-      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsV2).getClient();
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await client?.clean();
       resetAdapterClient();
     });
 
-    it('updates the existing write index in place', async () => {
+    it('updates the existing write index in place to v2', async () => {
+      const storageSettingsV2 = {
+        ...storageSettings,
+        version: 2,
+      } satisfies StorageSettings;
+      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsV2).getClient();
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
       await verifyIndex({ version: 2 });
+    });
 
-      const getIndicesResponse = await esClient.indices.get({
-        index: TEST_INDEX_NAME,
-      });
+    it('does not update the existing write index in place if the version is the same, even if mappings changed', async () => {
+      const storageSettingsNotQuiteV2 = {
+        ...storageSettings,
+        schema: {
+          ...storageSettings.schema,
+          properties: {
+            // change the mappings
+            ...storageSettings.schema.properties,
+            bar: {
+              type: 'keyword',
+            },
+          },
+        },
+        version: 1,
+      } satisfies StorageSettings;
+      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsNotQuiteV2).getClient();
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
 
-      const indices = Object.keys(getIndicesResponse);
+      const {
+        [TEST_CONCRETE_INDEX_NAME]: { mappings },
+      } = await esClient.indices.get({ index: TEST_INDEX_NAME });
 
-      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
-
-      expect(indices).toEqual([writeIndexName]);
-
-      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual(2);
+      expect(mappings!._meta?.version).toEqual(1);
+      expect(mappings!.properties).toEqual(storageSettings.schema.properties);
     });
 
     it('deletes the documents', async () => {
       await verifyClean();
+    });
+  });
+
+  describe('when writing/bootstrapping with a legacy-style version index', () => {
+    beforeAll(async () => {
+      // This represents an index that was created before the versioning system was introduced
+      await esClient.indices.create({
+        index: TEST_CONCRETE_INDEX_NAME,
+        aliases: {
+          [TEST_INDEX_NAME]: {
+            is_write_index: true,
+          },
+        },
+        mappings: {
+          _meta: {
+            version: 'abc', // not a number!
+          },
+          properties: storageSettings.schema.properties,
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('updates the version to v1', async () => {
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
     });
   });
 
@@ -453,7 +498,7 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function verifyIndex(options: { writeIndexName?: string; version?: number } = {}) {
-    const { writeIndexName = `${TEST_INDEX_NAME}-000001`, version = 1 } = options;
+    const { writeIndexName = TEST_CONCRETE_INDEX_NAME, version = 1 } = options;
 
     const getIndexResponse = await esClient.indices
       .get({
