@@ -6,6 +6,7 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import type { StreamQuery } from '../queries';
 
 export const buildEsqlQuery = (
@@ -13,13 +14,45 @@ export const buildEsqlQuery = (
   query: StreamQuery,
   includeMetadata: boolean = false
 ): string => {
-  const metadata = includeMetadata ? ' METADATA _id, _source' : '';
-  const systemFilter = query.system ? ` AND ${conditionToESQL(query.system.filter)}` : '';
-  const escapedKql = query.kql.query.replace(/"/g, '\\"');
+  const fromCommand = Builder.command({
+    name: 'from',
+    args: [
+      Builder.expression.source.index(indices.join(',')),
+      ...(includeMetadata
+        ? [
+            Builder.option({
+              name: 'METADATA',
+              args: [
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: '_id' })],
+                }),
+                Builder.expression.column({
+                  args: [Builder.identifier('_source')],
+                }),
+              ],
+            }),
+          ]
+        : []),
+    ],
+  });
 
-  // TODO: Move the following to kbn-streamlang esql transpiler
-  const esqlQuery = `FROM ${indices.join(
-    ','
-  )}${metadata} | WHERE KQL("${escapedKql}")${systemFilter}`;
-  return esqlQuery;
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(query.kql.query),
+  ]);
+
+  const whereCondition = query.system
+    ? Builder.expression.func.binary('and', [
+        kqlQuery,
+        Builder.expression.literal.string(conditionToESQL(query.system.filter), { unquoted: true }),
+      ])
+    : kqlQuery;
+
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: [whereCondition],
+  });
+
+  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
+
+  return BasicPrettyPrinter.print(esqlQuery);
 };
