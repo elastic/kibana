@@ -35,6 +35,6 @@ describe('validatePipelineId', () => {
   it('returns proper error message for invalid IDs', () => {
     const result = validatePipelineId('kibana.api');
     expect(result).toContain('Pipeline ID must begin with a letter or underscore');
-    expect(result).toContain('contain only letters, underscores, dashes, hyphens and numbers');
+    expect(result).toContain('contain only letters, underscores, dashes, hyphens, and numbers');
   });
 });
