@@ -83,14 +83,33 @@ describe('AwsCredentialsForm', () => {
     awsOverviewPath: 'https://docs.elastic.co/aws',
     templateName: 'cspm',
     getCloudSetupProviderByInputType: jest.fn(),
-    config: {
-      showCloudTemplates: true,
-    } as CloudSetupConfig,
+    config: {} as CloudSetupConfig,
     showCloudTemplates: false,
     defaultProvider: 'aws',
     defaultProviderType: 'aws',
     awsInputFieldMapping: {},
     isAwsCloudConnectorEnabled: false,
+    awsOrganizationEnabled: false,
+
+    // Required Azure and GCP fields (minimal, unused in AWS tests)
+    azureEnabled: false,
+    isAzureCloudConnectorEnabled: false,
+    azureOrganizationEnabled: false,
+    azureOverviewPath: '',
+    azurePolicyType: '',
+    azureCloudConnectorRemoteRoleTemplate: undefined,
+    azureManualFieldsEnabled: false,
+
+    gcpEnabled: false,
+    isGcpCloudConnectorEnabled: false,
+    gcpOrganizationEnabled: false,
+    gcpOverviewPath: '',
+    gcpPolicyType: '',
+    gcpCloudConnectorRemoteRoleTemplate: undefined,
+
+    // Other required fields
+    templateInputOptions: [],
+    elasticStackId: undefined,
   };
 
   interface AwsCredentialsFormTestProps {
@@ -157,9 +176,9 @@ describe('AwsCredentialsForm', () => {
         input: {
           ...defaultProps.input,
           streams: [
-            ...defaultProps.input.streams,
             {
               enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream, // <-- Add this line
               vars: {
                 'aws.credentials.type': { value: 'cloud_formation' },
               },
@@ -171,9 +190,7 @@ describe('AwsCredentialsForm', () => {
       renderWithProviders(propsWithCloudFormation);
 
       // Should render CloudFormation setup elements
-      expect(
-        screen.getByRole('radio', { name: 'CloudFormation', attribute: 'checked' })
-      ).toBeTruthy();
+      expect(screen.getByRole('radio', { name: 'CloudFormation' })).toHaveAttribute('checked');
     });
 
     it('handles organization account type', () => {
@@ -184,6 +201,7 @@ describe('AwsCredentialsForm', () => {
           streams: [
             {
               enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream,
               vars: {
                 'aws.credentials.type': { value: 'cloud_formation' },
                 'aws.account_type': { value: AWS_ORGANIZATION_ACCOUNT },
@@ -205,6 +223,7 @@ describe('AwsCredentialsForm', () => {
           streams: [
             {
               enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream,
               vars: {
                 'aws.credentials.type': { value: 'cloud_formation' },
               },
@@ -230,6 +249,7 @@ describe('AwsCredentialsForm', () => {
           streams: [
             {
               enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream,
               vars: {
                 'aws.credentials.type': { value: 'cloud_formation' },
               },
@@ -253,6 +273,7 @@ describe('AwsCredentialsForm', () => {
           streams: [
             {
               enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream,
               vars: {
                 'aws.credentials.type': { value: 'cloud_formation' },
               },

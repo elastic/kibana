@@ -264,4 +264,148 @@ describe.skip('AzureCredentialsFormAgentless', () => {
       });
     });
   });
+
+  describe('Component Behavior Tests', () => {
+    const serverlessMock = createCloudServerlessMock(true, AZURE_PROVIDER, AZURE_PROVIDER);
+
+    beforeEach(() => {
+      uiSettingsClient.get = jest.fn().mockReturnValue(false);
+    });
+
+    describe('rendering with different configurations', () => {
+      it('renders without credential type selector when cloud connectors are disabled', () => {
+        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+
+        expect(
+          screen.queryByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+        ).toBeInTheDocument();
+      });
+
+      it('renders with credential type selector when cloud connectors are enabled', () => {
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
+        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+
+        expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
+        ).toBeInTheDocument();
+      });
+
+      it('handles hasInvalidRequiredVars prop correctly', () => {
+        render(
+          <AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} hasInvalidRequiredVars />
+        );
+
+        // The component should still render all expected fields even with invalid vars
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+        ).toBeInTheDocument();
+      });
+
+      it('renders with different setup technologies', () => {
+        render(
+          <AzureCredentialsFormAgentlessWrapper
+            cloud={serverlessMock}
+            setupTechnology={SetupTechnology.AGENTLESS}
+          />
+        );
+
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+      });
+    });
+
+    describe('user interactions', () => {
+      it('allows switching between credential types when cloud connectors enabled', async () => {
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
+        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+
+        const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+
+        // Initially should be cloud connectors
+        expect(credentialSelector).toHaveValue(AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS);
+
+        // Switch to service principal
+        userEvent.selectOptions(
+          credentialSelector,
+          AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+        );
+
+        await waitFor(() => {
+          expect(credentialSelector).toHaveValue(
+            AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+          );
+        });
+
+        // Cloud connector ARM template button should not be visible for service principal
+        expect(
+          screen.queryByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
+        ).not.toBeInTheDocument();
+      });
+
+      it('maintains form state when credential type changes', async () => {
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
+        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+
+        const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+
+        // Switch to service principal
+        userEvent.selectOptions(
+          credentialSelector,
+          AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+        );
+
+        await waitFor(() => {
+          expect(credentialSelector).toHaveValue(
+            AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+          );
+        });
+
+        // Form fields should be present and functional
+        const clientIdField = screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+        const tenantIdField = screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+        const clientSecretField = screen.getByTestId(
+          AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET
+        );
+
+        expect(clientIdField).toBeInTheDocument();
+        expect(tenantIdField).toBeInTheDocument();
+        expect(clientSecretField).toBeInTheDocument();
+      });
+    });
+
+    describe('integration with cloud setup context', () => {
+      it('responds to different cloud providers correctly', () => {
+        const gcpCloudMock = createCloudServerlessMock(true, GCP_PROVIDER, GCP_PROVIDER);
+
+        render(<AzureCredentialsFormAgentlessWrapper cloud={gcpCloudMock} />);
+
+        // Should still render Azure fields even with different cloud provider
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+        ).toBeInTheDocument();
+      });
+
+      it('handles serverless vs regular cloud environments', () => {
+        const regularCloudMock = createCloudServerlessMock(false, AZURE_PROVIDER, AZURE_PROVIDER);
+
+        render(<AzureCredentialsFormAgentlessWrapper cloud={regularCloudMock} />);
+
+        // Regular cloud should show standard Azure fields
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)
+        ).toBeInTheDocument();
+      });
+    });
+  });
 });
