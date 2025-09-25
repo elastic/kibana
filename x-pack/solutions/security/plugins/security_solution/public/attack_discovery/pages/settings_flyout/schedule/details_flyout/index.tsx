@@ -44,6 +44,7 @@ import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { WithMissingPrivileges } from '../missing_privileges';
 
 interface Props {
   scheduleId: string;
@@ -73,9 +74,10 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    settings,
   });
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
     useGetAttackDiscoverySchedule({
@@ -180,14 +182,18 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="edit"
-              size="m"
-              onClick={() => setIsEditing(true)}
-              disabled={isLoading}
-            >
-              {i18n.SCHEDULE_EDIT_BUTTON_TITLE}
-            </EuiButton>
+            <WithMissingPrivileges>
+              {(enabled) => (
+                <EuiButton
+                  data-test-subj="edit"
+                  size="m"
+                  onClick={() => setIsEditing(true)}
+                  disabled={isLoading || !enabled}
+                >
+                  {i18n.SCHEDULE_EDIT_BUTTON_TITLE}
+                </EuiButton>
+              )}
+            </WithMissingPrivileges>
           </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
