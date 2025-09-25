@@ -34,6 +34,7 @@ import {
 } from '../schema/constants';
 import { Filter, Query } from '@kbn/es-query';
 import { LensApiFilterType } from '../schema/filter';
+import { LensState } from '@kbn/lens-plugin/public/state_management/types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -470,6 +471,22 @@ export const filtersToLensState = (filters: LensApiFilterType[]): Filter[] => {
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
   return query;
+};
+
+export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
+  return {
+    filters: filtersToApiFormat(state.state.filters),
+    query: queryToApiFormat(state.state.query as Query),
+  };
+};
+
+export const addFiltersAndQueryToLensState = (state: LensApiState, attributes: LensAttributes) => {
+  if (state.filters) {
+    attributes.state.filters = filtersToLensState(state.filters);
+  }
+  if (state.query) {
+    attributes.state.query = queryToLensState(state.query as LensApiFilterType);
+  }
 };
 
 export type DeepMutable<T> = T extends (...args: never[]) => unknown

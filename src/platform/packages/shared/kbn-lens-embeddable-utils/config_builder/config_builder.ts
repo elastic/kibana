@@ -10,7 +10,6 @@
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { Query } from '@kbn/es-query';
 import type { LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
@@ -25,12 +24,7 @@ import {
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
-import {
-  filtersToApiFormat,
-  filtersToLensState,
-  queryToApiFormat,
-  queryToLensState,
-} from './transforms/utils';
+import { addFiltersAndQueryToLensState, filtersAndQueryToApiFormat } from './transforms/utils';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -105,12 +99,7 @@ export class LensConfigBuilder {
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
       const attributes = converter.fromAPItoLensState(config);
-      if (config.filters) {
-        attributes.state.filters = filtersToLensState(config.filters);
-      }
-      if (config.query) {
-        attributes.state.query = queryToLensState(config.query);
-      }
+      addFiltersAndQueryToLensState(config, attributes);
       return attributes;
     }
     throw new Error(`No attributes converter found for chart type: ${chartType}`);
@@ -122,8 +111,7 @@ export class LensConfigBuilder {
       const converter = this.apiConvertersByChart.metric;
       return {
         ...converter.fromLensStateToAPI(config),
-        filters: filtersToApiFormat(config.state.filters),
-        query: queryToApiFormat(config.state.query as Query),
+        ...filtersAndQueryToApiFormat(config),
       };
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
