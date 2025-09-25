@@ -39,7 +39,7 @@ import { notificationService } from '../../../../services/notification';
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
 
-interface IndexActionsContextMenuProps {
+export interface IndexActionsContextMenuProps {
   // either an array of indices selected in the list view or an array of 1 index name on the details panel/page
   indexNames: string[];
   // indices data
@@ -85,7 +85,7 @@ interface IndexActionsContextMenuProps {
   fill?: boolean;
   // sets the button's loading state
   isLoading?: boolean;
-  indicesListURLParams: string;
+  indicesListURLParams?: string;
 }
 
 export const IndexActionsContextMenu = ({
@@ -109,7 +109,7 @@ export const IndexActionsContextMenu = ({
   reloadIndices,
   fill = true,
   isLoading = false,
-  indicesListURLParams,
+  indicesListURLParams = '',
 }: IndexActionsContextMenuProps) => {
   const {
     services: { extensionsService },
