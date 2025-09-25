@@ -11,8 +11,8 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { dashboardServiceProvider, type DashboardItem } from '../services/dashboard_service';
-
+import { getFindDashboardsService } from '@kbn/dashboard-content-management-service';
+import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
 interface DashboardOption {
   value: string;
   label: string;
@@ -32,6 +32,10 @@ export function DashboardsSelector({
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
   const [searchValue, setSearchValue] = useState<string>('');
   const [isLoading, setLoading] = useState(false);
+  const findDashboardsService = useMemo(
+    () => getFindDashboardsService(contentManagement),
+    [contentManagement]
+  );
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -47,9 +51,7 @@ export function DashboardsSelector({
     try {
       const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
         try {
-          const fetchedDashboard = await dashboardServiceProvider(contentManagement).fetchDashboard(
-            dashboard.id
-          );
+          const fetchedDashboard = await findDashboardsService.findById(dashboard.id);
 
           // Only return the dashboard if it exists, fetch was successful, and has a title
           if (
@@ -83,7 +85,7 @@ export function DashboardsSelector({
       // Set empty array or handle the error appropriately
       setSelectedDashboards([]);
     }
-  }, [dashboardsFormData, contentManagement]);
+  }, [contentManagement, dashboardsFormData, findDashboardsService]);
 
   useEffect(() => {
     fetchDashboardTitles();
@@ -104,7 +106,7 @@ export function DashboardsSelector({
     []
   );
 
-  const getDashboardItem = (dashboard: DashboardItem) => ({
+  const getDashboardItem = (dashboard: SearchDashboardsResponse['hits'][number]) => ({
     value: dashboard.id,
     label: dashboard.attributes.title,
   });
@@ -112,16 +114,18 @@ export function DashboardsSelector({
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
       setLoading(true);
-      const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
-        .catch(() => {});
-      const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
+      const dashboards = await findDashboardsService.search({
+        size: 100,
+        search: searchValue,
+      });
+
+      const dashboardOptions = (dashboards.hits ?? []).map((dashboard) =>
         getDashboardItem(dashboard)
       );
       setDashboardList(dashboardOptions);
       setLoading(false);
     }
-  }, [contentManagement, searchValue]);
+  }, [contentManagement, findDashboardsService, searchValue]);
 
   useEffect(() => {
     if (isComboBoxOpen) {
@@ -149,6 +153,7 @@ export function DashboardsSelector({
       onFocus={handleComboBoxFocus}
       onSearchChange={onSearchChange}
       data-test-subj="dashboardsSelector"
+      aria-label={placeholder}
     />
   );
 }
