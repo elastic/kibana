@@ -92,6 +92,7 @@ export class ServiceManager {
       logger: logger.get('conversations'),
       security,
       elasticsearch,
+      spaces,
     });
 
     const chat = createChatService({
