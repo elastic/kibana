@@ -6,6 +6,7 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
+import { escapeQuotes } from '@kbn/es-query';
 import type { StreamQuery } from '../queries';
 
 export const buildEsqlQuery = (
@@ -15,7 +16,7 @@ export const buildEsqlQuery = (
 ): string => {
   const metadata = includeMetadata ? ' METADATA _id, _source' : '';
   const systemFilter = query.system ? ` AND ${conditionToESQL(query.system.filter)}` : '';
-  const escapedKql = query.kql.query.replace(/"/g, '\\"');
+  const escapedKql = escapeQuotes(query.kql.query);
   // eslint-disable-next-line prettier/prettier
   const esqlQuery = `FROM ${indices.join(',')}${metadata} | WHERE KQL("${escapedKql}")${systemFilter}`;
   return esqlQuery;
