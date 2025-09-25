@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -104,9 +105,16 @@ export const setTabs: InternalStateThunkActionCreator<
   };
 
 export const updateTabs: InternalStateThunkActionCreator<
-  [{ items: TabState[] | TabItem[]; selectedItem: TabState | TabItem | null }],
+  [
+    {
+      items: TabState[] | TabItem[];
+      selectedItem: TabState | TabItem | null;
+      updatedDiscoverSession?: DiscoverSession;
+    },
+    void
+  ],
   Promise<void>
-> = ({ items, selectedItem }) =>
+> = ({ items, selectedItem, updatedDiscoverSession }) =>
   async function updateTabsThunkFn(
     dispatch,
     getState,
@@ -246,6 +254,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTabId,
         recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
+        updatedDiscoverSession,
       })
     );
   };
