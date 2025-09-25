@@ -8,20 +8,19 @@
  */
 
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
+import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type {
-  CumulativeSumIndexPatternColumn,
-  MaxIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
-import type { LensApiCumulativeSumOperation } from '../../schema/metric_ops';
+  LensApiCumulativeSumOperation,
+  LensApiSumMetricOperation,
+} from '../../schema/metric_ops';
 
 describe('Cumulative Sum Transforms', () => {
   const testRef = { id: 'col1', field: 'sales' };
-  const columnRef: MaxIndexPatternColumn = {
-    operationType: 'max',
-    sourceField: 'sales',
-    dataType: 'number',
-    isBucketed: false,
-    label: 'Max of sales',
+  const columnRef: LensApiSumMetricOperation = {
+    operation: 'sum',
+    field: 'sales',
+    label: 'Sum of sales',
+    empty_as_null: false,
   };
 
   describe('fromCumulativeSumAPItoLensState', () => {

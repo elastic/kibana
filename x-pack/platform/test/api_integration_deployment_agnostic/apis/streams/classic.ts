@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -53,12 +53,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            settings: {},
+            processing: { steps: [] },
             classic: {},
           },
-        });
+        } satisfies Streams.ClassicStream.Definition);
       });
 
       it('Allows setting processing on classic streams', async () => {
@@ -68,19 +67,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: TEST_STREAM_NAME,
             },
             body: {
-              dashboards: [],
-              queries: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
+                  settings: {},
                   processing: {
                     steps: [
                       {
                         action: 'grok',
                         where: { always: {} },
-                        from: 'message',
+                        from: 'nested.message',
                         patterns: [
                           '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                         ],
@@ -123,11 +121,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
+                  from: 'nested.message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
@@ -137,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             classic: {},
           },
-        });
+        } satisfies Streams.ClassicStream.Definition);
 
         expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
@@ -149,10 +148,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('Executes processing on classic streams', async () => {
+      it('Executes processing on classic streams with dotted field names', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          'nested.message': '2023-01-01T00:00:10.000Z error test',
         };
         const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
         expect(response.result).to.eql('created');
@@ -160,7 +159,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
+
+      it('Executes processing on classic streams with subobjects', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
           log: {
@@ -174,16 +193,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {},
                 },
               },
@@ -220,13 +236,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await indexDocument(esClient, 'logs-invalid_pipeline-default', doc);
         expect(response.result).to.eql('created');
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -270,16 +285,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -301,16 +313,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             path: { name: TEST_STREAM_NAME },
             body: {
-              queries: [],
-              dashboards: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: {
-                    steps: [],
-                  },
+                  processing: { steps: [] },
+                  settings: {},
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -439,13 +448,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, FIRST_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -493,9 +501,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: '2023-01-01T00:00:10.000Z error test',
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
-          log: {
-            level: 'error',
-          },
+          'log.level': 'error',
         });
       });
 
@@ -505,13 +511,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, SECOND_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -541,16 +546,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the ingest pipeline when the processing is removed from the first stream', async () => {
         await putStream(apiClient, FIRST_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               classic: {},
             },
           },
@@ -565,14 +567,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('clears the pipeline when processing is removed from the second stream', async () => {
         await putStream(apiClient, SECOND_STREAM_NAME, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
+              settings: {},
               classic: {},
             },
           },
@@ -600,13 +601,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
         });
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -678,13 +678,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('fails to store non-existing processor', async () => {
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
+              settings: {},
               processing: {
                 steps: [
                   {
@@ -728,14 +727,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ORPHANED_STREAM_NAME,
             },
             body: {
-              dashboards: [],
-              queries: [],
-              rules: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
+                  settings: {},
                   classic: {},
                 },
               },

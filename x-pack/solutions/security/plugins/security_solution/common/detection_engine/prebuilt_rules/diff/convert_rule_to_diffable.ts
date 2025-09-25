@@ -6,8 +6,6 @@
  */
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import { requiredOptional } from '@kbn/zod-helpers';
-import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { assertUnreachable } from '../../../utility_types';
 import type {
   EqlRule,
@@ -40,27 +38,28 @@ import type {
   DiffableThreatMatchFields,
   DiffableThresholdFields,
 } from '../../../api/detection_engine/prebuilt_rules';
-import { addEcsToRequiredFields } from '../../rule_management/utils';
-import { extractBuildingBlockObject } from './extract_building_block_object';
+import { extractBuildingBlockObject } from './extractors/extract_building_block_object';
 import {
   extractInlineKqlQuery,
   extractRuleEqlQuery,
   extractRuleEsqlQuery,
   extractRuleKqlQuery,
-} from './extract_rule_data_query';
-import { extractRuleDataSource } from './extract_rule_data_source';
-import { extractRuleNameOverrideObject } from './extract_rule_name_override_object';
-import { extractRuleSchedule } from './extract_rule_schedule';
-import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
-import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
-import { extractThreatArray } from './extract_threat_array';
-import { normalizeRuleThreshold } from './normalize_rule_threshold';
+} from './extractors/extract_rule_data_query';
+import { extractRuleDataSource } from './extractors/extract_rule_data_source';
+import { extractRuleNameOverrideObject } from './extractors/extract_rule_name_override_object';
+import { extractRuleSchedule } from './extractors/extract_rule_schedule';
+import { extractTimelineTemplateReference } from './extractors/extract_timeline_template_reference';
+import { extractTimestampOverrideObject } from './extractors/extract_timestamp_override_object';
+import { normalizeRuleThreshold } from './normalizers/normalize_rule_threshold';
+import { normalizeRuleResponse } from './normalize_rule_response';
 
 /**
- * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
+ * Structures and groups together similar fields for diffing purposes.
  * Read more in the JSDoc description of DiffableRule.
  */
-export const convertRuleToDiffable = (rule: RuleResponse): DiffableRule => {
+export const convertRuleToDiffable = (ruleResponse: RuleResponse): DiffableRule => {
+  const rule = normalizeRuleResponse(ruleResponse);
+
   const commonFields = extractDiffableCommonFields(rule);
 
   switch (rule.type) {
@@ -119,26 +118,26 @@ const extractDiffableCommonFields = (
     version: rule.version,
 
     // Main domain fields
-    name: rule.name?.trim(),
-    tags: rule.tags ?? [],
+    name: rule.name,
+    tags: rule.tags,
     description: rule.description,
     severity: rule.severity,
-    severity_mapping: rule.severity_mapping ?? [],
+    severity_mapping: rule.severity_mapping,
     risk_score: rule.risk_score,
-    risk_score_mapping: rule.risk_score_mapping?.map((mapping) => requiredOptional(mapping)) ?? [],
+    risk_score_mapping: rule.risk_score_mapping,
 
     // About -> Advanced settings
-    references: rule.references ?? [],
-    false_positives: rule.false_positives ?? [],
-    threat: extractThreatArray(rule),
+    references: rule.references,
+    false_positives: rule.false_positives,
+    threat: rule.threat,
     note: rule.note ?? '',
     setup: rule.setup ?? '',
-    related_integrations: rule.related_integrations ?? [],
-    required_fields: addEcsToRequiredFields(rule.required_fields),
+    related_integrations: rule.related_integrations,
+    required_fields: rule.required_fields,
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
+    max_signals: rule.max_signals,
 
     // --------------------- OPTIONAL FIELDS
     investigation_fields: rule.investigation_fields,

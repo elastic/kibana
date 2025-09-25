@@ -44,6 +44,7 @@ describe('conversationLangchainMessages', () => {
   it('handles a round with only user and assistant messages', () => {
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
@@ -74,6 +75,7 @@ describe('conversationLangchainMessages', () => {
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
@@ -118,11 +120,13 @@ describe('conversationLangchainMessages', () => {
   it('handles multiple rounds', () => {
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
       },
       {
+        id: 'round-2',
         input: makeRoundInput('search for bar'),
         steps: [
           makeToolCallStep(
@@ -177,6 +181,7 @@ describe('conversationLangchainMessages', () => {
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),

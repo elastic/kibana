@@ -326,6 +326,18 @@ describe('casing', () => {
     expect(text3).toBe('FROM index | STATS FN1(), FN2(), FN3()');
   });
 
+  test('parameter function name is printed as specified', () => {
+    const text = reprint('ROW ??functionName(*)').text;
+
+    expect(text).toBe('ROW ??functionName(*)');
+  });
+
+  test('parameter function name is printed as specified (single ?)', () => {
+    const text = reprint('ROW ?functionName(42)').text;
+
+    expect(text).toBe('ROW ?functionName(42)');
+  });
+
   test('can choose keyword casing', () => {
     const query = 'FROM index | RENAME a AS b';
     const text1 = reprint(query, { lowercase: true }).text;
@@ -769,6 +781,10 @@ FROM index
       expect(text).toBe(`ROW F(0, {})`);
     });
 
+    test('supports nested maps', () => {
+      assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
+    });
+
     test('empty map (multiline)', () => {
       const src = `ROW F(0, {"a": 0}) | LIMIT 1`;
       const { root } = parse(src);
@@ -895,6 +911,21 @@ FROM index
       "abc":
         "abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz"
     })`);
+    });
+
+    test('supports wrapping in nested maps', () => {
+      assertReprint(
+        `ROW
+  FN(
+    1,
+    {
+      "map":
+        {
+          "aaaaaaaaaaaaaaaaaaaaa": 111111111111111,
+          "bbbbbbbbbbbbbbbbbbbbbbbb": 222222222222222
+        }
+    })`
+      );
     });
   });
 
