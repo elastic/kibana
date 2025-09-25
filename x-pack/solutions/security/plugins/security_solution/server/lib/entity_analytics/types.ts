@@ -97,6 +97,7 @@ export interface CalculateScoresParams {
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  filters?: Array<{ entity_types: string[]; filter: string }>;
 }
 
 export interface CalculateAndPersistScoresParams {
