@@ -849,10 +849,10 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: disableBrowserInputWhenBothEnabled
+              transformFn: disableBrowserInputWhenBothEnabled,
             },
           ],
-        }
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -950,10 +950,10 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: disableBrowserInputWhenBothEnabled
+              transformFn: disableBrowserInputWhenBothEnabled,
             },
           ],
-        }
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
