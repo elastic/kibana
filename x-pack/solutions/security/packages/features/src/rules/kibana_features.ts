@@ -105,6 +105,7 @@ export const getRulesBaseKibanaFeature = (
         LISTS_API_SUMMARY,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
+        'rac'
       ],
     },
     read: {
@@ -129,6 +130,7 @@ export const getRulesBaseKibanaFeature = (
         LISTS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
+        'rac'
       ],
     },
   },

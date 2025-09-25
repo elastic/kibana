@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  RULES_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
@@ -17,7 +18,6 @@ import {
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
-  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
@@ -56,8 +56,7 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      // TODO Remove `${SECURITY_FEATURE_ID}.detections` ? Check if AI4SOC needs it
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`],
+      capabilities: [[RULES_UI_READ_PRIVILEGE, RULES_UI_DETECTIONS_PRIVILEGE]],
       links: [
         {
           id: SecurityPageName.rulesAdd,

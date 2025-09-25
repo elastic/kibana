@@ -8,9 +8,11 @@
 import { getRulesBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
 import type { SecurityFeatureParams } from '../security/types';
+import { rulesDefaultProductFeaturesConfig } from './product_feature_config';
 
 export const getRulesFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
   baseKibanaFeature: getRulesBaseKibanaFeature(params),
   baseKibanaSubFeatureIds: [],
   subFeaturesMap: new Map(),
+  productFeatureConfig: rulesDefaultProductFeaturesConfig
 });

@@ -51,7 +51,13 @@ export const UserPrivilegesProvider = ({
   const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
   const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
 
-  const listPrivileges = useFetchListPrivileges(read);
+  const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
+  const readRules = rulesCapabilities?.[RULES_UI_READ] === true
+  const editRules = rulesCapabilities?.[RULES_UI_EDIT] === true
+
+  const shouldFetchListPrivileges = read || readRules;
+
+  const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
   const endpointPrivileges = useEndpointPrivileges();
 
@@ -74,12 +80,11 @@ export const UserPrivilegesProvider = ({
   );
 
   const rulesPrivileges = useMemo(() => {
-    const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
     return {
-      read: rulesCapabilities?.[RULES_UI_READ] === true,
-      edit: rulesCapabilities?.[RULES_UI_EDIT] === true,
+      read: readRules,
+      edit: editRules,
     };
-  }, [kibanaCapabilities]);
+  }, [readRules, editRules]);
 
   const contextValue = useMemo(
     () => ({

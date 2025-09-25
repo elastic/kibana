@@ -57,9 +57,13 @@ export const USERS_API_READ = 'users-read' as const;
 
 // Rules UI privileges
 export const RULES_UI_READ = 'read_rules' as const;
+export const RULES_UI_DETECTIONS = 'detections' as const;
+export const RULES_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
 export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_READ}` as const;
 export const RULES_UI_EDIT = 'edit_rules' as const;
 export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_EDIT}` as const;
+export const RULES_UI_DETECTIONS_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_DETECTIONS}` as const;
+export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;
