@@ -24,7 +24,7 @@ import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_message';
+import { useRandomAiPersonalityMessage, } from '../../../../hooks/use_waiting_for_ai_message';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
 import { StreamSystemsTable } from './stream_systems_table';
 
@@ -133,7 +133,7 @@ export const StreamSystemsFlyout = ({
 };
 
 function LoadingState() {
-  const label = useWaitingForAiMessage();
+  const label = useRandomAiPersonalityMessage();
 
   return (
     <EuiFlexGroup

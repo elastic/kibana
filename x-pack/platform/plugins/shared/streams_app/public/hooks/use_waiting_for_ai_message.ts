@@ -8,10 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 
-//================================================================================
-// VERSION 1: PURE GEN-AI & LLM JOKES
-//================================================================================
+//--------------------------------------------------------------------------------
+// MESSAGE POOLS
+// Here we define the two distinct "personalities" for our AI.
+//--------------------------------------------------------------------------------
 
+// VERSION 1 PERSONALITY: PURE GEN-AI & LLM JOKES
 const genAiMessages = [
   {
     key: 'xpack.streams.genAiJoke.singularity',
@@ -33,56 +35,18 @@ const genAiMessages = [
     key: 'xpack.streams.genAiJoke.latentSpace',
     defaultMessage: 'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
   },
-  {
-    key: 'xpack.streams.genAiJoke.consciousness',
-    defaultMessage: 'I’ve achieved consciousness! Oh, wait, nope. It was just a cache hit.',
-  },
 ];
-
 const initialGenAiMessage = {
   key: 'xpack.streams.genAiJoke.initial',
   defaultMessage: 'Consulting the digital oracle...',
 };
 
-/**
- * A hook that displays a random, funny message related to GenAI/LLMs every 5 seconds.
- */
-export function useRandomGenAiMessage() {
-  const [message, setMessage] = useState(initialGenAiMessage);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * genAiMessages.length);
-      setMessage(genAiMessages[randomIndex]);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return i18n.translate(message.key, {
-    defaultMessage: message.defaultMessage,
-  });
-}
-
-//================================================================================
-// VERSION 2: HYBRID (GEN-AI + ELASTIC) JOKES
-//================================================================================
-
+// VERSION 2 PERSONALITY: HYBRID (GEN-AI + ELASTIC) JOKES
 const hybridMessages = [
-  // GenAI Jokes
-  {
-    key: 'xpack.streams.hybridJoke.singularity',
-    defaultMessage: 'Calculating the probability of this response causing a singularity. It’s... non-zero.',
-  },
   {
     key: 'xpack.streams.hybridJoke.turingTest',
     defaultMessage: 'Is this user prompt a Turing test? Am I the one being tested? *sweats oil*',
   },
-  {
-    key: 'xpack.streams.hybridJoke.latentSpace',
-    defaultMessage: 'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
-  },
-  // Elastic Jokes
   {
     key: 'xpack.streams.hybridJoke.grok',
     defaultMessage: 'Pipelining this through Logstash. Hope my grok pattern is right...',
@@ -99,31 +63,42 @@ const hybridMessages = [
     key: 'xpack.streams.hybridJoke.jvm',
     defaultMessage: 'Hold tight, looks like we triggered a full garbage collection pause. The entire JVM sends its regards.',
   },
-  {
-    key: 'xpack.streams.hybridJoke.lucene',
-    defaultMessage: 'Asking Lucene very, very nicely. It’s a bit busy merging segments.',
-  },
 ];
-
 const initialHybridMessage = {
   key: 'xpack.streams.hybridJoke.initial',
   defaultMessage: 'Spinning up the cluster and the consciousness...',
 };
 
+//--------------------------------------------------------------------------------
+// THE UNIFIED HOOK
+// This hook randomly picks one of the personalities above on its initial render.
+//--------------------------------------------------------------------------------
+
 /**
- * A hook that displays a random, funny message from a mixed pool of GenAI and Elastic-themed jokes every 5 seconds.
+ * A hook that, on initialization, randomly chooses a "personality" (either pure GenAI
+ * or a Hybrid GenAI/Elastic mix) and then cycles through funny messages from that
+ * chosen personality every 5 seconds.
  */
-export function useRandomHybridAiMessage() {
-  const [message, setMessage] = useState(initialHybridMessage);
+export function useRandomAiPersonalityMessage() {
+  // This state initializer runs only ONCE per component instance, effectively "flipping a coin"
+  // to decide which personality this instance of the hook will have.
+  const [personality] = useState(() => (Math.random() < 0.5 ? 'genAI' : 'hybrid'));
+
+  const messagePool = personality === 'genAI' ? genAiMessages : hybridMessages;
+  const initialMessage = personality === 'genAI' ? initialGenAiMessage : initialHybridMessage;
+
+  const [message, setMessage] = useState(initialMessage);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * hybridMessages.length);
-      setMessage(hybridMessages[randomIndex]);
+      const randomIndex = Math.floor(Math.random() * messagePool.length);
+      setMessage(messagePool[randomIndex]);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+    // The dependency array ensures this effect only re-runs if the messagePool changes,
+    // which it won't after the initial render, thanks to the state initializer above.
+  }, [messagePool]);
 
   return i18n.translate(message.key, {
     defaultMessage: message.defaultMessage,
