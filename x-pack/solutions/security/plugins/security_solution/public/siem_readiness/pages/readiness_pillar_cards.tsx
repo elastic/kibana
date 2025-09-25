@@ -248,13 +248,13 @@ const PillarCard: React.FC<Pillar> = ({ pillarProps, pillarStats }) => {
 };
 
 export const ReadinessPillarCards: React.FC = () => {
-  const { pillarsProps } = usePillarsProps();
+  const { pillarPropsMap } = usePillarsProps();
   const { readinessTasksStats } = useReadinessTasksStats();
 
   return (
     <EuiFlexGroup direction="row" gutterSize="l" style={{ height: CARDS_HEIGHT }}>
-      {Object.values(pillarsProps).map((pillar) => {
-        const stats = readinessTasksStats.pillarStats[pillar.pillarKey];
+      {Object.values(pillarPropsMap).map((pillar) => {
+        const stats = readinessTasksStats.pillarStatsMap[pillar.pillarKey];
 
         return (
           <EuiFlexItem key={pillar.pillarKey}>
@@ -266,7 +266,7 @@ export const ReadinessPillarCards: React.FC = () => {
   );
 };
 
-const ShieldIcon = ({ color, width = 16, height = 16 }) => (
+const ShieldIcon = ({ color = BRONZE_COLOR, width = 16, height = 16 }) => (
   <svg
     width={width}
     height={height}

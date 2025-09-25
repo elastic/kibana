@@ -122,13 +122,13 @@ describe('useReadinessTasks', () => {
           task_id: 'enable-endpoint-visibility',
           status: 'completed',
           meta: { agent_status: 'healthy', endpoint_count: 5 },
-          timestamp: '2023-09-21T10:00:00.000Z',
+          '@timestamp': '2023-09-21T10:00:00.000Z',
         },
         {
           task_id: 'ingest-cloud-audit-logs',
           status: 'incomplete',
           meta: { cloud_provider: ['aws'], log_count: 0 },
-          timestamp: '2023-09-21T09:30:00.000Z',
+          '@timestamp': '2023-09-21T09:30:00.000Z',
         },
       ];
 
@@ -185,7 +185,7 @@ describe('useReadinessTasks', () => {
           task_id: 'enable-endpoint-visibility',
           status: 'incomplete',
           meta: {},
-          timestamp: '2023-09-21T10:00:00.000Z',
+          '@timestamp': '2023-09-21T10:00:00.000Z',
         },
       ];
 
@@ -194,7 +194,7 @@ describe('useReadinessTasks', () => {
           task_id: 'enable-endpoint-visibility',
           status: 'completed',
           meta: { agent_status: 'healthy', endpoint_count: 5 },
-          timestamp: '2023-09-21T10:30:00.000Z',
+          '@timestamp': '2023-09-21T10:30:00.000Z',
         },
       ];
 

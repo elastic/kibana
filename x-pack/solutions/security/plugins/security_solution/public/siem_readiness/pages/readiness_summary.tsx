@@ -42,7 +42,7 @@ interface PieChartDataItem {
 
 const PillarsPieChart: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
-  const { pillarsProps } = usePillarsProps();
+  const { pillarPropsMap } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
   const { charts } = useKibana<CoreStart>().services;
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -56,7 +56,7 @@ const PillarsPieChart: React.FC = () => {
     },
   };
 
-  const pieChartData: PieChartDataItem[] = Object.entries(readinessTasksStats.pillarStats).map(
+  const pieChartData: PieChartDataItem[] = Object.entries(readinessTasksStats.pillarStatsMap).map(
     ([pillarKey, pillarStats]) => {
       return {
         pillarKey,
@@ -96,7 +96,7 @@ const PillarsPieChart: React.FC = () => {
                   );
                 }
 
-                return pillarsProps[pillarKey].displayName;
+                return pillarPropsMap[pillarKey].displayName;
               },
               shape: {
                 fillColor: (pillarKey) => {
@@ -104,7 +104,7 @@ const PillarsPieChart: React.FC = () => {
                     return euiTheme.colors.lightShade;
                   }
 
-                  return pillarsProps[pillarKey].color;
+                  return pillarPropsMap[pillarKey].color;
                 },
               },
             },
@@ -125,7 +125,7 @@ const PillarsPieChart: React.FC = () => {
           width: '50%',
         }}
       >
-        <EuiTitle className="eui-textCenter" size="m" style={{ fontWeight: 700 }}>
+        <EuiTitle className="eui-textCenter" size="m" css={{ fontWeight: 700 }}>
           <h1>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
         </EuiTitle>
         <EuiTitle className="eui-textCenter" size="xxs">
@@ -142,14 +142,14 @@ const PillarsPieChart: React.FC = () => {
 
 const PillarsMiniSummaryTable: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
-  const { pillarsProps } = usePillarsProps();
+  const { pillarPropsMap } = usePillarsProps();
 
   const legendTableData: LegendTableDataItem[] = Object.entries(
-    readinessTasksStats.pillarStats
+    readinessTasksStats.pillarStatsMap
   ).map(([pillarKey, pillarStats]) => {
     return {
       pillarKey,
-      pillarName: pillarsProps[pillarKey].displayName,
+      pillarName: pillarPropsMap[pillarKey].displayName,
       ...pillarStats,
     };
   });
@@ -161,7 +161,7 @@ const PillarsMiniSummaryTable: React.FC = () => {
         defaultMessage: 'Readiness Section',
       }),
       render: (pillarName: string, record: LegendTableDataItem) => (
-        <EuiHealth color={pillarsProps[record.pillarKey].color}>{pillarName}</EuiHealth>
+        <EuiHealth color={pillarPropsMap[record.pillarKey].color}>{pillarName}</EuiHealth>
       ),
     },
     {

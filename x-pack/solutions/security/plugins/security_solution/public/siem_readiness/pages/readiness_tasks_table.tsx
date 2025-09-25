@@ -67,7 +67,7 @@ export const ReadinessTasksTable: React.FC = () => {
     null
   );
 
-  const { pillarsProps } = usePillarsProps();
+  const { pillarPropsMap } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
   const { logReadinessTask, getLatestTasks } = useReadinessTasks();
 
@@ -86,12 +86,12 @@ export const ReadinessTasksTable: React.FC = () => {
           defaultMessage: 'All Categories',
         }),
       },
-      ...Object.values(pillarsProps).map((pillar) => ({
+      ...Object.values(pillarPropsMap).map((pillar) => ({
         value: pillar.pillarKey,
         inputDisplay: pillar.displayName,
       })),
     ],
-    [pillarsProps]
+    [pillarPropsMap]
   );
 
   const filteredTasks = useMemo(
@@ -338,7 +338,7 @@ export const ReadinessTasksTable: React.FC = () => {
           const taskData = getLatestTasks.data?.find(
             (latestTaskData) => latestTaskData.task_id === task.id
           );
-          const taskPillar = pillarsProps[task.pillar];
+          const taskPillar = pillarPropsMap[task.pillar];
 
           return (
             <EuiAccordion

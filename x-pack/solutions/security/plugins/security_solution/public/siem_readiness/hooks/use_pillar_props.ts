@@ -6,20 +6,23 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface UsePillarsProps {
-  pillars: PillarsProps;
+  pillarPropsMap: PillarsProps;
 }
 
 export type PillarKey = 'visibility' | 'detection' | 'response';
 
 export interface PillarsProps {
-  [key: PillarKey]: PillarProps;
+  visibility: PillarProps;
+  detection: PillarProps;
+  response: PillarProps;
 }
 
 export interface PillarProps {
   pillarKey: PillarKey;
-  displayName: 'Visibility' | 'Detection' | 'Response';
+  displayName: string;
   color: string;
   description: string;
   icon: string;
@@ -28,34 +31,46 @@ export interface PillarProps {
 export const usePillarsProps = (): UsePillarsProps => {
   const { euiTheme } = useEuiTheme();
 
-  const pillarsProps = {
+  const pillarPropsMap = {
     visibility: {
       pillarKey: 'visibility',
-      displayName: 'Visibility',
+      displayName: i18n.translate('xpack.securitySolution.siemReadiness.visibility.displayName', {
+        defaultMessage: 'Visibility',
+      }),
       color: euiTheme.colors.vis.euiColorVisBehindText2,
-      description:
-        'Your visibility score is how well your systems are monitored through logs, agents, and cloud telemetry.',
+      description: i18n.translate('xpack.securitySolution.siemReadiness.visibility.description', {
+        defaultMessage:
+          'Your visibility score is how well your systems are monitored through logs, agents, and cloud telemetry.',
+      }),
       icon: 'eye',
     },
     detection: {
       pillarKey: 'detection',
-      displayName: 'Detection',
+      displayName: i18n.translate('xpack.securitySolution.siemReadiness.detection.displayName', {
+        defaultMessage: 'Detection',
+      }),
       color: euiTheme.colors.vis.euiColorVisBehindText4,
-      description:
-        'Detections measure how well your system identifies threats through tuned, active detection rules.',
+      description: i18n.translate('xpack.securitySolution.siemReadiness.detection.description', {
+        defaultMessage:
+          'Detections measure how well your system identifies threats through tuned, active detection rules.',
+      }),
       icon: 'securitySignal',
     },
     response: {
       pillarKey: 'response',
-      displayName: 'Response',
+      displayName: i18n.translate('xpack.securitySolution.siemReadiness.response.displayName', {
+        defaultMessage: 'Response',
+      }),
       color: euiTheme.colors.vis.euiColorVisBehindText0,
-      description:
-        'Response shows how quickly and effectively your team investigates and acts on detected threats.',
+      description: i18n.translate('xpack.securitySolution.siemReadiness.response.description', {
+        defaultMessage:
+          'Response shows how quickly and effectively your team investigates and acts on detected threats.',
+      }),
       icon: 'magnifyWithExclamation',
     },
   };
 
   return {
-    pillarsProps,
+    pillarPropsMap,
   };
 };

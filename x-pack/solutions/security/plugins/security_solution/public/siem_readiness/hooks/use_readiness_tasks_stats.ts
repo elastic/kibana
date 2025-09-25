@@ -13,12 +13,14 @@ export interface PillarStats {
   total: number;
 }
 
-interface PillarsStats {
-  [key: 'visibility' | 'detection' | 'response']: PillarStats;
+interface PillarsStatsMap {
+  visibility: PillarStats;
+  detection: PillarStats;
+  response: PillarStats;
 }
 
 interface ReadinessTasksStats {
-  pillarStats: PillarsStats;
+  pillarStatsMap: PillarsStatsMap;
   totalCompleted: number;
   totalTasks: number;
   totalIncomplete: number;
@@ -26,35 +28,35 @@ interface ReadinessTasksStats {
 
 export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksStats } => {
   const { getLatestTasks } = useReadinessTasks();
+  const latestTasksData = getLatestTasks.data || [];
 
   const readinessTasksStats = useMemo((): ReadinessTasksStats => {
-    const latestTasksData = getLatestTasks.data || [];
     const completedTaskIds = new Set(
       latestTasksData.filter((task) => task.status === 'completed').map((task) => task.task_id)
     );
 
-    const pillarStats = {
+    const pillarStatsMap: PillarStatsMap = {
       visibility: { completed: 0, total: 0 },
       detection: { completed: 0, total: 0 },
       response: { completed: 0, total: 0 },
     };
 
     READINESS_TASKS.forEach((task) => {
-      pillarStats[task.pillar].total++;
+      pillarStatsMap[task.pillar].total++;
       if (completedTaskIds.has(task.id)) {
-        pillarStats[task.pillar].completed++;
+        pillarStatsMap[task.pillar].completed++;
       }
     });
 
     const totalTasks = READINESS_TASKS.length;
-    const totalCompleted = Object.values(pillarStats).reduce(
+    const totalCompleted = Object.values(pillarStatsMap).reduce(
       (sum, stat) => sum + stat.completed,
       0
     );
     const totalIncomplete = totalTasks - totalCompleted;
 
     return {
-      pillarStats,
+      pillarStatsMap,
       totalCompleted,
       totalTasks,
       totalIncomplete,
