@@ -6592,7 +6592,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lock-manager@link:packages/kbn-lock-manager":
+"@kbn/lock-manager@link:src/platform/packages/shared/kbn-lock-manager":
   version "0.0.0"
   uid ""
 
