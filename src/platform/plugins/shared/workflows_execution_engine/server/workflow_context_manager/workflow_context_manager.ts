@@ -77,6 +77,7 @@ export class WorkflowContextManager {
       }
     });
 
+    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
     return stepContext;
   }
@@ -137,6 +138,48 @@ export class WorkflowContextManager {
       event: workflowExecution.context?.event,
       inputs: workflowExecution.context?.inputs,
     };
+  }
+
+  private enrichStepContextWithMockedData(stepContext: StepContext): void {
+    const contextOverride: StepContext | undefined =
+      this.workflowExecutionState.getWorkflowExecution().context?.contextOverride;
+
+    if (contextOverride) {
+      stepContext.consts = {
+        ...stepContext.consts,
+        ...(contextOverride.consts || {}),
+      };
+
+      stepContext.inputs = {
+        ...stepContext.inputs,
+        ...(contextOverride.inputs || {}),
+      };
+
+      stepContext.event = {
+        ...stepContext.event,
+        ...(contextOverride.event || {}),
+      };
+
+      stepContext.execution = {
+        ...stepContext.execution,
+        ...(contextOverride.execution || {}),
+      };
+
+      stepContext.workflow = {
+        ...stepContext.workflow,
+        ...(contextOverride.workflow || {}),
+      };
+
+      if (!stepContext.foreach) {
+        stepContext.foreach = contextOverride.foreach;
+      }
+
+      Object.entries(contextOverride.steps || {}).forEach(([stepId, stepData]) => {
+        if (!stepContext.steps[stepId]) {
+          stepContext.steps[stepId] = stepData;
+        }
+      });
+    }
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
