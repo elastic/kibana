@@ -44,6 +44,7 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
+    getToolTypeInfo: jest.fn(),
     getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
   };
 };
@@ -78,7 +79,7 @@ export const createMockedExecutableTool = (
     type: ToolType.builtin,
     description: 'test description',
     readonly: false,
-    schema: z.object({}),
+    schema: () => z.object({}),
     configuration: {},
     tags: ['tag-1', 'tag-2'],
     ...parts,
