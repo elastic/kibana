@@ -13,7 +13,7 @@ export class ReferencedPanelManager {
   // The uid refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
   // So, if the same saved object panel is referenced in two different dashboards, it will have different uid values in each dashboard, but the same panelId, since they're both referencing the same panel.
   private panelsById = new Map<string, ReferencedPanelAttributesWithReferences>();
-  private uidToId = new Map<string, string>();
+  private panelUidToId = new Map<string, string>();
   private panelsTypeById = new Map<string, string>();
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
@@ -41,7 +41,7 @@ export class ReferencedPanelManager {
   }
 
   getByUid(uid: string): ReferencedPanelAttributesWithReferences | undefined {
-    const panelId = this.uidToId.get(uid);
+    const panelId = this.panelUidToId.get(uid);
     return panelId ? this.panelsById.get(panelId) : undefined;
   }
 
@@ -69,7 +69,7 @@ export class ReferencedPanelManager {
 
     const panelId = panelReference.id;
 
-    this.uidToId.set(uid, panelId);
+    this.panelUidToId.set(uid, panelId);
 
     if (!this.panelsTypeById.has(panelId)) {
       this.panelsTypeById.set(panelId, panel.type);
