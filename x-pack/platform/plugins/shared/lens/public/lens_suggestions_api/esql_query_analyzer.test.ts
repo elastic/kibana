@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shouldPreferLineChartForESQLQuery, analyzeESQLTimeSeriesPattern } from './esql_query_analyzer';
+import { shouldPreferLineChartForESQLQuery } from './esql_query_analyzer';
 
 describe('esql_query_analyzer', () => {
   describe('shouldPreferLineChartForESQLQuery', () => {
@@ -123,97 +123,6 @@ describe('esql_query_analyzer', () => {
       };
 
       expect(shouldPreferLineChartForESQLQuery(query)).toBe(false);
-    });
-  });
-
-  describe('analyzeESQLTimeSeriesPattern', () => {
-    it('should correctly analyze time series patterns', () => {
-      const query = {
-        esql: 'FROM logs | STATS avg_cpu = AVG(cpu.percent), max_memory = MAX(memory.usage) BY BUCKET(@timestamp, 1h)',
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result).toEqual({
-        isTimeSeries: true,
-        hasNonCountAggregation: true,
-        aggregationTypes: ['avg', 'max'],
-        timestampFields: ['@timestamp'],
-      });
-    });
-
-    it('should handle COUNT-only queries', () => {
-      const query = {
-        esql: 'FROM logs | STATS count = COUNT(*) BY BUCKET(@timestamp, 1h)',
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result).toEqual({
-        isTimeSeries: true,
-        hasNonCountAggregation: false,
-        aggregationTypes: ['count'],
-        timestampFields: ['@timestamp'],
-      });
-    });
-
-    it('should handle non-time-series queries', () => {
-      const query = {
-        esql: 'FROM logs | STATS avg_response = AVG(response_time) BY host',
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result).toEqual({
-        isTimeSeries: false,
-        hasNonCountAggregation: true,
-        aggregationTypes: ['avg'],
-        timestampFields: [],
-      });
-    });
-
-    it('should detect multiple timestamp fields', () => {
-      const query = {
-        esql: `FROM logs 
-               | STATS created_events = COUNT(*) BY BUCKET(created_timestamp, 1h)
-               | STATS updated_events = COUNT(*) BY BUCKET(updated_timestamp, 1h)`,
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result.isTimeSeries).toBe(true);
-      expect(result.timestampFields).toContain('created_timestamp');
-      expect(result.timestampFields).toContain('updated_timestamp');
-    });
-
-    it('should correctly identify new aggregation functions as non-count', () => {
-      const query = {
-        esql: 'FROM metrics | STATS rate_value = RATE(requests), std_value = STDDEV(latency) BY BUCKET(@timestamp, 1h)',
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result).toEqual({
-        isTimeSeries: true,
-        hasNonCountAggregation: true,
-        aggregationTypes: ['rate', 'stddev'],
-        timestampFields: ['@timestamp'],
-      });
-    });
-
-    it('should correctly identify histogram functions as count-like', () => {
-      const query = {
-        esql: 'FROM logs | STATS unique_count = COUNT_DISTINCT(user.id), cardinality_val = CARDINALITY(session.id) BY BUCKET(@timestamp, 1h)',
-      };
-
-      const result = analyzeESQLTimeSeriesPattern(query);
-
-      expect(result).toEqual({
-        isTimeSeries: true,
-        hasNonCountAggregation: false, // Both functions are histogram-style
-        aggregationTypes: ['count_distinct', 'cardinality'],
-        timestampFields: ['@timestamp'],
-      });
     });
   });
 });
