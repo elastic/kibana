@@ -83,9 +83,17 @@ describe('getJestConfigs', () => {
   });
 
   it('should discover configs and tests using git ls-files', async () => {
-    // Mock git ls-files responses
+    // Mock git ls-files responses for combined command
     mockExecResponder = (cmd: string) => {
-      if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
+      // Handle combined command that includes both test files and config files
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return {
+          stdout:
+            'pkg/a/foo.test.ts\npkg/b/bar.test.tsx\npkg/a/jest.config.js\npkg/b/jest.config.js',
+        };
+      }
+      // Fallback for separate commands (in case of provided config paths)
+      else if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
         return { stdout: 'pkg/a/jest.config.js\npkg/b/jest.config.js' };
       } else if (cmd.includes('*.test.ts') || cmd.includes('*.test.tsx')) {
         return { stdout: 'pkg/a/foo.test.ts\npkg/b/bar.test.tsx' };
@@ -123,7 +131,12 @@ describe('getJestConfigs', () => {
   it('should identify orphaned test files', async () => {
     // Mock scenario where we have test files that don't match any config
     mockExecResponder = (cmd: string) => {
-      if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
+      // Handle combined command
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return { stdout: 'pkg/a/good.test.ts\npkg/orphan/bad.test.ts\npkg/a/jest.config.js' };
+      }
+      // Fallback for separate commands
+      else if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
         return { stdout: 'pkg/a/jest.config.js' };
       } else if (cmd.includes('*.test.ts') || cmd.includes('*.test.tsx')) {
         return { stdout: 'pkg/a/good.test.ts\npkg/orphan/bad.test.ts' };
@@ -142,7 +155,12 @@ describe('getJestConfigs', () => {
   it('should identify empty configs', async () => {
     // Mock scenario where config exists but no matching test files
     mockExecResponder = (cmd: string) => {
-      if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
+      // Handle combined command
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return { stdout: 'pkg/a/test.test.ts\npkg/a/jest.config.js\npkg/empty/jest.config.js' };
+      }
+      // Fallback for separate commands
+      else if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
         return { stdout: 'pkg/a/jest.config.js\npkg/empty/jest.config.js' };
       } else if (cmd.includes('*.test.ts') || cmd.includes('*.test.tsx')) {
         return { stdout: 'pkg/a/test.test.ts' };
@@ -161,7 +179,12 @@ describe('getJestConfigs', () => {
   it('should identify test files covered by multiple configs', async () => {
     // Simple test - just verify the function returns the expected structure
     mockExecResponder = (cmd: string) => {
-      if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
+      // Handle combined command
+      if (cmd.includes('*.test.ts') && cmd.includes('jest.config')) {
+        return { stdout: 'pkg/a/test.test.ts\npkg/a/jest.config.js' };
+      }
+      // Fallback for separate commands
+      else if (cmd.includes('jest.config') || cmd.includes('jest.integration.config')) {
         return { stdout: 'pkg/a/jest.config.js' };
       } else if (cmd.includes('*.test.ts') || cmd.includes('*.test.tsx')) {
         return { stdout: 'pkg/a/test.test.ts' };

@@ -40,37 +40,44 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
   duplicateTestFiles: Array<{ testFile: string; configs: string[] }>;
 }> {
   try {
-    // Step 1: Get all config files and all potential test files in parallel
-    const [configFiles, allTestFiles] = await Promise.all([
-      // Get config files
-      configPaths && configPaths.length > 0
-        ? Promise.resolve(configPaths.map((config) => resolve(REPO_ROOT, config)))
-        : execAsync(
-            `git ls-files -- '**/jest.config.js' '**/*/jest.config.js' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.*.js' '**/*/jest.integration.config.*.js'`,
-            { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 } // 10MB buffer
-          ).then(
-            (result) =>
-              result.stdout
-                .split('\n')
-                .filter(Boolean)
-                .map((file) => resolve(REPO_ROOT, file))
-                .filter((file) => existsSync(file)) // Exclude files deleted locally but not committed
-          ),
+    // Step 1: Get all config files and all potential test files
+    let configFiles: string[];
+    let allTestFiles: string[];
 
-      // Get all potential test files (cast a wide net)
-      // Exclude mock/helper files that are not meant to be run as standalone tests
-      execAsync(`git ls-files -- '*.test.ts' '*.test.tsx'`, {
+    if (configPaths && configPaths.length > 0) {
+      // Use provided config paths and get test files separately
+      configFiles = configPaths.map((config) => resolve(REPO_ROOT, config));
+
+      const testFilesResult = await execAsync(`git ls-files -- '*.test.ts' '*.test.tsx'`, {
         cwd: REPO_ROOT,
-        maxBuffer: 1024 * 1024 * 10, // 10MB buffer
-      }).then(
-        (result) =>
-          result.stdout
-            .split('\n')
-            .filter(Boolean)
-            .map((file) => resolve(REPO_ROOT, file))
-            .filter((file) => existsSync(file)) // Exclude files deleted locally but not committed
-      ),
-    ]);
+        maxBuffer: 1024 * 1024 * 10,
+      });
+
+      allTestFiles = testFilesResult.stdout
+        .split('\n')
+        .filter(Boolean)
+        .map((file) => resolve(REPO_ROOT, file))
+        .filter((file) => existsSync(file));
+    } else {
+      // Merge both git commands into one for better performance
+      const combinedResult = await execAsync(
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.*.js' '**/*/jest.integration.config.*.js'`,
+        { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
+      );
+
+      const allFiles = combinedResult.stdout
+        .split('\n')
+        .filter(Boolean)
+        .map((file) => resolve(REPO_ROOT, file))
+        .filter((file) => existsSync(file));
+
+      // Separate configs from test files using regex patterns
+      const configPattern = /jest(\.integration)?\.config(\.\w+)?\.(j|t)s$/;
+      const testPattern = /\.(test|spec)\.(ts|tsx)$/;
+
+      configFiles = allFiles.filter((file) => configPattern.test(file));
+      allTestFiles = allFiles.filter((file) => testPattern.test(file));
+    }
 
     // Step 2: Parse all config files in parallel and apply Jest matching rules using fast heuristic
     const configTestResults = await Promise.all(
@@ -215,6 +222,14 @@ function parseJestConfig(configPath: string): JestConfigRules | null {
     // Extract the config directory for resolving relative paths
     const configDir = dirname(configPath);
 
+    // Parse rootDir if specified
+    let actualRootDir = configDir;
+    const rootDirMatch = configContent.match(/rootDir\s*:\s*['"]([^'"]+)['"]/);
+    if (rootDirMatch) {
+      const rootDirValue = rootDirMatch[1];
+      actualRootDir = resolve(configDir, rootDirValue);
+    }
+
     // Simple regex-based extraction (covers most common cases)
     const rootsMatch = configContent.match(/roots\s*:\s*\[([^\]]+)\]/);
     if (rootsMatch) {
@@ -223,10 +238,10 @@ function parseJestConfig(configPath: string): JestConfigRules | null {
         .split(',')
         .map((r) => r.trim().replace(/['"]/g, ''))
         .filter(Boolean)
-        .map((r) => r.replace('<rootDir>', configDir));
+        .map((r) => r.replace('<rootDir>', actualRootDir));
       rules.roots = rootPaths;
     } else {
-      rules.roots = [configDir];
+      rules.roots = [actualRootDir];
     }
 
     const testMatchMatch = configContent.match(/testMatch\s*:\s*\[([^\]]+)\]/);
@@ -271,9 +286,15 @@ function matchesJestRules(testFilePath: string, rules: JestConfigRules): boolean
   const inRoots = rules.roots.some((root) => testFilePath.startsWith(root + osSep));
   if (!inRoots) return false;
 
-  // Check ignore patterns - simple string contains check
+  // Check ignore patterns - treat as path segments, not simple string contains
   const isIgnored = rules.testPathIgnorePatterns.some((pattern) => {
-    return testFilePath.includes(pattern.replace(/\//g, ''));
+    // Convert Jest patterns to simple path matching
+    // /node_modules/ should match /path/node_modules/ but not /path/my-node_modules-thing/
+    const cleanPattern = pattern.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+
+    // Check if the pattern appears as a complete path segment
+    const pathSegments = testFilePath.split('/');
+    return pathSegments.includes(cleanPattern);
   });
   if (isIgnored) return false;
 
