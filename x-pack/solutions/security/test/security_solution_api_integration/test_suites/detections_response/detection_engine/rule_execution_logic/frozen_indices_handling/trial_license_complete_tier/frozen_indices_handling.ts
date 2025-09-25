@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import type { CreateRuleProps } from '@kbn/security-solution-test-api-clients/api/detections_api.gen';
+import type { CreateRuleProps } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 
 import { dataGeneratorFactory } from '../../../../utils';
 import {

@@ -31,7 +31,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/packages/test-api-clients/api/detections_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/detections.gen.ts'
       ),
     },
   });
@@ -45,7 +45,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/packages/test-api-clients/api/endpoint_management_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts'
       ),
     },
   });
@@ -59,7 +59,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/packages/test-api-clients/api/entity_analytics_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts'
       ),
     },
   });
@@ -73,7 +73,7 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/packages/test-api-clients/api/timelines_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts'
       ),
     },
   });

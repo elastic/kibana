@@ -11,9 +11,9 @@ import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_int
 import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ingest_manager';
 import { UsageAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/usage_api';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/api/detections_api.gen';
-import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/api/entity_analytics_api.gen';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/api/exceptions_api.gen';
+import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
+import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/entity_analytics.gen';
+import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 

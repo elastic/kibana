@@ -8,7 +8,7 @@ This package contains Supertest API clients generated from OpenAPI schemas for u
 
 Add a service to your test services configuration
 ```typescript
-import { SecuritySolutionApiProvider } from '@kbn/security-solution-test-api-clients/api/detections_api.gen';
+import { SecuritySolutionApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 
 export const services = {
   detectionsApi: SecuritySolutionApiProvider,
