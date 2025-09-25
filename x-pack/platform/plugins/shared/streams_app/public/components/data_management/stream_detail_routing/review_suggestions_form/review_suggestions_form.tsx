@@ -18,6 +18,7 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
 import type { AIFeatures } from '../../stream_detail_enrichment/steps/blocks/action/grok/use_ai_features';
 import { useReviewSuggestionsFormContext } from './use_review_suggestions_form';
+import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 
 export interface ReviewSuggestionsFormProps {
   definition: Streams.WiredStream.GetResponse;
@@ -36,6 +37,7 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
     acceptSuggestion,
     rejectSuggestion,
   } = useReviewSuggestionsFormContext();
+  const { refresh: refreshDefinition } = useStreamDetail();
 
   // Reset suggestions when navigating to a different stream
   useUpdateEffect(() => {
@@ -69,7 +71,10 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
               partition={partition}
               onPreview={(toggle) => previewSuggestion(index, toggle)}
               onDismiss={() => rejectSuggestion(index)}
-              onSuccess={() => acceptSuggestion(index)}
+              onSuccess={() => {
+                acceptSuggestion(index);
+                refreshDefinition();
+              }}
             />
             <EuiSpacer size="s" />
           </NestedView>
