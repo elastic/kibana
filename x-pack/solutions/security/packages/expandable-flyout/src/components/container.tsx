@@ -193,10 +193,10 @@ export const Container: React.FC<ContainerProps> = memo(
     );
 
     const onClose = useCallback(
-      (e: MouseEvent | TouchEvent | KeyboardEvent) => {
+      (event: MouseEvent | TouchEvent | KeyboardEvent | undefined) => {
         closeFlyout();
         if (flyoutProps.onClose) {
-          flyoutProps.onClose(e);
+          flyoutProps.onClose(event);
         }
       },
       [closeFlyout, flyoutProps]
@@ -219,6 +219,7 @@ export const Container: React.FC<ContainerProps> = memo(
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}
+        aria-labelledby="EuiFlyoutResizable"
       >
         <ResizableContainer
           leftComponent={leftComponent as React.ReactElement}

@@ -279,7 +279,8 @@ export function UnifiedDocViewerFlyout({
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
         paddingSize="m"
-        {...a11yProps}
+        // {...a11yProps}
+        aria-labelledby="docViewerFlyout"
       >
         {screenReaderDescription}
         <EuiFlyoutHeader hasBorder>
