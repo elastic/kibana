@@ -7,11 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
-import type {
-  EntityType,
-  RiskScoresCalculationResponse,
-  RiskScoresPreviewResponse,
-} from '../../../../common/api/entity_analytics';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,
@@ -19,6 +15,7 @@ import type {
   RiskEngineConfiguration,
 } from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
+import type { CalculationResults } from './calculate_and_persist_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
@@ -36,7 +33,7 @@ export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<RiskScoresPreviewResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
-  ) => Promise<RiskScoresCalculationResponse & { entities: Record<EntityType, string[]> }>;
+  ) => Promise<CalculationResults>;
   getConfigurationWithDefaults: (
     entityAnalyticsConfig: EntityAnalyticsConfig
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;

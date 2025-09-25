@@ -18,6 +18,9 @@ import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 
+export type CalculationResults = RiskScoresCalculationResponse & {
+  entities: Record<EntityType, string[]>;
+};
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
     assetCriticalityService: AssetCriticalityService;
@@ -27,7 +30,7 @@ export const calculateAndPersistRiskScores = async (
     riskScoreDataClient: RiskScoreDataClient;
     experimentalFeatures: ExperimentalFeatures;
   }
-): Promise<RiskScoresCalculationResponse & { entities: Record<EntityType, string[]> }> => {
+): Promise<CalculationResults> => {
   const { riskScoreDataClient, spaceId, returnScores, refresh, ...rest } = params;
 
   const writer = await riskScoreDataClient.getWriter({
