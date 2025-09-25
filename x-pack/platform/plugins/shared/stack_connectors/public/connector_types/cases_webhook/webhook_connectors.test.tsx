@@ -14,6 +14,10 @@ import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+jest.mock('../../common/use_secret_headers', () => ({
+  useSecretHeaders: jest.fn().mockReturnValue({ data: [] }),
+}));
+
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {

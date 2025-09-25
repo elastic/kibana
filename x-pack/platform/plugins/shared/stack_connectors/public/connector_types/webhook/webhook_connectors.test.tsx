@@ -96,7 +96,6 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'https://test.com',
-        // headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         headers: { 'content-type': 'text' },
         hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
@@ -106,7 +105,11 @@ describe('WebhookActionConnectorFields renders', () => {
     };
 
     render(
-      <ConnectorFormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
         <WebhookActionConnectorFields
           readOnly={false}
           isEdit={false}

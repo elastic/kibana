@@ -116,9 +116,9 @@ export const HEADERS_SUBTITLE = i18n.translate(
 );
 
 export const MAX_HEADERS_LIMIT = (maxHeaders: number) =>
-  i18n.translate('xpack.stackConnectors.components.auth.maxCustomFieldLimit', {
+  i18n.translate('xpack.stackConnectors.components.auth.maxHeaders', {
     values: { maxHeaders },
-    defaultMessage: 'Maximum number of {maxHeaders} custom fields reached.',
+    defaultMessage: 'Maximum number of {maxHeaders} headers reached.',
   });
 
 export const KEY_LABEL = i18n.translate('xpack.stackConnectors.components.auth.keyTextFieldLabel', {

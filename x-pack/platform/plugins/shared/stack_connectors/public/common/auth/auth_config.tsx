@@ -31,12 +31,17 @@ import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
-import type { InternalHeader } from '../../../common/auth/types';
 
 interface Props {
   readOnly: boolean;
   isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
+}
+
+export interface Internal {
+  key: string;
+  value: string;
+  type: string;
 }
 
 const { emptyField } = fieldValidators;
@@ -67,7 +72,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const secretHeaders = useSecretHeaders(connectorId);
+  const { data: secretHeaderKeys = [] } = useSecretHeaders(connectorId);
 
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
@@ -88,8 +93,13 @@ export const AuthConfig: FunctionComponent<Props> = ({
 
     const defaultConfigHeader = [{ key: '', value: '', type: 'config' }];
 
-    const currentHeaders: Array<InternalHeader> = formData.__internal__?.headers ?? [];
+    const currentHeaders: Array<Internal> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
+    const secretHeaders = secretHeaderKeys.map((key) => ({
+      key,
+      value: '',
+      type: 'secret',
+    }));
 
     const mergedHeaders = hasHeaders
       ? [...(configHeaders.length > 0 ? configHeaders : defaultConfigHeader), ...secretHeaders]
@@ -107,7 +117,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
         { runDeserializer: false }
       );
     }
-  }, [connectorId, getFormData, secretHeaders, updateFieldValues, hasHeaders]);
+  }, [connectorId, getFormData, secretHeaderKeys, updateFieldValues, hasHeaders]);
 
   const options = [
     {

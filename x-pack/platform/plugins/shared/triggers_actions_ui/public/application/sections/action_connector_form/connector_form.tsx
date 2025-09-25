@@ -17,7 +17,7 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import type { ConnectorFormSchema } from './types';
+import type { ConnectorFormSchema, InternalConnectorForm } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import { connectorOverrides } from './connector_overrides';
 
@@ -39,6 +39,7 @@ export type ResetForm = (
       }
     | undefined
 ) => void;
+
 interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
@@ -63,7 +64,7 @@ interface Props {
  */
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+export const formDeserializer = (data: InternalConnectorForm): InternalConnectorForm => {
   const overrides = connectorOverrides(data.actionTypeId);
   if (overrides?.formDeserializer) {
     return overrides.formDeserializer(data);
@@ -84,16 +85,28 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
   }));
 
   return {
-    ...(data as any),
+    ...data,
     __internal__: {
-      ...((data as any).__internal__ ?? {}),
+      ...(data.__internal__ ?? {}),
       headers: configHeaders,
     },
   };
 };
 
+const buildHeaderRecords = (
+  headers: Array<{ key: string; value: string; type: string }>,
+  type: 'config' | 'secret'
+): Record<string, string> => {
+  return headers
+    .filter((header) => header.type === type && header.key && header.key.trim())
+    .reduce<Record<string, string>>((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+};
+
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
+export const formSerializer = (formData: InternalConnectorForm): InternalConnectorForm => {
   const overrides = connectorOverrides(formData.actionTypeId);
   if (overrides?.formSerializer) {
     return overrides.formSerializer(formData);
@@ -107,32 +120,10 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
     return formData;
   }
 
-  const webhookFormData = formData as {
-    config: { headers?: Array<{ key: string; value: string }> };
-    __internal__?: {
-      headers?: Array<{
-        key: string;
-        value: string;
-        type: 'config' | 'secret';
-      }>;
-    };
-  };
+  const headers = formData?.__internal__?.headers ?? [];
 
-  const headers = webhookFormData?.__internal__?.headers ?? [];
-
-  const configHeaders = headers
-    .filter((header) => header.type === 'config' && header.key)
-    .reduce((acc, { key, value }) => {
-      acc[key] = value;
-      return acc;
-    }, {} as Record<string, string>);
-
-  const secretHeaders = headers
-    .filter((h) => h.type === 'secret' && h.key && h.key.trim())
-    .reduce((acc, { key, value }) => {
-      acc[key] = value;
-      return acc;
-    }, {} as Record<string, string>);
+  const configHeaders = buildHeaderRecords(headers, 'config');
+  const secretHeaders = buildHeaderRecords(headers, 'secret');
 
   return {
     ...formData,

@@ -28,13 +28,6 @@ const customWrapper = () => {
 describe('useSecretHeaders', () => {
   const addErrorMock = jest.fn();
   const getMock = jest.fn();
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
-  const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
 
   const mockServices = {
     http: { get: getMock },
@@ -50,22 +43,21 @@ describe('useSecretHeaders', () => {
 
   it('fetches secret headers successfully', async () => {
     getMock.mockResolvedValue(['secretHeader1', 'secretHeader2']);
-    const { result } = renderHook(() => useSecretHeaders('connector1'), { wrapper });
+    const { result } = renderHook(() => useSecretHeaders('connector1'), {
+      wrapper: customWrapper(),
+    });
 
     await waitFor(() => {
-      expect(result.current).toEqual([
-        { key: 'secretHeader1', value: '', type: 'secret' },
-        { key: 'secretHeader2', value: '', type: 'secret' },
-      ]);
+      expect(result.current.data).toEqual(['secretHeader1', 'secretHeader2']);
     });
 
     expect(getMock).toHaveBeenCalledWith('/internal/stack_connectors/connector1/secret_headers');
   });
 
   it('returns empty array if connectorId is undefined', async () => {
-    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper });
+    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper: customWrapper() });
 
-    expect(result.current).toEqual([]);
+    expect(result.current.data).toEqual([]);
     expect(getMock).not.toHaveBeenCalled();
   });
 

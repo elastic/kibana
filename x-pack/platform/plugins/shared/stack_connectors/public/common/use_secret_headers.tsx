@@ -10,11 +10,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 
-interface SecretHeader {
-  key: string;
-  value: string;
-  type: 'secret';
-}
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useSecretHeaders(connectorId?: string) {
@@ -23,21 +18,14 @@ export function useSecretHeaders(connectorId?: string) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const query = useQuery<SecretHeader[], ServerError>(
+  const query = useQuery<string[], ServerError>(
     ['secretHeaders', connectorId],
     async () => {
-      const response = await http.get<string[]>(
-        `/internal/stack_connectors/${connectorId}/secret_headers`
-      );
-
-      return response.map((key) => ({
-        key,
-        value: '',
-        type: 'secret' as const,
-      }));
+      return await http.get<string[]>(`/internal/stack_connectors/${connectorId}/secret_headers`);
     },
     {
       enabled: Boolean(connectorId),
+      initialData: [],
       refetchOnMount: 'always',
       onError: (error: ServerError) => {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
@@ -49,6 +37,6 @@ export function useSecretHeaders(connectorId?: string) {
     }
   );
 
-  return query.data || [];
+  return query || {};
 }
 export type UseSecretHeaders = ReturnType<typeof useSecretHeaders>;
