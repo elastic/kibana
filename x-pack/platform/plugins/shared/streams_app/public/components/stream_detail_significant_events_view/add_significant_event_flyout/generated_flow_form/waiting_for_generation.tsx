@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useWaitingForAiMessage } from './use_waiting_for_ai_message';
+import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_message';
 
 export function AiFlowWaitingForGeneration({ stopGeneration }: { stopGeneration: () => void }) {
   const label = useWaitingForAiMessage();

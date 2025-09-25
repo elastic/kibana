@@ -26,8 +26,11 @@ import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { NoSystemsEmptyState } from './empty_state/no_systems';
+import { StreamSystemsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_systems_flyout';
+import { useStreamSystems } from '../data_management/stream_detail_management/stream_systems/hooks/use_stream_systems';
+import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
+import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -37,15 +40,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const {
     core: { notifications },
     services: { telemetryClient },
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
   } = useKibana();
   const {
     timeState: { start, end },
   } = useTimefilter();
+  const aiFeatures = useAIFeatures();
 
   const theme = useEuiTheme().euiTheme;
 
@@ -53,35 +52,22 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
 
-  const systemsFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      const { systems } = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/{name}/systems',
-        {
-          params: {
-            path: { name: definition.stream.name },
-          },
-          signal,
-        }
-      );
-
-      return systems;
-    },
-    [definition.stream.name, streamsRepositoryClient]
-  );
+  const { systems, refresh, loading: systemsLoading } = useStreamSystems(definition.stream);
+  const { identifySystems } = useStreamSystemsApi(definition.stream);
+  const [isSystemDetectionFlyoutOpen, setIsSystemDetectionFlyoutOpen] = useState(false);
+  const [isSystemDetectionLoading, setIsSystemDetectionLoading] = useState(false);
+  const [detectedSystems, setDetectedSystems] = useState<System[]>([]);
 
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     start,
     end,
   });
-
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
     start,
     end,
   });
-
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>(undefined);
 
@@ -110,9 +96,21 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     );
   }, [significantEventsFetchState.value, theme, xFormatter]);
 
-  if (systemsFetch.loading || significantEventsFetchState.loading) {
+  if (systemsLoading || significantEventsFetchState.loading) {
     return <LoadingPanel />;
   }
+
+  const systemDetectionFlyout = isSystemDetectionFlyoutOpen ? (
+    <StreamSystemsFlyout
+      definition={definition.stream}
+      systems={detectedSystems}
+      isLoading={isSystemDetectionLoading}
+      closeFlyout={() => {
+        refresh();
+        setIsSystemDetectionFlyoutOpen(false);
+      }}
+    />
+  ) : null;
 
   const editFlyout = isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
@@ -185,11 +183,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       }}
       initialFlow={initialFlow}
       initialSelectedSystems={selectedSystems}
-      systems={systemsFetch.value ?? []}
+      systems={systems}
     />
   ) : null;
 
-  const noSystems = systemsFetch.value && systemsFetch.value.length === 0;
+  const noSystems = systems.length === 0;
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
 
@@ -198,7 +196,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       <>
         <NoSystemsEmptyState
           onSystemDetectionClick={() => {
-            // Pull from main
+            setIsSystemDetectionLoading(true);
+            setIsSystemDetectionFlyoutOpen(true);
+
+            identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+              .then((data) => {
+                setDetectedSystems(data.systems);
+              })
+              .finally(() => {
+                setIsSystemDetectionLoading(false);
+              });
           }}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
@@ -206,6 +213,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setIsEditFlyoutOpen(true);
           }}
         />
+        {systemDetectionFlyout}
         {editFlyout}
       </>
     );
@@ -224,7 +232,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setInitialFlow('manual');
             setIsEditFlyoutOpen(true);
           }}
-          systems={systemsFetch.value ?? []}
+          systems={systems}
           selectedSystems={selectedSystems}
           onSystemsChange={setSelectedSystems}
         />

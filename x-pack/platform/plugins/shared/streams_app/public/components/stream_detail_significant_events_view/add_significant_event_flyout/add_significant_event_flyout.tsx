@@ -233,15 +233,6 @@ export function AddSignificantEventFlyout({
                 <EuiSpacer size="m" />
                 {selectedFlow === 'ai' && (
                   <>
-                    {/* {aiFeatures && !aiFeatures.enabled && !aiFeatures.genAiConnectors.loading && (
-                      <AIFeaturesDisabledCallout
-                        couldBeEnabled={aiFeatures?.couldBeEnabled ?? false}
-                      />
-                    )}
-                    <AIConnectorSelector
-                      genAiConnectors={aiFeatures.genAiConnectors}
-                      disabled={isSubmitting || isGenerating}
-                    /> */}
                     <SystemSelector
                       systems={systems}
                       selectedSystems={selectedSystems}
@@ -252,7 +243,6 @@ export function AddSignificantEventFlyout({
                       fill
                       isLoading={isGenerating}
                       disabled={
-                        // Move to helper
                         isSubmitting ||
                         selectedSystems.length === 0 ||
                         !aiFeatures?.genAiConnectors?.selectedConnector
