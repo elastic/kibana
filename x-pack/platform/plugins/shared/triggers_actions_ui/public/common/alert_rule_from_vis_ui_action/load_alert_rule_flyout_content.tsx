@@ -17,6 +17,7 @@ import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '@kbn/
 import { getRuleFlyoutComponent } from './rule_flyout_component';
 import { buildAdditionalQuery } from './build_additional_query';
 import type { ServiceDependencies } from './rule_flyout_component';
+import { stripBucketClauseFromQuery } from './strip_bucket_clause_from_query';
 
 export const loadAlertRuleFlyoutContent = async ({
   embeddable,
@@ -42,7 +43,9 @@ export const loadAlertRuleFlyoutContent = async ({
       }
     : getDataFromEmbeddable(embeddable);
 
-  const { query } = embeddableData;
+  let query = embeddableData.query;
+  query = stripBucketClauseFromQuery(query);
+
   const datatable = getDataTableFromEmbeddable(embeddable);
   const dataView = query
     ? undefined
