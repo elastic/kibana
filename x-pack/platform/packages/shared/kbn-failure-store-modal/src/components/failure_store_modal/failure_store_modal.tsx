@@ -89,14 +89,14 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   const retentionPeriodUnit = customRetentionPeriod
     ? customRetentionPeriod.unit
     : defaultRetentionPeriod
-      ? defaultRetentionPeriod.unit
-      : 'd';
+    ? defaultRetentionPeriod.unit
+    : 'd';
 
   const retentionPeriodValue = customRetentionPeriod
     ? customRetentionPeriod.size
     : defaultRetentionPeriod
-      ? defaultRetentionPeriod.size
-      : '30';
+    ? defaultRetentionPeriod.size
+    : '30';
 
   const { form } = useForm({
     defaultValue: {
@@ -125,16 +125,16 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       isCustomPeriod && customRetentionPeriod
         ? customRetentionPeriod.size
         : defaultRetentionPeriod
-          ? defaultRetentionPeriod.size
-          : '30'
+        ? defaultRetentionPeriod.size
+        : '30'
     );
     form.setFieldValue(
       'retentionPeriodUnit',
       isCustomPeriod && customRetentionPeriod
         ? customRetentionPeriod.unit
         : defaultRetentionPeriod
-          ? defaultRetentionPeriod.unit
-          : 'd'
+        ? defaultRetentionPeriod.unit
+        : 'd'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodType]);
@@ -201,7 +201,8 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
               <EuiFormRow>
                 {isCustomPeriod || defaultRetentionPeriod ? (
-                  <RetentionPeriodField disabled={!isCustomPeriod} />) : (
+                  <RetentionPeriodField disabled={!isCustomPeriod} />
+                ) : (
                   <EuiCallOut
                     announceOnMount
                     typeof="info"
