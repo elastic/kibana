@@ -7,10 +7,11 @@
 
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useStreamSystemsApi } from '../../../../hooks/use_stream_systems_api';
@@ -33,6 +34,8 @@ export function StreamExistingSystemsTable({
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const { removeSystemsFromStream } = useStreamSystemsApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
 
   const columns: Array<EuiBasicTableColumn<System>> = [
     {
@@ -130,57 +133,68 @@ export function StreamExistingSystemsTable({
 
   return (
     <div css={{ padding: '16px' }}>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <TableTitle pageIndex={0} pageSize={10} total={systems.length} label={SYSTEMS_LABEL} />
+          <TableTitle
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            total={systems.length}
+            label={SYSTEMS_LABEL}
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="plusInSquare"
-            aria-label={GENERATE_SIGNIFICANT_EVENTS}
-            isDisabled={selectedSystems.length === 0}
-          >
-            {GENERATE_SIGNIFICANT_EVENTS}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="cross"
-            aria-label={CLEAR_SELECTION}
-            isDisabled={selectedSystems.length === 0 || isLoading}
-            onClick={() => {
-              setSelectedSystems([]);
-            }}
-          >
-            {CLEAR_SELECTION}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            isLoading={isDeleting}
-            iconType="trash"
-            color="danger"
-            aria-label={DELETE_ALL}
-            isDisabled={selectedSystems.length === 0 || isLoading}
-            onClick={() => {
-              setIsDeleting(true);
-              removeSystemsFromStream(selectedSystems.map((s) => s.name))
-                .then(() => {
-                  removeSystemsFromStream(selectedSystems.map((s) => s.name)).finally(() => {
-                    setSelectedSystems([]);
-                  });
-                })
-                .finally(() => {
-                  refreshSystems();
-                  setIsDeleting(false);
-                });
-            }}
-          >
-            {DELETE_ALL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {selectedSystems.length > 0 && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="plusInSquare"
+                aria-label={GENERATE_SIGNIFICANT_EVENTS}
+                isDisabled={selectedSystems.length === 0}
+              >
+                {GENERATE_SIGNIFICANT_EVENTS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                aria-label={CLEAR_SELECTION}
+                isDisabled={selectedSystems.length === 0 || isLoading}
+                onClick={() => {
+                  setSelectedSystems([]);
+                }}
+              >
+                {CLEAR_SELECTION}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                isLoading={isDeleting}
+                iconType="trash"
+                color="danger"
+                aria-label={DELETE_ALL}
+                isDisabled={selectedSystems.length === 0 || isLoading}
+                onClick={() => {
+                  setIsDeleting(true);
+                  removeSystemsFromStream(selectedSystems.map((s) => s.name))
+                    .then(() => {
+                      removeSystemsFromStream(selectedSystems.map((s) => s.name)).finally(() => {
+                        setSelectedSystems([]);
+                      });
+                    })
+                    .finally(() => {
+                      refreshSystems();
+                      setIsDeleting(false);
+                    });
+                }}
+              >
+                {DELETE_ALL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
-      <EuiBasicTable
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+      <EuiInMemoryTable
         loading={isLoading}
         tableCaption={TABLE_CAPTION_LABEL}
         items={systems}
@@ -190,6 +204,17 @@ export function StreamExistingSystemsTable({
           initialSelected: selectedSystems,
           onSelectionChange: setSelectedSystems,
           selected: selectedSystems,
+        }}
+        pagination={{
+          pageSize,
+          pageSizeOptions: [5, 10, 25],
+          onChangePage: (pIndex) => {
+            setPageIndex(pIndex);
+          },
+          onChangeItemsPerPage: (pSize) => {
+            setPageSize(pSize);
+            setPageIndex(0);
+          },
         }}
       />
       {isDetailFlyoutOpen && (
