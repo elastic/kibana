@@ -11,9 +11,10 @@ import React, { useCallback, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import { noop } from 'lodash/fp';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
+import { noop } from 'lodash/fp';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -52,8 +53,10 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     setConversationSettings,
     setConversationsSettingsBulkActions,
   }) => {
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      settings,
     });
     const selectedSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });

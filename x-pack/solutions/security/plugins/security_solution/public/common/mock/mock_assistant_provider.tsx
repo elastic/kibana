@@ -15,6 +15,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -65,6 +66,11 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       }}
       userProfileService={mockUserProfileService}
       chrome={chrome}
+      settings={{
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart}
     >
       {children}
     </AssistantProvider>
