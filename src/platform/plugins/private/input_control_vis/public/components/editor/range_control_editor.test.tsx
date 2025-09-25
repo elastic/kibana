@@ -99,7 +99,7 @@ test('handleOptionsChange - step', async () => {
 
   expect(handleFieldNameChange).not.toHaveBeenCalled();
   expect(handleIndexPatternChange).not.toHaveBeenCalled();
-  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'step', expect.any(Number));
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'step', 0.5);
 });
 
 test('handleOptionsChange - decimalPlaces', async () => {
@@ -134,5 +134,5 @@ test('handleOptionsChange - decimalPlaces', async () => {
 
   expect(handleFieldNameChange).not.toHaveBeenCalled();
   expect(handleIndexPatternChange).not.toHaveBeenCalled();
-  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'decimalPlaces', expect.any(Number));
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'decimalPlaces', 2);
 });
