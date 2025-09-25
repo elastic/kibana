@@ -28,11 +28,11 @@ export const validateAgentId = ({
     return `Agent ids are limited to ${agentIdMaxLength} characters.`;
   }
   if (hasNamespaceName(agentId)) {
-    return `Agent id cannot have the same name as a reserved namespaces`;
+    return `Agent id cannot have the same name as a reserved namespace.`;
   }
   if (!builtIn) {
     if (isInProtectedNamespace(agentId)) {
-      return `Agent id is using a protected namespaces.`;
+      return `Agent id is using a protected namespace.`;
     }
   }
 };

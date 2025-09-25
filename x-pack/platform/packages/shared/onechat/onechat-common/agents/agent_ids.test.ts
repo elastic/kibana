@@ -53,20 +53,20 @@ describe('validateAgentId', () => {
     expect(error).toBe(`Agent ids are limited to ${agentIdMaxLength} characters.`);
   });
 
-  test('fails when toolId equals a protected namespace name', () => {
+  test('fails when agentId equals a protected namespace name', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const error = validateAgentId({ agentId: protectedNamespaceName, builtIn: false });
-    expect(error).toBe('Agent id cannot have the same name as a reserved namespaces');
+    expect(error).toBe('Agent id cannot have the same name as a reserved namespace.');
   });
 
-  test('fails when non built-in tool uses a protected namespace', () => {
+  test('fails when non built-in agent uses a protected namespace', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const agentId = `${protectedNamespaceName}.agent`;
     const error = validateAgentId({ agentId, builtIn: false });
-    expect(error).toBe('Agent id is using a protected namespaces.');
+    expect(error).toBe('Agent id is using a protected namespace.');
   });
 
-  test('allows built-in tool to use a protected namespace', () => {
+  test('allows built-in agent to use a protected namespace', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const agentId = `${protectedNamespaceName}.internal_agent`;
     const error = validateAgentId({ agentId, builtIn: true });

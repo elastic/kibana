@@ -43,11 +43,11 @@ export const validateToolId = ({
     return `Tool ids are limited to ${toolIdMaxLength} characters.`;
   }
   if (hasNamespaceName(toolId)) {
-    return `Tool id cannot have the same name as a reserved namespaces`;
+    return `Tool id cannot have the same name as a reserved namespace.`;
   }
   if (!builtIn) {
     if (isInProtectedNamespace(toolId)) {
-      return `Tool id is using a protected namespaces.`;
+      return `Tool id is using a protected namespace.`;
     }
   }
 };
