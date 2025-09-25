@@ -6,6 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import type { AriaAttributes } from 'react';
 import React, { Fragment } from 'react';
 
 export interface Error {
@@ -20,6 +21,10 @@ export interface Error {
 interface Props {
   title: React.ReactNode;
   error: Error;
+  id?: string;
+  role?: string;
+  'aria-live'?: AriaAttributes['aria-live'];
+  'data-test-subj'?: string;
 }
 
 export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
