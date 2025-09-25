@@ -1126,36 +1126,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
       const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-<<<<<<< HEAD
       // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
       const removeProtection =
         isEndpointPolicy &&
         ((assignedInOldPolicy && !assignedInNewPolicy) ||
           (!assignedInOldPolicy && assignedInNewPolicy));
 
-      bumpPromises.push(
-        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        })
-      );
-    }
-=======
-        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-        const removeProtection =
-          isEndpointPolicy &&
-          ((assignedInOldPolicy && !assignedInNewPolicy) ||
-            (!assignedInOldPolicy && assignedInNewPolicy));
-        if (options?.bumpRevision !== false) {
-          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+      if (options?.bumpRevision !== false) {
+        bumpPromises.push(
+          agentPolicyService.bumpRevision(soClient, esClient, policyId, {
             user: options?.user,
             removeProtection,
-          });
-        }
-      },
-      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
-    );
->>>>>>> 2738a40a6ec ([Fleet] Update frozen variables for preconfigured managed policies (#235306))
+          })
+        );
+      }
+    }
 
     const assetRemovePromise = removeOldAssets({
       soClient,
