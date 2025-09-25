@@ -59,6 +59,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       stepId: 'workflowTimeoutStep',
       stepType: 'workflow-timeout',
       timeout: '60s',
+      isInternalStep: true,
     };
 
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
