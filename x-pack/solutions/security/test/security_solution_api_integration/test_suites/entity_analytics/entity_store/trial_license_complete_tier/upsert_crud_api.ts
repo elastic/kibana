@@ -58,7 +58,6 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should update an existing user', async () => {
         log.info('Creating user as test subject...');
-        const date = new Date().toISOString();
         const userName = 'test-user-1';
         const testDocs = [{ user: { name: userName, domain: 'domain.com' } }];
 
@@ -89,8 +88,8 @@ export default function (providerContext: FtrProviderContext) {
               attributes: {
                 privileged: true,
               },
-              lifecycle: {
-                first_seen: date,
+              behaviors: {
+                brute_force_victim: true,
               },
             },
           },
@@ -107,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.domain).toEqual(['domain.com']);
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
+            expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
           });
 
           return true;
@@ -133,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.user?.domain).toContain('domain.com updated');
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
-            expect(hit._source?.entity?.lifecycle?.First_seen).toEqual(date);
+            expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
           });
           return true;
         });

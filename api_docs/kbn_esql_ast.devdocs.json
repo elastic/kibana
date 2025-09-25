@@ -8345,14 +8345,6 @@
             "path": "src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/logs_data_source_profile/accessors/get_row_additional_leading_controls.ts"
           },
           {
-            "plugin": "stackAlerts",
-            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
-          },
-          {
-            "plugin": "stackAlerts",
-            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
-          },
-          {
             "plugin": "inference",
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
           },

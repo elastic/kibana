@@ -79,5 +79,5 @@ export function generateTriggerSnippet(
   // (type:)${triggerType}
   // ...parameters
   // stringify always adds a newline, so we need to remove it
-  return `${triggerType}\n${stringify(parameters, stringifyOptions)}`;
+  return stringify([{ type: triggerType, ...parameters }], stringifyOptions).replace('- type:', '');
 }

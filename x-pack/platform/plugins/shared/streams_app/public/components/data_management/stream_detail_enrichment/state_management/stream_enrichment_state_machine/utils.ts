@@ -97,7 +97,7 @@ export function getDataSourcesSamples(
 export function getStepsForSimulation({ stepRefs }: Pick<StreamEnrichmentContextType, 'stepRefs'>) {
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
-    .filter((snapshot) => isWhereBlock(snapshot.context) || snapshot.context.isNew);
+    .filter((snapshot) => isWhereBlock(snapshot.context.step) || snapshot.context.isNew);
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(

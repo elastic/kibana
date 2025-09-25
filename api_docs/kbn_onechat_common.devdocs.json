@@ -1748,6 +1748,38 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentCapabilities",
+        "description": [
+          "\nSet of capabilities to use when calling an agent."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentCapabilities.visualizations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visualizations",
+            "description": [
+              "\nIf true, will allow the agent to return visualizations in the response."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.AgentConfiguration",
         "type": "Interface",
         "tags": [],
@@ -4441,6 +4473,21 @@
           ".reasoning; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ResolvedAgentCapabilities",
+        "type": "Type",
+        "tags": [],
+        "label": "ResolvedAgentCapabilities",
+        "description": [],
+        "signature": [
+          "{ visualizations: boolean; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

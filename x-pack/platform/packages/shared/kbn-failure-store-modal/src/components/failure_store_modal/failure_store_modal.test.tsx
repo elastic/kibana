@@ -78,6 +78,21 @@ describe('FailureStoreModal', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('displays a callout when there is not info about default retention period', () => {
+    const { queryByTestId } = renderModal({
+      failureStoreEnabled: true,
+    });
+    expect(queryByTestId('defaultRetentionCallout')).toBeInTheDocument();
+  });
+
+  it('displays no callout when there is info about default retention period', () => {
+    const { queryByTestId } = renderModal({
+      failureStoreEnabled: true,
+      defaultRetentionPeriod: '30d',
+    });
+    expect(queryByTestId('defaultRetentionCallout')).not.toBeInTheDocument();
+  });
   describe('save modal', () => {
     it('only saves failureStoreEnabled if it is disabled', async () => {
       const { getByTestId, queryByTestId } = renderModal({

@@ -13,6 +13,7 @@ import type {
   NavigationTreeDefinition,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
+import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -362,7 +363,7 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   iconV2: 'database',
-                  id: 'ingest_and_data',
+                  id: INGEST_AND_MANAGE_DATA_NAV_ID, // This id can't be changed as we use it to anchor the tour step
                   sideNavVersion: 'v2',
                   renderAs: 'panelOpener',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
@@ -530,7 +531,7 @@ export const getNavigationTreeDefinition = ({
                           ),
                         },
                       ],
-                      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
+                      id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
                       renderAs: 'panelOpener',
                       spaceBefore: null,
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

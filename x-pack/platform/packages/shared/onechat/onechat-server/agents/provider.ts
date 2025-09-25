@@ -6,7 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { type ConversationRound, type RoundInput, type ChatAgentEvent } from '@kbn/onechat-common';
+import {
+  type ConversationRound,
+  type RoundInput,
+  type ChatAgentEvent,
+  type AgentCapabilities,
+} from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '../src/model_provider';
@@ -88,6 +93,10 @@ export interface AgentParams {
    * The input triggering this round.
    */
   nextInput: RoundInput;
+  /**
+   * Agent capabilities to enable.
+   */
+  capabilities?: AgentCapabilities;
 }
 
 export interface AgentResponse {

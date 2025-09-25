@@ -46,7 +46,7 @@ export interface ExecutableTool<
   /**
    * Tool's input schema, defined as a zod schema.
    */
-  schema: TSchema;
+  schema: () => MaybePromise<TSchema>;
   /**
    * Run handler that can be used to execute the tool.
    */

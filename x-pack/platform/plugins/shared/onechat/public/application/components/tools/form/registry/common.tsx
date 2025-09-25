@@ -16,6 +16,7 @@ import type {
   EsqlToolFormData,
   IndexSearchToolFormData,
   BuiltinToolFormData,
+  WorkflowToolFormData,
 } from '../types/tool_form_types';
 
 export const commonToolFormDefaultValues = {
@@ -37,8 +38,10 @@ export interface ToolTypeRegistryEntry<TFormData extends ToolFormData = ToolForm
 export type EsqlToolTypeRegistryEntry = ToolTypeRegistryEntry<EsqlToolFormData>;
 export type IndexSearchToolTypeRegistryEntry = ToolTypeRegistryEntry<IndexSearchToolFormData>;
 export type BuiltinToolTypeRegistryEntry = ToolTypeRegistryEntry<BuiltinToolFormData>;
+export type WorkflowToolTypeRegistryEntry = ToolTypeRegistryEntry<WorkflowToolFormData>;
 
 export type SupportedToolTypeRegistryEntry =
   | EsqlToolTypeRegistryEntry
   | IndexSearchToolTypeRegistryEntry
-  | BuiltinToolTypeRegistryEntry;
+  | BuiltinToolTypeRegistryEntry
+  | WorkflowToolTypeRegistryEntry;

@@ -21,9 +21,8 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  GraphNode,
   HttpGraphNode,
-  UnionExecutionGraphNode,
+  GraphNodeUnion,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
@@ -68,7 +67,7 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph
   ) {}
 
-  public create<TStep extends UnionExecutionGraphNode>(node: TStep): NodeImplementation {
+  public create<TStep extends GraphNodeUnion>(node: TStep): NodeImplementation {
     const stepLogger = this.workflowLogger.createStepLogger(
       this.workflowRuntime.getCurrentStepExecutionId(),
       node.stepId,
@@ -194,7 +193,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       default:
-        throw new Error(`Unknown node type: ${(node as GraphNode).stepType}`);
+        throw new Error(`Unknown node type: ${(node as GraphNodeUnion).stepType}`);
     }
   }
 }
