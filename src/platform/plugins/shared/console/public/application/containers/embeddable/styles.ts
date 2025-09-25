@@ -20,7 +20,7 @@ import { layoutVar } from '@kbn/core-chrome-layout-constants';
 export const useEmbeddableConsoleStyleVariables = () => {
   const { euiTheme } = useEuiTheme();
   const isDark = useIsDarkMode();
-  const background = isDark ? euiTheme.colors.darkestShade : euiTheme.colors.ink;
+  const background = isDark ? euiTheme.colors.ink : euiTheme.colors.darkestShade;
   const baseTextColor = makeHighContrastColor(euiTheme.colors.lightestShade)(background);
   const text = tint(baseTextColor, 0.2);
 
