@@ -47,6 +47,7 @@ import {
 } from '@kbn/securitysolution-exception-list-components';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
@@ -92,10 +93,14 @@ import {
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
-import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import {
+  isAdvancedModeEnabled,
+  isProcessDescendantsEnabled,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ADVANCED_MODE_TAG,
   PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TrustedAppsApiClient } from '../../service';
@@ -103,10 +108,7 @@ import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ProcessDescendantsTooltip } from '../../../event_filters/view/components/process_descendant_tooltip';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */

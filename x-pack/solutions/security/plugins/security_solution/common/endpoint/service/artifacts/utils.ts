@@ -132,7 +132,7 @@ export const isAdvancedModeTag: TagFilter = (tag) => tag === ADVANCED_MODE_TAG;
 
 export const isProcessDescendantsEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
-  tag: string = FILTER_PROCESS_DESCENDANTS_TAG,
+  tag: string = FILTER_PROCESS_DESCENDANTS_TAG
 ): boolean => (item.tags ?? []).includes(tag);
 
 /** Checks if the given tag is for filtering process descendants in event filters */
