@@ -43,7 +43,11 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: SyntheticsServerSetup;
-}): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
+}): Promise<{
+  apiKey?: SyntheticsServiceApiKey;
+  isValid: boolean;
+  insufficientPermissions?: boolean;
+}> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
@@ -65,10 +69,10 @@ export const getAPIKeyForSyntheticsService = async ({
         indexPermissions.read;
 
       if (!hasPermissions) {
+        server.logger.debug(`API key ${apiKey.name} has insufficient permissions`);
         return { isValid: false, apiKey };
       }
-
-      return { apiKey, isValid };
+      return { apiKey, isValid, insufficientPermissions: !hasPermissions };
     }
   } catch (error) {
     server.logger.error(`API key is invalid, ${error.message}`, { error });
