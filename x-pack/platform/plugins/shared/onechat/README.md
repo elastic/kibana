@@ -92,16 +92,20 @@ class MyPlugin {
   setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
     onechat.tools.register({
       id: 'my_tool',
-      name: 'My Tool',
       description: 'My very first tool',
-      meta: {
-        tags: ['foo', 'bar'],
-      },
+      tags: [],
       schema: z.object({
         someNumber: z.number().describe('Some random number'),
       }),
-      handler: ({ someNumber }, context) => {
-        return 42 + someNumber;
+      handler: async ({ someNumber }, context) => {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { value: 42 + someNumber },
+            },
+          ],
+        };
       },
     });
   }
