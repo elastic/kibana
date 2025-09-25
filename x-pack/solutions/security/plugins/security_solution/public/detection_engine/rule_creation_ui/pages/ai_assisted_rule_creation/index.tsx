@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAccordion,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -15,7 +14,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 // import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { ChatActions } from '@kbn/elastic-assistant/impl/assistant/chat_actions';
@@ -29,7 +28,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { MaxWidthEuiFlexItem } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
-import { useKibana } from '../../../../common/lib/kibana';
+// import { useKibana } from '../../../../common/lib/kibana';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { PromptTextArea } from './prompt_textarea';
 import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
@@ -39,17 +38,15 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
     {
       loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
+      // isSignalIndexExists,
+      // isAuthenticated,
+      // hasEncryptionKey,
+      // canUserCRUD,
     },
   ] = useUserData();
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
-  const { addSuccess, addError } = useAppToasts();
-  const { navigateToApp } = useKibana().services.application;
-  const { application, triggersActionsUi } = useKibana().services;
+  const { loading: listsConfigLoading } = useListsConfig();
+  const { addError } = useAppToasts();
+  // const { navigateToApp } = useKibana().services.application;
   const isLoading = userInfoLoading || listsConfigLoading;
   const { euiTheme } = useEuiTheme();
   const collapseFn = useRef<() => void | undefined>();
@@ -148,7 +145,8 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           connectors={aiConnectors.map((c) => ({
                             name: c.name,
                             id: c.id,
-                            description: c?.config?.apiProvider,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            description: (c as any).config?.apiProvider,
                           }))}
                           selectedId={selectedConnectorId}
                           onChange={setSelectedConnectorId}
@@ -167,7 +165,9 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                   mode="collapsible"
                   initialSize={30}
                   minSize={'20%'}
-                />
+                >
+                  <></>
+                </EuiResizablePanel>
               </>
             );
           }}
@@ -180,5 +180,3 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
 };
 
 export const AiAssistedCreateRulePage = React.memo(AiAssistedCreateRulePageComponent);
-
-const MemoEuiAccordion = memo(EuiAccordion);

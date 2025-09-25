@@ -42,7 +42,6 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
         response
       ): Promise<IKibanaResponse<AIAssistedCreateRuleResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        console.log('Creating AI-assisted rule');
         const { user_query: userQuery, connector_id: connectorId } = request.body;
 
         const ctx = await context.resolve(['securitySolution', 'alerting']);
@@ -80,22 +79,7 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             });
           };
 
-          // const model = await inferenceService.getChatModel({
-          //   request,
-          //   connectorId,
-          //   chatModelOptions: {
-          //     // not passing specific `model`, we'll always use the connector default model
-          //     // temperature may need to be parametrized in the future
-          //     temperature: 0.05,
-          //     // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
-          //     maxRetries: 1,
-          //     // Disable streaming explicitly
-          //     disableStreaming: true,
-          //     // Set a hard limit of 50 concurrent requests
-          //     maxConcurrency: 50,
-          //     signal: abortController.signal,
-          //   },
-          // });
+          // Initial implementation branch
           if (userQuery.startsWith('AAA')) {
             const model = await createLlmInstance();
 
@@ -109,7 +93,7 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             return response.ok({
               body: {
                 rule: result.rule,
-              },
+              } as AIAssistedCreateRuleResponse,
             });
           }
 
@@ -137,7 +121,7 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
           return response.ok({
             body: {
               rule: result.rule,
-            },
+            } as AIAssistedCreateRuleResponse,
           });
         } catch (err) {
           const error = transformError(err);

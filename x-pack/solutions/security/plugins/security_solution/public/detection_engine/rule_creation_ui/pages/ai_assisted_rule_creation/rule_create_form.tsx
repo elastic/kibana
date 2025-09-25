@@ -71,7 +71,6 @@ import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
@@ -119,7 +118,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
     useListsConfig();
   const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
-  const { application, triggersActionsUi } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
@@ -134,15 +133,15 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+  // const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const kibanaAbsoluteUrl = useMemo(
-    () =>
-      application.getUrlForApp(`${APP_UI_ID}`, {
-        absolute: true,
-      }),
-    [application]
-  );
+  // const kibanaAbsoluteUrl = useMemo(
+  //   () =>
+  //     application.getUrlForApp(`${APP_UI_ID}`, {
+  //       absolute: true,
+  //     }),
+  //   [application]
+  // );
 
   const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
     rule,
@@ -186,7 +185,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
   const { mutateAsync: createRule, isLoading: isCreateRuleLoading } = useCreateRule();
   const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
-  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
+  const [_, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -222,15 +221,15 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
     dataViewId: defineStepData.dataViewId,
   });
 
-  const rulesUrl = getRulesUrl();
-  const backOptions = useMemo(
-    () => ({
-      path: rulesUrl,
-      text: i18n.BACK_TO_RULES,
-      pageId: SecurityPageName.rules,
-    }),
-    [rulesUrl]
-  );
+  // const rulesUrl = getRulesUrl();
+  // const backOptions = useMemo(
+  //   () => ({
+  //     path: rulesUrl,
+  //     text: i18n.BACK_TO_RULES,
+  //     pageId: SecurityPageName.rules,
+  //   }),
+  //   [rulesUrl]
+  // );
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -292,7 +291,6 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
 
         case RuleStep.aboutRule: {
           const valid = await aboutStepForm.validate();
-          console.log('getErrors', aboutStepForm.getErrors());
           return {
             valid,
             warnings: aboutStepForm.getValidationWarnings(),
@@ -353,7 +351,6 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
   const editStep = useCallback(
     async (step: RuleStep) => {
       const { valid } = await validateStep(activeStep);
-      console.log('step', step, valid);
 
       if (valid) {
         goToStep(step);
@@ -817,7 +814,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      <MyEuiPanel zindex={4} hasBorder>
+                      <MyEuiPanel hasBorder>
                         <MemoEuiAccordion
                           initialIsOpen={true}
                           id={RuleStep.defineRule}
@@ -831,7 +828,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
                         </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
-                      <MyEuiPanel hasBorder zindex={3}>
+                      <MyEuiPanel hasBorder>
                         <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.aboutRule}
@@ -845,7 +842,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
                         </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
-                      <MyEuiPanel hasBorder zindex={2}>
+                      <MyEuiPanel hasBorder>
                         <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.scheduleRule}
@@ -859,7 +856,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
                         </MemoEuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
-                      <MyEuiPanel hasBorder zindex={1}>
+                      <MyEuiPanel hasBorder>
                         <MemoEuiAccordion
                           initialIsOpen={false}
                           id={RuleStep.ruleActions}

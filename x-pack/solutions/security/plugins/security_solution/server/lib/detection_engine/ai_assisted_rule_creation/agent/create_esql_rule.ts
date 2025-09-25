@@ -22,7 +22,6 @@ export const createEsqlRuleNode = ({ model }: CreateEsqlRuleNodeParams) => {
       const baseRuleParams = await ruleCreationChain.invoke({
         user_request: state.userQuery,
       });
-      console.log('state createEsqlRuleNode', state);
       return { rule: { ...baseRuleParams, language: 'esql', type: 'esql' } };
     } catch (e) {
       return { error: e.message };

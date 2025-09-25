@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { MessagesAnnotation, StateGraph } from '@langchain/langgraph';
@@ -12,8 +14,6 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-
-import { createEsqlRuleNode } from './create_esql_rule';
 
 // Define tools
 const multiply = tool(
@@ -67,7 +67,8 @@ function shouldContinue(state: typeof MessagesAnnotation.State) {
   const lastMessage = messages.at(-1);
 
   // If the LLM makes a tool call, then perform an action
-  if (lastMessage?.tool_calls?.length) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((lastMessage as any)?.tool_calls?.length) {
     return 'Action';
   }
   // Otherwise, we stop (reply to the user)
@@ -125,7 +126,6 @@ export const getToolAgent = ({ model: modelNoTool, logger }: GetRuleCreationAgen
     };
   }
 
-  const createEsqlRule = createEsqlRuleNode({ model });
   const agentBuilder = new StateGraph(MessagesAnnotation)
     .addNode('llmCall', llmCall)
     .addNode('tools', toolNode)

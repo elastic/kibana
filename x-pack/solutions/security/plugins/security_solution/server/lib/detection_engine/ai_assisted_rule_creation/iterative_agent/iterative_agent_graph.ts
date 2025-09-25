@@ -20,7 +20,7 @@ import type { RuleCreationState } from './state';
 import { RuleCreationAnnotation } from './state';
 import { addDefaultFieldsToRulesNode } from './nodes/add_default_fields_to_rule';
 
-import { createEsqQueryNode } from './nodes/create_esql_query';
+// import { createEsqQueryNode } from './nodes/create_esql_query';
 import { nlToEsqlQueryNode } from './nodes/nl_to_esql';
 import { validateEsqlQueryNode } from './nodes/validate_esql_query';
 import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_description';
@@ -50,19 +50,17 @@ export const getIterativeRuleCreationAgent = async ({
   savedObjectsClient,
   rulesClient,
 }: GetRuleCreationAgentParams) => {
-  //   const createEsqlRule = createEsqlRuleNode({ model });
-  const createEsqlQuery = await createEsqQueryNode({
-    model,
-    esClient,
-    connectorId,
-    inference,
-    logger,
-    request,
-    createLlmInstance,
-  });
+  //   const createEsqlQuery = await createEsqQueryNode({
+  //     model,
+  //     esClient,
+  //     connectorId,
+  //     inference,
+  //     logger,
+  //     request,
+  //     createLlmInstance,
+  //   });
 
   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
-    //  .addNode('createEsqlQuery', createEsqlQuery)
     .addNode(
       'createEsqlQuery',
       await nlToEsqlQueryNode({
@@ -90,21 +88,6 @@ export const getIterativeRuleCreationAgent = async ({
       END,
     ])
     .addEdge('addDefaultFieldsToRules', END);
-
-  //   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
-  //     .addNode('getTagsNode', getTagsNode({ rulesClient, savedObjectsClient, model }))
-  //     .addEdge(START, 'getTagsNode')
-  //     .addEdge('getTagsNode', END);
-
-  // .addEdge(START, 'getIndexPattern')
-  // .addEdge('getIndexPattern', 'createEsqlQuery')
-  // .addEdge('createEsqlQuery', 'validateEsqlQuery')
-  // .addEdge('validateEsqlQuery', 'createRuleNameAndDescription')
-  // .addConditionalEdges('createRuleNameAndDescription', shouldAddDefaultFieldsToRule, [
-  //   'addDefaultFieldsToRules',
-  //   END,
-  // ])
-  // .addEdge('addDefaultFieldsToRules', END);
 
   const graph = ruleCreationAgentGraph.compile();
   graph.name = 'Rule Creation Graph';
