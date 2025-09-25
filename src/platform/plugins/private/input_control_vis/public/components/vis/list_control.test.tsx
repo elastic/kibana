@@ -20,11 +20,7 @@ const formatOptionLabel = (value: any) => {
 };
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <I18nProvider>
-      {component}
-    </I18nProvider>
-  );
+  return render(<I18nProvider>{component}</I18nProvider>);
 };
 
 let stageFilter: jest.Mock;
@@ -50,7 +46,7 @@ test('renders ListControl', () => {
   expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
   expect(screen.getByText('list control')).toBeInTheDocument();
   expect(screen.getByTestId('listControlSelect0')).toBeInTheDocument();
-  
+
   // Check that combobox is rendered with correct placeholder
   expect(screen.getByPlaceholderText('Select...')).toBeInTheDocument();
 });
@@ -71,7 +67,7 @@ test('disableMsg', () => {
 
   expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
   expect(screen.getByText('list control')).toBeInTheDocument();
-  
+
   // When disabled, it should render a disabled text field instead of combobox
   const disabledInput = screen.getByDisplayValue('');
   expect(disabledInput).toBeDisabled();

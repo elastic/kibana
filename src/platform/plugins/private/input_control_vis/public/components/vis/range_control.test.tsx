@@ -34,23 +34,19 @@ const control: RangeControlClass = {
 } as RangeControlClass;
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <I18nProvider>
-      {component}
-    </I18nProvider>
-  );
+  return render(<I18nProvider>{component}</I18nProvider>);
 };
 
 test('renders RangeControl', () => {
   renderWithIntl(<RangeControl control={control} controlIndex={0} stageFilter={() => {}} />);
-  
+
   expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
   expect(screen.getByText('range control')).toBeInTheDocument();
-  
+
   // Check for range inputs
   const rangeInputs = screen.getAllByRole('spinbutton');
   expect(rangeInputs).toHaveLength(2); // min and max inputs
-  
+
   // Check that inputs have correct accessibility labels
   expect(screen.getByLabelText('Range minimum')).toBeInTheDocument();
   expect(screen.getByLabelText('Range maximum')).toBeInTheDocument();
@@ -76,18 +72,18 @@ test('disabled', () => {
       return true;
     },
   } as RangeControlClass;
-  
+
   renderWithIntl(
     <RangeControl control={disabledRangeControl} controlIndex={0} stageFilter={() => {}} />
   );
-  
+
   expect(screen.getByTestId('inputControl0')).toBeInTheDocument();
   expect(screen.getByText('range control')).toBeInTheDocument();
-  
+
   // Check for disabled state - ValidatedDualRange should be disabled
   const rangeInputs = screen.getAllByRole('spinbutton');
   expect(rangeInputs).toHaveLength(2);
-  rangeInputs.forEach(input => {
+  rangeInputs.forEach((input) => {
     expect(input).toBeDisabled();
   });
 });

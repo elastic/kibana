@@ -86,7 +86,7 @@ describe('renders', () => {
     // Should show index pattern and field selectors
     expect(screen.getByText('Index Pattern')).toBeInTheDocument();
     expect(screen.getByText('Field')).toBeInTheDocument();
-    
+
     // Should not show control-specific options when no field is selected
     expect(screen.queryByTestId('listControlMultiselectInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('listControlDynamicOptionsSwitch')).not.toBeInTheDocument();
@@ -122,10 +122,10 @@ describe('renders', () => {
     // Should display all main form controls
     expect(screen.getByText('Index Pattern')).toBeInTheDocument();
     expect(screen.getByText('Field')).toBeInTheDocument();
-    
+
     // Should display parent/chaining control when parent candidates are provided
     expect(screen.getByText('Parent control')).toBeInTheDocument();
-    
+
     // Should show control-specific options for selected field
     await waitFor(() => {
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
@@ -174,10 +174,10 @@ describe('renders', () => {
       // Dynamic options switch should be enabled for string fields
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
       expect(dynamicSwitch).not.toBeDisabled();
-      
+
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
-      
+
       // Should not show size input when dynamic options is enabled
       expect(screen.queryByTestId('listControlSizeInput')).not.toBeInTheDocument();
     });
@@ -221,10 +221,10 @@ describe('renders', () => {
       // Dynamic options should be disabled (unchecked) for this test
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
       expect(dynamicSwitch).not.toBeDisabled();
-      
+
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
-      
+
       // Should show size input when dynamic options is disabled
       expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
       expect(screen.getByTestId('listControlSizeInput')).toHaveValue(5);
@@ -269,10 +269,10 @@ describe('renders', () => {
       // Dynamic options switch should be disabled for non-string fields
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
       expect(dynamicSwitch).toBeDisabled();
-      
+
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
-      
+
       // Should show size input when dynamic options is not available
       expect(screen.getByTestId('listControlSizeInput')).toBeInTheDocument();
       expect(screen.getByTestId('listControlSizeInput')).toHaveValue(5);
@@ -341,7 +341,7 @@ test('handleOptionsChange - size', async () => {
 
   await user.clear(input);
   await user.type(input, '7');
-  
+
   // Use act to wrap the blur operation that triggers state updates
   await act(async () => {
     input.blur();
