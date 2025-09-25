@@ -35,6 +35,7 @@ const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   has_alerts_mappings: hasAlertsMappings,
   is_exportable: isExportable,
   auto_recover_alerts: autoRecoverAlerts,
+  is_internally_managed: isInternallyManaged,
   ...rest
 }: AsApiContract<InternalRuleType>) => ({
   enabledInLicense,
@@ -50,6 +51,7 @@ const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   hasAlertsMappings,
   isExportable,
   autoRecoverAlerts,
+  isInternallyManaged,
   ...rest,
 });
 
