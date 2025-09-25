@@ -68,14 +68,14 @@ export function generateConnectorSnippet(
         ...parameters,
       },
     ];
-    
+
     let result: string;
     if (withStepsSection) {
       result = stringify({ steps: step }, stringifyOptions);
     } else {
       result = stringify(step, stringifyOptions);
     }
-    
+
     // If there are no required params, add a comment inside the empty with block
     if (requiredParams.length === 0) {
       const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
@@ -83,7 +83,7 @@ export function generateConnectorSnippet(
       // Replace the empty with block with comment and cursor positioned for parameters (6 spaces for step context)
       result = result.replace('with: {}', `with:\n      ${comment}\n      $0`);
     }
-    
+
     return result;
   }
 
@@ -91,7 +91,7 @@ export function generateConnectorSnippet(
   // (type:)${stepType}
   // ...parameters
   const yamlString = stringify(parameters, stringifyOptions);
-  
+
   // If there are no required params, add a comment inside the empty with block
   if (requiredParams.length === 0) {
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
@@ -100,6 +100,6 @@ export function generateConnectorSnippet(
     const withComment = yamlString.replace('with: {}', `with:\n    ${comment}\n    $0`);
     return `${connectorType}\n${withComment}`;
   }
-  
+
   return `${connectorType}\n${yamlString}`;
 }

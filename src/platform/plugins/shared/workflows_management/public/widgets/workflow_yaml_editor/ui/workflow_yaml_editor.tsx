@@ -1337,7 +1337,7 @@ export const WorkflowYAMLEditor = ({
                   try {
                     const zodSchema = getWorkflowZodSchema();
                     const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
-                    
+
                     const blob = new Blob([JSON.stringify(jsonSchema, null, 2)], {
                       type: 'application/json',
                     });
@@ -1370,7 +1370,7 @@ export const WorkflowYAMLEditor = ({
               </div>
             </EuiFlexItem>
           )}
-          
+
           {/* Status indicator */}
           <EuiFlexItem grow={false}>
             {hasChanges ? (

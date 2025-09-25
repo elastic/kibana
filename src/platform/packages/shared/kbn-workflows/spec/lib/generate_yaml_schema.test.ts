@@ -52,7 +52,9 @@ describe('generate_yaml_schema', () => {
       ];
       const hasConnectorProps =
         !!testObj.properties &&
-        connectorPropNames.some((prop) => Object.prototype.hasOwnProperty.call(testObj.properties, prop));
+        connectorPropNames.some((prop) =>
+          Object.prototype.hasOwnProperty.call(testObj.properties, prop)
+        );
 
       const path = 'properties.with.anyOf.0.allOf.1';
       const shouldRemoveAdditionalProperties = hasConnectorProps && path.includes('with');

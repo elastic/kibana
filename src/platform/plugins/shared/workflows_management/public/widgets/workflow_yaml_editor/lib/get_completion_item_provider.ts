@@ -302,7 +302,7 @@ function getConnectorTypeFromPosition(model: any, position: any): string | null 
  */
 function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
   const currentLine = model.getLineContent(currentLineNumber);
-  let currentIndent = getIndentLevel(currentLine);
+  const currentIndent = getIndentLevel(currentLine);
 
   // Detecting if in with block
 
@@ -346,7 +346,12 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
 
     // Stop if we encounter a line with significantly less indentation (other major structure)
     // But be more lenient with comment lines
-    if (lineIndent < currentIndent && line.trim() !== '' && !line.includes('with:') && !currentLine.trim().startsWith('#')) {
+    if (
+      lineIndent < currentIndent &&
+      line.trim() !== '' &&
+      !line.includes('with:') &&
+      !currentLine.trim().startsWith('#')
+    ) {
       // Hit major structure boundary
       break;
     }
@@ -569,13 +574,13 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       connectorSchemaCache.set(connectorType, result);
       return result;
     }
-    
+
     // Handle ZodUnion schemas (from our generic intersection fix)
     if (actualSchema instanceof z.ZodUnion) {
       // For union schemas, extract common properties from all options
       const unionOptions = actualSchema._def.options;
       const commonProperties: Record<string, any> = {};
-      
+
       // Helper function to extract properties from any schema type
       const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
         if (schema instanceof z.ZodObject) {
@@ -588,11 +593,11 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
         }
         return {};
       };
-      
+
       // Get properties that exist in ALL union options
       if (unionOptions.length > 0) {
         const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
-        
+
         // Check each property in the first option
         for (const [key, schema] of Object.entries(firstOptionProps)) {
           // Check if this property exists in ALL other options
@@ -600,13 +605,13 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
             const optionProps = extractPropertiesFromSchema(option);
             return optionProps[key];
           });
-          
+
           if (existsInAll) {
             commonProperties[key] = schema;
           }
         }
       }
-      
+
       if (Object.keys(commonProperties).length > 0) {
         // Found common properties in union schema
         connectorSchemaCache.set(connectorType, commonProperties);
@@ -628,10 +633,10 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
         }
         return {};
       };
-      
+
       // For intersection schemas, extract properties from both sides
       const allProperties = extractPropertiesFromSchema(actualSchema);
-      
+
       if (Object.keys(allProperties).length > 0) {
         connectorSchemaCache.set(connectorType, allProperties);
         return allProperties;
@@ -643,7 +648,7 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       // For discriminated unions, extract common properties from all options
       const unionOptions = Array.from(actualSchema._def.options.values());
       const commonProperties: Record<string, any> = {};
-      
+
       // Helper function to extract properties from any schema type (reuse from above)
       const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
         if (schema instanceof z.ZodObject) {
@@ -656,10 +661,10 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
         }
         return {};
       };
-      
+
       if (unionOptions.length > 0) {
         const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
-        
+
         // Check each property in the first option
         for (const [key, schema] of Object.entries(firstOptionProps)) {
           // Check if this property exists in ALL other options
@@ -667,13 +672,13 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
             const optionProps = extractPropertiesFromSchema(option);
             return optionProps[key];
           });
-          
+
           if (existsInAll) {
             commonProperties[key] = schema;
           }
         }
       }
-      
+
       if (Object.keys(commonProperties).length > 0) {
         connectorSchemaCache.set(connectorType, commonProperties);
         return commonProperties;
@@ -1121,7 +1126,7 @@ export function getCompletionItemProvider(
           // and go straight to showing connector parameters
           const currentLine = model.getLineContent(lineNumber);
           const isOnCommentLine = currentLine.trim().startsWith('#');
-          
+
           if (isOnCommentLine) {
             // We're on a comment line in a with block - show connector parameters
             // Skip the value position detection and go straight to parameter suggestions
@@ -1147,79 +1152,79 @@ export function getCompletionItemProvider(
             // Analyzing cursor position
 
             if (isInValuePosition) {
-            // Typing value after colon, not suggesting parameter names
+              // Typing value after colon, not suggesting parameter names
 
-            // Extract the parameter name more carefully
-            // Get everything before the colon, remove leading whitespace and dashes
-            const beforeColon = lineUpToCursor.substring(0, colonIndex);
-            const paramName = beforeColon.replace(/^\s*-?\s*/, '').trim();
-            // Parameter name extracted
+              // Extract the parameter name more carefully
+              // Get everything before the colon, remove leading whitespace and dashes
+              const beforeColon = lineUpToCursor.substring(0, colonIndex);
+              const paramName = beforeColon.replace(/^\s*-?\s*/, '').trim();
+              // Parameter name extracted
 
-            // Only provide value suggestions if we have a valid parameter name
-            if (paramName && !paramName.includes(' ')) {
-              // Provide basic value suggestions based on common parameter patterns
-              const valueSuggestions: monaco.languages.CompletionItem[] = [];
+              // Only provide value suggestions if we have a valid parameter name
+              if (paramName && !paramName.includes(' ')) {
+                // Provide basic value suggestions based on common parameter patterns
+                const valueSuggestions: monaco.languages.CompletionItem[] = [];
 
-              if (
-                paramName.includes('enabled') ||
-                paramName.includes('disabled') ||
-                paramName.endsWith('Stream')
-              ) {
-                valueSuggestions.push(
-                  {
-                    label: 'true',
+                if (
+                  paramName.includes('enabled') ||
+                  paramName.includes('disabled') ||
+                  paramName.endsWith('Stream')
+                ) {
+                  valueSuggestions.push(
+                    {
+                      label: 'true',
+                      kind: monaco.languages.CompletionItemKind.Value,
+                      insertText: 'true',
+                      range,
+                      documentation: 'Boolean true value',
+                    },
+                    {
+                      label: 'false',
+                      kind: monaco.languages.CompletionItemKind.Value,
+                      insertText: 'false',
+                      range,
+                      documentation: 'Boolean false value',
+                    }
+                  );
+                } else if (
+                  paramName.includes('size') ||
+                  paramName.includes('count') ||
+                  paramName.includes('limit')
+                ) {
+                  valueSuggestions.push({
+                    label: '10',
                     kind: monaco.languages.CompletionItemKind.Value,
-                    insertText: 'true',
+                    insertText: '10',
                     range,
-                    documentation: 'Boolean true value',
-                  },
-                  {
-                    label: 'false',
+                    documentation: 'Numeric value',
+                  });
+                } else if (lineUpToCursor.match(/:\s*$/)) {
+                  // Generic string placeholder only if the value is still empty
+                  valueSuggestions.push({
+                    label: '""',
                     kind: monaco.languages.CompletionItemKind.Value,
-                    insertText: 'false',
+                    insertText: '""',
                     range,
-                    documentation: 'Boolean false value',
-                  }
-                );
-              } else if (
-                paramName.includes('size') ||
-                paramName.includes('count') ||
-                paramName.includes('limit')
-              ) {
-                valueSuggestions.push({
-                  label: '10',
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: '10',
-                  range,
-                  documentation: 'Numeric value',
-                });
-              } else if (lineUpToCursor.match(/:\s*$/)) {
-                // Generic string placeholder only if the value is still empty
-                valueSuggestions.push({
-                  label: '""',
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: '""',
-                  range,
-                  documentation: 'String value',
-                  command: {
-                    id: 'cursorMove',
-                    title: 'Move cursor left',
-                    arguments: ['cursorMove', { to: 'left' }],
-                  },
-                });
+                    documentation: 'String value',
+                    command: {
+                      id: 'cursorMove',
+                      title: 'Move cursor left',
+                      arguments: ['cursorMove', { to: 'left' }],
+                    },
+                  });
+                }
+
+                return {
+                  suggestions: valueSuggestions,
+                  incomplete: false,
+                };
               }
 
+              // If we can't determine a valid parameter name, don't show any suggestions
               return {
-                suggestions: valueSuggestions,
+                suggestions: [],
                 incomplete: false,
               };
-            }
-
-            // If we can't determine a valid parameter name, don't show any suggestions
-            return {
-              suggestions: [],
-              incomplete: false,
-            };
             }
           }
 
