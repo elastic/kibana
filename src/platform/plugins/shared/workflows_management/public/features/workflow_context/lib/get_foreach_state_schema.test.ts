@@ -79,6 +79,6 @@ describe('getForeachStateSchema', () => {
         type: 'foreach',
         name: 'foreach-step',
       })
-    ).toThrow('Foreach configuration must be an array');
+    ).toThrow(/Foreach step must iterate over an array/);
   });
 });
