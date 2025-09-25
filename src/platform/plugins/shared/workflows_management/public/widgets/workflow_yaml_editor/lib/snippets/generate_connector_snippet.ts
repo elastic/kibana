@@ -42,9 +42,7 @@ export function generateConnectorSnippet(
     // No required params, just add empty with block with a placeholder comment
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     parameters = {
-      with: {
-        '': `# Add parameters here. Press ${shortcut} to see all available options`,
-      },
+      with: {},
     };
     // We'll add the comment manually after YAML serialization
   } else {
@@ -99,7 +97,7 @@ export function generateConnectorSnippet(
   if (requiredParams.length === 0) {
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
-    // Replace the empty with block with comment and cursor positioned for parameters
+    // Replace the empty with block with one that has a comment (4 spaces for proper indentation)
     const withComment = yamlString.replace('with: {}', `with:\n    ${comment}\n    $0`);
     return `${connectorType}\n${withComment}`;
   }

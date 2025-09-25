@@ -131,6 +131,9 @@ export const WorkflowYAMLEditor = ({
     services: { http, notifications },
   } = useKibana<CoreStart>();
 
+  // Only show debug features in development
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -1312,59 +1315,61 @@ export const WorkflowYAMLEditor = ({
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {/* Debug: Download Schema Button */}
-          <EuiFlexItem grow={false}>
-            <div
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 6px',
-                color: euiTheme.colors.textSubdued,
-                cursor: 'pointer',
-                borderRadius: euiTheme.border.radius.small,
-                fontSize: '12px',
-                '&:hover': {
-                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                  color: euiTheme.colors.primaryText,
-                },
-              }}
-              onClick={() => {
-                try {
-                  const zodSchema = getWorkflowZodSchema();
-                  const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
-                  
-                  const blob = new Blob([JSON.stringify(jsonSchema, null, 2)], {
-                    type: 'application/json',
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'workflow-schema.json';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                } catch (error) {
-                  // to download schema:', error);
-                  notifications?.toasts.addError(error as Error, {
-                    title: 'Failed to download schema',
-                  });
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              title="Download JSON schema for debugging"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.currentTarget.click();
-                }
-              }}
-            >
-              <EuiIcon type="download" size="s" />
-              <span>Schema</span>
-            </div>
-          </EuiFlexItem>
+          {/* Debug: Download Schema Button - Only show in development */}
+          {isDevelopment && (
+            <EuiFlexItem grow={false}>
+              <div
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 6px',
+                  color: euiTheme.colors.textSubdued,
+                  cursor: 'pointer',
+                  borderRadius: euiTheme.border.radius.small,
+                  fontSize: '12px',
+                  '&:hover': {
+                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    color: euiTheme.colors.primaryText,
+                  },
+                }}
+                onClick={() => {
+                  try {
+                    const zodSchema = getWorkflowZodSchema();
+                    const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
+                    
+                    const blob = new Blob([JSON.stringify(jsonSchema, null, 2)], {
+                      type: 'application/json',
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'workflow-schema.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  } catch (error) {
+                    // to download schema:', error);
+                    notifications?.toasts.addError(error as Error, {
+                      title: 'Failed to download schema',
+                    });
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                title="Download JSON schema for debugging"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                <EuiIcon type="download" size="s" />
+                <span>Schema</span>
+              </div>
+            </EuiFlexItem>
+          )}
           
           {/* Status indicator */}
           <EuiFlexItem grow={false}>
