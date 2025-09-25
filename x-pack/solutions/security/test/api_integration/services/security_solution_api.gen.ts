@@ -74,6 +74,7 @@ import type { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-so
 import type { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
 import type { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import type { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
+import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
@@ -961,6 +962,14 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    entityDetailsHighlights(props: EntityDetailsHighlightsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/api/entity_details/highlights', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     entityStoreGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -2525,6 +2534,9 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

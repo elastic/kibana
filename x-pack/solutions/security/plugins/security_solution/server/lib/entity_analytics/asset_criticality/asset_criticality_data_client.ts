@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslFieldAndFormat,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -121,7 +125,7 @@ export class AssetCriticalityDataClient {
     size?: number;
     from?: number;
     sort?: SearchRequest['sort'];
-    fields?: string[];
+    fields?: (QueryDslFieldAndFormat | string)[];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),

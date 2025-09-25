@@ -17,39 +17,33 @@ import {
   buildVulnerabilityEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import {
-  AnonymizationFieldResponse,
-  getAnonymizedValue,
-  getRawDataOrDefault,
-} from '@kbn/elastic-assistant-common';
+import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
 import { omit } from 'lodash';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
 import { transformRawDataToRecord } from '@kbn/elastic-assistant-common/impl/data_anonymization/transform_raw_data';
 import { flattenObject } from '@kbn/object-utils/src/flatten_object';
+
+import type {
+  QueryDslQueryContainer,
+  QueryDslFieldAndFormat,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { EntityDetailsHighlightsResponse } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
+import { EntityDetailsHighlightsRequestBody } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
 import { getThreshold } from '../../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
-import { type AssetCriticalityGetPrivilegesResponse } from '../../../../../common/api/entity_analytics';
 import { APP_ID, API_VERSIONS, DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createGetRiskScores } from '../../risk_score/get_risk_score';
 import type { IdentifierValuesByField } from '../../asset_criticality';
 import { buildCriticalitiesQuery } from '../../asset_criticality';
-
-export const RouteRequestBody = z.object({
-  entityType: z.string(),
-  entityIdentifier: z.string(),
-  anonymizationFields: z.array(AnonymizationFieldResponse),
-  from: z.number(),
-  to: z.number(),
-});
 
 export const entityDetailsHighlightsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -72,7 +66,7 @@ export const entityDetailsHighlightsRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(RouteRequestBody),
+            body: buildRouteValidationWithZod(EntityDetailsHighlightsRequestBody),
           },
         },
       },
@@ -80,17 +74,17 @@ export const entityDetailsHighlightsRoute = (
         context,
         request,
         response
-      ): Promise<IKibanaResponse<AssetCriticalityGetPrivilegesResponse>> => {
+      ): Promise<IKibanaResponse<EntityDetailsHighlightsResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const entityType: EntityType = request.body.entityType;
-          const entityIdentifier: string = request.body.entityIdentifier;
+          const entityType = request.body.entityType;
+          const entityIdentifier = request.body.entityIdentifier;
           const anonymizationFields = request.body.anonymizationFields;
           const entityField = EntityTypeToIdentifierField[entityType];
           const fromDate = request.body.from;
           const toDate = request.body.to;
 
-          const [coreStart, { security }] = await getStartServices();
+          const [coreStart] = await getStartServices();
           const securitySolution = await context.securitySolution;
           const esClient = coreStart.elasticsearch.client.asInternalUser;
           const spaceId = securitySolution.getSpaceId();
@@ -106,7 +100,7 @@ export const entityDetailsHighlightsRoute = (
 
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
-          const fields = anonymizationFields
+          const fields: QueryDslFieldAndFormat[] = anonymizationFields
             .filter((fieldItem) => fieldItem.allowed)
             .map((fieldItem) => ({
               field: fieldItem.field,
@@ -136,7 +130,7 @@ export const entityDetailsHighlightsRoute = (
           let latestRiskScore: EntityRiskScoreRecord | null = null;
           if (engineStatus.riskEngineStatus === 'ENABLED') {
             const riskScore = await getRiskScore({
-              entityType,
+              entityType: entityType as EntityType,
               entityIdentifier,
               pagination: { querySize: 1, cursorStart: 0 },
             });
@@ -177,14 +171,15 @@ export const entityDetailsHighlightsRoute = (
                 'result.evaluation'
               ),
             },
-            {}
-          ); // second param is rulesStates which is only available inside cloud posture plugin server
+            {} // second param is rulesStates which is only available inside cloud posture plugin server
+          );
 
-          const misconfigurations = await esClient.search<unknown, unknown>({
+          const misconfigurations = await esClient.search({
             ...misconfigurationQuery,
             _source: false,
             fields,
             size: 10,
+            query: misconfigurationQuery.query as QueryDslQueryContainer,
           });
 
           const vulnerabilitiesQuery = getVulnerabilitiesQuery({
@@ -192,8 +187,10 @@ export const entityDetailsHighlightsRoute = (
             enabled: true,
             pageSize: 1,
           });
-          const vulnerabilities = await esClient.search<unknown, unknown>({
+
+          const vulnerabilities = await esClient.search({
             ...vulnerabilitiesQuery,
+            query: misconfigurationQuery.query as QueryDslQueryContainer,
             _source: false,
             fields,
             size: 10,

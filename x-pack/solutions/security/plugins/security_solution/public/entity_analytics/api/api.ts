@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
@@ -449,12 +451,12 @@ export const useEntityAnalyticsRoutes = () => {
       params: {
         entityType: string;
         entityIdentifier: string;
-        anonymizationFields: string[];
+        anonymizationFields: AnonymizationFieldResponse[];
         from: number;
         to: number;
       },
       signal?: AbortSignal
-    ) =>
+    ): Promise<EntityDetailsHighlightsResponse> =>
       http.fetch(ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
