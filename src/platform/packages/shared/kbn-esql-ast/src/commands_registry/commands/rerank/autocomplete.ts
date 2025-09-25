@@ -25,8 +25,12 @@ import {
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+  withCompleteItem,
+  withTriggerSuggestionDialog,
+} from '../../complete_items';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
 export const QUERY_TEXT = 'Your search query' as const;
@@ -169,13 +173,10 @@ async function handleOnFieldList({
       );
 
       return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => {
-        // if there is already a command, we don't want to override it
-        if (suggestion.command) return suggestion;
-        return {
+        return withTriggerSuggestionDialog({
           ...suggestion,
           rangeToReplace,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        };
+        });
       });
     },
     // complete: get next actions suggestions for completed field
@@ -240,12 +241,13 @@ export function buildNextActions(options?: { withSpaces?: boolean }): ISuggestio
     sortText: '01',
   });
 
-  items.push({
-    ...commaCompleteItem,
-    text: commaCompleteItem.text + ' ',
-    sortText: '02',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  });
+  items.push(
+    withTriggerSuggestionDialog({
+      ...commaCompleteItem,
+      text: commaCompleteItem.text + ' ',
+      sortText: '02',
+    })
+  );
 
   items.push({
     ...pipeCompleteItem,

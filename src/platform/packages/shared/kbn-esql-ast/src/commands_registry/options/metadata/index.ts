@@ -9,10 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommandOption, ESQLCommand } from '../../../types';
 import type { ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
+import {
+  commaCompleteItem,
+  pipeCompleteItem,
+  withTriggerSuggestionDialog,
+} from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../ast/is';
 
 export const METADATA_FIELDS = [
@@ -25,7 +28,7 @@ export const METADATA_FIELDS = [
   '_score',
 ];
 
-export const metadataSuggestion: ISuggestionItem = {
+export const metadataSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
@@ -33,8 +36,7 @@ export const metadataSuggestion: ISuggestionItem = {
     defaultMessage: 'Metadata',
   }),
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
 export const getMetadataSuggestions = (command: ESQLCommand, queryText: string) => {
   const metadataNode = command.args.find((arg) => isOptionNode(arg) && arg.name === 'metadata') as
@@ -67,22 +69,22 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
           })),
         (fragment, rangeToReplace) => {
           const _suggestions = [
-            {
+            withTriggerSuggestionDialog({
               ...pipeCompleteItem,
               text: fragment + ' | ',
               filterText: fragment,
-              command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
-            },
+            }),
           ];
           if (filteredMetaFields.length > 1) {
-            _suggestions.push({
-              ...commaCompleteItem,
-              text: fragment + ', ',
-              filterText: fragment,
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            });
+            _suggestions.push(
+              withTriggerSuggestionDialog({
+                ...commaCompleteItem,
+                text: fragment + ', ',
+                filterText: fragment,
+                rangeToReplace,
+              })
+            );
           }
           return _suggestions;
         }

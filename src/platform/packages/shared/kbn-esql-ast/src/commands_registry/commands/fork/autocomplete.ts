@@ -8,11 +8,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
+import {
+  pipeCompleteItem,
+  getCommandAutocompleteDefinitions,
+  withTriggerSuggestionDialog,
+} from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { esqlCommandRegistry } from '../..';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
@@ -89,7 +92,7 @@ export async function autocomplete(
   );
 }
 
-const newBranchSuggestion: ISuggestionItem = {
+const newBranchSuggestion: ISuggestionItem = withTriggerSuggestionDialog({
   kind: 'Issue',
   label: i18n.translate('kbn-esql-ast.esql.suggestions.newBranchLabel', {
     defaultMessage: 'New branch',
@@ -99,8 +102,7 @@ const newBranchSuggestion: ISuggestionItem = {
   }),
   text: '($0)',
   asSnippet: true,
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
 const getActiveBranch = (command: ESQLCommand) => {
   const finalBranch = command.args[command.args.length - 1];

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { withTriggerSuggestionDialog } from '../../complete_items';
 
 export async function autocomplete(
   query: string,
@@ -36,7 +36,7 @@ export async function autocomplete(
 
     if ('STATS'.startsWith(afterInline) && afterInline.length <= 'INLINE'.length) {
       return [
-        {
+        withTriggerSuggestionDialog({
           label: 'STATS',
           text: 'STATS ',
           kind: 'Keyword',
@@ -44,8 +44,7 @@ export async function autocomplete(
             defaultMessage: 'STATS keyword',
           }),
           sortText: 'A',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        },
+        }),
       ];
     }
   }
@@ -55,7 +54,7 @@ export async function autocomplete(
 
   if ('INLINE'.startsWith(trimmedInput) && trimmedInput.length <= 'INLINE'.length) {
     return [
-      {
+      withTriggerSuggestionDialog({
         label: 'INLINE STATS',
         text: 'INLINE STATS ',
         kind: 'Keyword',
@@ -63,8 +62,7 @@ export async function autocomplete(
           defaultMessage: 'INLINE STATS command',
         }),
         sortText: 'A',
-        command: TRIGGER_SUGGESTION_COMMAND,
-      },
+      }),
     ];
   }
 

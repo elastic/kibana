@@ -15,7 +15,7 @@ import {
   getNewUserDefinedColumnSuggestion,
 } from '../../complete_items';
 import { Location } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { withTriggerSuggestionDialog } from '../../complete_items';
 import { getFunctionSuggestions } from '../../../definitions/utils';
 import { isRestartingExpression } from '../../../definitions/utils/shared';
 
@@ -39,8 +39,8 @@ export async function autocomplete(
   // ROW col0 = 23 /
   else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
-      { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
-      { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      withTriggerSuggestionDialog(pipeCompleteItem),
+      withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' }),
     ];
   }
 

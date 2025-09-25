@@ -25,7 +25,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import { withTriggerSuggestionDialog } from '../../commands_registry/complete_items';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
@@ -68,16 +68,18 @@ export const buildFieldsDefinitions = (
   fields: string[],
   openSuggestions = true
 ): ISuggestionItem[] => {
-  return fields.map((label) => ({
-    label,
-    text: getSafeInsertText(label),
-    kind: 'Variable',
-    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fieldDefinition', {
-      defaultMessage: `Field specified by the input table`,
-    }),
-    sortText: 'D',
-    command: openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
-  }));
+  return fields.map((label) => {
+    const suggestion: ISuggestionItem = {
+      label,
+      text: getSafeInsertText(label),
+      kind: 'Variable',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fieldDefinition', {
+        defaultMessage: `Field specified by the input table`,
+      }),
+      sortText: 'D',
+    };
+    return openSuggestions ? withTriggerSuggestionDialog(suggestion) : suggestion;
+  });
 };
 
 export function getFunctionDefinition(name: string) {
@@ -256,7 +258,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
-  return {
+  return withTriggerSuggestionDialog({
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -276,9 +278,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
-    // trigger a suggestion follow up on selection
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
+  });
 }
 
 /**
@@ -399,7 +399,7 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
-    return {
+    const suggestion: ISuggestionItem = {
       label: column.name,
       text:
         getSafeInsertText(column.name) +
@@ -408,9 +408,10 @@ export const buildColumnSuggestions = (
       kind: 'Variable',
       detail: titleCaseType,
       sortText,
-      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
-  }) as ISuggestionItem[];
+
+    return options?.openSuggestions ? withTriggerSuggestionDialog(suggestion) : suggestion;
+  });
 
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {

@@ -14,8 +14,11 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand } from '../../../types';
-import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import {
+  commaCompleteItem,
+  pipeCompleteItem,
+  withTriggerSuggestionDialog,
+} from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
@@ -113,13 +116,14 @@ export async function autocomplete(
         { ...commaCompleteItem, text: ', ' },
         prependSpace(sortModifierSuggestions.NULLS_FIRST),
         prependSpace(sortModifierSuggestions.NULLS_LAST),
-      ].map((suggestion) => ({
-        ...suggestion,
-        filterText: fragment,
-        text: fragment + suggestion.text,
-        rangeToReplace,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      ].map((suggestion) =>
+        withTriggerSuggestionDialog({
+          ...suggestion,
+          filterText: fragment,
+          text: fragment + suggestion.text,
+          rangeToReplace,
+        })
+      );
     }
 
     case 'after_order': {
@@ -128,7 +132,7 @@ export async function autocomplete(
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
         pipeCompleteItem,
-        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+        withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
         rangeToReplace: nullsPrefixRange,
@@ -141,20 +145,18 @@ export async function autocomplete(
       return [
         { ...pipeCompleteItem, text: ' | ' },
         { ...commaCompleteItem, text: ', ' },
-      ].map((suggestion) => ({
-        ...suggestion,
-        filterText: fragment,
-        text: fragment + suggestion.text,
-        rangeToReplace,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      ].map((suggestion) =>
+        withTriggerSuggestionDialog({
+          ...suggestion,
+          filterText: fragment,
+          text: fragment + suggestion.text,
+          rangeToReplace,
+        })
+      );
     }
 
     case 'after_nulls': {
-      return [
-        pipeCompleteItem,
-        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
-      ];
+      return [pipeCompleteItem, withTriggerSuggestionDialog({ ...commaCompleteItem, text: ', ' })];
     }
 
     default: {

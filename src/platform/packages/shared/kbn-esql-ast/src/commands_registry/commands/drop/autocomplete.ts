@@ -16,7 +16,7 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { withTriggerSuggestionDialog } from '../../complete_items';
 
 export async function autocomplete(
   query: string,
@@ -45,12 +45,11 @@ export async function autocomplete(
       return fieldSuggestions.map((suggestion) => {
         // if there is already a command, we don't want to override it
         if (suggestion.command) return suggestion;
-        return {
+        return withTriggerSuggestionDialog({
           ...suggestion,
           text: suggestion.text,
-          command: TRIGGER_SUGGESTION_COMMAND,
           rangeToReplace,
-        };
+        });
       });
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
@@ -58,13 +57,14 @@ export async function autocomplete(
       const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
       if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
-      return finalSuggestions.map<ISuggestionItem>((s) => ({
-        ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
+      return finalSuggestions.map<ISuggestionItem>((s) =>
+        withTriggerSuggestionDialog({
+          ...s,
+          filterText: fragment,
+          text: fragment + s.text,
+          rangeToReplace,
+        })
+      );
     }
   );
 }

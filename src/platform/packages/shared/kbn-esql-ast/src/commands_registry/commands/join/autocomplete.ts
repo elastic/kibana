@@ -14,8 +14,11 @@ import {
 import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+  withTriggerSuggestionDialog,
+} from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';
@@ -53,17 +56,15 @@ export async function autocomplete(
         return [];
       }
 
-      return filteredMnemonics.map(
-        ([mnemonic, description], i) =>
-          ({
-            label: mnemonic,
-            text: mnemonic + ' $0',
-            asSnippet: true,
-            detail: description,
-            kind: 'Keyword',
-            sortText: `${i}-MNEMONIC`,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          } as ISuggestionItem)
+      return filteredMnemonics.map(([mnemonic, description], i) =>
+        withTriggerSuggestionDialog({
+          label: mnemonic,
+          text: mnemonic + ' $0',
+          asSnippet: true,
+          detail: description,
+          kind: 'Keyword',
+          sortText: `${i}-MNEMONIC`,
+        })
       );
     }
 
@@ -106,7 +107,7 @@ export async function autocomplete(
     }
 
     case 'after_index': {
-      const suggestion: ISuggestionItem = {
+      const suggestion: ISuggestionItem = withTriggerSuggestionDialog({
         label: 'ON',
         text: 'ON ',
         detail: i18n.translate('kbn-esql-ast.esql.autocomplete.join.onKeyword', {
@@ -114,8 +115,7 @@ export async function autocomplete(
         }),
         kind: 'Keyword',
         sortText: '0-ON',
-        command: TRIGGER_SUGGESTION_COMMAND,
-      };
+      });
 
       return [suggestion];
     }
