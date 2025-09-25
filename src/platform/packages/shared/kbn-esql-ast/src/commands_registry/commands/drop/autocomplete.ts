@@ -43,8 +43,6 @@ export async function autocomplete(
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>
       return fieldSuggestions.map((suggestion) => {
-        // if there is already a command, we don't want to override it
-        if (suggestion.command) return suggestion;
         return withTriggerSuggestionDialog({
           ...suggestion,
           text: suggestion.text,

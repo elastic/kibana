@@ -180,8 +180,6 @@ export const suggestFields = async (
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // fie<suggest>
       return fieldSuggestions.map((suggestion) => {
-        // if there is already a command, we don't want to override it
-        if (suggestion.command) return suggestion;
         return withTriggerSuggestionDialog({
           ...suggestion,
           text: suggestion.text,
