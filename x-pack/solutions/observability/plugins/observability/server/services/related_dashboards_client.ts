@@ -73,7 +73,7 @@ export class RelatedDashboardsClient {
         ? panel.config.attributes.references
         : undefined;
       if (!references && panel.uid) {
-        references = this.referencedPanelManager.getByIndex(panel.uid)?.references;
+        references = this.referencedPanelManager.getByUid(panel.uid)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -92,7 +92,7 @@ export class RelatedDashboardsClient {
         ? panel.config.attributes.state
         : undefined;
       if (!state && panel.uid) {
-        state = this.referencedPanelManager.getByIndex(panel.uid)?.state;
+        state = this.referencedPanelManager.getByUid(panel.uid)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();

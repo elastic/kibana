@@ -10,10 +10,10 @@ import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from 
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 export class ReferencedPanelManager {
-  // The panelIndex refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
-  // So, if the same saved object panel is referenced in two different dashboards, it will have different panelIndex values in each dashboard, but the same panelId, since they're both referencing the same panel.
+  // The uid refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
+  // So, if the same saved object panel is referenced in two different dashboards, it will have different uid values in each dashboard, but the same panelId, since they're both referencing the same panel.
   private panelsById = new Map<string, ReferencedPanelAttributesWithReferences>();
-  private panelIndexToId = new Map<string, string>();
+  private uidToId = new Map<string, string>();
   private panelsTypeById = new Map<string, string>();
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
@@ -40,8 +40,8 @@ export class ReferencedPanelManager {
     }
   }
 
-  getByIndex(panelIndex: string): ReferencedPanelAttributesWithReferences | undefined {
-    const panelId = this.panelIndexToId.get(panelIndex);
+  getByUid(uid: string): ReferencedPanelAttributesWithReferences | undefined {
+    const panelId = this.uidToId.get(uid);
     return panelId ? this.panelsById.get(panelId) : undefined;
   }
 
@@ -62,14 +62,14 @@ export class ReferencedPanelManager {
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${type} and panelIndex ${uid} was not found in dashboard with id ${dashboard.id}`
+        `Reference for panel of type ${type} and uid ${uid} was not found in dashboard with id ${dashboard.id}`
       );
       return;
     }
 
     const panelId = panelReference.id;
 
-    this.panelIndexToId.set(uid, panelId);
+    this.uidToId.set(uid, panelId);
 
     if (!this.panelsTypeById.has(panelId)) {
       this.panelsTypeById.set(panelId, panel.type);

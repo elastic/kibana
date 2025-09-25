@@ -338,7 +338,7 @@ describe('RelatedDashboardsClient', () => {
     it('should fetch referenced panels when fetching dashboards', async () => {
       const PANEL_SO_ID = 'panelSOId';
       const PANEL_TYPE = 'lens';
-      const PANEL_INDEX = 'panelIndex';
+      const PANEL_UID = 'panelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
       dashboardClient.search.mockResolvedValue({
         contentTypeId: 'dashboard',
@@ -348,9 +348,9 @@ describe('RelatedDashboardsClient', () => {
               id: 'dashboard1',
               attributes: {
                 title: 'Dashboard 1',
-                panels: [{ config: {}, uid: PANEL_INDEX, type: PANEL_TYPE }],
+                panels: [{ config: {}, uid: PANEL_UID, type: PANEL_TYPE }],
               },
-              references: [{ name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID }],
+              references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
             },
           ],
           pagination: { total: 1 },
@@ -367,7 +367,7 @@ describe('RelatedDashboardsClient', () => {
       await client.fetchDashboards({ page: 1 });
       expect(soClientMock.bulkGet).toHaveBeenCalledWith([{ id: PANEL_SO_ID, type: PANEL_TYPE }]);
       // @ts-ignore next-line
-      expect(client.referencedPanelManager.getByIndex(PANEL_INDEX)).toStrictEqual({
+      expect(client.referencedPanelManager.getByUid(PANEL_UID)).toStrictEqual({
         ...PANEL_SO_ATTRIBUTES,
         references: [],
       });
@@ -376,8 +376,8 @@ describe('RelatedDashboardsClient', () => {
     it('should not refetch a referenced panel if it was fetched before', async () => {
       const PANEL_SO_ID = 'panelSOId';
       const PANEL_TYPE = 'lens';
-      const PANEL_INDEX = 'panelIndex';
-      const OTHER_PANEL_INDEX = 'otherPanelIndex';
+      const PANEL_UID = 'panelUid';
+      const OTHER_PANEL_UID = 'otherPanelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
       dashboardClient.search.mockResolvedValue({
         contentTypeId: 'dashboard',
@@ -388,13 +388,13 @@ describe('RelatedDashboardsClient', () => {
               attributes: {
                 title: 'Dashboard 1',
                 panels: [
-                  { config: {}, uid: PANEL_INDEX, type: PANEL_TYPE },
-                  { config: {}, uid: OTHER_PANEL_INDEX, type: PANEL_TYPE },
+                  { config: {}, uid: PANEL_UID, type: PANEL_TYPE },
+                  { config: {}, uid: OTHER_PANEL_UID, type: PANEL_TYPE },
                 ],
               },
               references: [
-                { name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID },
-                { name: OTHER_PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID },
+                { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+                { name: OTHER_PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
               ],
             },
           ],
@@ -412,9 +412,9 @@ describe('RelatedDashboardsClient', () => {
       await client.fetchDashboards({ page: 1 });
       expect(soClientMock.bulkGet).toHaveBeenCalledTimes(1);
       // @ts-ignore next-line
-      expect(client.referencedPanelManager.panelIndexToId.get(OTHER_PANEL_INDEX)).toBe(PANEL_SO_ID);
+      expect(client.referencedPanelManager.panelUidToId.get(OTHER_PANEL_UID)).toBe(PANEL_SO_ID);
       // @ts-ignore next-line
-      expect(client.referencedPanelManager.panelIndexToId.get(PANEL_INDEX)).toBe(PANEL_SO_ID);
+      expect(client.referencedPanelManager.panelUidToId.get(PANEL_UID)).toBe(PANEL_SO_ID);
     });
   });
 
@@ -476,7 +476,7 @@ describe('RelatedDashboardsClient', () => {
     });
 
     it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
-      const PANEL_INDEX = '123';
+      const PANEL_UID = '123';
       const INDEX_ID = 'index1';
 
       // dashboard panel without attributes
@@ -487,16 +487,16 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              uid: PANEL_INDEX,
+              uid: PANEL_UID,
               config: {},
             },
           ],
         },
       } as any);
 
-      // populate fallback map with references for the panelIndex
+      // populate fallback map with references for the panelUid
       // @ts-ignore private field access for testing only
-      client.referencedPanelManager.panelIndexToId.set(PANEL_INDEX, INDEX_ID);
+      client.referencedPanelManager.panelUidToId.set(PANEL_UID, INDEX_ID);
       // @ts-ignore private field access for testing only
       client.referencedPanelManager.panelsById.set(INDEX_ID, {
         references: [{ name: 'indexpattern', id: INDEX_ID, type: 'type' }],
@@ -533,7 +533,7 @@ describe('RelatedDashboardsClient', () => {
     });
 
     it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
-      const PANEL_INDEX = '456';
+      const PANEL_UID = '456';
       const FIELD_NAME = 'field1';
 
       client.dashboardsById.set('dashboardMissingState', {
@@ -543,7 +543,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              uid: PANEL_INDEX,
+              uid: PANEL_UID,
               config: {},
             },
           ],
@@ -551,7 +551,7 @@ describe('RelatedDashboardsClient', () => {
       } as any);
 
       // @ts-ignore private field access for testing only
-      client.referencedPanelManager.panelIndexToId.set(PANEL_INDEX, 'id');
+      client.referencedPanelManager.panelUidToId.set(PANEL_UID, 'id');
       // @ts-ignore private field access for testing only
       client.referencedPanelManager.panelsById.set('id', {
         state: {
