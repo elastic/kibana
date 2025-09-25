@@ -358,6 +358,10 @@ export class AlertsClient<
     return this.legacyAlertsClient.hasReachedAlertLimit();
   }
 
+  public getMaxAlertLimit(): number {
+    return this.legacyAlertsClient.getMaxAlertLimit();
+  }
+
   public checkLimitUsage() {
     return this.legacyAlertsClient.checkLimitUsage();
   }

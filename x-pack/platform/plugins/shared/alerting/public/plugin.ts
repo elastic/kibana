@@ -84,6 +84,7 @@ export interface AlertingUIConfig {
   };
   maintenanceWindow: { enabled: boolean };
 }
+const ALLOWED_MAX_ALERTS = 5000;
 
 export class AlertingPublicPlugin
   implements
@@ -95,7 +96,7 @@ export class AlertingPublicPlugin
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.config = this.initContext.config.get<AlertingUIConfig>();
-    this.maxAlertsPerRun = this.config.rules.run.alerts.max;
+    this.maxAlertsPerRun = Math.min(this.config.rules.run.alerts.max, ALLOWED_MAX_ALERTS);
   }
 
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
