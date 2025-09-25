@@ -222,7 +222,10 @@ describe('SavedObjectTypeRegistry', () => {
           registry.registerType(
             createType({
               name: 'typeAC',
+<<<<<<< HEAD
               namespaceType: 'multiple',
+=======
+>>>>>>> 2c9963254baa (Changes registration logic to ignore rather than throw)
               supportsAccessControl: true,
             })
           );
@@ -232,7 +235,10 @@ describe('SavedObjectTypeRegistry', () => {
           registry.registerType(
             createType({
               name: 'typeNAC',
+<<<<<<< HEAD
               namespaceType: 'multiple',
+=======
+>>>>>>> 2c9963254baa (Changes registration logic to ignore rather than throw)
               supportsAccessControl: false,
             })
           );
@@ -247,6 +253,7 @@ describe('SavedObjectTypeRegistry', () => {
         expect(readback?.supportsAccessControl).toBe(false);
       });
 
+<<<<<<< HEAD
       it('throws when `supportsAccessControl` is true and namespaceType is not multiple or multiple-isolated', () => {
         expect(() => {
           registry.registerType(
@@ -261,6 +268,8 @@ describe('SavedObjectTypeRegistry', () => {
         );
       });
 
+=======
+>>>>>>> 2c9963254baa (Changes registration logic to ignore rather than throw)
       it('overwrites `supportsAccessControl` to false when access control feature is disabled', () => {
         registry.setAccessControlEnabled(false);
 
@@ -268,7 +277,10 @@ describe('SavedObjectTypeRegistry', () => {
           registry.registerType(
             createType({
               name: 'typeAC',
+<<<<<<< HEAD
               namespaceType: 'multiple',
+=======
+>>>>>>> 2c9963254baa (Changes registration logic to ignore rather than throw)
               supportsAccessControl: true,
             })
           );

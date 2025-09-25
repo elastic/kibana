@@ -76,7 +76,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
-    validateType(type, supportsAccessControl);
+    validateType(type);
 
     if (process.env.NODE_ENV !== 'production') {
       deepFreeze(typeWithAccessControl);
@@ -165,10 +165,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = (
-  { name, management, hidden, hiddenFromHttpApis, supportsAccessControl }: SavedObjectsType,
-  accessControlEnabled: boolean
-) => {
+const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -185,12 +182,6 @@ const validateType = (
   if (hidden === true && hiddenFromHttpApis === false) {
     throw new Error(
       `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
-    );
-  }
-
-  if (supportsAccessControl === true && accessControlEnabled === false) {
-    throw new Error(
-      `Type ${name}: 'supportsAccessControl' cannot be 'true' when 'enableAccessControl' is disabled in configuration`
     );
   }
 };
