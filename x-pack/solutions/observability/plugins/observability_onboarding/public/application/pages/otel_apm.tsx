@@ -35,7 +35,7 @@ export const OtelApmPage = () => {
             'xpack.observability_onboarding.onboarding.otelApmQuickstartFlow.customHeader.otel.description',
             {
               defaultMessage:
-                'Follow these steps to instrument your application or service using the OpenTelemetry SDK to collect distributed traces, logs, and metrics.',
+                'Instrument your applications to send traces, logs, and metrics directly to Elastic’s managed OTLP endpoint.',
             }
           )}
           isTechnicalPreview={!isServerless}

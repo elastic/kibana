@@ -300,7 +300,7 @@ export function useCustomCards(
       description: i18n.translate(
         'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelDescription',
         {
-          defaultMessage: 'Collect distributed traces with OpenTelemetry',
+          defaultMessage: 'Monitor your applications with OpenTelemetry SDK',
         }
       ),
       name: 'otel',

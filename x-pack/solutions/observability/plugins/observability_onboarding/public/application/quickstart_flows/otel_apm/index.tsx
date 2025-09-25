@@ -74,21 +74,33 @@ export function OtelApmQuickstartFlow() {
           title={i18n.translate(
             'xpack.observability_onboarding.otelApmQuickstartFlow.euiCallOut.calloutTitleLabel',
             {
-              defaultMessage:
-                'This is a Tech Preview feature and should not be used in production.',
+              defaultMessage: 'Managed OTLP Endpoint is in Tech Preview for Elastic Cloud Hosted',
             }
           )}
           iconType="info"
           color="warning"
         >
           <p>
-            {i18n.translate(
-              'xpack.observability_onboarding.otelApmQuickstartFlow.p.descriptionTextGoesHereLabel',
-              {
-                defaultMessage:
-                  'For more details on how data is stored and how it compares to previous OpenTelemetry functionality, refer to Comparison between mOTLP and APM Server.',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.observability_onboarding.otelApmQuickstartFlow.p.descriptionTextGoesHereLabel"
+              defaultMessage="Managed OTLP Endpoint should not be used in production yet for Elastic Cloud Hosted deployments. For more details, refer to the {motlpDocumentation}."
+              values={{
+                motlpDocumentation: (
+                  <EuiLink
+                    data-test-subj="apmCreateOpenTelemetryAgentInstructionsMOTLPDocsLink"
+                    target="_blank"
+                    href="https://www.elastic.co/docs/reference/opentelemetry/motlp"
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.otelApmQuickstartFlow.motlpDocumentationLinkLabel',
+                      {
+                        defaultMessage: 'Managed OTLP Endpoint documentation',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiCallOut>
       )}
@@ -163,7 +175,7 @@ export function OtelApmQuickstartFlow() {
                       label: i18n.translate(
                         'xpack.observability_onboarding.otelApm.servicesLabel',
                         {
-                          defaultMessage: 'Open Services Inventory',
+                          defaultMessage: 'Open Service Inventory',
                         }
                       ),
                       href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
@@ -196,7 +208,7 @@ function InstallSDKInstructions() {
     <EuiText>
       <FormattedMessage
         id="xpack.observability_onboarding.otelApm.download.textPre"
-        defaultMessage="For guidance on downloading and getting started, refer to the {edotDocLink} for your language:"
+        defaultMessage="To download and install the SDK, refer to the {edotDocLink} for your language:"
         values={{
           edotDocLink: (
             <EuiLink
@@ -205,7 +217,7 @@ function InstallSDKInstructions() {
               href="http://ela.st/edot-sdks"
             >
               {i18n.translate('xpack.observability_onboarding.otelApm.EDOTDocumentationLinkLabel', {
-                defaultMessage: 'Elastic Distribution of OpenTelemetry Documentation',
+                defaultMessage: 'Elastic Distribution of OpenTelemetry documentation',
               })}
             </EuiLink>
           ),
