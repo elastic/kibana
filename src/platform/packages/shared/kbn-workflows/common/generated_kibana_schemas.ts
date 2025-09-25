@@ -2,7 +2,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
- * Generated at: 2025-09-25T11:02:38.328Z
+ * Generated at: 2025-09-25T13:34:44.389Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
  * 
  * To regenerate: npm run generate:kibana-connectors

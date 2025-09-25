@@ -3,7 +3,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-09-25T11:02:39.840Z
+ * Generated at: 2025-09-25T13:34:47.289Z
  * Source: Kibana OpenAPI spec (459 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
@@ -12,7 +12,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';
+import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';
 // Import schemas from generated schemas file
 import {
   post_actions_connector_id_Body,

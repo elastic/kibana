@@ -662,7 +662,7 @@ function generateElasticsearchConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';
+import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

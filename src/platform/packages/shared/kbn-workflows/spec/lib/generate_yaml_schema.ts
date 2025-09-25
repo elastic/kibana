@@ -77,6 +77,7 @@ function createRecursiveStepSchema(
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
+    
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
