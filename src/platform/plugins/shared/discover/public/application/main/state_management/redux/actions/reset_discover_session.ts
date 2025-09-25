@@ -77,6 +77,8 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     const selectedTab = allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId) ?? allTabs[0];
 
-    await dispatch(updateTabs({ items: allTabs, selectedItem: selectedTab }));
+    await dispatch(
+      updateTabs({ items: allTabs, selectedItem: selectedTab, updatedDiscoverSession })
+    );
   }
 );
