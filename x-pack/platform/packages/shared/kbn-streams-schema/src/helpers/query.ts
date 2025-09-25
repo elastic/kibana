@@ -14,20 +14,38 @@ export const buildEsqlQuery = (
   query: StreamQuery,
   includeMetadata: boolean = false
 ): string => {
-  const metadata = includeMetadata ? ' METADATA _id, _source' : '';
   const fromCommand = Builder.command({
     name: 'from',
     args: [
-      Builder.expression.literal.string(`${indices.join(',')}${metadata}`, { unquoted: true }),
+      Builder.expression.source.index(indices.join(',')),
+      ...(includeMetadata
+        ? [
+            Builder.option({
+              name: 'METADATA',
+              args: [
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: '_id' })],
+                }),
+                Builder.expression.column({
+                  args: [Builder.identifier('_source')],
+                }),
+              ],
+            }),
+          ]
+        : []),
     ],
   });
 
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(query.kql.query),
+  ]);
+
   const whereCondition = query.system
     ? Builder.expression.func.binary('and', [
-        Builder.expression.func.call('KQL', [Builder.expression.literal.string(query.kql.query)]),
+        kqlQuery,
         Builder.expression.literal.string(conditionToESQL(query.system.filter), { unquoted: true }),
       ])
-    : Builder.expression.func.call('KQL', [Builder.expression.literal.string(query.kql.query)]);
+    : kqlQuery;
 
   const whereCommand = Builder.command({
     name: 'where',
