@@ -66,7 +66,6 @@ export const AISettings: React.FC = () => {
           dataViews={dataViews}
           onTabChange={onTabChange}
           currentTab={currentTab}
-          settings={settings}
         />
       </DefaultAiConnectorSettingsContextProvider>
     </AssistantSpaceIdProvider>
