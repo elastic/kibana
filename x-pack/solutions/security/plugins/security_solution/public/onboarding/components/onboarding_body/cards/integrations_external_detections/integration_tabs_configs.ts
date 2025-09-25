@@ -14,13 +14,12 @@ export const INTEGRATION_TABS: Tab[] = [
     category: '',
     id: IntegrationTabId.recommendedSearchAILake,
     label: 'Recommended',
-    overflow: 'hidden',
+    overflow: 'scroll',
     showSearchTools: false,
     // Fleet has a default sorting for integrations by category that Security Solution does not want to apply
     // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardIds
     sortByFeaturedIntegrations: false,
     featuredCardIds: FEATURED_INTEGRATION_SORT_ORDER,
     height: `${INTEGRATION_CARD_HEIGHT * 1.8}px`,
-    overflow: 'scroll',
   },
 ];
