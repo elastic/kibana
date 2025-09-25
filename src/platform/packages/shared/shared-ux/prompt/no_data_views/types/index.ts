@@ -8,6 +8,7 @@
  */
 
 import type { EuiEmptyPromptProps } from '@elastic/eui';
+import type { PanelColor } from '@elastic/eui/src/components/panel/panel';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 
 /**
