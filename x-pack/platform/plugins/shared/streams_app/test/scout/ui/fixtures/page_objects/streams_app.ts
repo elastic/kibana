@@ -437,7 +437,7 @@ export class StreamsApp {
   }
 
   async fillCondition(field: string, operator: string, value: string) {
-    await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
+    await this.fillConditionFieldInput(field);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
     await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
   }
@@ -494,6 +494,10 @@ export class StreamsApp {
 
   getDataSourcesListItems() {
     return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
+  }
+
+  async confirmChangesInReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
   /**

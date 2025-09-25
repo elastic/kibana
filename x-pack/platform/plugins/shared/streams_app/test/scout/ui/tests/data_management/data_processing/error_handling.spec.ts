@@ -47,6 +47,7 @@ test.describe(
       });
 
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
@@ -73,6 +74,7 @@ test.describe(
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
       await pageObjects.streams.closeToasts();
 
       // Edit the processor
