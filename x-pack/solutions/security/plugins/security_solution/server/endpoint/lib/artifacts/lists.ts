@@ -186,19 +186,20 @@ export function translateToEndpointExceptions(
 
           storeUniqueItem(translatedItem);
         });
-      } else if ((
-        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
-        entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
-        isProcessDescendantsEnabled(entry)) || ( // TODO: may need to remove this
-        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
-        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
-        isProcessDescendantsEnabled(entry))
+      } else if (
+        (experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
+          entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
+          isProcessDescendantsEnabled(entry)) || // TODO: may need to remove this
+        (experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+          entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+          isProcessDescendantsEnabled(entry))
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
         storeUniqueItem(translatedItem);
-      } else if ((experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
-        isProcessDescendantsEnabled(entry))
+        isProcessDescendantsEnabled(entry)
       ) {
         const translatedItem = translateProcessDescendantTrustedApp(schemaVersion, entry);
         storeUniqueItem(translatedItem);
