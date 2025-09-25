@@ -59,4 +59,22 @@ describe('various dynamic query construction scenarios', () => {
 
     expect(query.print()).toBe('FROM index | WHERE `first`.name == "John"');
   });
+
+  test('Milton example', () => {
+    // Dynamic inputs
+    const indices = ['index1', 'index2'];
+    const includeMetadata = true;
+    const kqlQuery = 'foo: bar';
+    const system = { filter: 'foo < 42' };
+
+    // Query construction
+    const query = esql.from(indices, includeMetadata ? ['_id', '_source'] : []);
+    let filter = esql.exp`KQL(${kqlQuery})`;
+    if (system) filter = esql.exp`${filter} AND ${esql.exp(system.filter)}`;
+    query.pipe`WHERE ${filter}`;
+
+    expect(query.print('basic')).toBe(
+      'FROM index1, index2 METADATA _id, _source | WHERE KQL("foo: bar") AND foo < 42'
+    );
+  });
 });
