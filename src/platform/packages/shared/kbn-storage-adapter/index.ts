@@ -30,6 +30,8 @@ export interface StorageSchema {
 }
 
 interface StorageSettingsBase {
+  /** a number > 0 */
+  version: number;
   schema: StorageSchema;
 }
 

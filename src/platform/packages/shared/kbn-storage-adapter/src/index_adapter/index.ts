@@ -38,7 +38,6 @@ import type {
   StorageClientCleanResponse,
   InternalIStorageClient,
 } from '../..';
-import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
 
 function getAliasName(name: string) {
@@ -129,8 +128,12 @@ export class StorageIndexAdapter<
     return getAliasName(this.storage.name);
   }
 
+  private getSchemaVersion(): { version: number } {
+    return { version: this.storage.version };
+  }
+
   private async createOrUpdateIndexTemplate(): Promise<void> {
-    const version = getSchemaVersion(this.storage);
+    const { version } = this.getSchemaVersion();
 
     const template: IndicesPutIndexTemplateIndexTemplateMapping = {
       mappings: {
@@ -247,6 +250,14 @@ export class StorageIndexAdapter<
     });
 
     if (simulateIndexTemplateResponse.template.mappings) {
+      this.logger.debug(
+        () =>
+          `Updating mappings of index ${name}: ${JSON.stringify(
+            simulateIndexTemplateResponse.template.mappings,
+            null,
+            2
+          )}`
+      );
       await this.esClient.indices.putMapping({
         index: name,
         ...simulateIndexTemplateResponse.template.mappings,
@@ -262,14 +273,25 @@ export class StorageIndexAdapter<
    * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    const expectedSchemaVersion = getSchemaVersion(this.storage);
+    const { version: expectedSchemaVersion } = this.getSchemaVersion();
     await this.createOrUpdateIndexTemplate();
 
     const writeIndex = await this.getCurrentWriteIndex();
+    this.logger.debug(
+      () =>
+        `expected version: ${expectedSchemaVersion}, writeIndex: ${JSON.stringify(
+          writeIndex,
+          null,
+          2
+        )}`
+    );
     if (!writeIndex) {
       this.logger.debug(`Creating index`);
       await this.createIndex();
-    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
+    } else if (
+      typeof writeIndex.state.mappings?._meta?.version !== 'number' ||
+      writeIndex.state.mappings._meta.version < expectedSchemaVersion
+    ) {
       this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
       await this.updateMappingsOfExistingIndex({
         name: writeIndex.name,

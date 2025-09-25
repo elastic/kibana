@@ -16,7 +16,6 @@ import type {
 } from '../../..';
 import { StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { Logger } from '@kbn/core/server';
-import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
@@ -40,11 +39,11 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
 describe('StorageIndexAdapter', () => {
   let esServer: TestElasticsearchUtils;
   let esClient: Client;
-
   let loggerMock: jest.Mocked<Logger>;
 
   const storageSettings = {
     name: TEST_INDEX_NAME,
+    version: 1,
     schema: {
       properties: {
         foo: {
@@ -53,11 +52,12 @@ describe('StorageIndexAdapter', () => {
       },
     },
   } satisfies StorageSettings;
-
   let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
   let client: SimpleIStorageClient<typeof storageSettings>;
+
   beforeAll(async () => {
     await createServers();
+    resetAdapterClient();
   });
 
   afterAll(async () => {
@@ -316,19 +316,24 @@ describe('StorageIndexAdapter', () => {
   });
 
   describe('when writing/bootstrapping with an legacy index', () => {
+    const storageSettingsV2 = {
+      ...storageSettings,
+      version: 2,
+    } satisfies StorageSettings;
+
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
-
-      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
-
+      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsV2).getClient();
       await client.index({ id: 'foo', document: { foo: 'bar' } });
     });
 
     afterAll(async () => {
       await client?.clean();
+      resetAdapterClient();
     });
+
     it('updates the existing write index in place', async () => {
-      await verifyIndex({ version: 'next_version' });
+      await verifyIndex({ version: 2 });
 
       const getIndicesResponse = await esClient.indices.get({
         index: TEST_INDEX_NAME,
@@ -340,7 +345,7 @@ describe('StorageIndexAdapter', () => {
 
       expect(indices).toEqual([writeIndexName]);
 
-      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual(2);
     });
 
     it('deletes the documents', async () => {
@@ -351,10 +356,6 @@ describe('StorageIndexAdapter', () => {
   describe('when writing/bootstrapping with an existing, incompatible index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
-
-      jest
-        .spyOn(getSchemaVersionModule, 'getSchemaVersion')
-        .mockReturnValue('incompatible_version');
     });
 
     afterAll(async () => {
@@ -364,6 +365,7 @@ describe('StorageIndexAdapter', () => {
     it('fails when indexing', async () => {
       const incompatibleAdapter = createStorageIndexAdapter({
         ...storageSettings,
+        version: 2,
         schema: {
           properties: {
             foo: {
@@ -395,6 +397,11 @@ describe('StorageIndexAdapter', () => {
     return new StorageIndexAdapter(esClient, loggerMock, settings, options);
   }
 
+  function resetAdapterClient() {
+    adapter = createStorageIndexAdapter(storageSettings);
+    client = adapter.getClient();
+  }
+
   async function createServers() {
     const { startES } = createTestServers({
       adjustTimeout: jest.setTimeout,
@@ -409,11 +416,8 @@ describe('StorageIndexAdapter', () => {
 
     esServer = await startES();
 
-    jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
     esClient = esServer.es.getClient();
     loggerMock = createLoggerMock();
-    adapter = createStorageIndexAdapter(storageSettings);
-    client = adapter.getClient();
   }
 
   async function stopServers() {
@@ -448,8 +452,8 @@ describe('StorageIndexAdapter', () => {
     expect(getIndexResponse).toEqual({});
   }
 
-  async function verifyIndex(options: { writeIndexName?: string; version?: string } = {}) {
-    const { writeIndexName = `${TEST_INDEX_NAME}-000001`, version = 'current_version' } = options;
+  async function verifyIndex(options: { writeIndexName?: string; version?: number } = {}) {
+    const { writeIndexName = `${TEST_INDEX_NAME}-000001`, version = 1 } = options;
 
     const getIndexResponse = await esClient.indices
       .get({
