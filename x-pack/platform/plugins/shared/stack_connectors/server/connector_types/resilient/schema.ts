@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -25,14 +26,43 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
+const CommonIncidentAttributes = {
+  name: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+  severityCode: schema.nullable(schema.number()),
+  additionalFields: schema.nullable(
+    schema.recordOf(
+      schema.string({
+        validate: (value) => validateOtherFieldsKeys(value),
+      }),
+      schema.any(),
+      {
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: 200,
+            fieldName: 'additionalFields',
+          }),
+      }
+    )
+  ),
+};
+
+export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
+
+const validateOtherFieldsKeys = (key: string): string | undefined => {
+  return validateKeysAllowed({
+    key,
+    disallowList: commonIncidentSchemaObjectProperties,
+    fieldName: 'additionalFields',
+  });
+};
+
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
-    name: schema.string(),
-    description: schema.nullable(schema.string()),
-    externalId: schema.nullable(schema.string()),
-    incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-    severityCode: schema.nullable(schema.number()),
-    additionalFields: schema.nullable(schema.string()),
+    ...CommonIncidentAttributes,
   }),
   comments: schema.nullable(
     schema.arrayOf(
@@ -49,7 +79,22 @@ export const PushToServiceIncidentSchema = {
   description: schema.nullable(schema.string()),
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.number()),
-  additionalFields: schema.nullable(schema.recordOf(schema.string(), schema.any())),
+  additionalFields: schema.nullable(
+    schema.recordOf(
+      schema.string({
+        validate: (value) => validateOtherFieldsKeys(value),
+      }),
+      schema.any(),
+      {
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: 200,
+            fieldName: 'additionalFields',
+          }),
+      }
+    )
+  ),
 };
 
 // Reserved for future implementation

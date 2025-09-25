@@ -204,7 +204,7 @@ describe('IBM Resilient connector', () => {
 
     it('should call request with correct arguments', async () => {
       await connector.createIncident(
-        { ...incidentMock, additionalFields: '{"test_field":"testing"}' },
+        { ...incidentMock, additionalFields: { test_field: 'testing' } },
         connectorUsageCollector
       );
 
@@ -295,7 +295,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc_updated',
             incidentTypes: [1001],
             severityCode: 5,
-            additionalFields: '{"customField1":"customValue1"}',
+            additionalFields: { customField1: 'customValue1' },
           },
         },
         connectorUsageCollector
