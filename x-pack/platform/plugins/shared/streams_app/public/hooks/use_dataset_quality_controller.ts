@@ -105,6 +105,7 @@ export const useDatasetQualityController = (
     saveStateInUrl,
     timeState.timeRange.from,
     timeState.timeRange.to,
+    setTime,
   ]);
 
   return controller;
