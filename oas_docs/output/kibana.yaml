@@ -46247,7 +46247,7 @@ paths:
       operationId: put-logstash-pipeline
       parameters:
         - description: |
-            An identifier for the pipeline. Pipeline ID must begin with a letter or underscore and can contain only letters, underscores, dashes, hyphens and numbers.
+            An identifier for the pipeline. Pipeline ID must begin with a letter or underscore and can contain only letters, underscores, dashes, hyphens, and numbers.
           in: path
           name: id
           required: true
