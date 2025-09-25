@@ -44,7 +44,8 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
     const { euiTheme } = useEuiTheme();
     const { services } = useKibana();
     const maxUsersAllowed =
-      services.config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+      services.config?.entityAnalytics?.monitoring?.privileges?.users?.maxPrivilegedUsersAllowed ??
+      10000;
 
     const listStyle = css`
       list-style-type: disc;

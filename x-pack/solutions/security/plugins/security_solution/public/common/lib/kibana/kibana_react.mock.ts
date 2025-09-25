@@ -153,21 +153,6 @@ export const createStartServicesMock = (
     ...core,
     ...contractStartServicesMock,
     configSettings: getDefaultConfigSettings(),
-    config: {
-      entityAnalytics: {
-        monitoring: {
-          privileges: {
-            users: {
-              maxPrivilegedUsersAllowed: 10000,
-              csvUpload: {
-                errorRetries: 3,
-                maxBulkRequestBodySizeBytes: 10_485_760,
-              },
-            },
-          },
-        },
-      },
-    },
     apm,
     cases,
     unifiedSearch,
