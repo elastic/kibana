@@ -12,7 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/unified-histogram",
-    "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/esql-ast",
     "@kbn/shared-ux-button-toolbar",
