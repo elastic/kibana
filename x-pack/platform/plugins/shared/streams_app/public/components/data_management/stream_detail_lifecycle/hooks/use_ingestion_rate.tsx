@@ -84,9 +84,11 @@ export const useIngestionRate = ({
         data.search.search<
           IKibanaSearchRequest,
           IKibanaSearchResponse<{
-            aggregations: {
-              sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
-            };
+            aggregations:
+              | {
+                  sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
+                }
+              | undefined;
           }>
         >(
           {
@@ -133,6 +135,10 @@ export const useIngestionRate = ({
           { abortSignal: signal }
         )
       );
+
+      if (!aggregations || aggregations.sampler.docs_count.buckets.length === 0) {
+        return { start, end, interval, buckets: {} };
+      }
 
       return {
         start,
@@ -202,17 +208,19 @@ export const useIngestionRatePerTier = ({
         data.search.search<
           IKibanaSearchRequest,
           IKibanaSearchResponse<{
-            aggregations: {
-              sampler: {
-                docs_count: {
-                  buckets: Array<{
-                    key: number;
-                    doc_count: number;
-                    indices: { buckets: Array<{ key: string; doc_count: number }> };
-                  }>;
-                };
-              };
-            };
+            aggregations:
+              | {
+                  sampler: {
+                    docs_count: {
+                      buckets: Array<{
+                        key: number;
+                        doc_count: number;
+                        indices: { buckets: Array<{ key: string; doc_count: number }> };
+                      }>;
+                    };
+                  };
+                }
+              | undefined;
           }>
         >(
           {
@@ -256,7 +264,7 @@ export const useIngestionRatePerTier = ({
         )
       );
 
-      if (aggregations.sampler.docs_count.buckets.length === 0) {
+      if (!aggregations || aggregations.sampler.docs_count.buckets.length === 0) {
         return { start, end, interval, buckets: {} };
       }
 
