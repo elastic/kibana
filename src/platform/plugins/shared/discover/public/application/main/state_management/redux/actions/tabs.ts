@@ -17,7 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { TabState, TabsStateTransition } from '../types';
-import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
+import { selectAllTabs, selectRecentlyClosedTabs, selectTab, selectOpenTab } from '../selectors';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -140,7 +140,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
-      const existingTab = selectTab(currentState, item.id);
+      const existingTab = selectOpenTab(currentState, item.id);
 
       const tab: TabState = {
         ...DEFAULT_TAB_STATE,
@@ -309,7 +309,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
   async function initializeTabsThunkFn(
     {
       discoverSessionId,
-      shouldClearAllTabs,
+      shouldClearAllTabs: originalShouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     {
       dispatch,
@@ -321,11 +321,16 @@ export const initializeTabs = createInternalStateAsyncThunk(
     const {
       userId: existingUserId,
       spaceId: existingSpaceId,
+      persistedDiscoverSession: currentPersistedDiscoverSession,
       tabs: { unsafeCurrentId, transitioningFromTo },
     } = currentState;
+    const shouldClearAllTabs =
+      originalShouldClearAllTabs ??
+      Boolean(discoverSessionId && discoverSessionId !== currentPersistedDiscoverSession?.id);
 
     // console.log('initializeTabs called with:', {
     //   discoverSessionId,
+    //   shouldClearAllTabsOriginal: originalShouldClearAllTabs,
     //   shouldClearAllTabs,
     //   existingUserId,
     //   existingSpaceId,

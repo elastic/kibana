@@ -9,9 +9,11 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import type { DiscoverInternalState } from '../types';
-import { TabsBarVisibility } from '../types';
+import { TabsBarVisibility, type TabState } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
+export const selectOpenTab = (state: DiscoverInternalState, tabId: string): TabState | undefined =>
+  state.tabs.allIds.includes(tabId) ? state.tabs.byId[tabId] : undefined;
 
 export const selectAllTabs = createSelector(
   [
