@@ -48,6 +48,13 @@ describe('SettingsTab', () => {
         http: {
           basePath: { prepend: prependMock },
         },
+        notifications:{
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+          },
+        },
         productDocBase: undefined,
       },
     });
