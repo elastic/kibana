@@ -2357,7 +2357,8 @@
                     "description": "The type of tool to create (e.g., esql, index_search).",
                     "enum": [
                       "esql",
-                      "index_search"
+                      "index_search",
+                      "workflow"
                     ],
                     "type": "string"
                   }
