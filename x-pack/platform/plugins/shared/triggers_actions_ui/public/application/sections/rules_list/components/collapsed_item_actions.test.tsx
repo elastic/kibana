@@ -113,10 +113,8 @@ describe('CollapsedItemActions', () => {
 
   describe('when the rule is internally managed', () => {
     beforeAll(async () => {
-      await setup(true, true);
+      await setup(true);
     });
-
-    beforeEach(() => {});
 
     test('render update key action as only item', async () => {
       render(

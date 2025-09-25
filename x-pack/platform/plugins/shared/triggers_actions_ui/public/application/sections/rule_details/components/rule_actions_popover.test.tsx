@@ -166,6 +166,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );

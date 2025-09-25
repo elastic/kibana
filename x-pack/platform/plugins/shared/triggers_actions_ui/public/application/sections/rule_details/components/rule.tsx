@@ -207,7 +207,7 @@ export function RuleComponent({
         <EuiFlexItem grow={2}>
           <RuleStatusPanelWithApi
             rule={rule}
-            isEditable={!readOnly}
+            isEditable={!readOnly && !ruleType.isInternallyManaged}
             healthColor={healthColor}
             statusMessage={statusMessage}
             requestRefresh={requestRefresh}

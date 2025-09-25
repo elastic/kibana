@@ -564,6 +564,26 @@ describe('disable/enable functionality', () => {
 
     expect(actionsElem).toHaveTextContent('Disabled');
   });
+
+  it('should not show the enable/disable button when the rule type is internally managed', async () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType({
+      isInternallyManaged: true,
+    });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    expect(await screen.findByTestId('statusDropdownReadonly')).toBeInTheDocument();
+  });
 });
 
 describe('tabbed content', () => {
@@ -643,6 +663,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     enabledInLicense: true,
     category: 'my-category',
     isExportable: true,
+    isInternallyManaged: false,
     ...overloads,
   };
 }

@@ -146,6 +146,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     enabledInLicense: true,
     category: 'my-category',
     isExportable: true,
+    isInternallyManaged: false,
     ...overloads,
   };
 }

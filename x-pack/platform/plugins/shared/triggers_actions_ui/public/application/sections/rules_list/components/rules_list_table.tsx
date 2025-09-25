@@ -346,7 +346,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
           unsnoozeRule={async () => {}}
           rule={rule}
           onRuleChanged={onRuleChanged}
-          isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
+          isEditable={
+            rule.isEditable &&
+            isRuleTypeEditableInContext(rule.ruleTypeId) &&
+            !rule.isInternallyManaged
+          }
           autoRecoverAlerts={rule.autoRecoverAlerts}
         />
       );
@@ -816,7 +820,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {rule.isEditable ? (
+                  {rule.isEditable && !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
                       <EuiButtonIcon
                         color={'danger'}
