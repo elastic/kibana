@@ -10,8 +10,7 @@
 
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/235995
-test.describe.skip(
+test.describe(
   'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -65,8 +64,11 @@ test.describe.skip(
     test('should handle multiple reorder operations', async ({ pageObjects }) => {
       // Perform drag operations
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
+      await pageObjects.streams.checkDraggingOver();
+
       // Perform another reorder while in reordering state
       await pageObjects.streams.dragRoutingRule('logs.third', -1);
+      await pageObjects.streams.checkDraggingOver();
 
       // Save all changes
       await pageObjects.streams.saveRuleOrder();
