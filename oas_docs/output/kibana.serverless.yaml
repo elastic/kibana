@@ -58019,10 +58019,17 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/streams/{name}/significant_events/_generate:
-    get:
+    post:
       description: 'Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      operationId: get-streams-name-significant-events-generate
+      operationId: post-streams-name-significant-events-generate
       parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
         - in: path
           name: name
           required: true
@@ -58052,14 +58059,152 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
+              additionalProperties: false
+              type: object
+              properties:
+                system:
+                  additionalProperties: false
                   type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+                  properties:
+                    description:
+                      type: string
+                    filter:
+                      anyOf:
+                        - anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                contains:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                endsWith:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                eq:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                field:
+                                  minLength: 1
+                                  type: string
+                                gt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                gte:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                lt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                lte:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                neq:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                range:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    gt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    gte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                startsWith:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                              required:
+                                - field
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                exists:
+                                  type: boolean
+                                field:
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - field
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            and:
+                              items: {}
+                              type: array
+                          required:
+                            - and
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            or:
+                              items: {}
+                              type: array
+                          required:
+                            - or
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            not: {}
+                          required:
+                            - not
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            never:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - never
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            always:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - always
+                    name:
+                      minLength: 1
+                      type: string
+                  required:
+                    - name
+                    - filter
+                    - description
       responses: {}
       summary: Generate significant events
       tags:
