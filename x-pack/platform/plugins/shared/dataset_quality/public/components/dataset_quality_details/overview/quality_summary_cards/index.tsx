@@ -107,6 +107,7 @@ export default function QualitySummaryCards({
             handleDocsTrendChartChange('degraded');
             setSelectedCard('degraded');
           }}
+          isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
