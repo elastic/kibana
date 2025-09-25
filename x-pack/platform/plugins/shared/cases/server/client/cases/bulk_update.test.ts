@@ -914,6 +914,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": "low",
@@ -960,6 +961,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": "low",
