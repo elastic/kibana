@@ -55,7 +55,7 @@ export class MetricsExperiencePlugin
         runDevModeChecks: true,
       });
 
-      coreStart.featureFlags
+      this.metricExperienceEnabled$ = coreStart.featureFlags
         .getBooleanValue$(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false)
         .pipe(takeUntil(this.pluginStop$))
         .subscribe((isMetricsExperienceEnabled) => {
