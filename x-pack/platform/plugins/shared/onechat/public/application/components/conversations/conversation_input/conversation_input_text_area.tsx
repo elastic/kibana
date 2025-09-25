@@ -59,8 +59,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   const disabledPlaceholder = i18n.translate(
     'xpack.onechat.conversationInputForm.disabledPlaceholder',
     {
-      defaultMessage:
-        'The following agent could not be found: {agentId}. Please start a new conversation.',
+      defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
       values: {
         agentId,
       },
