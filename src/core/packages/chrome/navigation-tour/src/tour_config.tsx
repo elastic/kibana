@@ -11,10 +11,10 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
+import { INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
 import type { TourStep } from './types';
 
-// TODO: Update with actual blog post when available
-const newNavBlogPost = 'https://ela.st/new-kibana-navigation';
+const newNavBlogPost = 'https://ela.st/new-nav';
 
 export const tourSteps: TourStep[] = [
   {
@@ -62,6 +62,6 @@ export const tourSteps: TourStep[] = [
       </EuiText>
     ),
     // TODO: Update the target when there is a dedicated data management app
-    target: '[data-test-subj~="projectSideNav"] [data-test-subj*="ingest_and_data"]',
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${INGEST_AND_MANAGE_DATA_NAV_ID}"]`,
   },
 ];

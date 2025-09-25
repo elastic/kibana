@@ -55,9 +55,12 @@ export const useAttackDiscovery = ({
   const {
     http,
     notifications: { toasts },
+    settings,
   } = useKibana().services;
+
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    settings,
   });
 
   // loading boilerplate:

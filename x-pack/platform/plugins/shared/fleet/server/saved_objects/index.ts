@@ -105,6 +105,7 @@ import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
+import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
 
 /*
  * Saved object types and mappings
@@ -916,6 +917,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '21': {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1043,6 +1052,14 @@ export const getSavedObjectTypes = (
                 cloud_connector_id: { type: 'keyword' },
                 supports_cloud_connector: { type: 'boolean' },
               },
+            },
+          ],
+        },
+        '7': {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
             },
           ],
         },

@@ -110,4 +110,27 @@ describe('buildEsqlQuery', () => {
       );
     });
   });
+
+  describe('KQL query escaping (security)', () => {
+    it('should properly escape double quotes in KQL queries', () => {
+      const indices = ['logs.child'];
+      // eslint-disable-next-line prettier/prettier
+      const query = createTestQuery('message: "test \"quoted\" sentence"');
+      const esqlQuery = buildEsqlQuery(indices, query);
+
+      expect(esqlQuery).toBe(
+        'FROM logs.child | WHERE KQL("message: \\"test \\"quoted\\" sentence\\"") AND some.field == "some value"'
+      );
+    });
+
+    it('should properly escape backslashes in KQL queries', () => {
+      const indices = ['logs.child'];
+      const query = createTestQuery('file.path: "C:\\Program Files\\App"');
+      const esqlQuery = buildEsqlQuery(indices, query);
+
+      expect(esqlQuery).toBe(
+        'FROM logs.child | WHERE KQL("file.path: \\"C:\\\\Program Files\\\\App\\"") AND some.field == "some value"'
+      );
+    });
+  });
 });

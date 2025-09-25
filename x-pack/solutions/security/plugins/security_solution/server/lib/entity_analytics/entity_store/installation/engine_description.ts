@@ -25,7 +25,7 @@ import type { EntityEngineInstallationDescriptor } from './types';
 import { merge } from '../../../../../common/utils/objects/merge';
 import { defaultOptions } from '../constants';
 
-const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
+export const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   service: serviceEntityEngineDescription,

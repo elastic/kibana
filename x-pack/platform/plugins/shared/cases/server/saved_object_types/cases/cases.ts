@@ -185,6 +185,9 @@ export const createCaseSavedObjectType = (
           syncAlerts: {
             type: 'boolean',
           },
+          extractObservables: {
+            type: 'boolean',
+          },
         },
       },
       severity: {

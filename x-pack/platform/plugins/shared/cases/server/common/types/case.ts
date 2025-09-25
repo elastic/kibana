@@ -39,7 +39,7 @@ export interface CasePersistedAttributes {
   duration: number | null;
   external_service: ExternalServicePersisted | null;
   owner: string;
-  settings: { syncAlerts: boolean };
+  settings: { syncAlerts: boolean; extractObservables?: boolean };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
   tags: string[];
