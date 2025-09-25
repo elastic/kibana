@@ -9,8 +9,6 @@
 
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
 
 import { EuiPageBody, useEuiTheme } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
@@ -30,17 +28,13 @@ export const ManagementLandingPage = ({
   onAppMounted,
 }: ManagementLandingPageProps) => {
   const { euiTheme } = useEuiTheme();
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart, cloud, licensing } =
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart, cloud, hasEnterpriseLicense } =
     useAppContext();
   setBreadcrumbs();
 
   // Check if cloud services are available
   const isCloudEnabled = cloud?.isCloudEnabled || false;
   const cloudBaseUrl = cloud?.baseUrl;
-
-  // Check license information
-  const license = useObservable(licensing?.license$ ?? of(undefined));
-  const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
 
   useEffect(() => {
     onAppMounted('');
