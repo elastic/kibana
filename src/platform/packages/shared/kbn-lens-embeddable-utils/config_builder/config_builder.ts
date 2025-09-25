@@ -24,6 +24,8 @@ import {
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
 import { isLensLegacyFormat } from './utils';
+import { Filter, Query } from '@kbn/es-query';
+import { filtersToApiFormat, filtersToLensState, queryToApiFormat, queryToLensState } from './transforms/utils';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -97,7 +99,14 @@ export class LensConfigBuilder {
     const chartType = config.type;
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
-      return converter.fromAPItoLensState(config);
+      const attributes = converter.fromAPItoLensState(config);
+      if (config.filters) {
+        attributes.state.filters = filtersToLensState(config.filters);
+      }
+      if (config.query) {
+        attributes.state.query = queryToLensState(config.query);
+      }
+      return attributes;
     }
     throw new Error(`No attributes converter found for chart type: ${chartType}`);
   }
@@ -106,7 +115,11 @@ export class LensConfigBuilder {
     const chartType = config.visualizationType;
     if (chartType === 'lnsMetric') {
       const converter = this.apiConvertersByChart.metric;
-      return converter.fromLensStateToAPI(config);
+      return {
+        ...converter.fromLensStateToAPI(config),
+        filters: filtersToApiFormat(config.state.filters),
+        query: queryToApiFormat(config.state.query as Query),
+      }
     }
     throw new Error(`No API converter found for chart type: ${chartType}`);
   }
