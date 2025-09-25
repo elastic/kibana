@@ -8,7 +8,7 @@
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import { isProcessWithOverrideOption, type SetProcessor } from '../../../../types/processors';
-import { conditionToESQL, literalFromAny } from '../condition_to_esql';
+import { conditionToESQLAst, esqlLiteralFromAny } from '../condition_to_esql';
 
 export function convertSetProcessorToESQL(processor: SetProcessor): ESQLAstCommand[] {
   const setProcessor = processor as SetProcessor;
@@ -26,15 +26,15 @@ export function convertSetProcessorToESQL(processor: SetProcessor): ESQLAstComma
 
   // Param handling
   // Handle `copy_from` if specified, otherwise use literal fron `value`
-  let valueExpression = literalFromAny(setProcessor.value);
+  let valueExpression = esqlLiteralFromAny(setProcessor.value);
   if (setProcessor.copy_from) {
     valueExpression = Builder.expression.column(setProcessor.copy_from);
   }
 
-  const whereExpression = processor.where ? conditionToESQL(processor.where) : null;
+  const whereExpression = processor.where ? conditionToESQLAst(processor.where) : null;
   const overrideExpression =
     isProcessWithOverrideOption(processor) && processor.override === false
-      ? conditionToESQL({ field: processor.to, exists: false })
+      ? conditionToESQLAst({ field: processor.to, exists: false })
       : null;
 
   const mergedWhereExpression =

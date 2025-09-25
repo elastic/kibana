@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem } from '@kbn/esql-ast';
+import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-ast';
 import {
   type Condition,
   isAlwaysCondition,
@@ -15,11 +15,11 @@ import {
   isOrCondition,
 } from '../../../types/conditions';
 
-export function literalFromAny(value: any): ESQLAstItem {
+export function esqlLiteralFromAny(value: any): ESQLAstItem {
   if (Array.isArray(value)) {
     // Let the Builder handle nested structures properly
     return Builder.expression.list.literal({
-      values: value.map((item) => literalFromAny(item)) as any,
+      values: value.map((item) => esqlLiteralFromAny(item)) as any,
     });
   }
 
@@ -41,27 +41,27 @@ export function literalFromAny(value: any): ESQLAstItem {
   return Builder.expression.literal.string(JSON.stringify(value));
 }
 
-export function conditionToESQL(condition: Condition): ESQLAstItem {
+export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
   if (isFilterCondition(condition)) {
     const field = Builder.expression.column(condition.field);
 
     if ('eq' in condition) {
-      return Builder.expression.func.binary('==', [field, literalFromAny(condition.eq)]);
+      return Builder.expression.func.binary('==', [field, esqlLiteralFromAny(condition.eq)]);
     }
     if ('neq' in condition) {
-      return Builder.expression.func.binary('!=', [field, literalFromAny(condition.neq)]);
+      return Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(condition.neq)]);
     }
     if ('gt' in condition) {
-      return Builder.expression.func.binary('>', [field, literalFromAny(condition.gt)]);
+      return Builder.expression.func.binary('>', [field, esqlLiteralFromAny(condition.gt)]);
     }
     if ('gte' in condition) {
-      return Builder.expression.func.binary('>=', [field, literalFromAny(condition.gte)]);
+      return Builder.expression.func.binary('>=', [field, esqlLiteralFromAny(condition.gte)]);
     }
     if ('lt' in condition) {
-      return Builder.expression.func.binary('<', [field, literalFromAny(condition.lt)]);
+      return Builder.expression.func.binary('<', [field, esqlLiteralFromAny(condition.lt)]);
     }
     if ('lte' in condition) {
-      return Builder.expression.func.binary('<=', [field, literalFromAny(condition.lte)]);
+      return Builder.expression.func.binary('<=', [field, esqlLiteralFromAny(condition.lte)]);
     }
     if ('exists' in condition) {
       if (condition.exists === true) {
@@ -73,22 +73,22 @@ export function conditionToESQL(condition: Condition): ESQLAstItem {
       }
     }
     if ('range' in condition && condition.range) {
-      const parts: ESQLAstItem[] = [];
+      const parts: ESQLSingleAstItem[] = [];
       if (condition.range.gt !== undefined)
         parts.push(
-          Builder.expression.func.binary('>', [field, literalFromAny(condition.range.gt)])
+          Builder.expression.func.binary('>', [field, esqlLiteralFromAny(condition.range.gt)])
         );
       if (condition.range.gte !== undefined)
         parts.push(
-          Builder.expression.func.binary('>=', [field, literalFromAny(condition.range.gte)])
+          Builder.expression.func.binary('>=', [field, esqlLiteralFromAny(condition.range.gte)])
         );
       if (condition.range.lt !== undefined)
         parts.push(
-          Builder.expression.func.binary('<', [field, literalFromAny(condition.range.lt)])
+          Builder.expression.func.binary('<', [field, esqlLiteralFromAny(condition.range.lt)])
         );
       if (condition.range.lte !== undefined)
         parts.push(
-          Builder.expression.func.binary('<=', [field, literalFromAny(condition.range.lte)])
+          Builder.expression.func.binary('<=', [field, esqlLiteralFromAny(condition.range.lte)])
         );
 
       if (parts.length === 1) return parts[0];
@@ -113,13 +113,13 @@ export function conditionToESQL(condition: Condition): ESQLAstItem {
       ]);
     }
   } else if (isAndCondition(condition)) {
-    const andConditions = condition.and.map((c) => conditionToESQL(c));
+    const andConditions = condition.and.map((c) => conditionToESQLAst(c));
     return andConditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]));
   } else if (isOrCondition(condition)) {
-    const orConditions = condition.or.map((c) => conditionToESQL(c));
+    const orConditions = condition.or.map((c) => conditionToESQLAst(c));
     return orConditions.reduce((acc, cond) => Builder.expression.func.binary('or', [acc, cond]));
   } else if (isNotCondition(condition)) {
-    const notCondition = conditionToESQL(condition.not);
+    const notCondition = conditionToESQLAst(condition.not);
     return Builder.expression.func.unary('NOT', notCondition);
   } else if (isAlwaysCondition(condition)) {
     return Builder.expression.literal.boolean(true);

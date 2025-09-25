@@ -9,7 +9,7 @@ import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
 import type { DissectProcessor } from '../../../../types/processors';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
-import { conditionToESQL } from '../condition_to_esql';
+import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, castFieldsToString, buildWhereCondition } from './common';
 
 /**
@@ -87,7 +87,7 @@ export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQL
   commands.push(...castFieldsToString(fieldNames));
 
   // Build condition for when DISSECT should execute
-  const dissectCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQL);
+  const dissectCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQLAst);
 
   // Create temporary field name for conditional processing
   // Using CASE, set temporary field to source field if condition passes, empty string otherwise

@@ -8,7 +8,7 @@
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import type { RenameProcessor } from '../../../../types/processors';
-import { conditionToESQL } from '../condition_to_esql';
+import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';
 
 /**
@@ -64,7 +64,7 @@ export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAs
   // Processor's `if` condition is handled here as part of the CASE expression below
 
   if (where) {
-    conditions.push(conditionToESQL(where));
+    conditions.push(conditionToESQLAst(where));
   }
 
   const finalCondition =

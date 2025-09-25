@@ -8,7 +8,7 @@
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import type { AppendProcessor } from '../../../../types/processors';
-import { conditionToESQL, literalFromAny } from '../condition_to_esql';
+import { conditionToESQLAst, esqlLiteralFromAny } from '../condition_to_esql';
 
 export function convertAppendProcessorToESQL(processor: AppendProcessor): ESQLAstCommand[] {
   const {
@@ -18,7 +18,7 @@ export function convertAppendProcessorToESQL(processor: AppendProcessor): ESQLAs
     where,
   } = processor as AppendProcessor;
   const toColumn = Builder.expression.column(to);
-  const appendValueExpression = literalFromAny(value);
+  const appendValueExpression = esqlLiteralFromAny(value);
 
   let appendExpression = Builder.expression.func.call('MV_APPEND', [
     toColumn,
@@ -37,7 +37,7 @@ export function convertAppendProcessorToESQL(processor: AppendProcessor): ESQLAs
   ]);
 
   if (where) {
-    const whereCondition = conditionToESQL(where);
+    const whereCondition = conditionToESQLAst(where);
     appendAssignment = Builder.expression.func.call('CASE', [
       whereCondition,
       appendAssignment,

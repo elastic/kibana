@@ -7,6 +7,7 @@
 
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
 import type {
@@ -73,4 +74,15 @@ export function convertStreamlangDSLToESQLCommands(
 
   const query = Builder.expression.query(esqlAstCommands);
   return BasicPrettyPrinter.multiline(query, { pipeTab: transpilationOptions.pipeTab });
+}
+
+/**
+ * Converts a condition to ES|QL string format using the existing AST approach
+ * @example: { field: "age", range: { gte: 18, lt: 65 } } -> "age >= 18 AND age < 65"
+ */
+export function convertConditionToESQL(
+  condition: Parameters<typeof conditionToESQLAst>[0]
+): string {
+  const ast = conditionToESQLAst(condition);
+  return BasicPrettyPrinter.print(ast);
 }

@@ -9,7 +9,7 @@ import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
-import { conditionToESQL } from '../condition_to_esql';
+import { conditionToESQLAst } from '../condition_to_esql';
 
 export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCommand[] {
   const {
@@ -46,7 +46,7 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
     : coalesceDateParse;
 
   if (where) {
-    const whereCondition = conditionToESQL(where);
+    const whereCondition = conditionToESQLAst(where);
     dateProcessorAssignment = Builder.expression.func.call('CASE', [
       whereCondition,
       dateProcessorAssignment,

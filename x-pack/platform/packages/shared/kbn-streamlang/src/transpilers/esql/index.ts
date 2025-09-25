@@ -10,7 +10,8 @@ import type { BasicPrettyPrinterOptions } from '@kbn/esql-ast';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { streamlangDSLSchema } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
-import { convertStreamlangDSLToESQLCommands } from './conversions';
+import { convertConditionToESQL, convertStreamlangDSLToESQLCommands } from './conversions';
+import type { Condition } from '../../../types/conditions';
 
 const DEFAULT_PIPE_TAB = '  ';
 
@@ -24,6 +25,10 @@ export interface ESQLTranspilationResult {
   query: string;
   commands: string[];
 }
+
+export const conditionToESQL = (condition: Condition): string => {
+  return convertConditionToESQL(condition);
+};
 
 export const transpile = (
   streamlang: StreamlangDSL,
