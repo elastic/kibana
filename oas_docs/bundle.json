@@ -1727,6 +1727,15 @@
                     "description": "The ID of the agent to converse with. Defaults to the default Elastic AI agent.",
                     "type": "string"
                   },
+                  "capabilities": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "visualizations": {
+                        "type": "boolean"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "connector_id": {
                     "description": "Optional connector ID for the agent to use for external integrations.",
                     "type": "string"
@@ -1838,6 +1847,15 @@
                     "default": "elastic-ai-agent",
                     "description": "The ID of the agent to converse with. Defaults to the default Elastic AI agent.",
                     "type": "string"
+                  },
+                  "capabilities": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "visualizations": {
+                        "type": "boolean"
+                      }
+                    },
+                    "type": "object"
                   },
                   "connector_id": {
                     "description": "Optional connector ID for the agent to use for external integrations.",
