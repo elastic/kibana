@@ -500,6 +500,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-field-formats-common @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
