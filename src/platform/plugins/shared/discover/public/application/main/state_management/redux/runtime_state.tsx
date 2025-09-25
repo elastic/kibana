@@ -37,6 +37,7 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
+  migratedToAnotherId?: string;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -93,6 +94,7 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    migratedToAnotherId$: new BehaviorSubject<string | undefined>(undefined),
   };
 };
 

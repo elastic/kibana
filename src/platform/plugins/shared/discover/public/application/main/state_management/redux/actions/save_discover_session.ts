@@ -57,6 +57,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
   ) => {
     const state = getState();
     let nextSelectedTabId = state.tabs.unsafeCurrentId;
+    const previousTabIds: Record<string, string> = {};
     const currentTabs = selectAllTabs(state);
     const adHocDataViews = new Map<
       string,
@@ -103,6 +104,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             nextSelectedTabId = newTabId;
           }
           updatedTab.id = newTabId;
+          previousTabIds[newTabId] = tab.id;
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -227,6 +229,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           updatedDiscoverSession: discoverSession,
           nextSelectedTabId,
           transitioningFromTo,
+          previousTabIds,
         })
       ).unwrap();
     }

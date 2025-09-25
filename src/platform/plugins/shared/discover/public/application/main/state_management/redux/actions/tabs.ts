@@ -16,7 +16,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { type TabState, TabsStateTransition } from '../types';
+import type { TabState, TabsStateTransition } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -65,20 +65,42 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       justRemovedTabs.push(newRecentlyClosedTab);
 
-      dispatch(disconnectTab({ tabId: tab.id }));
-      delete runtimeStateManager.tabs.byId[tab.id];
+      const existingRuntimeState = runtimeStateManager.tabs.byId[tab.id];
+      if (!existingRuntimeState.migratedToAnotherId$.getValue()) {
+        dispatch(disconnectTab({ tabId: tab.id }));
+        delete runtimeStateManager.tabs.byId[tab.id];
+        // console.log(`Deleted runtime state for closed tab ${tab.id}`);
+      } else {
+        // console.log(
+        //   `Did not delete runtime state for closed tab ${
+        //     tab.id
+        //   } as it was migrated to another tab id ${existingRuntimeState.migratedToAnotherId$.getValue()}`
+        // );
+      }
     }
 
     for (const tab of addedTabs) {
-      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
-        profilesManager,
-        ebtManager,
-        initialValues: {
-          unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
-            ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
-            : undefined,
-        },
-      });
+      const existingRuntimeState = runtimeStateManager.tabs.byId[tab.id];
+      if (existingRuntimeState?.migratedToAnotherId$.getValue() === tab.id) {
+        existingRuntimeState.migratedToAnotherId$.next(undefined);
+        // console.log(
+        //   `Re-used runtime state for re-opened tab ${tab.id} that was migrated from another tab`
+        // );
+      } else {
+        runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
+          profilesManager,
+          ebtManager,
+          initialValues: {
+            unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
+              ? selectInitialUnifiedHistogramLayoutPropsMap(
+                  runtimeStateManager,
+                  tab.duplicatedFromId
+                )
+              : undefined,
+          },
+        });
+        // console.log(`Created new runtime state for newly added tab ${tab.id}`);
+      }
     }
 
     const selectedTabRuntimeState = selectTabRuntimeState(
@@ -297,17 +319,25 @@ export const initializeTabs = createInternalStateAsyncThunk(
       tabs: { unsafeCurrentId, transitioningFromTo },
     } = currentState;
 
+    // console.log('initializeTabs called with:', {
+    //   discoverSessionId,
+    //   shouldClearAllTabs,
+    //   existingUserId,
+    //   existingSpaceId,
+    //   unsafeCurrentId,
+    //   transitioningFromTo,
+    // });
+
     if (unsafeCurrentId && transitioningFromTo) {
       // already initialized with the requested discover session via resetDiscoverSession
-
-      if (transitioningFromTo === TabsStateTransition.savingFromNonPersistedToNewPersisted) {
-        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, unsafeCurrentId);
-        const currentTabStateContainer = currentTabRuntimeState?.stateContainer$.getValue();
-        currentTabStateContainer?.appState.updateUrlWithCurrentState();
-      }
+      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, unsafeCurrentId);
+      const currentTabStateContainer = currentTabRuntimeState?.stateContainer$.getValue();
+      currentTabStateContainer?.appState.updateUrlWithCurrentState();
+      // console.log('initializeTabs: already initialized, skipping');
       return null;
     }
 
+    // console.log('initializeTabs: starting initialization');
     dispatch(internalStateSlice.actions.setTabsInitializationStarted());
 
     const getUserId = async () => {
@@ -347,6 +377,12 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    // console.log('initializeTabs: fetched userId, spaceId, persistedDiscoverSession', {
+    //   userId,
+    //   spaceId,
+    //   persistedDiscoverSession,
+    // });
+
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
@@ -370,6 +406,10 @@ export const initializeTabs = createInternalStateAsyncThunk(
         })
       );
     }
+
+    // console.log('initializeTabs: completed setting tabs state', {
+    //   initialTabsState,
+    // });
 
     return { userId, spaceId, persistedDiscoverSession };
   }
