@@ -54,7 +54,6 @@ export const SessionExpirationModal: FunctionComponent<SessionExpirationModalPro
       initialFocus="[data-test-subj=session-expiration-extend-button]"
       role="dialog"
       aria-labelledby="session-expiration-modal-title"
-      aria-describedby="session-expiration-modal-body"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id="session-expiration-modal-title">
@@ -64,7 +63,7 @@ export const SessionExpirationModal: FunctionComponent<SessionExpirationModalPro
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
-      <EuiModalBody id="session-expiration-modal-body">
+      <EuiModalBody>
         <FormattedMessage
           id="xpack.security.sessionExpirationModal.body"
           defaultMessage="You will be logged out {timeout}. Please save your work and log in again."
