@@ -8,10 +8,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
-import { ChatDataRegistryApp } from './components/app';
+import { DataSourcesRegistryApp } from './components/app';
 
 export const renderApp = (mountParameters: AppMountParameters) => {
-  ReactDOM.render(<ChatDataRegistryApp />, mountParameters.element);
+  ReactDOM.render(<DataSourcesRegistryApp />, mountParameters.element);
 
   return () => ReactDOM.unmountComponentAtNode(mountParameters.element);
 };
