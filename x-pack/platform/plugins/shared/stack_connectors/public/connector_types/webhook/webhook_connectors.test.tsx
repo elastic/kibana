@@ -19,10 +19,14 @@ import {
   formDeserializer,
 } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useKibana: jest.fn(),
-  useConnectorContext: jest.fn(),
-}));
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+  return {
+    ...original,
+    useKibana: jest.fn(),
+    useConnectorContext: jest.fn(),
+  };
+});
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
