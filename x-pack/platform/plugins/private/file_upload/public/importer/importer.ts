@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { chunk, intersection } from 'lodash';
+import { chunk, cloneDeep, intersection } from 'lodash';
 import moment from 'moment';
 import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
+  IngestSimulateResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
@@ -250,6 +251,27 @@ export abstract class Importer implements IImporter {
       path: `/internal/file_upload/remove_pipelines/${ids.join(',')}`,
       method: 'DELETE',
       version: '1',
+    });
+  }
+
+  public async previewDocs(
+    data: ArrayBuffer,
+    ingestPipeline: IngestPipeline,
+    limit = 20
+  ): Promise<IngestSimulateResponse> {
+    this.read(data);
+    const pipeline = cloneDeep(ingestPipeline);
+    updatePipelineTimezone(pipeline);
+
+    return await getHttp().fetch<IngestSimulateResponse>({
+      path: `/internal/file_upload/preview_docs`,
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify({
+        // first doc is the header
+        docs: this._docArray.slice(1, limit + 1),
+        pipeline,
+      }),
     });
   }
 }
