@@ -123,7 +123,6 @@ describe('Input package with custom data stream type', () => {
   });
 });
 
-
 describe('OTel input package with custom data stream type', () => {
   beforeEach(() => {
     login();
@@ -191,13 +190,12 @@ describe('OTel input package with custom data stream type', () => {
     cy.request({
       method: 'GET',
       url: `/api/fleet/agent_policies/${agentPolicyId}/full`,
-    }).then(({body}) => {
+    }).then(({ body }) => {
       expect(body.item).to.have.property('processors');
       let routingTransform;
-      console.dir(body.item, {depth: null});
       Object.entries(body.item.processors).forEach(([name, config]) => {
         if (!name.match(/transform\/.*-routing/)) {
-          return
+          return;
         }
         routingTransform = config;
       });
@@ -210,8 +208,8 @@ describe('OTel input package with custom data stream type', () => {
               `set(attributes["data_stream.dataset"], "${datasetName}")`,
               'set(attributes["data_stream.namespace"], "default")',
             ],
-          }
-        ]
+          },
+        ],
       });
     });
   });
