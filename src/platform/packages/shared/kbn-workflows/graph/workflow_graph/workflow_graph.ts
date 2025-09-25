@@ -27,14 +27,16 @@ import { createTypedGraph } from './create_typed_graph';
  * ```
  */
 export class WorkflowGraph {
-  private graph: graphlib.Graph<GraphNodeUnion> | null = null;
+  private graph: graphlib.Graph<GraphNodeUnion>;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
 
+  constructor(graph: graphlib.Graph<GraphNodeUnion>) {
+    this.graph = graph;
+  }
+
   public static fromWorkflowDefinition(workflowDefinition: any): WorkflowGraph {
-    const workflowGraph = new WorkflowGraph();
-    workflowGraph.graph = convertToWorkflowGraph(workflowDefinition);
-    return workflowGraph;
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition));
   }
 
   public get topologicalOrder(): string[] {
@@ -45,7 +47,7 @@ export class WorkflowGraph {
   }
 
   public getNode(nodeId: string): GraphNodeUnion {
-    return this.graph!.node(nodeId);
+    return this.graph.node(nodeId);
   }
 
   public getNodeStack(nodeId: string): string[] {
@@ -65,11 +67,11 @@ export class WorkflowGraph {
   }
 
   public getAllNodes(): GraphNodeUnion[] {
-    return this.graph!.nodes().map((nodeId) => this.graph!.node(nodeId));
+    return this.graph.nodes().map((nodeId) => this.graph.node(nodeId));
   }
 
   public getEdges(): Array<{ v: string; w: string }> {
-    return this.graph!.edges().map((edge) => ({ v: edge.v, w: edge.w }));
+    return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
   public hasStep(stepId: string): boolean {
@@ -110,13 +112,13 @@ export class WorkflowGraph {
 
     // Add all nodes in the range to subgraph
     for (const nodeId of subGraphNodeIds) {
-      subGraph.setNode(nodeId, this.graph!.node(nodeId));
+      subGraph.setNode(nodeId, this.graph.node(nodeId));
     }
 
     // Add edges between nodes that are both in the subgraph
     const nodeIdSet = new Set(subGraphNodeIds);
     for (const nodeId of subGraphNodeIds) {
-      const successors = this.graph!.successors(nodeId) || [];
+      const successors = this.graph.successors(nodeId) || [];
       for (const succId of successors) {
         // Only add edge if both nodes are in the subgraph
         if (nodeIdSet.has(succId)) {
@@ -125,14 +127,12 @@ export class WorkflowGraph {
       }
     }
 
-    const workflowGraph = new WorkflowGraph();
-    workflowGraph.graph = subGraph;
-    return workflowGraph;
+    return new WorkflowGraph(subGraph);
   }
 
   public getDirectSuccessors(nodeId: string): GraphNodeUnion[] {
-    const successors = this.graph!.successors(nodeId) || [];
-    return successors.map((id) => this.graph!.node(id));
+    const successors = this.graph.successors(nodeId) || [];
+    return successors.map((id) => this.graph.node(id));
   }
 
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
@@ -144,12 +144,12 @@ export class WorkflowGraph {
 
       visited.add(predNodeId);
 
-      const preds = this.graph!.predecessors(predNodeId) || [];
+      const preds = this.graph.predecessors(predNodeId) || [];
       preds.forEach((predId) => collectPredecessors(predId));
     };
 
-    const directPredecessors = this.graph!.predecessors(nodeId) || [];
+    const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
-    return Array.from(visited).map((id) => this.graph!.node(id));
+    return Array.from(visited).map((id) => this.graph.node(id));
   }
 }
