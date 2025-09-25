@@ -4,43 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import React from 'react';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { useKibana } from '../../../../hooks/use_kibana';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
-import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
+import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
-export function IngestionRate({
+export function FailureStoreIngestionRate({
   definition,
   stats,
   isLoadingStats,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
+  stats?: FailureStoreStats;
   isLoadingStats: boolean;
 }) {
-  const { isServerless } = useKibana();
   const { timeState } = useTimefilter();
 
   return (
-    <>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={3}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiText>
-                <h5>
-                  {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
-                    defaultMessage: 'Ingestion over time',
-                  })}
-                </h5>
-              </EuiText>
-            </EuiFlexGroup>
+            <EuiText>
+              <h5>
+                {i18n.translate('xpack.streams.failureStoreEnabled.ingestionRatePanel', {
+                  defaultMessage: 'Failure ingestion rate over time',
+                })}
+              </h5>
+            </EuiText>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -58,22 +53,13 @@ export function IngestionRate({
         direction="column"
         gutterSize="xs"
       >
-        {isServerless ? (
-          <ChartBarSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-          />
-        ) : (
-          <ChartBarPhasesSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-          />
-        )}
+        <FailureStoreChartBarSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+        />
       </EuiFlexGroup>
-    </>
+    </EuiPanel>
   );
 }
