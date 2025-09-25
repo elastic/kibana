@@ -22,7 +22,6 @@ export const deleteComponentTemplates = async (
   const logger = appContextService.getLogger();
   if (componentTemplateIds.length) {
     logger.info(`Deleting currently installed component template ids ${componentTemplateIds}`);
-    return;
   }
   await pMap(
     componentTemplateIds,
@@ -43,6 +42,7 @@ async function deleteComponentTemplate(
 ): Promise<void> {
   if (OTEL_COMPONENT_TEMPLATES.includes(name)) {
     logger.info(`Skipping deletion of prebuilt OTEL component template: ${name}`);
+    return;
   }
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
