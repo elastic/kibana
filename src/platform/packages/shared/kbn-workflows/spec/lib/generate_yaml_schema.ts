@@ -34,8 +34,8 @@ export interface ConnectorContract {
 export interface InternalConnectorContract extends ConnectorContract {
   /** HTTP method(s) for this API endpoint */
   methods?: string[];
-  /** Summary for this API endpoint */
-  summary?: string;
+   /** Summary for this API endpoint */
+   summary?: string;
   /** URL pattern(s) for this API endpoint */
   patterns?: string[];
   /** Whether this is an internal connector with hardcoded endpoint details */
@@ -126,36 +126,9 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
     // Apply targeted fixes to make it valid for JSON Schema validators
     return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
   } catch (error) {
-    console.error('Schema generation failed:', error.message);
+    // console.error('Schema generation failed:', error.message);
     throw error; // Don't use fallback - we need to fix the root cause
   }
-}
-
-
-
-function applyMinimalAdditionalPropertiesFix(obj: any, path: string = ''): void {
-  if (typeof obj !== 'object' || obj === null) {
-    return;
-  }
-
-  if (Array.isArray(obj)) {
-    obj.forEach((item, index) => applyMinimalAdditionalPropertiesFix(item, `${path}[${index}]`));
-    return;
-  }
-
-  // Apply additionalProperties: false to connector "with" objects
-  // The schema system already handles type-specific validation, we just need to enforce strictness
-  if (obj.type === 'object' && obj.properties && !('additionalProperties' in obj)) {
-    // Apply to connector "with" objects (they should be strict)
-    if (path.includes('with') && Object.keys(obj.properties).length > 1) {
-      obj.additionalProperties = false;
-    }
-  }
-
-  // Recursively process all properties
-  Object.keys(obj).forEach(key => {
-    applyMinimalAdditionalPropertiesFix(obj[key], path ? `${path}.${key}` : key);
-  });
 }
 
 /**

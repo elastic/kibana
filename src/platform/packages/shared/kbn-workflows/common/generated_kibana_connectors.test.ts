@@ -106,19 +106,19 @@ describe('Generated Kibana Connectors', () => {
           const schema = connector.paramsSchema;
           
           // Helper function to get schema keys from different schema types
-          const getSchemaKeys = (schema: any): string[] => {
-            if ('shape' in schema) {
+          const getSchemaKeys = (schemaParam: any): string[] => {
+            if ('shape' in schemaParam) {
               // ZodObject
-              return Object.keys(schema.shape);
-            } else if ('_def' in schema && schema._def.typeName === 'ZodIntersection') {
+              return Object.keys(schemaParam.shape);
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodIntersection') {
               // ZodIntersection - combine keys from both sides
-              const leftKeys = getSchemaKeys(schema._def.left);
-              const rightKeys = getSchemaKeys(schema._def.right);
+              const leftKeys = getSchemaKeys(schemaParam._def.left);
+              const rightKeys = getSchemaKeys(schemaParam._def.right);
               return [...leftKeys, ...rightKeys];
-            } else if ('_def' in schema && schema._def.typeName === 'ZodUnion') {
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodUnion') {
               // ZodUnion - get keys from all options
               const allKeys = new Set<string>();
-              schema._def.options.forEach((option: any) => {
+              schemaParam._def.options.forEach((option: any) => {
                 getSchemaKeys(option).forEach((key: string) => allKeys.add(key));
               });
               return Array.from(allKeys);
@@ -159,18 +159,18 @@ describe('Generated Kibana Connectors', () => {
           const schema = connector.paramsSchema;
           
           // Helper function to get a parameter schema from different schema types
-          const getParamSchema = (schema: any, paramName: string): any => {
-            if ('shape' in schema) {
+          const getParamSchema = (schemaParam: any, paramName: string): any => {
+            if ('shape' in schemaParam) {
               // ZodObject
-              return schema.shape[paramName];
-            } else if ('_def' in schema && schema._def.typeName === 'ZodIntersection') {
+              return schemaParam.shape[paramName];
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodIntersection') {
               // ZodIntersection - check both sides
-              const leftParam = getParamSchema(schema._def.left, paramName);
-              const rightParam = getParamSchema(schema._def.right, paramName);
+              const leftParam = getParamSchema(schemaParam._def.left, paramName);
+              const rightParam = getParamSchema(schemaParam._def.right, paramName);
               return leftParam || rightParam;
-            } else if ('_def' in schema && schema._def.typeName === 'ZodUnion') {
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodUnion') {
               // ZodUnion - check all options
-              for (const option of schema._def.options) {
+              for (const option of schemaParam._def.options) {
                 const param = getParamSchema(option, paramName);
                 if (param) return param;
               }
@@ -193,18 +193,18 @@ describe('Generated Kibana Connectors', () => {
           const schema = connector.paramsSchema;
           
           // Helper function to get a parameter schema from different schema types
-          const getParamSchema = (schema: any, paramName: string): any => {
-            if ('shape' in schema) {
+          const getParamSchema = (schemaParam: any, paramName: string): any => {
+            if ('shape' in schemaParam) {
               // ZodObject
-              return schema.shape[paramName];
-            } else if ('_def' in schema && schema._def.typeName === 'ZodIntersection') {
+              return schemaParam.shape[paramName];
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodIntersection') {
               // ZodIntersection - check both sides
-              const leftParam = getParamSchema(schema._def.left, paramName);
-              const rightParam = getParamSchema(schema._def.right, paramName);
+              const leftParam = getParamSchema(schemaParam._def.left, paramName);
+              const rightParam = getParamSchema(schemaParam._def.right, paramName);
               return leftParam || rightParam;
-            } else if ('_def' in schema && schema._def.typeName === 'ZodUnion') {
+            } else if ('_def' in schemaParam && schemaParam._def.typeName === 'ZodUnion') {
               // ZodUnion - check all options
-              for (const option of schema._def.options) {
+              for (const option of schemaParam._def.options) {
                 const param = getParamSchema(option, paramName);
                 if (param) return param;
               }
@@ -477,10 +477,10 @@ describe('Generated Kibana Connectors', () => {
       // after fixing the broken $ref paths in the JSON schema
 
       // Import the schema generation function
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
       } = require('../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
@@ -625,10 +625,10 @@ describe('Generated Kibana Connectors', () => {
     it('should prove that additionalProperties: true was replaced with false', () => {
       // This test checks if our regex replacement worked
       // Import the schema generation function
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
       } = require('../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
@@ -680,6 +680,7 @@ describe('Generated Kibana Connectors', () => {
       // This test should catch the real issue: objects inside anyOf (nested in allOf) 
       // still have additionalProperties: false, which prevents caseId from being accepted
       
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { generateYamlSchemaFromConnectors, getJsonSchemaFromYamlSchema } = require('../spec/lib/generate_yaml_schema');
       
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
@@ -694,8 +695,8 @@ describe('Generated Kibana Connectors', () => {
       
       if (addCaseCommentMatch) {
         const connectorDef = addCaseCommentMatch[0];
-        console.log('Connector definition (first 800 chars):');
-        console.log(connectorDef.substring(0, 800));
+        // console.log('Connector definition (first 800 chars):');
+        // console.log(connectorDef.substring(0, 800));
         
         // The real issue: objects inside anyOf (which is inside allOf) still have additionalProperties: false
         // This means the user comment schema rejects caseId, and the alert comment schema rejects caseId
@@ -704,17 +705,17 @@ describe('Generated Kibana Connectors', () => {
                                                       connectorDef.includes('"additionalProperties":false');
         
         if (hasAnyOfWithAdditionalPropertiesFalse) {
-          console.log('❌ Found anyOf with additionalProperties: false - this still causes Monaco validation issues');
-          console.log('The anyOf objects reject caseId because it\'s not in their properties');
+          // console.log('❌ Found anyOf with additionalProperties: false - this still causes Monaco validation issues');
+          // console.log('The anyOf objects reject caseId because it\'s not in their properties');
           
           // This should fail until we fix the nested anyOf issue
           expect(hasAnyOfWithAdditionalPropertiesFalse).toBe(false);
         } else {
-          console.log('✅ No additionalProperties: false found in anyOf - schema should work');
+          // console.log('✅ No additionalProperties: false found in anyOf - schema should work');
           
           // Let's also check the downloaded schema to see if there's a discrepancy
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
           const fs = require('fs');
-          const path = require('path');
           const downloadedSchemaPath = '/Users/shaharglazner/Downloads/nschema.json';
           
           if (fs.existsSync(downloadedSchemaPath)) {
@@ -726,19 +727,19 @@ describe('Generated Kibana Connectors', () => {
               const downloadedHasAnyOfWithAdditionalPropertiesFalse = downloadedConnectorDef.includes('"anyOf"') && 
                                                                       downloadedConnectorDef.includes('"additionalProperties":false');
               
-              console.log('Downloaded schema analysis:');
-              console.log('  Has anyOf with additionalProperties: false:', downloadedHasAnyOfWithAdditionalPropertiesFalse);
+              // console.log('Downloaded schema analysis:');
+              // console.log('  Has anyOf with additionalProperties: false:', downloadedHasAnyOfWithAdditionalPropertiesFalse);
               
               if (downloadedHasAnyOfWithAdditionalPropertiesFalse) {
-                console.log('❌ DISCREPANCY: Downloaded schema still has the issue!');
-                console.log('This explains why Monaco still shows the error.');
-                console.log('The browser is using an older/cached version of the schema.');
+                // console.log('❌ DISCREPANCY: Downloaded schema still has the issue!');
+                // console.log('This explains why Monaco still shows the error.');
+                // console.log('The browser is using an older/cached version of the schema.');
               } else {
-                console.log('✅ Downloaded schema matches our generated schema - both are fixed');
+                // console.log('✅ Downloaded schema matches our generated schema - both are fixed');
               }
             }
           } else {
-            console.log('Downloaded schema file not found at:', downloadedSchemaPath);
+            // console.log('Downloaded schema file not found at:', downloadedSchemaPath);
           }
         }
       }
@@ -748,6 +749,7 @@ describe('Generated Kibana Connectors', () => {
       // This test ensures our generated JSON Schema is structurally valid
       // This is critical for Monaco autocomplete and validation to work properly
       
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { generateYamlSchemaFromConnectors, getJsonSchemaFromYamlSchema } = require('../spec/lib/generate_yaml_schema');
       
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
@@ -755,29 +757,28 @@ describe('Generated Kibana Connectors', () => {
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
       
       // Try to compile the schema with AJV (like Monaco does)
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const Ajv = require('ajv');
       const ajv = new Ajv({ strict: false, validateFormats: false });
       
       let schemaIsValid = false;
-      let compilationError = null;
       
       try {
         ajv.compile(jsonSchema);
         schemaIsValid = true;
-        console.log('✅ JSON Schema compiled successfully - Monaco autocomplete should work');
+        // console.log('✅ JSON Schema compiled successfully - Monaco autocomplete should work');
       } catch (error) {
-        compilationError = error.message;
-        console.log('❌ JSON Schema compilation failed:', error.message);
+        // console.log('❌ JSON Schema compilation failed:', error.message);
         
         // Common issues in generated schemas:
         if (error.message.includes('duplicate items')) {
-          console.log('Issue: Duplicate enum values in the schema');
+          // console.log('Issue: Duplicate enum values in the schema');
         }
         if (error.message.includes('must be array')) {
-          console.log('Issue: Schema structure problems with array definitions');
+          // console.log('Issue: Schema structure problems with array definitions');
         }
         if (error.message.includes('must match a schema in anyOf')) {
-          console.log('Issue: anyOf schema validation problems');
+          // console.log('Issue: anyOf schema validation problems');
         }
       }
       
@@ -785,14 +786,15 @@ describe('Generated Kibana Connectors', () => {
       expect(schemaIsValid).toBe(true);
       
       if (!schemaIsValid) {
-        console.log('🔧 Schema generation produced invalid JSON Schema');
-        console.log('This breaks Monaco autocomplete and validation');
-        console.log('Error:', compilationError);
+        // console.log('🔧 Schema generation produced invalid JSON Schema');
+        // console.log('This breaks Monaco autocomplete and validation');
+        // console.log('Error:', error.message);
       }
     });
 
     it('should prove that the schema is functional and validates properly (no more circular references)', () => {
       // This test proves whether the schema is actually functional or just empty garbage
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { generateYamlSchemaFromConnectors, getJsonSchemaFromYamlSchema } = require('../spec/lib/generate_yaml_schema');
       
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -834,6 +836,7 @@ describe('Generated Kibana Connectors', () => {
         ]
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const Ajv = require('ajv');
       const ajv = new Ajv({ strict: false, validateFormats: false });
       
@@ -842,46 +845,46 @@ describe('Generated Kibana Connectors', () => {
         
         // Test 1: Valid data should pass
         const validResult = validate(testWorkflow);
-        console.log('Valid workflow validation result:', validResult);
+        // console.log('Valid workflow validation result:', validResult);
         
         // Test 2: Invalid data should fail
         const invalidResult = validate(invalidWorkflow);
-        console.log('Invalid workflow validation result:', invalidResult);
+        // console.log('Invalid workflow validation result:', invalidResult);
         
         // Check if validation is working properly
-        console.log('Valid result:', validResult, 'Invalid result:', invalidResult);
+        // console.log('Valid result:', validResult, 'Invalid result:', invalidResult);
         
         if (validResult && invalidResult) {
-          console.log('❌ SCHEMA IS GARBAGE: Both valid and invalid data passed validation!');
+          // console.log('❌ SCHEMA IS GARBAGE: Both valid and invalid data passed validation!');
           expect(false).toBe(true); // Force failure
         } else if (!validResult && !invalidResult) {
-          console.log('⚠️ Both workflows rejected - checking if for different reasons');
-          console.log('Valid workflow errors:', validate.errors);
+          // console.log('⚠️ Both workflows rejected - checking if for different reasons');
+          // console.log('Valid workflow errors:', validate.errors);
           
           // Try invalid workflow to see its errors
           validate(invalidWorkflow);
-          console.log('Invalid workflow errors:', validate.errors);
+          // console.log('Invalid workflow errors:', validate.errors);
           
           // If both are rejected for the same reason, schema might be too strict
-          console.log('✅ Schema is functional but may be too strict');
+          // console.log('✅ Schema is functional but may be too strict');
         } else if (validResult && !invalidResult) {
-          console.log('✅ PERFECT: Valid data passed, invalid data rejected!');
+          // console.log('✅ PERFECT: Valid data passed, invalid data rejected!');
         } else {
-          console.log('⚠️ Valid data rejected, invalid data also rejected');
-          console.log('Schema may be too strict or have structural issues');
+          // console.log('⚠️ Valid data rejected, invalid data also rejected');
+          // console.log('Schema may be too strict or have structural issues');
         }
         
         // Check schema size to see if it's the useless fallback
         const schemaSize = JSON.stringify(jsonSchema).length;
-        console.log(`Schema size: ${Math.round(schemaSize / 1024)}KB`);
+        // console.log(`Schema size: ${Math.round(schemaSize / 1024)}KB`);
         
         if (schemaSize < 10000) { // Less than 10KB means it's garbage
-          console.log('❌ SCHEMA IS TOO SMALL - This is the useless fallback!');
+          // console.log('❌ SCHEMA IS TOO SMALL - This is the useless fallback!');
           expect(schemaSize).toBeGreaterThan(100000); // Should be much larger for real schema
         }
         
       } catch (error) {
-        console.log('❌ Schema compilation failed:', error.message);
+        // console.log('❌ Schema compilation failed:', error.message);
         throw error;
       }
     });

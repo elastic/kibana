@@ -440,7 +440,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
       if (paramMatch) {
         const paramName = paramMatch[1];
         existingParams.add(paramName);
-        console.log(`Found existing parameter: ${paramName} at line ${lineNumber}`);
+        // console.log(`Found existing parameter: ${paramName} at line ${lineNumber}`);
       }
     }
 
@@ -451,7 +451,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
     }
   }
 
-  console.log('Existing parameters found:', Array.from(existingParams));
+  // console.log('Existing parameters found:', Array.from(existingParams));
   return existingParams;
 }
 

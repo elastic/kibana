@@ -1346,7 +1346,7 @@ export const WorkflowYAMLEditor = ({
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 } catch (error) {
-                  console.error('Failed to download schema:', error);
+                  // to download schema:', error);
                   notifications?.toasts.addError(error as Error, {
                     title: 'Failed to download schema',
                   });
