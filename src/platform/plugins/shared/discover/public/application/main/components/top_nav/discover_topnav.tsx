@@ -15,8 +15,6 @@ import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -76,7 +74,9 @@ export const DiscoverTopNav = ({
     TABS_ENABLED_FEATURE_FLAG_KEY,
     false
   );
-  const savedSearch = useSavedSearchInitial();
+  const discoverSessionTitle = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession?.title
+  );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
@@ -262,7 +262,7 @@ export const DiscoverTopNav = ({
         onSavedQueryIdChange={updateSavedQueryId}
         query={query}
         savedQueryId={savedQuery}
-        screenTitle={savedSearch.title}
+        screenTitle={discoverSessionTitle}
         showDatePicker={showDatePicker}
         allowSavingQueries
         showSearchBar={true}
