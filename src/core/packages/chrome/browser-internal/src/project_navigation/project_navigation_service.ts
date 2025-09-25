@@ -47,6 +47,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
+import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
@@ -200,6 +201,7 @@ export class ProjectNavigationService {
       getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
       setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
       getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
+      tourManager: new NavigationTourManager(),
     };
   }
 
