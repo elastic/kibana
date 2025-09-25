@@ -7,10 +7,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { CustomSelectionTable } from '../../custom_selection_table';
-import { JobSelectorBadge } from '../job_selector_badge';
-import { TimeRangeBar } from '../timerange_bar';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiEmptyPrompt,
@@ -23,11 +19,17 @@ import {
   SortableProperties,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
-import { MlNodeAvailableWarningShared } from '../../node_available_warning';
+import { MlNodeAvailableWarningShared } from '@kbn/ml-node-checks/node_available_warning';
+
+import { CustomSelectionTable } from '../../custom_selection_table';
+
+import { JobSelectorBadge } from '../job_selector_badge';
+import { TimeRangeBar } from '../timerange_bar';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
