@@ -307,12 +307,6 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
   // Detecting if in with block
 
   // Special handling for comment lines - they should be treated as if they're at the same level as parameters
-  // If current line is a comment, use the indentation that parameters would have
-  if (currentLine.trim().startsWith('#')) {
-    // For comment lines, we need to check if they're inside a with block
-    // Comments in with blocks typically have the same indentation as parameters would
-    // So we'll use the comment's indentation as-is, but be more flexible in detection
-  }
 
   // Look backwards to find a "with:" line
   for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {

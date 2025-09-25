@@ -42,7 +42,9 @@ export function generateConnectorSnippet(
     // No required params, just add empty with block with a placeholder comment
     const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     parameters = {
-      with: {},
+      with: {
+        '': `# Add parameters here. Press ${shortcut} to see all available options`,
+      },
     };
     // We'll add the comment manually after YAML serialization
   } else {

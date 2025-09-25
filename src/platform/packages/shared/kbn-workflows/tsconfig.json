@@ -7,8 +7,7 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/es-query",
-    "@kbn/workflows",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }
