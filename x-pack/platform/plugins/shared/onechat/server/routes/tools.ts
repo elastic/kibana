@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { editableToolTypes } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
+import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -53,7 +53,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const tools = await registry.list({});
         return response.ok<ListToolsResponse>({
           body: {
-            results: tools.map(toDescriptorWithSchema),
+            results: tools.map(toDescriptor),
           },
         });
       })
@@ -93,7 +93,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
         return response.ok<GetToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -138,7 +138,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.create(createRequest);
         return response.ok<CreateToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -184,7 +184,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.update(toolId, update);
         return response.ok<UpdateToolResponse>({
-          body: toDescriptorWithSchema(tool),
+          body: await toDescriptorWithSchema(tool),
         });
       })
     );
@@ -265,8 +265,8 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
-
-        const validation = tool.schema.safeParse(toolParams);
+        const toolSchema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+        const validation = toolSchema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({
             body: {
