@@ -66,16 +66,24 @@ export const ensureActionRequestsIndexIsConfigured = async (
     integrationPolicyId: { type: 'keyword', ignore_above: 1024 },
     agentPolicyId: { type: 'keyword', ignore_above: 1024 },
   };
-  const backingIndexName = Object.keys(indexMapping)[0];
 
-  if (
-    !get(indexMapping[backingIndexName], 'mappings.properties.originSpaceId') ||
-    !get(indexMapping[backingIndexName], 'mappings.properties.tags') ||
-    !get(indexMapping[backingIndexName], 'mappings.properties.agent.properties.policy')
-  ) {
-    logger.debug(
-      `adding mappings to index [${ENDPOINT_ACTIONS_INDEX}] - Endpoint package v9.1.x not yet installed`
-    );
+  const needsMappingUpdates = Object.entries(indexMapping).some(
+    ([backingIndexName, backingIndexMapping]) => {
+      if (
+        !get(backingIndexMapping, 'mappings.properties.originSpaceId') ||
+        !get(backingIndexMapping, 'mappings.properties.tags') ||
+        !get(backingIndexMapping, 'mappings.properties.agent.properties.policy')
+      ) {
+        logger.debug(`DS Backing index [${backingIndexName}] missing required mappings`);
+        return true;
+      }
+
+      return false;
+    }
+  );
+
+  if (needsMappingUpdates) {
+    logger.debug(`adding mappings to index [${ENDPOINT_ACTIONS_INDEX}]`);
 
     await esClient.indices
       .putMapping({
