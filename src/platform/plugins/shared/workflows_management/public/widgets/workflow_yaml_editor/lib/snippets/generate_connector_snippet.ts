@@ -40,7 +40,6 @@ export function generateConnectorSnippet(
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder comment
-    const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
     parameters = {
       with: {},
     };
