@@ -293,108 +293,124 @@ export const calculateRiskScores = async ({
     // Build base filters that apply to all entity types
     const baseFilters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
 
-    const request = {
-      size: 0,
-      _source: false,
-      index,
-      ignore_unavailable: true,
-      runtime_mappings: runtimeMappings,
-      query: {
-        function_score: {
+    // Create separate queries for each entity type with entity-specific filters
+    const entityQueries = identifierTypes.map((_identifierType) => {
+      // Build entity-specific filters
+      const entityFilters = buildFiltersForEntityType(
+        _identifierType,
+        userFilter as QueryDslQueryContainer,
+        customFilters,
+        excludeAlertStatuses,
+        excludeAlertTags
+      );
+
+      // Combine base filters with entity-specific filters
+      const allFilters = [...baseFilters, ...entityFilters];
+
+      return {
+        entityType: _identifierType,
+        request: {
+          size: 0,
+          _source: false,
+          index,
+          ignore_unavailable: true,
+          runtime_mappings: runtimeMappings,
           query: {
-            bool: {
-              filter: baseFilters,
-              should: [
-                {
-                  match_all: {}, // This forces ES to calculate score
+            function_score: {
+              query: {
+                bool: {
+                  filter: allFilters,
+                  should: [
+                    {
+                      match_all: {}, // This forces ES to calculate score
+                    },
+                  ],
                 },
-              ],
+              },
+              field_value_factor: {
+                field: ALERT_RISK_SCORE, // sort by risk score
+              },
             },
           },
-          field_value_factor: {
-            field: ALERT_RISK_SCORE, // sort by risk score
+          aggs: {
+            [_identifierType]: buildIdentifierTypeAggregation({
+              afterKeys: userAfterKeys,
+              identifierType: _identifierType,
+              pageSize,
+              weights,
+              alertSampleSizePerShard,
+              scriptedMetricPainless,
+            }),
           },
         },
-      },
-      aggs: identifierTypes.reduce((aggs, _identifierType) => {
-        // Build entity-specific filters for each aggregation
-        const entityFilters = buildFiltersForEntityType(
-          _identifierType,
-          userFilter as QueryDslQueryContainer,
-          customFilters,
-          excludeAlertStatuses,
-          excludeAlertTags
+      };
+    });
+
+    // Execute queries for each entity type
+    const responses = await Promise.all(
+      entityQueries.map(async ({ entityType, request: entityRequest }) => {
+        if (debug) {
+          logger.info(
+            `Executing Risk Score query for ${entityType}:\n${JSON.stringify(entityRequest)}`
+          );
+        }
+
+        const response = await esClient.search<never, CalculateRiskScoreAggregations>(
+          entityRequest
         );
 
-        aggs[_identifierType] = {
-          ...buildIdentifierTypeAggregation({
-            afterKeys: userAfterKeys,
-            identifierType: _identifierType,
-            pageSize,
-            weights,
-            alertSampleSizePerShard,
-            scriptedMetricPainless,
-          }),
-          // Add entity-specific filters to the aggregation
-          filter:
-            entityFilters.length > 0
-              ? {
-                  bool: {
-                    filter: entityFilters,
-                  },
-                }
-              : undefined,
+        if (debug) {
+          logger.info(
+            `Received Risk Score response for ${entityType}:\n${JSON.stringify(response)}`
+          );
+        }
+
+        return {
+          entityType,
+          response,
+          request: entityRequest,
         };
-        return aggs;
-      }, {} as Record<string, AggregationsAggregationContainer>),
-    };
+      })
+    );
 
-    if (debug) {
-      logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
-    }
+    // Combine results from all entity queries
+    const combinedAggregations: Partial<CalculateRiskScoreAggregations> = {};
+    const combinedAfterKeys: Partial<AfterKeys> = {};
 
-    const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
+    responses.forEach(({ entityType, response }) => {
+      if (response.aggregations && (response.aggregations as Record<string, unknown>)[entityType]) {
+        (combinedAggregations as Record<string, unknown>)[entityType] = (
+          response.aggregations as Record<string, unknown>
+        )[entityType];
+        (combinedAfterKeys as Record<string, unknown>)[entityType] = (
+          response.aggregations as Record<string, { after_key?: Record<string, string> }>
+        )[entityType]?.after_key;
+      }
+    });
 
-    if (debug) {
-      logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
-    }
-
-    if (!response.aggregations) {
-      return {
-        ...(debug ? { request, response } : {}),
-        after_keys: {},
-        scores: {
-          host: [],
-          user: [],
-          service: [],
-        },
-        entities: { user: [], host: [], service: [], generic: [] },
-      };
-    }
+    const userBuckets = combinedAggregations.user?.buckets ?? [];
+    const hostBuckets = combinedAggregations.host?.buckets ?? [];
+    const serviceBuckets = combinedAggregations.service?.buckets ?? [];
 
     const hosts =
-      response.aggregations?.host?.buckets.map(
+      combinedAggregations.host?.buckets.map(
         ({ key }) => key[EntityTypeToIdentifierField.host]
       ) || [];
 
     const users =
-      response.aggregations?.user?.buckets.map(
+      combinedAggregations.user?.buckets.map(
         ({ key }) => key[EntityTypeToIdentifierField.user]
       ) || [];
 
     const services =
-      response.aggregations?.service?.buckets.map(
+      combinedAggregations.service?.buckets.map(
         ({ key }) => key[EntityTypeToIdentifierField.service]
       ) || [];
 
-    const userBuckets = response.aggregations.user?.buckets ?? [];
-    const hostBuckets = response.aggregations.host?.buckets ?? [];
-    const serviceBuckets = response.aggregations.service?.buckets ?? [];
-
     const afterKeys = {
-      host: response.aggregations.host?.after_key,
-      user: response.aggregations.user?.after_key,
-      service: experimentalFeatures ? response.aggregations.service?.after_key : undefined,
+      host: combinedAfterKeys.host,
+      user: combinedAfterKeys.user,
+      service: experimentalFeatures ? combinedAfterKeys.service : undefined,
     };
 
     const hostScores = await processScores({
@@ -420,7 +436,15 @@ export const calculateRiskScores = async ({
     });
 
     return {
-      ...(debug ? { request, response } : {}),
+      ...(debug
+        ? {
+            requests: responses.map(({ entityType, request, response }) => ({
+              entityType,
+              request,
+              response,
+            })),
+          }
+        : {}),
       after_keys: afterKeys,
       scores: {
         host: hostScores,
