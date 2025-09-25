@@ -75,11 +75,17 @@ async function runStep(params: WorkflowExecutionLoopParams): Promise<void> {
   const nodeImplementation = params.nodesFactory.create(stepContext);
   const monitorAbortController = new AbortController();
 
+  // The order of these promises is important - we want to stop monitoring
   const runMonitorPromise = runStackMonitor(params, stepContext, monitorAbortController);
-  const runStepPormise = nodeImplementation.run().then(() => monitorAbortController.abort());
+  let runStepPromise: Promise<void> = Promise.resolve();
+
+  // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
+  if (!monitorAbortController.signal.aborted) {
+    runStepPromise = nodeImplementation.run().then(() => monitorAbortController.abort());
+  }
 
   try {
-    await Promise.race([runMonitorPromise, runStepPormise]);
+    await Promise.race([runMonitorPromise, runStepPromise]);
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);

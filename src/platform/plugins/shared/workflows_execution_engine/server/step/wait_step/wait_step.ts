@@ -12,7 +12,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 import { parseDuration } from '../../utils';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class WaitStepImpl implements NodeImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
