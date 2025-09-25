@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -24,8 +27,7 @@ import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useStreamSystems } from './common/use_steam_systems';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
@@ -41,11 +43,6 @@ interface Props {
 }
 
 export function AddSignificantEventFlyout({ query, onClose, definition, onSave }: Props) {
-  const {
-    dependencies: {
-      start: { streams },
-    },
-  } = useKibana();
   const { euiTheme } = useEuiTheme();
 
   const isEditMode = !!query?.id;
@@ -56,6 +53,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
   const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedSystem, setSelectedSystem] = useState<EuiComboBoxOptionOption<string>[]>([]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -70,25 +68,20 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
     }
   }, [selectedFlow]);
 
-  const systemsFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streams.streamsRepositoryClient.fetch(`GET /internal/streams/{name}/systems`, {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
-        },
-      });
-    },
-    [streams.streamsRepositoryClient, definition]
-  );
+  const { value: systemsData, loading: systemsLoading } = useStreamSystems(definition);
+
+  const systems =
+    systemsData?.systems.map((system) => ({
+      name: system.name,
+      filter: system.filter,
+    })) || [];
 
   return (
     <EuiFlyout
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
+      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -140,6 +133,32 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                   selected={selectedFlow}
                   updateSelected={(flow) => setSelectedFlow(flow)}
                 />
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.euiFormRow.systemsLabel',
+                    { defaultMessage: 'Systems' }
+                  )}
+                >
+                  <EuiComboBox
+                    singleSelection={true}
+                    isLoading={systemsLoading}
+                    aria-label={i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.euiComboBox.selectSystemsLabel',
+                      { defaultMessage: 'Select systems' }
+                    )}
+                    placeholder={i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.euiComboBox.selectSystemsLabel',
+                      { defaultMessage: 'Select systems' }
+                    )}
+                    options={systems.map((system) => ({ label: system.name, value: system.name }))}
+                    selectedOptions={selectedSystem}
+                    onChange={(newOpts) => {
+                      setSelectedSystem(newOpts);
+                    }}
+                    isClearable={true}
+                  />
+                </EuiFormRow>
               </EuiPanel>
             </EuiFlexItem>
           )}
@@ -153,16 +172,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
               <EuiFlexItem grow={1}>
                 <EuiPanel hasShadow={false} paddingSize="l">
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText>
-                        <h4>
-                          {i18n.translate(
-                            'xpack.streams.streamDetailView.addSignificantEventFlyout.previewSignificantEventsLabel',
-                            { defaultMessage: 'Preview significant events' }
-                          )}
-                        </h4>
-                      </EuiText>
-                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} />
                     <EuiFlexItem grow={false}>
                       <StreamsAppSearchBar showDatePicker />
                     </EuiFlexItem>
@@ -178,17 +188,15 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                         setCanSave(next);
                       }}
                       definition={definition}
-                      systems={
-                        systemsFetch.value?.systems.map((system) => ({
-                          name: system.name,
-                          filter: system.filter,
-                        })) || []
-                      }
+                      systems={systems}
                     />
                   )}
 
                   {selectedFlow === 'ai' && (
                     <GeneratedFlowForm
+                      selectedSystem={systemsData?.systems.find(
+                        (s) => s.name === selectedSystem[0]?.value
+                      )}
                       isSubmitting={isSubmitting}
                       definition={definition}
                       setQueries={(next: StreamQueryKql[]) => {
@@ -210,7 +218,15 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
+                      { defaultMessage: 'Cancel' }
+                    )}
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }

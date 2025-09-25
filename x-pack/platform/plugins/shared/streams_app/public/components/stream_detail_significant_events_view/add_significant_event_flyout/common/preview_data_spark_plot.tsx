@@ -39,16 +39,18 @@ export function PreviewDataSparkPlot({
   isQueryValid,
   showTitle = true,
   compressed = false,
-  hideXAxis = false,
+  hideAxis = false,
   height,
+  noOfBuckets,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
-  hideXAxis?: boolean;
+  hideAxis?: boolean;
   height?: number;
+  noOfBuckets?: number;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
@@ -59,6 +61,7 @@ export function PreviewDataSparkPlot({
     kqlQuery: query.kql.query,
     timeState,
     isQueryValid,
+    noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
@@ -187,7 +190,7 @@ export function PreviewDataSparkPlot({
           annotations={sparkPlotData.annotations}
           xFormatter={xFormatter}
           compressed={compressed}
-          hideXAxis={hideXAxis}
+          hideAxis={hideAxis}
           height={height}
         />
       </>

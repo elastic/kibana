@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
@@ -26,9 +26,16 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
+  selectedSystem?: System;
 }
 
-export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
+export function GeneratedFlowForm({
+  setQueries,
+  definition,
+  setCanSave,
+  isSubmitting,
+  selectedSystem,
+}: Props) {
   const {
     core: { notifications },
     services: { telemetryClient },
@@ -84,9 +91,13 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                   setGeneratedQueries([]);
                   setSelectedQueries([]);
 
-                  const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
+                  const generation$ = generate(
+                    aiFeatures.genAiConnectors.selectedConnector!,
+                    selectedSystem
+                  );
                   generation$.subscribe({
                     next: (result) => {
+                      console.log(result);
                       const validation = validateQuery({
                         title: result.query.title,
                         kql: { query: result.query.kql },

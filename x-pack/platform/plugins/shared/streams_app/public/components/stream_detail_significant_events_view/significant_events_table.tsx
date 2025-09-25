@@ -5,16 +5,18 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
-import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -59,11 +61,33 @@ export function SignificantEventsTable({
   } = useKibana();
   const { timeState } = useTimefilter();
 
+  const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
+
   const items = useMemo(() => {
     return response.value ?? [];
   }, [response.value]);
+  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{OPEN_DETAILS_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: () => {
+        return (
+          <EuiButtonIcon
+            onClick={() => {}}
+            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
+            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
+          />
+        );
+      },
+    },
     {
       field: 'title',
       name: i18n.translate('xpack.streams.significantEventsTable.titleColumnTitle', {
@@ -81,13 +105,26 @@ export function SignificantEventsTable({
       ),
     },
     {
-      field: 'change',
-      name: i18n.translate('xpack.streams.significantEventsTable.changeColumnTitle', {
-        defaultMessage: 'Change',
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.system', {
+        defaultMessage: 'System',
       }),
-      render: (_, item) => {
-        const change = formatChangePoint(item);
-        return <ChangePointSummary change={change} xFormatter={xFormatter} />;
+      render: (query: StreamQuery) => {
+        return <EuiBadge color="hollow">{query.system?.name ?? '--'}</EuiBadge>;
+      },
+    },
+    {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.queryText', {
+        defaultMessage: 'Query',
+      }),
+      render: (query: StreamQuery) => {
+        if (!query.system?.filter) {
+          return '--';
+        }
+        return (
+          <EuiCodeBlock paddingSize="none">{JSON.stringify(query.system?.filter)}</EuiCodeBlock>
+        );
       },
     },
     {
@@ -97,6 +134,7 @@ export function SignificantEventsTable({
       }),
       render: (_, item) => {
         const change = formatChangePoint(item);
+
         return (
           <SignificantEventsHistogramChart
             id={item.query.id}
@@ -170,6 +208,25 @@ export function SignificantEventsTable({
       loading={response.loading}
       tableLayout="auto"
       itemId="id"
+      selection={{ onSelectionChange: setSelectedItems, selected: selectedItems }}
     />
   );
 }
+
+const OPEN_DETAILS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
+  defaultMessage: 'Open details',
+});
+
+const COLLAPSE_DETAILS_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.collapseDetails',
+  {
+    defaultMessage: 'Collapse details',
+  }
+);
+
+const EXPAND_DETAILS_LABEL = i18n.translate(
+  'xpack.streams.streamSystemsTable.columns.expandDetails',
+  {
+    defaultMessage: 'Expand details',
+  }
+);
