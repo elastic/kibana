@@ -200,7 +200,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -216,7 +216,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -461,7 +461,7 @@ export class StreamsApp {
       .getByTestId('streamsAppSchemaEditorControls')
       .getByRole('searchbox');
     await expect(searchBox).toBeVisible();
-    searchBox.clear();
+    await searchBox.clear();
     await searchBox.focus();
     await this.page.keyboard.type(searchTerm);
   }

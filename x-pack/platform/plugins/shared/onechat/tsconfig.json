@@ -75,7 +75,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",
+    "@kbn/workflows-management-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/doc-links",
+    "@kbn/workflows",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
   ]
