@@ -30,6 +30,7 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { StickyControlState } from '@kbn/controls-schemas';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -54,14 +55,12 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
-  const lastSavedChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({})
-  );
+  const lastSavedState$Ref = useRef(new BehaviorSubject<{ [id: string]: StickyControlState }>({}));
 
   /** Creation options management */
-  const initialState = useInitialControlGroupState(getCreationOptions, lastSavedChildState$Ref);
-  const childrenApi = useChildrenApi(initialState, lastSavedChildState$Ref);
-  const layoutApi = useLayoutApi(initialState, childrenApi);
+  const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
+  const childrenApi = useChildrenApi(initialState, lastSavedState$Ref);
+  const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
 
   /** Props management */
   const searchApi = useSearchApi({
@@ -89,40 +88,24 @@ export const ControlGroupRenderer = ({
     onApiAvailable({
       ...parentApi,
       reload: () => reload$.next(),
-      getInput$: () => lastSavedChildState$Ref.current,
-      getInput: () => lastSavedChildState$Ref.current.value,
+      getInput$: () => lastSavedState$Ref.current,
+      getInput: () => lastSavedState$Ref.current.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
-        const newControls: { [id: string]: SerializedPanelState<object> } = {};
-        const newControlsLayout: DashboardLayout['controls'] = {};
-
+        const newState: { [id: string]: StickyControlState } = {};
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
-          const { type, grow, width, order, ...rest } = control;
-          newControls[id] = {
-            rawState: {
-              type,
-              ...lastSavedChildState$Ref.current.value[id].rawState,
-              ...rest,
-            },
+          newState[id] = {
+            ...lastSavedState$Ref.current.value[id],
+            ...control,
           };
-          newControlsLayout[id] = { type, grow, width, order };
         });
-
-        lastSavedChildState$Ref.current.next({
-          ...lastSavedChildState$Ref.current.value,
-          ...newControls,
-        });
+        lastSavedState$Ref.current.next(newState);
         Object.values(parentApi.children$.getValue()).forEach((child) => {
           child.resetUnsavedChanges();
         });
-
-        // parentApi.layout$.next({
-        //   ...parentApi.layout$.getValue(),
-        //   controls: { ...parentApi.layout$.getValue().controls, ...newControlsLayout },
-        // });
       },
     } as unknown as ControlGroupRendererApi);
   }, [parentApi, onApiAvailable]);
-  console.log({ parentApi });
+
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : <ControlsRenderer parentApi={parentApi} />;
 };

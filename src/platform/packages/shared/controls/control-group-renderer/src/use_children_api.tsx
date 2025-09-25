@@ -8,8 +8,9 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, distinctUntilChanged, map, tap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -32,21 +33,32 @@ import type { ControlGroupCreationOptions } from './types';
 
 export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
-  lastSavedChildState$Ref: React.MutableRefObject<
-    BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
-  >
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
+  const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
   const currentChildState = useRef<{ [id: string]: SerializedPanelState<object> }>({});
-  const children$Ref = useRef(new BehaviorSubject<{ [uuid: string]: DefaultEmbeddableApi }>({}));
+  const lastSavedChildState$Ref = useRef(
+    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({}) // derived from lastSavedState$Ref
+  );
 
   useEffect(() => {
-    const lastSavedStateSubscription = lastSavedChildState$Ref.current.subscribe(
-      (lastSavedState) => {
-        console.log({ lastSavedState });
-        currentChildState.current = lastSavedState;
-      }
-    );
+    /** Derive `lastSavedChildState$Ref` from `lastSavedState$Ref` */
+    const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
+      const serializedState: { [id: string]: SerializedPanelState<object> } = {};
+      Object.entries(lastSavedState).forEach(([id, control]) => {
+        serializedState[id] = { rawState: omit(control, ['grow', 'width', 'order']) };
+      });
+      lastSavedChildState$Ref.current.next(serializedState);
+      currentChildState.current = serializedState;
+    });
 
+    return () => {
+      lastSavedStateSubscription.unsubscribe();
+    };
+  }, [lastSavedState$Ref]);
+
+  useEffect(() => {
+    /** Keep `currentChildState` in sync with children's state */
     const unsavedChangesSubscription = childrenUnsavedChanges$(children$Ref.current)
       .pipe(map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges)))
       .subscribe((hasUnsavedChanges) => {
@@ -61,13 +73,12 @@ export const useChildrenApi = (
         }
       });
     return () => {
-      lastSavedStateSubscription.unsubscribe();
       unsavedChangesSubscription.unsubscribe();
     };
-  }, [lastSavedChildState$Ref]);
+  }, []);
 
   const childrenApi = useMemo(() => {
-    if (!state) return;
+    if (!state) return; // don't return children API until state is initialized
 
     return {
       children$: children$Ref.current,

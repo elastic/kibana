@@ -8,7 +8,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useEffect, useMemo } from 'react';
+import { pick } from 'lodash';
+import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, pairwise } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,27 +23,56 @@ import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
   state: ControlGroupCreationOptions | undefined,
-  childrenApi: ReturnType<typeof useChildrenApi>
+  childrenApi: ReturnType<typeof useChildrenApi>,
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
+  const layout$Ref = useRef(
+    new BehaviorSubject<DashboardLayout>({ controls: {}, panels: {}, sections: {} })
+  );
+
+  useEffect(() => {
+    /** Keep `layout$` in sync with `lastSavedState$Ref` */
+    const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
+      const lastSavedLayout: DashboardLayout['controls'] = {};
+      Object.entries(lastSavedState).forEach(([id, control]) => {
+        lastSavedLayout[id] = pick(control, [
+          'grow',
+          'width',
+          'order',
+          'type',
+        ]) as DashboardLayout['controls'][string];
+      });
+      const currentLayout = layout$Ref.current.getValue();
+      layout$Ref.current.next({
+        ...currentLayout,
+        controls: { ...currentLayout.controls, ...lastSavedLayout },
+      });
+    });
+
+    return () => {
+      lastSavedStateSubscription.unsubscribe();
+    };
+  }, [lastSavedState$Ref]);
+
   const layoutApi = useMemo(() => {
     if (!state) return;
 
-    const layout$ = new BehaviorSubject<DashboardLayout>({
+    layout$Ref.current.next({
       controls: getControlsLayout(state.initialState?.initialChildControlState),
       panels: {},
       sections: {},
     });
 
     return {
-      layout$,
+      layout$: layout$Ref.current,
       addNewPanel: <State extends StickyControlState = StickyControlState>(
         panelPackage: PanelPackage<State>
       ) => {
         const { panelType: type, serializedState, maybePanelId } = panelPackage;
         const uuid = maybePanelId ?? uuidv4();
 
-        if (serializedState) childrenApi.setSerializedStateForChild(uuid, serializedState);
-        const oldControls = layout$.getValue().controls;
+        if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
+        const oldControls = layout$Ref.current.getValue().controls;
         const { rawState } = {
           rawState: {
             width: DEFAULT_CONTROL_WIDTH as StickyControlState['width'],
@@ -50,7 +80,7 @@ export const useLayoutApi = (
             ...serializedState?.rawState,
           },
         };
-        layout$.next({
+        layout$Ref.current.next({
           panels: {},
           sections: {},
           controls: {
@@ -64,26 +94,8 @@ export const useLayoutApi = (
           },
         });
       },
-      layoutHasUnsavedChanges$: layout$.pipe(
-        pairwise(),
-        map(([before, after]) => ({
-          hasUnsavedChanges: !deepEqual(before, after),
-        }))
-      ),
     };
   }, [state, childrenApi]);
-
-  // useEffect(() => {
-  //   if (!layoutApi) return;
-  //   lastSavedLayoutState$Ref.current.subscribe((lastSavedState) => {
-  //     console.log({ lastSavedState });
-  //     layoutApi?.layout$.next({
-  //       controls: lastSavedState,
-  //       panels: {},
-  //       sections: {},
-  //     });
-  //   });
-  // }, [layoutApi, lastSavedLayoutState$Ref]);
 
   return layoutApi;
 };
