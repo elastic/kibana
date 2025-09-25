@@ -12,7 +12,7 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
-import type { MapAttributes } from '../../../../server';
+import type { AdhocDataView, MapAttributes } from '../../../../server';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import type { MapStore, MapStoreState } from '../../../reducers/store';
 import { createMapStore } from '../../../reducers/store';
@@ -55,7 +55,6 @@ import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import type { ParsedMapStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -163,32 +162,18 @@ export class SavedMap {
 
     this._reportUsage();
 
-    if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
-        if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
-          const dataViewService = getIndexPatternService();
-          const promises = mapState.adHocDataViews.map((spec) => {
-            return dataViewService.create(spec);
-          });
-          await Promise.all(promises);
-        }
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
+    if (this._attributes?.adHocDataViews?.length) {
+      const dataViewService = getIndexPatternService();
+      const promises = this._attributes.adHocDataViews.map((spec) => {
+        return dataViewService.create(spec);
+      });
+      await Promise.all(promises);
     }
 
     if (this._mapEmbeddableState?.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
-    } else if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
-        if (mapState.settings) {
-          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
-        }
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
+    } else if (this._attributes?.settings) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._attributes.settings));
     }
 
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
@@ -215,19 +200,14 @@ export class SavedMap {
           zoom: this._mapEmbeddableState.mapCenter.zoom,
         })
       );
-    } else if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
-        this._store.dispatch(
-          setGotoWithCenter({
-            lat: mapState.center.lat,
-            lon: mapState.center.lon,
-            zoom: mapState.zoom,
-          })
-        );
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
+    } else if (this._attributes?.center) {
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: this._attributes.center.lat,
+          lon: this._attributes.center.lon,
+          zoom: this._attributes.zoom ?? 1,
+        })
+      );
     }
 
     const layerList: LayerDescriptor[] = this._attributes.layers ?? [];
@@ -391,24 +371,9 @@ export class SavedMap {
   }
 
   public getAutoFitToBounds(): boolean {
-    if (this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined) {
-      return this._mapEmbeddableState.mapSettings.autoFitToDataBounds;
-    }
-
-    if (!this._attributes || !this._attributes.mapStateJSON) {
-      return false;
-    }
-
-    try {
-      const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
-      if (mapState?.settings.autoFitToDataBounds !== undefined) {
-        return mapState.settings.autoFitToDataBounds;
-      }
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
-
-    return false;
+    return this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined
+      ? this._mapEmbeddableState.mapSettings.autoFitToDataBounds
+      : this._attributes?.settings?.autoFitToDataBounds ?? false;
   }
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
@@ -548,28 +513,24 @@ export class SavedMap {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
     this._attributes!.layers = layerListConfigOnly;
-
+    this._attributes!.adHocDataViews = await this._getAdHocDataViews();
+    this._attributes!.zoom = getMapZoom(state);
+    this._attributes!.center = getMapCenter(state);
+    this._attributes!.timeFilters = getTimeFilters(state);
+    this._attributes!.refreshConfig = {
+      isPaused: getTimeFilter().getRefreshInterval().pause,
+      interval: getTimeFilter().getRefreshInterval().value,
+    };
+    this._attributes!.query = getQuery(state);
+    this._attributes!.filters = getFilters(state);
     const mapSettings = getMapSettings(state);
-
-    this._attributes!.mapStateJSON = JSON.stringify({
-      adHocDataViews: await this._getAdHocDataViews(),
-      zoom: getMapZoom(state),
-      center: getMapCenter(state),
-      timeFilters: getTimeFilters(state),
-      refreshConfig: {
-        isPaused: getTimeFilter().getRefreshInterval().pause,
-        interval: getTimeFilter().getRefreshInterval().value,
-      },
-      query: getQuery(state),
-      filters: getFilters(state),
-      settings: {
-        ...mapSettings,
-        // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
-        customIcons: mapSettings.customIcons.map((icon) => {
-          return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-        }),
-      },
-    } as ParsedMapStateJSON);
+    this._attributes!.settings = {
+      ...mapSettings,
+      // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
+      customIcons: mapSettings.customIcons.map((icon) => {
+        return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+      }),
+    };
     this._attributes!.isLayerTOCOpen = getIsLayerTOCOpen(state);
     this._attributes!.openTOCDetails = getOpenTOCDetails(state);
   }
@@ -586,7 +547,14 @@ export class SavedMap {
         return !dataView.isPersisted();
       })
       .map((dataView) => {
-        return dataView.toSpec(false);
+        const { allowHidden, id, name, timeFieldName, title } = dataView.toSpec(false);
+        return {
+          allowHidden,
+          id,
+          name,
+          timeFieldName,
+          title,
+        } as AdhocDataView;
       });
   }
 }

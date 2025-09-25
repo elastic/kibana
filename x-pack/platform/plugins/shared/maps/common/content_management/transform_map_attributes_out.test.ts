@@ -16,6 +16,16 @@ describe('transformMapOut', () => {
     `);
   });
 
+  test('descrption', () => {
+    expect(transformMapAttributesOut({ title: 'my map', description: 'this is a great map' }, []))
+      .toMatchInlineSnapshot(`
+      Object {
+        "description": "this is a great map",
+        "title": "my map",
+      }
+    `);
+  });
+
   test('layerListJSON', () => {
     expect(
       transformMapAttributesOut(
@@ -42,6 +52,26 @@ describe('transformMapOut', () => {
             },
           },
         ],
+        "title": "my map",
+      }
+    `);
+  });
+
+  test('mapStateJSON', () => {
+    expect(
+      transformMapAttributesOut(
+        {
+          title: 'my map',
+          mapStateJSON: '{"center":{"lat":60,"lon":120}}',
+        },
+        []
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "center": Object {
+          "lat": 60,
+          "lon": 120,
+        },
         "title": "my map",
       }
     `);

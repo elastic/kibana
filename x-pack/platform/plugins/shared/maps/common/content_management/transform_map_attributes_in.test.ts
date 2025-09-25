@@ -50,6 +50,42 @@ describe('transformMapIn', () => {
     `);
   });
 
+  test('mapStateJSON', () => {
+    expect(
+      transformMapAttributesIn({
+        title: 'my map',
+        adHocDataViews: [],
+        center: {
+          lat: 60,
+          lon: 120,
+        },
+        filters: [],
+        query: {
+          query: 'find me',
+          language: 'kql',
+        },
+        refreshConfig: {
+          isPaused: false,
+          interval: 500,
+        },
+        settings: {},
+        timeFilters: {
+          from: 'now',
+          to: 'now-15m',
+        },
+        zoom: 1,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "mapStateJSON": "{\\"adHocDataViews\\":[],\\"center\\":{\\"lat\\":60,\\"lon\\":120},\\"filters\\":[],\\"query\\":{\\"query\\":\\"find me\\",\\"language\\":\\"kql\\"},\\"refreshConfig\\":{\\"isPaused\\":false,\\"interval\\":500},\\"settings\\":{},\\"timeFilters\\":{\\"from\\":\\"now\\",\\"to\\":\\"now-15m\\"},\\"zoom\\":1}",
+          "title": "my map",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+
   test('uiStateJSON', () => {
     expect(
       transformMapAttributesIn({

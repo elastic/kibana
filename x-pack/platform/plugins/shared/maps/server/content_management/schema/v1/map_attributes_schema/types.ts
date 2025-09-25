@@ -6,9 +6,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { mapAttributesSchema } from './map_attributes_schema';
+import type { adhocDataViewSchema, mapAttributesSchema } from './map_attributes_schema';
 
 /**
  * Shape of map attributes in REST APIs
  */
 export type MapAttributes = TypeOf<typeof mapAttributesSchema>;
+
+export type AdhocDataView = TypeOf<typeof adhocDataViewSchema>;

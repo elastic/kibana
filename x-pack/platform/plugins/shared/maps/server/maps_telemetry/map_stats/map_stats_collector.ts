@@ -39,7 +39,7 @@ export class MapStatsCollector {
   private _sourceCountStats: ClusterCountStats | undefined;
 
   push(attributes: MapAttributes) {
-    if (!attributes || !attributes.mapStateJSON || !attributes.layers) {
+    if (!attributes || !attributes.settings || !attributes.layers) {
       return;
     }
 

@@ -19,20 +19,30 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
 
   if (mapState.description) storedMapAttributes.description = mapState.description;
   if (mapState.layers) storedMapAttributes.layerListJSON = JSON.stringify(mapState.layers);
-  if (mapState.mapStateJSON) storedMapAttributes.mapStateJSON = mapState.mapStateJSON;
 
-  const uiStateJSON = getUiStateJSON(mapState);
+  const mapStateJSON = getJSONString(mapState, [
+    'adHocDataViews',
+    'center',
+    'filters',
+    'query',
+    'refreshConfig',
+    'settings',
+    'timeFilters',
+    'zoom',
+  ]);
+  if (mapStateJSON) storedMapAttributes.mapStateJSON = mapStateJSON;
+
+  const uiStateJSON = getJSONString(mapState, ['isLayerTOCOpen', 'openTOCDetails']);
   if (uiStateJSON) storedMapAttributes.uiStateJSON = uiStateJSON;
   return extractReferences({ attributes: storedMapAttributes });
 }
 
-function getUiStateJSON(mapState: MapAttributes) {
-  const uiState: Record<string, unknown> = {};
-  if ('isLayerTOCOpen' in mapState) {
-    uiState.isLayerTOCOpen = mapState.isLayerTOCOpen;
-  }
-  if ('openTOCDetails' in mapState) {
-    uiState.openTOCDetails = mapState.openTOCDetails;
-  }
-  return Object.keys(uiState).length ? JSON.stringify(uiState) : undefined;
+function getJSONString(mapState: Record<string, unknown>, keys: string[]) {
+  const selectedState: Record<string, unknown> = {};
+  keys.forEach((key) => {
+    if (key in mapState) {
+      selectedState[key] = mapState[key];
+    }
+  });
+  return Object.keys(selectedState).length ? JSON.stringify(selectedState) : undefined;
 }

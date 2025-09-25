@@ -13,6 +13,7 @@ import { configSchema } from './config';
 export type { StoredMapAttributes } from './saved_objects/types';
 
 export type {
+  AdhocDataView,
   MapAttributes,
 
   //

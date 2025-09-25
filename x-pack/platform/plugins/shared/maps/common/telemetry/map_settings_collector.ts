@@ -6,31 +6,17 @@
  */
 
 import type { MapAttributes } from '../../server';
-import type { MapSettings } from '../descriptor_types';
 
 export class MapSettingsCollector {
   private _customIconsCount: number = 0;
 
   constructor(attributes: MapAttributes) {
-    if (!attributes || !attributes.mapStateJSON) {
+    if (!attributes?.settings) {
       return;
     }
 
-    let mapSettings: MapSettings;
-
-    try {
-      const mapState = JSON.parse(attributes.mapStateJSON);
-      mapSettings = mapState.settings;
-    } catch (e) {
-      return;
-    }
-
-    if (!mapSettings) {
-      return;
-    }
-
-    if (mapSettings.customIcons) {
-      this._customIconsCount = mapSettings.customIcons.length;
+    if (attributes.settings.customIcons) {
+      this._customIconsCount = attributes.settings.customIcons.length;
     }
   }
 

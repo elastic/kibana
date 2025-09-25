@@ -8,13 +8,13 @@
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import type { ParsedMapStateJSON } from './types';
+import type { MapAttributes } from '../../../../server';
 
 export function getInitialRefreshConfig({
   mapState,
   globalState = {},
 }: {
-  mapState?: ParsedMapStateJSON;
+  mapState?: MapAttributes;
   globalState: GlobalQueryStateFromUrl;
 }) {
   const uiSettings = getUiSettings();

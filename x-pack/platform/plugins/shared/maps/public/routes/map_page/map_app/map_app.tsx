@@ -60,7 +60,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-import type { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
+import type { MapAttributes } from '../../../../server';
 
 const styles = {
   wrapper: css([
@@ -325,7 +325,7 @@ export class MapApp extends React.Component<Props, State> {
     this._updateGlobalState(updatedGlobalState);
   };
 
-  _getInitialTime(mapState?: ParsedMapStateJSON) {
+  _getInitialTime(mapState?: MapAttributes) {
     if (this._initialTimeFromUrl) {
       return this._initialTimeFromUrl;
     }
@@ -335,7 +335,7 @@ export class MapApp extends React.Component<Props, State> {
       : getTimeFilter().getTime();
   }
 
-  _initMapAndLayerSettings(mapState?: ParsedMapStateJSON) {
+  _initMapAndLayerSettings(mapState?: MapAttributes) {
     const globalState = this._getGlobalState();
 
     const savedObjectFilters = mapState?.filters ? mapState.filters : [];
@@ -369,7 +369,7 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  _onRefreshConfigChange({ isPaused, interval }: MapRefreshConfig) {
+  _onRefreshConfigChange({ isPaused, interval }: Required<MapAttributes>['refreshConfig']) {
     this.setState({
       isRefreshPaused: isPaused,
       refreshInterval: interval,
@@ -468,16 +468,7 @@ export class MapApp extends React.Component<Props, State> {
       );
     }
 
-    let mapState: ParsedMapStateJSON | undefined;
-    try {
-      const attributes = this.props.savedMap.getAttributes();
-      if (attributes.mapStateJSON) {
-        mapState = JSON.parse(attributes.mapStateJSON);
-      }
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
-    this._initMapAndLayerSettings(mapState);
+    this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
     this.setState({ initialized: true });
   }

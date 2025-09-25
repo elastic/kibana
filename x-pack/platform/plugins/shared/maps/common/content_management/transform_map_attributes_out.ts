@@ -20,9 +20,11 @@ export function transformMapAttributesOut(
   });
   return {
     title: injectedAttributes.title,
+    ...(injectedAttributes.description ? { description: injectedAttributes.description } : {}),
     ...(injectedAttributes.layerListJSON
       ? { layers: parseJSON<Partial<LayerDescriptor[]>>([], injectedAttributes.layerListJSON) }
       : {}),
+    ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.mapStateJSON),
     ...parseJSON<Partial<MapAttributes>>({}, injectedAttributes.uiStateJSON),
   };
 }

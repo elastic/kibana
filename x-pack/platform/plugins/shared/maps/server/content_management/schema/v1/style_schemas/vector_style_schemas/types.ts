@@ -29,12 +29,7 @@ import type {
   sizeStaticOptions,
   symbolizeAsOptions,
 } from './marker_schemas';
-import type {
-  fieldMetaOptions,
-  styleField,
-  vectorStylePropertiesSchema,
-  vectorStyleSchema,
-} from './vector_style_schemas';
+import type { vectorStylePropertiesSchema, vectorStyleSchema } from './vector_style_schemas';
 import type {
   labelBorderSizeOptions,
   labelDynamicOptions,
@@ -44,6 +39,8 @@ import type {
   labelZoomRangeSchema,
 } from './label_schemas';
 import type { STYLE_TYPE } from '../../../../../../common/constants';
+import type { fieldMetaOptionsSchema } from './field_meta_options_schema';
+import type { styleFieldSchema } from './style_field_schema';
 
 export type ColorStaticStylePropertyDescriptor = TypeOf<typeof colorStaticSchema>;
 export type ColorDynamicOptions = TypeOf<typeof colorDynamicOptions>;
@@ -115,8 +112,8 @@ export type StylePropertyOptions =
 
 export type VectorStylePropertiesDescriptor = Writable<TypeOf<typeof vectorStylePropertiesSchema>>;
 
-export type FieldMetaOptions = TypeOf<typeof fieldMetaOptions>;
-export type StylePropertyField = TypeOf<typeof styleField>;
+export type FieldMetaOptions = TypeOf<typeof fieldMetaOptionsSchema>;
+export type StylePropertyField = TypeOf<typeof styleFieldSchema>;
 
 export interface RangeFieldMeta {
   min: number;

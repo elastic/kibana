@@ -6,13 +6,46 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { layersSchema } from '../layer_schemas';
+import { settingsSchema } from './settings_schema';
+
+const mapCenterSchema = schema.object({
+  lat: schema.number(),
+  lon: schema.number(),
+});
+
+// TODO replace with refreshIntervalSchema from @kbn/data-service-server
+const refreshConfigSchema = schema.object({
+  isPaused: schema.boolean(),
+  interval: schema.number(),
+});
+
+export const adhocDataViewSchema = schema.object({
+  allowHidden: schema.maybe(schema.boolean()),
+  id: schema.string(),
+  name: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Human readable name used to differentiate the data view.',
+      },
+    })
+  ),
+  timeFieldName: schema.maybe(schema.string()),
+  title: schema.string({
+    meta: {
+      description:
+        'Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)',
+    },
+  }),
+});
 
 export const mapAttributesSchema = schema.object(
   {
-    title: schema.string(),
+    adHocDataViews: schema.maybe(schema.arrayOf(adhocDataViewSchema)),
+    center: schema.maybe(mapCenterSchema),
     description: schema.maybe(schema.string()),
-    mapStateJSON: schema.maybe(schema.string()),
+    filters: schema.maybe(schema.arrayOf(filterSchema)),
     isLayerTOCOpen: schema.maybe(
       schema.boolean({
         defaultValue: true,
@@ -37,6 +70,17 @@ export const mapAttributesSchema = schema.object(
           },
         })
       )
+    ),
+    query: schema.maybe(querySchema),
+    refreshConfig: schema.maybe(refreshConfigSchema),
+    settings: schema.maybe(settingsSchema),
+    timeFilters: schema.maybe(timeRangeSchema),
+    title: schema.string(),
+    zoom: schema.maybe(
+      schema.number({
+        max: 24,
+        min: 0,
+      })
     ),
   },
   { unknowns: 'forbid' }
