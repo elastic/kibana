@@ -30,7 +30,7 @@ const entityId = 'test-entity-id';
 
 const renderUseAssetInventoryAssistant = () =>
   renderHook((props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props), {
-    initialProps: { entityId, entityFields: mockEntityFields },
+    initialProps: { entityId, entityFields: mockEntityFields, isPreviewMode: false },
   });
 
 const useAssistantOverlayMock = useAssistantOverlay as jest.Mock;
@@ -151,6 +151,17 @@ describe('useAssetInventoryAssistant', () => {
     expect(hookResult.result.current.showAssistant).toEqual(false);
   });
 
+  it('should return showAssistant false when isPreviewMode is true', () => {
+    const hookResultWithPreviewMode = renderHook(
+      (props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props),
+      {
+        initialProps: { entityId, entityFields: mockEntityFields, isPreviewMode: true },
+      }
+    );
+
+    expect(hookResultWithPreviewMode.result.current.showAssistant).toEqual(false);
+  });
+
   it('returns entity fields as prompt context data', async () => {
     hookResult = renderUseAssetInventoryAssistant();
 
@@ -169,7 +180,7 @@ describe('useAssetInventoryAssistant', () => {
 
   it('falls back to default conversation ID when entityId is not provided', () => {
     renderHook((props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props), {
-      initialProps: { entityId: '', entityFields: mockEntityFields },
+      initialProps: { entityId: '', entityFields: mockEntityFields, isPreviewMode: false },
     });
 
     expect(useAssistantOverlayMock.mock.calls[0][1]).toEqual('Entity Summary');
@@ -177,7 +188,7 @@ describe('useAssetInventoryAssistant', () => {
 
   it('returns empty prompt context when entityFields is empty', async () => {
     renderHook((props: UseAssetInventoryAssistantParams) => useAssetInventoryAssistant(props), {
-      initialProps: { entityId, entityFields: {} },
+      initialProps: { entityId, entityFields: {}, isPreviewMode: false },
     });
 
     const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];

@@ -42,6 +42,7 @@ export const GenericEntityFlyoutFooter = ({
   const { showAssistant, showAssistantOverlay } = useAssetInventoryAssistant({
     entityId,
     entityFields,
+    isPreviewMode,
   });
 
   const openDocumentFlyout = useCallback(() => {
