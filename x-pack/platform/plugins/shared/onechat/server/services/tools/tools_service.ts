@@ -7,8 +7,10 @@
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { ToolTypeInfo } from '../../../common/tools';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -22,6 +24,7 @@ import { createToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
+  workflowsManagement?: WorkflowsPluginSetup;
 }
 
 export interface ToolsServiceStartDeps {
@@ -56,9 +59,13 @@ export class ToolsService {
   }
 
   start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger } = this.setupDeps!;
+    const { logger, workflowsManagement } = this.setupDeps!;
     const builtInToolSource = createBuiltInToolSource({ registry: this.builtinRegistry });
-    const persistedToolSource = createPersistedToolSource({ logger, elasticsearch });
+    const persistedToolSource = createPersistedToolSource({
+      logger,
+      elasticsearch,
+      workflowsManagement,
+    });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
@@ -71,8 +78,20 @@ export class ToolsService {
       });
     };
 
+    const getToolTypeInfo = () => {
+      return [
+        ...persistedToolSource.toolTypes.map<ToolTypeInfo>((typeDef) => {
+          return { type: typeDef, create: true };
+        }),
+        ...builtInToolSource.toolTypes.map<ToolTypeInfo>((typeDef) => {
+          return { type: typeDef, create: false };
+        }),
+      ];
+    };
+
     return {
       getRegistry,
+      getToolTypeInfo,
     };
   }
 }
