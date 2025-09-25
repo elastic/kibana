@@ -21,6 +21,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -32,9 +33,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
-import { Filter, Query } from '@kbn/es-query';
-import { LensApiFilterType } from '../schema/filter';
-import { LensState } from '@kbn/lens-plugin/public/state_management/types';
+import type { LensApiFilterType } from '../schema/filter';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -480,13 +479,11 @@ export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
   };
 };
 
-export const addFiltersAndQueryToLensState = (state: LensApiState, attributes: LensAttributes) => {
-  if (state.filters) {
-    attributes.state.filters = filtersToLensState(state.filters);
-  }
-  if (state.query) {
-    attributes.state.query = queryToLensState(state.query as LensApiFilterType);
-  }
+export const filtersAndQueryToLensState = (state: LensApiState) => {
+  return {
+    ...(state.filters ? { filters: filtersToLensState(state.filters) } : {}),
+    ...(state.query ? { query: queryToLensState(state.query as LensApiFilterType) } : {}),
+  };
 };
 
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
