@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Walker, parse } from '@kbn/esql-ast';
+import { Walker, Parser } from '@kbn/esql-ast';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
@@ -31,7 +31,7 @@ export function shouldPreferLineChartForESQLQuery(
   }
 
   try {
-    const { root } = parse(query.esql);
+    const { root } = Parser.parse(query.esql);
     
     // Find all STATS commands
     const statsCommands = Walker.matchAll(root, { type: 'command', name: 'stats' });
