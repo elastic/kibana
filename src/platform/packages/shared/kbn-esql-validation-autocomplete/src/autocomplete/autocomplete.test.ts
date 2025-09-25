@@ -541,7 +541,6 @@ describe('autocomplete', () => {
       testSuggestions('FROM a | EVAL REPLACE(keywordField, keywordField, /)', [
         ...getFieldNamesByType(ESQL_STRING_TYPES).map((field) => ({
           text: field,
-          // command: undefined,
         })),
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
