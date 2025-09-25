@@ -20,12 +20,12 @@ export interface ContextManagerInit {
   // New properties for logging
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
+  node: UnionExecutionGraphNode;
+  stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
   coreStart?: CoreStart; // For using Kibana's internal HTTP client
-  node: UnionExecutionGraphNode;
-  stackFrames: StackFrame[];
 }
 
 export class WorkflowContextManager {

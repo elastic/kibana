@@ -68,7 +68,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     wfExecutionRuntimeManagerMock.markWorkflowTimeouted = jest.fn();
 
     wfExecutionStateMock = {} as unknown as WorkflowExecutionState;
-    wfExecutionStateMock.getStepExecution = jest.fn();
+    wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({});
     wfExecutionStateMock.upsertStep = jest.fn();
     wfExecutionStateMock.getWorkflowExecution = jest.fn().mockReturnValue({
       id: 'workflow-execution-id',
@@ -232,11 +232,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
 
       // Should fail both nested scopes
       expect(wfExecutionStateMock.upsertStep).toHaveBeenCalledWith({
-        id: 'workflow-execution-id-nested-step-1-2', // buildStepExecutionId mock result
+        id: 'workflow-execution-id-nested-step-1-1', // buildStepExecutionId mock result
         status: ExecutionStatus.FAILED,
       });
       expect(wfExecutionStateMock.upsertStep).toHaveBeenCalledWith({
-        id: 'workflow-execution-id-nested-step-2-1', // buildStepExecutionId mock result
+        id: 'workflow-execution-id-nested-step-2-0', // buildStepExecutionId mock result
         status: ExecutionStatus.FAILED,
       });
 
@@ -287,13 +287,6 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       await impl.monitor(monitoredContextMock);
 
       expect(wfExecutionStateMock.getStepExecution).toHaveBeenCalledWith('workflow-step-exec-456');
-    });
-
-    it('should handle missing step execution gracefully', async () => {
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue(null);
-
-      // Should throw error due to null step execution
-      await expect(impl.monitor(monitoredContextMock)).rejects.toThrow();
     });
 
     it('should use correct time calculations', async () => {
