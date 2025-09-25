@@ -72,18 +72,44 @@ class SlowTestReporter extends BaseReporter {
     const sortedTests = [...this._slowTests].sort((a, b) => b.duration - a.duration);
     const testsToShow = sortedTests.slice(0, DEFAULTS.MAX_TESTS_SHOWN);
 
-    testsToShow.forEach((test) => this._logSlowTest(test));
+    // Group tests by file path
+    const testsByFile = testsToShow.reduce((acc, test) => {
+      const filePath = this._getRelativePath(test.filePath);
+      if (!acc[filePath]) {
+        acc[filePath] = [];
+      }
+      acc[filePath].push(test);
+      return acc;
+    }, {});
+
+    // Log tests grouped by file
+    Object.entries(testsByFile).forEach(([filePath, tests]) => {
+      this._logFileHeader(filePath);
+      tests.forEach((test) => this._logSlowTestUnderFile(test));
+    });
 
     const remainingCount = this._slowTests.length - DEFAULTS.MAX_TESTS_SHOWN;
     if (remainingCount > 0) {
-      const message = `  ... and ${remainingCount} others`;
+      const message = ` ... and ${remainingCount} others`;
       this.log(this._colorText(message, COLORS.GREY));
     }
 
     // Add the timing guidance note at the end
     const note = `Timing varies between machines - use as approximate guidance`;
     this.log('');
-    this.log(this._colorText(note, `  ℹ️  ${COLORS.GREY}${COLORS.ITALIC}`));
+    this.log(this._colorText(note, ` ℹ️  ${COLORS.GREY}${COLORS.ITALIC}`));
+  }
+
+  _logFileHeader(filePath) {
+    const styledFilePath = this._formatFilePath(filePath);
+    this.log(` ${styledFilePath}`);
+  }
+
+  _logSlowTestUnderFile(test) {
+    const testName = this._colorText(test.fullName, COLORS.GREY);
+    const durationLabel = this._formatDurationLabel(test.duration);
+
+    this.log(`   • ${testName} ${durationLabel}`);
   }
 
   _logSlowTest(test) {
@@ -119,7 +145,7 @@ class SlowTestReporter extends BaseReporter {
   }
 
   _getRelativePath(fullPath) {
-    return fullPath.replace(new RegExp(`^${process.cwd()}`), '.');
+    return fullPath.replace(new RegExp(`^${process.cwd()}/`), '');
   }
 
   _colorText(text, color) {
