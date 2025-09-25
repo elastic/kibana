@@ -25,29 +25,7 @@ export interface ActionCardProps {
    */
   action: Record<string, NoDataPageActions>;
 }
-
-export interface NoDataPageProps extends CommonProps, ActionCardProps {
-  /**
-   * Single name for the current solution, used to auto-generate the title, logo, description, and button label
-   */
-  solution: string;
-  /**
-   * Required in "kibana" flavor to set the docs link for the whole solution, otherwise optional
-   */
-  docsLink?: string;
-  /**
-   * Optionally replace the auto-generated logo
-   */
-  logo?: string;
-  /**
-   * Optionally replace the auto-generated page title (h1)
-   */
-  pageTitle?: string;
-  /**
-   * Optionally replace the auto-generated page description
-   */
-  pageDescription?: string;
-}
+export interface NoDataPageProps extends CommonProps, ActionCardProps {}
 
 /**
  * A list of services that are consumed by this component.
