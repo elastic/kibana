@@ -93,7 +93,7 @@ class MyPlugin {
     onechat.tools.register({
       id: 'my_tool',
       description: 'My very first tool',
-      tags: [],
+      tags: ['foo', 'bar'],
       schema: z.object({
         someNumber: z.number().describe('Some random number'),
       }),
