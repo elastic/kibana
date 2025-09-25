@@ -48,7 +48,7 @@ export function getContextSchemaForPath(
   );
 
   for (const enrichment of enrichments) {
-    schema = schema.extend({ [enrichment.key]: enrichment.value.optional() });
+    schema = schema.extend({ [enrichment.key]: enrichment.value });
   }
 
   return schema;
