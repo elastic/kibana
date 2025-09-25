@@ -6,10 +6,10 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { injectReferences } from '../../../../common/migrations/references';
 import type { MapItem } from '../../../../common/content_management';
 import type { MapAttributes } from './map_attributes_schema';
 import type { StoredMapAttributes } from '../../../saved_objects/types';
+import { transformMapAttributesOut } from '../../../../common/content_management/transform_map_attributes_out';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -37,16 +37,7 @@ export function savedObjectToItem(
   const { references, attributes, ...rest } = savedObject;
   return {
     ...rest,
-    attributes: transformMapOut(attributes as MapAttributes, references ?? []),
+    attributes: transformMapAttributesOut(attributes as MapAttributes, references ?? []),
     references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
-}
-
-function transformMapOut(storedMapState: StoredMapAttributes, references: SavedObjectReference[]) {
-  const { attributes } = injectReferences({
-    attributes: storedMapState,
-    references: references ?? [],
-  });
-  // TODO convert stringified JSON to objects
-  return attributes;
 }
