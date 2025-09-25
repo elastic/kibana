@@ -117,7 +117,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         <Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             style={{ maxWidth: 400 }}
             title={
               <FormattedMessage
@@ -262,7 +262,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
 
           <EuiModalBody>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               style={{ maxWidth: 400 }}
               title={
                 <FormattedMessage

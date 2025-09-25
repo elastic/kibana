@@ -237,7 +237,7 @@ export const DeprecationDetailsFlyout = ({
             {correctiveActions.api && (
               <>
                 <EuiCallOut
-                  announceOnMount
+                  announceOnMount={false}
                   title={i18nTexts.quickResolveCalloutTitle}
                   color="primary"
                   iconType="info"

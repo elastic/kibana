@@ -170,7 +170,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         {!isSlmRunning ? (
           <Fragment>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.slmWarningTitle"

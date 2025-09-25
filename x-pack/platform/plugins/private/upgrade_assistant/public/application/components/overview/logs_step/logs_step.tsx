@@ -198,7 +198,7 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
 
         {privilegesMissing.cluster && (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             iconType="question"
             color="warning"
             title={i18nTexts.missingClusterPrivilegesTitle}
@@ -212,7 +212,7 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
 
         {privilegesMissing.index && (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             iconType="question"
             color="warning"
             title={i18nTexts.missingIndexPrivilegesTitle}
@@ -232,7 +232,7 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
   if (hasPrivileges && error) {
     return (
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={i18nTexts.loadingError}
         color="danger"
         iconType="warning"

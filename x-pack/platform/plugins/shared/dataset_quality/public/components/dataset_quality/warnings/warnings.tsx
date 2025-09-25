@@ -94,7 +94,7 @@ export default function Warnings() {
       {!loading && nonAggregatableDatasets.length > 0 && (
         <EuiFlexItem>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={nonAggregatableWarningTitle}
             color="warning"
             iconType="warning"

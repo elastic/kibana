@@ -62,7 +62,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       {isManagedPolicy ? (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             size="s"
             color="warning"
             iconType="info"

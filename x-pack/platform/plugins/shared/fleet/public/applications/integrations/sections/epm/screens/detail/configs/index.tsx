@@ -115,7 +115,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 <>
                   <EuiSpacer size="s" />
                   <EuiCallOut
-                    announceOnMount
+                    announceOnMount={false}
                     data-test-subj="configsTab.notInstalled"
                     title={
                       <FormattedMessage

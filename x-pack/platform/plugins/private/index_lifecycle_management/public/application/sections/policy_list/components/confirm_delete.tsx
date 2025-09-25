@@ -89,7 +89,7 @@ export class ConfirmDelete extends Component<Props> {
       >
         {isManagedPolicy ? (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutTitle"

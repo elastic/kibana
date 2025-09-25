@@ -189,7 +189,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
         {isManagedRepository ? (
           <Fragment>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               size="s"
               color="warning"
               iconType="info"

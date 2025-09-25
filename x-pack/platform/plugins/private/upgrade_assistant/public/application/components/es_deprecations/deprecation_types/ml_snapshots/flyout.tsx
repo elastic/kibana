@@ -216,7 +216,7 @@ export const FixSnapshotsFlyout = ({
         {mlUpgradeModeEnabled && (
           <>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={i18nTexts.upgradeModeEnabledErrorTitle}
               color="warning"
               iconType="warning"

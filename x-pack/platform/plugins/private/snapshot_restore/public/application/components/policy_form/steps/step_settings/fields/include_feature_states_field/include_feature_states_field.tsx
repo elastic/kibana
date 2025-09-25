@@ -108,7 +108,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
             />
           ) : (
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               color="warning"
               iconType="warning"
               title={
