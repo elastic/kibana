@@ -18,7 +18,7 @@ export interface InternalToolDefinition<
   /**
    * The zod schema attached to this tool.
    */
-  schema: TSchema;
+  schema: TSchema | (() => MaybePromise<TSchema>);
   /**
    * Run handler that can be used to execute the tool.
    */
