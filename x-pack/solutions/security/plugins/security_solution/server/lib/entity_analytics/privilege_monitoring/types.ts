@@ -21,4 +21,4 @@ export interface PrivMonIntegrationsUser extends PrivMonBulkUser {
   labels: Record<string, unknown>;
 }
 
-export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';
+export type MonitoringEntitySyncType = 'entity_analytics_integration' | 'index';
