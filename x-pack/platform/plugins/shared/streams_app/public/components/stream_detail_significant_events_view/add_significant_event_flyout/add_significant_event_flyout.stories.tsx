@@ -53,6 +53,13 @@ export const Edit: StoryFn<{}> = () => {
         kql: {
           query: 'message:"cmp=com.tencent.qqmusic/.business.lockscreen.LockScreenActivity"',
         },
+        system: {
+          name: 'Test system',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+        },
       }}
     />
   );
