@@ -508,10 +508,11 @@ export const StepDataSchema = z.object({
 });
 export type StepData = z.infer<typeof StepDataSchema>;
 
+const ForEachContextItemSchema = z.unknown();
 export const ForEachContextSchema = z.object({
-  items: z.array(z.any()),
+  items: z.array(ForEachContextItemSchema),
   index: z.number().int(),
-  item: z.any(),
+  item: ForEachContextItemSchema,
   total: z.number().int(),
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;

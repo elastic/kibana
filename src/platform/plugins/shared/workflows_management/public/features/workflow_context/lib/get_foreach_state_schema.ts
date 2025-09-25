@@ -18,17 +18,22 @@ export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachStep: EnterForeachNodeConfiguration
 ) {
+  const itemSchema = z.unknown();
   const iterateOverPath =
     parseVariablePath(foreachStep.foreach)?.propertyPath || foreachStep.foreach;
-  let itemSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
-  if (!itemSchema) {
-    itemSchema = z.unknown();
-  } else if (itemSchema instanceof z.ZodArray) {
-    itemSchema = itemSchema.element;
+  let iterableSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
+  if (!iterableSchema) {
+    return ForEachContextSchema.extend({
+      item: itemSchema,
+      items: z.array(itemSchema),
+    });
+  }
+  if (iterableSchema instanceof z.ZodArray) {
+    iterableSchema = iterableSchema.element;
   } else {
     throw new Error(
       `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
-        itemSchema
+        iterableSchema
       )}`
     );
   }
