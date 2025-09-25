@@ -29262,6 +29262,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29338,6 +29340,7 @@ paths:
                                 - elasticsearch
                               type: string
                             write_to_logs_streams:
+                              nullable: true
                               type: boolean
                           required:
                             - name
@@ -29405,6 +29408,8 @@ paths:
                                     - additionalProperties: true
                                       type: object
                                       properties:
+                                        hash:
+                                          type: string
                                         id:
                                           type: string
                                       required:
@@ -29419,6 +29424,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29502,6 +29509,7 @@ paths:
                                 - remote_elasticsearch
                               type: string
                             write_to_logs_streams:
+                              nullable: true
                               type: boolean
                           required:
                             - name
@@ -29558,6 +29566,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29633,8 +29643,6 @@ paths:
                               enum:
                                 - logstash
                               type: string
-                            write_to_logs_streams:
-                              type: boolean
                           required:
                             - name
                             - type
@@ -29811,6 +29819,8 @@ paths:
                                     - additionalProperties: true
                                       type: object
                                       properties:
+                                        hash:
+                                          type: string
                                         id:
                                           type: string
                                       required:
@@ -29825,6 +29835,8 @@ paths:
                                         - additionalProperties: true
                                           type: object
                                           properties:
+                                            hash:
+                                              type: string
                                             id:
                                               type: string
                                           required:
@@ -29920,8 +29932,6 @@ paths:
                                 - not: {}
                             version:
                               type: string
-                            write_to_logs_streams:
-                              type: boolean
                           required:
                             - name
                             - type
@@ -30045,6 +30055,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30121,6 +30133,7 @@ paths:
                         - elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                   required:
                     - name
@@ -30188,6 +30201,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -30202,6 +30217,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30285,6 +30302,7 @@ paths:
                         - remote_elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                   required:
                     - name
@@ -30341,6 +30359,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30416,8 +30436,6 @@ paths:
                       enum:
                         - logstash
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - type
@@ -30594,6 +30612,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -30608,6 +30628,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -30703,8 +30725,6 @@ paths:
                         - not: {}
                     version:
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - type
@@ -30784,6 +30804,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -30860,6 +30882,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -30927,6 +30950,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -30941,6 +30966,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31024,6 +31051,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -31080,6 +31108,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31155,8 +31185,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -31333,6 +31361,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -31347,6 +31377,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31442,8 +31474,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -31635,6 +31665,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31711,6 +31743,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -31778,6 +31811,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -31792,6 +31827,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -31875,6 +31912,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -31931,6 +31969,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -32006,8 +32046,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -32184,6 +32222,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -32198,6 +32238,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -32293,8 +32335,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -32411,6 +32451,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32487,6 +32529,7 @@ paths:
                         - elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -32548,6 +32591,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -32562,6 +32607,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32645,6 +32692,7 @@ paths:
                         - remote_elasticsearch
                       type: string
                     write_to_logs_streams:
+                      nullable: true
                       type: boolean
                 - additionalProperties: false
                   type: object
@@ -32695,6 +32743,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -32770,8 +32820,6 @@ paths:
                       enum:
                         - logstash
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32944,6 +32992,8 @@ paths:
                             - additionalProperties: false
                               type: object
                               properties:
+                                hash:
+                                  type: string
                                 id:
                                   type: string
                               required:
@@ -32958,6 +33008,8 @@ paths:
                                 - additionalProperties: false
                                   type: object
                                   properties:
+                                    hash:
+                                      type: string
                                     id:
                                       type: string
                                   required:
@@ -33053,8 +33105,6 @@ paths:
                         - not: {}
                     version:
                       type: string
-                    write_to_logs_streams:
-                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -33131,6 +33181,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33207,6 +33259,7 @@ paths:
                               - elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -33274,6 +33327,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -33288,6 +33343,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33371,6 +33428,7 @@ paths:
                               - remote_elasticsearch
                             type: string
                           write_to_logs_streams:
+                            nullable: true
                             type: boolean
                         required:
                           - name
@@ -33427,6 +33485,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33502,8 +33562,6 @@ paths:
                             enum:
                               - logstash
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -33680,6 +33738,8 @@ paths:
                                   - additionalProperties: true
                                     type: object
                                     properties:
+                                      hash:
+                                        type: string
                                       id:
                                         type: string
                                     required:
@@ -33694,6 +33754,8 @@ paths:
                                       - additionalProperties: true
                                         type: object
                                         properties:
+                                          hash:
+                                            type: string
                                           id:
                                             type: string
                                         required:
@@ -33789,8 +33851,6 @@ paths:
                               - not: {}
                           version:
                             type: string
-                          write_to_logs_streams:
-                            type: boolean
                         required:
                           - name
                           - type
@@ -46189,6 +46249,146 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      system:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          filter:
+                                            anyOf:
+                                              - anyOf:
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      contains:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      endsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      eq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      neq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      range:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                      startsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                    required:
+                                                      - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      exists:
+                                                        type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                    required:
+                                                      - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  and:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - and
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  or:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - or
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  not: {}
+                                                required:
+                                                  - not
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  never:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - never
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  always:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - always
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
                                     required:
                                       - kql
                               type: array
@@ -47935,6 +48135,146 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      system:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          filter:
+                                            anyOf:
+                                              - anyOf:
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      contains:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      endsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      eq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      neq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      range:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                      startsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                    required:
+                                                      - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      exists:
+                                                        type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                    required:
+                                                      - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  and:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - and
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  or:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - or
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  not: {}
+                                                required:
+                                                  - not
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  never:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - never
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  always:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - always
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
                                     required:
                                       - kql
                               type: array
@@ -49457,6 +49797,146 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      system:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          filter:
+                                            anyOf:
+                                              - anyOf:
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      contains:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      endsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      eq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      neq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      range:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                      startsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                    required:
+                                                      - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      exists:
+                                                        type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                    required:
+                                                      - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  and:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - and
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  or:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - or
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  not: {}
+                                                required:
+                                                  - not
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  never:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - never
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  always:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - always
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
                                     required:
                                       - kql
                               type: array
@@ -51053,6 +51533,146 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      system:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          filter:
+                                            anyOf:
+                                              - anyOf:
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      contains:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      endsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      eq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      neq:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      range:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                      startsWith:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                    required:
+                                                      - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      exists:
+                                                        type: boolean
+                                                      field:
+                                                        minLength: 1
+                                                        type: string
+                                                    required:
+                                                      - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  and:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - and
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  or:
+                                                    items: {}
+                                                    type: array
+                                                required:
+                                                  - or
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  not: {}
+                                                required:
+                                                  - not
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  never:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - never
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  always:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties: {}
+                                                required:
+                                                  - always
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
                                     required:
                                       - kql
                               type: array
@@ -52575,6 +53195,146 @@ paths:
                                         type: string
                                     required:
                                       - query
+                                  system:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      filter:
+                                        anyOf:
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  contains:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  endsWith:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  eq:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  gt:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  gte:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  lt:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  lte:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  neq:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  range:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                  startsWith:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                required:
+                                                  - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  exists:
+                                                    type: boolean
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                required:
+                                                  - field
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              and:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - and
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              or:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - or
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              not: {}
+                                            required:
+                                              - not
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              never:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - never
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              always:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - always
+                                      name:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - name
+                                      - filter
                                 required:
                                   - kql
                           type: array
@@ -56154,6 +56914,8 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            mappings:
+                              type: boolean
                             queries:
                               items:
                                 additionalProperties: false
@@ -56176,6 +56938,7 @@ paths:
                                       - destination
                               type: array
                           required:
+                            - mappings
                             - queries
                             - routing
                       required:
@@ -56493,6 +57256,146 @@ paths:
                                         type: string
                                     required:
                                       - query
+                                  system:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      filter:
+                                        anyOf:
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  contains:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  endsWith:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  eq:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  gt:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  gte:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  lt:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  lte:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  neq:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                  range:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      gt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      gte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lt:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                      lte:
+                                                        anyOf:
+                                                          - type: string
+                                                          - type: number
+                                                          - type: boolean
+                                                  startsWith:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                required:
+                                                  - field
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  exists:
+                                                    type: boolean
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                required:
+                                                  - field
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              and:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - and
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              or:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - or
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              not: {}
+                                            required:
+                                              - not
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              never:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - never
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              always:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - always
+                                      name:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - name
+                                      - filter
                                 required:
                                   - kql
                         required:
@@ -56599,6 +57502,146 @@ paths:
                       type: string
                   required:
                     - query
+                system:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    filter:
+                      anyOf:
+                        - anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                contains:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                endsWith:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                eq:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                field:
+                                  minLength: 1
+                                  type: string
+                                gt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                gte:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                lt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                lte:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                neq:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                                range:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    gt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    gte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                startsWith:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: boolean
+                              required:
+                                - field
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                exists:
+                                  type: boolean
+                                field:
+                                  minLength: 1
+                                  type: string
+                              required:
+                                - field
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            and:
+                              items: {}
+                              type: array
+                          required:
+                            - and
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            or:
+                              items: {}
+                              type: array
+                          required:
+                            - or
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            not: {}
+                          required:
+                            - not
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            never:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - never
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            always:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - always
+                    name:
+                      minLength: 1
+                      type: string
+                  required:
+                    - name
+                    - filter
                 title:
                   minLength: 1
                   type: string
@@ -56872,6 +57915,146 @@ paths:
                           type: string
                       required:
                         - query
+                    system:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        filter:
+                          anyOf:
+                            - anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    contains:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    endsWith:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    eq:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    field:
+                                      minLength: 1
+                                      type: string
+                                    gt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    gte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    lte:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    neq:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                    range:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        gt:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                        gte:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                        lt:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                        lte:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                    startsWith:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                  required:
+                                    - field
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    exists:
+                                      type: boolean
+                                    field:
+                                      minLength: 1
+                                      type: string
+                                  required:
+                                    - field
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                and:
+                                  items: {}
+                                  type: array
+                              required:
+                                - and
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                or:
+                                  items: {}
+                                  type: array
+                              required:
+                                - or
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                not: {}
+                              required:
+                                - not
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                never:
+                                  additionalProperties: false
+                                  type: object
+                                  properties: {}
+                              required:
+                                - never
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                always:
+                                  additionalProperties: false
+                                  type: object
+                                  properties: {}
+                              required:
+                                - always
+                        name:
+                          minLength: 1
+                          type: string
+                      required:
+                        - name
+                        - filter
                   required:
                     - kql
               required:
