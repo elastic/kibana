@@ -12,18 +12,11 @@ import { DimensionType } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
 import type { RuleFormData } from '@kbn/response-ops-rule-form';
-import {
-  ES_QUERY_DEFAULT_VALUES,
-  type EsQueryRuleParams,
-} from '@kbn/response-ops-rule-params/es_query';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { getRuleFlyoutComponent } from './rule_flyout_component';
 import { buildAdditionalQuery } from './build_additional_query';
 import type { ServiceDependencies } from './rule_flyout_component';
-import { replaceTStartTend } from './replace_tstart_tend';
-
-const timeWindowSize = ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE;
-const timeWindowUnit = ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT;
 
 export const loadAlertRuleFlyoutContent = async ({
   embeddable,
@@ -49,9 +42,7 @@ export const loadAlertRuleFlyoutContent = async ({
       }
     : getDataFromEmbeddable(embeddable);
 
-  let query = embeddableData.query;
-  query = replaceTStartTend(query, timeWindowSize, timeWindowUnit);
-
+  const { query } = embeddableData;
   const datatable = getDataTableFromEmbeddable(embeddable);
   const dataView = query
     ? undefined
@@ -82,8 +73,6 @@ export const loadAlertRuleFlyoutContent = async ({
           esql: `// ${queryHeader}\n${query}\n${additionalQuery}`,
         },
         timeField,
-        timeWindowSize,
-        timeWindowUnit,
       },
     };
   } else {
@@ -115,8 +104,6 @@ export const loadAlertRuleFlyoutContent = async ({
           esql,
         },
         timeField,
-        timeWindowSize,
-        timeWindowUnit,
       },
     };
   }

@@ -131,42 +131,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
-        },
-        "tags": Array [],
-      }
-    `);
-  });
-
-  it("creates a rule with the visualization's ES|QL query plus an additional threshold line with replaced tstart tend values", async () => {
-    await act(
-      async () =>
-        await action.execute({
-          embeddable: embeddableMock,
-          data: {
-            query:
-              'FROM index | STATS count = COUNT(*) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
-            thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
-            xValues: {},
-          },
-        })
-    );
-
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "name": "Elasticsearch query rule from visualization",
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*) BY BUCKET(@timestamp, 100, NOW() - 5 minutes, NOW())
-      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE count >= 210",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -198,8 +162,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -232,8 +194,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -267,8 +227,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -299,8 +257,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -339,8 +295,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -376,8 +330,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -418,8 +370,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -462,8 +412,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -504,8 +452,6 @@ describe('AlertRuleFromVisAction', () => {
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "m",
         },
         "tags": Array [],
       }
@@ -576,8 +522,6 @@ describe('AlertRuleFromVisAction', () => {
             },
             "searchType": "esqlQuery",
             "timeField": "timestamp",
-            "timeWindowSize": 5,
-            "timeWindowUnit": "m",
           },
           "tags": Array [],
         }
@@ -648,8 +592,6 @@ describe('AlertRuleFromVisAction', () => {
             },
             "searchType": "esqlQuery",
             "timeField": "timestamp",
-            "timeWindowSize": 5,
-            "timeWindowUnit": "m",
           },
           "tags": Array [],
         }

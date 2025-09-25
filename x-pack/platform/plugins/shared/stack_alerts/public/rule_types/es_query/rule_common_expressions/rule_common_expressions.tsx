@@ -21,8 +21,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { builtInGroupByTypes } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { ES_QUERY_DEFAULT_VALUES } from '@kbn/response-ops-rule-params/es_query';
 import type { CommonRuleParams } from '../types';
+import { DEFAULT_VALUES } from '../constants';
 import type { TestQueryRowProps } from '../test_query_row';
 import { TestQueryRow } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
@@ -116,7 +116,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         <WhenExpression
           display="fullWidth"
           data-test-subj="whenExpression"
-          aggType={aggType ?? ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE}
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
           onChangeSelectedAggType={onChangeSelectedAggType}
         />
       </EuiFormRow>
@@ -132,7 +132,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         />
       ) : null}
       <GroupByExpression
-        groupBy={groupBy || ES_QUERY_DEFAULT_VALUES.GROUP_BY}
+        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
         data-test-subj="groupByExpression"
         termField={termField}
         termSize={termSize}
@@ -146,8 +146,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       />
       <ThresholdExpression
         data-test-subj="thresholdExpression"
-        thresholdComparator={thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-        threshold={threshold ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD}
+        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
         errors={errors}
         display="fullWidth"
         popupPosition="upLeft"
@@ -157,8 +157,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <ForLastExpression
         data-test-subj="forLastExpression"
         popupPosition="upLeft"
-        timeWindowSize={timeWindowSize ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE}
-        timeWindowUnit={timeWindowUnit ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT}
+        timeWindowSize={timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE}
+        timeWindowUnit={timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT}
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={onChangeWindowSize}

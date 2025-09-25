@@ -10,13 +10,10 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import {
-  ES_QUERY_DEFAULT_VALUES,
-  ES_QUERY_SERVERLESS_DEFAULT_VALUES,
-} from '@kbn/response-ops-rule-params/es_query';
 import type { EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
@@ -83,20 +80,18 @@ export const SearchSourceExpression = ({
           searchConfiguration: initialSearchConfiguration,
           timeField: createdSearchSource.getField('index')?.timeFieldName,
           searchType: SearchType.searchSource,
-          timeWindowSize: timeWindowSize ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_SIZE,
-          timeWindowUnit: timeWindowUnit ?? ES_QUERY_DEFAULT_VALUES.TIME_WINDOW_UNIT,
-          threshold: threshold ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD,
-          thresholdComparator: thresholdComparator ?? ES_QUERY_DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-          size:
-            size ??
-            (isServerless ? ES_QUERY_SERVERLESS_DEFAULT_VALUES.SIZE : ES_QUERY_DEFAULT_VALUES.SIZE),
-          aggType: aggType ?? ES_QUERY_DEFAULT_VALUES.AGGREGATION_TYPE,
+          timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+          timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+          threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+          thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+          size: size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
+          aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
           aggField,
-          groupBy: groupBy ?? ES_QUERY_DEFAULT_VALUES.GROUP_BY,
+          groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
           termField,
-          termSize: termSize ?? ES_QUERY_DEFAULT_VALUES.TERM_SIZE,
+          termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
           excludeHitsFromPreviousRun:
-            excludeHitsFromPreviousRun ?? ES_QUERY_DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+            excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
           // The sourceFields param is ignored
           sourceFields: [],
         });
@@ -119,7 +114,7 @@ export const SearchSourceExpression = ({
   if (paramsError) {
     return (
       <>
-        <EuiCallOut announceOnMount color="danger" iconType="warning">
+        <EuiCallOut color="danger" iconType="warning">
           <p>{paramsError.message}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

@@ -5,6 +5,28 @@
  * 2.0.
  */
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
+export const DEFAULT_VALUES = {
+  THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
+  QUERY: `{
+    "query":{
+      "match_all" : {}
+    }
+  }`,
+  SIZE: 100,
+  TIME_WINDOW_SIZE: 5,
+  TIME_WINDOW_UNIT: 'm',
+  THRESHOLD: [1000],
+  AGGREGATION_TYPE: 'count',
+  TERM_SIZE: 5,
+  GROUP_BY: 'all',
+  EXCLUDE_PREVIOUS_HITS: false,
+  CAN_SELECT_MULTI_TERMS: true,
+};
+export const SERVERLESS_DEFAULT_VALUES = {
+  SIZE: 10,
+};
+
 export const COMMON_EXPRESSION_ERRORS = {
   searchType: new Array<string>(),
   threshold0: new Array<string>(),

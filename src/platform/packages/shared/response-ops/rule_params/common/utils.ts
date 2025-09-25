@@ -22,14 +22,6 @@ export type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 const TimeWindowUnits = new Set(['s', 'm', 'h', 'd']);
 const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
-
-export const TimeWindowUnitNames = {
-  s: 'seconds',
-  m: 'minutes',
-  h: 'hours',
-  d: 'days',
-};
-
 export const betweenComparators = new Set(['between', 'notBetween']);
 export const jobsSelectionSchema = schema.object(
   {
