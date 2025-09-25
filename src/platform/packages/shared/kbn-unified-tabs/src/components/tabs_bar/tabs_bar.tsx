@@ -100,6 +100,15 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     const moveFocusToItemIdRef = useRef<string | null>(null);
     const hasSentMaxReachedEventRef = useRef(false);
 
+    const emitOnKeyUsedEvent = useCallback(
+      (key: string) => {
+        onEvent('tabsKeyboardShortcutsUsed', {
+          keyUsed: key,
+        });
+      },
+      [onEvent]
+    );
+
     const moveFocusToNextSelectedItem = useCallback((item: TabItem) => {
       moveFocusToItemIdRef.current = item.id;
     }, []);
@@ -186,10 +195,8 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex > 0 ? selectedItemIndex - 1 : lastItemIndex
           );
+          emitOnKeyUsedEvent(event.key);
 
-          onEvent('tabsKeyboardShortcutsUsed', {
-            keyUsed: event.key,
-          });
           return;
         }
 
@@ -198,27 +205,24 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             selectedItemIndex < lastItemIndex ? selectedItemIndex + 1 : firstItemIndex
           );
 
-          onEvent('tabsKeyboardShortcutsUsed', {
-            keyUsed: event.key,
-          });
+          emitOnKeyUsedEvent(event.key);
+
           return;
         }
 
         if (event.key === keys.HOME && items.length > 0) {
           await selectAndMoveFocusToItemIndex(0);
 
-          onEvent('tabsKeyboardShortcutsUsed', {
-            keyUsed: event.key,
-          });
+          emitOnKeyUsedEvent(event.key);
+
           return;
         }
 
         if (event.key === keys.END && items.length > 0) {
           await selectAndMoveFocusToItemIndex(lastItemIndex);
 
-          onEvent('tabsKeyboardShortcutsUsed', {
-            keyUsed: event.key,
-          });
+          emitOnKeyUsedEvent(event.key);
+
           return;
         }
 
@@ -229,13 +233,12 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         ) {
           await onClose?.(selectedItem);
 
-          onEvent('tabsKeyboardShortcutsUsed', {
-            keyUsed: event.key,
-          });
+          emitOnKeyUsedEvent(event.key);
+
           return;
         }
       },
-      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose, onEvent]
+      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose, emitOnKeyUsedEvent]
     );
 
     const mainTabsBarContent = (
