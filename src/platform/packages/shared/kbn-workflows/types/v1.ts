@@ -103,6 +103,7 @@ export interface EsWorkflowStepExecution {
   id: string;
   stepId: string;
   stepType?: string;
+  isInternalStep?: boolean;
 
   /** Current step's stack frames. */
   scopeStack: StackFrame[];
