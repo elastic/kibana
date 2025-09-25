@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
@@ -30,6 +31,59 @@ interface Props {
 interface State {
   collapsed: boolean;
 }
+
+const CollapsiblePanelTitle = ({
+  iconType,
+  title,
+  collapsed,
+  toggleCollapsed,
+}: {
+  iconType?: IconType;
+  title: string | ReactNode;
+  collapsed?: boolean;
+  toggleCollapsed?: () => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle>
+          <h2>
+            {iconType && (
+              <Fragment>
+                <EuiIcon
+                  type={iconType}
+                  size="xl"
+                  css={css`
+                    margin-right: ${euiTheme.size.s};
+                    vertical-align: text-bottom;
+                  `}
+                />{' '}
+              </Fragment>
+            )}
+            {title}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink data-test-subj="showHidePrivilege" onClick={toggleCollapsed}>
+          {collapsed ? (
+            <FormattedMessage
+              id="xpack.security.management.editRole.collapsiblePanel.showLinkText"
+              defaultMessage="show"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.security.management.editRole.collapsiblePanel.hideLinkText"
+              defaultMessage="hide"
+            />
+          )}
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export class CollapsiblePanel extends Component<React.PropsWithChildren<Props>, State> {
   public state = {
@@ -54,42 +108,12 @@ export class CollapsiblePanel extends Component<React.PropsWithChildren<Props>, 
 
   public getTitle = () => {
     return (
-      <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {this.props.iconType && (
-                <Fragment>
-                  <EuiIcon
-                    type={this.props.iconType}
-                    size="xl"
-                    css={({ euiTheme }) => css`
-                      margin-right: ${euiTheme.size.s};
-                      vertical-align: text-bottom;
-                    `}
-                  />{' '}
-                </Fragment>
-              )}
-              {this.props.title}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink data-test-subj="showHidePrivilege" onClick={this.toggleCollapsed}>
-            {this.state.collapsed ? (
-              <FormattedMessage
-                id="xpack.security.management.editRole.collapsiblePanel.showLinkText"
-                defaultMessage="show"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.security.management.editRole.collapsiblePanel.hideLinkText"
-                defaultMessage="hide"
-              />
-            )}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CollapsiblePanelTitle
+        iconType={this.props.iconType}
+        title={this.props.title}
+        collapsed={this.state.collapsed}
+        toggleCollapsed={this.toggleCollapsed}
+      />
     );
   };
 

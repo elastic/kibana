@@ -623,12 +623,7 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBasePlain",
                   ],
                 },
-                "dataGridRowStripesBackgroundHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBasePlain",
-                  ],
-                },
+                "dataGridRowStripesBackgroundHover": "#1D2A3E",
                 "dataGridRowStripesBackgroundSelect": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -638,7 +633,7 @@ exports[`it renders without blowing up 1`] = `
                 "dataGridRowStripesBackgroundSelectHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
+                    "colors.backgroundBaseInteractiveSelectHover",
                   ],
                 },
                 "dataGridRowStripesBackgroundStriped": Computed {
@@ -647,12 +642,7 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBaseSubdued",
                   ],
                 },
-                "dataGridRowStripesBackgroundStripedHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSubdued",
-                  ],
-                },
+                "dataGridRowStripesBackgroundStripedHover": "#1D2A3E",
                 "dataGridVerticalLineBorderColor": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1069,12 +1059,7 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBasePlain",
                   ],
                 },
-                "dataGridRowStripesBackgroundHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBasePlain",
-                  ],
-                },
+                "dataGridRowStripesBackgroundHover": "#ECF1F9",
                 "dataGridRowStripesBackgroundSelect": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1084,7 +1069,7 @@ exports[`it renders without blowing up 1`] = `
                 "dataGridRowStripesBackgroundSelectHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
+                    "colors.backgroundBaseInteractiveSelectHover",
                   ],
                 },
                 "dataGridRowStripesBackgroundStriped": Computed {
@@ -1093,12 +1078,7 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBaseSubdued",
                   ],
                 },
-                "dataGridRowStripesBackgroundStripedHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSubdued",
-                  ],
-                },
+                "dataGridRowStripesBackgroundStripedHover": "#ECF1F9",
                 "dataGridVerticalLineBorderColor": Computed {
                   "computer": [Function],
                   "dependencies": Array [
