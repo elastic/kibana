@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
+import { css } from '@emotion/react';
 
-import { SnapshotRestoreUIPlugin } from './plugin';
-
-/** @public */
-export const plugin = (ctx: PluginInitializerContext) => {
-  return new SnapshotRestoreUIPlugin(ctx);
-};
+/*
+ * Allow toggle mode link in indices field label to be flushed right
+ */
+export const indicesFieldWrapperStyle = css`
+  .euiFormLabel {
+    width: 100%;
+  }
+`;
