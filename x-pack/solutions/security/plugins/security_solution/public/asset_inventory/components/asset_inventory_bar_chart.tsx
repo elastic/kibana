@@ -101,10 +101,12 @@ export const handleElementClick = (
   const subtype = datum[ASSET_FIELDS.ENTITY_SUB_TYPE];
   const type = datum[ASSET_FIELDS.ENTITY_TYPE];
 
-  const filters = [
-    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index),
-    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index),
-  ];
+  const filters = [createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index)];
+
+  // Only add sub_type filter if it's not "Unknown" (indicating missing field)
+  if (subtype && subtype !== 'Unknown') {
+    filters.push(createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index));
+  }
 
   setQuery({ filters });
 };

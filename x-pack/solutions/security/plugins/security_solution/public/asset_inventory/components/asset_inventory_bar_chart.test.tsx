@@ -9,7 +9,7 @@ import { ASSET_FIELDS } from '../constants';
 import { handleElementClick } from './asset_inventory_bar_chart';
 
 describe('handleElementClick', () => {
-  it('should call setQuery with the correct filters', () => {
+  it('should call setQuery with the correct filters when sub_type is present', () => {
     const setQuery = jest.fn();
 
     const mockDatum = {
@@ -46,6 +46,79 @@ describe('handleElementClick', () => {
           meta: expect.objectContaining({
             key: 'entity.sub_type',
             params: { query: 'host_sub_type' },
+          }),
+        }),
+      ],
+    });
+  });
+
+  it('should call setQuery with only entity.type filter when sub_type is "Unknown"', () => {
+    const setQuery = jest.fn();
+
+    const mockDatum = {
+      [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',
+      [ASSET_FIELDS.ENTITY_SUB_TYPE]: 'Unknown',
+      count: 1,
+    };
+
+    const mockGeometryValue = {
+      value: 'geometry-value',
+      datum: mockDatum,
+    };
+
+    const mockSeriesIdentifier = {
+      key: 'series-identifier',
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const elements: Array<[any, any]> = [[mockGeometryValue, mockSeriesIdentifier]];
+
+    const mockIndexId = 'mock-index-id';
+
+    handleElementClick(elements, setQuery, mockIndexId);
+
+    expect(setQuery).toHaveBeenCalledWith({
+      filters: [
+        expect.objectContaining({
+          meta: expect.objectContaining({
+            key: 'entity.type',
+            params: { query: 'host_type' },
+          }),
+        }),
+      ],
+    });
+  });
+
+  it('should call setQuery with only entity.type filter when sub_type is missing', () => {
+    const setQuery = jest.fn();
+
+    const mockDatum = {
+      [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',
+      count: 1,
+    };
+
+    const mockGeometryValue = {
+      value: 'geometry-value',
+      datum: mockDatum,
+    };
+
+    const mockSeriesIdentifier = {
+      key: 'series-identifier',
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const elements: Array<[any, any]> = [[mockGeometryValue, mockSeriesIdentifier]];
+
+    const mockIndexId = 'mock-index-id';
+
+    handleElementClick(elements, setQuery, mockIndexId);
+
+    expect(setQuery).toHaveBeenCalledWith({
+      filters: [
+        expect.objectContaining({
+          meta: expect.objectContaining({
+            key: 'entity.type',
+            params: { query: 'host_type' },
           }),
         }),
       ],
