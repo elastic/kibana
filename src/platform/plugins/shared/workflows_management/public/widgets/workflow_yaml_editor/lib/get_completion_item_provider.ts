@@ -11,7 +11,7 @@ import type { Scalar } from 'yaml';
 import { YAMLParseError, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
+// Types are inferred from the schemas, no need to import them explicitly
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -302,9 +302,17 @@ function getConnectorTypeFromPosition(model: any, position: any): string | null 
  */
 function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
   const currentLine = model.getLineContent(currentLineNumber);
-  const currentIndent = getIndentLevel(currentLine);
+  let currentIndent = getIndentLevel(currentLine);
 
   // Detecting if in with block
+
+  // Special handling for comment lines - they should be treated as if they're at the same level as parameters
+  // If current line is a comment, use the indentation that parameters would have
+  if (currentLine.trim().startsWith('#')) {
+    // For comment lines, we need to check if they're inside a with block
+    // Comments in with blocks typically have the same indentation as parameters would
+    // So we'll use the comment's indentation as-is, but be more flexible in detection
+  }
 
   // Look backwards to find a "with:" line
   for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {
@@ -320,11 +328,15 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
       // We're in the with block if:
       // 1. The with: line has LESS indentation than current line (we're inside the block)
       // 2. OR if we're on the with: line itself
+      // 3. OR if current line is a comment and has reasonable indentation relative to with:
       if (lineIndent < currentIndent) {
         // We are INSIDE with block
         return true;
       } else if (lineNumber === currentLineNumber) {
         // We are ON the with: line itself
+        return true;
+      } else if (currentLine.trim().startsWith('#') && currentIndent > lineIndent) {
+        // Current line is a comment with more indentation than with: - likely inside the block
         return true;
       } else {
         // with: line has same/more indentation, we are NOT inside this with block
@@ -339,7 +351,8 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
     }
 
     // Stop if we encounter a line with significantly less indentation (other major structure)
-    if (lineIndent < currentIndent && line.trim() !== '' && !line.includes('with:')) {
+    // But be more lenient with comment lines
+    if (lineIndent < currentIndent && line.trim() !== '' && !line.includes('with:') && !currentLine.trim().startsWith('#')) {
       // Hit major structure boundary
       break;
     }
@@ -420,7 +433,6 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
 
   // Now scan from the with line forward to collect existing parameters
   // Be more flexible with indentation - parameters should be indented MORE than with:
-  const minParamIndent = withIndent + 1; // At least 1 space more than with:
 
   for (let lineNumber = withLineNumber + 1; lineNumber <= model.getLineCount(); lineNumber++) {
     const line = model.getLineContent(lineNumber);
@@ -544,18 +556,30 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       return null;
     }
 
+    // Handle function-generated schemas (like the complex union schemas)
+    let actualSchema = connector.paramsSchema;
+    if (typeof connector.paramsSchema === 'function') {
+      try {
+        actualSchema = connector.paramsSchema();
+      } catch (error) {
+        // If function execution fails, cache null and return
+        connectorSchemaCache.set(connectorType, null);
+        return null;
+      }
+    }
+
     // Extract the shape from the Zod schema
-    if (connector.paramsSchema instanceof z.ZodObject) {
+    if (actualSchema instanceof z.ZodObject) {
       // Found paramsSchema for connector (simple object)
-      const result = connector.paramsSchema.shape;
+      const result = actualSchema.shape;
       connectorSchemaCache.set(connectorType, result);
       return result;
     }
     
     // Handle ZodUnion schemas (from our generic intersection fix)
-    if (connector.paramsSchema instanceof z.ZodUnion) {
+    if (actualSchema instanceof z.ZodUnion) {
       // For union schemas, extract common properties from all options
-      const unionOptions = connector.paramsSchema._def.options;
+      const unionOptions = actualSchema._def.options;
       const commonProperties: Record<string, any> = {};
       
       // Get properties that exist in ALL union options
@@ -580,6 +604,61 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       
       if (Object.keys(commonProperties).length > 0) {
         // Found common properties in union schema
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
+    }
+
+    // Handle ZodIntersection schemas (from complex union handling)
+    if (actualSchema instanceof z.ZodIntersection) {
+      // For intersection schemas, try to extract properties from both sides
+      const leftSchema = actualSchema._def.left;
+      const rightSchema = actualSchema._def.right;
+      
+      const allProperties: Record<string, any> = {};
+      
+      // Extract properties from left side
+      if (leftSchema instanceof z.ZodObject) {
+        Object.assign(allProperties, leftSchema.shape);
+      }
+      
+      // Extract properties from right side
+      if (rightSchema instanceof z.ZodObject) {
+        Object.assign(allProperties, rightSchema.shape);
+      }
+      
+      if (Object.keys(allProperties).length > 0) {
+        connectorSchemaCache.set(connectorType, allProperties);
+        return allProperties;
+      }
+    }
+
+    // Handle discriminated unions
+    if (actualSchema instanceof z.ZodDiscriminatedUnion) {
+      // For discriminated unions, extract common properties from all options
+      const unionOptions = Array.from(actualSchema._def.options.values());
+      const commonProperties: Record<string, any> = {};
+      
+      if (unionOptions.length > 0) {
+        const firstOption = unionOptions[0];
+        if (firstOption instanceof z.ZodObject) {
+          const firstShape = firstOption.shape;
+          
+          // Check each property in the first option
+          for (const [key, schema] of Object.entries(firstShape)) {
+            // Check if this property exists in ALL other options
+            const existsInAll = unionOptions.every((option: any) => {
+              return option instanceof z.ZodObject && option.shape[key];
+            });
+            
+            if (existsInAll) {
+              commonProperties[key] = schema;
+            }
+          }
+        }
+      }
+      
+      if (Object.keys(commonProperties).length > 0) {
         connectorSchemaCache.set(connectorType, commonProperties);
         return commonProperties;
       }
@@ -702,7 +781,7 @@ function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as any);
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -773,7 +852,7 @@ function getTriggerTypeSuggestions(
   );
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type as TriggerType);
+    const snippetText = generateTriggerSnippet(triggerType.type as any);
 
     // Extended range for multi-line insertion
     const extendedRange = {
@@ -1022,26 +1101,36 @@ export function getCompletionItemProvider(
 
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {
-          // Check if we're typing a value (after colon with content)
-          const colonIndex = lineUpToCursor.lastIndexOf(':');
+          // Special case: if we're on a comment line in a with block, skip value detection
+          // and go straight to showing connector parameters
+          const currentLine = model.getLineContent(lineNumber);
+          const isOnCommentLine = currentLine.trim().startsWith('#');
+          
+          if (isOnCommentLine) {
+            // We're on a comment line in a with block - show connector parameters
+            // Skip the value position detection and go straight to parameter suggestions
+            // This will fall through to the connector parameter suggestions below
+          } else {
+            // Check if we're typing a value (after colon with content)
+            const colonIndex = lineUpToCursor.lastIndexOf(':');
 
-          // More precise detection: are we actually in a value position?
-          // We are in value position if:
-          // 1. There's a colon in the line
-          // 2. There's non-whitespace content after the colon (we're editing a value)
-          // 3. OR if the cursor is right after ": " (ready to type value)
-          const isInValuePosition =
-            colonIndex !== -1 &&
-            // Pattern 1: "key: value" where cursor is in/after value
-            (/:\s+\S/.test(lineUpToCursor) ||
-              // Pattern 2: "key: " where cursor is right after the space (about to type value)
-              lineUpToCursor.endsWith(': ') ||
-              // Pattern 3: "key:" where cursor is right after colon
-              lineUpToCursor.endsWith(':'));
+            // More precise detection: are we actually in a value position?
+            // We are in value position if:
+            // 1. There's a colon in the line
+            // 2. There's non-whitespace content after the colon (we're editing a value)
+            // 3. OR if the cursor is right after ": " (ready to type value)
+            const isInValuePosition =
+              colonIndex !== -1 &&
+              // Pattern 1: "key: value" where cursor is in/after value
+              (/:\s+\S/.test(lineUpToCursor) ||
+                // Pattern 2: "key: " where cursor is right after the space (about to type value)
+                lineUpToCursor.endsWith(': ') ||
+                // Pattern 3: "key:" where cursor is right after colon
+                lineUpToCursor.endsWith(':'));
 
-          // Analyzing cursor position
+            // Analyzing cursor position
 
-          if (isInValuePosition) {
+            if (isInValuePosition) {
             // Typing value after colon, not suggesting parameter names
 
             // Extract the parameter name more carefully
@@ -1115,6 +1204,7 @@ export function getCompletionItemProvider(
               suggestions: [],
               incomplete: false,
             };
+            }
           }
 
           // Continue to show connector parameters for manual triggers or when typing parameter names
