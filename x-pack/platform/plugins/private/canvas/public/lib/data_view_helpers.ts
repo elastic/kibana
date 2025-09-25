@@ -11,7 +11,7 @@ import { ErrorStrings } from '../../i18n';
 
 export const getDataViews = async () => {
   try {
-    return await dataViewsService.getIdsWithTitle();
+    return await dataViewsService.getSavedIdsWithTitle();
   } catch (e) {
     const { esService: strings } = ErrorStrings;
     getCanvasNotifyService().error(e, { title: strings.getIndicesFetchErrorMessage() });

@@ -23,7 +23,7 @@ export function useCreateDataView({ indexPatternString }: UseCreateDataViewProps
 
   useEffect(() => {
     const retrieveOrCreateDataView = async (indexPattern: string) => {
-      const existingDataView = await dataViews.getIdsWithTitle();
+      const existingDataView = await dataViews.getSavedIdsWithTitle();
       const foundDataView = existingDataView.find((dv) => dv.title === indexPattern);
       if (foundDataView) {
         return dataViews.get(foundDataView.id);

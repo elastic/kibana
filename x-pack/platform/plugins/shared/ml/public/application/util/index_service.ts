@@ -46,7 +46,7 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
   }
 
   async function loadDataViewListItems() {
-    return (await dataViewsService.getIdsWithTitle()).sort((a, b) =>
+    return (await dataViewsService.getSavedIdsWithTitle()).sort((a, b) =>
       a.title.localeCompare(b.title)
     );
   }

@@ -69,7 +69,7 @@ const setup = ({
     data: { query: {}, search },
     dataViewEditor: dataViewEditorPluginMock.createStartContract(),
     dataViews: {
-      getIdsWithTitle: jest.fn(() => []),
+      getSavedIdsWithTitle: jest.fn(() => []),
     },
   };
 

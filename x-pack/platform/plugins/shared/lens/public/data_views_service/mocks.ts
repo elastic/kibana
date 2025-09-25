@@ -218,7 +218,7 @@ export function mockDataViewsService() {
       }
       return result;
     }),
-    getIdsWithTitle: jest.fn(async () => {
+    getSavedIdsWithTitle: jest.fn(async () => {
       return [
         {
           id: sampleIndexPatterns[1].id,
@@ -231,5 +231,5 @@ export function mockDataViewsService() {
       ];
     }),
     create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+  } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>;
 }

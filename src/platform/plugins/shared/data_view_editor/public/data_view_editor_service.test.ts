@@ -19,7 +19,7 @@ describe('DataViewEditorService', () => {
       services: {
         http,
         dataViews: {
-          getIdsWithTitle: jest.fn().mockResolvedValue([]),
+          getSavedIdsWithTitle: jest.fn().mockResolvedValue([]),
           getRollupsEnabled: jest.fn().mockReturnValue(true),
         } as unknown as DataViewsServicePublic,
       },
@@ -35,7 +35,7 @@ describe('DataViewEditorService', () => {
       services: {
         http,
         dataViews: {
-          getIdsWithTitle: jest.fn().mockResolvedValue([]),
+          getSavedIdsWithTitle: jest.fn().mockResolvedValue([]),
           getRollupsEnabled: jest.fn().mockReturnValue(false),
         } as unknown as DataViewsServicePublic,
       },

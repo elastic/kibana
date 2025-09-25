@@ -74,7 +74,7 @@ describe('Querybar Menu component', () => {
       ...dataMock,
       dataViews: {
         ...dataMock.dataViews,
-        getIdsWithTitle: jest.fn(),
+        getSavedIdsWithTitle: jest.fn(),
       },
     };
     const services = {

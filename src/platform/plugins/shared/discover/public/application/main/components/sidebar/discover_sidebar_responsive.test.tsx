@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, act as rtlAct } from '@testing-library/react';
+import { act as rtlAct, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
@@ -231,7 +231,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   let comp: ReactWrapper<TestWrapperProps>;
   const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
-  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
+  mockedServices.data.dataViews.getSavedIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
       : []

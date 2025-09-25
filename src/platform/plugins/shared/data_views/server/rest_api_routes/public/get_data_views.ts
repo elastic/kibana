@@ -13,14 +13,14 @@ import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import type { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
 import type {
-  DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
+  DataViewsServerPluginStartDependencies,
 } from '../../types';
 import {
+  GET_DATA_VIEWS_DESCRIPTION,
+  INITIAL_REST_VERSION,
   SERVICE_KEY,
   SERVICE_PATH,
-  INITIAL_REST_VERSION,
-  GET_DATA_VIEWS_DESCRIPTION,
 } from '../../constants';
 import type { DataViewListItemRestResponse } from '../route_types';
 
@@ -36,7 +36,7 @@ export const getDataViews = async ({
   counterName,
 }: GetDataViewsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.getIdsWithTitle();
+  return dataViewsService.getSavedIdsWithTitle();
 };
 
 const getDataViewsRouteFactory =

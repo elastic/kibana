@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DataViewListItem, DataView as DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView as DataViewType, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 import {
-  DEFAULT_SECURITY_DATA_VIEW,
   DEFAULT_SECURITY_ALERT_DATA_VIEW,
+  DEFAULT_SECURITY_DATA_VIEW,
 } from '../../data_view_manager/components/data_view_picker/translations';
 
 export interface GetSourcererDataView {
@@ -44,7 +44,7 @@ export const createSourcererDataView = async ({
   if (dataViewId === null) {
     return;
   }
-  let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
+  let allDataViews: DataViewListItem[] = await dataViewService.getSavedIdsWithTitle();
   const siemDataViewExist = allDataViews.find((dv) => dv.id === dataViewId);
   const alertDataViewExist =
     alertDataViewId && allDataViews.find((dv) => dv.id === alertDataViewId);

@@ -7,12 +7,11 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
-import { firstValueFrom, from, of } from 'rxjs';
-import { delay } from 'rxjs';
+import { delay, firstValueFrom, from, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Pick2 } from '../../common/utility_types';
 
@@ -55,11 +54,11 @@ export const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: MockIndexPattern[]
 ): {
-  getIdsWithTitle: DataViewsContract['getIdsWithTitle'];
+  getSavedIdsWithTitle: DataViewsContract['getSavedIdsWithTitle'];
   get: (...args: Parameters<DataViewsContract['get']>) => Promise<MockIndexPattern>;
 } => {
   return {
-    async getIdsWithTitle(_refresh?: boolean) {
+    async getSavedIdsWithTitle(_refresh?: boolean) {
       const indexPatterns$ = of(
         indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
       );

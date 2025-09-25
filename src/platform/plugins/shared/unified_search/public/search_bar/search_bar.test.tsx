@@ -111,7 +111,7 @@ function wrapSearchBarInContext(
       },
       dataViewEditor: dataViewEditorMock,
       dataViews: {
-        getIdsWithTitle: jest.fn(() => []),
+        getSavedIdsWithTitle: jest.fn(() => []),
       },
     },
   };

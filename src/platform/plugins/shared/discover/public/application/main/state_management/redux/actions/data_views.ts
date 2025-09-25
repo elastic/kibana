@@ -11,15 +11,15 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
 import {
   internalStateSlice,
-  type TabActionPayload,
   type InternalStateThunkActionCreator,
+  type TabActionPayload,
 } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { createInternalStateAsyncThunk } from '../utils';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
   'internalState/loadDataViewList',
-  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
+  async (_, { extra: { services } }) => services.dataViews.getSavedIdsWithTitle(true)
 );
 
 export const setDataView: InternalStateThunkActionCreator<

@@ -165,7 +165,7 @@ const services = {
       },
     },
     dataViews: {
-      getIdsWithTitle: () => [
+      getSavedIdsWithTitle: () => [
         { id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9', title: 'logstash-*' },
         { id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f', title: 'test-*' },
       ],

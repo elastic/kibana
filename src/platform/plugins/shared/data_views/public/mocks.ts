@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsPlugin, DataViewsContract } from '.';
+import type { DataViewsContract, DataViewsPlugin } from '.';
 
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
@@ -43,7 +43,7 @@ const createStartContract = (): Start => {
     ),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
-    getIdsWithTitle: jest.fn().mockResolvedValue([]),
+    getSavedIdsWithTitle: jest.fn().mockResolvedValue([]),
     getFieldsForIndexPattern: jest.fn(),
     create: jest.fn().mockReturnValue(
       Promise.resolve({

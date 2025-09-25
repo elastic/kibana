@@ -6,19 +6,17 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { ValueFormatConfig } from '../../../../common/types';
 import { generateId } from '../../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {
   IndexPatternRef,
-  TextBasedPrivateState,
-  TextBasedLayerColumn,
   TextBasedLayer,
+  TextBasedLayerColumn,
+  TextBasedPrivateState,
 } from './types';
 import type { DataViewsState } from '../../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
@@ -28,7 +26,7 @@ export const MAX_NUM_OF_COLUMNS = 5;
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
 ): Promise<IndexPatternRef[]> {
-  const indexPatterns = await indexPatternsService.getIdsWithTitle();
+  const indexPatterns = await indexPatternsService.getSavedIdsWithTitle();
 
   const timefields = await Promise.all(
     indexPatterns.map((p) => indexPatternsService.get(p.id).then((pat) => pat.timeFieldName))

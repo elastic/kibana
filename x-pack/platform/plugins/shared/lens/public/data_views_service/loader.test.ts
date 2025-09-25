@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
+  buildIndexPatternField,
   ensureIndexPattern,
   loadIndexPatternRefs,
   loadIndexPatterns,
-  buildIndexPatternField,
 } from './loader';
-import { sampleIndexPatterns, mockDataViewsService } from './mocks';
+import { mockDataViewsService, sampleIndexPatterns } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
 describe('loader', () => {
@@ -94,12 +94,12 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getSavedIdsWithTitle: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -153,12 +153,12 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getSavedIdsWithTitle: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -210,12 +210,12 @@ describe('loader', () => {
               },
             ],
           })),
-          getIdsWithTitle: jest.fn(async () => ({
+          getSavedIdsWithTitle: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>,
       });
 
       expect(cache.foo.getFieldByName('bytes_counter')!.timeSeriesMetric).toEqual('counter');
@@ -265,8 +265,8 @@ describe('loader', () => {
           }
           return Promise.reject();
         }),
-        getIdsWithTitle: jest.fn(),
-      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+        getSavedIdsWithTitle: jest.fn(),
+      } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>;
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['1', '2'],
@@ -298,8 +298,8 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
-          getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          getSavedIdsWithTitle: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>,
         onError,
       });
 

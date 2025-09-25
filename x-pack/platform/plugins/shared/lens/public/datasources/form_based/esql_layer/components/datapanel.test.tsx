@@ -20,7 +20,7 @@ import userEvent from '@testing-library/user-event';
 import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 
-import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
+import { TextBasedDataPanel, type TextBasedDataPanelProps } from './datapanel';
 import type { TextBasedPrivateState } from '../types';
 
 import { createIndexPatternServiceMock } from '../../../../mocks/data_views_service_mock';
@@ -160,7 +160,7 @@ describe('TextBased Query Languages Data Panel', () => {
       expressions: expressionsPluginMock.createStartContract(),
       dataViews: {
         ...dataViewsMock,
-        getIdsWithTitle: jest.fn().mockReturnValue(
+        getSavedIdsWithTitle: jest.fn().mockReturnValue(
           Promise.resolve([
             { id: '1', title: 'my-fake-index-pattern' },
             { id: '2', title: 'my-fake-restricted-pattern' },

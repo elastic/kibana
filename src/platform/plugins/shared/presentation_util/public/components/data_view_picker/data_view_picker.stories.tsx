@@ -26,7 +26,7 @@ export function Example() {
 
   useMount(() => {
     (async () => {
-      const listItems = await dataViewsService.getIdsWithTitle();
+      const listItems = await dataViewsService.getSavedIdsWithTitle();
       setDataViews(listItems);
     })();
   });

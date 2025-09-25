@@ -7,10 +7,10 @@
 
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type {
-  DataViewsContract,
   DataView,
-  DataViewSpec,
   DataViewField,
+  DataViewsContract,
+  DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import type { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
@@ -18,7 +18,7 @@ import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;
-type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getSavedIdsWithTitle' | 'create'>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
@@ -134,7 +134,7 @@ export function buildIndexPatternField(
 export async function loadIndexPatternRefs(
   dataViews: MinimalDataViewsContract
 ): Promise<IndexPatternRef[]> {
-  const indexPatternsRefs = await dataViews.getIdsWithTitle();
+  const indexPatternsRefs = await dataViews.getSavedIdsWithTitle();
   return sortDataViewRefs(indexPatternsRefs);
 }
 

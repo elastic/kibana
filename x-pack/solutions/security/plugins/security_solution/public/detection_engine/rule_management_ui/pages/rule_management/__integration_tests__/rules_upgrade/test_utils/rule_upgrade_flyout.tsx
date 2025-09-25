@@ -150,7 +150,7 @@ export function mockAvailableDataViews(
   dataViews: DataViewSpec[],
   stickyFields: DataViewFieldMap
 ): void {
-  (KibanaServices.get().data.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValue(
+  (KibanaServices.get().data.dataViews.getSavedIdsWithTitle as jest.Mock).mockResolvedValue(
     dataViews.map(({ id, title }) => ({ id, title }))
   );
 

@@ -8,10 +8,10 @@
  */
 
 import type {
-  DataViewsContract,
   DataView,
   DataViewField,
   DataViewListItem,
+  DataViewsContract,
 } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +36,7 @@ export const isRollup = (indexPatternType: string = '') => {
 };
 
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
-  const existingIndexPatterns = await dataViewsService.getIdsWithTitle(true);
+  const existingIndexPatterns = await dataViewsService.getSavedIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
     const { id, title, namespaces, name, managed } = idxPattern;
     const isDefault = defaultIndex === id;

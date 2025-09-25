@@ -22,7 +22,7 @@ export function useFetchDataViews() {
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: ['fetchDataViewsList'],
     queryFn: async () => {
-      return dataViews.getIdsWithTitle();
+      return dataViews.getSavedIdsWithTitle();
     },
     retry: false,
     keepPreviousData: true,

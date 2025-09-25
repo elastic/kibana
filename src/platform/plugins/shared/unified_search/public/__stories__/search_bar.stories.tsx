@@ -10,10 +10,10 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { DataViewBase, Query } from '@kbn/es-query';
+import { buildExistsFilter } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { buildExistsFilter } from '@kbn/es-query';
 import { EuiButton, EuiComboBox } from '@elastic/eui';
 import type { SearchBarProps } from '../search_bar';
 import { SearchBar } from '../search_bar';
@@ -161,7 +161,7 @@ const services = {
       getQuerySuggestions: () => [],
     },
     dataViews: {
-      getIdsWithTitle: () => [
+      getSavedIdsWithTitle: () => [
         { id: '1234', title: 'logstash-*' },
         { id: '1235', title: 'test-*' },
       ],
