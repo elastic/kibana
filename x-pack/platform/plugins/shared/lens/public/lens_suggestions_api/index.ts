@@ -12,6 +12,7 @@ import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestio
 import type { DataViewsState } from '../state_management';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
+import { shouldPreferLineChartForESQLQuery } from './esql_query_analyzer';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -123,6 +124,23 @@ export const suggestionsApi = ({
   );
 
   const chartType = preferredChartType?.toLowerCase();
+
+  // Check if ES|QL query should prefer line chart over bar chart
+  // This applies when query contains STATS with AVG() (or other non-COUNT aggregations) BY BUCKET(@timestamp,...)
+  const shouldPreferLineChart = !preferredChartType && 
+    'query' in context && 
+    shouldPreferLineChartForESQLQuery(context.query);
+
+  if (shouldPreferLineChart) {
+    const lineChartResult = switchVisualizationType({
+      visualizationMap,
+      suggestions: newSuggestions,
+      targetTypeId: 'line',
+      familyType: 'lnsXY',
+      shouldSwitch: true,
+    });
+    if (lineChartResult) return lineChartResult;
+  }
 
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
