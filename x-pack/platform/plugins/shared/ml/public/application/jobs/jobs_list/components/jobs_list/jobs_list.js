@@ -23,7 +23,6 @@ import { JobDescription } from './job_description';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
   EuiBadge,
