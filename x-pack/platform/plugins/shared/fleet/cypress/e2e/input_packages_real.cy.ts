@@ -129,11 +129,11 @@ describe('OTel input package with custom data stream type', () => {
     login();
   });
 
-  const agentPolicyId = 'test-input-package-policy';
+  const agentPolicyId = 'test-otel-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
   const datasetName = 'check'; // Default from the package.
-  const dataStreamType = 'metrics';
+  const dataStreamType = 'logs';
 
   before(() => {
     cy.task('installTestPackage', OTEL_INPUT_TEST_PACKAGE);
@@ -162,17 +162,12 @@ describe('OTel input package with custom data stream type', () => {
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
 
     cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).click().clear().type(packagePolicyName);
-    cy.getBySel('multiTextInput-endpoints')
+    cy.getBySel('multiTextInput-http-endpoints-to-check')
       .find('[data-test-subj="multiTextInputRow-0"]')
       .click()
       .type('https://www.elastic.co/integrations');
 
-    cy.getBySel('multiTextInput-tags')
-      .find('[data-test-subj="multiTextInputRow-0"]')
-      .click()
-      .type('tag1');
-
-    // Select metrics data stream type.
+    // Select logs data stream type.
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
       .find(`label[for="${dataStreamType}"]`)
@@ -190,6 +185,35 @@ describe('OTel input package with custom data stream type', () => {
     cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
+  });
+
+  it(`agent policy configures the dataset and type`, () => {
+    cy.request({
+      method: 'GET',
+      url: `/api/fleet/agent_policies/${agentPolicyId}/full`,
+    }).then(({body}) => {
+      expect(body.item).to.have.property('processors');
+      let routingTransform;
+      console.dir(body.item, {depth: null});
+      Object.entries(body.item.processors).forEach(([name, config]) => {
+        if (!name.match(/transform\/.*-routing/)) {
+          return
+        }
+        routingTransform = config;
+      });
+      expect(routingTransform).to.deep.equal({
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              `set(attributes["data_stream.type"], "${dataStreamType}")`,
+              `set(attributes["data_stream.dataset"], "${datasetName}")`,
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          }
+        ]
+      });
+    });
   });
 
   it(`${dataStreamType} checkbox should be checked`, () => {

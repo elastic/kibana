@@ -44,6 +44,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'agentTamperProtectionEnabled',
           'subfeaturePrivileges',
+          'enableOtelIntegrations',
         ])}`,
 
         `--logging.loggers=${JSON.stringify([
