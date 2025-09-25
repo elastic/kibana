@@ -56,10 +56,17 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
         const tabId = getPreviousTabId(tab);
-        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
+        const shouldMigrateToAnotherId = tabId !== tab.id;
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
         const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+
+        if (shouldMigrateToAnotherId && tabRuntimeState && tabStateContainer) {
+          // If the tab id has changed, we need to migrate the runtime state to another id.
+          tabStateContainer.actions.stopSyncing();
+        }
+
+        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
         if (tabStateContainer) {
           const savedSearch = await fromSavedObjectTabToSavedSearch({
@@ -78,7 +85,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           tabStateContainer.appState.resetInitialState();
         }
 
-        if (tabId !== tab.id && tabRuntimeState && tabStateContainer) {
+        if (shouldMigrateToAnotherId && tabRuntimeState && tabStateContainer) {
           // If the tab id has changed, we need to migrate the runtime state to another id.
           runtimeStateManager.tabs.byId[tab.id] = tabRuntimeState;
           tabRuntimeState.migratedToAnotherId$.next(tab.id);
