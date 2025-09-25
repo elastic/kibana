@@ -63,10 +63,6 @@ export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
 
 export const convertCaseToCamelCase = (theCase: Case): CaseUI => {
   const { comments, ...restCase } = theCase;
-  const settings = restCase.settings;
-  if (settings != null && settings.extractObservables == null) {
-    settings.extractObservables = false;
-  }
   return {
     ...convertToCamelCase<Case, CaseUI>(restCase),
     ...(comments != null ? { comments: convertAttachmentsToCamelCase(comments) } : {}),
