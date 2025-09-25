@@ -2614,6 +2614,14 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
               },
               {
@@ -3554,6 +3562,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.onlyAgentlessFilter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "onlyAgentlessFilter",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
             "deprecated": false,
@@ -4652,15 +4674,15 @@
             "section": "def-public.CategoryFacet",
             "text": "CategoryFacet"
           },
-          "[]; selectedSubCategory: string | undefined; setSelectedSubCategory: React.Dispatch<React.SetStateAction<string | undefined>>; searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>>; setUrlandPushHistory: ({ searchString, categoryId, subCategoryId, }: ",
+          "[]; selectedSubCategory: string | undefined; setSelectedSubCategory: React.Dispatch<React.SetStateAction<string | undefined>>; searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>>; setUrlandPushHistory: ({ searchString, categoryId, subCategoryId, onlyAgentless, }: ",
           "IntegrationsURLParameters",
-          ") => void; setUrlandReplaceHistory: ({ searchString, categoryId, subCategoryId, }: ",
+          ") => void; setUrlandReplaceHistory: ({ searchString, categoryId, subCategoryId, onlyAgentless, }: ",
           "IntegrationsURLParameters",
           ") => void; preference: ",
           "IntegrationPreferenceType",
           "; setPreference: React.Dispatch<React.SetStateAction<",
           "IntegrationPreferenceType",
-          ">>; isLoading: boolean; isLoadingCategories: boolean; isLoadingAllPackages: boolean; isLoadingAppendCustomIntegrations: boolean; eprPackageLoadingError: ",
+          ">>; onlyAgentlessFilter: boolean; setOnlyAgentlessFilter: React.Dispatch<React.SetStateAction<boolean>>; isAgentlessEnabled: boolean; isLoading: boolean; isLoadingCategories: boolean; isLoadingAllPackages: boolean; isLoadingAppendCustomIntegrations: boolean; eprPackageLoadingError: ",
           "RequestError",
           " | null; eprCategoryLoadingError: ",
           "RequestError",
@@ -5622,7 +5644,7 @@
             "label": "integrations_all",
             "description": [],
             "signature": [
-              "({ searchTerm, category, subCategory, }: { searchTerm?: string | undefined; category?: string | undefined; subCategory?: string | undefined; }) => [string, string]"
+              "({ searchTerm, category, subCategory, onlyAgentless, }: { searchTerm?: string | undefined; category?: string | undefined; subCategory?: string | undefined; onlyAgentless?: boolean | undefined; }) => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
             "deprecated": false,
@@ -5633,7 +5655,7 @@
                 "id": "def-public.pagePathGetters.integrations_all.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    searchTerm,\n    category,\n    subCategory,\n  }",
+                "label": "{\n    searchTerm,\n    category,\n    subCategory,\n    onlyAgentless,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
                 "deprecated": false,
@@ -5676,6 +5698,20 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-public.pagePathGetters.integrations_all.$1.onlyAgentless",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "onlyAgentless",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
                     "deprecated": false,
@@ -14265,7 +14301,7 @@
               },
               ", options?: { user?: ",
               "AuthenticatedUser",
-              " | undefined; force?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; bumpRevision?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -14391,6 +14427,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipUniqueNameVerification",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.update.$5.bumpRevision",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "bumpRevision",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -24678,7 +24728,7 @@
             "label": "secret_references",
             "description": [],
             "signature": [
-              "PolicySecretReference",
+              "SecretReference",
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
@@ -26741,6 +26791,14 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
               },
               {
@@ -27391,7 +27449,7 @@
             "label": "secret_references",
             "description": [],
             "signature": [
-              "PolicySecretReference",
+              "SecretReference",
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
@@ -29064,6 +29122,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.ingestion_method",
+            "type": "string",
+            "tags": [],
+            "label": "[RegistryStreamKeys.ingestion_method]",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -29953,7 +30025,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\")[]"
+          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ilm_policy\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -31101,7 +31173,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"monitoring\" | \"security\" | \"siem\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"opentelemetry\" | \"cloud\" | \"custom\" | \"web\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
+          "\"connector\" | \"monitoring\" | \"security\" | \"siem\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"opentelemetry\" | \"cloud\" | \"custom\" | \"web\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"asset_inventory\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"misconfiguration_workflow\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"vulnerability_workflow\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
         "deprecated": false,

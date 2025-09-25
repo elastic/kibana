@@ -1,0 +1,633 @@
+{
+  "id": "@kbn/bench",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.cli",
+        "type": "Function",
+        "tags": [],
+        "label": "cli",
+        "description": [],
+        "signature": [
+          "() => Promise<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-bench/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.BenchmarkRunContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "BenchmarkRunContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunContext.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunContext.workspace",
+            "type": "Object",
+            "tags": [],
+            "label": "workspace",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workspaces",
+                "scope": "server",
+                "docId": "kibKbnWorkspacesPluginApi",
+                "section": "def-server.IWorkspace",
+                "text": "IWorkspace"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.BenchmarkRunnable",
+        "type": "Interface",
+        "tags": [],
+        "label": "BenchmarkRunnable",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunnable.beforeAll",
+            "type": "Function",
+            "tags": [],
+            "label": "beforeAll",
+            "description": [],
+            "signature": [
+              "((ctx: ",
+              {
+                "pluginId": "@kbn/bench",
+                "scope": "server",
+                "docId": "kibKbnBenchPluginApi",
+                "section": "def-server.BenchmarkRunContext",
+                "text": "BenchmarkRunContext"
+              },
+              ") => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bench",
+                "id": "def-server.BenchmarkRunnable.beforeAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/bench",
+                    "scope": "server",
+                    "docId": "kibKbnBenchPluginApi",
+                    "section": "def-server.BenchmarkRunContext",
+                    "text": "BenchmarkRunContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunnable.afterAll",
+            "type": "Function",
+            "tags": [],
+            "label": "afterAll",
+            "description": [],
+            "signature": [
+              "((ctx: ",
+              {
+                "pluginId": "@kbn/bench",
+                "scope": "server",
+                "docId": "kibKbnBenchPluginApi",
+                "section": "def-server.BenchmarkRunContext",
+                "text": "BenchmarkRunContext"
+              },
+              ") => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bench",
+                "id": "def-server.BenchmarkRunnable.afterAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/bench",
+                    "scope": "server",
+                    "docId": "kibKbnBenchPluginApi",
+                    "section": "def-server.BenchmarkRunContext",
+                    "text": "BenchmarkRunContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunnable.before",
+            "type": "Function",
+            "tags": [],
+            "label": "before",
+            "description": [],
+            "signature": [
+              "((ctx: ",
+              {
+                "pluginId": "@kbn/bench",
+                "scope": "server",
+                "docId": "kibKbnBenchPluginApi",
+                "section": "def-server.BenchmarkRunContext",
+                "text": "BenchmarkRunContext"
+              },
+              ") => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bench",
+                "id": "def-server.BenchmarkRunnable.before.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/bench",
+                    "scope": "server",
+                    "docId": "kibKbnBenchPluginApi",
+                    "section": "def-server.BenchmarkRunContext",
+                    "text": "BenchmarkRunContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunnable.after",
+            "type": "Function",
+            "tags": [],
+            "label": "after",
+            "description": [],
+            "signature": [
+              "((ctx: ",
+              {
+                "pluginId": "@kbn/bench",
+                "scope": "server",
+                "docId": "kibKbnBenchPluginApi",
+                "section": "def-server.BenchmarkRunContext",
+                "text": "BenchmarkRunContext"
+              },
+              ") => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bench",
+                "id": "def-server.BenchmarkRunnable.after.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/bench",
+                    "scope": "server",
+                    "docId": "kibKbnBenchPluginApi",
+                    "section": "def-server.BenchmarkRunContext",
+                    "text": "BenchmarkRunContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.BenchmarkRunnable.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "@kbn/bench",
+                "scope": "server",
+                "docId": "kibKbnBenchPluginApi",
+                "section": "def-server.BenchmarkRunContext",
+                "text": "BenchmarkRunContext"
+              },
+              ") => Promise<void | ",
+              "BenchmarkRunReturn",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bench",
+                "id": "def-server.BenchmarkRunnable.run.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/bench",
+                    "scope": "server",
+                    "docId": "kibKbnBenchPluginApi",
+                    "section": "def-server.BenchmarkRunContext",
+                    "text": "BenchmarkRunContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-bench/src/runner/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.InitialBenchConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "InitialBenchConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.benchmarks",
+            "type": "Array",
+            "tags": [],
+            "label": "benchmarks",
+            "description": [],
+            "signature": [
+              "Benchmark",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.runs",
+            "type": "number",
+            "tags": [],
+            "label": "runs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.timeout",
+            "type": "number",
+            "tags": [],
+            "label": "timeout",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.profile",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "profile",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.InitialBenchConfig.openProfile",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "openProfile",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.ModuleBenchmark",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModuleBenchmark",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/bench",
+            "scope": "server",
+            "docId": "kibKbnBenchPluginApi",
+            "section": "def-server.ModuleBenchmark",
+            "text": "ModuleBenchmark"
+          },
+          " extends ",
+          "BenchmarkBase"
+        ],
+        "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ModuleBenchmark.kind",
+            "type": "string",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "signature": [
+              "\"module\""
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ModuleBenchmark.module",
+            "type": "string",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/bench",
+        "id": "def-server.ScriptBenchmark",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScriptBenchmark",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/bench",
+            "scope": "server",
+            "docId": "kibKbnBenchPluginApi",
+            "section": "def-server.ScriptBenchmark",
+            "text": "ScriptBenchmark"
+          },
+          " extends ",
+          "BenchmarkBase"
+        ],
+        "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.kind",
+            "type": "string",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "signature": [
+              "\"script\""
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.ensure",
+            "type": "Object",
+            "tags": [],
+            "label": "ensure",
+            "description": [],
+            "signature": [
+              "{ bootstrap?: boolean | undefined; build?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.beforeAll",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "beforeAll",
+            "description": [],
+            "signature": [
+              "Script",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.afterAll",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "afterAll",
+            "description": [],
+            "signature": [
+              "Script",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.before",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "before",
+            "description": [],
+            "signature": [
+              "Script",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.after",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "after",
+            "description": [],
+            "signature": [
+              "Script",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/bench",
+            "id": "def-server.ScriptBenchmark.run",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "run",
+            "description": [],
+            "signature": [
+              "string | { cwd?: string | undefined; cmd: string; args?: string[] | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-bench/src/config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

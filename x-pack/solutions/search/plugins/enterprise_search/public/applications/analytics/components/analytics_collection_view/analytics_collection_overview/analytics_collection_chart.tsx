@@ -31,6 +31,7 @@ import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type {
   DateHistogramIndexPatternColumn,
+  FormulaIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 
@@ -232,7 +233,7 @@ export const AnalyticsCollectionChartWithLens = withLensData<
           ),
           isLoading: false,
         },
-  getAttributes: (dataView, formulaApi): TypedLensByValueInput['attributes'] => {
+  getAttributes: (dataView): TypedLensByValueInput['attributes'] => {
     return {
       references: [
         {
@@ -252,27 +253,25 @@ export const AnalyticsCollectionChartWithLens = withLensData<
             layers: LENS_LAYERS.reduce(
               (results, { id, x, y, formula }) => ({
                 ...results,
-                [id]: formulaApi.insertOrReplaceFormulaColumn(
-                  y,
-                  {
-                    formula,
-                  },
-                  {
-                    columnOrder: [],
-                    columns: {
-                      [x]: {
-                        dataType: 'date',
-                        isBucketed: false,
-                        label: 'Timestamp',
-                        operationType: 'date_histogram',
-                        params: { includeEmptyRows: true, interval: 'auto' },
-                        scale: 'ordinal',
-                        sourceField: dataView?.timeFieldName!,
-                      } as DateHistogramIndexPatternColumn,
-                    },
-                  },
-                  dataView!
-                )!,
+                [id]: {
+                  [x]: {
+                    dataType: 'date',
+                    isBucketed: false,
+                    label: 'Timestamp',
+                    operationType: 'date_histogram',
+                    params: { includeEmptyRows: true, interval: 'auto' },
+                    scale: 'ordinal',
+                    sourceField: dataView?.timeFieldName!,
+                  } as DateHistogramIndexPatternColumn,
+                  [y]: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: formula,
+                    operationType: 'formula',
+                    params: { formula, isFormulaBroken: false },
+                    references: [],
+                  } satisfies FormulaIndexPatternColumn,
+                },
               }),
               {}
             ),
