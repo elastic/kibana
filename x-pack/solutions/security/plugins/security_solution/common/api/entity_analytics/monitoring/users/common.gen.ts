@@ -28,6 +28,13 @@ export const UserName = z.object({
     .optional(),
 });
 
+export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
+export const MonitoringLabel = z.object({
+  field: z.string(),
+  value: z.string(),
+  source: z.string(),
+});
+
 export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
 export const MonitoredUserUpdateDoc = z.object({
   id: z.string().optional(),
@@ -49,15 +56,7 @@ export const MonitoredUserUpdateDoc = z.object({
     .optional(),
   entity_analytics_monitoring: z
     .object({
-      labels: z
-        .array(
-          z.object({
-            field: z.string().optional(),
-            value: z.string().optional(),
-            source: z.string().optional(),
-          })
-        )
-        .optional(),
+      labels: z.array(MonitoringLabel).optional(),
     })
     .optional(),
 });

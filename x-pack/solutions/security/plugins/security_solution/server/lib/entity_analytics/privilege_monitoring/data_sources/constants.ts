@@ -5,12 +5,8 @@
  * 2.0.
  */
 
+import type { Matcher } from '../../../../../common/api/entity_analytics';
 import { PRIVMON_BASE_INDEX_NAME } from '../../../../../common/constants';
-
-export interface Matcher {
-  values: string[];
-  fields: string[];
-}
 
 export const OKTA_ADMIN_ROLES: string[] = [
   'Super Administrator',

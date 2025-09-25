@@ -65,6 +65,12 @@ export const UpdatedMonitoringEntitySource = z.object({
     .optional(),
 });
 
+export type Matcher = z.infer<typeof Matcher>;
+export const Matcher = z.object({
+  fields: z.array(z.string()),
+  values: z.array(z.string()),
+});
+
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
 export const MonitoringEntitySourceProperties = z.object({
   name: z.string().optional(),
@@ -73,14 +79,7 @@ export const MonitoringEntitySourceProperties = z.object({
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
+  matchers: z.array(Matcher).optional(),
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),

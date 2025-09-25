@@ -6,12 +6,14 @@
  */
 
 import { uniq } from 'lodash';
-import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
+import type {
+  Matcher,
+  MonitoringEntitySource,
+} from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
 import type { PrivMonIntegrationsUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
-import type { Matcher } from '../../..';
 
 export type AfterKey = Record<string, string> | undefined;
 
