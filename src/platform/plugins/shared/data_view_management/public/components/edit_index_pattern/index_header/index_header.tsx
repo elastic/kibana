@@ -60,6 +60,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
+      bottomBorder
       rightSideItems={[
         canSave && (
           <EuiButton

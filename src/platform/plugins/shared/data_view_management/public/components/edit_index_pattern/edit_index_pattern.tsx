@@ -175,16 +175,17 @@ export const EditIndexPattern = withRouter(
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
-          <IndexHeader
-            indexPattern={dataView}
-            setDefault={() => dataViewMgmtService.setDefaultDataView()}
-            editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() => {
-              setFlyoutOpen(true);
-            }}
-            defaultIndex={defaultIndex}
-            canSave={userEditPermission}
-          >
+          <>
+            <IndexHeader
+              indexPattern={dataView}
+              setDefault={() => dataViewMgmtService.setDefaultDataView()}
+              editIndexPatternClick={editPattern}
+              deleteIndexPatternClick={() => {
+                setFlyoutOpen(true);
+              }}
+              defaultIndex={defaultIndex}
+              canSave={userEditPermission}
+            />
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
@@ -261,7 +262,7 @@ export const EditIndexPattern = withRouter(
                 </EuiCallOut>
               </>
             )}
-          </IndexHeader>
+          </>
         )}
         <EuiSpacer size="xl" />
 
