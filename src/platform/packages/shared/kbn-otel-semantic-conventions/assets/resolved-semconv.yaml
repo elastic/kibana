@@ -3155,15 +3155,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.protocol.name
         type: string
@@ -3935,6 +3943,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: A string identifying the remoting system. See below for a list of well-known identifiers.
         requirement_level: required
@@ -17184,15 +17196,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.protocol.name
         type: string
@@ -21605,15 +21625,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: if and only if a route was successfully matched.
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
     metric_name: aspnetcore.routing.match_attempts
     instrument: counter
@@ -29101,15 +29129,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.protocol.name
         type: string
@@ -29412,15 +29448,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.protocol.name
         type: string
@@ -29725,15 +29769,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.protocol.name
         type: string
@@ -43165,6 +43217,495 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.nfs.client.net.count
+    type: metric
+    brief: Reports the count of kernel NFS client TCP segments and UDP datagrams handled.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.netudpcnt and svc_stat.nettcpcnt
+    stability: development
+    attributes:
+      - name: network.transport
+        type:
+          members:
+            - id: tcp
+              value: tcp
+              brief: TCP
+              stability: stable
+            - id: udp
+              value: udp
+              brief: UDP
+              stability: stable
+            - id: pipe
+              value: pipe
+              brief: Named or anonymous pipe.
+              stability: stable
+            - id: unix
+              value: unix
+              brief: Unix domain socket
+              stability: stable
+            - id: quic
+              value: quic
+              brief: QUIC
+              stability: stable
+        brief: |
+          [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
+        examples:
+          - tcp
+          - udp
+        requirement_level: recommended
+        note: |
+          The value SHOULD be normalized to lowercase.
+
+          Consider always setting the transport when setting a port number, since
+          a port number is ambiguous without knowing the transport. For example
+          different processes could be listening on TCP port 12345 and UDP port 12345.
+        stability: stable
+    metric_name: nfs.client.net.count
+    instrument: counter
+    unit: '{record}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        network.transport:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.client.net.tcp.connection.accepted
+    type: metric
+    brief: Reports the count of kernel NFS client TCP connections accepted.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.nettcpconn
+    stability: development
+    metric_name: nfs.client.net.tcp.connection.accepted
+    instrument: counter
+    unit: '{connection}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.client.operation.count
+    type: metric
+    brief: Reports the count of kernel NFSv4+ client operations.
+    stability: development
+    attributes:
+      - name: nfs.operation.name
+        type: string
+        brief: NFSv4+ operation name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.version
+        type: int
+        brief: ONC/Sun RPC program version.
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.client.operation.count
+    instrument: counter
+    unit: '{operation}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        nfs.operation.name:
+          source_group: registry.nfs.server.repcache.status
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        onc_rpc.version:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.client.procedure.count
+    type: metric
+    brief: Reports the count of kernel NFS client procedures.
+    stability: development
+    attributes:
+      - name: onc_rpc.procedure.name
+        type: string
+        brief: ONC/Sun RPC procedure name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.version
+        type: int
+        brief: ONC/Sun RPC program version.
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.client.procedure.count
+    instrument: counter
+    unit: '{procedure}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        onc_rpc.procedure.name:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        onc_rpc.version:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.client.rpc.authrefresh.count
+    type: metric
+    brief: Reports the count of kernel NFS client RPC authentication refreshes.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.rpcauthrefresh
+    stability: development
+    metric_name: nfs.client.rpc.authrefresh.count
+    instrument: counter
+    unit: '{authrefresh}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.client.rpc.count
+    type: metric
+    brief: Reports the count of kernel NFS client RPCs sent, regardless of whether they're accepted/rejected by the server.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.rpccnt
+    stability: development
+    metric_name: nfs.client.rpc.count
+    instrument: counter
+    unit: '{request}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.client.rpc.retransmit.count
+    type: metric
+    brief: Reports the count of kernel NFS client RPC retransmits.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.rpcretrans
+    stability: development
+    metric_name: nfs.client.rpc.retransmit.count
+    instrument: counter
+    unit: '{retransmit}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.server.fh.stale.count
+    type: metric
+    brief: Reports the count of kernel NFS server stale file handles.
+    note: |
+      Linux: this metric is taken from the Linux kernel NFSD_STATS_FH_STALE counter in the nfsd_net struct
+    stability: development
+    metric_name: nfs.server.fh.stale.count
+    instrument: counter
+    unit: '{fh}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.server.io
+    type: metric
+    brief: Reports the count of kernel NFS server bytes returned to receive and transmit (read and write) requests.
+    note: |
+      Linux: this metric is taken from the Linux kernel NFSD_STATS_IO_READ and NFSD_STATS_IO_WRITE counters in the nfsd_net struct
+    stability: development
+    attributes:
+      - name: network.io.direction
+        type:
+          members:
+            - id: transmit
+              value: transmit
+              stability: development
+            - id: receive
+              value: receive
+              stability: development
+        brief: The network IO operation direction.
+        examples:
+          - transmit
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.server.io
+    instrument: counter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        network.io.direction:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.server.net.count
+    type: metric
+    brief: Reports the count of kernel NFS server TCP segments and UDP datagrams handled.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.nettcpcnt and svc_stat.netudpcnt
+    stability: development
+    metric_name: nfs.server.net.count
+    instrument: counter
+    unit: '{record}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.server.net.tcp.connection.accepted
+    type: metric
+    brief: Reports the count of kernel NFS server TCP connections accepted.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.nettcpconn
+    stability: development
+    metric_name: nfs.server.net.tcp.connection.accepted
+    instrument: counter
+    unit: '{connection}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
+  - id: metric.nfs.server.operation.count
+    type: metric
+    brief: Reports the count of kernel NFSv4+ server operations.
+    stability: development
+    attributes:
+      - name: nfs.operation.name
+        type: string
+        brief: NFSv4+ operation name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.version
+        type: int
+        brief: ONC/Sun RPC program version.
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.server.operation.count
+    instrument: counter
+    unit: '{operation}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        nfs.operation.name:
+          source_group: registry.nfs.server.repcache.status
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        onc_rpc.version:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.server.procedure.count
+    type: metric
+    brief: Reports the count of kernel NFS server procedures.
+    stability: development
+    attributes:
+      - name: onc_rpc.procedure.name
+        type: string
+        brief: ONC/Sun RPC procedure name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.version
+        type: int
+        brief: ONC/Sun RPC program version.
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.server.procedure.count
+    instrument: counter
+    unit: '{procedure}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        onc_rpc.procedure.name:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        onc_rpc.version:
+          source_group: registry.onc_rpc
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.server.repcache.requests
+    type: metric
+    brief: Reports the kernel NFS server reply cache request count by cache hit status.
+    stability: development
+    attributes:
+      - name: nfs.server.repcache.status
+        type: string
+        brief: |
+          Linux: one of "hit" (NFSD_STATS_RC_HITS), "miss" (NFSD_STATS_RC_MISSES), or "nocache" (NFSD_STATS_RC_NOCACHE -- uncacheable)
+        examples: hit
+        requirement_level: recommended
+        stability: development
+    metric_name: nfs.server.repcache.requests
+    instrument: counter
+    unit: '{request}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        nfs.server.repcache.status:
+          source_group: registry.nfs.server.repcache.status
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.server.rpc.count
+    type: metric
+    brief: Reports the count of kernel NFS server RPCs handled.
+    note: |
+      Linux: this metric is taken from the Linux kernel's svc_stat.rpccnt, the count of good RPCs. This metric can have
+      an error.type of "format", "auth", or "client" for svc_stat.badfmt, svc_stat.badauth, and svc_stat.badclnt.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level: recommended
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+    metric_name: nfs.server.rpc.count
+    instrument: counter
+    unit: '{request}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+  - id: metric.nfs.server.thread.count
+    type: metric
+    brief: Reports the count of kernel NFS server available threads.
+    note: |
+      Linux: this metric is taken from the Linux kernel nfsd_th_cnt variable
+    stability: development
+    metric_name: nfs.server.thread.count
+    instrument: updowncounter
+    unit: '{thread}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/metrics.yaml
+    entity_associations:
+      - host
   - id: metric.nodejs.eventloop.delay.max
     type: metric
     brief: Event loop maximum delay.
@@ -56018,7 +56559,7 @@ groups:
   - id: registry.db.metrics.deprecated
     type: attribute_group
     brief: |
-      "Describes deprecated db metrics attributes."
+      Describes deprecated db metrics attributes.
     stability: development
     attributes:
       - name: db.client.connections.pool.name
@@ -59427,14 +59968,22 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level: recommended
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
     lineage:
       provenance:
@@ -61946,6 +62495,32 @@ groups:
         registry_id: main
         path: /home/weaver/source/network/deprecated/registry-deprecated.yaml
     display_name: Deprecated Network Attributes
+  - id: registry.nfs.server.repcache.status
+    type: attribute_group
+    brief: |
+      NFS Server replies check a Reply Cache (repcache), which can have one of 3 result states
+    attributes:
+      - name: nfs.operation.name
+        type: string
+        brief: NFSv4+ operation name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: nfs.server.repcache.status
+        type: string
+        brief: |
+          Linux: one of "hit" (NFSD_STATS_RC_HITS), "miss" (NFSD_STATS_RC_MISSES), or "nocache" (NFSD_STATS_RC_NOCACHE -- uncacheable)
+        examples: hit
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/nfs/registry.yaml
+    display_name: NFS Server Reply Cache Attributes
   - id: registry.nodejs
     type: attribute_group
     brief: Describes Node.js related attributes.
@@ -61990,6 +62565,42 @@ groups:
         registry_id: main
         path: /home/weaver/source/oci/registry.yaml
     display_name: Open Container Initiative (OCI) Attributes
+  - id: registry.onc_rpc
+    type: attribute_group
+    brief: This document defines attributes for [ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)
+    attributes:
+      - name: onc_rpc.procedure.name
+        type: string
+        brief: ONC/Sun RPC procedure name.
+        examples:
+          - OPEN
+          - READ
+          - GETATTR
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.procedure.number
+        type: int
+        brief: ONC/Sun RPC procedure number.
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.program.name
+        type: string
+        brief: ONC/Sun RPC program name.
+        examples:
+          - portmapper
+          - nfs
+        requirement_level: recommended
+        stability: development
+      - name: onc_rpc.version
+        type: int
+        brief: ONC/Sun RPC program version.
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/onc_rpc/registry.yaml
+    display_name: ONC RPC (Sun RPC) attributes
   - id: registry.openai
     type: attribute_group
     brief: |
@@ -63198,6 +63809,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: A string identifying the remoting system. See below for a list of well-known identifiers.
         requirement_level: recommended
@@ -64717,7 +65332,7 @@ groups:
   - id: registry.vcs.deprecated
     type: attribute_group
     brief: |
-      "Describes deprecated vcs attributes."
+      Describes deprecated vcs attributes.
     attributes:
       - name: vcs.repository.change.id
         type: string
@@ -65250,6 +65865,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: A string identifying the remoting system. See below for a list of well-known identifiers.
         requirement_level: required
@@ -66803,6 +67422,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -67086,6 +67709,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -74228,6 +74855,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -74410,6 +75041,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -74631,6 +75266,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -74859,6 +75498,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -75036,6 +75679,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -75194,6 +75841,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -75374,6 +76025,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -75575,6 +76230,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -75766,6 +76425,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -75999,6 +76662,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -76308,6 +76975,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -76579,6 +77250,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: The value `aws-api`.
         examples:
           - aws-api
@@ -76792,6 +77467,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: The value `aws-api`.
         examples:
@@ -80527,15 +81206,23 @@ groups:
       - name: http.route
         type: string
         brief: |
-          The matched route, that is, the path template in the format used by the respective server framework.
+          The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.
         examples:
           - /users/:userID?
-          - '{controller}/{action}/{id?}'
+          - my-controller/my-action/{id?}
         requirement_level:
           conditionally_required: If and only if it's available
         note: |
           MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
           SHOULD include the [application root](/docs/http/http-spans.md#http-server-definitions) if there is one.
+
+          A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like `/users/` and placeholders that
+          are constrained to a finite, predefined set of values, e.g. `{controller}` or `{action}`.
+
+          A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.
+
+          Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+          support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.
         stability: stable
       - name: network.local.address
         type: string
@@ -81823,6 +82510,10 @@ groups:
               value: connect_rpc
               brief: Connect RPC
               stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
+              stability: development
         brief: A string identifying the remoting system. See below for a list of well-known identifiers.
         requirement_level: required
         stability: development
@@ -82078,6 +82769,10 @@ groups:
             - id: connect_rpc
               value: connect_rpc
               brief: Connect RPC
+              stability: development
+            - id: onc_rpc
+              value: onc_rpc
+              brief: '[ONC RPC (Sun RPC)](https://datatracker.ietf.org/doc/html/rfc5531)'
               stability: development
         brief: A string identifying the remoting system. See below for a list of well-known identifiers.
         requirement_level: required
