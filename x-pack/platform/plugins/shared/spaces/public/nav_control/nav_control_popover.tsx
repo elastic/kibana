@@ -12,6 +12,7 @@ import {
   EuiSkeletonRectangle,
   useEuiTheme,
 } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 
@@ -19,7 +20,7 @@ import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SpacesMenu } from './components/spaces_menu';
-import { useSpaces } from './hooks/use_spaces';
+import { SPACES_QUERY_KEY, useSpaces } from './hooks/use_spaces';
 import { SolutionViewTour } from './solution_view_tour';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
@@ -63,6 +64,7 @@ const NavControlPopoverUI = ({
   manageSpacesLink,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const queryClient = useQueryClient();
   const [showSpaceSelector, setShowSpaceSelector] = useState(false);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [showTour, setShowTour] = useState(false);
@@ -98,7 +100,11 @@ const NavControlPopoverUI = ({
 
   const toggleSpaceSelector = useCallback(() => {
     setShowSpaceSelector(!showSpaceSelector);
-  }, [showSpaceSelector]);
+    // Invalidate spaces cache when opening the popover to ensure fresh data
+    if (!showSpaceSelector) {
+      queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
+    }
+  }, [showSpaceSelector, queryClient]);
 
   const getButton = useCallback(
     (linkIcon: JSX.Element, linkTitle: string) => {
