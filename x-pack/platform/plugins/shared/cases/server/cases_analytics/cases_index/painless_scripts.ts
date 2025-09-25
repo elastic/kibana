@@ -160,5 +160,9 @@ export const CAI_CASES_INDEX_SCRIPT: StoredScript = {
     if (source.cases.total_comments != null && source.cases.total_comments >= 0){
       ctx._source.total_comments = source.cases.total_comments;
     }
+
+    if (source.cases.total_events != null && source.cases.total_events >= 0){
+      ctx._source.total_events = source.cases.total_events;
+    }
   `,
 };

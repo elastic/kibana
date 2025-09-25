@@ -145,6 +145,9 @@ describe('Model versions', () => {
                   },
                 },
               },
+              "total_events": Object {
+                "type": "integer",
+              },
             },
             "type": "mappings_addition",
           },

@@ -259,6 +259,9 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      total_events: {
+        type: 'integer',
+      },
     },
   },
   migrations: caseMigrations,

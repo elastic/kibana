@@ -156,6 +156,9 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     total_alerts: {
       type: 'integer',
     },
+    total_events: {
+      type: 'integer',
+    },
     total_comments: {
       type: 'integer',
     },

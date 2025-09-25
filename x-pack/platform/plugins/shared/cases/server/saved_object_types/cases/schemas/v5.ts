@@ -11,4 +11,5 @@ export const casesSchema = casesSchemaV4.extends({
   settings: schema.object({
     extractObservables: schema.maybe(schema.boolean()),
   }),
+  total_events: schema.maybe(schema.number()),
 });

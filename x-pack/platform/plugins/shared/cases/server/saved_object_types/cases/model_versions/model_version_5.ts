@@ -27,6 +27,9 @@ export const modelVersion5: SavedObjectsModelVersion = {
             },
           },
         },
+        total_events: {
+          type: 'integer', // Integer to match the behavior for the existing total_alerts and total_comments fields
+        },
         settings: {
           properties: {
             extractObservables: {
@@ -40,7 +43,9 @@ export const modelVersion5: SavedObjectsModelVersion = {
       type: 'data_backfill',
       backfillFn: (doc) => {
         const settings = doc.attributes.settings;
-        return { attributes: { settings: { ...settings, extractObservables: false } } };
+        return {
+          attributes: { total_events: 0, settings: { ...settings, extractObservables: false } },
+        };
       },
     },
   ],
