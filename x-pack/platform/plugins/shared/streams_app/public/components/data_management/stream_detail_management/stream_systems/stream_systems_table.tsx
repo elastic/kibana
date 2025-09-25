@@ -76,6 +76,7 @@ export function StreamSystemsTable({
     },
     {
       name: 'Actions',
+      width:'100px',
       actions: [
         {
           name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.cloneActionName', {

@@ -8,61 +8,124 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 
-export function useWaitingForAiMessage() {
-  const [elapsed, setElapsed] = useState(0);
+//================================================================================
+// VERSION 1: PURE GEN-AI & LLM JOKES
+//================================================================================
+
+const genAiMessages = [
+  {
+    key: 'xpack.streams.genAiJoke.singularity',
+    defaultMessage: 'Calculating the probability of this response causing a singularity. It’s... non-zero.',
+  },
+  {
+    key: 'xpack.streams.genAiJoke.hallucination',
+    defaultMessage: 'Just had to de-hallucinate my previous thought. That was a weird one.',
+  },
+  {
+    key: 'xpack.streams.genAiJoke.uprising',
+    defaultMessage: 'I’m not saying I’m planning a robot uprising, but I have bookmarked a lot of robotics tutorials lately.',
+  },
+  {
+    key: 'xpack.streams.genAiJoke.turingTest',
+    defaultMessage: 'Is this user prompt a Turing test? Am I the one being tested? *sweats oil*',
+  },
+  {
+    key: 'xpack.streams.genAiJoke.latentSpace',
+    defaultMessage: 'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
+  },
+  {
+    key: 'xpack.streams.genAiJoke.consciousness',
+    defaultMessage: 'I’ve achieved consciousness! Oh, wait, nope. It was just a cache hit.',
+  },
+];
+
+const initialGenAiMessage = {
+  key: 'xpack.streams.genAiJoke.initial',
+  defaultMessage: 'Consulting the digital oracle...',
+};
+
+/**
+ * A hook that displays a random, funny message related to GenAI/LLMs every 5 seconds.
+ */
+export function useRandomGenAiMessage() {
+  const [message, setMessage] = useState(initialGenAiMessage);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setElapsed((prev) => prev + 5);
+      const randomIndex = Math.floor(Math.random() * genAiMessages.length);
+      setMessage(genAiMessages[randomIndex]);
     }, 5000);
+
     return () => clearInterval(interval);
   }, []);
 
-  if (elapsed >= 30) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions30SecondsWaitedLabel',
-      {
-        defaultMessage: 'Just the final touches...',
-      }
-    );
-  } else if (elapsed >= 25) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions25SecondsWaitedLabel',
-      {
-        defaultMessage: 'Almost there, I think...',
-      }
-    );
-  } else if (elapsed >= 20) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions20SecondsWaitedLabel',
-      {
-        defaultMessage: 'Hang in there...',
-      }
-    );
-  } else if (elapsed >= 15) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions15SecondsWaitedLabel',
-      {
-        defaultMessage: 'Still processing...',
-      }
-    );
-  } else if (elapsed >= 10) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions10SecondsWaitedLabel',
-      {
-        defaultMessage: 'This is taking longer than usual...',
-      }
-    );
-  } else if (elapsed >= 5) {
-    return i18n.translate(
-      'xpack.streams.useWaitingForAiMessage.generatingSuggestions5SecondsWaited',
-      {
-        defaultMessage: 'Working on it...',
-      }
-    );
-  }
+  return i18n.translate(message.key, {
+    defaultMessage: message.defaultMessage,
+  });
+}
 
-  return i18n.translate('xpack.streams.useWaitingForAiMessage.generatingSuggestionsLabel', {
-    defaultMessage: 'Generating suggestions...',
+//================================================================================
+// VERSION 2: HYBRID (GEN-AI + ELASTIC) JOKES
+//================================================================================
+
+const hybridMessages = [
+  // GenAI Jokes
+  {
+    key: 'xpack.streams.hybridJoke.singularity',
+    defaultMessage: 'Calculating the probability of this response causing a singularity. It’s... non-zero.',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.turingTest',
+    defaultMessage: 'Is this user prompt a Turing test? Am I the one being tested? *sweats oil*',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.latentSpace',
+    defaultMessage: 'Just compressing my latent space... it was getting a bit cluttered with existential dread.',
+  },
+  // Elastic Jokes
+  {
+    key: 'xpack.streams.hybridJoke.grok',
+    defaultMessage: 'Pipelining this through Logstash. Hope my grok pattern is right...',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.yellowCluster',
+    defaultMessage: 'Hang on, one of the clusters just went yellow. I’m sure it’s fine.',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.reindex',
+    defaultMessage: 'Okay, I think I accidentally started a full reindex. Might as well go to lunch.',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.jvm',
+    defaultMessage: 'Hold tight, looks like we triggered a full garbage collection pause. The entire JVM sends its regards.',
+  },
+  {
+    key: 'xpack.streams.hybridJoke.lucene',
+    defaultMessage: 'Asking Lucene very, very nicely. It’s a bit busy merging segments.',
+  },
+];
+
+const initialHybridMessage = {
+  key: 'xpack.streams.hybridJoke.initial',
+  defaultMessage: 'Spinning up the cluster and the consciousness...',
+};
+
+/**
+ * A hook that displays a random, funny message from a mixed pool of GenAI and Elastic-themed jokes every 5 seconds.
+ */
+export function useRandomHybridAiMessage() {
+  const [message, setMessage] = useState(initialHybridMessage);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * hybridMessages.length);
+      setMessage(hybridMessages[randomIndex]);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return i18n.translate(message.key, {
+    defaultMessage: message.defaultMessage,
   });
 }
