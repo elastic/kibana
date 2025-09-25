@@ -18,6 +18,8 @@
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],
       "@kbn/ai-assistant-common/*": ["x-pack/platform/packages/shared/ai-assistant/common/*"],
+      "@kbn/ai-assistant-connector-selector-action": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action"],
+      "@kbn/ai-assistant-connector-selector-action/*": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/*"],
       "@kbn/ai-assistant-cta": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta"],
       "@kbn/ai-assistant-cta/*": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/*"],
       "@kbn/ai-assistant-default-llm-setting": ["x-pack/platform/packages/shared/ai-assistant-default-llm-setting"],
