@@ -15,6 +15,7 @@ const COLORS = {
   GREY: '\x1b[90m',
   BOLD_WHITE: '\x1b[1m\x1b[37m',
   RED_BG: '\x1b[41m',
+  ITALIC: '\x1b[3m',
   RESET: '\x1b[0m',
 };
 
@@ -62,9 +63,9 @@ class SlowTestReporter extends BaseReporter {
   _logWarningTitle() {
     const count = this._slowTests.length;
     const plural = count > 1 ? 's' : '';
-    const title = `⚠️  Found ${count} slow test${plural} (>${this._options.warnOnSlowerThan}ms):`;
+    const mainTitle = `⚠️  Found ${count} slow test${plural} (>${this._options.warnOnSlowerThan}ms):`;
 
-    this.log(this._colorText(title, `${COLORS.YELLOW}\x1b[1m`));
+    this.log(this._colorText(mainTitle, `${COLORS.YELLOW}\x1b[1m`));
   }
 
   _logSlowTests() {
@@ -78,6 +79,11 @@ class SlowTestReporter extends BaseReporter {
       const message = `  ... and ${remainingCount} others`;
       this.log(this._colorText(message, COLORS.GREY));
     }
+
+    // Add the timing guidance note at the end
+    const note = `Timing varies between machines - use as approximate guidance`;
+    this.log('');
+    this.log(this._colorText(note, `  ℹ️  ${COLORS.GREY}${COLORS.ITALIC}`));
   }
 
   _logSlowTest(test) {
