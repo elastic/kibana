@@ -45,7 +45,8 @@ export const resetToZero = async ({
   const esql = /* sql */ `
     FROM ${alias} 
     | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0 ${entities.length > 0 ? excludedEntities : ''}
-    | KEEP ${EntityTypeToIdentifierField[entityType]}
+    | STATS count = count(${entityField}) BY ${entityField}
+    | KEEP ${entityField}
     `;
 
   logger.debug(`Reset to zero ESQL query:\n${esql}`);
