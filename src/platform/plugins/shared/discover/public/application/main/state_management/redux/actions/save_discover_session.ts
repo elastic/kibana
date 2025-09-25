@@ -65,6 +65,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       }
     >();
 
+    let nextSelectedTabId = state.tabs.unsafeCurrentId;
+
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
@@ -92,6 +94,15 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               services,
             })
           );
+        }
+
+        if (newCopyOnSave) {
+          // to avoid id conflicts, we need to assign a new id to the tab if we're copying a discover session
+          const newTabId = uuidv4();
+          if (tab.id === nextSelectedTabId) {
+            nextSelectedTabId = newTabId;
+          }
+          updatedTab.id = newTabId;
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -205,7 +216,9 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      await dispatch(resetDiscoverSession({ updatedDiscoverSession: discoverSession })).unwrap();
+      await dispatch(
+        resetDiscoverSession({ updatedDiscoverSession: discoverSession, nextSelectedTabId })
+      ).unwrap();
     }
 
     return { discoverSession };
