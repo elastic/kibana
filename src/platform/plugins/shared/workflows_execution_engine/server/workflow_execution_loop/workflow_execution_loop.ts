@@ -9,15 +9,15 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { UnionExecutionGraphNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
-import type { NodeWithErrorCatching, MonitorableNode } from './step/node_implementation';
-import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_context_manager/workflow_scope_stack';
-import type { NodesFactory } from './step/nodes_factory';
-import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { buildStepExecutionId } from './utils';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { NodeWithErrorCatching, MonitorableNode } from '../step/node_implementation';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import type { NodesFactory } from '../step/nodes_factory';
+import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { buildStepExecutionId } from '../utils';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;

@@ -42,7 +42,7 @@ import { NodesFactory } from './step/nodes_factory';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
-import { workflowExecutionLoop } from './workflow_execution_loop';
+import { workflowExecutionLoop } from './workflow_execution_loop/workflow_execution_loop';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
