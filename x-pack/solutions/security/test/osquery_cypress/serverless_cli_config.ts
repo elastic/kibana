@@ -7,7 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
-import { SERVERLESS_NODES } from '@kbn/es';
+import { getServerlessNodes } from '@kbn/es';
 import { startOsqueryCypress } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...securitySolutionCypressConfig.get('kbnTestServer.serverArgs'),
         `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://${
-          SERVERLESS_NODES[0].name
+          getServerlessNodes()[0].name
         }:${securitySolutionCypressConfig.get('servers.elasticsearch.port')}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
         `--xpack.fleet.packages.0.version=latest`,
