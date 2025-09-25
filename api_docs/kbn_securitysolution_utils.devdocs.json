@@ -1355,7 +1355,7 @@
             "section": "def-common.TrustedDeviceConditionEntryField",
             "text": "TrustedDeviceConditionEntryField"
           },
-          ".HOST, ",
+          ".DEVICE_ID, ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",
@@ -1363,7 +1363,15 @@
             "section": "def-common.TrustedDeviceConditionEntryField",
             "text": "TrustedDeviceConditionEntryField"
           },
-          ".DEVICE_ID, ",
+          ".DEVICE_TYPE, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".HOST, ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",
@@ -1379,7 +1387,23 @@
             "section": "def-common.TrustedDeviceConditionEntryField",
             "text": "TrustedDeviceConditionEntryField"
           },
-          ".PRODUCT_ID]; readonly WINDOWS_ONLY: readonly [",
+          ".MANUFACTURER_ID, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".PRODUCT_ID, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".PRODUCT_NAME]; readonly WINDOWS_ONLY: readonly [",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",

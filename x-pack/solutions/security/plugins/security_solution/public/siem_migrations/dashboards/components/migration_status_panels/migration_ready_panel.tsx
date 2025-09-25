@@ -18,7 +18,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
-
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 export interface MigrationReadyPanelProps {
   migrationStats: DashboardMigrationStats;
 }
@@ -30,14 +30,15 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     setMissingResources
   );
   const { startMigration, isLoading: isStarting } = useStartMigration();
+  const { openFlyout } = useMigrationDataInputContext();
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
   }, [getMissingResources, migrationStats.id]);
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-    // @TODO: openFlyout  here
-  }, []);
+    openFlyout(migrationStats);
+  }, [migrationStats, openFlyout]);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
