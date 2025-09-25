@@ -19,7 +19,7 @@ import type { ControlGroupCreationOptions, ControlGroupRuntimeState } from './ty
 
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
-  childState$Ref: React.MutableRefObject<
+  lastSavedChildState$Ref: React.MutableRefObject<
     BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
   >
 ) => {
@@ -49,7 +49,7 @@ export const useInitialControlGroupState = (
         };
       }, {} as ControlGroupRuntimeState['initialChildControlState']);
       console.log({ serializedState });
-      childState$Ref.current.next(serializedState);
+      lastSavedChildState$Ref.current.next(serializedState);
       setInitialState({
         ...creationOptions,
         initialState: { ...creationOptions.initialState, initialChildControlState: controls },

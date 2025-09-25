@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, pairwise } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,10 +22,7 @@ import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
   state: ControlGroupCreationOptions | undefined,
-  childrenApi: ReturnType<typeof useChildrenApi>,
-  lastState$Ref: React.MutableRefObject<
-    BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
-  >
+  childrenApi: ReturnType<typeof useChildrenApi>
 ) => {
   const layoutApi = useMemo(() => {
     if (!state) return;
@@ -78,14 +75,15 @@ export const useLayoutApi = (
 
   // useEffect(() => {
   //   if (!layoutApi) return;
-  //   lastState$Ref.current.subscribe((lastSavedState) => {
+  //   lastSavedLayoutState$Ref.current.subscribe((lastSavedState) => {
+  //     console.log({ lastSavedState });
   //     layoutApi?.layout$.next({
-  //       controls: getControlsLayout(lastSavedState),
+  //       controls: lastSavedState,
   //       panels: {},
   //       sections: {},
   //     });
   //   });
-  // }, [layoutApi, lastState$Ref]);
+  // }, [layoutApi, lastSavedLayoutState$Ref]);
 
   return layoutApi;
 };

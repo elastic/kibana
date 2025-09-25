@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map, tap } from 'rxjs';
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -18,7 +18,10 @@ import {
   type ESQLControlVariable,
   type PublishesESQLVariable,
 } from '@kbn/esql-types';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import {
+  childrenUnsavedChanges$,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-containers';
 import {
   apiAppliesFilters,
   type AppliesFilters,
@@ -29,41 +32,61 @@ import type { ControlGroupCreationOptions } from './types';
 
 export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
-  lastState$Ref: React.MutableRefObject<
+  lastSavedChildState$Ref: React.MutableRefObject<
     BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>
   >
 ) => {
+  const currentChildState = useRef<{ [id: string]: SerializedPanelState<object> }>({});
+  const children$Ref = useRef(new BehaviorSubject<{ [uuid: string]: DefaultEmbeddableApi }>({}));
+
+  useEffect(() => {
+    const lastSavedStateSubscription = lastSavedChildState$Ref.current.subscribe(
+      (lastSavedState) => {
+        console.log({ lastSavedState });
+        currentChildState.current = lastSavedState;
+      }
+    );
+
+    const unsavedChangesSubscription = childrenUnsavedChanges$(children$Ref.current)
+      .pipe(map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges)))
+      .subscribe((hasUnsavedChanges) => {
+        if (hasUnsavedChanges) {
+          const result = Object.values(children$Ref.current.getValue()).reduce((prev, child) => {
+            return {
+              ...prev,
+              [child.uuid]: child.serializeState(),
+            };
+          }, {});
+          currentChildState.current = result;
+        }
+      });
+    return () => {
+      lastSavedStateSubscription.unsubscribe();
+      unsavedChangesSubscription.unsubscribe();
+    };
+  }, [lastSavedChildState$Ref]);
+
   const childrenApi = useMemo(() => {
-    const children$ = new BehaviorSubject<{ [uuid: string]: DefaultEmbeddableApi }>({});
+    if (!state) return;
 
     return {
-      children$,
+      children$: children$Ref.current,
       registerChildApi: (child: DefaultEmbeddableApi) => {
-        console.log('registerChildApi');
-        children$.next({
-          ...children$.value,
+        children$Ref.current.next({
+          ...children$Ref.current.value,
           [child.uuid]: child,
         });
       },
       setSerializedStateForChild: (id: string, childState: SerializedPanelState<object>) => {
-        console.log('setSerializedStateForChild');
-        lastState$Ref.current.next({ ...lastState$Ref.current.value, [id]: childState });
+        currentChildState.current[id] = childState;
       },
-      getSerializedStateForChild: (id: string) => {
-        console.log('get serialized state for child 123', lastState$Ref.current.getValue());
-        return lastState$Ref.current.getValue()[id];
-      },
+      getSerializedStateForChild: (id: string) => currentChildState.current[id],
       lastSavedStateForChild$: (id: string) => {
-        return lastState$Ref.current.pipe(
-          map((newState) => newState[id]),
-          tap((test) => {
-            console.log('lastSavedStateForChild$', test);
-          })
-        );
+        return lastSavedChildState$Ref.current.pipe(map((lastSavedState) => lastSavedState[id]));
       },
-      getLastSavedStateForChild: (id: string) => lastState$Ref.current.getValue()[id],
+      getLastSavedStateForChild: (id: string) => lastSavedChildState$Ref.current.getValue()[id],
       appliedFilters$: combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
-        { children$ },
+        { children$: children$Ref.current },
         'appliedFilters$',
         apiAppliesFilters,
         [],
@@ -77,14 +100,14 @@ export const useChildrenApi = (
         }
       ).pipe(distinctUntilChanged(deepEqual)),
       esqlVariables$: combineCompatibleChildrenApis<PublishesESQLVariable, ESQLControlVariable[]>(
-        { children$ },
+        { children$: children$Ref.current },
         'esqlVariable$',
         apiPublishesESQLVariable,
         []
       ),
       timeslice$: new BehaviorSubject(undefined),
     };
-  }, [lastState$Ref]);
+  }, [state, lastSavedChildState$Ref]);
 
   return childrenApi;
 };
