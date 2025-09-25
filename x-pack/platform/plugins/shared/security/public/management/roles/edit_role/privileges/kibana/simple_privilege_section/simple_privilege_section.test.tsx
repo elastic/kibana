@@ -96,7 +96,7 @@ describe('<SimplePrivilegeForm>', () => {
 
   it('displays "none" when no privilege is selected', () => {
     const props = buildProps();
-    const wrapper = shallowWithThemeProvider(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'none',
@@ -119,7 +119,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithThemeProvider(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'custom',
@@ -140,7 +140,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithThemeProvider(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'read',
@@ -162,7 +162,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithThemeProvider(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiComboBox);
     expect(selector.props()).toMatchObject({
       isDisabled: true,

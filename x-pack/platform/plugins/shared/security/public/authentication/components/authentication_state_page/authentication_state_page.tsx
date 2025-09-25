@@ -26,30 +26,9 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
   const euiBottomShadowM = useEuiShadow('m');
 
   return (
-    <div css={kbnFullScreenBgCss}>
+    <div css={kbnFullScreenBgCss} data-test-subj="secAuthenticationStatePage">
       <header
-        css={css`
-          position: relative;
-          padding: ${euiTheme.size.xl};
-          z-index: 10;
-        `}
-      >
-        <div className="secAuthenticationStatePage__content eui-textCenter">
-          <EuiSpacer size="xxl" />
-          <span className="secAuthenticationStatePage__logo">
-            {props.logo ? (
-              <EuiImage src={props.logo} size={40} alt={'logo'} />
-            ) : (
-              <EuiIcon type="logoElastic" size="xxl" />
-            )}
-          </span>
-          <EuiTitle size="l" className="secAuthenticationStatePage__title">
-            <h1>{props.title}</h1>
-          </EuiTitle>
-          <EuiSpacer size="xl" />
-        </div>
-      </header>
-      <header
+        data-test-subj="secAuthenticationStatePageHeader"
         css={css`
           position: relative;
           padding: ${euiTheme.size.xl};
@@ -57,6 +36,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         `}
       >
         <div
+          data-test-subj="secAuthenticationStatePageContent"
           css={css`
             position: relative;
             margin: auto;
@@ -70,6 +50,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         >
           <EuiSpacer size="xxl" />
           <span
+            data-test-subj="secAuthenticationStatePageLogo"
             css={css`
               margin-bottom: ${euiTheme.size.xl};
               display: inline-block;

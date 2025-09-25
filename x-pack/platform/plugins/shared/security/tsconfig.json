@@ -1,14 +1,14 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
-    "../../../../../typings/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -95,9 +95,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
     "@kbn/licensing-types",
-    "@kbn/lazy-object",
+    "@kbn/lazy-object"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
