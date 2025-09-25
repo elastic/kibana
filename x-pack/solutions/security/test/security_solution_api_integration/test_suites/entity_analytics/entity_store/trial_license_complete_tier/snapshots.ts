@@ -252,11 +252,23 @@ async function createDocumentsAndTriggerTransform(
   });
   expect(acknowledged).to.be(true);
 
+  const startedWaiting: number = new Date().valueOf();
+  let transformReTriggered: boolean = false;
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
+    if (!transformReTriggered && new Date().valueOf() - startedWaiting > TIMEOUT_MS / 2.0) {
+      transformReTriggered = true;
+      const { acknowledged: acknowledged2nd } = await es.transform.scheduleNowTransform({
+        transform_id: HOST_TRANSFORM_ID,
+      });
+      expect(acknowledged2nd).to.be(true);
+    }
     const response = await es.transform.getTransformStats({
       transform_id: HOST_TRANSFORM_ID,
     });
     transform = response.transforms[0];
+    if (new Date().valueOf() - startedWaiting > TIMEOUT_MS * 0.95) {
+      console.log(JSON.stringify(response));
+    }
     expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
