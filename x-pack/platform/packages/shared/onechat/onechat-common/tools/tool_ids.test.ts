@@ -6,7 +6,7 @@
  */
 
 import { toolIdRegexp, validateToolId, toolIdMaxLength } from './tool_ids';
-import { protectedNamespaces } from './namespaces';
+import { protectedNamespaces } from '../base/namespaces';
 
 describe('validateToolId', () => {
   test('returns undefined for valid id (non built-in)', () => {
