@@ -508,6 +508,16 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
               {
+                id: 'management_ai',
+                title: i18n.translate('xpack.observability.obltNav.ai', {
+                  defaultMessage: 'AI',
+                }),
+                children: [
+                  { link: 'management:genAiSettings' },
+                  { link: 'management:aiAssistantManagementSelection' },
+                ],
+              },
+              {
                 id: 'security',
                 title: i18n.translate('xpack.observability.obltNav.security', {
                   defaultMessage: 'Security',
@@ -558,9 +568,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                   {
                     link: 'management:tags',
-                  },
-                  {
-                    link: 'management:aiAssistantManagementSelection',
                   },
                   {
                     link: 'management:spaces',
