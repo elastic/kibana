@@ -10,4 +10,4 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 export const LOGHUB_DIR = Path.join(REPO_ROOT, '../loghub');
 export const LOGHUB_REPO = 'https://github.com/logpai/loghub.git';
-export const LOGHUB_PARSER_DIR = Path.join(__dirname, '../parsers');
+export const LOGHUB_PARSER_DIR = Path.join(__dirname, '../../parsers');

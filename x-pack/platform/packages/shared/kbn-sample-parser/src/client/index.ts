@@ -20,6 +20,7 @@ export class SampleParserClient {
     rpm = 10000,
     distribution = 'uniform',
     systems = {},
+    streamType = 'wired',
   }: {
     rpm?: number;
     distribution?: 'relative' | 'uniform';
@@ -27,6 +28,7 @@ export class SampleParserClient {
       loghub?: boolean | string[];
       serverless?: boolean | string[];
     };
+    streamType?: 'classic' | 'wired';
   }): Promise<StreamLogGenerator[]> {
     const { loghub, serverless } = systems;
 
@@ -43,6 +45,7 @@ export class SampleParserClient {
             log: this.logger,
             distribution,
             rpm,
+            streamType,
           })
         : Promise.resolve([]),
       includeServerless
@@ -51,6 +54,7 @@ export class SampleParserClient {
             log: this.logger,
             distribution,
             rpm,
+            streamType,
           })
         : Promise.resolve([]),
     ]);

@@ -25,16 +25,40 @@ export async function getServerlessGenerators({
   log,
   distribution,
   rpm,
+  streamType,
 }: {
   systems?: string[];
   log: ToolingLog;
   distribution: 'uniform' | 'relative';
   rpm: number;
+  streamType: 'classic' | 'wired';
 }): Promise<StreamLogGenerator[]> {
   let systems = await getSystems({ log });
 
+  const filters = requestedSystems?.map((system) => {
+    if (system.includes('*')) {
+      const parts = system.split('*');
+      return (val: string) => {
+        const index = 0;
+        for (const part of parts) {
+          const next = val.indexOf(part, index);
+          if (next === -1) {
+            return false;
+          }
+        }
+        return true;
+      };
+    }
+
+    return (val: string) => {
+      return val.includes(system);
+    };
+  });
+
   if (requestedSystems?.length) {
-    systems = systems.filter((system) => requestedSystems.includes(system.name));
+    systems = systems.filter((system) => {
+      return filters?.some((filter) => filter(system.name));
+    });
   }
 
   if (!systems && requestedSystems?.length) {
@@ -71,6 +95,7 @@ export async function getServerlessGenerators({
         system,
         log,
         targetRpm: Math.max(1, targetRpm),
+        streamType,
       });
     })
   );

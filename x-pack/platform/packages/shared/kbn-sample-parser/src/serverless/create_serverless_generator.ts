@@ -14,15 +14,17 @@ export function createServerlessGenerator({
   system,
   log,
   targetRpm,
+  streamType,
 }: {
   system: ServerlessSystem;
   log: ToolingLog;
   targetRpm?: number;
+  streamType: 'classic' | 'wired';
 }): StreamLogGenerator {
   let index = 0;
   let start = 0;
 
-  const { rpm: systemRpm, min, max, range } = parseServerlessDataset({ system });
+  const { rpm: systemRpm, min, range } = parseServerlessDataset({ system });
 
   const count = system.hits.length;
 
@@ -64,6 +66,7 @@ export function createServerlessGenerator({
         const next = {
           ...hit,
           '@timestamp': simulatedTimestamp,
+          _index: streamType === 'classic' ? system.name : undefined,
         };
 
         docs.push(next);

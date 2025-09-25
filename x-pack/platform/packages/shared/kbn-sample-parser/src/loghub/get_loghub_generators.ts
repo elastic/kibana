@@ -29,11 +29,13 @@ export async function getLoghubGenerators({
   log,
   distribution,
   rpm,
+  streamType,
 }: {
   systems?: string[];
   log: ToolingLog;
   distribution: 'uniform' | 'relative';
   rpm: number;
+  streamType: 'classic' | 'wired';
 }): Promise<StreamLogGenerator[]> {
   let systems = await getSystems({ log });
 
@@ -63,7 +65,7 @@ export async function getLoghubGenerators({
   const totalRpm = sumBy(results, ({ rpm: systemRpm }) => systemRpm);
 
   return await Promise.all(
-    results.map(({ system, parser, rpm: systemRpm, queries }) => {
+    results.map(({ system, parser, rpm: systemRpm }) => {
       let targetRpm: number;
       if (distribution === 'relative') {
         const share = systemRpm / totalRpm;
@@ -77,7 +79,7 @@ export async function getLoghubGenerators({
         parser,
         log,
         targetRpm: Math.max(1, targetRpm),
-        queries,
+        streamType,
       });
     })
   );

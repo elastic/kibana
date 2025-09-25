@@ -18,16 +18,25 @@ import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
+/**
+ * Scenario for Serverless logs. Note that selecting all systems creates
+ * memory pressure, and could cause the termination of a worker thread.
+ */
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm } = (runOptions.scenarioOpts ?? {}) as { rpm?: number };
+  const { rpm, streamType, systems } = (runOptions.scenarioOpts ?? {}) as {
+    rpm?: number;
+    systems?: string | string[];
+    streamType?: 'classic' | 'wired';
+  };
 
   const generators = await client.getLogGenerators({
     rpm,
+    streamType: streamType === 'classic' ? 'classic' : 'wired',
     systems: {
-      serverless: castArray(runOptions.scenarioOpts.systems ?? []),
+      serverless: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
   });
 

@@ -37,7 +37,7 @@ describe('createLoghubGenerator', () => {
     });
 
     it('generates the first event at the start time', () => {
-      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
+      const generator = createLoghubGenerator({ system, parser, log, streamType: 'wired' });
       const startTime = 100_000;
       const docs = generator.next(startTime);
 
@@ -47,7 +47,7 @@ describe('createLoghubGenerator', () => {
     });
 
     it('generates the second event with the right offset', () => {
-      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
+      const generator = createLoghubGenerator({ system, parser, log, streamType: 'wired' });
       const startTime = 100_000;
       generator.next(startTime);
 
@@ -57,12 +57,27 @@ describe('createLoghubGenerator', () => {
     });
 
     it('returns no events if current time is before the next event', () => {
-      const generator = createLoghubGenerator({ system, parser, log, queries: [] });
+      const generator = createLoghubGenerator({ system, parser, log, streamType: 'wired' });
       const startTime = 100_000;
       generator.next(startTime);
 
       const docs = generator.next(startTime + 60000 - 1);
       expect(docs).toHaveLength(0);
+    });
+
+    it('sets _index for classic stream type', () => {
+      const classicGenerator = createLoghubGenerator({
+        system,
+        parser,
+        log,
+        streamType: 'classic',
+      });
+
+      const startTime = 200_000;
+      const docs = classicGenerator.next(startTime);
+
+      expect(docs).toHaveLength(1);
+      expect(docs[0]._index).toBe(`logs-${system.name.toLowerCase()}-default`);
     });
   });
 
@@ -79,7 +94,13 @@ describe('createLoghubGenerator', () => {
     });
 
     it('applies speed throttle when log rate is too high', () => {
-      const generator = createLoghubGenerator({ system, parser, log, targetRpm: 100, queries: [] });
+      const generator = createLoghubGenerator({
+        system,
+        parser,
+        log,
+        targetRpm: 100,
+        streamType: 'wired',
+      });
 
       const startTime = 100_000;
       const firstBatch = generator.next(startTime);
