@@ -182,6 +182,7 @@ export function AddSignificantEventFlyout({
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
+      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">

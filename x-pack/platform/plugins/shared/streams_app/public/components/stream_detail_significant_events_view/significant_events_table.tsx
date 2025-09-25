@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
@@ -15,6 +15,7 @@ import type { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { StreamSystemDetailsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_system_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
@@ -68,6 +69,7 @@ export function SignificantEventsTable({
     return response.value ?? [];
   }, [response.value]);
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<SignificantEventItem>();
+  const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -98,19 +100,16 @@ export function SignificantEventsTable({
         defaultMessage: 'Title',
       }),
       render: (_, record) => (
-        <EuiButtonEmpty
+        <EuiLink
           aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
             defaultMessage: 'Open in discover',
           })}
-          target="_blank"
           href={discover?.locator?.getRedirectUrl(
             buildDiscoverParams(record.query, definition, timeState)
           )}
-          iconType="discoverApp"
-          iconSide="right"
         >
           {record.query.title}
-        </EuiButtonEmpty>
+        </EuiLink>
       ),
     },
     {
@@ -119,7 +118,35 @@ export function SignificantEventsTable({
         defaultMessage: 'System',
       }),
       render: (query: StreamQuery) => {
-        return <EuiBadge color="hollow">{query.system?.name ?? '--'}</EuiBadge>;
+        return (
+          <EuiBadge
+            color="hollow"
+            onClickAriaLabel={i18n.translate(
+              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              {
+                defaultMessage: 'Open system details',
+              }
+            )}
+            onClick={() => {
+              if (query.system?.name) {
+                setIsSystemDetailFlyoutOpen(query.system.name);
+              }
+            }}
+            iconOnClick={() => {
+              if (query.system?.name) {
+                setIsSystemDetailFlyoutOpen(query.system.name);
+              }
+            }}
+            iconOnClickAriaLabel={i18n.translate(
+              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              {
+                defaultMessage: 'Open system details',
+              }
+            )}
+          >
+            {query.system?.name ?? '--'}
+          </EuiBadge>
+        );
       },
     },
     {
@@ -159,6 +186,31 @@ export function SignificantEventsTable({
       }),
       actions: [
         {
+          name: i18n.translate('xpack.streams.significantEventsTable.openInDiscoverActionTitle', {
+            defaultMessage: 'Open in Discover',
+          }),
+          description: i18n.translate(
+            'xpack.streams.significantEventsTable.openInDiscoverActionDescription',
+            {
+              defaultMessage: 'Open query in Discover',
+            }
+          ),
+          render: (item) => {
+            return (
+              <WithLoadingSpinner
+                iconType="discoverApp"
+                onClick={() => {
+                  const url = discover?.locator?.getRedirectUrl(
+                    buildDiscoverParams(item.query, definition, timeState)
+                  );
+                  window.open(url, '_blank');
+                }}
+              />
+            );
+          },
+          isPrimary: true,
+        },
+        {
           name: i18n.translate('xpack.streams.significantEventsTable.editQueryActionTitle', {
             defaultMessage: 'Edit',
           }),
@@ -168,6 +220,7 @@ export function SignificantEventsTable({
               defaultMessage: 'Edit query',
             }
           ),
+          isPrimary: true,
           render: (item) => {
             return (
               <WithLoadingSpinner
@@ -205,19 +258,30 @@ export function SignificantEventsTable({
   ];
 
   return (
-    <EuiBasicTable
-      tableCaption={i18n.translate('xpack.streams.significantEventsTable.tableCaption', {
-        defaultMessage: 'Significant events',
-      })}
-      compressed
-      items={items}
-      rowHeader="title"
-      columns={columns}
-      loading={response.loading}
-      tableLayout="auto"
-      itemId="id"
-      selection={{ onSelectionChange: setSelectedItems, selected: selectedItems }}
-    />
+    <>
+      <EuiBasicTable
+        tableCaption={i18n.translate('xpack.streams.significantEventsTable.tableCaption', {
+          defaultMessage: 'Significant events',
+        })}
+        compressed
+        items={items}
+        rowHeader="title"
+        columns={columns}
+        loading={response.loading}
+        tableLayout="auto"
+        itemId="id"
+        selection={{ onSelectionChange: setSelectedItems, selected: selectedItems }}
+      />
+      {isSystemDetailFlyoutOpen && (
+        <StreamSystemDetailsFlyout
+          definition={definition}
+          system={isSystemDetailFlyoutOpen}
+          closeFlyout={() => {
+            setIsSystemDetailFlyoutOpen('');
+          }}
+        />
+      )}
+    </>
   );
 }
 
