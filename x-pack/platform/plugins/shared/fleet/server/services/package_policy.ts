@@ -1395,7 +1395,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       };
     }
 
-    for (const agentPolicy of agentPolicies) {
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
       if (agentPolicy) {
         validateReusableIntegrationsAndSpaceAwareness(packagePolicy, [agentPolicy]);
       }
