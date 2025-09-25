@@ -277,7 +277,7 @@ on the same input data and combines the results in a single output table. A disc
 
 **Branch identification:**
 - The \`_fork\` column identifies each branch with values like \`fork1\`, \`fork2\`, \`fork3\`, etc.
-- Values correspond to the order branches are defined
+- Values correspond to the order in which branches are defined
 - \`fork1\` always indicates the first branch
 
 **Column handling:**
