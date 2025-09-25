@@ -6,14 +6,12 @@
  */
 
 import { uniq } from 'lodash';
-import type {
-  Matcher,
-  MonitoringEntitySource,
-} from '../../../../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildMatcherScript, buildPrivilegedSearchBody } from './queries';
 import type { PrivMonIntegrationsUser } from '../../../../types';
 import { createSearchService } from '../../../../users/search';
+import { generateLabels } from '../../generate_labels';
 
 export type AfterKey = Record<string, string> | undefined;
 
@@ -93,7 +91,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
         // process current page
         if (buckets.length && aggregations) {
-          const privMonUsers = await extractPrivMonUsers(aggregations, source.matchers[0]);
+          const privMonUsers = await extractPrivMonUsers(aggregations, source);
           users.push(...privMonUsers);
         }
 
@@ -112,7 +110,7 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
 
   const extractPrivMonUsers = async (
     aggregation: PrivMatchersAggregation,
-    matchers: Matcher
+    source: MonitoringEntitySource
   ): Promise<PrivMonIntegrationsUser[]> => {
     const buckets: PrivBucket[] | undefined =
       aggregation.privileged_user_status_since_last_run?.buckets;
@@ -134,17 +132,11 @@ export const createPatternMatcherService = (dataClient: PrivilegeMonitoringDataC
         existingUserId: existingUserMap.get(bucket.key.username),
         isPrivileged: Boolean(isPriv),
         latestDocForUser: topHit,
-        labels: generateLabels(matchers, topHit),
+        labels: generateLabels(source.id, source.matchers, topHit),
       };
     });
     return usersProcessed;
   };
 
-  const generateLabels = (matchers: Matcher, topHit: PrivTopHit): Record<string, unknown> => {
-    // TODO: Implement label generation logic based on matchers and topHit (latest document for user)
-    // https://github.com/elastic/security-team/issues/13986
-    dataClient.log('debug', `Generating labels for user ${JSON.stringify(topHit, null, 2)}`);
-    return { sources: ['entity_analytics_integration'] }; // Placeholder implementation
-  };
   return { findPrivilegedUsersFromMatchers };
 };
