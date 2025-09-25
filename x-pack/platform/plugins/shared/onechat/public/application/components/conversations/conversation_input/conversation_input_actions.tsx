@@ -13,7 +13,7 @@ import { useAgentId, useHasActiveConversation } from '../../../hooks/use_convers
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
-import { useSendMessage } from '../../../context/send_message_context';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 interface ConversationInputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
