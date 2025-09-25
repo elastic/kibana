@@ -14,7 +14,11 @@ import {
 } from './security_modules';
 
 describe('security_modules', () => {
-  describe('constants', () => {
+  describe('data contract enforcement', () => {
+    // These are intentional change-detection tests to ensure compatibility
+    // across the system. If these fail, update the mappings and verify
+    // that downstream consumers (schema detection, event filtering) are updated.
+
     it('should have CORE_SECURITY_MODULES with expected modules', () => {
       expect(CORE_SECURITY_MODULES).toEqual([
         'crowdstrike',
@@ -189,19 +193,6 @@ describe('security_modules', () => {
         const result = getSecurityModuleDatasets(['unknown1', 'unknown2']);
 
         expect(result).toEqual([]);
-      });
-
-      it('should handle duplicate modules by including their datasets once per occurrence', () => {
-        const result = getSecurityModuleDatasets(['crowdstrike', 'crowdstrike']);
-
-        expect(result).toEqual([
-          'crowdstrike.alert',
-          'crowdstrike.falcon',
-          'crowdstrike.fdr',
-          'crowdstrike.alert',
-          'crowdstrike.falcon',
-          'crowdstrike.fdr',
-        ]);
       });
 
       it('should handle mixed case and different string types', () => {

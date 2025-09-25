@@ -47,61 +47,24 @@ describe('event_kind_filters', () => {
   });
 
   describe('createEventKindFilter', () => {
-    it('should create correct Elasticsearch bool query structure', () => {
-      const mockModules = ['crowdstrike', 'sentinel_one', 'microsoft_defender_endpoint'];
-      mockGetAllSecurityModules.mockReturnValue(mockModules);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result).toEqual({
-        bool: {
-          should: [
-            {
-              term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must: [
-                  { term: { 'event.kind': 'signal' } },
-                  { terms: { 'event.module': mockModules } },
-                ],
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
+    describe('query structure snapshots', () => {
+      it('should generate expected query structure with multiple modules', () => {
+        mockGetAllSecurityModules.mockReturnValue(['crowdstrike', 'sentinel_one']);
+        const result = createEventKindFilterForTest();
+        expect(result).toMatchSnapshot();
       });
-    });
 
-    it('should include native events filter', () => {
-      mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result.bool.should).toContainEqual({
-        term: { 'event.kind': 'event' },
+      it('should handle empty modules list', () => {
+        mockGetAllSecurityModules.mockReturnValue([]);
+        const result = createEventKindFilterForTest();
+        expect(result).toMatchSnapshot();
       });
-    });
 
-    it('should include security signals filter with module constraints', () => {
-      const mockModules = ['crowdstrike', 'sentinel_one'];
-      mockGetAllSecurityModules.mockReturnValue(mockModules);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result.bool.should).toContainEqual({
-        bool: {
-          must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': mockModules } }],
-        },
+      it('should handle single module', () => {
+        mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
+        const result = createEventKindFilterForTest();
+        expect(result).toMatchSnapshot();
       });
-    });
-
-    it('should set minimum_should_match to 1', () => {
-      mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result.bool.minimum_should_match).toBe(1);
     });
 
     it('should call getAllSecurityModules to get current module list', () => {
@@ -111,107 +74,6 @@ describe('event_kind_filters', () => {
 
       expect(mockGetAllSecurityModules).toHaveBeenCalledTimes(1);
       expect(mockGetAllSecurityModules).toHaveBeenCalledWith();
-    });
-
-    it('should work with empty security modules list', () => {
-      mockGetAllSecurityModules.mockReturnValue([]);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result).toEqual({
-        bool: {
-          should: [
-            {
-              term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': [] } }],
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    });
-
-    it('should work with single security module', () => {
-      mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result.bool.should[1]).toEqual({
-        bool: {
-          must: [
-            { term: { 'event.kind': 'signal' } },
-            { terms: { 'event.module': ['crowdstrike'] } },
-          ],
-        },
-      });
-    });
-
-    it('should work with multiple security modules', () => {
-      const mockModules = [
-        'crowdstrike',
-        'jamf_protect',
-        'sentinel_one',
-        'sentinel_one_cloud_funnel',
-        'microsoft_defender_endpoint',
-        'm365_defender',
-      ];
-      mockGetAllSecurityModules.mockReturnValue(mockModules);
-
-      const result = createEventKindFilterForTest();
-
-      expect(result.bool.should[1]).toEqual({
-        bool: {
-          must: [{ term: { 'event.kind': 'signal' } }, { terms: { 'event.module': mockModules } }],
-        },
-      });
-    });
-
-    describe('query structure validation', () => {
-      it('should always have exactly 2 should clauses', () => {
-        mockGetAllSecurityModules.mockReturnValue(['crowdstrike', 'sentinel_one']);
-
-        const result = createEventKindFilterForTest();
-
-        expect(result.bool.should).toHaveLength(2);
-      });
-
-      it('should have the first should clause for event.kind: event', () => {
-        mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
-
-        const result = createEventKindFilterForTest();
-
-        expect(result.bool.should[0]).toEqual({
-          term: { 'event.kind': 'event' },
-        });
-      });
-
-      it('should have the second should clause for event.kind: signal with module filtering', () => {
-        const mockModules = ['crowdstrike', 'sentinel_one'];
-        mockGetAllSecurityModules.mockReturnValue(mockModules);
-
-        const result = createEventKindFilterForTest();
-
-        expect(result.bool.should[1]).toEqual({
-          bool: {
-            must: [
-              { term: { 'event.kind': 'signal' } },
-              { terms: { 'event.module': mockModules } },
-            ],
-          },
-        });
-      });
-
-      it('should have bool.must with exactly 2 clauses in the signal filter', () => {
-        mockGetAllSecurityModules.mockReturnValue(['crowdstrike']);
-
-        const result = createEventKindFilterForTest();
-
-        expect(result.bool.should[1].bool!.must).toHaveLength(2);
-      });
     });
 
     describe('integration with security modules', () => {

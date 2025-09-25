@@ -9,14 +9,10 @@ import { getSupportedSchemas } from './supported_schemas';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import * as securityModules from './security_modules';
 
+const actualSecurityModules = jest.requireActual('./security_modules');
+
 jest.mock('./security_modules', () => ({
-  CORE_SECURITY_MODULES: [
-    'crowdstrike',
-    'jamf_protect',
-    'sentinel_one',
-    'sentinel_one_cloud_funnel',
-  ],
-  MICROSOFT_DEFENDER_MODULES: ['microsoft_defender_endpoint', 'm365_defender'],
+  ...jest.requireActual('./security_modules'),
   getSecurityModuleDatasets: jest.fn(),
   getAllSecurityModules: jest.fn(),
 }));
@@ -29,31 +25,9 @@ const mockGetSecurityModuleDatasets =
 describe('getSupportedSchemas', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Set up default mock implementation to return realistic data
-    mockGetSecurityModuleDatasets.mockImplementation((modules: readonly string[]) => {
-      const datasetMap: Record<string, string[]> = {
-        crowdstrike: ['crowdstrike.alert', 'crowdstrike.falcon', 'crowdstrike.fdr'],
-        jamf_protect: [
-          'jamf_protect.telemetry',
-          'jamf_protect.alerts',
-          'jamf_protect.web-threat-events',
-          'jamf_protect.web-traffic-events',
-        ],
-        sentinel_one: ['sentinel_one.alert'],
-        sentinel_one_cloud_funnel: ['sentinel_one_cloud_funnel.event'],
-        microsoft_defender_endpoint: ['microsoft_defender_endpoint.log'],
-        m365_defender: ['m365_defender.alert', 'm365_defender.incident'],
-      };
-
-      const datasets: string[] = [];
-      modules.forEach((module) => {
-        const moduleDatasets = datasetMap[module];
-        if (moduleDatasets) {
-          datasets.push(...moduleDatasets);
-        }
-      });
-      return datasets;
-    });
+    mockGetSecurityModuleDatasets.mockImplementation(
+      actualSecurityModules.getSecurityModuleDatasets
+    );
   });
   describe('Microsoft Defender for Endpoint integration', () => {
     it('should include Microsoft Defender datasets when feature flag is enabled', () => {
