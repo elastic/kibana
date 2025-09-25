@@ -34,6 +34,7 @@ import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils
 import type { WorkflowsSearchParams } from '../../types';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
+import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const workflowTemplateYaml = `name: New workflow
 enabled: false
@@ -47,7 +48,7 @@ steps:
 `;
 
 export function WorkflowsPage() {
-  const { application, chrome, notifications, featureFlags } = useKibana().services;
+  const { application, notifications, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
   const { createWorkflow } = useWorkflowActions();
@@ -58,6 +59,7 @@ export function WorkflowsPage() {
   });
 
   const { data: workflows, refetch } = useWorkflows(search);
+  useWorkflowsBreadcrumbs();
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
   const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
@@ -67,17 +69,6 @@ export function WorkflowsPage() {
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
-
-  chrome!.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-      href: application!.getUrlForApp('workflows', { path: '/' }),
-    },
-  ]);
-
-  chrome!.docTitle.change([
-    i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-  ]);
 
   const handleCreateWorkflow = () => {
     createWorkflow.mutate(
