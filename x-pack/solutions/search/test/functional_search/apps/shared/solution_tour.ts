@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // or manually update the index.
     it('should close the solution tour if its visible', async () => {
       await PageObjects.common.navigateToApp('spaceSelector');
-      await PageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       if (await testSubjects.exists('spaceSolutionTour')) {
         log.info('Found the solution tour open, closing it');
         await testSubjects.click('closeTourBtn'); // close the tour

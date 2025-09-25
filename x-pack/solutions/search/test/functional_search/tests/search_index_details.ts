@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'indexManagement',
     'searchNavigation',
-    'solutionNavigation',
   ]);
   const es = getService('es');
   const esArchiver = getService('esArchiver');

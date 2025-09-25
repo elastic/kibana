@@ -28,8 +28,6 @@ export default function searchSolutionNavigation({
       await esArchiver.load(archiveEmptyIndex);
       ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-solution-nav-ftr'));
       await searchSpace.navigateTo(spaceCreated.id);
-      // Ensure the tour is closed before starting tests
-      await solutionNavigation.sidenav.tour.ensureHidden();
     });
 
     after(async () => {
