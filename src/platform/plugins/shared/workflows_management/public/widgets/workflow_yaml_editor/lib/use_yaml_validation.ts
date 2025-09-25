@@ -330,7 +330,7 @@ export function useYamlValidation({
               options: {
                 inlineClassName: 'template-variable-error',
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-                hoverMessage: hoverMessage ? createMarkdownContent(errorMessage) : null,
+                hoverMessage: hoverMessage ? createMarkdownContent(hoverMessage) : null,
               },
             });
           } else {
