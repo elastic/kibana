@@ -10,8 +10,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_message';
 
-export function AiFlowWaitingForGeneration({ stopGeneration }: { stopGeneration: () => void }) {
-  const label = useWaitingForAiMessage();
+export function AiFlowWaitingForGeneration({
+  stopGeneration,
+  hasInitialResults = false,
+}: {
+  stopGeneration: () => void;
+  hasInitialResults?: boolean;
+}) {
+  const label = useWaitingForAiMessage(hasInitialResults);
 
   return (
     <EuiFlexGroup
