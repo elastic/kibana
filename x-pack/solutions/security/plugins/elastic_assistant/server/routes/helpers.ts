@@ -241,7 +241,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   threadId: string;
-  interruptResumeValue?: InterruptResumeValue
+  interruptResumeValue?: InterruptResumeValue;
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;

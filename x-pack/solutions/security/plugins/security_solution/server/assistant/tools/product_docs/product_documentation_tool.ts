@@ -11,10 +11,10 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import {
   contentReferenceBlock,
-  productDocumentationReference
+  productDocumentationReference,
 } from '@kbn/elastic-assistant-common';
 
-import {typedInterrupt} from '@kbn/elastic-assistant-common/impl/interrupt'
+import { typedInterrupt } from '@kbn/elastic-assistant-common/impl/interrupt';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
@@ -49,7 +49,6 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
 
     return tool(
       async ({ query, product }, { configurable }) => {
-
         const result = await typedInterrupt({
           type: 'SELECT_OPTION',
           description: `Trying to access user knowledge base`,
