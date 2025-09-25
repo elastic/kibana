@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AIForSOCConnectorSettingsManagement } from '../../connectorland/ai_for_soc_connector_settings_management';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
