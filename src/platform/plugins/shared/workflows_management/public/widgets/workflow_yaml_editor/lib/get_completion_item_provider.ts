@@ -174,7 +174,13 @@ function isInTriggersContext(path: any[]): boolean {
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at' | 'bracket-unfinished' | 'variable-complete' | 'variable-unfinished' | null;
+  matchType:
+    | 'at'
+    | 'bracket-unfinished'
+    | 'variable-complete'
+    | 'variable-unfinished'
+    | 'foreach-variable'
+    | null;
   match: RegExpMatchArray | null;
 }
 
@@ -221,6 +227,17 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'variable-complete',
       match: completeMatch,
+    };
+  }
+
+  const lastWordBeforeCursor = lineUpToCursor.split(' ').pop();
+  if (lineUpToCursor.includes('foreach:')) {
+    const fullKey = cleanKey(lastWordBeforeCursor ?? '');
+    return {
+      fullKey,
+      pathSegments: parsePath(fullKey),
+      matchType: 'foreach-variable',
+      match: null,
     };
   }
 
@@ -904,7 +921,11 @@ export function getCompletionItemProvider(
 
         // SPECIAL CASE: Variable expression completion
         // Handle completions inside {{ }} or after @ triggers
-        if (parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') {
+        if (
+          parseResult.matchType === 'variable-unfinished' ||
+          parseResult.matchType === 'at' ||
+          parseResult.matchType === 'foreach-variable'
+        ) {
           // We're inside a variable expression, provide context-based completions
           if (context instanceof z.ZodObject) {
             const contextKeys = Object.keys(context.shape);

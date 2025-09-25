@@ -235,8 +235,7 @@ export function useYamlValidation({
 
         // Currently, foreach doesn't use mustache expressions, so we need to handle it separately
         // TODO: remove if/when foreach uses mustache expressions
-        const foreachVariableItems = workflowGraph
-          ?.getAllNodes()
+        const foreachVariableItems = (workflowGraph?.getAllNodes() ?? [])
           .map((node) => {
             if (isEnterForeach(node)) {
               const yamlNode = getStepNode(yamlDocument, node.stepId);
@@ -295,12 +294,12 @@ export function useYamlValidation({
                 errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
               } else {
                 const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
-                hoverMessage = `<pre>(property) ${
-                  parsedPath.propertyPath
-                }: ${getDetailedTypeDescription(refSchema)}</pre>`;
                 if (!refSchema) {
                   errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
                 } else if (getZodTypeName(refSchema) === 'unknown') {
+                  hoverMessage = `<pre>(property) ${
+                    parsedPath.propertyPath
+                  }: ${getDetailedTypeDescription(refSchema)}</pre>`;
                   severity = 'warning';
                   errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`;
                 }
@@ -368,7 +367,7 @@ export function useYamlValidation({
         );
         setError(null);
       } catch (e) {
-        setError(e as Error);
+        setError(new Error('Error validating variables'));
       }
     },
     [workflowYamlSchema]

@@ -30,7 +30,7 @@ export function getSchemaAtPath(
   schema: z.ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
-) {
+): z.ZodType | null {
   try {
     const segments = parsePath(path);
     if (!segments) {
