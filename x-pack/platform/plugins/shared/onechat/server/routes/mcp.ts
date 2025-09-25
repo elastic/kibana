@@ -70,10 +70,12 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           // Expose tools scoped to the request
           for (const tool of tools) {
+            const toolSchema =
+              typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,
-              tool.schema.shape,
+              toolSchema.shape,
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
                 return {

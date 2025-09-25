@@ -131,8 +131,6 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           if (updateErrors.length > 0) {
             throw combineErrors(updateErrors);
           }
-        } catch (e) {
-          throw e;
         } finally {
           if (subscription) {
             subscription.unsubscribe();

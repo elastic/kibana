@@ -49,6 +49,7 @@ export function AssistantProvider({
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    settings,
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
@@ -115,6 +116,7 @@ export function AssistantProvider({
     chrome,
     getUrlForApp,
     openChatTrigger$,
+    settings,
   });
 
   useEffect(() => {
