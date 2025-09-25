@@ -39,7 +39,6 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -50,9 +49,18 @@ export const setTabs: InternalStateThunkActionCreator<
     { runtimeStateManager, tabsStorageManager, services: { profilesManager, ebtManager } }
   ) {
     const previousState = getState();
+    const discoverSessionChanged =
+      params.updatedDiscoverSession &&
+      previousState.persistedDiscoverSession &&
+      params.updatedDiscoverSession.id !== previousState.persistedDiscoverSession?.id;
+
     const previousTabs = selectAllTabs(previousState);
-    const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
-    const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
+    const removedTabs = discoverSessionChanged
+      ? previousTabs
+      : differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
+    const addedTabs = discoverSessionChanged
+      ? params.allTabs
+      : differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
     const justRemovedTabs: TabState[] = [];
 
     for (const tab of removedTabs) {
@@ -268,15 +276,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
-    const tabsEnabled = services.core.featureFlags.getBooleanValue(
-      TABS_ENABLED_FEATURE_FLAG_KEY,
-      false
-    );
-
-    if (tabsEnabled && shouldClearAllTabs) {
-      dispatch(clearAllTabs());
-    }
-
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
     const getUserId = async () => {
@@ -320,23 +319,20 @@ export const initializeTabs = createInternalStateAsyncThunk(
       userId,
       spaceId,
       persistedDiscoverSession,
+      shouldClearAllTabs,
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
-    dispatch(setTabs(initialTabsState));
+    dispatch(
+      setTabs({
+        ...initialTabsState,
+        updatedDiscoverSession: persistedDiscoverSession,
+      })
+    );
 
     return { userId, spaceId, persistedDiscoverSession };
   }
 );
-
-export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
-  const defaultTab: TabState = {
-    ...DEFAULT_TAB_STATE,
-    ...createTabItem([]),
-  };
-
-  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab }));
-};
 
 export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string }]> = ({
   restoreTabId,
