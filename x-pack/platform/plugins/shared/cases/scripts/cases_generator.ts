@@ -161,7 +161,9 @@ const generateCases = async ({
       (newCase, index) => {
         if (index % concurrency === 0) {
           const caseCount = cases.length;
-          console.log(`CREATING CASES ${index + 1} to ${Math.min(index + concurrency, caseCount)}`);
+          console.info(
+            `CREATING CASES ${index + 1} to ${Math.min(index + concurrency, caseCount)}`
+          );
         }
         return makeRequest({ url: kibana, path, newCase, username, password, apiKey, ssl });
       },
