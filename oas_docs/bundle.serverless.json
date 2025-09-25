@@ -46702,6 +46702,7 @@
                                         }
                                       },
                                       "required": [
+                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -50350,6 +50351,7 @@
                                         }
                                       },
                                       "required": [
+                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -53555,6 +53557,7 @@
                                         }
                                       },
                                       "required": [
+                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -56899,6 +56902,7 @@
                                         }
                                       },
                                       "required": [
+                                        "system",
                                         "kql"
                                       ],
                                       "type": "object"
@@ -60106,6 +60110,7 @@
                                     }
                                   },
                                   "required": [
+                                    "system",
                                     "kql"
                                   ],
                                   "type": "object"
@@ -67714,6 +67719,7 @@
                                     }
                                   },
                                   "required": [
+                                    "system",
                                     "kql"
                                   ],
                                   "type": "object"

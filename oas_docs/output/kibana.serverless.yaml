@@ -46330,6 +46330,7 @@ paths:
                                           - name
                                           - filter
                                     required:
+                                      - system
                                       - kql
                               type: array
                             rules:
@@ -48216,6 +48217,7 @@ paths:
                                           - name
                                           - filter
                                     required:
+                                      - system
                                       - kql
                               type: array
                             rules:
@@ -49878,6 +49880,7 @@ paths:
                                           - name
                                           - filter
                                     required:
+                                      - system
                                       - kql
                               type: array
                             rules:
@@ -51614,6 +51617,7 @@ paths:
                                           - name
                                           - filter
                                     required:
+                                      - system
                                       - kql
                               type: array
                             rules:
@@ -53276,6 +53280,7 @@ paths:
                                       - name
                                       - filter
                                 required:
+                                  - system
                                   - kql
                           type: array
                         rules:
@@ -57337,6 +57342,7 @@ paths:
                                       - name
                                       - filter
                                 required:
+                                  - system
                                   - kql
                         required:
                           - index
