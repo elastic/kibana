@@ -34,6 +34,7 @@ export interface UseGenAIConnectorsResult {
   reloadConnectors: () => void;
   getConnector: (id: string) => InferenceConnector | undefined;
   isConnectorSelectionRestricted: boolean;
+  defaultConnector?: string;
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -168,5 +169,6 @@ export function useGenAIConnectorsWithoutContext(
     },
     getConnector,
     isConnectorSelectionRestricted,
+    defaultConnector: defaultConnector === NO_DEFAULT_CONNECTOR ? undefined : defaultConnector,
   };
 }

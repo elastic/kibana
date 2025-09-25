@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import {
-  ConnectorSelectorBase,
   navigateToConnectorsManagementApp,
   navigateToSettingsManagementApp,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ConnectorSelectable,
+  type ConnectorSelectableComponentProps,
+} from '@kbn/ai-assistant-connector-selector-action';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
 
+type ConnectorLists = [
+  preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'],
+  custom: ConnectorSelectableComponentProps['customConnectors']
+];
 export function ChatActionsMenu({
   connectors,
   disabled,
@@ -46,6 +46,18 @@ export function ChatActionsMenu({
       )
     );
   };
+
+  const [preConfiguredConnectors, customConnectors] = useMemo<ConnectorLists>(() => {
+    if (!connectors.connectors) return [[], []];
+
+    return connectors.connectors.reduce<ConnectorLists>(
+      ([pre, custom], { id, name, isPreconfigured }) => {
+        const item = { value: id, label: name };
+        return isPreconfigured ? [[...pre, item], custom] : [pre, [...custom, item]];
+      },
+      [[], []]
+    );
+  }, [connectors.connectors]);
 
   return (
     <EuiPopover
@@ -128,23 +140,21 @@ export function ChatActionsMenu({
               defaultMessage: 'Connector',
             }),
             content: (
-              <EuiPanel>
-                <ConnectorSelectorBase {...connectors} />
-
-                <EuiButtonEmpty
-                  flush="left"
-                  size="xs"
-                  data-test-subj="settingsTabGoToConnectorsButton"
-                  onClick={() => {
-                    toggleActionsMenu();
-                    navigateToConnectorsManagementApp(application!);
-                  }}
-                >
-                  {i18n.translate('xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel', {
-                    defaultMessage: 'Manage connectors',
-                  })}
-                </EuiButtonEmpty>
-              </EuiPanel>
+              <ConnectorSelectable
+                customConnectors={customConnectors}
+                preConfiguredConnectors={preConfiguredConnectors}
+                value={connectors.selectedConnector}
+                defaultConnectorId={connectors.defaultConnector}
+                onValueChange={connectors.selectConnector}
+                onAddConnectorClick={() => {
+                  toggleActionsMenu();
+                  navigateToConnectorsManagementApp(application!);
+                }}
+                onManageConnectorsClick={() => {
+                  toggleActionsMenu();
+                  navigateToConnectorsManagementApp(application!);
+                }}
+              />
             ),
           },
         ]}
