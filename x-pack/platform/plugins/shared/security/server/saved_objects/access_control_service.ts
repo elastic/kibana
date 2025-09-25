@@ -6,12 +6,15 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
+  AccessControlAuthorizeResult,
   AuthorizeObject,
   CheckAuthorizationResult,
+  GetTypesRequiringAccessControlCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
+import { SecurityAction } from '.';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 
@@ -25,29 +28,51 @@ export class AccessControlService {
   getTypesRequiringPrivilegeCheck({
     objects,
     typeRegistry,
+    actions,
   }: {
     objects: AuthorizeObject[];
     typeRegistry?: ISavedObjectTypeRegistry;
-  }) {
+    actions: Set<SecurityAction>;
+  }): GetTypesRequiringAccessControlCheckResult {
     if (!typeRegistry) {
-      return { typesRequiringAccessControl: new Set<string>() };
+      return { typesRequiringAccessControl: new Set<string>(), results: [] };
     }
     const currentUser = this.userForOperation;
-    const typesRequiringCheck = new Set<string>();
+    const typesRequiringAccessControl = new Set<string>();
 
-    for (const obj of objects) {
+    // This is all here because our authz functions support multiple actions at once.
+    // This is not a real use case, but we need to handle it anyway.
+    const actionsIgnoringDefaultMode = [SecurityAction.UPDATE, SecurityAction.BULK_UPDATE];
+    const anyActionsForcingDefaultCheck =
+      Array.from(actions).filter((item) => !actionsIgnoringDefaultMode.includes(item)).length > 0;
+
+    const results: AccessControlAuthorizeResult[] = objects.map((obj) => {
+      let requiresManageAccessControl = false;
+      // Alternatively just make two different checks based on anyActionsForcingDefaultCheck just for readability sake
       if (
+        // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
+        // Is this due to the overuse of ts expect error?
+        // Shouldn't we only need to check that accessControl is defined?
         typeRegistry.supportsAccessControl(obj.type) &&
-        obj.accessControl?.accessMode === 'read_only' &&
+        (anyActionsForcingDefaultCheck || obj.accessControl?.accessMode === 'read_only') &&
         obj.accessControl?.owner &&
-        currentUser &&
+        currentUser && // Sid - if we don't have a user, should't we ultimately throw?
         obj.accessControl.owner !== currentUser.profile_uid
       ) {
-        typesRequiringCheck.add(obj.type);
+        typesRequiringAccessControl.add(obj.type);
+        requiresManageAccessControl = true;
       }
-    }
+      return {
+        type: obj.type,
+        id: obj.id,
+        ...(obj.name && { name: obj.name }),
+        requiresManageAccessControl,
+      };
+    });
 
-    return { typesRequiringAccessControl: typesRequiringCheck };
+    // ToDo: potentially return an array of which objects specifically require manage access control so we can use that from places like import/export
+    // or for surfacing better messages to the user.
+    return { typesRequiringAccessControl, results };
   }
 
   enforceAccessControl<A extends string>({
@@ -61,15 +86,15 @@ export class AccessControlService {
   }) {
     if (authorizationResult.status === 'unauthorized') {
       const typeList = [...typesRequiringAccessControl].sort().join(',');
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(`Access denied: Unable to manage access control for ${typeList}`)
-      );
+      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
     }
 
     const { typeMap } = authorizationResult;
     const unauthorizedTypes: Set<string> = new Set();
 
     for (const type of typesRequiringAccessControl) {
+      console.log('type', type);
+      console.log('typeMap', typeMap);
       const typeAuth = typeMap.get(type);
       const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
       if (!accessControlAuth) {
@@ -88,9 +113,7 @@ export class AccessControlService {
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort().join(',');
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(`Access denied: Unable to manage access control for ${typeList}`)
-      );
+      throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
     }
   }
 }

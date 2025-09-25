@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
-const READ_ONLY_TYPE = 'read_only_type';
-const NON_READ_ONLY_TYPE = 'non_read_only_type';
+export const READ_ONLY_TYPE = 'read_only_type';
+export const NON_READ_ONLY_TYPE = 'non_read_only_type';
 
 export class ReadOnlyObjectsPlugin implements Plugin {
   public setup(core: CoreSetup) {
