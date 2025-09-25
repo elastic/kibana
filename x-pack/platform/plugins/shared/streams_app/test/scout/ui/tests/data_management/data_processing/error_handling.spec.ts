@@ -36,14 +36,14 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('message');
+      await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
 
       // Simulate network failure
-      await page.route('**/streams/**/_ingest', (route) => {
+      await page.route('**/streams/**/_ingest', async (route) => {
         // Abort the request to simulate a network failure
-        route.abort();
+        await route.abort();
       });
 
       await pageObjects.streams.saveProcessorsListChanges();
@@ -54,8 +54,8 @@ test.describe(
       await pageObjects.streams.closeToasts();
 
       // Restore network and retry
-      await page.route('**/streams/**/_ingest', (route) => {
-        route.continue();
+      await page.route('**/streams/**/_ingest', async (route) => {
+        await route.continue();
       });
       await pageObjects.streams.saveProcessorsListChanges();
 
@@ -69,7 +69,7 @@ test.describe(
     }) => {
       // Create a processor first
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('message');
+      await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveProcessorsListChanges();
@@ -81,9 +81,9 @@ test.describe(
       await pageObjects.streams.clickSaveProcessor();
 
       // Simulate network failure
-      await page.route('**/streams/**/_ingest', (route) => {
+      await page.route('**/streams/**/_ingest', async (route) => {
         // Abort the request to simulate a network failure
-        route.abort();
+        await route.abort();
       });
 
       await pageObjects.streams.saveProcessorsListChanges();
@@ -94,8 +94,8 @@ test.describe(
       await pageObjects.streams.closeToasts();
 
       // Restore network and retry
-      await page.route('**/streams/**/_ingest', (route) => {
-        route.continue();
+      await page.route('**/streams/**/_ingest', async (route) => {
+        await route.continue();
       });
       await pageObjects.streams.saveProcessorsListChanges();
 
