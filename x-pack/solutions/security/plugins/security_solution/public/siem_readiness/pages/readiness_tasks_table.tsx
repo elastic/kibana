@@ -22,6 +22,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiNotificationBadge,
+  type IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SiemReadinessTask, ReadinessTaskConfig, ReadinessTaskId } from '@kbn/siem-readiness';
@@ -134,7 +135,12 @@ export const ReadinessTasksTable: React.FC = () => {
 
   const readinessTasksAddOnsMap: Record<
     ReadinessTaskId,
-    { action?: () => void; actionButtonLabel?: string; illustration?: string; learnMoreLink?: string }
+    {
+      action?: () => void;
+      actionButtonLabel?: string;
+      illustration: IconType;
+      learnMoreLink?: string;
+    }
   > = useMemo(
     () => ({
       'lets-get-started': {

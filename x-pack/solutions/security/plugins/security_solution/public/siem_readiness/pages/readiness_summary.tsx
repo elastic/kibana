@@ -19,8 +19,6 @@ import {
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useReadinessTasksStats } from '../hooks/use_readiness_tasks_stats';
@@ -40,12 +38,12 @@ interface PieChartDataItem {
   completedTasksCount: number;
 }
 
+type PillarIncludingIncomplete = PillarKey | 'incomplete';
+
 const PillarsPieChart: React.FC = () => {
   const { readinessTasksStats } = useReadinessTasksStats();
   const { pillarPropsMap } = usePillarsProps();
   const { euiTheme } = useEuiTheme();
-  const { charts } = useKibana<CoreStart>().services;
-  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const themeOverrides: PartialTheme = {
     partition: {
@@ -73,11 +71,7 @@ const PillarsPieChart: React.FC = () => {
   return (
     <div style={{ position: 'relative', width: PieChartSize }}>
       <Chart size={{ height: PieChartSize }}>
-        <Settings
-          baseTheme={chartBaseTheme}
-          theme={themeOverrides}
-          ariaLabelledBy={siemReadinessPieChartChartId}
-        />
+        <Settings theme={themeOverrides} ariaLabelledBy={siemReadinessPieChartChartId} />
         <Partition
           id="pillarDonut"
           data={pieChartData}
@@ -86,7 +80,7 @@ const PillarsPieChart: React.FC = () => {
           layers={[
             {
               groupByRollup: (d: PieChartDataItem) => d.pillarKey,
-              nodeLabel: (pillarKey: PillarKey) => {
+              nodeLabel: (pillarKey: PillarIncludingIncomplete) => {
                 if (pillarKey === 'incomplete') {
                   return i18n.translate(
                     'xpack.securitySolution.siemReadiness.incompleteTasksLabel',
@@ -99,7 +93,7 @@ const PillarsPieChart: React.FC = () => {
                 return pillarPropsMap[pillarKey].displayName;
               },
               shape: {
-                fillColor: (pillarKey) => {
+                fillColor: (pillarKey: PillarIncludingIncomplete) => {
                   if (pillarKey === 'incomplete') {
                     return euiTheme.colors.lightShade;
                   }
@@ -126,7 +120,9 @@ const PillarsPieChart: React.FC = () => {
         }}
       >
         <EuiTitle className="eui-textCenter" size="m">
-          <h1 style={{ fontWeight: 700 }}>{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
+          <h1
+            style={{ fontWeight: 700 }}
+          >{`${readinessTasksStats.totalCompleted}/${readinessTasksStats.totalTasks}`}</h1>
         </EuiTitle>
         <EuiTitle className="eui-textCenter" size="xxs">
           <h3>
@@ -161,7 +157,9 @@ const PillarsMiniSummaryTable: React.FC = () => {
         defaultMessage: 'Readiness Section',
       }),
       render: (pillarName: string, record: LegendTableDataItem) => (
-        <EuiHealth color={pillarPropsMap[record.pillarKey as PillarKey].color}>{pillarName}</EuiHealth>
+        <EuiHealth color={pillarPropsMap[record.pillarKey as PillarKey].color}>
+          {pillarName}
+        </EuiHealth>
       ),
     },
     {
@@ -245,7 +243,7 @@ export const ReadinessSummary = () => {
         <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xxl }}>
           <PillarsPieChart />
         </EuiFlexItem>
-        <EuiFlexItem grow={3} css={{ alignSelf: 'center' }}>
+        <EuiFlexItem grow={3} css={{ alignSelf: 'center', maxWidth: 330 }}>
           <PillarsMiniSummaryTable />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

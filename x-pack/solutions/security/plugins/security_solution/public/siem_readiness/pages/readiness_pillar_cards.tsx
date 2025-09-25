@@ -253,7 +253,7 @@ export const ReadinessPillarCards: React.FC = () => {
 
   return (
     <EuiFlexGroup direction="row" gutterSize="l" style={{ height: CARDS_HEIGHT }}>
-      {Object.values(pillarPropsMap).map((pillar) => {
+      {Object.values(pillarPropsMap).map((pillar: PillarProps) => {
         const stats = readinessTasksStats.pillarStatsMap[pillar.pillarKey];
 
         return (

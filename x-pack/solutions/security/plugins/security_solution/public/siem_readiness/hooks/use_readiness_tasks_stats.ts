@@ -61,7 +61,7 @@ export const useReadinessTasksStats = (): { readinessTasksStats: ReadinessTasksS
       totalTasks,
       totalIncomplete,
     };
-  }, [getLatestTasks]);
+  }, [latestTasksData]);
 
   return {
     readinessTasksStats,
