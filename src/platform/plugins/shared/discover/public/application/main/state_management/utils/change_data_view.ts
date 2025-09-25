@@ -51,7 +51,7 @@ export async function changeDataView({
 
   const { dataViews, uiSettings } = services;
   const { id: currentTabId } = getCurrentTab();
-  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId)!;
   const currentDataView = currentDataView$.getValue();
   const state = appState.getState();
   let nextDataView: DataView | null = null;

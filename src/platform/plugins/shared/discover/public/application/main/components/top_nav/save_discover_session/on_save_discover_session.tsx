@@ -44,7 +44,7 @@ export const onSaveDiscoverSession = async ({
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
   const isTimeBased = allTabs.some((tab) => {
     const tabRuntimeState = selectTabRuntimeState(state.runtimeStateManager, tab.id);
-    const tabDataView = tabRuntimeState.currentDataView$.getValue();
+    const tabDataView = tabRuntimeState?.currentDataView$.getValue();
 
     if (tabDataView) {
       return tabDataView.isTimeBased();

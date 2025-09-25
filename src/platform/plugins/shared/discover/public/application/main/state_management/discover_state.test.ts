@@ -403,14 +403,14 @@ describe('Discover state', () => {
         selectTabRuntimeState(
           runtimeStateManager,
           state.getCurrentTab().id
-        ).currentDataView$.getValue()
+        )!.currentDataView$.getValue()
       ).toBeUndefined();
       state.actions.setDataView(dataViewMock);
       expect(
         selectTabRuntimeState(
           runtimeStateManager,
           state.getCurrentTab().id
-        ).currentDataView$.getValue()
+        )!.currentDataView$.getValue()
       ).toBe(dataViewMock);
     });
 
@@ -1193,7 +1193,7 @@ describe('Discover state', () => {
           selectTabRuntimeState(
             runtimeStateManager,
             state.getCurrentTab().id
-          ).currentDataView$.getValue()
+          )!.currentDataView$.getValue()
         ).toBe(dataViewComplexMock);
       });
       expect(state.appState.getState().dataSource).toEqual(
@@ -1230,7 +1230,7 @@ describe('Discover state', () => {
           selectTabRuntimeState(
             runtimeStateManager,
             state.getCurrentTab().id
-          ).currentDataView$.getValue()
+          )!.currentDataView$.getValue()
         ).toBe(dataViewAdHoc);
       });
       expect(state.appState.getState().dataSource).toEqual(
@@ -1260,7 +1260,7 @@ describe('Discover state', () => {
       const selectedDataView$ = selectTabRuntimeState(
         runtimeStateManager,
         state.getCurrentTab().id
-      ).currentDataView$;
+      )!.currentDataView$;
       const selectedDataViewId = selectedDataView$.getValue()?.id;
       expect(selectedDataViewId).toBe(dataViewMock.id);
       await state.actions.onDataViewEdited(dataViewMock);
@@ -1281,7 +1281,7 @@ describe('Discover state', () => {
           selectTabRuntimeState(
             runtimeStateManager,
             state.getCurrentTab().id
-          ).currentDataView$.getValue()?.id
+          )!.currentDataView$.getValue()?.id
         ).not.toBe(previousId);
       });
       state.actions.stopSyncing();
@@ -1386,7 +1386,7 @@ describe('Discover state', () => {
         selectTabRuntimeState(
           runtimeStateManager,
           state.getCurrentTab().id
-        ).currentDataView$.getValue()?.id
+        )!.currentDataView$.getValue()?.id
       ).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
@@ -1402,7 +1402,7 @@ describe('Discover state', () => {
         selectTabRuntimeState(
           runtimeStateManager,
           state.getCurrentTab().id
-        ).currentDataView$.getValue()?.id
+        )!.currentDataView$.getValue()?.id
       ).toBe(dataViewComplexMock.id);
 
       // Undo all changes to the saved search, this should trigger a fetch, again
@@ -1416,7 +1416,7 @@ describe('Discover state', () => {
         selectTabRuntimeState(
           runtimeStateManager,
           state.getCurrentTab().id
-        ).currentDataView$.getValue()?.id
+        )!.currentDataView$.getValue()?.id
       ).toBe(dataViewMock.id);
 
       state.actions.stopSyncing();

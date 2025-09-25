@@ -66,11 +66,12 @@ export const setTabs: InternalStateThunkActionCreator<
       justRemovedTabs.push(newRecentlyClosedTab);
 
       const existingRuntimeState = runtimeStateManager.tabs.byId[tab.id];
-      if (!existingRuntimeState.migratedToAnotherId$.getValue()) {
+      if (!existingRuntimeState?.migratedToAnotherId$.getValue()) {
         dispatch(disconnectTab({ tabId: tab.id }));
         delete runtimeStateManager.tabs.byId[tab.id];
         // console.log(`Deleted runtime state for closed tab ${tab.id}`);
       } else {
+        runtimeStateManager.tabs.byId[tab.id] = undefined;
         // console.log(
         //   `Did not delete runtime state for closed tab ${
         //     tab.id
@@ -137,7 +138,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     const currentState = getState();
     const currentTabId = currentState.tabs.unsafeCurrentId;
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
-    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
+    const currentTabStateContainer = currentTabRuntimeState?.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectOpenTab(currentState, item.id);
@@ -200,7 +201,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         } else if (!tab.initialAppState) {
           // the new tab is a fresh one
           const currentQuery = selectTabRuntimeAppState(runtimeStateManager, currentTabId)?.query;
-          const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+          const currentDataView = currentTabRuntimeState?.currentDataView$.getValue();
 
           if (!currentQuery || !currentDataView) {
             return tab;
@@ -517,10 +518,10 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function disconnectTabThunkFn(_, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    const stateContainer = tabRuntimeState?.stateContainer$.getValue();
     stateContainer?.dataState.cancel();
     stateContainer?.actions.stopSyncing();
-    tabRuntimeState.customizationService$.getValue()?.cleanup();
+    tabRuntimeState?.customizationService$.getValue()?.cleanup();
   };
 
 function differenceIterateeByTabId(tab: TabState) {

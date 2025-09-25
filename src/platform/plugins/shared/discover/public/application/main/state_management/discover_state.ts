@@ -300,7 +300,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
@@ -485,7 +485,7 @@ export function getDiscoverStateContainer({
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
@@ -534,7 +534,7 @@ export function getDiscoverStateContainer({
   };
 
   const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId)!;
     const scopedEbtManager = scopedEbtManager$.getValue();
     const { fieldsMetadata } = services;
 

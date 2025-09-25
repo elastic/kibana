@@ -85,7 +85,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
     const histogramConfig$ = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    ).unifiedHistogramConfig$;
+    )!.unifiedHistogramConfig$;
 
     histogramConfig$.next({
       ...histogramConfig$.getValue(),
@@ -112,7 +112,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
     const histogramConfig$ = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
-    ).unifiedHistogramConfig$;
+    )!.unifiedHistogramConfig$;
 
     histogramConfig$.next({
       ...histogramConfig$.getValue(),

@@ -47,7 +47,7 @@ export const useUnsavedChanges = ({
       }),
       switchMap(([allTabs]) => {
         const stateContainerObservables = allTabs.map(
-          (tab) => selectTabRuntimeState(runtimeStateManager, tab.id).stateContainer$
+          (tab) => selectTabRuntimeState(runtimeStateManager, tab.id)!.stateContainer$
         );
 
         return combineLatest(stateContainerObservables);

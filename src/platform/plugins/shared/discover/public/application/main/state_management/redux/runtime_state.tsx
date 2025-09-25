@@ -49,7 +49,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
-  tabs: { byId: Record<string, ReactiveTabRuntimeState> };
+  tabs: { byId: Record<string, ReactiveTabRuntimeState | undefined> };
 };
 
 export const createRuntimeStateManager = (): RuntimeStateManager => ({
@@ -153,7 +153,8 @@ export const useCurrentTabRuntimeState = <T,>(
   selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
 ) => {
   const { currentTabId } = useCurrentTabContext();
-  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
+  // TODO: Handle the case where runtime state is undefined
+  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)!));
 };
 
 export type CombinedRuntimeState = DiscoverRuntimeState & Pick<TabRuntimeState, 'currentDataView'>;
