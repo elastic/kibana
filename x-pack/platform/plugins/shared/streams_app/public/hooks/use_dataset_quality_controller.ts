@@ -35,7 +35,7 @@ export const useDatasetQualityController = (
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const history = useHistory();
-  const { timeState } = useTimefilter();
+  const { timeState, setTime } = useTimefilter();
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -84,6 +84,7 @@ export const useDatasetQualityController = (
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
+            setTime,
           });
         }
       );
