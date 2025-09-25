@@ -624,6 +624,9 @@
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "text": {
+            "type": "text"
           }
         },
         "type": "unsigned_long"
@@ -645,6 +648,9 @@
       "settings": {
         "properties": {
           "syncAlerts": {
+            "type": "boolean"
+          },
+          "extractObservables": {
             "type": "boolean"
           }
         }
@@ -718,6 +724,9 @@
             "type": "keyword"
           }
         }
+      },
+      "eventId": {
+        "type": "keyword"
       },
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"
@@ -2701,6 +2710,9 @@
   "maintenance-window": {
     "dynamic": false,
     "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },

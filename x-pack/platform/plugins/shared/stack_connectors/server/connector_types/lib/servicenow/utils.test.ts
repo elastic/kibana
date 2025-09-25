@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   prepareIncident,
-  createServiceError,
+  addServiceMessageToError,
   getPushedDate,
   throwIfSubActionIsNotSupported,
   getAxiosInstance,
@@ -109,7 +109,7 @@ describe('utils', () => {
     test('it creates an error when the response is null', async () => {
       const error = new Error('An error occurred');
       // @ts-expect-error
-      expect(createServiceError(error, 'Unable to do action').message).toBe(
+      expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: errorResponse was null'
       );
     });
@@ -120,7 +120,7 @@ describe('utils', () => {
         response: { data: { error: { message: 'Denied', detail: 'no access' } } },
       } as ResponseError;
 
-      expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
+      expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
       );
     });
@@ -131,7 +131,7 @@ describe('utils', () => {
         response: { data: { error: null } },
       } as ResponseError;
 
-      expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
+      expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
       );
     });

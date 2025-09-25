@@ -38,7 +38,8 @@
     "@kbn/index-editor",
     "@kbn/share-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/file-upload-plugin"
+    "@kbn/file-upload-plugin",
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*",
